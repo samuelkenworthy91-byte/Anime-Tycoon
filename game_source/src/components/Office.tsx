@@ -711,6 +711,7 @@ export default function Office({
             <Rec k="Best score" v={`${run.bestScore}/40`} />
             <Rec k="Lifetime revenue" v={formatGBPShort(run.totalRevenue)} />
             <Rec k="Awards won" v={String(run.awards)} />
+            <Rec k="Structures studied" v={String(run.arcUnlocked.length)} />
           </div>
         </Modal>
       )}

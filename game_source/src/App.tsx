@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
-import { GENRES, comboKey, type Contract, type Draft } from "./engine/data";
+import { ARCS, GENRES, comboKey, type Contract, type Draft } from "./engine/data";
 import { computeResult, type ShowResult } from "./engine/scoring";
 import { advanceWeeks, AIR_WEEKS, initialRun, MAX_WEEKS, type RunState } from "./engine/state";
 import Title from "./components/Title";
@@ -135,6 +135,24 @@ export default function App() {
     setScreen("create");
   }, []);
 
+  const unlockArc = useCallback(
+    (id: string, cost: number) => {
+      if (!run || run.rd < cost) return;
+      sfx.fanfare();
+      setRun((r) =>
+        r
+          ? {
+              ...r,
+              rd: r.rd - cost,
+              arcUnlocked: [...r.arcUnlocked, id],
+              notices: [...r.notices, `Story structure studied: ${ARCS.find((a) => a.id === id)?.name}!`],
+            }
+          : r
+      );
+    },
+    [run]
+  );
+
   const beginProduction = useCallback((d: Draft) => {
     sfx.whoosh();
     setRun((r) => (r ? { ...r, cash: r.cash - draftCost(d) } : r));
@@ -232,6 +250,10 @@ export default function App() {
       comboLevels: { ...run.comboLevels, [ck]: Math.min(5, (run.comboLevels[ck] ?? 0) + 1) },
       castCombos: [...new Set([...run.castCombos, ...result.chemDiscovered])],
       arcCombos: [...new Set([...run.arcCombos, ...result.arcCombosDiscovered])],
+      arcKnowledge: draft.arcs.reduce(
+        (acc, id) => ({ ...acc, [id]: (acc[id] ?? 0) + 1 }),
+        run.arcKnowledge
+      ),
       studioTop: Math.max(run.studioTop, result.quality),
       franchises: {
         ...run.franchises,
@@ -353,7 +375,14 @@ export default function App() {
           />
         )}
         {screen === "create" && run && (
-          <Create run={run} sequelKey={sequelKey} paused={paused} onBegin={beginProduction} onCancel={() => setScreen("office")} />
+          <Create
+            run={run}
+            sequelKey={sequelKey}
+            paused={paused}
+            onBegin={beginProduction}
+            onCancel={() => setScreen("office")}
+            onUnlockArc={unlockArc}
+          />
         )}
         {screen === "produce" && run && draft && (
           <Produce run={run} draft={draft} paused={paused} onFinish={finishProduction} />

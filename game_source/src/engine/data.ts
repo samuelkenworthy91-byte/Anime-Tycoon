@@ -11,6 +11,13 @@ import {
   Sword,
   Mic2,
   Eye,
+  Laugh,
+  ChefHat,
+  Gauge,
+  Crosshair,
+  Wand2,
+  Rocket,
+  VenetianMask,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,7 +34,15 @@ export type GenreId =
   | "cyber"
   | "fantasy"
   | "idol"
-  | "mystery";
+  | "mystery"
+  | "comedy"
+  | "cooking"
+  | "racing"
+  | "military"
+  | "supernatural"
+  | "space"
+  | "noir"
+  | "magical";
 
 export type MediumId = "tv" | "movie" | "ona";
 export type BudgetId = "indie" | "standard" | "blockbuster";
@@ -80,6 +95,15 @@ export interface CastMember {
   role: CastRole;
 }
 
+export type ArcUnlock =
+  | { kind: "rd"; cost: number }
+  | { kind: "genre"; genre: GenreId }
+  | { kind: "franchise" }
+  | { kind: "hits"; n: number }
+  | { kind: "shows"; n: number }
+  | { kind: "score"; n: number }
+  | { kind: "staff"; n: number };
+
 export interface Arc {
   id: string;
   name: string;
@@ -94,6 +118,8 @@ export interface Arc {
   /** synergy bonus if the matching cast slot's affinities fit the genres */
   cast?: CastRole;
   castQ?: number;
+  /** what must be true before this arc can be picked */
+  unlock?: ArcUnlock;
 }
 
 export interface Draft {
@@ -128,6 +154,14 @@ export const GENRES: Genre[] = [
   { id: "idol", label: "Idol", color: "#f472b6", icon: Mic2, desc: "Center position or nothing.", ideal: [55, 56, 82], ratio: [0.24, 0.32, 0.44], rd: 30 },
   { id: "mystery", label: "Mystery", color: "#94a3b8", icon: Eye, desc: "The butler never did it.", ideal: [72, 40, 50], ratio: [0.5, 0.24, 0.26], rd: 32 },
   { id: "cyber", label: "Cyberpunk", color: "#22d3ee", icon: Cpu, desc: "Neon rain and broken AIs.", ideal: [58, 66, 76], ratio: [0.3, 0.36, 0.34], rd: 36 },
+  { id: "comedy", label: "Comedy", color: "#ffb347", icon: Laugh, desc: "Gags per minute, guaranteed.", ideal: [58, 55, 50], ratio: [0.36, 0.34, 0.3], rd: 18 },
+  { id: "cooking", label: "Cooking", color: "#e76f51", icon: ChefHat, desc: "Food porn in 24fps.", ideal: [48, 66, 58], ratio: [0.3, 0.4, 0.3], rd: 22 },
+  { id: "racing", label: "Racing", color: "#e63946", icon: Gauge, desc: "Checkered flags and drifting.", ideal: [72, 70, 46], ratio: [0.28, 0.48, 0.24], rd: 26 },
+  { id: "military", label: "Military", color: "#6a994e", icon: Crosshair, desc: "Deploy. Regroup. Repeat.", ideal: [64, 72, 44], ratio: [0.26, 0.5, 0.24], rd: 28 },
+  { id: "supernatural", label: "Supernatural", color: "#9d4edd", icon: Wand2, desc: "Monsters behind the curtain.", ideal: [62, 52, 58], ratio: [0.36, 0.3, 0.34], rd: 24 },
+  { id: "space", label: "Space", color: "#4cc9f0", icon: Rocket, desc: "The final frontier, animated.", ideal: [60, 74, 66], ratio: [0.26, 0.44, 0.3], rd: 30 },
+  { id: "noir", label: "Noir", color: "#8d99ae", icon: VenetianMask, desc: "Rain, hats, and alibis.", ideal: [70, 52, 60], ratio: [0.42, 0.3, 0.28], rd: 26 },
+  { id: "magical", label: "Magical Girl", color: "#f72585", icon: Sparkles, desc: "Transform! Sparkle! Save the day.", ideal: [34, 58, 78], ratio: [0.34, 0.3, 0.36], rd: 20 },
 ];
 
 export const GENRE = (id: GenreId) => GENRES.find((g) => g.id === id)!;
@@ -150,6 +184,28 @@ export const COMBO: Record<string, number> = {
   [pair("sports", "slice")]: 1.1,
   [pair("horror", "cyber")]: 1.1,
   [pair("idol", "shonen")]: 1.08,
+  [pair("comedy", "slice")]: 1.16,
+  [pair("comedy", "shonen")]: 1.12,
+  [pair("cooking", "slice")]: 1.18,
+  [pair("cooking", "idol")]: 1.12,
+  [pair("racing", "sports")]: 1.25,
+  [pair("racing", "mecha")]: 1.15,
+  [pair("military", "mecha")]: 1.22,
+  [pair("military", "shonen")]: 1.14,
+  [pair("supernatural", "horror")]: 1.2,
+  [pair("supernatural", "mystery")]: 1.15,
+  [pair("space", "mecha")]: 1.24,
+  [pair("space", "cyber")]: 1.16,
+  [pair("noir", "mystery")]: 1.22,
+  [pair("noir", "cyber")]: 1.15,
+  [pair("magical", "shojo")]: 1.24,
+  [pair("magical", "idol")]: 1.14,
+  [pair("comedy", "horror")]: 0.82,
+  [pair("racing", "slice")]: 0.85,
+  [pair("military", "idol")]: 0.8,
+  [pair("space", "shojo")]: 0.85,
+  [pair("noir", "slice")]: 0.85,
+  [pair("magical", "military")]: 0.8,
   [pair("cyber", "shojo")]: 0.8,
   [pair("mecha", "slice")]: 0.8,
   [pair("horror", "sports")]: 0.8,
@@ -170,6 +226,11 @@ export const SECRET_COMBOS: Record<string, number> = {
   [pair("mystery", "romance")]: 1.18,
   [pair("horror", "romance")]: 1.16,
   [pair("cyber", "fantasy")]: 1.15,
+  [pair("cooking", "horror")]: 1.26,
+  [pair("racing", "mystery")]: 1.22,
+  [pair("space", "slice")]: 1.24,
+  [pair("magical", "military")]: 1.25,
+  [pair("noir", "romance")]: 1.2,
 };
 export const secretComboKey = (genres: GenreId[]) => comboKey(genres) in SECRET_COMBOS ? comboKey(genres) : null;
 
@@ -209,17 +270,17 @@ export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: num
 };
 
 export const SLOTS: Record<SlotId, { label: string; cost: number; reach: number; best: GenreId[]; desc: string }> = {
-  midnight: { label: "Midnight Otaku Slot", cost: 6_000, reach: 0.78, best: ["horror", "mystery", "cyber", "slice"], desc: "Cheap airtime for devoted weirdos." },
-  evening: { label: "Evening Family Slot", cost: 40_000, reach: 1.15, best: ["romance", "shojo", "slice", "fantasy"], desc: "Dinner-table viewing." },
-  stream: { label: "Global Streaming", cost: 60_000, reach: 1.35, best: ["isekai", "fantasy", "cyber", "horror"], desc: "Day-one simulcast worldwide." },
-  prime: { label: "Prime-Time Saturday", cost: 110_000, reach: 1.62, best: ["shonen", "sports", "mecha", "idol"], desc: "The whole nation watches." },
+  midnight: { label: "Midnight Otaku Slot", cost: 6_000, reach: 0.78, best: ["horror", "mystery", "cyber", "slice", "noir", "supernatural"], desc: "Cheap airtime for devoted weirdos." },
+  evening: { label: "Evening Family Slot", cost: 40_000, reach: 1.15, best: ["romance", "shojo", "slice", "fantasy", "comedy", "cooking", "magical"], desc: "Dinner-table viewing." },
+  stream: { label: "Global Streaming", cost: 60_000, reach: 1.35, best: ["isekai", "fantasy", "cyber", "horror", "space", "supernatural"], desc: "Day-one simulcast worldwide." },
+  prime: { label: "Prime-Time Saturday", cost: 110_000, reach: 1.62, best: ["shonen", "sports", "mecha", "idol", "racing", "military"], desc: "The whole nation watches." },
 };
 
 export const AUDIENCES: Record<AudienceId, { label: string; mult: number; fit: Partial<Record<GenreId, number>>; desc: string }> = {
-  kids: { label: "Saturday Kids", mult: 1.0, fit: { shonen: 1.2, sports: 1.15, idol: 1.1, mecha: 1.05, horror: 0.7, cyber: 0.8, mystery: 0.9, romance: 0.9 }, desc: "Toys sell themselves." },
-  teens: { label: "Teen Fever", mult: 1.05, fit: { shonen: 1.15, isekai: 1.15, horror: 1.05, mecha: 1.0, romance: 1.0, idol: 1.05, slice: 0.95 }, desc: "Loud, loyal, extremely online." },
-  adults: { label: "Seinen Adults", mult: 1.0, fit: { cyber: 1.2, mystery: 1.15, horror: 1.1, slice: 1.05, romance: 1.0, shojo: 0.95, shonen: 0.88, isekai: 0.95 }, desc: "Discerning tastes, deep wallets." },
-  family: { label: "All Ages", mult: 1.12, fit: { idol: 1.15, sports: 1.1, shonen: 1.05, fantasy: 1.05, slice: 1.05, horror: 0.85, cyber: 0.9 }, desc: "Hard to please everyone." },
+  kids: { label: "Saturday Kids", mult: 1.0, fit: { shonen: 1.2, sports: 1.15, idol: 1.1, mecha: 1.05, horror: 0.7, cyber: 0.8, mystery: 0.9, romance: 0.9, comedy: 1.15, cooking: 1.1, racing: 1.1, magical: 1.1, supernatural: 0.85, noir: 0.7, military: 0.95, space: 1.0 }, desc: "Toys sell themselves." },
+  teens: { label: "Teen Fever", mult: 1.05, fit: { shonen: 1.15, isekai: 1.15, horror: 1.05, mecha: 1.0, romance: 1.0, idol: 1.05, slice: 0.95, comedy: 1.05, racing: 1.15, supernatural: 1.1, space: 1.05, military: 1.05, noir: 0.95, cooking: 0.95, magical: 0.95 }, desc: "Loud, loyal, extremely online." },
+  adults: { label: "Seinen Adults", mult: 1.0, fit: { cyber: 1.2, mystery: 1.15, horror: 1.1, slice: 1.05, romance: 1.0, shojo: 0.95, shonen: 0.88, isekai: 0.95, noir: 1.2, military: 1.1, space: 1.05, comedy: 1.0, supernatural: 1.0, cooking: 1.0, racing: 0.95, magical: 0.85 }, desc: "Discerning tastes, deep wallets." },
+  family: { label: "All Ages", mult: 1.12, fit: { idol: 1.15, sports: 1.1, shonen: 1.05, fantasy: 1.05, slice: 1.05, horror: 0.85, cyber: 0.9, comedy: 1.15, cooking: 1.15, magical: 1.1, racing: 0.95, space: 0.95, noir: 0.8, military: 0.85, supernatural: 0.9 }, desc: "Hard to please everyone." },
 };
 
 /* ---------------------------------------------------------------- offices */
@@ -363,10 +424,41 @@ function reg(m: CastMember): CastMember {
   CAST[m.id] = m;
   return m;
 }
-export const castById = (id: string): CastMember =>
-  CAST[id] ?? CAST.kai;
+/**
+ * Extra genre affinities for the newer genres, mapped by character id.
+ * Kept separate from the reg() lines so the 136 base characters stay readable.
+ */
+export const CAST_AFF_EXTRA: Record<string, GenreId[]> = {
+  /* comedy */
+  kenta: ["comedy"], s_kiki: ["comedy"], s_sosuke: ["comedy"], p_chacha: ["comedy"], v_lich: ["comedy"], v_scuttle: ["comedy"],
+  /* cooking */
+  taro: ["cooking"], s_koko: ["cooking"], s_okada: ["cooking"], p_pudding: ["cooking"], p_mocha: ["cooking"],
+  /* racing */
+  rin: ["racing"], jin: ["racing"], s_haruto: ["racing"], p_pochi: ["racing"], v_tempest: ["racing"],
+  /* military */
+  daichi: ["military"], s_takeshi: ["military"], s_gen: ["military"], v_warden: ["military"], v_ash: ["military"], v_kurogane: ["military"],
+  /* supernatural */
+  shiori: ["supernatural"], s_chiaki: ["supernatural"], p_baku: ["supernatural"], p_kuro: ["supernatural"], v_moth: ["supernatural"], v_nightshade: ["supernatural"],
+  /* space */
+  sora: ["space"], mira: ["space"], p_koro: ["space"], p_tama: ["space"], v_paradox: ["space"], v_zero: ["space"], v_mirage: ["space"],
+  /* noir */
+  akira: ["noir"], renji: ["noir"], s_shin: ["noir"], s_aoi: ["noir"], v_nocturne: ["noir"], v_silence: ["noir"],
+  /* magical */
+  hikari: ["magical"], emi: ["magical"], s_mimi: ["magical"], p_nya: ["magical"], p_piko: ["magical"], v_hex: ["magical"],
+};
+
+export const castById = (id: string): CastMember => {
+  const c = CAST[id] ?? CAST.kai;
+  const extra = CAST_AFF_EXTRA[id];
+  return extra ? { ...c, aff: [...c.aff, ...extra] } : c;
+};
 export const castList = (role: CastRole): CastMember[] =>
-  Object.values(CAST).filter((c) => c.role === role);
+  Object.values(CAST)
+    .filter((c) => c.role === role)
+    .map((c) => {
+      const extra = CAST_AFF_EXTRA[c.id];
+      return extra ? { ...c, aff: [...c.aff, ...extra] } : c;
+    });
 
 /* ------------------------------------------------------------ protagonists */
 export const PROTAGONISTS: CastMember[] = [
@@ -546,6 +638,23 @@ export const ARCS: Arc[] = [
   { id: "collab", name: "Merch Collab", cost: 20_000, q: 0, f: 0.1, syn: ["idol", "slice"], synQ: 2, desc: "The crossover toy drop. Bots crash the site." },
   { id: "ova", name: "OVA Special", cost: 30_000, q: 2, f: 0.1, franchiseOnly: true, desc: "A bonus disc for the true believers." },
   { id: "war", name: "All-Out War", cost: 42_000, q: 6, f: 0.1, syn: ["shonen", "mecha", "fantasy"], synQ: 4, desc: "The entire cast fights at once. Budget dies." },
+  /* ------------------------------------------------- unlockable arcs */
+  { id: "movienight", name: "Movie Night Special", cost: 12_000, q: 1, f: 0.04, desc: "A low-stakes breather the fans rewatch.", unlock: { kind: "shows", n: 2 } },
+  { id: "heist", name: "Heist Caper", cost: 19_000, q: 2, f: 0.06, syn: ["mystery", "comedy"], synQ: 3, desc: "One last score. This time it's personal.", unlock: { kind: "genre", genre: "comedy" } },
+  { id: "cookingbattle", name: "Cooking Battle", cost: 16_000, q: 1, f: 0.09, syn: ["cooking"], synQ: 4, synF: 0.02, desc: "Judges weep. Merch sells out.", unlock: { kind: "genre", genre: "cooking" } },
+  { id: "grandprix", name: "Grand Prix", cost: 25_000, q: 2, f: 0.09, syn: ["racing", "sports"], synQ: 4, desc: "Tyre strategy, friendship, and the finish line.", unlock: { kind: "genre", genre: "racing" } },
+  { id: "bootcamp", name: "Boot Camp", cost: 17_000, q: 2, f: 0.04, syn: ["military", "shonen"], synQ: 3, desc: "They'll break you. Then they'll build you.", unlock: { kind: "genre", genre: "military" } },
+  { id: "ghosthunt", name: "Ghost Hunt", cost: 15_000, q: 3, f: 0.05, syn: ["supernatural", "horror"], synQ: 4, desc: "The cameras catch something. Nobody rewatches.", unlock: { kind: "genre", genre: "supernatural" } },
+  { id: "orbital", name: "Orbital Rescue", cost: 23_000, q: 2, f: 0.06, syn: ["space", "mecha"], synQ: 4, desc: "Six minutes of fuel left. Hold the line.", unlock: { kind: "genre", genre: "space" } },
+  { id: "raincity", name: "Rain City Chase", cost: 20_000, q: 3, f: 0.03, syn: ["noir", "mystery"], synQ: 4, desc: "Every shadow is a suspect.", unlock: { kind: "genre", genre: "noir" } },
+  { id: "transformation", name: "Transformation Test", cost: 18_000, q: 2, f: 0.05, syn: ["magical", "shojo"], synQ: 4, desc: "The new form fails at the worst moment.", unlock: { kind: "genre", genre: "magical" } },
+  { id: "directorscut", name: "Director's Cut", cost: 21_000, q: 3, f: 0.02, syn: ["cyber", "mystery"], synQ: 3, desc: "Forty minutes nobody asked for. Critics adore it.", unlock: { kind: "rd", cost: 18 } },
+  { id: "fanservice", name: "Fan Service Deluxe", cost: 9_000, q: -2, f: 0.12, desc: "Cheap. Shameless. Financially unwise to skip.", unlock: { kind: "rd", cost: 10 } },
+  { id: "mega", name: "Mega Crossover", cost: 30_000, q: 2, f: 0.14, franchiseOnly: true, desc: "Every franchise you own, one timeline.", unlock: { kind: "franchise" } },
+  { id: "awardpush", name: "Award Season Push", cost: 26_000, q: 4, f: 0.03, desc: "Screeners, galas, and one very tired director.", unlock: { kind: "score", n: 30 } },
+  { id: "guildwar", name: "Guild War", cost: 34_000, q: 5, f: 0.07, syn: ["fantasy", "shonen"], synQ: 4, desc: "Factions, betrayals, and a siege that spans two episodes.", unlock: { kind: "hits", n: 3 } },
+  { id: "expansion", name: "Studio Expansion Arc", cost: 24_000, q: 3, f: 0.05, desc: "The meta-narrative: your own studio, animated.", unlock: { kind: "staff", n: 6 } },
+  { id: "idolfest", name: "Idol Festival", cost: 22_000, q: 2, f: 0.1, syn: ["idol"], synQ: 4, desc: "Three nights. One stage. Zero dry eyes.", unlock: { kind: "genre", genre: "idol" } },
 ];
 
 /* ------------------------------------------- hidden arc synergies (shipped to discover) */
@@ -569,6 +678,12 @@ export const ARC_COMBOS: ArcCombo[] = [
   { id: "road", name: "Redemption Road", arcs: ["origin", "redemption", "finale"], q: 2, f: 0 },
   { id: "gag", name: "Gag Reel", arcs: ["filler", "beach"], q: -1, f: 0.03 },
   { id: "deep", name: "Deep Lore", arcs: ["lore", "twist"], q: 2, f: 0 },
+  { id: "speed", name: "Need for Speed", arcs: ["grandprix", "montage"], q: 2, f: 0.01 },
+  { id: "haunted", name: "Haunted Case Files", arcs: ["ghosthunt", "case"], q: 2, f: 0.01 },
+  { id: "feast", name: "Feast & Merch", arcs: ["cookingbattle", "collab"], q: 2, f: 0.02 },
+  { id: "orbit", name: "Orbital Launch", arcs: ["orbital", "launch"], q: 2, f: 0.01 },
+  { id: "crime", name: "Crime & Rain", arcs: ["raincity", "case", "twist"], q: 2, f: 0.01 },
+  { id: "magicgirl", name: "Magical Rising", arcs: ["transformation", "live", "confession"], q: 2, f: 0.01 },
 ];
 
 /** synergies whose arcs are all present in the season */

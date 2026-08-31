@@ -1,4 +1,5 @@
 import {
+  GENRES,
   OFFICES,
   PUN_TITLES,
   RIVAL_STUDIOS,
@@ -9,6 +10,7 @@ import {
   type Draft,
   type GenreId,
   type RivalShow,
+  type Arc,
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
@@ -79,6 +81,10 @@ export interface RunState {
   castCombos: string[];
   /** discovered arc synergy ids */
   arcCombos: string[];
+  /** arc ids bought with research data (rd-gated arcs) */
+  arcUnlocked: string[];
+  /** how many times each arc id has been shipped (stats stay hidden until then) */
+  arcKnowledge: Record<string, number>;
   /** best raw quality ever shipped — reviews compare against this */
   studioTop: number;
   franchises: Record<string, Franchise>;
@@ -102,6 +108,28 @@ export interface RunState {
   incomeThisWeek: number;
   fansThisWeek: number;
 }
+
+/** null = arc is pickable; otherwise a human-readable reason it's locked */
+export const arcLockReason = (a: Arc, r: RunState): string | null => {
+  if (!a.unlock) return null;
+  const u = a.unlock;
+  switch (u.kind) {
+    case "rd":
+      return r.arcUnlocked.includes(a.id) ? null : `Study blueprint (${u.cost} RD)`;
+    case "genre":
+      return r.genresUnlocked.includes(u.genre) ? null : `Requires the ${GENRES.find((g) => g.id === u.genre)?.label ?? u.genre} licence`;
+    case "franchise":
+      return Object.keys(r.franchises).length > 0 ? null : "Requires owning a franchise";
+    case "hits":
+      return r.hits >= u.n ? null : `Requires ${u.n} hit shows (${r.hits}/${u.n})`;
+    case "shows":
+      return r.showsMade >= u.n ? null : `Requires ${u.n} shows aired (${r.showsMade}/${u.n})`;
+    case "score":
+      return r.bestScore >= u.n ? null : `Requires a ${u.n}/40 review score (best: ${r.bestScore})`;
+    case "staff":
+      return r.staff.length >= u.n ? null : `Requires ${u.n} staff hired (${r.staff.length}/${u.n})`;
+  }
+};
 
 export const MAX_WEEKS = 48 * 12; // twelve-year career
 export const START_CASH = 90_000;
@@ -128,6 +156,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     comboLevels: {},
     castCombos: [],
     arcCombos: [],
+    arcUnlocked: [],
+    arcKnowledge: {},
     studioTop: 0,
     franchises: {},
     pendingSequel: null,

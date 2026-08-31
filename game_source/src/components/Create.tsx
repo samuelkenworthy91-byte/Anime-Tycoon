@@ -22,6 +22,7 @@ import {
   X,
   PawPrint,
   Skull,
+  Lock,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -51,6 +52,7 @@ import {
   type MediumId,
   type SlotId,
 } from "../engine/data";
+import { arcLockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 
@@ -132,12 +134,14 @@ export default function Create({
   paused,
   onBegin,
   onCancel,
+  onUnlockArc,
 }: {
   run: RunState;
   sequelKey?: string;
   paused?: boolean;
   onBegin: (d: Draft) => void;
   onCancel: () => void;
+  onUnlockArc?: (id: string, cost: number) => void;
 }) {
   const [step, setStep] = useState(0);
   const [d, setD] = useState<Draft>(() => freshDraft(run, sequelKey));
@@ -200,8 +204,9 @@ export default function Create({
       }
       if (a.id === "finale" && idx === d.arcs.length - 1 && d.arcs.length >= 4) q += 3;
     });
-    return { q, f };
-  }, [d.arcs, d.genres]);
+    const known = d.arcs.every((id) => (run.arcKnowledge[id] ?? 0) > 0);
+    return { q, f, known };
+  }, [d.arcs, d.genres, run.arcKnowledge]);
 
   const castRows: { role: "protag" | "secondary" | "pet" | "villain"; title: string; hint: string; icon: React.ReactNode; list: CastMember[] }[] = [
     { role: "protag", title: "LEAD ROLE", hint: "The face of the show.", icon: <Users size={14} />, list: PROTAGONISTS },
@@ -414,44 +419,50 @@ export default function Create({
                   {d.arcs.length === 0 && <span className="px-2 text-xs text-paper/40">Episode board is empty… add arcs below.</span>}
                   {d.arcs.map((id, i) => {
                     const a = ARCS.find((x) => x.id === id)!;
-                    const syn = a.syn?.some((s) => d.genres.includes(s));
                     return (
                       <button
                         key={id}
                         onClick={() => toggleArc(id)}
-                        className={cn(
-                          "btn-press flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-bold",
-                          syn ? "border-gold/60 bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/80"
-                        )}
+                        className="btn-press flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-2 py-1 text-[10px] font-bold text-paper/80"
                       >
                         {i + 1}. {a.name} <X size={10} />
                       </button>
                     );
                   })}
-                  {d.arcs.length >= 3 && (
+                  {d.arcs.length >= 3 && arcTotals.known && (
                     <span className="ml-auto text-right text-[10px] leading-tight text-paper/60">
                       Σ quality <b className={arcTotals.q >= 0 ? "text-mint" : "text-neon"}>{arcTotals.q >= 0 ? "+" : ""}{arcTotals.q}</b>
                       <br />
                       fans <b className="text-cyanx">+{Math.round(arcTotals.f * 100)}%</b>
                     </span>
                   )}
+                  {d.arcs.length >= 3 && !arcTotals.known && (
+                    <span className="ml-auto text-[10px] italic text-viol">some payoffs unknown — ship them to learn</span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {ARCS.map((a) => {
                     const on = d.arcs.includes(a.id);
-                    const locked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
+                    const reason = arcLockReason(a, run);
+                    const baseLocked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
+                    const locked = baseLocked || reason !== null;
+                    const known = (run.arcKnowledge[a.id] ?? 0) > 0;
+                    const study = reason?.startsWith("Study") && onUnlockArc;
                     return (
-                      <button
+                      <div
                         key={a.id}
-                        disabled={locked}
-                        onClick={() => toggleArc(a.id)}
+                        role="button"
+                        tabIndex={locked ? -1 : 0}
+                        onClick={() => !locked && toggleArc(a.id)}
+                        onKeyDown={(e) => !locked && (e.key === "Enter" || e.key === " ") && toggleArc(a.id)}
                         className={cn(
-                          "btn-press relative rounded-2xl border p-2.5 text-left",
+                          "btn-press relative cursor-pointer rounded-2xl border p-2.5 text-left",
                           on ? "border-neon bg-neon/10" : "border-line bg-panel2/70 hover:border-neon/40",
-                          locked && "opacity-35 saturate-0"
+                          locked && "cursor-not-allowed opacity-60 saturate-50"
                         )}
                       >
                         <div className="flex items-center gap-1.5">
+                          {locked && <Lock size={11} className="shrink-0 text-gold" />}
                           <span className="font-display text-xs font-extrabold">{a.name}</span>
                           <span className={cn("ml-auto text-[10px] font-bold", a.cost < 0 ? "text-mint" : "text-gold")}>
                             {a.cost < 0 && "SAVES "}
@@ -459,15 +470,34 @@ export default function Create({
                           </span>
                         </div>
                         <div className="mt-0.5 text-[10px] text-paper/50">{a.desc}</div>
-                        <div className="mt-1 flex items-center gap-2 text-[9px] font-bold">
-                          <span className={a.q >= 0 ? "text-mint" : "text-neon"}>
-                            Q {a.q >= 0 ? "+" : ""}
-                            {a.q}
-                          </span>
-                          {a.f !== 0 && <span className="text-cyanx">Fans +{Math.round(a.f * 100)}%</span>}
-                        </div>
+                        {locked ? (
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span className="rounded bg-panel3 px-1.5 py-0.5 text-[9px] font-bold text-gold/90">{reason}</span>
+                            {study && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onUnlockArc?.(a.id, (a.unlock as { kind: "rd"; cost: number }).cost);
+                                }}
+                                className="btn-press rounded-lg border border-gold/60 bg-gold/15 px-2 py-0.5 text-[9px] font-extrabold text-gold hover:bg-gold/25"
+                              >
+                                STUDY · {(a.unlock as { kind: "rd"; cost: number }).cost} RD
+                              </button>
+                            )}
+                          </div>
+                        ) : known ? (
+                          <div className="mt-1 flex items-center gap-2 text-[9px] font-bold">
+                            <span className={a.q >= 0 ? "text-mint" : "text-neon"}>
+                              Q {a.q >= 0 ? "+" : ""}
+                              {a.q}
+                            </span>
+                            {a.f !== 0 && <span className="text-cyanx">Fans +{Math.round(a.f * 100)}%</span>}
+                          </div>
+                        ) : (
+                          <div className="mt-1 text-[9px] italic text-viol">Payoff unknown — ship it to find out</div>
+                        )}
                         {!on && !locked && <Plus size={13} className="absolute right-2 top-2 text-paper/30" />}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

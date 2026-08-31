@@ -95,7 +95,7 @@ export default function OfficeScene({
     const rowH = h * (0.5 / Math.max(1, rows.length));
     rows.forEach((row, ri) => {
       const depth = 0.55 + ri * 0.22; // front rows bigger
-      const yBase = h * 0.34 + ri * rowH * 1.06;
+      const yBase = h * (0.4 + ri * rowH * 0.9);
       const gap = Math.min(120, (w * 0.78) / Math.max(1, row.length));
       const startX = w / 2 - (gap * (row.length - 1)) / 2;
       row.forEach((_, ci) => {
@@ -112,9 +112,9 @@ export default function OfficeScene({
       return {
         desk: i + 1,
         x: d.x,
-        y: d.y + 34 * d.s,
+        y: d.y + 26 * d.s,
         homeX: d.x,
-        homeY: d.y + 34 * d.s,
+        homeY: d.y + 26 * d.s,
         state: "seated" as const,
         target: null,
         t: 0,
@@ -148,6 +148,8 @@ export default function OfficeScene({
       s.h = wrap.clientHeight;
       canvas.width = Math.max(1, Math.round(s.w * dpr));
       canvas.height = Math.max(1, Math.round(s.h * dpr));
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS px, crisp on hi-dpi
+      if (s.w > 20 && s.h > 20) layoutDesks();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -523,6 +525,10 @@ export default function OfficeScene({
     const draw = (now: number) => {
       const dt = Math.min(64, now - last);
       last = now;
+      if (s.w < 20 || s.h < 20) {
+        s.raf = requestAnimationFrame(draw);
+        return;
+      }
       const { staff: curStaff, boss: curBoss, timeOfDay: tod } = latest.current;
       updateWalkers(dt);
 
@@ -540,13 +546,13 @@ export default function OfficeScene({
           g.fillStyle = "rgba(242,236,223,.75)";
           g.font = `700 ${10 * d.s}px "Space Grotesk", sans-serif`;
           g.textAlign = "center";
-          g.fillText(curBoss.name, d.x, d.y + 40 * d.s);
+          g.fillText(curBoss.name, d.x, d.y + 15 * d.s);
         } else if (m) {
           drawDesk(d.x, d.y, d.s, true, m.color, !!tired, now);
           g.fillStyle = "rgba(242,236,223,.65)";
           g.font = `700 ${9 * d.s}px "Space Grotesk", sans-serif`;
           g.textAlign = "center";
-          g.fillText(m.name, d.x, d.y + 40 * d.s);
+          g.fillText(m.name, d.x, d.y + 15 * d.s);
         } else {
           drawDesk(d.x, d.y, d.s, false, "#666", false, now);
         }
