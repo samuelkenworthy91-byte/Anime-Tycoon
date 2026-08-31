@@ -98,7 +98,7 @@ export default function Title({
             <Sparkles size={13} className="text-gold" />
           </div>
           <div className="mt-1.5 text-[10px] font-bold tracking-[0.2em] text-paper/60">
-            EIGHT YEARS · £90,000 · ONE BEDROOM STUDIO
+            TWELVE YEARS · £90,000 · ONE BEDROOM STUDIO
           </div>
         </div>
 
