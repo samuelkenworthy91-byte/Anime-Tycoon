@@ -22,6 +22,15 @@ npm run preview    # serve the production build
 - `ENTER` advances through create/release flows
 - `M` mute, `ESC`/`P` pause
 
+## Reviews & discovery
+
+Four critics score each show out of 10 (40 total). Reviews are relative to
+your studio's own all-time best, Game Dev Tycoon style: the first show aims
+at a preset bar, and every new best raises the target ~10%, so the Hall of
+Fame (32/40) stays hard and 40/40 is effectively unreachable. What the genre
+wants from your sliders, which casts click, and which arc pairings amplify
+each other are all hidden until you ship and read the post-release breakdown.
+
 ## Time
 
 One in-game day ≈ 2 real minutes while you're in the office. Seven days =

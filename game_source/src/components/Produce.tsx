@@ -15,7 +15,6 @@ import {
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
-  GENRES,
   POINT_COLOR,
   POINT_LABEL,
   PROMOS,
@@ -76,29 +75,7 @@ export default function Produce({
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner)!;
   const phase = PHASES[phaseIdx];
 
-  const ideal = useMemo<[number, number, number]>(() => {
-    if (!draft.genres.length) return [50, 50, 50];
-    const sum = [0, 0, 0];
-    draft.genres.forEach((g) => {
-      const it = GENRES.find((x) => x.id === g)!.ideal;
-      sum[0] += it[0];
-      sum[1] += it[1];
-      sum[2] += it[2];
-    });
-    return sum.map((v) => Math.round(v / draft.genres.length)) as [number, number, number];
-  }, [draft.genres]);
 
-  const ratio = useMemo<[number, number, number]>(() => {
-    if (!draft.genres.length) return [0.34, 0.33, 0.33];
-    const sum = [0, 0, 0];
-    draft.genres.forEach((g) => {
-      const it = GENRES.find((x) => x.id === g)!.ratio;
-      sum[0] += it[0];
-      sum[1] += it[1];
-      sum[2] += it[2];
-    });
-    return sum.map((v) => v / draft.genres.length) as [number, number, number];
-  }, [draft.genres]);
 
   const desks = useMemo<FloorDesk[]>(() => {
     const list: FloorDesk[] = [
@@ -239,7 +216,7 @@ export default function Produce({
               DIRECTION MEETING
             </h2>
             <p className="mt-1 text-xs text-paper/50">
-              Set the balance for each stage. Gold marks match the genre memo — the closer you land, the better the reviews.
+              The director has opinions about the balance. The critics will tell you if you got it right.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
@@ -279,35 +256,14 @@ export default function Produce({
                       className="ink-range relative z-10"
                       style={{ "--p": `${sliders[i]}%` } as React.CSSProperties}
                     />
-                    <div
-                      className="pointer-events-none absolute top-1/2 z-0 h-5 w-[3px] -translate-y-1/2 rounded bg-gold/80 shadow-[0_0_8px_rgba(255,209,102,.9)]"
-                      style={{ left: `calc(${ideal[i]}% - 1px)` }}
-                    />
                   </div>
                   <div className="mt-1 flex justify-between text-[10px] text-paper/50">
                     <span>{sliders[i]}%</span>
-                    <span className="text-gold">memo ≈{ideal[i]}%</span>
                     <span>{100 - sliders[i]}%</span>
                   </div>
                 </div>
               );
             })}
-          </div>
-          <div className="ink-card mt-3 p-3">
-            <div className="mb-1.5 text-[10px] font-bold tracking-widest text-paper/50">
-              GENRE POINT TARGET — aim your effort here
-            </div>
-            <div className="flex h-4 overflow-hidden rounded-full border border-line">
-              {(["story", "art", "sound"] as PointType[]).map((t, i) => (
-                <div
-                  key={t}
-                  className="flex items-center justify-center text-[9px] font-extrabold text-ink"
-                  style={{ width: `${ratio[i] * 100}%`, background: POINT_COLOR[t] }}
-                >
-                  {Math.round(ratio[i] * 100)}%
-                </div>
-              ))}
-            </div>
           </div>
           <div className="mt-4 flex justify-center">
             <Btn big variant="primary" className="anim-ring w-full max-w-sm" onClick={startPhase}>
@@ -494,7 +450,6 @@ export default function Produce({
                     style={{ width: `${totalPts ? (points[t] / totalPts) * 100 : 0}%`, background: POINT_COLOR[t] }}
                   />
                 </div>
-                <div className="mt-0.5 text-[9px] text-paper/40">target {Math.round(ratio[["story", "art", "sound"].indexOf(t)] * 100)}%</div>
               </div>
             ))}
           </div>

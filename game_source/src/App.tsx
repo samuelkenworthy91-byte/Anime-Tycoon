@@ -171,6 +171,8 @@ export default function App() {
         newCombo: !(key in run.comboLevels),
         comboDiscovered: key in run.comboLevels,
         castCombos: run.castCombos,
+        arcCombos: run.arcCombos,
+        studioTop: run.studioTop,
         franchiseMult,
         costs: draftCost(d) + pr.spent,
         fanBase: run.fans,
@@ -229,6 +231,8 @@ export default function App() {
       bestScore: Math.max(run.bestScore, result.total),
       comboLevels: { ...run.comboLevels, [ck]: Math.min(5, (run.comboLevels[ck] ?? 0) + 1) },
       castCombos: [...new Set([...run.castCombos, ...result.chemDiscovered])],
+      arcCombos: [...new Set([...run.arcCombos, ...result.arcCombosDiscovered])],
+      studioTop: Math.max(run.studioTop, result.quality),
       franchises: {
         ...run.franchises,
         [fkey]: { baseTitle, season: draft.season, lastScore: result.total, alive: result.hallOfFame },

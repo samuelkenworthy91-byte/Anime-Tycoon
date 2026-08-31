@@ -548,6 +548,33 @@ export const ARCS: Arc[] = [
   { id: "war", name: "All-Out War", cost: 42_000, q: 6, f: 0.1, syn: ["shonen", "mecha", "fantasy"], synQ: 4, desc: "The entire cast fights at once. Budget dies." },
 ];
 
+/* ------------------------------------------- hidden arc synergies (shipped to discover) */
+export interface ArcCombo {
+  id: string;
+  name: string;
+  /** every arc in this list must be in the season for the synergy to fire */
+  arcs: string[];
+  q: number;
+  f: number;
+}
+
+export const ARC_COMBOS: ArcCombo[] = [
+  { id: "rivalry", name: "Rivalry Saga", arcs: ["tournament", "origin"], q: 2, f: 0.02 },
+  { id: "heart", name: "Heartfelt Trilogy", arcs: ["beach", "festival", "confession"], q: 3, f: 0.01 },
+  { id: "suspense", name: "Suspense Engine", arcs: ["case", "twist", "cliffhanger"], q: 3, f: 0 },
+  { id: "spectacle", name: "Sakuga Spectacle", arcs: ["launch", "sakuga", "war"], q: 3, f: 0.01 },
+  { id: "music", name: "Song & Dance", arcs: ["live", "musical"], q: 2, f: 0.015 },
+  { id: "gold", name: "Franchise Gold", arcs: ["crossover", "ova", "finale"], q: 2, f: 0.03 },
+  { id: "blitz", name: "Merch Blitz", arcs: ["mascot", "collab"], q: 1, f: 0.02 },
+  { id: "road", name: "Redemption Road", arcs: ["origin", "redemption", "finale"], q: 2, f: 0 },
+  { id: "gag", name: "Gag Reel", arcs: ["filler", "beach"], q: -1, f: 0.03 },
+  { id: "deep", name: "Deep Lore", arcs: ["lore", "twist"], q: 2, f: 0 },
+];
+
+/** synergies whose arcs are all present in the season */
+export const arcCombosFor = (arcIds: string[]): ArcCombo[] =>
+  ARC_COMBOS.filter((c) => c.arcs.every((a) => arcIds.includes(a)));
+
 /* ------------------------------------------------------------------ staff */
 const FIRST = ["Hana", "Yuto", "Mei", "Ren", "Sakura", "Daichi", "Aoi", "Kenji", "Mio", "Sota", "Rin", "Takeshi", "Nao", "Haru", "Yuki", "Kenta", "Asuka", "Shun", "Emi", "Taiga", "Kira", "Masa", "Noa", "Goro"];
 const LAST = ["Tanaka", "Sato", "Kurosawa", "Ishikawa", "Mori", "Abe", "Fujimoto", "Okabe", "Shinohara", "Wakamatsu", "Hirasawa", "Kobayashi", "Endo", "Miura", "Tsukishima", "Araki"];

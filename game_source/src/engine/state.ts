@@ -77,6 +77,10 @@ export interface RunState {
   comboLevels: Record<string, number>;
   /** discovered cast chemistry ids */
   castCombos: string[];
+  /** discovered arc synergy ids */
+  arcCombos: string[];
+  /** best raw quality ever shipped — reviews compare against this */
+  studioTop: number;
   franchises: Record<string, Franchise>;
   pendingSequel: string | null;
   contracts: Contract[];
@@ -123,6 +127,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     mediumsUnlocked: ["tv", "ona"],
     comboLevels: {},
     castCombos: [],
+    arcCombos: [],
+    studioTop: 0,
     franchises: {},
     pendingSequel: null,
     contracts: [rollContract(0), rollContract(0), rollContract(0)],

@@ -28,6 +28,7 @@ import {
 import { Btn, CountUp } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
+  ARC_COMBOS,
   CAST_CHEMS,
   castById,
   GENRES,
@@ -192,7 +193,7 @@ export default function Office({
       {/* hall of fame posters */}
       <div className="absolute left-[4%] top-[8%] z-10 hidden gap-2 sm:flex">
         {run.hallOfFame.slice(-3).map((h, i) => (
-          <div key={i} className="w-[52px] -rotate-2 overflow-hidden rounded border-2 border-gold/70 md:w-[68px]">
+          <div key={i} className="aspect-square w-[52px] -rotate-2 overflow-hidden rounded border-2 border-gold/70 md:w-[68px]">
             <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-full w-full" />
             <div className="bg-gold/90 py-0.5 text-center font-display text-[7px] font-extrabold text-ink">{h.score}/40</div>
           </div>
@@ -298,7 +299,7 @@ export default function Office({
         {inFlight > 0 && (
           <div className="mx-auto mt-1 max-w-4xl text-center text-[11px] text-mint/80">
             <TrendingUp size={11} className="mr-1 inline" />
-            ≈ {formatGBPShort(inFlight)} still landing over the next 12 weeks from current broadcasts
+            Broadcast revenue still landing — the box office will tell you what it was
           </div>
         )}
       </div>
@@ -676,6 +677,29 @@ export default function Office({
                   <div key={id} className="flex items-center gap-2 rounded-lg border border-mint/40 bg-mint/5 px-2.5 py-1.5">
                     <span className="truncate text-xs font-bold text-mint">{c.name}</span>
                     <span className="ml-auto text-[10px] font-extrabold text-gold">×{c.mult.toFixed(2)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mb-2 mt-4 flex items-center gap-2 text-xs font-bold tracking-widest text-cyanx">
+            <ChevronRight size={14} /> ARC SYNERGIES (discovered by experimenting)
+          </div>
+          {run.arcCombos.length === 0 ? (
+            <div className="text-sm text-paper/40">Some story arcs amplify each other. Ship the right pairings to find out.</div>
+          ) : (
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {run.arcCombos.map((id) => {
+                const c = ARC_COMBOS.find((x) => x.id === id);
+                if (!c) return null;
+                return (
+                  <div key={id} className="flex items-center gap-2 rounded-lg border border-cyanx/40 bg-cyanx/5 px-2.5 py-1.5">
+                    <span className="truncate text-xs font-bold text-cyanx">{c.name}</span>
+                    <span className="ml-auto text-[10px] font-extrabold text-gold">
+                      {c.q >= 0 ? "+" : ""}
+                      {c.q} Q{c.f ? ` · +${Math.round(c.f * 100)}% fans` : ""}
+                    </span>
                   </div>
                 );
               })}

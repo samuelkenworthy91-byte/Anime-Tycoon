@@ -18,7 +18,6 @@ import {
   Zap,
   Briefcase,
   Users,
-  AlertTriangle,
   Plus,
   X,
   PawPrint,
@@ -27,7 +26,6 @@ import {
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
-import { castById } from "../engine/data";
 import {
   ARCS,
   AUDIENCES,
@@ -92,26 +90,19 @@ export function draftWeeks(d: Draft): number {
 function CastPick({
   m,
   on,
-  match,
-  weight,
   onPick,
-  compact,
 }: {
   m: CastMember;
   on: boolean;
-  match: number;
-  weight: number;
   onPick: () => void;
-  compact?: boolean;
 }) {
-  const bonus = Math.round(match * 2.6 * weight * 10) / 10;
   return (
     <button
       onClick={onPick}
       className={cn(
         "btn-press group relative overflow-hidden rounded-2xl border text-left",
         on ? "border-neon shadow-[0_0_26px_rgba(255,77,141,.4)]" : "border-line hover:border-neon/40",
-        compact ? "aspect-square" : "aspect-[4/5]"
+        "aspect-square"
       )}
     >
       <Portrait
@@ -122,21 +113,9 @@ function CastPick({
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
-      {bonus > 0 && (
-        <div className="absolute right-1.5 top-1.5 rounded-full bg-mint px-2 py-0.5 text-[9px] font-extrabold text-ink">
-          +{bonus}
-        </div>
-      )}
       <div className="absolute inset-x-0 bottom-0 p-2">
         <div className="font-display text-sm font-extrabold leading-tight">{m.name}</div>
         <div className="text-[10px] font-bold text-cyanx">{m.archetype}</div>
-        <div className="mt-0.5 flex flex-wrap gap-1">
-          {m.aff.map((a) => (
-            <span key={a} className="rounded bg-ink/70 px-1.5 py-0.5 text-[9px] font-bold text-paper/70">
-              {GENRES.find((g) => g.id === a)!.label}
-            </span>
-          ))}
-        </div>
       </div>
       {on && (
         <div className="absolute left-1.5 top-1.5 rounded-full bg-neon p-1 text-white">
@@ -169,24 +148,8 @@ export default function Create({
   const combo = comboLabel(d.genres, comboDiscovered);
   const comboLv = run.comboLevels[comboKey(d.genres)] ?? 0;
   const cost = draftCost(d, run);
-  const after = run.cash - cost;
   const weeks = draftWeeks(d);
 
-  const ideal = useMemo<[number, number, number]>(() => {
-    if (!d.genres.length) return [50, 50, 50];
-    const sum = [0, 0, 0];
-    d.genres.forEach((g) => {
-      const it = GENRES.find((x) => x.id === g)!.ideal;
-      sum[0] += it[0];
-      sum[1] += it[1];
-      sum[2] += it[2];
-    });
-    return [
-      Math.round(sum[0] / d.genres.length),
-      Math.round(sum[1] / d.genres.length),
-      Math.round(sum[2] / d.genres.length),
-    ];
-  }, [d.genres]);
 
   const stepValid = [d.title.trim().length > 0, d.genres.length >= 1, true, !!d.protag && !!d.secondary && !!d.pet && !!d.villain, d.arcs.length >= 3][step] ?? true;
 
@@ -213,12 +176,6 @@ export default function Create({
       if (old.genres.length >= 2) return { ...old, genres: [old.genres[1], id] };
       return { ...old, genres: [...old.genres, id] };
     });
-  };
-
-  const arcCastFit = (a: (typeof ARCS)[number], d: Draft) => {
-    if (!a.cast) return false;
-    const m = castById(d[a.cast]);
-    return m.aff.some((g) => d.genres.includes(g));
   };
 
   const toggleArc = (id: string) => {
@@ -381,28 +338,7 @@ export default function Create({
                   </span>
                 )}
               </div>
-              {d.genres.length > 0 && (
-                <Section title="IDEAL PRODUCTION FOCUS (MEMO FROM THE DIRECTOR)">
-                  <div className="space-y-1.5 text-xs">
-                    {(["Pre-Production", "Animation", "Sound & Voice"] as const).map((label, i) => (
-                      <div key={label} className="flex items-center gap-2">
-                        <span className="w-28 shrink-0 font-bold text-paper/60">{label}</span>
-                        <div className="relative h-2 flex-1 rounded-full bg-abyss">
-                          <div
-                            className="absolute top-0 h-2 w-1.5 -translate-x-1/2 rounded bg-gold shadow-[0_0_8px_rgba(255,209,102,.8)]"
-                            style={{ left: `${ideal[i]}%` }}
-                          />
-                        </div>
-                        <span className="w-9 text-right font-bold text-gold">{ideal[i]}%</span>
-                      </div>
-                    ))}
-                    <div className="pt-1 text-[10px] text-paper/40">
-                      Shown: Story vs Characters · Sakuga vs Consistency · OST vs Voice — you'll set these next.
-                    </div>
-                  </div>
-                </Section>
-              )}
-            </div>
+                          </div>
           )}
 
           {step === 2 && (
@@ -440,23 +376,18 @@ export default function Create({
               {castRows.map((row) => (
                 <Section key={row.role} title={`${row.title} — ${CAST_ROLE_LABEL[row.role]}`}>
                   <div className="mb-1 text-[10px] text-paper/40">{row.hint}</div>
-                  <div className={cn("grid grid-cols-4 gap-2 sm:grid-cols-6", row.list.length > 24 && "lg:grid-cols-8")}>
+                  <div className="nice-scroll grid max-h-[42vh] grid-cols-3 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-5">
                     {row.list.map((m) => {
                       const on = d[row.role] === m.id;
-                      const match = m.aff.filter((g) => d.genres.includes(g)).length;
-                      const weight = { protag: 1, secondary: 0.55, villain: 0.45, pet: 0.3 }[row.role];
                       return (
                         <CastPick
                           key={m.id}
                           m={m}
                           on={on}
-                          match={match}
-                          weight={weight}
                           onPick={() => {
                             sfx.select();
                             set({ [row.role]: m.id } as Partial<Draft>);
                           }}
-                          compact={row.role !== "protag"}
                         />
                       );
                     })}
@@ -508,7 +439,6 @@ export default function Create({
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {ARCS.map((a) => {
                     const on = d.arcs.includes(a.id);
-                    const syn = a.syn?.some((s) => d.genres.includes(s));
                     const locked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
                     return (
                       <button
@@ -535,13 +465,6 @@ export default function Create({
                             {a.q}
                           </span>
                           {a.f !== 0 && <span className="text-cyanx">Fans +{Math.round(a.f * 100)}%</span>}
-                          {a.syn && <span className={syn ? "text-gold" : "text-paper/30"}>★ {a.syn.map((s) => GENRES.find((g) => g.id === s)!.label).join("/")}</span>}
-                          {a.cast && (
-                            <span className={cn("rounded px-1 py-0.5", arcCastFit(a, d) ? "bg-mint/15 text-mint" : "bg-panel3 text-paper/40")}>
-                              {a.cast === "pet" ? "🐾" : a.cast === "villain" ? "☠" : "⭐"} {a.cast.toUpperCase()}
-                              {arcCastFit(a, d) ? " +" + a.castQ : ""}
-                            </span>
-                          )}
                         </div>
                         {!on && !locked && <Plus size={13} className="absolute right-2 top-2 text-paper/30" />}
                       </button>
@@ -574,18 +497,7 @@ export default function Create({
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
                   <Row k="UP-FRONT COST" v={formatGBP(cost)} money big />
-                  <Row
-                    k="Cash after"
-                    v={formatGBP(after)}
-                    money
-                    big
-                    bad={after < 0}
-                  />
-                  {after < 0 && (
-                    <div className="flex items-center gap-2 rounded-lg border border-neon/40 bg-neon/10 p-2 text-[11px] text-neon2">
-                      <AlertTriangle size={14} /> Overdraft! The studio will sink if this show flops…
-                    </div>
-                  )}
+                  <div className="text-[10px] text-paper/40">The studio's cash takes the hit — keep an eye on the office.</div>
                 </div>
               </Section>
               <Btn big variant="gold" className="w-full" onClick={() => onBegin(d)}>
@@ -598,7 +510,7 @@ export default function Create({
         {/* side production bible */}
         <div className="hidden w-64 shrink-0 lg:block">
           <div className="ink-card sticky top-0 overflow-hidden">
-            <div className="relative h-44">
+            <div className="relative aspect-square">
               <Portrait img={protag.img} pos={protag.pos} name={protag.name} alt={protag.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-panel via-transparent to-transparent" />
               <div className="absolute bottom-2 left-3 right-3">
@@ -625,10 +537,6 @@ export default function Create({
                 <div className="flex justify-between text-paper/60">
                   <span>Cost</span>
                   <span className="font-bold text-gold">{formatGBP(cost)}</span>
-                </div>
-                <div className="flex justify-between text-paper/60">
-                  <span>Cash after</span>
-                  <span className={cn("font-bold", after < 0 ? "text-neon" : "text-mint")}>{formatGBP(after)}</span>
                 </div>
                 <div className="flex justify-between text-paper/60">
                   <span>Schedule</span>
