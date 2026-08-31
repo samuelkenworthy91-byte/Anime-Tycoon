@@ -188,37 +188,9 @@ export default function Office({
         }))}
         maxStaff={off.maxStaff}
         timeOfDay={(clockPhase + 0.5) / 4}
+        awards={run.awards}
         onDeskClick={() => setModal("staff")}
       />
-      {/* hall of fame posters */}
-      <div className="absolute left-[4%] top-[8%] z-10 hidden gap-2 sm:flex">
-        {run.hallOfFame.slice(-3).map((h, i) => (
-          <div key={i} className="aspect-square w-[52px] -rotate-2 overflow-hidden rounded border-2 border-gold/70 md:w-[68px]">
-            <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-full w-full" />
-            <div className="bg-gold/90 py-0.5 text-center font-display text-[7px] font-extrabold text-ink">{h.score}/40</div>
-          </div>
-        ))}
-        {run.hallOfFame.length === 0 && (
-          <div className="flex h-16 w-14 items-center justify-center rounded border border-dashed border-line bg-abyss/60 text-center text-[8px] text-paper/30 md:w-20">
-            HALL OF
-            <br />
-            FAME POSTER
-          </div>
-        )}
-      </div>
-      {run.research.includes("merch") && (
-        <div className="absolute left-[5%] top-[44%] z-10 hidden sm:block">
-          <div className="flex gap-1.5 rounded border border-line bg-panel2/80 px-1.5 py-1">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className="h-2.5 w-2 rounded-t-full" style={{ background: ["#ff4d8d", "#3be1ff", "#ffd166"][i] }} />
-                <div className="h-3 w-2.5 rounded-b-sm" style={{ background: ["#a12046", "#1a6d80", "#8a6b1a"][i] }} />
-              </div>
-            ))}
-          </div>
-          <div className="h-1.5 w-full rounded bg-[#5e3b24]" />
-        </div>
-      )}
 
       {/* ---------------------------------------------------------- HUD */}
       <div className="relative z-20 flex items-center gap-2 border-b border-line/60 bg-ink/75 py-2 pl-3 pr-[76px] backdrop-blur-md md:pl-5">
@@ -254,6 +226,10 @@ export default function Office({
           <div className="ink-chip hidden items-center gap-1.5 px-2 py-1 text-xs font-bold text-gold lg:flex">
             <Star size={13} />
             <CountUp to={score} />
+          </div>
+          <div className="ink-chip hidden items-center gap-1.5 px-2 py-1 text-xs font-bold text-gold sm:flex" title="Awards won">
+            <Trophy size={13} />
+            <CountUp to={run.awards} />
           </div>
         </div>
       </div>
