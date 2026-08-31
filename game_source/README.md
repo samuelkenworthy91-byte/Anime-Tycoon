@@ -54,6 +54,13 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 `npm run apk:open` opens the android project in Android Studio (useful for
 release builds, icons and signing). The app id is `com.kirameki.studio`.
 
+### Build via GitHub Actions
+
+A ready-made workflow lives at `.github/workflows/apk.yml` (not committed —
+the sandbox bot cannot push workflow files). Drop it into the repo and it
+builds the debug APK on every push and on manual dispatch, uploading it as
+the `kirameki-studio-apk` artifact.
+
 ## Project layout
 
 - `src/engine/` — data (cast, genres, arcs, rivals), state (calendar, payouts,
