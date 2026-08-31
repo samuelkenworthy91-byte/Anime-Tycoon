@@ -9,6 +9,9 @@ on:
       - "game_source/**"
       - ".github/workflows/apk.yml"
 
+permissions:
+  contents: read
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
