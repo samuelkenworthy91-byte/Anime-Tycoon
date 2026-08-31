@@ -1,4 +1,4 @@
-# Kirameki Studio — Anime Studio Tycoon
+# Anime Runner
 
 A game-dev-story-style anime studio tycoon. Plan shows, cast 136 characters
 (40 leads, 32 supporting, 32 pets/mascots, 32 villains), pop the point bubbles
@@ -61,7 +61,7 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 `npm run apk:open` opens the android project in Android Studio (useful for
-release builds, icons and signing). The app id is `com.kirameki.studio`.
+release builds, icons and signing). The app id is `com.kirameki.studio` (package id; the launcher name is **Anime Runner**).
 
 ### Build via GitHub Actions
 

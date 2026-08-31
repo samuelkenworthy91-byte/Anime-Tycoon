@@ -296,7 +296,7 @@ export interface Office {
 }
 export const OFFICES: Office[] = [
   { id: 0, name: "Bedroom Studio", maxStaff: 2, rent: 400, cost: 0, desks: 3, blurb: "A futon, a tablet and a dream.", bg: "img/bg-office-1.jpg" },
-  { id: 1, name: "Kirameki Building", maxStaff: 4, rent: 2_200, cost: 220_000, desks: 5, blurb: "Second floor above a ramen shop.", bg: "img/bg-office-2.jpg" },
+  { id: 1, name: "Anime Runner Building", maxStaff: 4, rent: 2_200, cost: 220_000, desks: 5, blurb: "Second floor above a ramen shop.", bg: "img/bg-office-2.jpg" },
   { id: 2, name: "Sakuga Tower", maxStaff: 6, rent: 6_500, cost: 1_100_000, desks: 7, blurb: "Glass walls. Real coffee. Legends work here.", bg: "img/bg-office-3.jpg" },
   { id: 3, name: "Neo District HQ", maxStaff: 9, rent: 18_000, cost: 4_200_000, desks: 10, blurb: "Rooftop terrace. Ping-pong table. Five coffee machines.", bg: "" },
   { id: 4, name: "Sakuga Global Campus", maxStaff: 12, rent: 55_000, cost: 18_000_000, desks: 13, blurb: "The whole industry orbits this address.", bg: "" },

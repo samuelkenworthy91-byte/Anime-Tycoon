@@ -19,7 +19,7 @@ type Screen = "title" | "office" | "create" | "produce" | "contract" | "release"
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
   const [run, setRun] = useState<RunState | null>(null);
-  const [meta, setMeta] = useState({ studio: "Studio Kirameki", showrunner: "steady" });
+  const [meta, setMeta] = useState({ studio: "Anime Runner", showrunner: "steady" });
   const [draft, setDraft] = useState<Draft | null>(null);
   const [result, setResult] = useState<ShowResult | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
