@@ -29,6 +29,10 @@ interface Walker {
  * Game Dev Story-style animated office: staff sit at desks with live monitors,
  * occasionally get up and wander to the coffee machine / water cooler / snack
  * machine, windows show a day-night city, and furniture upgrades per level.
+ *
+ * All changing props are read through a `latest` ref so the animation loop is
+ * set up exactly once and never restarts (previously new object identities on
+ * every render tore the scene down and reset all walkers).
  */
 export default function OfficeScene({
   level,
@@ -52,11 +56,86 @@ export default function OfficeScene({
     raf: 0,
     w: 320,
     h: 320,
-    t: 0,
     walkers: [] as Walker[],
     desks: [] as { x: number; y: number; s: number }[],
+    rows: [] as number[][],
   });
+  const latest = useRef({ level, boss, staff, maxStaff, timeOfDay, onDeskClick });
+  latest.current = { level, boss, staff, maxStaff, timeOfDay, onDeskClick };
 
+  /* ----------------------------------------------------------- scene build */
+  const buildRows = (maxStaff: number, level: number): number[][] => {
+    const totalDesks = maxStaff + 1;
+    const rows: number[][] = [];
+    let left = totalDesks;
+    const rowSizes =
+      level >= 3
+        ? [5, 4, Math.max(0, left - 9)]
+        : level >= 2
+          ? [4, Math.max(0, Math.ceil((totalDesks - 4) / 2)), Math.max(0, Math.floor((totalDesks - 4) / 2))]
+          : level === 1
+            ? [3, Math.max(0, totalDesks - 3)]
+            : [totalDesks];
+    rowSizes.forEach((n) => {
+      if (n > 0 && left > 0) {
+        rows.push(Array.from({ length: Math.min(n, left) }, (_, j) => j));
+        left -= Math.min(n, left);
+      }
+    });
+    return rows;
+  };
+
+  const layoutDesks = () => {
+    const s = st.current;
+    const w = s.w;
+    const h = s.h;
+    const desks: { x: number; y: number; s: number }[] = [];
+    const rows = buildRows(latest.current.maxStaff, latest.current.level);
+    s.rows = rows;
+    const rowH = h * (0.5 / Math.max(1, rows.length));
+    rows.forEach((row, ri) => {
+      const depth = 0.55 + ri * 0.22; // front rows bigger
+      const yBase = h * (0.4 + ri * rowH * 0.9);
+      const gap = Math.min(120, (w * 0.78) / Math.max(1, row.length));
+      const startX = w / 2 - (gap * (row.length - 1)) / 2;
+      row.forEach((_, ci) => {
+        desks.push({ x: startX + ci * gap, y: yBase, s: depth });
+      });
+    });
+    s.desks = desks;
+  };
+
+  const makeWalkers = () => {
+    const s = st.current;
+    s.walkers = latest.current.staff.map((_, i) => {
+      const d = s.desks[i + 1] ?? { x: s.w / 2, y: s.h * 0.5, s: 1 };
+      return {
+        desk: i + 1,
+        x: d.x,
+        y: d.y + 26 * d.s,
+        homeX: d.x,
+        homeY: d.y + 26 * d.s,
+        state: "seated" as const,
+        target: null,
+        t: 0,
+        next: (6 + Math.random() * 10) * 1000,
+        dir: 1 as const,
+      };
+    });
+  };
+
+  const rebuild = () => {
+    layoutDesks();
+    makeWalkers();
+  };
+
+  /* ---------------------------------------------- rebuild when layout key */
+  useEffect(() => {
+    rebuild();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level, maxStaff, staff.length]);
+
+  /* ------------------------------------------------------- canvas + loop */
   useEffect(() => {
     const wrap = wrapRef.current!;
     const canvas = canvasRef.current!;
@@ -67,71 +146,16 @@ export default function OfficeScene({
     const resize = () => {
       s.w = wrap.clientWidth;
       s.h = wrap.clientHeight;
-      canvas.width = s.w * dpr;
-      canvas.height = s.h * dpr;
+      canvas.width = Math.max(1, Math.round(s.w * dpr));
+      canvas.height = Math.max(1, Math.round(s.h * dpr));
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS px, crisp on hi-dpi
+      if (s.w > 20 && s.h > 20) layoutDesks();
     };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
 
-    const totalDesks = maxStaff + 1;
-    /* desk grid: rows of desks, back rows higher & smaller (light perspective) */
-    const rows: number[][] = [];
-    let left = totalDesks;
-    const rowSizes = level >= 3 ? [5, 4, Math.max(0, left - 9)] : level >= 2 ? [4, Math.max(0, Math.ceil((totalDesks - 4) / 2)), Math.max(0, Math.floor((totalDesks - 4) / 2))] : level === 1 ? [3, Math.max(0, totalDesks - 3)] : [totalDesks];
-    rowSizes.forEach((n) => {
-      if (n > 0 && left > 0) {
-        rows.push(Array.from({ length: Math.min(n, left) }, (_, j) => j));
-        left -= Math.min(n, left);
-      }
-    });
-
-    const layout = () => {
-      const w = s.w;
-      const h = s.h;
-      const desks: { x: number; y: number; s: number }[] = [];
-      const rowH = h * (0.5 / Math.max(1, rows.length));
-      rows.forEach((row, ri) => {
-        const depth = 0.55 + ri * 0.22; // front rows bigger
-        const yBase = h * 0.34 + ri * rowH * 1.06;
-        const gap = Math.min(120, (w * 0.78) / Math.max(1, row.length));
-        const startX = w / 2 - (gap * (row.length - 1)) / 2;
-        row.forEach((_, ci) => {
-          desks.push({ x: startX + ci * gap, y: yBase, s: depth });
-        });
-      });
-      s.desks = desks;
-    };
-    layout();
-
-    /* walkers: one per staff seat (index 1..staff.length), boss stays put */
-    s.walkers = staff.map((_, i) => {
-      const d = s.desks[i + 1] ?? { x: s.w / 2, y: s.h * 0.5, s: 1 };
-      return {
-        desk: i + 1,
-        x: d.x,
-        y: d.y + 34 * d.s,
-        homeX: d.x,
-        homeY: d.y + 34 * d.s,
-        state: "seated" as const,
-        target: null,
-        t: 0,
-        next: 6 + Math.random() * 10,
-        dir: 1 as const,
-      };
-    });
-
-    const spots = (): Spot[] => {
-      const w = s.w;
-      const h = s.h;
-      const list: Spot[] = [
-        { x: w * 0.1, y: h * 0.52, kind: "water" },
-        { x: w * 0.9, y: h * 0.5, kind: "coffee" },
-      ];
-      if (level >= 2) list.push({ x: w * 0.86, y: h * 0.66, kind: "snack" });
-      if (level >= 3) list.push({ x: w * 0.12, y: h * 0.72, kind: "pong" });
-      return list;
-    };
+    rebuild();
 
     const onPointer = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -141,7 +165,7 @@ export default function OfficeScene({
         const dw = 150 * d.s;
         const dh = 90 * d.s;
         if (Math.abs(px - d.x) < dw / 2 && Math.abs(py - d.y) < dh / 2) {
-          onDeskClick?.(i);
+          latest.current.onDeskClick?.(i);
         }
       });
     };
@@ -158,6 +182,7 @@ export default function OfficeScene({
     const drawRoom = (tod: number, t: number) => {
       const w = s.w;
       const h = s.h;
+      const level = latest.current.level;
       const [top, bottom] = sky(tod);
       const skyGrad = g.createLinearGradient(0, 0, 0, h * 0.34);
       skyGrad.addColorStop(0, top);
@@ -169,8 +194,8 @@ export default function OfficeScene({
       if (tod > 0.74 || tod < 0.1) {
         g.fillStyle = "rgba(255,255,255,.7)";
         for (let i = 0; i < 24; i++) {
-          const sx = ((i * 137.5 + 40) % w);
-          const sy = ((i * 71.3 + 20) % (h * 0.22));
+          const sx = (i * 137.5 + 40) % w;
+          const sy = (i * 71.3 + 20) % (h * 0.22);
           g.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 900 + i));
           g.fillRect(sx, sy, 2, 2);
         }
@@ -240,81 +265,83 @@ export default function OfficeScene({
       }
     };
 
-    const drawDesk = (x: number, y: number, s: number, occupied: boolean, color: string, tired: boolean, t: number) => {
-      const w = 130 * s;
-      const deskH = 26 * s;
-      const monitorW = 64 * s;
-      const monitorH = 42 * s;
+    const drawDesk = (x: number, y: number, sc: number, occupied: boolean, color: string, tired: boolean, t: number) => {
+      const w = 130 * sc;
+      const deskH = 26 * sc;
+      const monitorW = 64 * sc;
+      const monitorH = 42 * sc;
+      const level = latest.current.level;
       /* chair behind */
       g.fillStyle = "#241c3e";
       g.beginPath();
-      g.roundRect(x - 22 * s, y - 40 * s, 44 * s, 40 * s, 10 * s);
+      g.roundRect(x - 22 * sc, y - 40 * sc, 44 * sc, 40 * sc, 10 * sc);
       g.fill();
       if (occupied) {
         /* staff chibi: body + head */
         const bob = Math.sin(t / 260) * 1.6;
         g.fillStyle = color;
         g.beginPath();
-        g.arc(x, y - 42 * s + bob, 11 * s, Math.PI, 0);
+        g.arc(x, y - 42 * sc + bob, 11 * sc, Math.PI, 0);
         g.fill();
         g.fillStyle = "#ffd9b8";
-        g.fillRect(x - 8 * s, y - 42 * s + bob, 16 * s, 12 * s);
+        g.fillRect(x - 8 * sc, y - 42 * sc + bob, 16 * sc, 12 * sc);
         g.fillStyle = "#0a0812";
-        g.fillRect(x - 5 * s, y - 37 * s + bob, 2.4 * s, 3 * s);
-        g.fillRect(x + 2.6 * s, y - 37 * s + bob, 2.4 * s, 3 * s);
+        g.fillRect(x - 5 * sc, y - 37 * sc + bob, 2.4 * sc, 3 * sc);
+        g.fillRect(x + 2.6 * sc, y - 37 * sc + bob, 2.4 * sc, 3 * sc);
         g.fillStyle = tired ? "#4a4166" : "#3a3f66";
         g.beginPath();
-        g.roundRect(x - 12 * s, y - 28 * s + bob, 24 * s, 14 * s, 5 * s);
+        g.roundRect(x - 12 * sc, y - 28 * sc + bob, 24 * sc, 14 * sc, 5 * sc);
         g.fill();
         if (tired) {
           g.fillStyle = "#ffd166";
-          g.font = `800 ${10 * s}px "Bricolage Grotesque", sans-serif`;
+          g.font = `800 ${10 * sc}px "Bricolage Grotesque", sans-serif`;
           g.textAlign = "center";
-          g.fillText("Z z", x, y - 54 * s);
+          g.fillText("Z z", x, y - 54 * sc);
         }
       } else {
         g.fillStyle = "rgba(255,255,255,.05)";
         g.beginPath();
-        g.roundRect(x - 10 * s, y - 36 * s, 20 * s, 34 * s, 6 * s);
+        g.roundRect(x - 10 * sc, y - 36 * sc, 20 * sc, 34 * sc, 6 * sc);
         g.fill();
       }
       /* monitor */
       g.fillStyle = "#0a0812";
       g.beginPath();
-      g.roundRect(x - monitorW / 2, y - 30 * s, monitorW, monitorH, 5 * s);
+      g.roundRect(x - monitorW / 2, y - 30 * sc, monitorW, monitorH, 5 * sc);
       g.fill();
       g.strokeStyle = "rgba(120,100,220,.5)";
       g.lineWidth = 1;
       g.stroke();
       if (occupied) {
         for (let bI = 0; bI < 5; bI++) {
-          const hgt = 3 + Math.abs(Math.sin(t / 300 + bI * 1.7)) * 16 * s;
+          const hgt = 3 + Math.abs(Math.sin(t / 300 + bI * 1.7)) * 16 * sc;
           g.fillStyle = color;
           g.globalAlpha = 0.85;
-          g.fillRect(x - monitorW / 2 + 6 * s + bI * 11 * s, y - 24 * s + (monitorH - 14 * s) - hgt, 6 * s, hgt);
+          g.fillRect(x - monitorW / 2 + 6 * sc + bI * 11 * sc, y - 24 * sc + (monitorH - 14 * sc) - hgt, 6 * sc, hgt);
         }
         g.globalAlpha = 1;
       } else {
         g.fillStyle = "rgba(60,70,120,.5)";
-        g.fillRect(x - monitorW / 2 + 6 * s, y - 24 * s, monitorW - 12 * s, 6 * s);
+        g.fillRect(x - monitorW / 2 + 6 * sc, y - 24 * sc, monitorW - 12 * sc, 6 * sc);
       }
       /* desk slab */
-      const slab = g.createLinearGradient(0, y + 8 * s, 0, y + 26 * s);
+      const slab = g.createLinearGradient(0, y + 8 * sc, 0, y + 26 * sc);
       slab.addColorStop(0, level >= 2 ? "#6e5a8a" : "#8a5a3b");
       slab.addColorStop(1, level >= 2 ? "#43365c" : "#5e3b24");
       g.fillStyle = slab;
       g.beginPath();
-      g.roundRect(x - w / 2, y, w, deskH, 4 * s);
+      g.roundRect(x - w / 2, y, w, deskH, 4 * sc);
       g.fill();
       /* name tag */
       g.fillStyle = "rgba(242,236,223,.65)";
-      g.font = `700 ${9 * s}px "Space Grotesk", sans-serif`;
+      g.font = `700 ${9 * sc}px "Space Grotesk", sans-serif`;
       g.textAlign = "center";
     };
 
     const drawAmenities = (t: number) => {
       const w = s.w;
       const h = s.h;
+      const level = latest.current.level;
       /* water cooler (left) */
       g.fillStyle = "#2f4a6b";
       g.beginPath();
@@ -400,13 +427,26 @@ export default function OfficeScene({
       void t;
     };
 
+    const spots = (): Spot[] => {
+      const w = s.w;
+      const h = s.h;
+      const level = latest.current.level;
+      const list: Spot[] = [
+        { x: w * 0.1, y: h * 0.52, kind: "water" },
+        { x: w * 0.9, y: h * 0.5, kind: "coffee" },
+      ];
+      if (level >= 2) list.push({ x: w * 0.86, y: h * 0.66, kind: "snack" });
+      if (level >= 3) list.push({ x: w * 0.12, y: h * 0.72, kind: "pong" });
+      return list;
+    };
+
+    /* walker timings are in real ms (dt comes from requestAnimationFrame) */
     const updateWalkers = (dt: number) => {
       for (const wk of s.walkers) {
         wk.t += dt;
         if (wk.state === "seated") {
           if (wk.t > wk.next) {
-            const spots2 = spots();
-            const sp = spots2[Math.floor(Math.random() * spots2.length)];
+            const sp = spots()[Math.floor(Math.random() * spots().length)];
             wk.target = { x: sp.x + (Math.random() - 0.5) * 20, y: sp.y };
             wk.state = "walk";
             wk.dir = wk.target.x >= wk.x ? 1 : -1;
@@ -428,21 +468,23 @@ export default function OfficeScene({
             wk.dir = dx >= 0 ? 1 : -1;
           }
         } else if (wk.state === "pause") {
-          if (wk.t > 1.6 + Math.random() * 1.4) {
+          if (wk.t > (1.6 + Math.random() * 1.4) * 1000) {
             wk.target = { x: wk.homeX, y: wk.homeY };
             wk.state = "walk";
             wk.dir = wk.homeX >= wk.x ? 1 : -1;
           }
-        } else if (wk.state === "walk" && !wk.target) {
-          wk.state = "seated";
-          wk.next = 6 + Math.random() * 10;
-          wk.t = 0;
         }
-        if (wk.state === "walk" && wk.target && Math.hypot(wk.target.x - wk.x, wk.target.y - wk.y) < 2 && Math.hypot(wk.homeX - wk.x, wk.homeY - wk.y) < 2) {
+        /* arrived back at desk → sit down and rest for a while */
+        if (
+          wk.state === "walk" &&
+          wk.target &&
+          Math.hypot(wk.target.x - wk.x, wk.target.y - wk.y) < 2 &&
+          Math.hypot(wk.homeX - wk.x, wk.homeY - wk.y) < 2
+        ) {
           wk.x = wk.homeX;
           wk.y = wk.homeY;
           wk.state = "seated";
-          wk.next = 6 + Math.random() * 12;
+          wk.next = (6 + Math.random() * 12) * 1000;
           wk.t = 0;
         }
       }
@@ -451,91 +493,97 @@ export default function OfficeScene({
     const drawWalker = (wk: Walker, color: string, tired: boolean, t: number) => {
       const walking = wk.state === "walk";
       const bob = walking ? Math.abs(Math.sin(t / 110)) * 3 : Math.sin(t / 300) * 1.2;
-      const s = 0.9;
+      const sc = 0.9;
       g.fillStyle = color;
       g.beginPath();
-      g.arc(wk.x, wk.y - 34 * s + bob, 10 * s, Math.PI, 0);
+      g.arc(wk.x, wk.y - 34 * sc + bob, 10 * sc, Math.PI, 0);
       g.fill();
       g.fillStyle = "#ffd9b8";
-      g.fillRect(wk.x - 7 * s, wk.y - 34 * s + bob, 14 * s, 10 * s);
+      g.fillRect(wk.x - 7 * sc, wk.y - 34 * sc + bob, 14 * sc, 10 * sc);
       g.fillStyle = "#0a0812";
-      g.fillRect(wk.x - 4.5 * s, wk.y - 30 * s + bob, 2.2 * s, 2.6 * s);
-      g.fillRect(wk.x + 2.2 * s, wk.y - 30 * s + bob, 2.2 * s, 2.6 * s);
+      g.fillRect(wk.x - 4.5 * sc, wk.y - 30 * sc + bob, 2.2 * sc, 2.6 * sc);
+      g.fillRect(wk.x + 2.2 * sc, wk.y - 30 * sc + bob, 2.2 * sc, 2.6 * sc);
       g.fillStyle = tired ? "#4a4166" : "#3a3f66";
       g.beginPath();
-      g.roundRect(wk.x - 11 * s, wk.y - 23 * s + bob, 22 * s, 13 * s, 5 * s);
+      g.roundRect(wk.x - 11 * sc, wk.y - 23 * sc + bob, 22 * sc, 13 * sc, 5 * sc);
       g.fill();
       if (walking) {
         /* little feet shuffle */
         g.fillStyle = "#181230";
-        g.fillRect(wk.x - 6 * s + Math.sin(t / 90) * 3, wk.y - 8 * s, 4 * s, 3 * s);
-        g.fillRect(wk.x + 2 * s - Math.sin(t / 90) * 3, wk.y - 8 * s, 4 * s, 3 * s);
+        g.fillRect(wk.x - 6 * sc + Math.sin(t / 90) * 3, wk.y - 8 * sc, 4 * sc, 3 * sc);
+        g.fillRect(wk.x + 2 * sc - Math.sin(t / 90) * 3, wk.y - 8 * sc, 4 * sc, 3 * sc);
       }
       if (tired && wk.state !== "walk") {
         g.fillStyle = "#ffd166";
         g.font = `800 10px "Bricolage Grotesque", sans-serif`;
         g.textAlign = "center";
-        g.fillText("Z z", wk.x, wk.y - 46 * s);
+        g.fillText("Z z", wk.x, wk.y - 46 * sc);
       }
     };
 
+    let last = performance.now();
     const draw = (now: number) => {
-      const t = now;
-      const dt = 16;
+      const dt = Math.min(64, now - last);
+      last = now;
+      if (s.w < 20 || s.h < 20) {
+        s.raf = requestAnimationFrame(draw);
+        return;
+      }
+      const { staff: curStaff, boss: curBoss, timeOfDay: tod } = latest.current;
       updateWalkers(dt);
-      const s2 = st.current;
-      drawRoom(timeOfDay, t);
-      drawAmenities(t);
+
+      drawRoom(tod, now);
+      drawAmenities(now);
 
       /* desks back-to-front (rows drawn by index order; draw desks in y order) */
-      const order = s2.desks.map((d, i) => ({ d, i })).sort((a, b) => a.d.y - b.d.y);
+      const order = s.desks.map((d, i) => ({ d, i })).sort((a, b) => a.d.y - b.d.y);
       for (const { d, i } of order) {
         const isBoss = i === 0;
-        const m = isBoss ? boss : staff[i - 1];
+        const m = isBoss ? curBoss : curStaff[i - 1];
         const tired = !isBoss && m?.tired;
         if (isBoss) {
-          drawDesk(d.x, d.y, d.s * 1.25, true, boss.color, false, t);
+          drawDesk(d.x, d.y, d.s * 1.25, true, curBoss.color, false, now);
           g.fillStyle = "rgba(242,236,223,.75)";
           g.font = `700 ${10 * d.s}px "Space Grotesk", sans-serif`;
           g.textAlign = "center";
-          g.fillText(boss.name, d.x, d.y + 40 * d.s);
+          g.fillText(curBoss.name, d.x, d.y + 15 * d.s);
         } else if (m) {
-          drawDesk(d.x, d.y, d.s, true, m.color, !!tired, t);
+          drawDesk(d.x, d.y, d.s, true, m.color, !!tired, now);
           g.fillStyle = "rgba(242,236,223,.65)";
           g.font = `700 ${9 * d.s}px "Space Grotesk", sans-serif`;
           g.textAlign = "center";
-          g.fillText(m.name, d.x, d.y + 40 * d.s);
+          g.fillText(m.name, d.x, d.y + 15 * d.s);
         } else {
-          drawDesk(d.x, d.y, d.s, false, "#666", false, t);
+          drawDesk(d.x, d.y, d.s, false, "#666", false, now);
         }
       }
 
       /* walking staff drawn on the floor, in front of desks */
-      const walkers = [...s2.walkers].sort((a, b) => a.y - b.y);
+      const walkers = [...s.walkers].sort((a, b) => a.y - b.y);
       for (const wk of walkers) {
-        const m = staff[wk.desk - 1];
+        const m = curStaff[wk.desk - 1];
         if (!m) continue;
-        if (wk.state !== "seated") drawWalker(wk, m.color, !!m.tired, t);
+        if (wk.state !== "seated") drawWalker(wk, m.color, !!m.tired, now);
       }
 
       /* time-of-day lighting overlay */
-      if (timeOfDay > 0.74 || timeOfDay < 0.1) {
+      if (tod > 0.74 || tod < 0.1) {
         g.fillStyle = "rgba(8,10,30,.34)";
-        g.fillRect(0, 0, s2.w, s2.h);
-      } else if (timeOfDay > 0.62) {
+        g.fillRect(0, 0, s.w, s.h);
+      } else if (tod > 0.62) {
         g.fillStyle = "rgba(255,140,80,.14)";
-        g.fillRect(0, 0, s2.w, s2.h);
+        g.fillRect(0, 0, s.w, s.h);
       }
-      if (timeOfDay > 0.74) {
+      if (tod > 0.74) {
         /* warm interior lights at night */
-        const lamp = g.createRadialGradient(s2.w / 2, s2.h * 0.5, 20, s2.w / 2, s2.h * 0.5, s2.w * 0.6);
+        const lamp = g.createRadialGradient(s.w / 2, s.h * 0.5, 20, s.w / 2, s.h * 0.5, s.w * 0.6);
         lamp.addColorStop(0, "rgba(255,209,102,.10)");
         lamp.addColorStop(1, "rgba(255,209,102,0)");
         g.fillStyle = lamp;
-        g.fillRect(0, 0, s2.w, s2.h);
+        g.fillRect(0, 0, s.w, s.h);
       }
 
-      s2.raf = requestAnimationFrame(draw);
+      s.raf = requestAnimationFrame(draw);
     };
     s.raf = requestAnimationFrame(draw);
 
@@ -545,7 +593,7 @@ export default function OfficeScene({
       ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, maxStaff, staff, boss, timeOfDay]);
+  }, []);
 
   return (
     <div ref={wrapRef} className="absolute inset-0 h-full w-full overflow-hidden">

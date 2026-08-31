@@ -1,6 +1,8 @@
 import {
   ARCS,
   AUDIENCES,
+  GENRES,
+  arcCombosFor,
   BUDGETS,
   CAST_WEIGHTS,
   MEDIUMS,
@@ -52,6 +54,10 @@ export interface ShowResult {
   chemDiscovered: string[];
   /** a secret genre combo was discovered by shipping this show */
   secretDiscovered: boolean;
+  /** raw quality (0..40) — feeds the studio's all-time best */
+  quality: number;
+  /** arc synergies newly discovered by shipping this season */
+  arcCombosDiscovered: string[];
 }
 
 export type TierKey = "masterpiece" | "hit" | "solid" | "mixed" | "flop";
@@ -85,6 +91,10 @@ export function computeResult(opts: {
   comboDiscovered: boolean;
   /** cast chemistry ids already discovered this run */
   castCombos: string[];
+  /** arc synergy ids already discovered this run */
+  arcCombos: string[];
+  /** best raw quality the studio has ever shipped (reviews are relative to it) */
+  studioTop: number;
   franchiseMult: number;
   costs: number;
   fanBase: number;
@@ -102,6 +112,8 @@ export function computeResult(opts: {
     newCombo,
     comboDiscovered,
     castCombos,
+    arcCombos,
+    studioTop,
     franchiseMult,
     costs,
     fanBase,
@@ -168,13 +180,21 @@ export function computeResult(opts: {
     }
   });
 
+  /* ---- hidden arc synergies: the right arcs together pay off (shipped to discover) */
+  const arcCombosHit = arcCombosFor(draft.arcs);
+  const arcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
+  const arcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
+  arcQ += arcComboQ;
+  arcsF += arcComboF;
+  const arcCombosDiscovered = arcCombosHit.filter((c) => !arcCombos.includes(c.id)).map((c) => c.id);
+
   const slot = SLOTS[draft.slot];
   const slotFit = slot.best.some((g) => draft.genres.includes(g)) ? 2 : 0;
   const scope = BUDGETS[draft.budget].scope;
 
-  /* ---- raw quality on a 0..40-ish curve */
-  const pointScore = Math.pow(totalPts, 0.82) * 1.32 * scope;
-  let raw = 6 + pointScore * ratioMatch + sliderPart + casting + arcQ * 0.85 + slotFit;
+  /* ---- raw quality on a 0..40 curve: rookie teams land ~29, legends ~40 */
+  const pointScore = Math.pow(totalPts / 170, 1.35) * 12 * scope;
+  let raw = 4 + pointScore * ratioMatch + sliderPart * 0.5 + casting * 0.35 + Math.max(0, arcQ) * 0.35 + slotFit * 0.8;
   raw *= comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel);
   raw -= issues * 0.9;
 
@@ -184,18 +204,27 @@ export function computeResult(opts: {
   const chemDiscovered = matchingChems.filter((c) => !castCombos.includes(c.id)).map((c) => c.id);
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
 
-  const quality = clamp(raw * chemMult, 4, 40);
+  /* unclamped: elite studios can push past 40; reviews compare against your best */
+  const quality = clamp(raw * chemMult, 4, 60);
 
-  /* ---- four critics, each out of 10 */
+  /* ---- four critics, each out of 10, relative to your studio's all-time best.
+     Game Dev Tycoon-style: reviews compare this show against your own high score,
+     so a great first show lands ~7s and every new best raises the bar. */
   const floor = showrunner === "vision" ? 3 : 1;
-  const base = quality / 4;
+  /* GDT review algorithm: first show aims at a preset bar; afterwards the bar
+     ratchets to ~10% above your all-time best, so every new best raises it */
+  const target = Math.max(56, studioTop > 0 ? 10 + studioTop * 1.1 : 56);
+  const u = clamp(quality / target, 0, 1);
   const reviews: Review[] = REVIEWERS.map((r) => {
-    let s = base;
-    if (r.bias === "story") s += (perPhase[0] - 2) * 0.3 + (mix[0] - genreRatio[0]) * 3 + (Math.random() - 0.5) * 0.7;
-    if (r.bias === "hype") s += (hype / 100) * 1.2 + (Math.random() - 0.4) * 1.6;
+    let s = 10 * u;
+    if (r.bias === "story") s += (perPhase[0] - 2) * 0.25 + (mix[0] - genreRatio[0]) * 2.5 + (Math.random() - 0.5) * 0.8;
+    if (r.bias === "hype") s += (hype / 100) * 1.0 + (Math.random() - 0.4) * 1.4;
     if (r.bias === "harsh") s += -0.5 - issues * 0.12 + Math.random() * 0.5;
-    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 3 - issues * 0.18 + (Math.random() - 0.5) * 0.7;
+    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 2.5 - issues * 0.18 + (Math.random() - 0.5) * 0.8;
     s = Math.round(clamp(s, floor, 10));
+    /* reviewers never hand out perfect 10s (GDT second pass) */
+    if (s >= 10) s = 9;
+    else if (s === 9 && Math.random() < 0.35) s = 8;
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
     return { outlet: r.name, focus: r.focus, score: s, quote: pool[Math.floor(Math.random() * pool.length)] };
@@ -244,15 +273,23 @@ export function computeResult(opts: {
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)}` },
     { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
-    { label: "Direction sliders", pts: `+${sliderPart.toFixed(1)}` },
-    { label: `Casting · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${casting.toFixed(1)}` },
-    { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${(arcQ * 0.7).toFixed(1)}` },
+    { label: "Direction sliders", pts: `+${(sliderPart * 0.5).toFixed(1)}` },
+    { label: `Casting · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${(casting * 0.35).toFixed(1)}` },
+    { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${(Math.max(0, arcQ) * 0.35).toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? "+2.0" : "+0.0" },
-    { label: `Genre combo ×${comboMult(draft.genres).toFixed(2)} (Lv${comboLevel})`, pts: `×${(comboMult(draft.genres) * comboLevelBonus(comboLevel)).toFixed(2)}` },
+    { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${(comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel)).toFixed(2)}` },
     { label: `Production issues (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
   ];
   if (chemMult !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemMult.toFixed(2)}` });
+  if (arcCombosHit.length > 0)
+    breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ} Q` });
+  const affNotes: string[] = [];
+  for (const m of [protag, sec, pet, vil]) {
+    const hit = m.aff.filter((g) => draft.genres.includes(g as never));
+    if (hit.length) affNotes.push(`${m.name} ↔ ${hit.map((g) => GENRES.find((x) => x.id === g)!.label).join("/")}`);
+  }
+  if (affNotes.length) breakdown.push({ label: "Affinity", pts: affNotes.join(" · ") });
   if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: "✦" });
 
   return {
@@ -273,6 +310,8 @@ export function computeResult(opts: {
     chemMult,
     chemDiscovered,
     secretDiscovered,
+    quality,
+    arcCombosDiscovered,
   };
 }
 

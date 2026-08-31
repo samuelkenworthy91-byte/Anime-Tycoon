@@ -1,4 +1,4 @@
-# Kirameki Studio — Anime Studio Tycoon
+# Anime Runner
 
 A game-dev-story-style anime studio tycoon. Plan shows, cast 136 characters
 (40 leads, 32 supporting, 32 pets/mascots, 32 villains), pop the point bubbles
@@ -21,6 +21,15 @@ npm run preview    # serve the production build
   bubble of each desk, `SPACE` grabs the top bubble on screen
 - `ENTER` advances through create/release flows
 - `M` mute, `ESC`/`P` pause
+
+## Reviews & discovery
+
+Four critics score each show out of 10 (40 total). Reviews are relative to
+your studio's own all-time best, Game Dev Tycoon style: the first show aims
+at a preset bar, and every new best raises the target ~10%, so the Hall of
+Fame (32/40) stays hard and 40/40 is effectively unreachable. What the genre
+wants from your sliders, which casts click, and which arc pairings amplify
+each other are all hidden until you ship and read the post-release breakdown.
 
 ## Time
 
@@ -52,7 +61,7 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 `npm run apk:open` opens the android project in Android Studio (useful for
-release builds, icons and signing). The app id is `com.kirameki.studio`.
+release builds, icons and signing). The app id is `com.kirameki.studio` (package id; the launcher name is **Anime Runner**).
 
 ### Build via GitHub Actions
 

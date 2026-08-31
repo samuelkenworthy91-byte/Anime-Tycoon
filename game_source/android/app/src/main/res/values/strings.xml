@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Kirameki Studio</string>
-    <string name="title_activity_main">Kirameki Studio</string>
+    <string name="app_name">Anime Runner</string>
+    <string name="title_activity_main">Anime Runner</string>
     <string name="package_name">com.kirameki.studio</string>
     <string name="custom_url_scheme">com.kirameki.studio</string>
 </resources>

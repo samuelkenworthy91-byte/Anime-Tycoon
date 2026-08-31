@@ -56,7 +56,7 @@ export default function Title({
   onStart: (studio: string, showrunner: string) => void;
 }) {
   const [view, setView] = useState<"menu" | "setup" | "scores">("menu");
-  const [studio, setStudio] = useState("Studio Kirameki");
+  const [studio, setStudio] = useState("Anime Runner");
   const [runner, setRunner] = useState<"steady" | "vision">("steady");
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function Title({
           setView("setup");
         } else if (view === "setup") {
           sfx.select();
-          onStart(studio.trim() || "Studio Kirameki", runner);
+          onStart(studio.trim() || "Anime Runner", runner);
         }
       }
     };
@@ -88,9 +88,9 @@ export default function Title({
           <div className="mb-1 text-xs tracking-[0.5em] text-neon/90 md:text-sm">
             ANIME STUDIO TYCOON
           </div>
-          <h1 className="font-display font-extrabold leading-[0.9] tracking-tight text-[15vw] drop-shadow-[0_6px_24px_rgba(0,0,0,.8)] md:text-[7.5rem]">
-            <span className="text-paper drop-shadow-[0_4px_0_rgba(255,77,141,.55)]">KIRA</span>
-            <span className="text-neon drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">MEKI</span>
+          <h1 className="font-display font-extrabold leading-[0.9] tracking-tight text-[11vw] drop-shadow-[0_6px_24px_rgba(0,0,0,.8)] md:text-[6.5rem]">
+            <span className="text-paper drop-shadow-[0_4px_0_rgba(255,77,141,.55)]">ANIME</span>
+            <span className="text-neon drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">RUNNER</span>
           </h1>
           <div className="mt-2 inline-flex items-center gap-2 ink-chip px-4 py-1.5 text-[11px] font-bold tracking-[0.3em] text-paper/80 md:text-xs">
             <Sparkles size={13} className="text-gold" />
@@ -113,7 +113,7 @@ export default function Title({
                 big
                 variant="cyan"
                 className="w-72"
-                onClick={() => onStart("Studio Kirameki", Math.random() < 0.5 ? "steady" : "vision")}
+                onClick={() => onStart("Anime Runner", Math.random() < 0.5 ? "steady" : "vision")}
               >
                 <Zap size={20} /> QUICK START
               </Btn>
@@ -158,7 +158,7 @@ export default function Title({
                     value={studio}
                     onChange={(e) => setStudio(e.target.value.slice(0, 26))}
                     className="ink-input flex-1 px-4 py-3 text-base font-bold"
-                    placeholder="Studio Kirameki"
+                    placeholder="Anime Runner"
                   />
                   <Btn
                     variant="ghost"
@@ -215,7 +215,7 @@ export default function Title({
                 big
                 variant="primary"
                 className="w-full"
-                onClick={() => onStart(studio.trim() || "Studio Kirameki", runner)}
+                onClick={() => onStart(studio.trim() || "Anime Runner", runner)}
               >
                 <Zap size={20} /> OPEN FOR BUSINESS
               </Btn>

@@ -6,7 +6,6 @@ import {
   CAST_CHEMS,
   GENRES,
   MEDIUMS,
-  SHEET_POS,
   castById,
   comboMult,
   formatGBP,
@@ -120,12 +119,7 @@ export default function Release({
           {/* poster */}
           <div className="anim-pop ink-card overflow-hidden">
             <div className="relative aspect-[4/5]">
-              <img
-                src={protag.img}
-                alt={protag.name}
-                className="h-full w-full object-cover"
-                style={protag.pos !== undefined ? { objectPosition: SHEET_POS[protag.pos], objectFit: "cover" } : undefined}
-              />
+              <Portrait img={protag.img} pos={protag.pos} name={protag.name} alt={protag.name} className="absolute inset-0" />
               <div className="crt absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-3">
                 <div className="font-display text-xl font-extrabold leading-tight drop-shadow-lg">{draft.title}</div>
