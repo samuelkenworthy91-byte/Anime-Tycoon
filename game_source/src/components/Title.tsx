@@ -83,15 +83,21 @@ export default function Title({
       <div className="pointer-events-none absolute inset-0 screentone opacity-40" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-between px-4 py-6 md:py-8">
-        {/* logo */}
-        <div className="text-center anim-up">
-          <div className="mb-1 text-xs tracking-[0.5em] text-neon/90 md:text-sm">
+        {/* logo lockup — emblem + wordmark (deliberately unisex: no character art) */}
+        <div className="flex flex-col items-center text-center anim-up">
+          <img
+            src="img/logo-mark.png"
+            alt="Anime Runner"
+            className="mb-2 h-16 w-16 rounded-2xl border border-gold/40 shadow-[0_8px_30px_rgba(0,0,0,.65)] md:h-20 md:w-20"
+          />
+          <div className="mb-1 text-[10px] tracking-[0.5em] text-cyanx/90 md:text-xs">
             ANIME STUDIO TYCOON
           </div>
           <h1 className="font-display font-extrabold leading-[0.9] tracking-tight text-[11vw] drop-shadow-[0_6px_24px_rgba(0,0,0,.8)] md:text-[6.5rem]">
-            <span className="text-paper drop-shadow-[0_4px_0_rgba(255,77,141,.55)]">ANIME</span>
-            <span className="text-neon drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">RUNNER</span>
+            <span className="text-paper drop-shadow-[0_4px_0_rgba(17,26,61,.9)]">ANIME</span>
+            <span className="text-gold drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">RUNNER</span>
           </h1>
+          <div className="mt-1 h-[3px] w-40 rounded-full bg-gradient-to-r from-transparent via-cyanx to-transparent md:w-64" />
           <div className="mt-2 inline-flex items-center gap-2 ink-chip px-4 py-1.5 text-[11px] font-bold tracking-[0.3em] text-paper/80 md:text-xs">
             <Sparkles size={13} className="text-gold" />
             ANIMATION HOUSE

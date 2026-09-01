@@ -399,6 +399,15 @@ export const CAST_CHEMS: CastChem[] = [
   { id: "mash", name: "Monster Mash", members: ["yuki", "v_titanus", "p_kona"], mult: 1.11 },
   { id: "tag", name: "Tag Team", members: ["kenta", "s_eiji", "p_gon"], mult: 1.1 },
   { id: "willthey", name: "Will They, Won't They", members: ["hikari", "s_nozomi", "p_mochi"], mult: 1.1 },
+  /* --- wave two pairings --- */
+  { id: "boardroom", name: "Hostile Takeover", members: ["kuro", "s_tobi", "v_kairos"], mult: 1.15 },
+  { id: "skycrew", name: "Sky Crew", members: ["tsubasa", "s_boone", "p_fuwa"], mult: 1.14 },
+  { id: "shrine", name: "Foxfire Rite", members: ["suzume", "s_amber", "p_nibi"], mult: 1.14 },
+  { id: "quietwar", name: "The Quiet War", members: ["sen", "s_kanna", "v_onikage"], mult: 1.13 },
+  { id: "inkwell", name: "Inkwell Nights", members: ["itsuki", "s_alfred", "v_harlequin"], mult: 1.12 },
+  { id: "podium", name: "Podium Finish", members: ["leo", "s_maki", "p_ponta"], mult: 1.12 },
+  { id: "greenwood", name: "Greenwood Pact", members: ["ash", "s_reina", "p_lumen"], mult: 1.11 },
+  { id: "forge", name: "Forge & Spark", members: ["zuri", "s_peko", "p_cogsworth"], mult: 1.11 },
 ];
 export const castChemFor = (draft: { protag: string; secondary: string; pet: string; villain: string }) =>
   CAST_CHEMS.filter((c) =>
@@ -445,6 +454,15 @@ export const CAST_AFF_EXTRA: Record<string, GenreId[]> = {
   akira: ["noir"], renji: ["noir"], s_shin: ["noir"], s_aoi: ["noir"], v_nocturne: ["noir"], v_silence: ["noir"],
   /* magical */
   hikari: ["magical"], emi: ["magical"], s_mimi: ["magical"], p_nya: ["magical"], p_piko: ["magical"], v_hex: ["magical"],
+  /* --- wave two cast (sheets 9-10) --- */
+  sen: ["noir", "military"], zuri: ["racing", "cooking"], ash: ["supernatural"], kuro: ["noir", "racing"],
+  tsubasa: ["racing", "military", "space"], itsuki: ["noir", "supernatural"], suzume: ["supernatural", "magical"], leo: ["comedy", "racing"],
+  s_boone: ["racing", "cooking"], s_peko: ["comedy", "magical"], s_reina: ["military", "noir"], s_amber: ["supernatural", "cooking"],
+  s_kanna: ["military", "noir"], s_alfred: ["noir", "comedy"], s_tobi: ["noir", "space"], s_maki: ["racing", "military"],
+  p_drakko: ["magical", "comedy"], p_sakumi: ["magical", "supernatural"], p_cogsworth: ["noir", "space"], p_bloop: ["space", "magical"],
+  p_ponta: ["comedy", "cooking"], p_lumen: ["magical", "supernatural"], p_nibi: ["supernatural", "noir"], p_fuwa: ["comedy", "space"],
+  v_amethyst: ["magical", "supernatural"], v_gravemark: ["military"], v_kairos: ["noir", "space"], v_plague: ["supernatural", "noir"],
+  v_harlequin: ["comedy", "supernatural"], v_onikage: ["supernatural", "military"], v_hollowchild: ["magical", "space"], v_bioform: ["military", "space"],
 };
 
 export const castById = (id: string): CastMember => {
@@ -502,6 +520,15 @@ export const PROTAGONISTS: CastMember[] = [
   reg({ id: "jun", name: "Jun", archetype: "Foxfire", img: "img/cast-protag-8.jpg", pos: 1, tag: "Always three tricks ahead.", aff: ["fantasy", "isekai", "mystery"], role: "protag" }),
   reg({ id: "kaede", name: "Kaede", archetype: "Autumn Verse", img: "img/cast-protag-8.jpg", pos: 2, tag: "Writes haiku, wins duels.", aff: ["slice", "romance", "fantasy"], role: "protag" }),
   reg({ id: "sota", name: "Sota", archetype: "Debugger", img: "img/cast-protag-8.jpg", pos: 3, tag: "Found the bug. Fixed the world.", aff: ["cyber", "mystery", "mecha"], role: "protag" }),
+  /* --- wave two (sheets 9-10) --- */
+  reg({ id: "sen", name: "Sen", archetype: "Scarred Blade", img: "img/cast-protag-9.jpg", pos: 0, tag: "The scar remembers so he doesn't have to.", aff: ["shonen", "mystery", "horror"], role: "protag" }),
+  reg({ id: "zuri", name: "Zuri", archetype: "Gearsmith", img: "img/cast-protag-9.jpg", pos: 1, tag: "Builds it twice, breaks it once.", aff: ["mecha", "sports", "fantasy"], role: "protag" }),
+  reg({ id: "ash", name: "Ash", archetype: "Green Arrow", img: "img/cast-protag-9.jpg", pos: 2, tag: "Never misses. Never brags.", aff: ["fantasy", "isekai", "mystery"], role: "protag" }),
+  reg({ id: "kuro", name: "Kuro", archetype: "Red Coat", img: "img/cast-protag-9.jpg", pos: 3, tag: "Trouble finds him. He charges it rent.", aff: ["cyber", "shonen", "horror"], role: "protag" }),
+  reg({ id: "tsubasa", name: "Tsubasa", archetype: "Sky Wrench", img: "img/cast-protag-10.jpg", pos: 0, tag: "Flies first, files paperwork never.", aff: ["mecha", "isekai", "sports"], role: "protag" }),
+  reg({ id: "itsuki", name: "Itsuki", archetype: "Ink & Lamplight", img: "img/cast-protag-10.jpg", pos: 1, tag: "Writes the ending before the start.", aff: ["romance", "mystery", "slice"], role: "protag" }),
+  reg({ id: "suzume", name: "Suzume", archetype: "Foxfire Maiden", img: "img/cast-protag-10.jpg", pos: 2, tag: "The shrine bells ring when she's angry.", aff: ["fantasy", "horror", "shojo"], role: "protag" }),
+  reg({ id: "leo", name: "Leo", archetype: "No Rules", img: "img/cast-protag-10.jpg", pos: 3, tag: "Lands the trick on the last take.", aff: ["sports", "slice", "idol"], role: "protag" }),
 ];
 
 /* ------------------------------------------------------------ supporting */
@@ -538,6 +565,15 @@ export const SECONDARY: CastMember[] = [
   reg({ id: "s_eiji", name: "Eiji", archetype: "The Big Brother", img: "img/cast-secondary-8.jpg", pos: 1, tag: "Threatens every suitor.", aff: ["shonen", "slice", "sports"], role: "secondary" }),
   reg({ id: "s_koko", name: "Koko", archetype: "The Mystic Cat", img: "img/cast-secondary-8.jpg", pos: 2, tag: "Predicts cliffhangers. Demands tuna.", aff: ["mystery", "fantasy", "horror"], role: "secondary" }),
   reg({ id: "s_sosuke", name: "Sosuke", archetype: "The Automaton Butler", img: "img/cast-secondary-8.jpg", pos: 3, tag: "Polished. Unreadable. Battery at 99%.", aff: ["mystery", "mecha", "slice"], role: "secondary" }),
+  /* --- wave two (sheets 9-10) --- */
+  reg({ id: "s_boone", name: "Boone", archetype: "The Grease Mentor", img: "img/cast-secondary-9.jpg", pos: 0, tag: "Fixes engines and egos.", aff: ["mecha", "sports", "slice"], role: "secondary" }),
+  reg({ id: "s_peko", name: "Peko", archetype: "The Hype Friend", img: "img/cast-secondary-9.jpg", pos: 1, tag: "Confetti follows her indoors.", aff: ["idol", "shojo", "slice"], role: "secondary" }),
+  reg({ id: "s_reina", name: "Reina", archetype: "The Council President", img: "img/cast-secondary-9.jpg", pos: 2, tag: "The clipboard is a weapon.", aff: ["mystery", "romance", "slice"], role: "secondary" }),
+  reg({ id: "s_amber", name: "Amber", archetype: "The Hooded Traveller", img: "img/cast-secondary-9.jpg", pos: 3, tag: "Knows every road and none of the rules.", aff: ["isekai", "fantasy", "mystery"], role: "secondary" }),
+  reg({ id: "s_kanna", name: "Kanna", archetype: "The Silent Bodyguard", img: "img/cast-secondary-10.jpg", pos: 0, tag: "One eye. Zero misses.", aff: ["mystery", "horror", "cyber"], role: "secondary" }),
+  reg({ id: "s_alfred", name: "Alfred", archetype: "The Perfect Butler", img: "img/cast-secondary-10.jpg", pos: 1, tag: "Tea at three. Secrets at midnight.", aff: ["mystery", "romance", "shojo"], role: "secondary" }),
+  reg({ id: "s_tobi", name: "Tobi", archetype: "The Rookie Reporter", img: "img/cast-secondary-10.jpg", pos: 2, tag: "Shutter first, questions later.", aff: ["slice", "mystery", "cyber"], role: "secondary" }),
+  reg({ id: "s_maki", name: "Maki", archetype: "The Rival Ace", img: "img/cast-secondary-10.jpg", pos: 3, tag: "Beats your record, then your excuses.", aff: ["sports", "shonen", "idol"], role: "secondary" }),
 ];
 
 /* ------------------------------------------------------------------ pets */
@@ -574,6 +610,15 @@ export const PETS: CastMember[] = [
   reg({ id: "p_yuzu", name: "Yuzu", archetype: "Citrus Cat", img: "img/cast-pet-8.jpg", pos: 1, tag: "Zesty zoomies.", aff: ["slice", "shojo"], role: "pet" }),
   reg({ id: "p_goma", name: "Goma", archetype: "Sesame Dog", img: "img/cast-pet-8.jpg", pos: 2, tag: "Sprinkled with love.", aff: ["slice", "romance"], role: "pet" }),
   reg({ id: "p_puri", name: "Puri", archetype: "Cream Dragon", img: "img/cast-pet-8.jpg", pos: 3, tag: "Toasts marshmallows.", aff: ["fantasy", "shonen", "isekai"], role: "pet" }),
+  /* --- wave two (sheets 9-10) --- */
+  reg({ id: "p_drakko", name: "Drakko", archetype: "Dragon Hatchling", img: "img/cast-pet-9.jpg", pos: 0, tag: "Hoards socks. Guards them fiercely.", aff: ["fantasy", "isekai", "shonen"], role: "pet" }),
+  reg({ id: "p_sakumi", name: "Sakumi", archetype: "Blossom Ferret", img: "img/cast-pet-9.jpg", pos: 1, tag: "Sheds petals, not fur.", aff: ["shojo", "slice", "romance"], role: "pet" }),
+  reg({ id: "p_cogsworth", name: "Cogsworth", archetype: "Clockwork Owl", img: "img/cast-pet-9.jpg", pos: 2, tag: "Ticks. Judges. Ticks again.", aff: ["mystery", "mecha", "cyber"], role: "pet" }),
+  reg({ id: "p_bloop", name: "Bloop", archetype: "Prism Jelly", img: "img/cast-pet-9.jpg", pos: 3, tag: "Glows brightest when hugged.", aff: ["fantasy", "slice", "cyber"], role: "pet" }),
+  reg({ id: "p_ponta", name: "Ponta", archetype: "Grumpy Red Panda", img: "img/cast-pet-10.jpg", pos: 0, tag: "Sighs like a middle manager.", aff: ["slice", "romance"], role: "pet" }),
+  reg({ id: "p_lumen", name: "Lumen", archetype: "Crystal Fawn", img: "img/cast-pet-10.jpg", pos: 1, tag: "Antlers hum near the truth.", aff: ["fantasy", "mystery", "shojo"], role: "pet" }),
+  reg({ id: "p_nibi", name: "Nibi", archetype: "Two-Tail Cat", img: "img/cast-pet-10.jpg", pos: 2, tag: "Two tails, twice the trouble.", aff: ["horror", "mystery", "fantasy"], role: "pet" }),
+  reg({ id: "p_fuwa", name: "Fuwa", archetype: "Cloud Sheep", img: "img/cast-pet-10.jpg", pos: 3, tag: "Naps loudly. Thunders quietly.", aff: ["slice", "shojo", "sports"], role: "pet" }),
 ];
 
 /* ---------------------------------------------------------------- villains */
@@ -610,6 +655,15 @@ export const VILLAINS: CastMember[] = [
   reg({ id: "v_inquisitor", name: "The Grand Inquisitor", archetype: "The Perfect Verdict", img: "img/cast-villain-8.jpg", pos: 1, tag: "No appeals accepted.", aff: ["mystery", "mecha", "horror"], role: "villain" }),
   reg({ id: "v_nightshade", name: "Nightshade", archetype: "The Poison Garden", img: "img/cast-villain-8.jpg", pos: 2, tag: "Everything she plants dies.", aff: ["horror", "mystery", "shojo"], role: "villain" }),
   reg({ id: "v_titanus", name: "Titanus Rex", archetype: "The Apex Monster", img: "img/cast-villain-8.jpg", pos: 3, tag: "The city is his nest.", aff: ["shonen", "mecha", "horror"], role: "villain" }),
+  /* --- wave two (sheets 9-10) --- */
+  reg({ id: "v_amethyst", name: "Empress Amethyst", archetype: "The Violet Crown", img: "img/cast-villain-9.jpg", pos: 0, tag: "Her throne is lit by other people's fire.", aff: ["fantasy", "shojo", "horror"], role: "villain" }),
+  reg({ id: "v_gravemark", name: "Gravemark", archetype: "The Cracked Warlord", img: "img/cast-villain-9.jpg", pos: 1, tag: "Armour older than the war.", aff: ["shonen", "fantasy", "horror"], role: "villain" }),
+  reg({ id: "v_kairos", name: "CEO Kairos", archetype: "The Friendly Contract", img: "img/cast-villain-9.jpg", pos: 2, tag: "Everything is negotiable. Including you.", aff: ["cyber", "mecha", "mystery"], role: "villain" }),
+  reg({ id: "v_plague", name: "The Green Doctor", archetype: "The Cure That Isn't", img: "img/cast-villain-9.jpg", pos: 3, tag: "Prescribes silence.", aff: ["horror", "mystery", "fantasy"], role: "villain" }),
+  reg({ id: "v_harlequin", name: "Harlequin", archetype: "The Laughing Trick", img: "img/cast-villain-10.jpg", pos: 0, tag: "The punchline is always you.", aff: ["horror", "mystery", "slice"], role: "villain" }),
+  reg({ id: "v_onikage", name: "Onikage", archetype: "The Cursed Blade", img: "img/cast-villain-10.jpg", pos: 1, tag: "The mask cracked. He didn't.", aff: ["shonen", "horror", "fantasy"], role: "villain" }),
+  reg({ id: "v_hollowchild", name: "The Pale Empress", archetype: "The Quiet Void", img: "img/cast-villain-10.jpg", pos: 2, tag: "She asks nicely. Once.", aff: ["horror", "shojo", "mystery"], role: "villain" }),
+  reg({ id: "v_bioform", name: "Bioform IX", archetype: "The Failed Experiment", img: "img/cast-villain-10.jpg", pos: 3, tag: "Built to win. Nobody said at what.", aff: ["mecha", "cyber", "shonen"], role: "villain" }),
 ];
 
 /* ------------------------------------------------------------------- arcs */
