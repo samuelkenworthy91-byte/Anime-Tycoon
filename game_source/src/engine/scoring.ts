@@ -98,6 +98,8 @@ export function computeResult(opts: {
   franchiseMult: number;
   costs: number;
   fanBase: number;
+  /** dynasty-era audience expectations — raises the review bar */
+  audienceBar?: number;
 }): ShowResult {
   const {
     draft,
@@ -117,6 +119,7 @@ export function computeResult(opts: {
     franchiseMult,
     costs,
     fanBase,
+    audienceBar,
   } = opts;
 
   const totalPts = points.story + points.art + points.sound;
@@ -213,7 +216,7 @@ export function computeResult(opts: {
   const floor = showrunner === "vision" ? 3 : 1;
   /* GDT review algorithm: first show aims at a preset bar; afterwards the bar
      ratchets to ~10% above your all-time best, so every new best raises it */
-  const target = Math.max(56, studioTop > 0 ? 10 + studioTop * 1.1 : 56);
+  const target = Math.max(56, (studioTop > 0 ? 10 + studioTop * 1.1 : 56) + (audienceBar ?? 0));
   const u = clamp(quality / target, 0, 1);
   const reviews: Review[] = REVIEWERS.map((r) => {
     let s = 10 * u;

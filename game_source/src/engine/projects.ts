@@ -471,6 +471,8 @@ export interface ScoringContext {
   studioTop: number;
   franchises: Record<string, { season: number }>;
   fans: number;
+  /** dynasty-era audience expectations — raises the review bar */
+  audienceBar?: number;
 }
 
 /** compute the review result for a project from its accumulated state */
@@ -506,6 +508,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     franchiseMult,
     costs: p.spent,
     fanBase: ctx.fans,
+    audienceBar: ctx.audienceBar,
   });
 
   let out = res;

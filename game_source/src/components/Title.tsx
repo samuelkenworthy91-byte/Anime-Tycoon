@@ -40,7 +40,7 @@ export function HighScoreTable({ highlight }: { highlight?: number }) {
           <div className="min-w-0 flex-1">
             <div className="truncate font-bold">{s.name}</div>
             <div className="text-[11px] text-paper/50">
-              Y{s.year} · {s.shows} shows · {formatNum(s.fans)} fans {s.victory ? "· LEGEND" : ""}
+              Y{s.year} · {s.shows} shows · {formatNum(s.fans)} fans {s.dynasty ? "· DYNASTY" : s.victory ? "· LEGEND" : ""}
             </div>
           </div>
           <div className="font-display font-extrabold text-gold">{s.score.toLocaleString()}</div>

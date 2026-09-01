@@ -1061,6 +1061,8 @@ export function formatNum(n: number): string {
 }
 
 /* -------------------------------------------------------------- calendar */
+/** the length of the career campaign — after this the studio enters Dynasty Mode */
+export const CAREER_WEEKS = 48 * 12;
 export const WEEKS_PER_MONTH = 4;
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export const yearOfWeek = (w: number) => Math.floor(w / 48) + 1;

@@ -1,6 +1,7 @@
 import {
   GENRES,
   OFFICES,
+  CAREER_WEEKS,
   castById,
   comboKey,
   dateLabel,
@@ -136,6 +137,16 @@ import {
   type MilestoneOutcome,
   type Project,
 } from "./projects";
+import {
+  computeIndustryRecords,
+  dynastyAudienceBar,
+  dynastyDifficulty,
+  dynastyFX,
+  dynastySalaryMult,
+  mentorJunior,
+  migrateDynasty,
+  type DynastyState,
+} from "./legacy";
 
 export type { Franchise, EntryKind } from "./franchise";
 
@@ -235,6 +246,8 @@ export interface RunState {
   staffEvents: StaffEvent[];
   /** retired greats — each gives a permanent studio bonus */
   legends: LegendRec[];
+  /** present once the campaign ends and Dynasty Mode begins */
+  dynasty: DynastyState | null;
   /** genre/audience/medium demand — shifts every season */
   market: MarketState;
   /** recent releases (yours + rivals) flooding their genres */
@@ -271,7 +284,8 @@ export const arcLockReason = (a: Arc, r: RunState): string | null => {
   }
 };
 
-export const MAX_WEEKS = 48 * 12; // twelve-year career
+/** twelve-year career — after this the studio enters Dynasty Mode */
+export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
 export const AIR_WEEKS = 8; // a show earns revenue over 8 broadcast weeks
 
@@ -320,6 +334,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     heads: {},
     staffEvents: [],
     legends: [],
+    dynasty: null,
     market: initMarket(),
     recentReleases: [],
     partners: Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
@@ -340,6 +355,7 @@ export function migrateRun(raw: unknown): RunState {
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
     staffEvents: Array.isArray(r.staffEvents) ? r.staffEvents : [],
     legends: Array.isArray(r.legends) ? r.legends : [],
+    dynasty: migrateDynasty((r as { dynasty?: unknown }).dynasty, r.week ?? 0) ?? null,
     market: r.market && typeof r.market === "object" ? r.market : initMarket(),
     recentReleases: Array.isArray(r.recentReleases) ? r.recentReleases : [],
     partners:
@@ -362,7 +378,11 @@ export function migrateRun(raw: unknown): RunState {
 
 export const office = (r: RunState) => OFFICES[r.officeLevel];
 export const weeklyOutgoings = (r: RunState) =>
-  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) + facilityUpkeep(r.facilities);
+  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) + facilityUpkeep(r.facilities);
+
+/** the studio's staff capacity — dynasty investments can add desks */
+export const staffCapacity = (r: RunState) =>
+  OFFICES[r.officeLevel].maxStaff + (r.dynasty ? dynastyFX(r).extraStaff : 0);
 
 /** how much cash/fans the state expects to land in the next `weeks` weeks */
 export function pendingIncome(r: RunState, weeks: number): number {
@@ -450,6 +470,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let bonds = { ...(r.bonds ?? {}) };
   let events = [...(r.staffEvents ?? [])];
   let legends = [...(r.legends ?? [])];
+  let dynasty = r.dynasty ?? null;
   const heads = r.heads ?? {};
   let market = r.market ?? initMarket();
   let recentReleases = [...(r.recentReleases ?? [])];
@@ -462,13 +483,16 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   /* facilities + department heads + retired legends → studio-wide effects */
   const baseFx = facilityFX(r.facilities);
   const spm = studioPointMult(heads, staffArr, legends);
+  const dynFx = dynastyFX(r);
   const fx = {
     ...baseFx,
     pointMult: {
-      story: baseFx.pointMult.story * spm.story,
-      art: baseFx.pointMult.art * spm.art,
-      sound: baseFx.pointMult.sound * spm.sound,
+      story: baseFx.pointMult.story * spm.story * dynFx.pointMult,
+      art: baseFx.pointMult.art * spm.art * dynFx.pointMult,
+      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult,
     },
+    speed: baseFx.speed + dynFx.speed,
+    rdWeekly: baseFx.rdWeekly + dynFx.rdWeekly,
   };
   const studio = studioProduction(heads, staffArr);
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
@@ -534,7 +558,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
           const m = personMod(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)), { bonds });
-          const g = gainXp(nx, WEEKLY_XP * m.xpMult);
+          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult);
           nx = g.staff;
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
@@ -622,8 +646,9 @@ export function advanceWeeks(r: RunState, n: number): RunState {
 
     /* franchises cool off, rest up — and sometimes find a cult */
     if (w % 4 === 0) {
+      const diff = r.dynasty ? dynastyDifficulty(r) : null;
       for (const [k, fr] of Object.entries(franchises)) {
-        const t = tickFranchise(fr, w);
+        const t = tickFranchise(fr, w, { restMult: diff?.restMult ?? 1 });
         franchises = { ...franchises, [k]: t.franchise };
         if (t.notice) notices.push(t.notice);
       }
@@ -717,7 +742,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       /* the whole studio shares in an award year */
       if (ceremony.playerAwards > 0) {
         staffArr = staffArr.map((st) => {
-          const g = gainXp(st, AWARD_XP * ceremony.playerAwards);
+          const g = gainXp(st, AWARD_XP * ceremony.playerAwards * dynastyFX(r).xpMult);
           if (g.levelsGained > 0)
             notices.push(`${st.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
           return moraleDelta({ ...g.staff, awardsWon: (g.staff.awardsWon ?? 0) + ceremony.playerAwards }, 8);
@@ -727,7 +752,15 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       /* the longest careers eventually end — a legend retires */
       const retiree = staffArr.find((st) => retirementEligible(st, w) && Math.random() < RETIRE_CHANCE);
       if (retiree) {
-        legends = [...legends, toLegend(retiree, w)];
+        const legend = toLegend(retiree, w);
+        legends = [...legends, legend];
+        /* in dynasty mode a retiring great passes their craft on first */
+        if (dynasty) {
+          const mentor = mentorJunior(staffArr, retiree);
+          staffArr = mentor.staff;
+          if (mentor.notice) notices.push(mentor.notice);
+          dynasty = { ...dynasty, legacies: [...dynasty.legacies, { ...legend, mentored: mentor.mentored }] };
+        }
         staffArr = staffArr.filter((x) => x.id !== retiree.id);
         projects = projects.map((p) => ({ ...p, staffIds: p.staffIds.filter((id) => id !== retiree.id) }));
         notices.push(
@@ -763,9 +796,17 @@ export function advanceWeeks(r: RunState, n: number): RunState {
         awards,
       });
       rivalWorld = fy.world;
-      const py = planRivalYear(rivalWorld, year + 1, w);
+      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: r.dynasty ? dynastyDifficulty(r).rivalBoost : 0 });
       rivalWorld = py.world;
       notices.push(...py.notices);
+
+      /* dynasty mode re-tabulates the all-time industry records each year */
+      if (dynasty) {
+        dynasty = {
+          ...dynasty,
+          records: computeIndustryRecords({ ...r, cash, fans, awards, rivalWorld, franchises }),
+        };
+      }
     }
   }
 
@@ -788,6 +829,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     bonds,
     staffEvents: events,
     legends,
+    dynasty,
     market,
     recentReleases,
     commissions,
@@ -803,7 +845,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
 /* =================================================================== */
 
 /** how many major productions this office can run at once */
-export const projectCapacity = (r: RunState) => OFFICES[r.officeLevel].projects;
+export const projectCapacity = (r: RunState) =>
+  OFFICES[r.officeLevel].projects + (r.dynasty ? dynastyFX(r).extraProjects : 0);
 
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
@@ -934,7 +977,7 @@ export function previewResult(r: RunState, p: Project): ShowResult {
   const d = p.draft;
   const fr = d.franchiseKey ? r.franchises[d.franchiseKey] ?? null : null;
   const cross = d.crossKey ? r.franchises[d.crossKey] ?? null : null;
-  return computeProjectResult(p, {
+  let out = computeProjectResult(p, {
     research: r.research,
     merchMult: facilityFX(r.facilities).merchMult,
     marketMult: marketMultiplierFor(r, p),
@@ -946,7 +989,25 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     studioTop: r.studioTop,
     franchises: r.franchises,
     fans: r.fans,
+    audienceBar: dynastyAudienceBar(r),
   });
+  /* dynasty-era empire buffs apply after the core review lands */
+  const dfx = dynastyFX(r);
+  if (dfx.revenueMult !== 1) {
+    out = {
+      ...out,
+      revenue: Math.round(out.revenue * dfx.revenueMult),
+      breakdown: [...out.breakdown, { label: "International marketing division", pts: `×${dfx.revenueMult.toFixed(2)} revenue` }],
+    };
+  }
+  if (dfx.fanMult > 0) {
+    out = {
+      ...out,
+      fans: Math.round(out.fans * (1 + dfx.fanMult)),
+      breakdown: [...out.breakdown, { label: "Studio museum & archive", pts: `+${Math.round(dfx.fanMult * 100)}% fans` }],
+    };
+  }
+  return out;
 }
 
 /** release a ready project: reviews land, payouts get scheduled over the
@@ -1023,7 +1084,13 @@ export function releaseProject(
   if (prevFr) {
     /* a continuation — the fans came in with expectations */
     const kind: EntryKind = draft.continuation ?? "season";
-    const judged = recordContinuation(prevFr, { ...draft, continuation: kind as Draft["continuation"] }, resShape, r.week);
+    const judged = recordContinuation(
+      prevFr,
+      { ...draft, continuation: kind as Draft["continuation"] },
+      resShape,
+      r.week,
+      { fatigueAdd: r.dynasty ? dynastyDifficulty(r).fatigueAdd : 0 }
+    );
     const v = judged.verdict;
     franchises[prevFr.key] = judged.franchise;
     if (v.verdict === "delight") {
@@ -1148,7 +1215,7 @@ export function releaseProject(
     staff: (() => {
       /* the training room deepens what shipping a show teaches */
       const gain = 1 + facilityFX(r.facilities).trainSkill;
-      const xp = releaseXp(p, result.total, result.tier);
+      const xp = releaseXp(p, result.total, result.tier) * dynastyFX(r).xpMult;
       const moraleSwing = result.hallOfFame || result.tier === "hit" ? 12 : result.tier === "flop" ? -14 : 4;
       return r.staff.map((s) => {
         if (!p.staffIds.includes(s.id)) return s;
@@ -1242,7 +1309,7 @@ export function relocateOffice(r: RunState): RunState | null {
 export function grantContractXp(r: RunState): RunState {
   const notices = [...r.notices];
   const staff = r.staff.map((s) => {
-    const g = gainXp(ensureCareer(s, r.week), CONTRACT_XP);
+    const g = gainXp(ensureCareer(s, r.week), CONTRACT_XP * dynastyFX(r).xpMult);
     if (g.levelsGained > 0)
       notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
     return moraleDelta(g.staff, 2);
@@ -1384,7 +1451,7 @@ export function respondPoach(
 export function hireRivalTalent(r: RunState, talentId: string): RunState | null {
   const t = rivalTalentById(r.rivalWorld, talentId);
   if (!t) return null;
-  if (r.staff.length >= OFFICES[r.officeLevel].maxStaff) return null;
+  if (r.staff.length >= staffCapacity(r)) return null;
   if (r.cash < t.cost) return null;
   const staff = rivalTalentToStaff(t, r.week);
   const studioName = r.rivalWorld.studios.find((s) => s.id === t.studioId)?.name ?? "a rival studio";

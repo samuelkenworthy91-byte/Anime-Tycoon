@@ -5,6 +5,8 @@ export interface ScoreEntry {
   shows: number;
   year: number;
   victory: boolean;
+  /** the studio made it into Dynasty Mode before folding */
+  dynasty?: boolean;
   date: number;
 }
 

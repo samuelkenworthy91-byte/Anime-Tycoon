@@ -16,6 +16,12 @@ can poach their notables back), drift up and down a shared ranking table, build
 rivalries with you, and — rarely — decline, restructure, get acquired, collapse
 and return under new management.
 
+Year 12 ends the campaign — not the studio. A career retrospective scores the
+twelve years into a rank (Failed Studio → Anime Empire), then the save opens
+into **Dynasty Mode**: an endless run where the industry gets hungrier, staff
+retire into mentoring legacies, enormous empire investments sink your money, and
+the all-time industry records are fought over against the rivals.
+
 ## Run the game
 
 ```bash
@@ -84,10 +90,12 @@ the `kirameki-studio-apk` artifact.
 
 - `src/engine/` — data (cast, genres, arcs), rivals (persistent rival studios,
   rankings, rivalries, poaching), state (calendar, payouts, awards), scoring
-  (reviews, revenue, combos, chemistry)
+  (reviews, revenue, combos, chemistry), legacy (career evaluation, dynasty
+  difficulty, empire investments, mentoring, industry records)
 - `src/components/` — Title, Office (animated GDS-style scene + management),
   Create (planning + casting), Produce / ProductionFloor (bubble mini-game),
-  ContractJob, Release (premiere), GameOver
+  ContractJob, Release (premiere), Retrospective (year-12 evaluation),
+  Dynasty (empire investments/records/legacies), GameOver
 - `public/img/` — environment art and character sheets (2x2 portrait grids)
 - `android/` — generated Capacitor Android project (regenerate with
   `npm run apk:add` if deleted)

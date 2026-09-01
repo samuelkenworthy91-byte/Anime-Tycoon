@@ -72,9 +72,34 @@ unzip -l game_source/android/app/build/outputs/apk/debug/app-debug.apk \
 
 The game autosaves to `localStorage` after every change while a career is in
 progress, and **CONTINUE** appears on the title screen when a save exists.
-Saves are retired when a career ends (bankruptcy or the end of the twelve
-years) and when you start a new career. The Hall of Fame score table is stored
-separately and is never cleared by starting a new run.
+Bankruptcy is the only way a studio dies — that retires the save. Reaching the
+end of the twelve-year campaign opens a **career retrospective** (rank, history
+and timeline) and then continues into **Dynasty Mode**; the save is *not*
+deleted or retired at Year 12, so a dynasty save stays resumable indefinitely.
+The Hall of Fame score table is stored separately and is never cleared by
+starting a new run.
+
+## Late game — Dynasty Mode
+
+Year 12 ends the *campaign*, not the studio:
+
+- **Career retrospective** — a nine-category scoring of total revenue, fanbase,
+  awards, best show, franchises, studio rank, staff developed, rival performance
+  and Hall of Fame productions, ranked *Failed Studio → Cult Studio → Industry
+  Regular → Major Studio → Legendary Studio → Anime Empire*.
+- **Career history** — biggest hit, biggest flop, longest franchise, favourite
+  staff member, most profitable IP, awards, highest rival and a studio timeline.
+- **Dynasty Mode** — play indefinitely after Year 12. The industry gets
+  progressively hungrier: higher staff salaries, a rising audience bar,
+  stronger rival greenlights, faster franchise fatigue and slower rest.
+- **Empire investments** — six enormous optional money sinks (second production
+  building, animation campus, international marketing, render farm, museum &
+  archive, talent academy), each a permanent studio-wide buff.
+- **Legacy staff** — long-serving greats retire, mentor a junior in their role,
+  and leave a permanent +3% discipline bonus.
+- **Industry records** — all-time highest-grossing show, most successful movie,
+  longest franchise, most awarded studio and largest fanbase, tracked against
+  the rival studios and refreshed every year end.
 
 ## Assets
 

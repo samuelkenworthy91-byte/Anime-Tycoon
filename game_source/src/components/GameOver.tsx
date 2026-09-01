@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Crown, RotateCcw, Home, Skull, Flame, Clapperboard, Star, Banknote, Save } from "lucide-react";
+import { RotateCcw, Home, Skull, Flame, Clapperboard, Star, Banknote, Save } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { addScore } from "../engine/storage";
 import { formatNum, formatGBP, yearOfWeek } from "../engine/data";
 import { studioScore, type RunState } from "../engine/state";
 import { HighScoreTable } from "./Title";
-import { cn } from "../utils/cn";
 
+/** the studio is out of money — the one and only way a run ends. (Year 12 is
+ *  a retrospective, never game over; a dynasty save dies only here.) */
 export default function GameOver({
   run,
-  victory,
   onRestart,
   onTitle,
 }: {
   run: RunState;
-  victory: boolean;
   onRestart: () => void;
   onTitle: () => void;
 }) {
@@ -24,9 +23,8 @@ export default function GameOver({
   const score = useMemo(() => studioScore(run), [run]);
 
   useEffect(() => {
-    if (victory) sfx.fanfare();
-    else sfx.fail();
-  }, [victory]);
+    sfx.fail();
+  }, []);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -44,7 +42,8 @@ export default function GameOver({
       fans: run.fans,
       shows: run.showsMade,
       year: yearOfWeek(run.week),
-      victory,
+      victory: false,
+      dynasty: !!run.dynasty,
       date: Date.now(),
     });
     setSavedRank(rank);
@@ -53,25 +52,16 @@ export default function GameOver({
   return (
     <div className="relative flex h-full w-full flex-col overflow-y-auto bg-ink nice-scroll">
       <div className="absolute inset-0 gridlines" />
-      <div
-        className={cn(
-          "absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full blur-[120px]",
-          victory ? "bg-gold/15" : "bg-neon/10"
-        )}
-      />
+      <div className="absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-neon/10 blur-[120px]" />
       <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 p-4 py-8">
         <div className="text-center anim-up">
-          <div className={cn("text-xs tracking-[0.5em]", victory ? "text-gold" : "text-neon")}>
-            {victory ? "STUDIO LEGEND" : "BANKRUPT"}
-          </div>
-          <h1 className={cn("font-display text-5xl font-extrabold md:text-7xl", victory ? "shine-text" : "text-paper")}>
-            {victory ? "STUDIO LEGEND" : "BANKRUPT"}
-          </h1>
+          <div className="text-xs tracking-[0.5em] text-neon">BANKRUPT</div>
+          <h1 className="font-display text-5xl font-extrabold text-paper md:text-7xl">BANKRUPT</h1>
           <div className="mt-1 flex items-center justify-center gap-2 text-paper/60">
-            {victory ? <Crown size={15} className="text-gold" /> : <Skull size={15} className="text-neon" />}
+            <Skull size={15} className="text-neon" />
             <span className="text-sm">
-              {victory
-                ? `${run.studio} defined a whole era of anime.`
+              {run.dynasty
+                ? `${run.studio} fell in Dynasty Year ${Math.max(1, Math.floor((run.week - (run.dynasty.startedWeek ?? 0)) / 48) + 1)} — after ${yearOfWeek(run.week)} years in the business.`
                 : `${run.studio} ran out of ink in Year ${yearOfWeek(run.week)}.`}
             </span>
           </div>

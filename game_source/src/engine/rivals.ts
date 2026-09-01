@@ -495,7 +495,7 @@ function makeTitle(fr: RivalFranchise, kind: RivalEntryKind): string {
 /* ------------------------------------------------------ yearly planning */
 
 /** decide what one studio greenlights this year */
-function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number): RivalProduction[] {
+function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number, boost = 0): RivalProduction[] {
   if (studio.status === "collapsed") return [];
   const p = PERSONAS[studio.persona];
   let count = clamp(Math.round(studio.size + p.volumeBias + (Math.random() * 2 - 1)), 1, 5);
@@ -540,7 +540,7 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
     }
     const medium: MediumId = Math.random() < 0.8 ? p.medium : pick(["tv", "ona", "movie"] as MediumId[]);
     const budget: BudgetId = Math.random() < 0.75 ? p.budget : pick(["indie", "standard", "blockbuster"] as BudgetId[]);
-    const score = computeScore(studio, { genres, franchiseKey, kind });
+    const score = computeScore(studio, { genres, franchiseKey, kind }, boost);
     productions.push({
       id: `rp${++rivalProdSeq}_${year}_${i}`,
       title,
@@ -580,9 +580,9 @@ function pickGenres(studio: RivalStudio): GenreId[] {
 }
 
 /** score a rival greenlight — bounded and personality-driven */
-function computeScore(studio: RivalStudio, prod: { genres: GenreId[]; franchiseKey: string | null; kind: RivalEntryKind }): number {
+function computeScore(studio: RivalStudio, prod: { genres: GenreId[]; franchiseKey: string | null; kind: RivalEntryKind }, boost = 0): number {
   const p = PERSONAS[studio.persona];
-  let s = 12 + studio.tier * 2.4 + studio.reputation * 0.07 + p.qualityBias;
+  let s = 12 + studio.tier * 2.4 + studio.reputation * 0.07 + p.qualityBias + boost;
   if (prod.genres.some((g) => studio.specialist.includes(g))) s += 3;
   else if (prod.genres.some((g) => studio.preferred.includes(g))) s += 1;
   if (prod.franchiseKey) {
@@ -652,13 +652,14 @@ function yearTransition(studio: RivalStudio, year: number): { studio: RivalStudi
   return { studio: st, notice: null };
 }
 
-export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number): { world: RivalWorld; notices: string[] } {
+export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number }): { world: RivalWorld; notices: string[] } {
   const notices: string[] = [];
+  const boost = opts?.qualityBoost ?? 0;
   const studios = world.studios.map((st) => {
     const t = yearTransition(st, year);
     if (t.notice) notices.push(t.notice);
     const next = t.studio;
-    const slate = planStudioYear(next, year, yearStartWeek);
+    const slate = planStudioYear(next, year, yearStartWeek, boost);
     return { ...next, productions: slate };
   });
   return { world: { ...world, studios, year, yearStartWeek }, notices };

@@ -29,9 +29,11 @@ import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
 import Release from "./components/Release";
 import GameOver from "./components/GameOver";
+import Retrospective from "./components/Retrospective";
+import { beginDynastyMode } from "./engine/legacy";
 import { cn } from "./utils/cn";
 
-type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover";
+type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
@@ -48,7 +50,6 @@ export default function App() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
-  const [victory, setVictory] = useState(false);
   const [muteUI, setMuteUI] = useState(isMuted());
   /* real-time game clock: 1 in-game day = 2 real minutes; 7 days = 1 week */
   const [clockDay, setClockDay] = useState(0);
@@ -56,7 +57,7 @@ export default function App() {
   const dayAccRef = useRef(0);
   const dayCountRef = useRef(0);
 
-  const canPause = screen !== "title" && screen !== "gameover";
+  const canPause = screen !== "title" && screen !== "gameover" && screen !== "retrospective";
   /* bumped whenever a save is written/cleared so the title screen re-reads it */
   const [saveStamp, setSaveStamp] = useState(0);
 
@@ -94,7 +95,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run, meta, screen]);
 
-  /* a finished career is not resumable — retire the save */
+  /* bankruptcy is the only way a studio dies — retire the save then */
   useEffect(() => {
     if (screen === "gameover") {
       clearAllSaves();
@@ -119,14 +120,12 @@ export default function App() {
               if (n.bailouts < 2) {
                 n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
               } else {
-                setVictory(false);
                 setScreen("gameover");
                 return n;
               }
             }
-            if (n.week >= MAX_WEEKS) {
-              setVictory(true);
-              setScreen("gameover");
+            if (n.week >= MAX_WEEKS && !n.dynasty) {
+              setScreen("retrospective");
             }
             return n;
           });
@@ -144,21 +143,22 @@ export default function App() {
     if (!save) return;
     primeAudio();
     sfx.fanfare();
+    const resumed = migrateRun(save.run);
     setMeta(save.meta);
-    setRun(migrateRun(save.run));
+    setRun(resumed);
     setReleased(null);
     setFocus(null);
     setShipId(null);
     setContract(null);
     setContPlan(null);
-    setVictory(false);
     setPaused(false);
     setSavePicker(false);
     dayAccRef.current = save.clock?.acc ?? 0;
     dayCountRef.current = save.clock?.dayCount ?? 0;
     setClockDay(save.clock?.day ?? 0);
     setClockPhase(save.clock?.phase ?? 0);
-    setScreen("office");
+    /* a save parked exactly at the career end re-opens the retrospective */
+    setScreen(resumed.week >= MAX_WEEKS && !resumed.dynasty ? "retrospective" : "office");
   }, []);
 
   const startRun = useCallback((studio: string, showrunner: string) => {
@@ -172,7 +172,6 @@ export default function App() {
     setShipId(null);
     setContract(null);
     setContPlan(null);
-    setVictory(false);
     setPaused(false);
     setScreen("office");
   }, []);
@@ -186,7 +185,6 @@ export default function App() {
     setShipId(null);
     setContract(null);
     setContPlan(null);
-    setVictory(false);
     setPaused(false);
     setScreen("office");
   }, [meta]);
@@ -196,6 +194,14 @@ export default function App() {
     setPaused(false);
     setScreen("title");
   }, []);
+
+  /** from the retrospective: the campaign ends, the save lives on */
+  const continueDynasty = useCallback(() => {
+    if (!run) return;
+    sfx.fanfare();
+    setRun(beginDynastyMode(run));
+    setScreen("office");
+  }, [run]);
 
   /** apply time + check for bankruptcy / end of career */
   const settle = useCallback((next: RunState, weeks: number): RunState => {
@@ -209,14 +215,12 @@ export default function App() {
           notices: [...r.notices, "Emergency crowdfunding from the fans! (+£150,000)"],
         };
       } else {
-        setVictory(false);
         setScreen("gameover");
         return r;
       }
     }
-    if (r.week >= MAX_WEEKS) {
-      setVictory(true);
-      setScreen("gameover");
+    if (r.week >= MAX_WEEKS && !r.dynasty) {
+      setScreen("retrospective");
     }
     return r;
   }, []);
@@ -364,7 +368,7 @@ export default function App() {
       const settled = settle(next, contract.weeks);
       setRun(settled);
       setContract(null);
-      if (settled.cash >= 0 && settled.week < MAX_WEEKS) setScreen("office");
+      if (settled.cash >= 0 && (settled.week < MAX_WEEKS || settled.dynasty)) setScreen("office");
     },
     [run, contract, settle]
   );
@@ -529,11 +533,14 @@ export default function App() {
         {screen === "release" && released && (
           <Release draft={released.draft} result={released.result} onContinue={continueFromRelease} />
         )}
+        {screen === "retrospective" && run && (
+          <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />
+        )}
         {screen === "gameover" && run && (
-          <GameOver run={run} victory={victory} onRestart={restart} onTitle={quitToTitle} />
+          <GameOver run={run} onRestart={restart} onTitle={quitToTitle} />
         )}
 
-        {screen !== "title" && screen !== "gameover" && (
+        {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
           <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
             <button
               aria-label="Mute"

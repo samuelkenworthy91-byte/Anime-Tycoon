@@ -367,7 +367,8 @@ export function recordContinuation(
   fr: Franchise,
   d: Draft,
   result: { total: number; revenue: number; fans: number; hallOfFame: boolean },
-  week: number
+  week: number,
+  opts?: { fatigueAdd?: number }
 ): { franchise: Franchise; verdict: ExpectationVerdict } {
   const kind = (d.continuation ?? "season") as EntryKind;
   const def = continuationDef(kind);
@@ -378,7 +379,7 @@ export function recordContinuation(
   const cast = fr.cast.map((c) => ({ ...c, popularity: clampPct(c.popularity + charDelta) }));
 
   let popularity = clampPct(fr.popularity + verdict.popDelta);
-  let fatigue = clampPct(fr.fatigue + (def?.fatigueAdd ?? 12) + verdict.fatigueExtra);
+  let fatigue = clampPct(fr.fatigue + (def?.fatigueAdd ?? 12) + verdict.fatigueExtra + (opts?.fatigueAdd ?? 0));
   if (kind === "reboot") {
     fatigue = 12;
     popularity = clampPct(Math.max(popularity, 30 + result.total));
@@ -423,10 +424,11 @@ export const CULT_MAX_SCORE = 26; // only overlooked shows get cults
 /** called every 4 weeks: rest heals fatigue, hype cools, cults may form */
 export function tickFranchise(
   fr: Franchise,
-  week: number
+  week: number,
+  opts?: { restMult?: number }
 ): { franchise: Franchise; notice: string | null } {
   const rested = week - fr.lastEntryWeek;
-  let fatigue = Math.max(0, fr.fatigue - (rested > 8 ? 3 : 1));
+  let fatigue = Math.max(0, fr.fatigue - (rested > 8 ? 3 : 1) * (opts?.restMult ?? 1));
   let popularity = fr.popularity;
   const floor = fr.cult ? 45 : 12;
   if (popularity > floor) popularity -= 1;

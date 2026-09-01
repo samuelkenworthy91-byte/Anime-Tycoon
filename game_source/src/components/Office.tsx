@@ -55,12 +55,14 @@ import {
   pendingIncome,
   projectCapacity,
   relocateOffice,
+  staffCapacity,
   startBlockReason,
   studioScore,
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
 import { activeProjects } from "../engine/projects";
+import { buyInvestment, computeIndustryRecords, dynastyYear } from "../engine/legacy";
 import Portrait from "./Portrait";
 import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
@@ -69,6 +71,7 @@ import CrewPanel from "./Crew";
 import MarketPanel from "./Market";
 import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
+import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
 import { cn } from "../utils/cn";
 
@@ -98,7 +101,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals">(null);
+  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
@@ -174,7 +177,7 @@ export default function Office({
           tired: s.stamina < 45,
           look: workerLookIndex(s),
         }))}
-        maxStaff={off.maxStaff}
+        maxStaff={staffCapacity(run)}
         timeOfDay={(clockPhase + 0.5) / 4}
         onDeskClick={() => setModal("staff")}
       />
@@ -327,7 +330,7 @@ export default function Office({
             )}
           </Btn>
           <Btn variant="ghost" className="relative" onClick={() => setModal("staff")}>
-            <Users size={15} /> STAFF <span className="text-[10px] opacity-70">({run.staff.length}/{off.maxStaff})</span>
+            <Users size={15} /> STAFF <span className="text-[10px] opacity-70">({run.staff.length}/{staffCapacity(run)})</span>
             {run.staffEvents.length > 0 && (
               <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold font-display text-[9px] font-extrabold text-ink">
                 {run.staffEvents.length}
@@ -348,6 +351,12 @@ export default function Office({
           <Btn variant="ghost" onClick={() => setModal("rivals")}>
             <Swords size={15} className="text-cyanx" /> RIVALS
           </Btn>
+          {run.dynasty && (
+            <Btn variant="gold" className="anim-pop" onClick={() => setModal("dynasty")}>
+              <Crown size={15} /> DYNASTY
+              <span className="text-[10px] opacity-70">Y{dynastyYear(run) + 1}</span>
+            </Btn>
+          )}
           <Btn variant="ghost" onClick={() => setModal("hof")}>
             <Trophy size={15} className="text-gold" /> RECORDS
           </Btn>
@@ -461,7 +470,7 @@ export default function Office({
       {/* ----------------------------------------------------------- STAFF */}
       {modal === "staff" && (
         <Modal title="STAFF ROOM" onClose={() => setModal(null)}>
-          <CrewPanel run={run} setRun={setRun} maxStaff={off.maxStaff} />
+          <CrewPanel run={run} setRun={setRun} maxStaff={staffCapacity(run)} />
         </Modal>
       )}
 
@@ -655,8 +664,52 @@ export default function Office({
         </Modal>
       )}
 
+      {/* --------------------------------------------------------- DYNASTY */}
+      {modal === "dynasty" && (
+        <Modal title="STUDIO DYNASTY" onClose={() => setModal(null)}>
+          <DynastyPanel
+            run={run}
+            onBuy={(id) => {
+              sfx.cash();
+              setRun((r) => buyInvestment(r, id) ?? r);
+            }}
+          />
+        </Modal>
+      )}
+
       {modal === "hof" && (
         <Modal title="STUDIO RECORDS" onClose={() => setModal(null)}>
+          <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-cyanx">
+            <Crown size={14} /> ALL-TIME INDUSTRY RECORDS
+          </div>
+          <div className="mb-3 space-y-1.5">
+            {computeIndustryRecords(run).map((r) => (
+              <div
+                key={r.id}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs",
+                  r.player ? "border-gold/60 bg-gold/10" : "border-line/60 bg-panel2/50"
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  <span className="font-bold">{r.label}:</span>{" "}
+                  <span className="text-paper/70">{r.holder}</span>
+                  {r.title && <span className="text-paper/40"> — “{r.title}”</span>}
+                </span>
+                <span className="shrink-0 font-display font-extrabold text-gold">
+                  {r.id === "grossing" || r.id === "movie"
+                    ? formatGBPShort(r.value)
+                    : r.id === "fanbase"
+                      ? formatNum(r.value)
+                      : r.id === "franchise"
+                        ? `${r.value} entries`
+                        : `${r.value}`}
+                </span>
+                {r.player && <Crown size={12} className="shrink-0 text-gold" />}
+              </div>
+            ))}
+          </div>
+
           <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-gold">
             <Trophy size={14} /> HALL OF FAME (32+/40)
           </div>
