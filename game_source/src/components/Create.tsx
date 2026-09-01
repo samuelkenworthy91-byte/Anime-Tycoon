@@ -31,7 +31,6 @@ import {
   ARCS,
   AUDIENCES,
   BUDGETS,
-  CAST_ROLE_LABEL,
   GENRES,
   MEDIUMS,
   PETS,
@@ -57,6 +56,9 @@ import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 
 const STEPS = ["CONCEPT", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
+/** CAST is broken into one screen per role, in this order. */
+const CAST_ORDER = ["protag", "secondary", "pet", "villain"] as const;
+const CAST_STEP_INDEX = 3;
 
 export function freshDraft(run: RunState, sequelKey?: string): Draft {
   const fr = sequelKey ? run.franchises[sequelKey] : undefined;
@@ -144,6 +146,8 @@ export default function Create({
   onUnlockArc?: (id: string, cost: number) => void;
 }) {
   const [step, setStep] = useState(0);
+  /** which cast role is being picked — CAST is split into one screen per role */
+  const [castStep, setCastStep] = useState(0);
   const [d, setD] = useState<Draft>(() => freshDraft(run, sequelKey));
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
@@ -155,23 +159,57 @@ export default function Create({
   const weeks = draftWeeks(d);
 
 
-  const stepValid = [d.title.trim().length > 0, d.genres.length >= 1, true, !!d.protag && !!d.secondary && !!d.pet && !!d.villain, d.arcs.length >= 3][step] ?? true;
+  const stepValid =
+    [
+      d.title.trim().length > 0,
+      d.genres.length >= 1,
+      true,
+      !!d[CAST_ORDER[Math.min(castStep, CAST_ORDER.length - 1)]],
+      d.arcs.length >= 3,
+    ][step] ?? true;
+
+  /** NEXT / CONTINUE — walks through the cast sub-screens before leaving step 3. */
+  const goNext = () => {
+    if (!stepValid) return;
+    if (step === CAST_STEP_INDEX && castStep < CAST_ORDER.length - 1) {
+      sfx.select();
+      setCastStep((c) => c + 1);
+      return;
+    }
+    if (step < STEPS.length - 1) {
+      sfx.select();
+      if (step + 1 === CAST_STEP_INDEX) setCastStep(0);
+      setStep((s) => Math.min(STEPS.length - 1, s + 1));
+    } else {
+      onBegin(d);
+    }
+  };
+
+  const goBack = () => {
+    if (step === CAST_STEP_INDEX && castStep > 0) {
+      sfx.click();
+      setCastStep((c) => c - 1);
+      return;
+    }
+    if (step === 0) return;
+    sfx.click();
+    if (step - 1 === CAST_STEP_INDEX) setCastStep(CAST_ORDER.length - 1);
+    setStep((s) => Math.max(0, s - 1));
+  };
+
+  const jumpToStep = (i: number) => {
+    if (i === CAST_STEP_INDEX) setCastStep(0);
+    setStep(i);
+  };
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (paused) return;
-      if (e.key === "Enter" && stepValid) {
-        if (step < STEPS.length - 1) {
-          sfx.select();
-          setStep((s) => Math.min(STEPS.length - 1, s + 1));
-        } else {
-          onBegin(d);
-        }
-      }
+      if (e.key === "Enter" && stepValid) goNext();
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [step, stepValid, d, onBegin, paused]);
+  });
 
   const toggleGenre = (id: GenreId) => {
     sfx.click();
@@ -209,11 +247,14 @@ export default function Create({
   }, [d.arcs, d.genres, run.arcKnowledge]);
 
   const castRows: { role: "protag" | "secondary" | "pet" | "villain"; title: string; hint: string; icon: React.ReactNode; list: CastMember[] }[] = [
-    { role: "protag", title: "LEAD ROLE", hint: "The face of the show.", icon: <Users size={14} />, list: PROTAGONISTS },
-    { role: "secondary", title: "SUPPORTING", hint: "The trusty best friend / mentor / rival.", icon: <Users size={14} />, list: SECONDARY },
+    { role: "protag", title: "LEAD ROLE", hint: "The face of the show — everything is built around them.", icon: <Users size={14} />, list: PROTAGONISTS },
+    { role: "secondary", title: "SIDEKICK", hint: "The trusty best friend / mentor / rival.", icon: <Users size={14} />, list: SECONDARY },
     { role: "pet", title: "PET / MASCOT", hint: "Merch sales depend on them.", icon: <PawPrint size={14} />, list: PETS },
     { role: "villain", title: "VILLAIN", hint: "Every hero needs a foil.", icon: <Skull size={14} />, list: VILLAINS },
   ];
+  const CAST_SCREENS = castRows.length;
+  const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
+  const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-ink">
@@ -234,18 +275,20 @@ export default function Create({
             {STEPS.map((s, i) => (
               <button
                 key={s}
-                onClick={() => setStep(i)}
+                onClick={() => jumpToStep(i)}
                 className={cn(
                   "btn-press rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wider",
                   i === step ? "border-neon bg-neon/15 text-neon" : i < step ? "border-line text-paper/50" : "border-line/50 text-paper/30"
                 )}
               >
                 {i + 1}. {s}
+                {i === CAST_STEP_INDEX && step === CAST_STEP_INDEX && ` ${castStep + 1}/${CAST_SCREENS}`}
               </button>
             ))}
           </div>
           <div className="ml-auto text-xs font-bold text-neon md:hidden">
             {step + 1}/{STEPS.length}
+            {step === CAST_STEP_INDEX && ` · ${castStep + 1}/${CAST_SCREENS}`}
           </div>
         </div>
       </div>
@@ -373,41 +416,125 @@ export default function Create({
           )}
 
           {step === 3 && (
-            <div className="space-y-5 anim-up">
-              <div className="flex items-center gap-2">
-                <span className="font-display text-lg font-extrabold">CAST THE SHOW</span>
-                <span className="text-[11px] text-paper/50">Pick one from each row — genre fit adds casting score.</span>
+            <div key={castRow.role} className="space-y-4 anim-up">
+              {/* which slot are we casting? */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-display text-lg font-extrabold">CASTING: {castRow.title}</span>
+                <span className="ink-chip px-2 py-0.5 text-[10px] font-bold tracking-widest text-cyanx">
+                  {castStep + 1} / {CAST_SCREENS}
+                </span>
+                <span className="text-[11px] text-paper/50">{castRow.hint}</span>
               </div>
-              {castRows.map((row) => (
-                <Section key={row.role} title={`${row.title} — ${CAST_ROLE_LABEL[row.role]}`}>
-                  <div className="mb-1 text-[10px] text-paper/40">{row.hint}</div>
-                  <div className="nice-scroll grid max-h-[42vh] grid-cols-3 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-5">
-                    {row.list.map((m) => {
-                      const on = d[row.role] === m.id;
+
+              {/* sub-step pips */}
+              <div className="flex gap-1.5">
+                {castRows.map((r, i) => (
+                  <button
+                    key={r.role}
+                    onClick={() => {
+                      sfx.click();
+                      setCastStep(i);
+                    }}
+                    className={cn(
+                      "btn-press flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-[10px] font-bold tracking-wider",
+                      i === castStep
+                        ? "border-neon bg-neon/15 text-neon"
+                        : i < castStep
+                          ? "border-line bg-panel2/60 text-paper/60"
+                          : "border-line/50 text-paper/30"
+                    )}
+                  >
+                    {r.icon}
+                    <span className="hidden sm:inline">{r.title}</span>
+                    {i < castStep && <Check size={11} className="text-mint" />}
+                  </button>
+                ))}
+              </div>
+
+              {/* chosen-so-far strip */}
+              <div className="ink-card flex items-center gap-3 p-2.5">
+                <Portrait
+                  img={castPicked.img}
+                  pos={castPicked.pos}
+                  name={castPicked.name}
+                  alt={castPicked.name}
+                  className="h-16 w-16 shrink-0 rounded-xl border border-neon/50 object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="font-display text-base font-extrabold leading-tight">{castPicked.name}</div>
+                  <div className="text-[11px] font-bold text-cyanx">{castPicked.archetype}</div>
+                  <div className="truncate text-[10px] italic text-paper/50">“{castPicked.tag}”</div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {castPicked.aff.map((a) => {
+                      const gg = GENRES.find((x) => x.id === a);
+                      const hit = d.genres.includes(a);
                       return (
-                        <CastPick
-                          key={m.id}
-                          m={m}
-                          on={on}
-                          onPick={() => {
-                            sfx.select();
-                            set({ [row.role]: m.id } as Partial<Draft>);
-                          }}
-                        />
+                        <span
+                          key={a}
+                          className={cn(
+                            "rounded-full border px-1.5 py-0.5 text-[9px] font-bold",
+                            hit ? "border-mint text-mint" : "border-line text-paper/40"
+                          )}
+                          style={hit ? undefined : { borderColor: undefined }}
+                        >
+                          {gg?.label ?? a}
+                          {hit && " ✓"}
+                        </span>
                       );
                     })}
                   </div>
-                </Section>
-              ))}
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs font-bold text-paper/50">HERO NAME:</span>
-                <input
-                  value={d.protagName}
-                  onChange={(e) => set({ protagName: e.target.value.slice(0, 18) })}
-                  className="ink-input w-48 px-3 py-2 text-sm font-bold"
-                />
-                <span className="text-[10px] italic text-paper/40">“{protag.tag}”</span>
+                </div>
+                <Btn
+                  variant="ghost"
+                  onClick={() => {
+                    sfx.click();
+                    const pool = castRow.list;
+                    set({ [castRow.role]: pool[Math.floor(Math.random() * pool.length)].id } as Partial<Draft>);
+                  }}
+                  aria-label="Random pick"
+                >
+                  <Dices size={18} />
+                </Btn>
               </div>
+
+              {/* the grid for this role only */}
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-5">
+                {castRow.list.map((m) => (
+                  <CastPick
+                    key={m.id}
+                    m={m}
+                    on={d[castRow.role] === m.id}
+                    onPick={() => {
+                      sfx.select();
+                      set({ [castRow.role]: m.id } as Partial<Draft>);
+                    }}
+                  />
+                ))}
+              </div>
+
+              {castRow.role === "protag" && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-bold text-paper/50">HERO NAME:</span>
+                  <input
+                    value={d.protagName}
+                    onChange={(e) => set({ protagName: e.target.value.slice(0, 18) })}
+                    className="ink-input w-48 px-3 py-2 text-sm font-bold"
+                  />
+                  <span className="text-[10px] italic text-paper/40">“{protag.tag}”</span>
+                </div>
+              )}
+
+              <Btn big variant="primary" className="w-full" onClick={goNext}>
+                {castStep < CAST_SCREENS - 1 ? (
+                  <>
+                    CONTINUE — CAST {castRows[castStep + 1].title} <ChevronRight size={18} />
+                  </>
+                ) : (
+                  <>
+                    CONTINUE — PLAN THE SEASON <ChevronRight size={18} />
+                  </>
+                )}
+              </Btn>
             </div>
           )}
 
@@ -580,13 +707,15 @@ export default function Create({
 
       {/* footer nav */}
       <div className="relative z-10 flex items-center justify-between border-t border-line/60 bg-ink/70 px-3 py-2.5 backdrop-blur-md md:px-6">
-        <Btn variant="ghost" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>
+        <Btn variant="ghost" disabled={step === 0 && castStep === 0} onClick={goBack}>
           <ChevronLeft size={16} /> BACK
         </Btn>
-        <div className="text-[11px] text-paper/40">ENTER ↵ advances</div>
+        <div className="text-[11px] text-paper/40">
+          {step === CAST_STEP_INDEX ? `ENTER ↵ continue · ${castRow.title}` : "ENTER ↵ advances"}
+        </div>
         {step < STEPS.length - 1 ? (
-          <Btn variant="primary" disabled={!stepValid} onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}>
-            NEXT <ChevronRight size={16} />
+          <Btn variant="primary" disabled={!stepValid} onClick={goNext}>
+            {step === CAST_STEP_INDEX && castStep < CAST_SCREENS - 1 ? "CONTINUE" : "NEXT"} <ChevronRight size={16} />
           </Btn>
         ) : (
           <Btn variant="gold" onClick={() => onBegin(d)}>

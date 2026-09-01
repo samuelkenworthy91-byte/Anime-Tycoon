@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard } from "lucide-react";
+import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, HardDriveDownload, ChevronLeft, Check } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
 import { ARCS, GENRES, comboKey, type Contract, type Draft } from "./engine/data";
 import { computeResult, type ShowResult } from "./engine/scoring";
 import { advanceWeeks, AIR_WEEKS, initialRun, MAX_WEEKS, type RunState } from "./engine/state";
+import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
 import Create, { draftCost, draftWeeks } from "./components/Create";
@@ -34,6 +36,50 @@ export default function App() {
   const dayCountRef = useRef(0);
 
   const canPause = screen !== "title" && screen !== "gameover";
+  /* bumped whenever a save is written/cleared so the title screen re-reads it */
+  const [saveStamp, setSaveStamp] = useState(0);
+
+  /* slot picker shown over the pause menu */
+  const [savePicker, setSavePicker] = useState(false);
+  const [savedTo, setSavedTo] = useState<SlotId | null>(null);
+
+  /** the current career, packaged for storage */
+  const snapshot = useCallback((): SaveData | null => {
+    if (!run) return null;
+    return {
+      run,
+      meta,
+      clock: { day: clockDay, phase: clockPhase, acc: dayAccRef.current, dayCount: dayCountRef.current },
+      summary: {
+        studio: run.studio,
+        week: run.week,
+        cash: run.cash,
+        fans: run.fans,
+        shows: run.showsMade,
+        officeLevel: run.officeLevel,
+      },
+    };
+  }, [run, meta, clockDay, clockPhase]);
+
+  /* ------------------------------------------------------------ autosave
+   * The run is written to the rolling AUTOSAVE slot whenever it changes while
+   * a career is in progress. Manual slots are only written from the pause
+   * menu. Resuming always drops you back into the office, which is the only
+   * safe re-entry point (mini-games are transient).                        */
+  useEffect(() => {
+    if (!run || screen === "title" || screen === "gameover") return;
+    const snap = snapshot();
+    if (snap) saveSlot("auto", snap);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run, meta, screen]);
+
+  /* a finished career is not resumable — retire the save */
+  useEffect(() => {
+    if (screen === "gameover") {
+      clearAllSaves();
+      setSaveStamp((n) => n + 1);
+    }
+  }, [screen]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -72,9 +118,31 @@ export default function App() {
   }, [screen, paused, run !== null, run?.week]);
 
   /* --------------------------------------------------------- lifecycle */
+  const loadRun = useCallback((slot: SlotId) => {
+    const save = loadSlot(slot);
+    if (!save) return;
+    primeAudio();
+    sfx.fanfare();
+    setMeta(save.meta);
+    setRun(save.run as RunState);
+    setDraft(null);
+    setResult(null);
+    setContract(null);
+    setSequelKey(undefined);
+    setVictory(false);
+    setPaused(false);
+    setSavePicker(false);
+    dayAccRef.current = save.clock?.acc ?? 0;
+    dayCountRef.current = save.clock?.dayCount ?? 0;
+    setClockDay(save.clock?.day ?? 0);
+    setClockPhase(save.clock?.phase ?? 0);
+    setScreen("office");
+  }, []);
+
   const startRun = useCallback((studio: string, showrunner: string) => {
     primeAudio();
     sfx.fanfare();
+    clearAllSaves();
     setMeta({ studio, showrunner });
     setRun(initialRun(studio, showrunner));
     setDraft(null);
@@ -88,6 +156,7 @@ export default function App() {
 
   const restart = useCallback(() => {
     sfx.fanfare();
+    clearAllSaves();
     setRun(initialRun(meta.studio, meta.showrunner));
     setDraft(null);
     setResult(null);
@@ -344,12 +413,26 @@ export default function App() {
             <Btn big variant="primary" className="w-full" onClick={() => setPaused(false)}>
               <Play size={18} /> RESUME
             </Btn>
+            <Btn
+              variant="cyan"
+              className="w-full"
+              onClick={() => {
+                sfx.select();
+                setSavedTo(null);
+                setSavePicker(true);
+              }}
+            >
+              <HardDriveDownload size={16} /> SAVE GAME
+            </Btn>
             <Btn variant="gold" className="w-full" onClick={restart}>
               <RotateCcw size={16} /> INSTANT RESTART
             </Btn>
             <Btn variant="ghost" className="w-full" onClick={quitToTitle}>
-              <Home size={16} /> QUIT TO TITLE
+              <Home size={16} /> SAVE &amp; QUIT TO TITLE
             </Btn>
+          </div>
+          <div className="text-[10px] text-mint/70">
+            Autosaving continuously — SAVE GAME writes a slot you can come back to.
           </div>
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
             <Keyboard size={12} /> Tap bubbles · keys 1-7 per desk · SPACE top bubble · ENTER next · M mute · ESC pause
@@ -360,10 +443,46 @@ export default function App() {
     [restart, quitToTitle]
   );
 
+  /* ------------------------------------------------- save slot picker */
+  const savePickerOverlay = (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-abyss/90 p-4 backdrop-blur-md">
+      <div className="anim-pop ink-card w-full max-w-sm space-y-3 p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display flex items-center gap-2 text-xl font-extrabold text-cyanx">
+            <HardDriveDownload size={18} /> SAVE GAME
+          </h2>
+          <Btn variant="ghost" onClick={() => { sfx.back(); setSavePicker(false); }}>
+            <ChevronLeft size={16} /> Back
+          </Btn>
+        </div>
+
+        <SaveSlots
+          mode="save"
+          refreshKey={saveStamp}
+          onChanged={() => setSaveStamp((n) => n + 1)}
+          onPick={(id) => {
+            const snap = snapshot();
+            if (!snap) return;
+            const ok = saveSlot(id, snap);
+            setSavedTo(ok ? id : null);
+            setSaveStamp((n) => n + 1);
+            if (ok) sfx.fanfare();
+          }}
+        />
+
+        {savedTo && (
+          <div className="anim-pop flex items-center justify-center gap-2 rounded-xl border border-mint/50 bg-mint/10 px-3 py-2 text-xs font-bold text-mint">
+            <Check size={14} /> Saved to {slotLabel(savedTo)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <FxProvider>
       <div className="relative h-full w-full overflow-hidden bg-ink">
-        {screen === "title" && <Title onStart={startRun} />}
+        {screen === "title" && <Title key={saveStamp} onStart={startRun} onLoad={loadRun} />}
         {screen === "office" && run && (
           <Office
             run={run}
@@ -422,6 +541,7 @@ export default function App() {
         )}
 
         {paused && pauseMenu}
+        {paused && savePicker && savePickerOverlay}
       </div>
     </FxProvider>
   );

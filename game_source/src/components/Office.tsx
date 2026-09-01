@@ -74,7 +74,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards">(null);
+  const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
@@ -174,6 +174,14 @@ export default function Office({
     role === "writer" ? <PenTool size={13} /> : role === "animator" ? <Monitor size={13} /> : <Music size={13} />;
 
   const seq = run.pendingSequel ? run.franchises[run.pendingSequel] : null;
+  /* every series you have ever shipped can be continued, at any time, in any order */
+  const seriesList = useMemo(
+    () =>
+      Object.entries(run.franchises).sort(
+        (a, b) => b[1].season - a[1].season || b[1].lastScore - a[1].lastScore
+      ),
+    [run.franchises]
+  );
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-ink">
@@ -267,6 +275,12 @@ export default function Office({
           {seq && (
             <Btn big variant="gold" className="anim-pop" onClick={() => onNewShow(run.pendingSequel!)}>
               <Zap size={19} /> SEASON {seq.season + 1}
+            </Btn>
+          )}
+          {seriesList.length > 0 && (
+            <Btn variant="ghost" onClick={() => setModal("sequels")}>
+              <Clapperboard size={15} className="text-gold" /> SERIES
+              <span className="text-[10px] opacity-70">({seriesList.length})</span>
             </Btn>
           )}
           <Btn variant="cyan" onClick={() => setModal("contracts")}>
@@ -616,6 +630,54 @@ export default function Office({
       )}
 
       {/* ------------------------------------------------------------- HOF */}
+      {modal === "sequels" && (
+        <Modal title="YOUR SERIES" onClose={() => setModal(null)}>
+          <div className="mb-3 text-xs text-paper/60">
+            Every show you have shipped stays on the shelf. Greenlight the next season whenever you
+            like — starting other series in between doesn't cancel anything.
+          </div>
+          <div className="space-y-2">
+            {seriesList.map(([key, fr]) => {
+              const hof = run.hallOfFame.some((h) => h.title.startsWith(fr.baseTitle));
+              return (
+                <div key={key} className="ink-card flex items-center gap-3 p-2.5">
+                  <div
+                    className={cn(
+                      "flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl border font-display font-extrabold leading-none",
+                      hof ? "border-gold/70 bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/70"
+                    )}
+                  >
+                    <span className="text-[8px] tracking-widest opacity-70">S</span>
+                    <span className="text-base">{fr.season}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-display text-sm font-extrabold">{fr.baseTitle}</div>
+                    <div className="text-[10px] text-paper/50">
+                      {fr.season} season{fr.season === 1 ? "" : "s"} · last scored{" "}
+                      <b className={fr.lastScore >= 30 ? "text-mint" : "text-paper/70"}>{fr.lastScore}/40</b>
+                      {hof && <span className="ml-1 text-gold">· HALL OF FAME</span>}
+                    </div>
+                    <div className="text-[10px] text-cyanx">
+                      Season {fr.season + 1} carries a ×{(1 + 0.14 * fr.season).toFixed(2)} audience bonus
+                    </div>
+                  </div>
+                  <Btn
+                    variant={fr.lastScore >= 30 ? "gold" : "ghost"}
+                    onClick={() => {
+                      sfx.select();
+                      setModal(null);
+                      onNewShow(key);
+                    }}
+                  >
+                    <Zap size={14} /> SEASON {fr.season + 1}
+                  </Btn>
+                </div>
+              );
+            })}
+          </div>
+        </Modal>
+      )}
+
       {modal === "hof" && (
         <Modal title="STUDIO RECORDS" onClose={() => setModal(null)}>
           <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-gold">
@@ -623,7 +685,7 @@ export default function Office({
           </div>
           {run.hallOfFame.length === 0 ? (
             <div className="rounded-xl border border-dashed border-line p-4 text-center text-sm text-paper/40">
-              No hall-of-fame shows yet. Score 32/40 to earn sequel rights.
+              No hall-of-fame shows yet. Score 32/40 to immortalise a show.
             </div>
           ) : (
             <div className="space-y-1.5">

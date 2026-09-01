@@ -116,6 +116,7 @@ export default function ProductionFloor({
     bg: null as HTMLImageElement | null,
     face: null as HTMLImageElement | null,
     _portraits: [] as HTMLImageElement[],
+    _sprites: [] as HTMLImageElement[],
   });
 
   useEffect(() => {
@@ -146,8 +147,15 @@ export default function ProductionFloor({
 
     /* background environment art */
     const bg = new Image();
-    bg.src = "img/bg-floor.jpg";
+    bg.src = "img/scene-floor.jpg";
     s.bg = bg;
+
+    /* painted HD-2D worker sprites, drawn seated behind each desk */
+    s._sprites = [1, 2, 3, 4, 5, 6].map((n) => {
+      const im = new Image();
+      im.src = `img/sprite-worker-${n}.png`;
+      return im;
+    });
 
     /* showrunner portrait is the player avatar */
     const face = new Image();
@@ -325,7 +333,11 @@ export default function ProductionFloor({
         const ratio = Math.max(s.w / s.bg.width, s.h / s.bg.height);
         const bw = s.bg.width * ratio;
         const bh = s.bg.height * ratio;
+        /* soften + darken the backdrop: the painted cast in front of it is the
+           focal plane, exactly how the HD-2D scenes stack their layers */
+        g.filter = "blur(2.5px) brightness(.62) saturate(.9)";
         g.drawImage(s.bg, (s.w - bw) / 2, (s.h - bh) / 2, bw, bh);
+        g.filter = "none";
       } else {
         const wall = g.createLinearGradient(0, 0, 0, s.h);
         wall.addColorStop(0, "#171226");
@@ -362,22 +374,47 @@ export default function ProductionFloor({
       desks.forEach((d, i) => {
         const x = deskX(i);
         const w = Math.min(96, (s.w / desks.length) * 0.82);
-        /* chair + person */
-        const hairs = ["#ff8fc7", "#ffd166", "#5ef0c0", "#7af0ff", "#f472b6", "#a3e635", "#c084fc"];
-        const hair = d.isBoss ? "#ffd166" : hairs[i % hairs.length];
-        g.fillStyle = hair;
-        g.beginPath();
-        g.arc(x, dy - 26, 12, Math.PI, 0);
-        g.fill();
-        g.fillStyle = "#ffd9b8";
-        g.fillRect(x - 9, dy - 26, 18, 13);
-        g.fillStyle = "#0a0812";
-        g.fillRect(x - 5.5, dy - 21, 2.5, 3);
-        g.fillRect(x + 3, dy - 21, 2.5, 3);
-        g.fillStyle = d.isBoss ? "#5a3f8a" : "#3a3f66";
-        g.beginPath();
-        g.roundRect(x - 13, dy - 13, 26, 14, 5);
-        g.fill();
+        /* painted worker, seated: the desk slab and monitor overlap the legs */
+        const spriteList = s._sprites;
+        const spr = d.isBoss
+          ? spriteList[5]
+          : spriteList[i % 5];
+        if (spr && spr.complete && spr.naturalWidth > 0) {
+          /* show the upper body only — cropped at the waist so they read as
+             sitting rather than floating above the desk */
+          const sh = 156;
+          const sw = (spr.naturalWidth / spr.naturalHeight) * sh;
+          const crop = 0.62; // top 62% of the sprite — cut at the waist
+          g.save();
+          g.beginPath();
+          g.rect(x - sw / 2 - 6, dy - 98, sw + 12, 120);
+          g.clip();
+          g.shadowColor = "rgba(6,5,16,.7)";
+          g.shadowBlur = 10;
+          g.shadowOffsetY = 4;
+          g.drawImage(
+            spr,
+            0,
+            0,
+            spr.naturalWidth,
+            spr.naturalHeight * crop,
+            x - sw / 2,
+            dy - 98,
+            sw,
+            sh * crop
+          );
+          g.restore();
+          g.shadowBlur = 0;
+          g.shadowOffsetY = 0;
+        } else {
+          /* fallback while the art loads */
+          g.fillStyle = d.isBoss ? "#ffd166" : "#7af0ff";
+          g.beginPath();
+          g.arc(x, dy - 26, 12, Math.PI, 0);
+          g.fill();
+          g.fillStyle = "#ffd9b8";
+          g.fillRect(x - 9, dy - 26, 18, 13);
+        }
 
         /* monitor */
         g.fillStyle = "#0a0812";
@@ -388,15 +425,15 @@ export default function ProductionFloor({
         g.lineWidth = 1;
         g.stroke();
         for (let bI = 0; bI < 4; bI++) {
-          const hgt = 4 + Math.abs(Math.sin(now / 240 + bI + i)) * 10;
+          const hgt = 5 + Math.abs(Math.sin(now / 240 + bI + i)) * 14;
           g.fillStyle = POINT_COLOR[d.type];
           g.globalAlpha = 0.85;
-          g.fillRect(x - 16 + bI * 8, dy + 13 - hgt, 5, hgt);
+          g.fillRect(x - 24 + bI * 12, dy + 18 - hgt, 8, hgt);
         }
         g.globalAlpha = 1;
 
         /* desk slab */
-        const slab = g.createLinearGradient(0, dy + 16, 0, dy + 26);
+        const slab = g.createLinearGradient(0, dy + 22, 0, dy + 36);
         slab.addColorStop(0, "#8a5a3b");
         slab.addColorStop(1, "#5e3b24");
         g.fillStyle = slab;

@@ -259,7 +259,8 @@ export default function Release({
                 )}
                 {draft.franchiseKey && result.total < 30 && (
                   <div className="rounded-xl border border-neon/50 bg-neon/10 p-2 text-center text-[11px] font-bold text-neon2">
-                    The sequel underperformed — the committee closes the franchise.
+                    The sequel underperformed — reviews cooled off. The series stays on your shelf
+                    though: you can revive it from SERIES in the office whenever you want.
                   </div>
                 )}
 

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices, Save, FolderOpen } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
-import { getScores, type ScoreEntry } from "../engine/storage";
-import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum } from "../engine/data";
+import { getScores, newestSave, slotLabel, type SlotId, type ScoreEntry } from "../engine/storage";
+import SaveSlots from "./SaveSlots";
+import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel } from "../engine/data";
 import { cn } from "../utils/cn";
 
 /* ----------------------------------------------------------- score table */
@@ -52,10 +53,16 @@ export function HighScoreTable({ highlight }: { highlight?: number }) {
 /* ----------------------------------------------------------------- title */
 export default function Title({
   onStart,
+  onLoad,
 }: {
   onStart: (studio: string, showrunner: string) => void;
+  /** resume a specific slot */
+  onLoad?: (id: SlotId) => void;
 }) {
-  const [view, setView] = useState<"menu" | "setup" | "scores">("menu");
+  /* bumped after a delete so the slot list and CONTINUE re-read storage */
+  const [saveTick, setSaveTick] = useState(0);
+  const newest = useMemo(() => newestSave(), [saveTick]);
+  const [view, setView] = useState<"menu" | "setup" | "scores" | "load">("menu");
   const [studio, setStudio] = useState("Anime Runner");
   const [runner, setRunner] = useState<"steady" | "vision">("steady");
 
@@ -65,6 +72,10 @@ export default function Title({
         primeAudio();
         if (view === "menu") {
           sfx.select();
+          if (newest && onLoad) {
+            onLoad(newest.id);
+            return;
+          }
           setView("setup");
         } else if (view === "setup") {
           sfx.select();
@@ -74,7 +85,7 @@ export default function Title({
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [view, studio, runner, onStart]);
+  }, [view, studio, runner, onStart, newest, onLoad]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-ink">
@@ -83,15 +94,21 @@ export default function Title({
       <div className="pointer-events-none absolute inset-0 screentone opacity-40" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-between px-4 py-6 md:py-8">
-        {/* logo */}
-        <div className="text-center anim-up">
-          <div className="mb-1 text-xs tracking-[0.5em] text-neon/90 md:text-sm">
+        {/* logo lockup — emblem + wordmark (deliberately unisex: no character art) */}
+        <div className="flex flex-col items-center text-center anim-up">
+          <img
+            src="img/logo-mark.png"
+            alt="Anime Runner"
+            className="mb-2 h-16 w-16 rounded-2xl border border-gold/40 shadow-[0_8px_30px_rgba(0,0,0,.65)] md:h-20 md:w-20"
+          />
+          <div className="mb-1 text-[10px] tracking-[0.5em] text-cyanx/90 md:text-xs">
             ANIME STUDIO TYCOON
           </div>
           <h1 className="font-display font-extrabold leading-[0.9] tracking-tight text-[11vw] drop-shadow-[0_6px_24px_rgba(0,0,0,.8)] md:text-[6.5rem]">
-            <span className="text-paper drop-shadow-[0_4px_0_rgba(255,77,141,.55)]">ANIME</span>
-            <span className="text-neon drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">RUNNER</span>
+            <span className="text-paper drop-shadow-[0_4px_0_rgba(17,26,61,.9)]">ANIME</span>
+            <span className="text-gold drop-shadow-[0_4px_0_rgba(59,225,255,.45)]">RUNNER</span>
           </h1>
+          <div className="mt-1 h-[3px] w-40 rounded-full bg-gradient-to-r from-transparent via-cyanx to-transparent md:w-64" />
           <div className="mt-2 inline-flex items-center gap-2 ink-chip px-4 py-1.5 text-[11px] font-bold tracking-[0.3em] text-paper/80 md:text-xs">
             <Sparkles size={13} className="text-gold" />
             ANIMATION HOUSE
@@ -106,8 +123,34 @@ export default function Title({
         <div className="w-full max-w-2xl anim-up" style={{ animationDelay: "120ms" }}>
           {view === "menu" && (
             <div className="flex flex-col items-center gap-3">
+              {newest && (
+                <div className="w-72 anim-pop">
+                  <Btn
+                    big
+                    variant="gold"
+                    className="w-full anim-ring"
+                    onClick={() => onLoad?.(newest.id)}
+                  >
+                    <Save size={20} /> CONTINUE
+                  </Btn>
+                  <div className="mt-1 rounded-xl border border-gold/30 bg-gold/5 px-2.5 py-1.5 text-[10px] leading-tight text-paper/70">
+                    <div className="truncate font-bold text-gold">
+                      {newest.save.summary.studio}
+                      <span className="ml-1.5 font-normal text-paper/45">
+                        {slotLabel(newest.id)}
+                      </span>
+                    </div>
+                    <div className="truncate">
+                      {dateLabel(newest.save.summary.week)} ·{" "}
+                      {formatGBP(newest.save.summary.cash)} ·{" "}
+                      {formatNum(newest.save.summary.fans)} fans ·{" "}
+                      {newest.save.summary.shows} shows
+                    </div>
+                  </div>
+                </div>
+              )}
               <Btn big variant="primary" className="w-72 anim-ring" onClick={() => setView("setup")}>
-                <Play size={20} /> FOUND YOUR STUDIO
+                <Play size={20} /> {newest ? "NEW CAREER" : "FOUND YOUR STUDIO"}
               </Btn>
               <Btn
                 big
@@ -117,14 +160,38 @@ export default function Title({
               >
                 <Zap size={20} /> QUICK START
               </Btn>
+              <Btn big variant="ghost" className="w-72" onClick={() => setView("load")}>
+                <FolderOpen size={20} className="text-cyanx" /> LOAD GAME
+              </Btn>
               <Btn big variant="ghost" className="w-72" onClick={() => setView("scores")}>
                 <Trophy size={20} className="text-gold" /> HALL OF FAME
               </Btn>
               <div className="mt-2 max-w-xs text-center text-[11px] leading-relaxed text-paper/60">
                 Take contracts, plan shows, pop the point bubbles your staff make.
                 <br />
-                ENTER begin · 1-7 desks · SPACE grab · ESC pause
+                {newest ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
+                <br />
+                Autosaves as you play · 3 manual slots from the pause menu.
               </div>
+            </div>
+          )}
+
+          {view === "load" && (
+            <div className="ink-card p-4 md:p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-display flex items-center gap-2 text-xl font-extrabold text-cyanx">
+                  <FolderOpen size={18} /> LOAD GAME
+                </h2>
+                <Btn variant="ghost" onClick={() => setView("menu")}>
+                  <ChevronLeft size={16} /> Back
+                </Btn>
+              </div>
+              <SaveSlots
+                mode="load"
+                refreshKey={saveTick}
+                onChanged={() => setSaveTick((n) => n + 1)}
+                onPick={(id) => onLoad?.(id)}
+              />
             </div>
           )}
 
