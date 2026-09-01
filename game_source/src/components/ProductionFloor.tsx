@@ -1,15 +1,16 @@
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import { sfx } from "../engine/audio";
 import { useFx } from "../fx/fx";
-import { POINT_COLOR, STAFF_PORTRAITS, type PointType } from "../engine/data";
+import { POINT_COLOR, WORKER_LOOKS, BOSS_LOOK, type PointType } from "../engine/data";
 
 export interface FloorDesk {
   name: string;
   skill: number;
   type: PointType;
   isBoss?: boolean;
-  /** portrait sheet index; the boss (showrunner) uses their own photo */
-  portrait?: number;
+  /** WORKER_LOOKS index; picks both the desk sprite and the bubble face.
+      The boss (showrunner) uses their own photo for bubbles. */
+  look?: number;
   img?: string;
 }
 
@@ -150,10 +151,11 @@ export default function ProductionFloor({
     bg.src = "img/scene-floor.jpg";
     s.bg = bg;
 
-    /* painted HD-2D worker sprites, drawn seated behind each desk */
-    s._sprites = [1, 2, 3, 4, 5, 6].map((n) => {
+    /* painted HD-2D worker sprites, drawn seated behind each desk; one per
+       look, with the showrunner's model appended at the end */
+    s._sprites = [...WORKER_LOOKS.map((l) => l.sprite), BOSS_LOOK.sprite].map((src) => {
       const im = new Image();
-      im.src = `img/sprite-worker-${n}.png`;
+      im.src = src;
       return im;
     });
 
@@ -377,8 +379,8 @@ export default function ProductionFloor({
         /* painted worker, seated: the desk slab and monitor overlap the legs */
         const spriteList = s._sprites;
         const spr = d.isBoss
-          ? spriteList[5]
-          : spriteList[i % 5];
+          ? spriteList[WORKER_LOOKS.length]
+          : spriteList[(d.look ?? i) % WORKER_LOOKS.length];
         if (spr && spr.complete && spr.naturalWidth > 0) {
           /* show the upper body only — cropped at the waist so they read as
              sitting rather than floating above the desk */
@@ -487,28 +489,19 @@ export default function ProductionFloor({
         if (b.kind !== "bug") {
           const desk = desks[b.desk];
           const isBoss = desk?.isBoss;
-          const portrait = desk?.portrait;
+          const look = desk?.look;
           let img: HTMLImageElement | null = null;
           if (isBoss) img = s.face;
-          else if (portrait !== undefined && st.current._portraits[portrait]) {
-            img = st.current._portraits[portrait] ?? null;
+          else if (look !== undefined && st.current._portraits[look % WORKER_LOOKS.length]) {
+            img = st.current._portraits[look % WORKER_LOOKS.length] ?? null;
           }
           if (img && img.complete && img.naturalWidth > 0) {
             g.save();
             g.beginPath();
             g.arc(px, b.y, r * 0.72, 0, Math.PI * 2);
             g.clip();
-            if (isBoss) {
-              g.drawImage(img, px - r * 0.8, b.y - r * 0.8, r * 1.6, r * 1.6);
-            } else if (portrait !== undefined) {
-              const sheet = STAFF_PORTRAITS[portrait];
-              const pw = img.width / 2;
-              const ph = img.height / 2;
-              const sx = (sheet.pos % 2) * pw;
-              const sy = Math.floor(sheet.pos / 2) * ph;
-              /* zoom in on the face, roughly the top half of the quadrant */
-              g.drawImage(img, sx, sy, pw, ph, px - r * 0.8, b.y - r * 0.8, r * 1.6, r * 1.6);
-            }
+            /* portraits are already head-and-shoulders crops of the sprite */
+            g.drawImage(img, px - r * 0.8, b.y - r * 0.8, r * 1.6, r * 1.6);
             g.restore();
             g.strokeStyle = "rgba(255,255,255,.75)";
             g.lineWidth = 1.2;
@@ -590,10 +583,10 @@ export default function ProductionFloor({
     };
     s.raf = requestAnimationFrame(draw);
 
-    /* preload staff portrait sheets */
-    st.current._portraits = STAFF_PORTRAITS.map((sp) => {
+    /* preload the matching worker portraits for the point bubbles */
+    st.current._portraits = WORKER_LOOKS.map((l) => {
       const im = new Image();
-      im.src = sp.img;
+      im.src = l.portrait;
       return im;
     });
 

@@ -78,8 +78,11 @@ export interface Staff {
   salary: number; // per week
   cost: number; // signing fee
   stamina: number; // 0..100, drains with work
-  /** index into STAFF_PORTRAITS */
+  /** index into STAFF_PORTRAITS (legacy; kept so old saves still load) */
   portrait: number;
+  /** index into WORKER_LOOKS — the painted model used for the office sprite,
+      the desk sprite on the production floor AND the menu portrait */
+  look?: number;
 }
 
 export interface CastMember {
@@ -775,6 +778,28 @@ export const STAFF_PORTRAITS: { img: string; pos: number }[] = [
   { img: "img/staff-4.jpg", pos: 3 },
 ];
 
+/* --------------------------------------------------------- worker looks
+ * The ten painted chibi staff models. Each look pairs the full-body office
+ * sprite with a portrait cropped from the very same painting, so the person
+ * you hire from a menu is exactly the person who walks around the office.
+ * Sprite 6 is reserved for the showrunner. */
+export interface WorkerLook {
+  sprite: string;
+  portrait: string;
+}
+export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11].map((n) => ({
+  sprite: `img/sprite-worker-${n}.png`,
+  portrait: `img/portrait-worker-${n}.png`,
+}));
+export const BOSS_LOOK: WorkerLook = {
+  sprite: "img/sprite-worker-6.png",
+  portrait: "img/portrait-worker-6.png",
+};
+/** stable model index for a staff member (old saves fall back to their
+    legacy portrait index, so everyone keeps a consistent face) */
+export const workerLookIndex = (s: Staff) => (s.look ?? s.portrait) % WORKER_LOOKS.length;
+export const workerLook = (s: Staff) => WORKER_LOOKS[workerLookIndex(s)];
+
 let staffId = 0;
 export function rollCandidate(week: number): Staff {
   const roles: StaffRole[] = ["writer", "animator", "composer"];
@@ -795,6 +820,7 @@ export function rollCandidate(week: number): Staff {
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,
+    look: (staffId + Math.floor(Math.random() * 3)) % WORKER_LOOKS.length,
   };
   s.salary = Math.round((320 + main * 12) / 10) * 10;
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;

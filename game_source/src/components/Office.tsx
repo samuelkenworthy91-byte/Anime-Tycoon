@@ -40,7 +40,8 @@ import {
   SHOWRUNNERS,
   MEDIUMS,
   POINT_COLOR,
-  STAFF_PORTRAITS,
+  workerLook,
+  workerLookIndex,
   dateLabel,
   formatGBP,
   formatGBPShort,
@@ -193,6 +194,7 @@ export default function Office({
           name: s.name.split(" ")[0],
           color: POINT_COLOR[ROLE_POINT[s.role]],
           tired: s.stamina < 45,
+          look: workerLookIndex(s),
         }))}
         maxStaff={off.maxStaff}
         timeOfDay={(clockPhase + 0.5) / 4}
@@ -369,8 +371,7 @@ export default function Office({
                 {run.staff.map((s) => (
                   <div key={s.id} className="ink-card flex items-center gap-2 p-2.5">
                     <Portrait
-                      img={STAFF_PORTRAITS[s.portrait].img}
-                      pos={STAFF_PORTRAITS[s.portrait].pos}
+                      img={workerLook(s).portrait}
                       name={s.name}
                       alt={s.name}
                       className="h-10 w-10 rounded-lg border border-line object-cover"
@@ -432,8 +433,7 @@ export default function Office({
                 {run.candidates.map((c) => (
                   <div key={c.id} className="ink-card flex items-center gap-2 p-2.5">
                     <Portrait
-                      img={STAFF_PORTRAITS[c.portrait].img}
-                      pos={STAFF_PORTRAITS[c.portrait].pos}
+                      img={workerLook(c).portrait}
                       name={c.name}
                       alt={c.name}
                       className="h-10 w-10 rounded-lg border border-line object-cover"

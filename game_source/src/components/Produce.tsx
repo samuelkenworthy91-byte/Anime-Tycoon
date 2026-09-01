@@ -22,6 +22,7 @@ import {
   SHOWRUNNERS,
   formatGBP,
   staffPoint,
+  workerLookIndex,
   type Draft,
   type PointType,
 } from "../engine/data";
@@ -82,7 +83,7 @@ export default function Produce({
       { name: runner.name.split(" ")[0], skill: 46 + run.showsMade * 2, type: PHASES[phaseIdx].type, isBoss: true, img: runner.img },
     ];
     run.staff.forEach((s) =>
-      list.push({ name: s.name.split(" ")[0], skill: Math.round(staffPoint(s, ROLE_POINT[s.role]) * (0.6 + s.stamina / 250)), type: ROLE_POINT[s.role], portrait: s.portrait })
+      list.push({ name: s.name.split(" ")[0], skill: Math.round(staffPoint(s, ROLE_POINT[s.role]) * (0.6 + s.stamina / 250)), type: ROLE_POINT[s.role], look: workerLookIndex(s) })
     );
     return list;
   }, [run.staff, run.showsMade, runner.name, phaseIdx]);

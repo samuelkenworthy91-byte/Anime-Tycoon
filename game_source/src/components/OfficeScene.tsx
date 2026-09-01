@@ -1,9 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { WORKER_LOOKS, BOSS_LOOK } from "../engine/data";
 
 export interface OfficeStaff {
   name: string;
   color: string;
   tired?: boolean;
+  /** index into WORKER_LOOKS so each person keeps their own painted model */
+  look?: number;
 }
 
 /* ------------------------------------------------------------------ art
@@ -22,15 +25,9 @@ const SCENES = [
   "img/scene-office-3.jpg",
 ];
 
-const SPRITES = [
-  "img/sprite-worker-1.png",
-  "img/sprite-worker-2.png",
-  "img/sprite-worker-3.png",
-  "img/sprite-worker-4.png",
-  "img/sprite-worker-5.png",
-];
+const SPRITES = WORKER_LOOKS.map((l) => l.sprite);
 /** the showrunner has their own painted sprite */
-const BOSS_SPRITE = "img/sprite-worker-6.png";
+const BOSS_SPRITE = BOSS_LOOK.sprite;
 
 /** clear floor each backdrop leaves for characters, in stage percentages */
 interface FloorZone {
@@ -104,6 +101,16 @@ function Character({
   onClick?: () => void;
   bobDelay: number;
 }) {
+  /* WotL-style toddle: while a move is in flight the sprite rocks foot to
+     foot; standing still it settles back into the idle breathing bob */
+  const [stepping, setStepping] = useState(false);
+  useEffect(() => {
+    if (body.dur <= 0) return;
+    setStepping(true);
+    const t = window.setTimeout(() => setStepping(false), body.dur * 1000);
+    return () => window.clearTimeout(t);
+  }, [body.target.x, body.target.y, body.dur]);
+
   /* nearer the camera = larger, and drawn on top */
   const depth = Math.max(0, Math.min(1, (body.pos.y - 55) / 40));
   const h = scale * (0.82 + depth * 0.36);
@@ -132,7 +139,10 @@ function Character({
         }}
       />
 
-      <span className="block h-full anim-bob" style={{ animationDelay: `${bobDelay}ms` }}>
+      <span
+        className={stepping ? "block h-full anim-waddle" : "block h-full anim-bob"}
+        style={{ animationDelay: stepping ? "0ms" : `${bobDelay}ms` }}
+      >
         <img
           src={src}
           alt={label}
@@ -313,7 +323,7 @@ export default function OfficeScene({
           return (
             <Character
               key={`${c.name}-${i}`}
-              src={c.boss ? BOSS_SPRITE : SPRITES[(i - 1) % SPRITES.length]}
+              src={c.boss ? BOSS_SPRITE : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
               body={b}
               scale={SPRITE_H[lvl] * 100}
               label={c.boss ? `${c.name} · showrunner` : c.name}

@@ -221,6 +221,28 @@ select {
 .anim-bob {
   animation: bob 1.6s ease-in-out infinite;
 }
+/* FFT-style walk: a quick foot-to-foot rock with a tiny hop on each step */
+@keyframes waddle {
+  0% {
+    transform: rotate(-3.5deg) translateY(0);
+  }
+  25% {
+    transform: rotate(0deg) translateY(-2.5px);
+  }
+  50% {
+    transform: rotate(3.5deg) translateY(0);
+  }
+  75% {
+    transform: rotate(0deg) translateY(-2.5px);
+  }
+  100% {
+    transform: rotate(-3.5deg) translateY(0);
+  }
+}
+.anim-waddle {
+  animation: waddle 0.48s linear infinite;
+  transform-origin: 50% 100%;
+}
 .anim-pop {
   animation: pop-in 0.35s cubic-bezier(0.2, 1.4, 0.3, 1) both;
 }
