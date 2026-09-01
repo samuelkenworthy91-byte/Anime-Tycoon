@@ -5,6 +5,7 @@ import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
 import { ARCS, GENRES, comboKey, type Contract, type Draft } from "./engine/data";
 import { computeResult, type ShowResult } from "./engine/scoring";
 import { advanceWeeks, AIR_WEEKS, initialRun, MAX_WEEKS, type RunState } from "./engine/state";
+import { clearGame, loadGame, saveGame } from "./engine/storage";
 import Title from "./components/Title";
 import Office from "./components/Office";
 import Create, { draftCost, draftWeeks } from "./components/Create";
@@ -34,6 +35,38 @@ export default function App() {
   const dayCountRef = useRef(0);
 
   const canPause = screen !== "title" && screen !== "gameover";
+  /* bumped whenever a save is written/cleared so the title screen re-reads it */
+  const [saveStamp, setSaveStamp] = useState(0);
+
+  /* ------------------------------------------------------------ autosave
+   * The run is written to localStorage whenever it changes while a career is
+   * in progress. Resuming always drops you back into the office, which is the
+   * only safe re-entry point (mini-games are transient).                    */
+  useEffect(() => {
+    if (!run || screen === "title" || screen === "gameover") return;
+    saveGame({
+      run,
+      meta,
+      clock: { day: clockDay, phase: clockPhase, acc: dayAccRef.current, dayCount: dayCountRef.current },
+      summary: {
+        studio: run.studio,
+        week: run.week,
+        cash: run.cash,
+        fans: run.fans,
+        shows: run.showsMade,
+        officeLevel: run.officeLevel,
+      },
+    });
+    setSaveStamp((n) => n + 1);
+  }, [run, meta, screen, clockDay, clockPhase]);
+
+  /* a finished career is not resumable — retire the save */
+  useEffect(() => {
+    if (screen === "gameover") {
+      clearGame();
+      setSaveStamp((n) => n + 1);
+    }
+  }, [screen]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -72,9 +105,30 @@ export default function App() {
   }, [screen, paused, run !== null, run?.week]);
 
   /* --------------------------------------------------------- lifecycle */
+  const continueRun = useCallback(() => {
+    const save = loadGame();
+    if (!save) return;
+    primeAudio();
+    sfx.fanfare();
+    setMeta(save.meta);
+    setRun(save.run as RunState);
+    setDraft(null);
+    setResult(null);
+    setContract(null);
+    setSequelKey(undefined);
+    setVictory(false);
+    setPaused(false);
+    dayAccRef.current = save.clock?.acc ?? 0;
+    dayCountRef.current = save.clock?.dayCount ?? 0;
+    setClockDay(save.clock?.day ?? 0);
+    setClockPhase(save.clock?.phase ?? 0);
+    setScreen("office");
+  }, []);
+
   const startRun = useCallback((studio: string, showrunner: string) => {
     primeAudio();
     sfx.fanfare();
+    clearGame();
     setMeta({ studio, showrunner });
     setRun(initialRun(studio, showrunner));
     setDraft(null);
@@ -88,6 +142,7 @@ export default function App() {
 
   const restart = useCallback(() => {
     sfx.fanfare();
+    clearGame();
     setRun(initialRun(meta.studio, meta.showrunner));
     setDraft(null);
     setResult(null);
@@ -348,9 +403,10 @@ export default function App() {
               <RotateCcw size={16} /> INSTANT RESTART
             </Btn>
             <Btn variant="ghost" className="w-full" onClick={quitToTitle}>
-              <Home size={16} /> QUIT TO TITLE
+              <Home size={16} /> SAVE &amp; QUIT TO TITLE
             </Btn>
           </div>
+          <div className="text-[10px] text-mint/70">Progress saves automatically — CONTINUE on the title screen.</div>
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
             <Keyboard size={12} /> Tap bubbles · keys 1-7 per desk · SPACE top bubble · ENTER next · M mute · ESC pause
           </div>
@@ -363,7 +419,9 @@ export default function App() {
   return (
     <FxProvider>
       <div className="relative h-full w-full overflow-hidden bg-ink">
-        {screen === "title" && <Title onStart={startRun} />}
+        {screen === "title" && (
+          <Title key={saveStamp} onStart={startRun} onContinue={continueRun} save={loadGame()} />
+        )}
         {screen === "office" && run && (
           <Office
             run={run}

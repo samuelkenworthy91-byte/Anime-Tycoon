@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices } from "lucide-react";
+import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices, Save, Trash2 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
-import { getScores, type ScoreEntry } from "../engine/storage";
-import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum } from "../engine/data";
+import { clearGame, getScores, type SaveGame, type ScoreEntry } from "../engine/storage";
+import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel } from "../engine/data";
 import { cn } from "../utils/cn";
 
 /* ----------------------------------------------------------- score table */
@@ -52,9 +52,15 @@ export function HighScoreTable({ highlight }: { highlight?: number }) {
 /* ----------------------------------------------------------------- title */
 export default function Title({
   onStart,
+  onContinue,
+  save,
 }: {
   onStart: (studio: string, showrunner: string) => void;
+  onContinue?: () => void;
+  save?: SaveGame | null;
 }) {
+  const [dismissedSave, setDismissedSave] = useState(false);
+  const resumable = save && !dismissedSave ? save : null;
   const [view, setView] = useState<"menu" | "setup" | "scores">("menu");
   const [studio, setStudio] = useState("Anime Runner");
   const [runner, setRunner] = useState<"steady" | "vision">("steady");
@@ -65,6 +71,10 @@ export default function Title({
         primeAudio();
         if (view === "menu") {
           sfx.select();
+          if (resumable && onContinue) {
+            onContinue();
+            return;
+          }
           setView("setup");
         } else if (view === "setup") {
           sfx.select();
@@ -74,7 +84,7 @@ export default function Title({
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [view, studio, runner, onStart]);
+  }, [view, studio, runner, onStart, resumable, onContinue]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-ink">
@@ -112,8 +122,35 @@ export default function Title({
         <div className="w-full max-w-2xl anim-up" style={{ animationDelay: "120ms" }}>
           {view === "menu" && (
             <div className="flex flex-col items-center gap-3">
+              {resumable && (
+                <div className="w-72 anim-pop">
+                  <Btn big variant="gold" className="w-full anim-ring" onClick={() => onContinue?.()}>
+                    <Save size={20} /> CONTINUE
+                  </Btn>
+                  <div className="mt-1 flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-2.5 py-1.5 text-[10px] leading-tight text-paper/70">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-bold text-gold">{resumable.summary.studio}</div>
+                      <div className="truncate">
+                        {dateLabel(resumable.summary.week)} · {formatGBP(resumable.summary.cash)} ·{" "}
+                        {formatNum(resumable.summary.fans)} fans · {resumable.summary.shows} shows
+                      </div>
+                    </div>
+                    <button
+                      aria-label="Delete save"
+                      onClick={() => {
+                        sfx.back();
+                        clearGame();
+                        setDismissedSave(true);
+                      }}
+                      className="btn-press shrink-0 rounded-lg border border-line px-1.5 py-1 text-paper/40 hover:text-neon"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              )}
               <Btn big variant="primary" className="w-72 anim-ring" onClick={() => setView("setup")}>
-                <Play size={20} /> FOUND YOUR STUDIO
+                <Play size={20} /> {resumable ? "NEW CAREER" : "FOUND YOUR STUDIO"}
               </Btn>
               <Btn
                 big
@@ -129,7 +166,9 @@ export default function Title({
               <div className="mt-2 max-w-xs text-center text-[11px] leading-relaxed text-paper/60">
                 Take contracts, plan shows, pop the point bubbles your staff make.
                 <br />
-                ENTER begin · 1-7 desks · SPACE grab · ESC pause
+                {resumable ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
+                <br />
+                Your career autosaves after every change.
               </div>
             </div>
           )}
