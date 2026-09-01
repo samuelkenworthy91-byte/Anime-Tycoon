@@ -23,6 +23,7 @@ import Title from "./components/Title";
 import Office from "./components/Office";
 import Create from "./components/Create";
 import { type Commission } from "./engine/market";
+import { type ContinuationPlan } from "./components/Library";
 import Produce from "./components/Produce";
 import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
@@ -45,7 +46,7 @@ export default function App() {
   /** the project on the release-prep screen */
   const [shipId, setShipId] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
-  const [sequelKey, setSequelKey] = useState<string | undefined>();
+  const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
   const [victory, setVictory] = useState(false);
   const [muteUI, setMuteUI] = useState(isMuted());
@@ -149,7 +150,7 @@ export default function App() {
     setFocus(null);
     setShipId(null);
     setContract(null);
-    setSequelKey(undefined);
+    setContPlan(null);
     setVictory(false);
     setPaused(false);
     setSavePicker(false);
@@ -170,7 +171,7 @@ export default function App() {
     setFocus(null);
     setShipId(null);
     setContract(null);
-    setSequelKey(undefined);
+    setContPlan(null);
     setVictory(false);
     setPaused(false);
     setScreen("office");
@@ -184,7 +185,7 @@ export default function App() {
     setFocus(null);
     setShipId(null);
     setContract(null);
-    setSequelKey(undefined);
+    setContPlan(null);
     setVictory(false);
     setPaused(false);
     setScreen("office");
@@ -223,7 +224,15 @@ export default function App() {
   /* --------------------------------------------------------- show flow */
   const newShow = useCallback((key?: string) => {
     sfx.select();
-    setSequelKey(key);
+    setContPlan(key ? { key, kind: "season" } : null);
+    setPendingCommission(null);
+    setScreen("create");
+  }, []);
+
+  /** a continuation chosen in the franchise library */
+  const continueFranchise = useCallback((plan: ContinuationPlan) => {
+    sfx.select();
+    setContPlan(plan);
     setPendingCommission(null);
     setScreen("create");
   }, []);
@@ -231,7 +240,7 @@ export default function App() {
   /** a commission brief was accepted on the market screen */
   const takeCommission = useCallback((c: Commission) => {
     sfx.select();
-    setSequelKey(undefined);
+    setContPlan(null);
     setPendingCommission(c);
     setScreen("create");
   }, []);
@@ -466,6 +475,7 @@ export default function App() {
             onNewShow={newShow}
             onContract={takeContract}
             onCommission={takeCommission}
+            onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
             onSkipWeek={skipWeek}
@@ -476,7 +486,7 @@ export default function App() {
         {screen === "create" && run && (
           <Create
             run={run}
-            sequelKey={sequelKey}
+            plan={contPlan ?? undefined}
             commission={pendingCommission ?? undefined}
             paused={paused}
             onBegin={beginProduction}

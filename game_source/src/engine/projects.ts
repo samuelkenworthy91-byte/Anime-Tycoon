@@ -462,6 +462,8 @@ export interface ScoringContext {
   merchMult?: number;
   /** market demand multiplier (trends + saturation + attention, 1 = neutral) */
   marketMult?: number;
+  /** franchise excitement multiplier (popularity/fatigue/format aware) */
+  franchiseMult?: number;
   showrunner: string;
   comboLevels: Record<string, number>;
   castCombos: string[];
@@ -484,7 +486,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
 
   const key = comboKey(genres);
   const comboLevel = ctx.comboLevels[key] ?? 0;
-  const franchiseMult = d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1;
+  const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
 
   const res = computeResult({
     draft: d,

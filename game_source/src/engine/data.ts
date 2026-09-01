@@ -161,6 +161,12 @@ export interface Draft {
   sliders: [number, number, number];
   franchiseKey?: string;
   season: number;
+  /** which kind of franchise continuation this is (unset = original) */
+  continuation?: "season" | "movie" | "ova" | "side" | "prequel" | "spinoff" | "reboot" | "crossover";
+  /** crossover partner franchise */
+  crossKey?: string;
+  /** spin-off featured character (cast id from the parent IP) */
+  spinChar?: string;
 }
 
 /* ---------------------------------------------------------------- genres */

@@ -66,6 +66,7 @@ import ProjectsPanel from "./Projects";
 import FacilitiesPanel from "./Facilities";
 import CrewPanel from "./Crew";
 import MarketPanel from "./Market";
+import LibraryPanel, { type ContinuationPlan } from "./Library";
 import { type Commission } from "../engine/market";
 import { cn } from "../utils/cn";
 
@@ -76,6 +77,7 @@ export default function Office({
   onNewShow,
   onContract,
   onCommission,
+  onContinue,
   onMilestone,
   onShip,
   onSkipWeek,
@@ -87,6 +89,7 @@ export default function Office({
   onNewShow: (sequelKey?: string) => void;
   onContract: (c: Contract) => void;
   onCommission: (c: Commission) => void;
+  onContinue: (plan: ContinuationPlan) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
   onSkipWeek: () => void;
@@ -306,7 +309,7 @@ export default function Office({
           )}
           {seriesList.length > 0 && (
             <Btn variant="ghost" onClick={() => setModal("sequels")}>
-              <Clapperboard size={15} className="text-gold" /> SERIES
+              <Clapperboard size={15} className="text-gold" /> LIBRARY
               <span className="text-[10px] opacity-70">({seriesList.length})</span>
             </Btn>
           )}
@@ -628,50 +631,15 @@ export default function Office({
 
       {/* ------------------------------------------------------------- HOF */}
       {modal === "sequels" && (
-        <Modal title="YOUR SERIES" onClose={() => setModal(null)}>
-          <div className="mb-3 text-xs text-paper/60">
-            Every show you have shipped stays on the shelf. Greenlight the next season whenever you
-            like — starting other series in between doesn't cancel anything.
-          </div>
-          <div className="space-y-2">
-            {seriesList.map(([key, fr]) => {
-              const hof = run.hallOfFame.some((h) => h.title.startsWith(fr.baseTitle));
-              return (
-                <div key={key} className="ink-card flex items-center gap-3 p-2.5">
-                  <div
-                    className={cn(
-                      "flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl border font-display font-extrabold leading-none",
-                      hof ? "border-gold/70 bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/70"
-                    )}
-                  >
-                    <span className="text-[8px] tracking-widest opacity-70">S</span>
-                    <span className="text-base">{fr.season}</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-display text-sm font-extrabold">{fr.baseTitle}</div>
-                    <div className="text-[10px] text-paper/50">
-                      {fr.season} season{fr.season === 1 ? "" : "s"} · last scored{" "}
-                      <b className={fr.lastScore >= 30 ? "text-mint" : "text-paper/70"}>{fr.lastScore}/40</b>
-                      {hof && <span className="ml-1 text-gold">· HALL OF FAME</span>}
-                    </div>
-                    <div className="text-[10px] text-cyanx">
-                      Season {fr.season + 1} carries a ×{(1 + 0.14 * fr.season).toFixed(2)} audience bonus
-                    </div>
-                  </div>
-                  <Btn
-                    variant={fr.lastScore >= 30 ? "gold" : "ghost"}
-                    onClick={() => {
-                      sfx.select();
-                      setModal(null);
-                      onNewShow(key);
-                    }}
-                  >
-                    <Zap size={14} /> SEASON {fr.season + 1}
-                  </Btn>
-                </div>
-              );
-            })}
-          </div>
+        <Modal title="FRANCHISE LIBRARY" onClose={() => setModal(null)}>
+          <LibraryPanel
+            run={run}
+            setRun={setRun}
+            onContinue={(plan) => {
+              setModal(null);
+              onContinue(plan);
+            }}
+          />
         </Modal>
       )}
 
@@ -686,18 +654,32 @@ export default function Office({
             </div>
           ) : (
             <div className="space-y-1.5">
-              {run.hallOfFame.map((h, i) => (
-                <div key={i} className="ink-card flex items-center gap-2 p-2">
-                  <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-9 w-9 rounded-lg" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold">{h.title}</div>
-                    <div className="text-[10px] text-paper/50">
-                      {h.genres.map((g) => GENRES.find((x) => x.id === g)?.label).join(" × ")} · {dateLabel(h.week)}
+              {run.hallOfFame.map((h, i) => {
+                /* every hall-of-famer is a chapter of some franchise's history */
+                const fr = Object.values(run.franchises).find((f) =>
+                  f.entries.some((e) => e.title === h.title)
+                );
+                return (
+                  <div key={i} className="ink-card flex items-center gap-2 p-2">
+                    <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-9 w-9 rounded-lg" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-bold">{h.title}</div>
+                      <div className="text-[10px] text-paper/50">
+                        {h.genres.map((g) => GENRES.find((x) => x.id === g)?.label).join(" × ")} · {dateLabel(h.week)}
+                      </div>
+                      {fr && (
+                        <button
+                          className="text-[10px] font-bold text-cyanx"
+                          onClick={() => setModal("sequels")}
+                        >
+                          {fr.baseTitle} franchise · {fr.entries.length} entr{fr.entries.length === 1 ? "y" : "ies"} · pop {fr.popularity} →
+                        </button>
+                      )}
                     </div>
+                    <div className="font-display text-base font-extrabold text-gold">{h.score}/40</div>
                   </div>
-                  <div className="font-display text-base font-extrabold text-gold">{h.score}/40</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

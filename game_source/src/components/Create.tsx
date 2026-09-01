@@ -55,16 +55,44 @@ import { arcLockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
+import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
+import { type ContinuationPlan } from "./Library";
 
 const STEPS = ["CONCEPT", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
 /** CAST is broken into one screen per role, in this order. */
 const CAST_ORDER = ["protag", "secondary", "pet", "villain"] as const;
 const CAST_STEP_INDEX = 3;
 
-export function freshDraft(run: RunState, sequelKey?: string): Draft {
-  const fr = sequelKey ? run.franchises[sequelKey] : undefined;
-  return {
-    title: fr ? `${fr.baseTitle} S${fr.season + 1}` : randomTitle(),
+/** the working title each continuation type suggests */
+function continuationTitle(fr: Franchise, plan: ContinuationPlan, run: RunState): string {
+  switch (plan.kind) {
+    case "season":
+      return `${fr.baseTitle} S${fr.season + 1}`;
+    case "movie":
+      return `${fr.baseTitle}: The Movie`;
+    case "ova":
+      return `${fr.baseTitle} OVA`;
+    case "side":
+      return `${fr.baseTitle}: Side Story`;
+    case "prequel":
+      return `${fr.baseTitle} Zero`;
+    case "spinoff": {
+      const ch = fr.cast.find((c) => c.id === plan.spinChar);
+      return ch ? `${ch.name}!` : `${fr.baseTitle} Gaiden`;
+    }
+    case "reboot":
+      return `${fr.baseTitle} Re:`;
+    case "crossover": {
+      const other = plan.crossKey ? run.franchises[plan.crossKey] : undefined;
+      return other ? `${fr.baseTitle} × ${other.baseTitle}` : `${fr.baseTitle} ×`;
+    }
+  }
+}
+
+export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
+  const fr = plan ? run.franchises[plan.key] : undefined;
+  const base: Draft = {
+    title: randomTitle(),
     medium: "tv",
     budget: "standard",
     slot: "midnight",
@@ -77,8 +105,28 @@ export function freshDraft(run: RunState, sequelKey?: string): Draft {
     villain: VILLAINS[0].id,
     arcs: [],
     sliders: [50, 50, 50],
-    franchiseKey: sequelKey,
-    season: (fr?.season ?? 0) + 1,
+    season: 1,
+  };
+  if (!fr || !plan) return base;
+  const def = continuationDef(plan.kind);
+  const castOf = (role: "protag" | "secondary" | "pet" | "villain") => fr.cast.find((c) => c.role === role);
+  const protagChar = plan.kind === "spinoff" && plan.spinChar ? fr.cast.find((c) => c.id === plan.spinChar) : castOf("protag");
+  return {
+    ...base,
+    title: continuationTitle(fr, plan, run),
+    medium: def?.medium && run.mediumsUnlocked.includes(def.medium) ? def.medium : base.medium,
+    genres: fr.genres.length ? fr.genres.slice(0, 2) : base.genres,
+    audience: fr.audience,
+    protag: protagChar?.id ?? base.protag,
+    protagName: protagChar?.name ?? base.protagName,
+    secondary: castOf("secondary")?.id ?? base.secondary,
+    pet: castOf("pet")?.id ?? base.pet,
+    villain: castOf("villain")?.id ?? base.villain,
+    franchiseKey: plan.key,
+    season: plan.kind === "season" || plan.kind === "reboot" ? fr.season + 1 : fr.season,
+    continuation: plan.kind,
+    crossKey: plan.crossKey,
+    spinChar: plan.spinChar,
   };
 }
 
@@ -126,7 +174,7 @@ function CastPick({
 
 export default function Create({
   run,
-  sequelKey,
+  plan,
   commission,
   paused,
   onBegin,
@@ -134,7 +182,8 @@ export default function Create({
   onUnlockArc,
 }: {
   run: RunState;
-  sequelKey?: string;
+  /** continuing an existing franchise (kind, crossover partner, spin-off star) */
+  plan?: ContinuationPlan;
   /** producing under contract: brief fields are locked to the partner's terms */
   commission?: Commission;
   paused?: boolean;
@@ -146,12 +195,15 @@ export default function Create({
   /** which cast role is being picked — CAST is split into one screen per role */
   const [castStep, setCastStep] = useState(0);
   const [d, setD] = useState<Draft>(() => {
-    const base = freshDraft(run, sequelKey);
+    const base = freshDraft(run, plan);
     return commission
       ? { ...base, medium: commission.medium, audience: commission.audience, genres: [commission.genre] }
       : base;
   });
   const partner = commission ? partnerById(commission.partnerId) : null;
+  const planFr = plan ? run.franchises[plan.key] : undefined;
+  const planDef = plan ? continuationDef(plan.kind) : null;
+  const expectation = planFr && plan ? expectedScore(planFr, plan.kind) : null;
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
@@ -274,11 +326,21 @@ export default function Create({
             <ChevronLeft size={16} />
           </Btn>
           <div className="font-display text-sm font-extrabold md:text-base">
-            {commission ? "COMMISSIONED PRODUCTION" : sequelKey ? "SEASON GREENLIGHT" : "NEW PRODUCTION"}
+            {commission
+              ? "COMMISSIONED PRODUCTION"
+              : plan
+                ? `${(CONTINUATIONS.find((c) => c.kind === plan.kind)?.label ?? "SEQUEL").toUpperCase()} — ${run.franchises[plan.key]?.baseTitle ?? ""}`
+                : "NEW PRODUCTION"}
           </div>
           {commission && partner && (
             <div className="hidden rounded-md border border-gold/40 bg-gold/10 px-2 py-1 text-[10px] text-gold sm:block">
               {partner.name}: {GENRES.find((g) => g.id === commission.genre)?.label} · +{formatGBP(commission.advance)} · they take {Math.round(commission.share * 100)}%
+            </div>
+          )}
+          {plan && planFr && expectation !== null && (
+            <div className="hidden rounded-md border border-cyanx/40 bg-cyanx/10 px-2 py-1 text-[10px] text-cyanx sm:block">
+              Fans expect ≥{expectation}/40 · IP popularity {planFr.popularity} · fatigue {planFr.fatigue}
+              {planDef && planDef.fee > 0 && ` · +${formatGBP(planDef.fee)} fee`}
             </div>
           )}
           <div className="ml-auto hidden gap-1 md:flex">
@@ -323,7 +385,10 @@ export default function Create({
               <Section title="FORMAT">
                 <div className="grid grid-cols-3 gap-2">
                   {(Object.keys(MEDIUMS) as MediumId[]).map((m) => {
-                    const locked = !run.mediumsUnlocked.includes(m) || (!!commission && m !== commission.medium);
+                    const locked =
+                      !run.mediumsUnlocked.includes(m) ||
+                      (!!commission && m !== commission.medium) ||
+                      (!!planDef?.medium && run.mediumsUnlocked.includes(planDef.medium) && m !== planDef.medium);
                     return (
                       <Pick key={m} active={d.medium === m} disabled={locked} onClick={() => set({ medium: m })}>
                         {m === "tv" ? <Tv size={18} /> : m === "movie" ? <Clapperboard size={18} /> : <Smartphone size={18} />}
@@ -664,6 +729,15 @@ export default function Create({
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
                   <Row k="UP-FRONT COST" v={formatGBP(cost)} money big />
+                  {plan && planFr && planDef && expectation !== null && (
+                    <>
+                      <div className="my-2 border-t border-line/60" />
+                      <Row k="Continuation" v={`${planDef.label} of ${planFr.baseTitle}`} />
+                      <Row k="Fans expect" v={`≥${expectation}/40 — miss it and the franchise suffers`} />
+                      {planDef.fee > 0 && <Row k="Rights & setup fee" v={formatGBP(planDef.fee)} money />}
+                      <Row k="Franchise fatigue" v={`${planFr.fatigue} now, +${planDef.fatigueAdd} on release`} />
+                    </>
+                  )}
                   {commission && partner && (
                     <>
                       <div className="my-2 border-t border-line/60" />

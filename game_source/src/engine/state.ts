@@ -1,6 +1,7 @@
 import {
   GENRES,
   OFFICES,
+  castById,
   comboKey,
   dateLabel,
   PUN_TITLES,
@@ -54,6 +55,21 @@ import {
   type StaffEvent,
 } from "./careers";
 import {
+  continuationBlock,
+  continuationDef,
+  createFranchise,
+  franchiseBoost,
+  MERCH_COOLDOWN,
+  merchBlock,
+  merchProductById,
+  merchReturn,
+  migrateFranchise,
+  recordContinuation,
+  tickFranchise,
+  type EntryKind,
+  type Franchise,
+} from "./franchise";
+import {
   REP_DELIVERED,
   REP_EXCELLENT,
   REP_LATE,
@@ -105,13 +121,7 @@ import {
   type Project,
 } from "./projects";
 
-export interface Franchise {
-  baseTitle: string;
-  season: number;
-  lastScore: number;
-  /** hall-of-fame shows may spawn sequels; a failed sequel ends the line */
-  alive: boolean;
-}
+export type { Franchise, EntryKind } from "./franchise";
 
 export interface HofEntry {
   title: string;
@@ -323,6 +333,9 @@ export function migrateRun(raw: unknown): RunState {
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
+    franchises: Object.fromEntries(
+      Object.entries(r.franchises ?? {}).map(([k, v]) => [k, migrateFranchise(k, v, r.week ?? 0)])
+    ),
     /* old staff get a full career, deterministically from their id, so the
        same person comes back with the same personality every load */
     staff: (r.staff ?? []).map((s) => ensureCareer({ ...s }, 0)),
@@ -415,6 +428,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
   const partners = { ...(r.partners ?? {}) };
+  let franchises = { ...(r.franchises ?? {}) };
 
   /* facilities + department heads + retired legends → studio-wide effects */
   const baseFx = facilityFX(r.facilities);
@@ -565,6 +579,15 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     recentReleases = [...pruneReleases(recentReleases, w), ...rivalPremieres(rivals, w)];
 
+    /* franchises cool off, rest up — and sometimes find a cult */
+    if (w % 4 === 0) {
+      for (const [k, fr] of Object.entries(franchises)) {
+        const t = tickFranchise(fr, w);
+        franchises = { ...franchises, [k]: t.franchise };
+        if (t.notice) notices.push(t.notice);
+      }
+    }
+
     /* the market breathes every season */
     if (w % 12 === 0) {
       const drift = driftMarket(market);
@@ -586,7 +609,16 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       const lateStage = projects.find(
         (p) => (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
       );
-      const ev = rollMarketEvent(w, partners, ready?.id ?? null, lateStage?.id ?? null);
+      const top = Object.values(franchises)
+        .filter((f) => f.popularity >= 50)
+        .sort((a, b) => b.popularity - a.popularity)[0];
+      const ev = rollMarketEvent(
+        w,
+        partners,
+        ready?.id ?? null,
+        lateStage?.id ?? null,
+        top ? { key: top.key, title: top.baseTitle, popularity: top.popularity } : null
+      );
       if (ev) {
         marketEvents = [ev];
         notices.push("📞 The phone rings — an industry offer needs an answer (see the market screen).");
@@ -670,6 +702,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     recentReleases,
     commissions,
     marketEvents,
+    franchises,
     notices: notices.slice(-40),
   };
 }
@@ -707,6 +740,23 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     if (r.cash + commission.advance < projectUpfront(d)) return null;
   } else if (startBlockReason(r, d)) return null;
 
+  /* continuations must reference real IPs and pay their fee */
+  const contDef = d.continuation ? continuationDef(d.continuation) : null;
+  const contFee = contDef?.fee ?? 0;
+  if (d.continuation) {
+    const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
+    if (!fr) return null;
+    const block = continuationBlock(fr, d.continuation, {
+      week: r.week,
+      franchiseCount: Object.keys(r.franchises).length,
+      officeLevel: r.officeLevel,
+    });
+    if (block) return null;
+    if (d.continuation === "crossover" && (!d.crossKey || !r.franchises[d.crossKey] || d.crossKey === d.franchiseKey))
+      return null;
+    if (r.cash + (commission?.advance ?? 0) < projectUpfront(d) + contFee) return null;
+  }
+
   let p = makeProject(d, r.week);
   const partner = commission ? partnerById(commission.partnerId) : null;
   if (commission && partner) {
@@ -727,7 +777,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   }
   return {
     ...r,
-    cash: r.cash - projectUpfront(d) + (commission?.advance ?? 0),
+    cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
     projects: [...r.projects, p],
     commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
     notices: [
@@ -790,10 +840,14 @@ export function marketMultiplierFor(r: RunState, p: Project): number {
 }
 
 export function previewResult(r: RunState, p: Project): ShowResult {
+  const d = p.draft;
+  const fr = d.franchiseKey ? r.franchises[d.franchiseKey] ?? null : null;
+  const cross = d.crossKey ? r.franchises[d.crossKey] ?? null : null;
   return computeProjectResult(p, {
     research: r.research,
     merchMult: facilityFX(r.facilities).merchMult,
     marketMult: marketMultiplierFor(r, p),
+    franchiseMult: franchiseBoost(fr, d, cross),
     showrunner: r.showrunner,
     comboLevels: r.comboLevels,
     castCombos: r.castCombos,
@@ -854,12 +908,87 @@ export function releaseProject(
     partners = { ...partners, [deal.partnerId]: Math.max(0, Math.min(100, rep)) };
   }
 
+  /* ---- the franchise ledger: every release becomes IP history ---- */
   const fkey = draft.franchiseKey ?? draft.title;
-  const baseTitle = draft.franchiseKey
-    ? r.franchises[draft.franchiseKey]?.baseTitle ?? draft.title
-    : draft.title;
+  const prevFr = draft.franchiseKey ? r.franchises[draft.franchiseKey] : undefined;
+  const franchises = { ...r.franchises };
+  const resShape = {
+    total: result.total,
+    revenue: result.revenue,
+    fans: result.fans,
+    hallOfFame: result.hallOfFame,
+  };
+  const castSeed = {
+    protag: draft.protag,
+    protagName: draft.protagName,
+    secondary: draft.secondary,
+    secondaryName: castById(draft.secondary).name,
+    pet: draft.pet,
+    petName: draft.pet === "none" ? "" : castById(draft.pet).name,
+    villain: draft.villain,
+    villainName: castById(draft.villain).name,
+  };
+  const frNotices: string[] = [];
+  if (prevFr) {
+    /* a continuation — the fans came in with expectations */
+    const kind: EntryKind = draft.continuation ?? "season";
+    const judged = recordContinuation(prevFr, { ...draft, continuation: kind as Draft["continuation"] }, resShape, r.week);
+    const v = judged.verdict;
+    franchises[prevFr.key] = judged.franchise;
+    if (v.verdict === "delight") {
+      result = {
+        ...result,
+        fans: Math.round(result.fans * v.fanMult),
+        breakdown: [...result.breakdown, { label: `Fans expected ${v.expected}/40`, pts: "exceeded! +15% fans" }],
+      };
+      frNotices.push(`Fans are ecstatic — “${draft.title}” beat the ${v.expected}/40 they hoped for!`);
+    } else if (v.verdict === "disappointment") {
+      result = {
+        ...result,
+        fans: Math.round(result.fans * v.fanMult),
+        breakdown: [
+          ...result.breakdown,
+          { label: `Fans expected ${v.expected}/40`, pts: `betrayed — ${Math.round((1 - v.fanMult) * 100)}% fans lost` },
+        ],
+      };
+      frNotices.push(
+        `💔 “${draft.title}” scored ${result.total}/40 against the ${v.expected}/40 fans expected. The franchise takes the hit.`
+      );
+    } else {
+      result = { ...result, breakdown: [...result.breakdown, { label: `Fans expected ${v.expected}/40`, pts: "met" }] };
+    }
+    if (kind === "spinoff") {
+      /* the featured character carries their fame into a brand-new IP */
+      const feat = prevFr.cast.find((c) => c.id === draft.spinChar);
+      const spin = createFranchise(draft.title, draft, castSeed, resShape, r.week, prevFr.key);
+      if (feat) {
+        spin.cast = spin.cast.map((c) =>
+          c.id === feat.id ? { ...c, popularity: Math.min(100, Math.max(c.popularity, feat.popularity)) } : c
+        );
+      }
+      franchises[draft.title] = spin;
+      frNotices.push(`“${draft.title}” begins its own franchise line, spun off from ${prevFr.baseTitle}.`);
+    }
+    if (kind === "crossover" && draft.crossKey && franchises[draft.crossKey]) {
+      /* the partner IP shares the spotlight — and the exhaustion */
+      const partner = franchises[draft.crossKey];
+      franchises[draft.crossKey] = {
+        ...partner,
+        entries: [
+          ...partner.entries,
+          { kind: "crossover", title: draft.title, score: result.total, revenue: 0, fans: 0, week: r.week },
+        ],
+        fatigue: Math.min(100, partner.fatigue + 14),
+        popularity: Math.min(100, partner.popularity + (result.total >= 28 ? 6 : 0)),
+        lastEntryWeek: r.week,
+      };
+    }
+  } else {
+    /* an original — a brand-new IP record is born */
+    franchises[fkey] = createFranchise(fkey, draft, castSeed, resShape, r.week);
+  }
   const ck = comboKey(draft.genres);
-  const notices = [...r.notices];
+  const notices = [...r.notices, ...frNotices];
   if (deal) {
     notices.push(
       result.total >= deal.minQuality
@@ -919,10 +1048,7 @@ export function releaseProject(
       r.arcKnowledge
     ),
     studioTop: Math.max(r.studioTop, result.quality),
-    franchises: {
-      ...r.franchises,
-      [fkey]: { baseTitle, season: draft.season, lastScore: result.total, alive: result.hallOfFame },
-    },
+    franchises,
     pendingSequel:
       result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
     hallOfFame: result.hallOfFame
@@ -1271,6 +1397,44 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
         notices: [...r.notices, `Bidding war won: +£${(ev.amount ?? 0).toLocaleString("en-GB")} now, but they take 50% of “${p.draft.title}”.`],
       };
     }
+    case "gamelicence": {
+      const fr = ev.franchiseKey ? r.franchises[ev.franchiseKey] : undefined;
+      if (!fr) return null;
+      const next = {
+        ...fr,
+        popularity: Math.min(100, fr.popularity + 4),
+        fatigue: Math.min(100, fr.fatigue + 8),
+      };
+      return {
+        ...r,
+        marketEvents: rest,
+        cash: r.cash + (ev.amount ?? 0),
+        franchises: { ...r.franchises, [fr.key]: next },
+        notices: [
+          ...r.notices,
+          `“${fr.baseTitle}” game licence signed: +£${(ev.amount ?? 0).toLocaleString("en-GB")}. The brand works overtime.`,
+        ],
+      };
+    }
+    case "collab": {
+      const fr = ev.franchiseKey ? r.franchises[ev.franchiseKey] : undefined;
+      if (!fr) return null;
+      const next = {
+        ...fr,
+        popularity: Math.min(100, fr.popularity + 8),
+        fatigue: Math.min(100, fr.fatigue + 6),
+      };
+      return {
+        ...r,
+        marketEvents: rest,
+        cash: r.cash + (ev.amount ?? 0),
+        franchises: { ...r.franchises, [fr.key]: next },
+        notices: [
+          ...r.notices,
+          `Collaboration campaign live: “${fr.baseTitle}” is on every corner shop shelf (+£${(ev.amount ?? 0).toLocaleString("en-GB")}).`,
+        ],
+      };
+    }
     case "sponsor": {
       const p = ev.projectId ? r.projects.find((x) => x.id === ev.projectId) : undefined;
       if (!p) return null;
@@ -1288,4 +1452,40 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
       };
     }
   }
+}
+
+
+/* ============================ franchising ops ============================ */
+
+/** launch a merchandise line for an IP: pay now, royalties arrive weekly */
+export function launchMerch(r: RunState, franchiseKey: string, productId: string): RunState | null {
+  const fr = r.franchises[franchiseKey];
+  const product = merchProductById(productId);
+  if (!fr || !product) return null;
+  if (merchBlock(fr, product, r.week, r.cash)) return null;
+  const total = merchReturn(fr, product);
+  const weekly = Math.floor(total / product.weeks);
+  const payouts = [...r.payouts];
+  for (let i = 1; i <= product.weeks; i++) {
+    payouts.push({
+      week: r.week + i,
+      amount: weekly + (i === product.weeks ? total - weekly * product.weeks : 0),
+      fans: 0,
+      label: `“${fr.baseTitle}” ${product.label}`,
+    });
+  }
+  const next: Franchise = {
+    ...fr,
+    merchCooldown: { ...fr.merchCooldown, [product.id]: r.week + MERCH_COOLDOWN },
+  };
+  return {
+    ...r,
+    cash: r.cash - product.cost,
+    payouts,
+    franchises: { ...r.franchises, [franchiseKey]: next },
+    notices: [
+      ...r.notices,
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks.`,
+    ],
+  };
 }

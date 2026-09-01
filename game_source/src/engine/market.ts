@@ -314,7 +314,14 @@ export function rollCommission(
 }
 
 /* ------------------------------------------------------- market events */
-export type MarketEventKind = "emergency" | "bidding" | "adaptation" | "overseas" | "sponsor";
+export type MarketEventKind =
+  | "emergency"
+  | "bidding"
+  | "adaptation"
+  | "overseas"
+  | "sponsor"
+  | "gamelicence"
+  | "collab";
 
 export interface MarketEvent {
   id: string;
@@ -328,6 +335,8 @@ export interface MarketEvent {
   amount: number;
   partnerId?: string;
   projectId?: string;
+  /** franchise-targeted offers (game licences, collab campaigns) */
+  franchiseKey?: string;
 }
 
 let eventSeq = 0;
@@ -336,11 +345,13 @@ export function rollMarketEvent(
   week: number,
   _partners: Record<string, number>,
   readyProjectId: string | null,
-  lateStageProjectId: string | null
+  lateStageProjectId: string | null,
+  topFranchise?: { key: string; title: string; popularity: number } | null
 ): MarketEvent | null {
   const kinds: MarketEventKind[] = ["emergency", "adaptation", "overseas"];
   if (readyProjectId) kinds.push("bidding");
   if (lateStageProjectId) kinds.push("sponsor");
+  if (topFranchise) kinds.push("gamelicence", "collab");
   const kind = kinds[Math.floor(Math.random() * kinds.length)];
   const id = `mev${++eventSeq}_${week}`;
 
@@ -405,6 +416,34 @@ export function rollMarketEvent(
         accept: "TAKE THE MONEY (+£60,000, −8 hype, +2 issues)",
         decline: "PROTECT THE CUT",
       };
+    case "gamelicence": {
+      const amount = Math.round((60_000 + topFranchise!.popularity * 2_200) / 5_000) * 5_000;
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 5,
+        franchiseKey: topFranchise!.key,
+        amount,
+        text: `A games publisher wants to license “${topFranchise!.title}” for a video game. £${amount.toLocaleString("en-GB")} up front — but a mediocre tie-in wears the brand out a little.`,
+        accept: `LICENSE IT (+£${amount.toLocaleString("en-GB")}, +4 popularity, +8 fatigue)`,
+        decline: "PROTECT THE BRAND",
+      };
+    }
+    case "collab": {
+      const amount = Math.round((30_000 + topFranchise!.popularity * 1_400) / 5_000) * 5_000;
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 4,
+        franchiseKey: topFranchise!.key,
+        amount,
+        text: `A snack brand proposes a collaboration campaign with “${topFranchise!.title}” — limited packaging, TV spots, a themed café. £${amount.toLocaleString("en-GB")} plus a wave of attention.`,
+        accept: `RUN THE CAMPAIGN (+£${amount.toLocaleString("en-GB")}, +8 popularity, +6 fatigue)`,
+        decline: "PASS",
+      };
+    }
   }
 }
 
