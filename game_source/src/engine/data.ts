@@ -83,6 +83,26 @@ export interface Staff {
   /** index into WORKER_LOOKS — the painted model used for the office sprite,
       the desk sprite on the production floor AND the menu portrait */
   look?: number;
+  /* ---- career (engine/careers.ts fills + maintains these) ---- */
+  /** lifetime career experience; level derives from it */
+  xp?: number;
+  /** 0..100 — long-term happiness (stamina is short-term energy) */
+  morale?: number;
+  /** 1-3 personality trait ids (see TRAIT_DEFS) */
+  traits?: string[];
+  /** specialisation id (see SPEC_DEFS), role-specific */
+  spec?: string;
+  /** favourite genre — matters for the Genre Fanatic trait & morale */
+  favGenre?: GenreId;
+  /** week this person signed with the studio */
+  joinedWeek?: number;
+  /** shipped shows this person worked on (most recent last) */
+  shows?: { title: string; score: number; week: number }[];
+  awardsWon?: number;
+  bestShow?: { title: string; score: number } | null;
+  lastTrainedWeek?: number;
+  /** cooldown so salary/poach events do not spam */
+  lastEventWeek?: number;
 }
 
 export interface CastMember {
@@ -964,7 +984,9 @@ export function rollRivalShows(year: number, yearStartWeek: number): RivalShow[]
   const used = new Set<string>();
   const pick = <T,>(arr: T[]): T => {
     let v = arr[Math.floor(Math.random() * arr.length)];
-    while (used.has(String(v)) && used.size < arr.length) v = arr[Math.floor(Math.random() * arr.length)];
+    let guard = 0;
+    while (used.has(String(v)) && used.size < arr.length && guard++ < 60)
+      v = arr[Math.floor(Math.random() * arr.length)];
     used.add(String(v));
     return v;
   };

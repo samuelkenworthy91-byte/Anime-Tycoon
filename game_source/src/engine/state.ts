@@ -5,7 +5,7 @@ import {
   dateLabel,
   PUN_TITLES,
   RIVAL_STUDIOS,
-  rollCandidate,
+  ROLE_POINT,
   rollContract,
   rollRivalShows,
   type Contract,
@@ -17,6 +17,42 @@ import {
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import {
+  AWARD_XP,
+  CONTRACT_XP,
+  HEAD_MIN_LEVEL,
+  HEAD_MIN_OFFICE,
+  HEAD_SALARY_MULT,
+  HEAD_TITLES,
+  RETIRE_CHANCE,
+  TRAIN_COOLDOWN,
+  WEEKLY_XP,
+  bondKey,
+  bondKind,
+  ensureCareer,
+  gainXp,
+  hasTrait,
+  levelTitle,
+  marketSalary,
+  moraleDelta,
+  moraleOf,
+  personMod,
+  poachable,
+  releaseXp,
+  retirementEligible,
+  recordShow,
+  rollHire,
+  studioPointMult,
+  studioProduction,
+  toLegend,
+  trainCost,
+  trainXp,
+  wantsRaise,
+  type HeadSlot,
+  type Heads,
+  type LegendRec,
+  type StaffEvent,
+} from "./careers";
 import {
   MAX_TIER,
   facilityDef,
@@ -30,6 +66,8 @@ import {
 import {
   activeProjects,
   applyMilestoneOutcome,
+  projectOfStaff,
+  type StaffModFn,
   assignedStaffIds,
   computeProjectResult,
   draftCost,
@@ -137,6 +175,14 @@ export interface RunState {
   projects: Project[];
   /** built rooms: facility id → tier */
   facilities: Facilities;
+  /** weeks each pair of staff has worked together ("idA~idB" → weeks) */
+  bonds: Record<string, number>;
+  /** department heads: slot → staff id */
+  heads: Heads;
+  /** pending salary requests / rival job offers */
+  staffEvents: StaffEvent[];
+  /** retired greats — each gives a permanent studio bonus */
+  legends: LegendRec[];
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -179,7 +225,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     totalRevenue: 0,
     bestScore: 0,
     staff: [],
-    candidates: [rollCandidate(0), rollCandidate(0), rollCandidate(0)],
+    candidates: [rollHire(0), rollHire(0), rollHire(0)],
     research: [],
     genresUnlocked: ["shonen", "shojo", "slice", "fantasy"],
     mediumsUnlocked: ["tv", "ona"],
@@ -206,6 +252,10 @@ export function initialRun(studio: string, showrunner: string): RunState {
     fansThisWeek: 0,
     projects: [],
     facilities: {},
+    bonds: {},
+    heads: {},
+    staffEvents: [],
+    legends: [],
   };
 }
 
@@ -216,7 +266,14 @@ export function migrateRun(raw: unknown): RunState {
     ...r,
     projects: Array.isArray(r.projects) ? r.projects : [],
     facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
-    staff: (r.staff ?? []).map((s) => ({ ...s })),
+    bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
+    heads: r.heads && typeof r.heads === "object" ? r.heads : {},
+    staffEvents: Array.isArray(r.staffEvents) ? r.staffEvents : [],
+    legends: Array.isArray(r.legends) ? r.legends : [],
+    /* old staff get a full career, deterministically from their id, so the
+       same person comes back with the same personality every load */
+    staff: (r.staff ?? []).map((s) => ensureCareer({ ...s }, 0)),
+    candidates: (r.candidates ?? []).map((s) => ensureCareer({ ...s }, r.week ?? 0)),
   };
 }
 
@@ -293,7 +350,27 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let incomeThisWeek = 0;
   let fansThisWeek = 0;
   const perWeek = weeklyOutgoings(r);
-  const fx = facilityFX(r.facilities);
+
+  /* staff, relationships and events evolve week by week */
+  let staffArr = r.staff.map((x) => ensureCareer(x, r.week));
+  let bonds = { ...(r.bonds ?? {}) };
+  let events = [...(r.staffEvents ?? [])];
+  let legends = [...(r.legends ?? [])];
+  const heads = r.heads ?? {};
+
+  /* facilities + department heads + retired legends → studio-wide effects */
+  const baseFx = facilityFX(r.facilities);
+  const spm = studioPointMult(heads, staffArr, legends);
+  const fx = {
+    ...baseFx,
+    pointMult: {
+      story: baseFx.pointMult.story * spm.story,
+      art: baseFx.pointMult.art * spm.art,
+      sound: baseFx.pointMult.sound * spm.sound,
+    },
+  };
+  const studio = studioProduction(heads, staffArr);
+  const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
 
   for (let i = 1; i <= n; i++) {
     const w = r.week + i;
@@ -316,13 +393,111 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     payouts = payouts.filter((p) => p.week !== w);
 
     /* every project in the pipeline gets a week of work */
-    const tick = tickProjectsWeek(projects, r.staff, w, fx);
+    const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio);
     projects = tick.projects;
     cash += tick.cashDelta;
     notices.push(...tick.notices);
 
     /* the archive room quietly files away research */
     rd += fx.rdWeekly;
+
+    /* ------- colleagues who work together grow bonds ------- */
+    for (const p of projects) {
+      if (p.stage === "airing" || p.stage === "done") continue;
+      for (let ai = 0; ai < p.staffIds.length; ai++)
+        for (let bi = ai + 1; bi < p.staffIds.length; bi++) {
+          const k = bondKey(p.staffIds[ai], p.staffIds[bi]);
+          bonds[k] = (bonds[k] ?? 0) + 1;
+        }
+    }
+
+    /* ------- stamina, morale and experience, person by person ------- */
+    {
+      const busy = assignedStaffIds(projects);
+      const drain = Math.max(1, 3 - fx.staminaSave);
+      const rest = 9 + fx.staminaRest;
+      staffArr = staffArr.map((st) => {
+        let nx = { ...st };
+        const proj = busy.has(st.id) ? projectOfStaff(projects, st.id) : null;
+        if (proj) {
+          nx.stamina = Math.max(12, nx.stamina - drain);
+          /* morale while working */
+          let dm = 0;
+          if (nx.stamina < 35) dm -= 2; // overworked
+          const team = staffArr.filter((x) => proj.staffIds.includes(x.id) && x.id !== st.id);
+          if (team.some((x) => hasTrait(x, "genius"))) dm -= 1;
+          if (team.some((x) => (bonds[bondKey(st.id, x.id)] ?? 0) >= 8 && bondKind(st, x) === "clash")) dm -= 1;
+          if (hasTrait(st, "fanatic") && st.favGenre)
+            dm += proj.draft.genres.includes(st.favGenre) ? 1 : -1;
+          dm += fx.moraleRest;
+          if (dm !== 0) nx = moraleDelta(nx, dm);
+          /* experience from doing the work */
+          const m = personMod(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)), { bonds });
+          const g = gainXp(nx, WEEKLY_XP * m.xpMult);
+          nx = g.staff;
+          if (g.levelsGained > 0)
+            notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
+        } else {
+          nx.stamina = Math.min(100, nx.stamina + rest);
+          const cur = moraleOf(nx);
+          let dm = cur < 70 ? 2 : cur > 70 ? -1 : 0;
+          dm += fx.moraleRest;
+          if (dm !== 0) nx = { ...nx, morale: Math.max(0, Math.min(100, cur + dm)) };
+        }
+        return nx;
+      });
+    }
+
+    /* ------- quarterly reviews: raises requested, rivals come calling ------- */
+    if (w % 12 === 0) {
+      for (const st of staffArr) {
+        if (events.length >= 2) break;
+        if (events.some((e) => e.staffId === st.id)) continue;
+        if (w - (st.lastEventWeek ?? -99) < 24) continue;
+        if (wantsRaise(st, w)) {
+          events.push({
+            id: `ev${w}_${st.id}`,
+            staffId: st.id,
+            kind: "raise",
+            amount: marketSalary(st),
+            week: w,
+            expiresWeek: w + 8,
+          });
+          staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
+          notices.push(`${st.name} requests a salary review (£${marketSalary(st).toLocaleString("en-GB")}/wk).`);
+        } else if (poachable(st) && Math.random() < 0.35) {
+          const offer = Math.round((st.salary * 1.6) / 10) * 10;
+          events.push({
+            id: `ev${w}_${st.id}`,
+            staffId: st.id,
+            kind: "poach",
+            amount: offer,
+            week: w,
+            expiresWeek: w + 6,
+          });
+          staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
+          notices.push(`A rival studio is courting ${st.name} (£${offer.toLocaleString("en-GB")}/wk offer)!`);
+        }
+      }
+    }
+
+    /* ------- unanswered requests sour, unanswered offers may cost you ------- */
+    for (const e of events.filter((e2) => w > e2.expiresWeek)) {
+      const st = staffArr.find((x) => x.id === e.staffId);
+      if (!st) continue;
+      if (e.kind === "raise") {
+        staffArr = staffArr.map((x) => (x.id === st.id ? moraleDelta(x, -12) : x));
+        notices.push(`${st.name}'s salary request went unanswered — morale drops.`);
+      } else if (moraleOf(st) < 45) {
+        staffArr = staffArr.filter((x) => x.id !== st.id);
+        projects = projects.map((p) => ({ ...p, staffIds: p.staffIds.filter((id) => id !== st.id) }));
+        notices.push(`${st.name} accepts the rival offer and leaves the studio.`);
+      } else {
+        staffArr = staffArr.map((x) => (x.id === st.id ? moraleDelta(x, -15) : x));
+        notices.push(`${st.name} turned the rival down — but feels taken for granted.`);
+      }
+    }
+    events = events.filter((e) => w <= e.expiresWeek && staffArr.some((x) => x.id === e.staffId));
 
     /* rival studios premiere their parody shows */
     const airing = rivals.filter((r2) => r2.week === w);
@@ -359,6 +534,27 @@ export function advanceWeeks(r: RunState, n: number): RunState {
         const w2 = ceremony.categories[0].winner;
         notices.push(`Anime of the Year: “${w2.title}” (${w2.studio}, ${w2.score}/40).`);
       }
+      /* the whole studio shares in an award year */
+      if (ceremony.playerAwards > 0) {
+        staffArr = staffArr.map((st) => {
+          const g = gainXp(st, AWARD_XP * ceremony.playerAwards);
+          if (g.levelsGained > 0)
+            notices.push(`${st.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
+          return moraleDelta({ ...g.staff, awardsWon: (g.staff.awardsWon ?? 0) + ceremony.playerAwards }, 8);
+        });
+      }
+
+      /* the longest careers eventually end — a legend retires */
+      const retiree = staffArr.find((st) => retirementEligible(st, w) && Math.random() < RETIRE_CHANCE);
+      if (retiree) {
+        legends = [...legends, toLegend(retiree, w)];
+        staffArr = staffArr.filter((x) => x.id !== retiree.id);
+        projects = projects.map((p) => ({ ...p, staffIds: p.staffIds.filter((id) => id !== retiree.id) }));
+        notices.push(
+          `🌸 ${retiree.name} retires after ${Math.round((w - (retiree.joinedWeek ?? 0)) / 48)} years — a studio legend. Their craft lives on (+3% ${ROLE_POINT[retiree.role]} forever).`
+        );
+      }
+
       yearShows = [];
       rivals = rollRivalShows(year + 1, w);
     }
@@ -379,18 +575,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     projects,
     incomeThisWeek,
     fansThisWeek,
-    staff: (() => {
-      /* people on a production tire; everyone else recovers */
-      const busy = assignedStaffIds(projects);
-      const drain = Math.max(1, 3 - fx.staminaSave);
-      const rest = 9 + fx.staminaRest;
-      return r.staff.map((s) => ({
-        ...s,
-        stamina: busy.has(s.id)
-          ? Math.max(12, s.stamina - n * drain)
-          : Math.min(100, s.stamina + n * rest),
-      }));
-    })(),
+    staff: staffArr,
+    bonds,
+    staffEvents: events,
+    legends,
     notices: notices.slice(-40),
   };
 }
@@ -556,17 +744,24 @@ export function releaseProject(
     staff: (() => {
       /* the training room deepens what shipping a show teaches */
       const gain = 1 + facilityFX(r.facilities).trainSkill;
-      return r.staff.map((s) =>
-        p.staffIds.includes(s.id)
-          ? {
-              ...s,
-              stamina: Math.max(15, s.stamina - 18),
-              story: Math.min(99, s.story + gain),
-              art: Math.min(99, s.art + gain),
-              sound: Math.min(99, s.sound + gain),
-            }
-          : s
-      );
+      const xp = releaseXp(p, result.total, result.tier);
+      const moraleSwing = result.hallOfFame || result.tier === "hit" ? 12 : result.tier === "flop" ? -14 : 4;
+      return r.staff.map((s) => {
+        if (!p.staffIds.includes(s.id)) return s;
+        let nx: typeof s = {
+          ...s,
+          stamina: Math.max(15, s.stamina - 18),
+          story: Math.min(99, s.story + gain),
+          art: Math.min(99, s.art + gain),
+          sound: Math.min(99, s.sound + gain),
+        };
+        nx = recordShow(nx, draft.title, result.total, r.week);
+        nx = moraleDelta(nx, moraleSwing);
+        const g = gainXp(nx, xp);
+        if (g.levelsGained > 0)
+          notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
+        return g.staff;
+      });
     })(),
     yearShows: [...r.yearShows, { title: draft.title, studio: r.studio, score: result.total, player: true }],
     lastResult: result,
@@ -633,6 +828,149 @@ export function relocateOffice(r: RunState): RunState | null {
           : ""),
     ],
   };
+}
+
+/* =================================================================== */
+/*                           CAREER OPS                                */
+/* =================================================================== */
+
+/** contract jobs teach the whole crew a little */
+export function grantContractXp(r: RunState): RunState {
+  const notices = [...r.notices];
+  const staff = r.staff.map((s) => {
+    const g = gainXp(ensureCareer(s, r.week), CONTRACT_XP);
+    if (g.levelsGained > 0)
+      notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
+    return moraleDelta(g.staff, 2);
+  });
+  return { ...r, staff, notices };
+}
+
+/* ---------------------------------------------------- department heads */
+/** null = this person can take the chair; otherwise the blocking reason */
+export function headBlockReason(r: RunState, slot: HeadSlot, staffId: string): string | null {
+  const s = r.staff.find((x) => x.id === staffId);
+  if (!s) return "No such staff member";
+  if (r.officeLevel < HEAD_MIN_OFFICE[slot])
+    return `Requires ${OFFICES[HEAD_MIN_OFFICE[slot]].name} or larger`;
+  if (slot !== "production" && s.role !== slot) return `Needs a ${slot}`;
+  if (s.level < HEAD_MIN_LEVEL[slot]) return `Needs career level ${HEAD_MIN_LEVEL[slot]} (they are Lv ${s.level})`;
+  if (r.heads[slot] === staffId) return "Already holds this chair";
+  return null;
+}
+
+/** promote someone into a department chair (+25% salary, big morale boost) */
+export function appointHead(r: RunState, slot: HeadSlot, staffId: string): RunState | null {
+  if (headBlockReason(r, slot, staffId)) return null;
+  const s = r.staff.find((x) => x.id === staffId)!;
+  return {
+    ...r,
+    heads: { ...r.heads, [slot]: staffId },
+    staff: r.staff.map((x) =>
+      x.id === staffId
+        ? moraleDelta({ ...x, salary: Math.round((x.salary * HEAD_SALARY_MULT) / 10) * 10 }, 15)
+        : x
+    ),
+    notices: [...r.notices, `${s.name} is now ${HEAD_TITLES[slot]} — ${s.name.split(" ")[0]}'s department runs itself.`],
+  };
+}
+
+/* ------------------------------------------------------------- training */
+/** null = this person can take a course right now */
+export function trainBlockReason(r: RunState, staffId: string): string | null {
+  const tier = r.facilities.training ?? 0;
+  if (tier < 1) return "Build a Training Room first";
+  const s = r.staff.find((x) => x.id === staffId);
+  if (!s) return "No such staff member";
+  if (r.week - (s.lastTrainedWeek ?? -99) < TRAIN_COOLDOWN)
+    return `On cooldown (${TRAIN_COOLDOWN - (r.week - (s.lastTrainedWeek ?? 0))} wk left)`;
+  const cost = trainCost(tier);
+  if (r.cash < cost.cash) return `Needs £${cost.cash.toLocaleString("en-GB")}`;
+  if (r.rd < cost.rd) return `Needs ${cost.rd} research data`;
+  return null;
+}
+
+/** a course: costs money, RD and energy — pays out XP and +1 to one skill */
+export function trainStaff(r: RunState, staffId: string, focus: PointType): RunState | null {
+  if (trainBlockReason(r, staffId)) return null;
+  const tier = r.facilities.training ?? 0;
+  const cost = trainCost(tier);
+  const notices = [...r.notices];
+  const staff = r.staff.map((s) => {
+    if (s.id !== staffId) return s;
+    let nx = ensureCareer({ ...s }, r.week);
+    nx = {
+      ...nx,
+      [focus]: Math.min(99, nx[focus] + 1),
+      stamina: Math.max(12, nx.stamina - 12),
+      lastTrainedWeek: r.week,
+    };
+    nx = moraleDelta(nx, 3);
+    const g = gainXp(nx, trainXp(tier));
+    if (g.levelsGained > 0)
+      notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
+    notices.push(`${g.staff.name} completes a ${focus} masterclass (+1 ${focus}, +${trainXp(tier)} XP).`);
+    return g.staff;
+  });
+  return { ...r, cash: r.cash - cost.cash, rd: r.rd - cost.rd, staff, notices };
+}
+
+/* ------------------------------------------------------ salary politics */
+export function respondSalary(
+  r: RunState,
+  eventId: string,
+  choice: "accept" | "counter" | "refuse"
+): RunState {
+  const e = r.staffEvents.find((x) => x.id === eventId && x.kind === "raise");
+  if (!e) return r;
+  const staff = r.staff.map((s) => {
+    if (s.id !== e.staffId) return s;
+    if (choice === "accept") return moraleDelta({ ...s, salary: e.amount }, 15);
+    if (choice === "counter")
+      return moraleDelta({ ...s, salary: Math.round((s.salary + e.amount) / 2 / 10) * 10 }, 4);
+    return moraleDelta(s, -18);
+  });
+  const name = r.staff.find((s) => s.id === e.staffId)?.name ?? "Someone";
+  const note =
+    choice === "accept"
+      ? `${name} gets the full raise — loyalty secured.`
+      : choice === "counter"
+        ? `${name} meets you halfway on salary.`
+        : `${name}'s raise is refused. The mood darkens.`;
+  return { ...r, staff, staffEvents: r.staffEvents.filter((x) => x.id !== eventId), notices: [...r.notices, note] };
+}
+
+export function respondPoach(
+  r: RunState,
+  eventId: string,
+  choice: "match" | "promote" | "release"
+): RunState {
+  const e = r.staffEvents.find((x) => x.id === eventId && x.kind === "poach");
+  if (!e) return r;
+  const target = r.staff.find((s) => s.id === e.staffId);
+  if (!target) return { ...r, staffEvents: r.staffEvents.filter((x) => x.id !== eventId) };
+
+  if (choice === "release") {
+    return {
+      ...r,
+      staff: r.staff.filter((s) => s.id !== e.staffId),
+      projects: r.projects.map((p) => ({ ...p, staffIds: p.staffIds.filter((id) => id !== e.staffId) })),
+      staffEvents: r.staffEvents.filter((x) => x.id !== eventId),
+      notices: [...r.notices, `${target.name} leaves for the rival studio. The desk feels empty.`],
+    };
+  }
+  const staff = r.staff.map((s) => {
+    if (s.id !== e.staffId) return s;
+    if (choice === "match") return moraleDelta({ ...s, salary: e.amount }, 10);
+    /* promote: slightly less money than the offer, but recognition + growth */
+    const g = gainXp(s, 120);
+    return moraleDelta({ ...g.staff, salary: Math.round((e.amount * 0.9) / 10) * 10 }, 18);
+  });
+  const note =
+    choice === "match"
+      ? `You match the rival offer — ${target.name} stays.`
+      : `${target.name} stays for the promotion and the trust, not just the money.`;
+  return { ...r, staff, staffEvents: r.staffEvents.filter((x) => x.id !== eventId), notices: [...r.notices, note] };
 }
 
 export function studioScore(r: RunState): number {

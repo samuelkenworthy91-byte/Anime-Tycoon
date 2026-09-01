@@ -7,6 +7,7 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
+  grantContractXp,
   initialRun,
   MAX_WEEKS,
   migrateRun,
@@ -321,18 +322,19 @@ export default function App() {
   const finishContract = useCallback(
     (success: boolean, scored: number) => {
       if (!run || !contract) return;
+      const base = success ? grantContractXp(run) : run;
       const next: RunState = {
-        ...run,
-        cash: run.cash + (success ? contract.pay : 0),
-        rd: run.rd + (success ? contract.rd : Math.max(1, Math.round(contract.rd / 3))),
-        staff: run.staff.map((s) => ({ ...s, stamina: Math.max(20, s.stamina - 10) })),
+        ...base,
+        cash: base.cash + (success ? contract.pay : 0),
+        rd: base.rd + (success ? contract.rd : Math.max(1, Math.round(contract.rd / 3))),
+        staff: base.staff.map((s) => ({ ...s, stamina: Math.max(20, s.stamina - 10) })),
         notices: [
-          ...run.notices,
+          ...base.notices,
           success
             ? `Contract delivered: ${contract.name} (+£${contract.pay.toLocaleString("en-GB")}).`
             : `Contract failed: ${contract.name} — ${scored}/${contract.target} points.`,
         ],
-        contracts: run.contracts.filter((x) => x.id !== contract.id),
+        contracts: base.contracts.filter((x) => x.id !== contract.id),
       };
       const settled = settle(next, contract.weeks);
       setRun(settled);

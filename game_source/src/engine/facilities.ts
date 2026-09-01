@@ -161,6 +161,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
     effects: (t) => [
       `Idle staff recover +${[4, 8, 12][t - 1]} stamina/week (base 9)`,
       `Assigned staff lose ${[1, 1, 2][t - 1]} less stamina/week`,
+      `Everyone gains +${t} morale/week`,
     ],
   },
   {
@@ -253,6 +254,8 @@ export interface FacilityFX {
   staminaRest: number;
   /** reduced stamina drain per week for assigned staff */
   staminaSave: number;
+  /** weekly morale bonus for everyone (a happy canteen) */
+  moraleRest: number;
   /** flat research points per week */
   rdWeekly: number;
   /** multiplier on research earned from sprints */
@@ -272,6 +275,7 @@ export const NO_FX: FacilityFX = {
   trainSkill: 0,
   staminaRest: 0,
   staminaSave: 0,
+  moraleRest: 0,
   rdWeekly: 0,
   rdMult: 1,
 };
@@ -319,6 +323,7 @@ export function facilityFX(fac: Facilities | undefined): FacilityFX {
   if (c) {
     fx.staminaRest += [4, 8, 12][c - 1];
     fx.staminaSave += [1, 1, 2][c - 1];
+    fx.moraleRest += c;
   }
 
   const rf = tier("render");

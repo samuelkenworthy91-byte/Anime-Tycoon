@@ -251,17 +251,44 @@ export function toggleAssign(projects: Project[], projectId: string, staffId: st
 /* ------------------------------------------------------- weekly tick */
 const staminaF = (s: Staff) => 0.55 + s.stamina / 220;
 
+/* ------------------------------------------------- per-person modifiers */
+/** personal work modifiers (traits, specs, morale, bonds — see careers.ts) */
+export interface StaffWorkMod {
+  /** multiplier on weekly production points (replaces the stamina factor) */
+  out: number;
+  /** multiplier on this person's team-speed contribution */
+  pace: number;
+  /** flat team speed added just by being present */
+  aura: number;
+}
+export type StaffModFn = (s: Staff, p: Project, team: Staff[]) => StaffWorkMod;
+
+/** studio-wide production effects (department heads — see careers.ts) */
+export interface StudioMod {
+  speed: number;
+  burnMult: number;
+}
+export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1 };
+
 /** how much stage work the team banks in one week (1 = on schedule) */
-export function teamSpeed(p: Project, team: Staff[], fx: FacilityFX = NO_FX): number {
+export function teamSpeed(
+  p: Project,
+  team: Staff[],
+  fx: FacilityFX = NO_FX,
+  mods?: StaffModFn,
+  studio: StudioMod = NO_STUDIO
+): number {
   const focus = STAGE_FOCUS[p.stage];
   let v = 0.35; // the showrunner keeps things moving even solo
   for (const s of team) {
     const rel = focus ? staffPoint(s, focus) : (s.story + s.art + s.sound) / 3;
-    v += (0.22 + rel / 280) * staminaF(s);
+    const m = mods?.(s, p, team);
+    v += (0.22 + rel / 280) * (m ? m.pace : staminaF(s)) + (m?.aura ?? 0);
   }
   /* render farm speeds everything (blockbusters most); the animation
-     department cuts delays specifically during the animation stage */
-  v += fxSpeedFor(fx, p.draft.budget);
+     department cuts delays specifically during the animation stage;
+     a production manager keeps every schedule tight */
+  v += fxSpeedFor(fx, p.draft.budget) + studio.speed;
   if (p.stage === "animation") v += fx.speedAnimation;
   return Math.min(2.4, v);
 }
@@ -273,7 +300,14 @@ export interface WeekTickResult {
 }
 
 /** advance every project by one calendar week */
-export function tickProjectsWeek(projects: Project[], staff: Staff[], week: number, fx: FacilityFX = NO_FX): WeekTickResult {
+export function tickProjectsWeek(
+  projects: Project[],
+  staff: Staff[],
+  week: number,
+  fx: FacilityFX = NO_FX,
+  mods?: StaffModFn,
+  studio: StudioMod = NO_STUDIO
+): WeekTickResult {
   let cashDelta = 0;
   const notices: string[] = [];
 
@@ -292,8 +326,9 @@ export function tickProjectsWeek(projects: Project[], staff: Staff[], week: numb
     }
 
     /* ----- production burn */
-    cashDelta -= p.weeklyBurn;
-    p.spent += p.weeklyBurn;
+    const burn = Math.round(p.weeklyBurn * studio.burnMult);
+    cashDelta -= burn;
+    p.spent += burn;
 
     /* ----- work happens unless the team is waiting on a milestone */
     if (!p.milestone) {
@@ -301,7 +336,8 @@ export function tickProjectsWeek(projects: Project[], staff: Staff[], week: numb
       const focus = STAGE_FOCUS[p.stage];
       if (focus) {
         for (const s of team) {
-          p.points[focus] += Math.round(staffPoint(s, focus) * 0.07 * staminaF(s) * fx.pointMult[focus]);
+          const m = mods?.(s, p, team);
+          p.points[focus] += Math.round(staffPoint(s, focus) * 0.07 * (m ? m.out : staminaF(s)) * fx.pointMult[focus]);
         }
       }
       if (p.stage === "post") {
@@ -315,7 +351,7 @@ export function tickProjectsWeek(projects: Project[], staff: Staff[], week: numb
         p.issues = Math.max(0, p.issues - Math.max(1, Math.round(team.length * 0.5)));
         p.hype = Math.max(0, p.hype - 1);
       } else {
-        p.progress += teamSpeed(p, team, fx);
+        p.progress += teamSpeed(p, team, fx, mods, studio);
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {

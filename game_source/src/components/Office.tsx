@@ -7,10 +7,6 @@ import {
   Banknote,
   Flame,
   X,
-  PenTool,
-  Monitor,
-  Music,
-  Trash2,
   Zap,
   FlaskConical,
   Crown,
@@ -37,24 +33,17 @@ import {
   NEWS,
   OFFICES,
   RESEARCH,
-  ROLE_LABEL,
   ROLE_POINT,
   SHOWRUNNERS,
   MEDIUMS,
   POINT_COLOR,
-  workerLook,
   workerLookIndex,
   dateLabel,
   formatGBP,
   formatGBPShort,
   formatNum,
-  levelUpCost,
-  rollCandidate,
-  staffMain,
-  LEVEL_TITLES,
   type Contract,
   type GenreId,
-  type Staff,
 } from "../engine/data";
 import {
   assignToProject,
@@ -69,11 +58,12 @@ import {
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
-import { activeProjects, projectOfStaff } from "../engine/projects";
+import { activeProjects } from "../engine/projects";
 import Portrait from "./Portrait";
 import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
 import FacilitiesPanel from "./Facilities";
+import CrewPanel from "./Crew";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -115,52 +105,6 @@ export default function Office({
   /* rooms drawn as glowing door signs inside the office scene */
   const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
 
-  const hire = (cand: Staff) => {
-    if (run.cash < cand.cost || run.staff.length >= off.maxStaff) return;
-    sfx.coin();
-    setRun((r) => ({
-      ...r,
-      cash: r.cash - cand.cost,
-      staff: [...r.staff, cand],
-      candidates: r.candidates.filter((c) => c.id !== cand.id),
-      notices: [...r.notices, `${cand.name} joins as ${ROLE_LABEL[cand.role]}!`],
-    }));
-  };
-  const fire = (id: string) => {
-    sfx.back();
-    setRun((r) => ({ ...r, staff: r.staff.filter((s) => s.id !== id) }));
-  };
-  const levelUp = (s: Staff) => {
-    const cost = levelUpCost(s);
-    if (run.rd < cost || s.level >= 5) return;
-    sfx.fanfare();
-    setRun((r) => ({
-      ...r,
-      rd: r.rd - cost,
-      staff: r.staff.map((x) =>
-        x.id === s.id
-          ? {
-              ...x,
-              level: x.level + 1,
-              story: Math.min(99, x.story + 5 + Math.floor(Math.random() * 6)),
-              art: Math.min(99, x.art + 5 + Math.floor(Math.random() * 6)),
-              sound: Math.min(99, x.sound + 5 + Math.floor(Math.random() * 6)),
-              salary: Math.round(x.salary * 1.22),
-            }
-          : x
-      ),
-      notices: [...r.notices, `${s.name} levels up to ${LEVEL_TITLES[s.level - 1]}!`],
-    }));
-  };
-  const scout = () => {
-    if (run.cash < 8_000) return;
-    sfx.click();
-    setRun((r) => ({
-      ...r,
-      cash: r.cash - 8_000,
-      candidates: [rollCandidate(r.week), rollCandidate(r.week), rollCandidate(r.week)],
-    }));
-  };
   const research = (id: string, rd: number) => {
     if (run.rd < rd) return;
     sfx.fanfare();
@@ -197,9 +141,6 @@ export default function Office({
     setModal(null);
     setRun((r) => relocateOffice(r) ?? r);
   };
-
-  const roleIcon = (role: Staff["role"]) =>
-    role === "writer" ? <PenTool size={13} /> : role === "animator" ? <Monitor size={13} /> : <Music size={13} />;
 
   const seq = run.pendingSequel ? run.franchises[run.pendingSequel] : null;
   /* every series you have ever shipped can be continued, at any time, in any order */
@@ -367,8 +308,13 @@ export default function Office({
           <Btn variant="cyan" onClick={() => setModal("contracts")}>
             <Briefcase size={15} /> CONTRACTS
           </Btn>
-          <Btn variant="ghost" onClick={() => setModal("staff")}>
+          <Btn variant="ghost" className="relative" onClick={() => setModal("staff")}>
             <Users size={15} /> STAFF <span className="text-[10px] opacity-70">({run.staff.length}/{off.maxStaff})</span>
+            {run.staffEvents.length > 0 && (
+              <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold font-display text-[9px] font-extrabold text-ink">
+                {run.staffEvents.length}
+              </span>
+            )}
           </Btn>
           <Btn variant="ghost" onClick={() => setModal("research")}>
             <FlaskConical size={15} className="text-viol" /> R&amp;D
@@ -481,117 +427,7 @@ export default function Office({
       {/* ----------------------------------------------------------- STAFF */}
       {modal === "staff" && (
         <Modal title="STAFF ROOM" onClose={() => setModal(null)}>
-          <div className="grid gap-3 md:grid-cols-2">
-            <div>
-              <div className="mb-2 text-xs font-bold tracking-widest text-paper/50">YOUR CREW</div>
-              {run.staff.length === 0 && <div className="text-sm text-paper/40">Nobody here but you.</div>}
-              <div className="space-y-2">
-                {run.staff.map((s) => (
-                  <div key={s.id} className="ink-card flex items-center gap-2 p-2.5">
-                    <Portrait
-                      img={workerLook(s).portrait}
-                      name={s.name}
-                      alt={s.name}
-                      className="h-10 w-10 rounded-lg border border-line object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span style={{ color: POINT_COLOR[ROLE_POINT[s.role]] }}>{roleIcon(s.role)}</span>
-                        <span className="truncate text-sm font-bold">{s.name}</span>
-                        <span className="ink-chip px-1.5 py-0.5 text-[9px] font-bold text-gold">
-                          Lv{s.level} {LEVEL_TITLES[s.level - 1]}
-                        </span>
-                        {(() => {
-                          const proj = projectOfStaff(run.projects, s.id);
-                          return proj ? (
-                            <span className="ink-chip max-w-[110px] truncate px-1.5 py-0.5 text-[9px] font-bold text-cyanx">
-                              ▶ {proj.draft.title}
-                            </span>
-                          ) : (
-                            <span className="ink-chip px-1.5 py-0.5 text-[9px] font-bold text-paper/35">idle</span>
-                          );
-                        })()}
-                        <span className="ml-auto text-[10px] text-paper/50">{formatGBP(s.salary)}/wk</span>
-                      </div>
-                      <div className="mt-1.5 grid grid-cols-3 gap-1.5">
-                        {(["story", "art", "sound"] as const).map((t) => (
-                          <div key={t}>
-                            <div className="flex justify-between text-[9px] font-bold text-paper/50">
-                              <span>{t.toUpperCase()}</span>
-                              <span>{s[t]}</span>
-                            </div>
-                            <div className="h-1.5 rounded bg-abyss">
-                              <div className="h-full rounded" style={{ width: `${s[t]}%`, background: POINT_COLOR[t] }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <Btn
-                        variant="gold"
-                        className="!px-2.5 !py-1 text-[10px]"
-                        disabled={run.rd < levelUpCost(s) || s.level >= 5}
-                        onClick={() => levelUp(s)}
-                      >
-                        LEVEL UP · {levelUpCost(s)} RD
-                      </Btn>
-                      <span className={cn("text-[10px] font-bold", s.stamina < 45 ? "text-neon" : "text-mint")}>
-                        {Math.round(s.stamina)}% energy
-                      </span>
-                      <button
-                        onClick={() => fire(s.id)}
-                        className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[10px] text-neon/80 hover:bg-neon/10"
-                      >
-                        <Trash2 size={11} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold tracking-widest text-paper/50">RECRUITMENT AD</span>
-                <Btn variant="ghost" className="!px-2.5 !py-1 text-[10px]" onClick={scout} disabled={run.cash < 8_000}>
-                  NEW ADS {formatGBP(8_000)}
-                </Btn>
-              </div>
-              <div className="space-y-2">
-                {run.candidates.map((c) => (
-                  <div key={c.id} className="ink-card flex items-center gap-2 p-2.5">
-                    <Portrait
-                      img={workerLook(c).portrait}
-                      name={c.name}
-                      alt={c.name}
-                      className="h-10 w-10 rounded-lg border border-line object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-bold">{c.name}</div>
-                      <div className="text-[10px] text-paper/55">
-                        {ROLE_LABEL[c.role]} · main <b className="text-mint">{staffMain(c)}</b> ·{" "}
-                        {formatGBP(c.salary)}/wk
-                      </div>
-                      <div className="text-[10px] text-gold">sign {formatGBP(c.cost)}</div>
-                    </div>
-                    <Btn
-                      variant="cyan"
-                      className="!px-3 !py-1.5 text-xs"
-                      onClick={() => hire(c)}
-                      disabled={run.cash < c.cost || run.staff.length >= off.maxStaff}
-                    >
-                      HIRE
-                    </Btn>
-                  </div>
-                ))}
-                {run.staff.length >= off.maxStaff && (
-                  <div className="rounded-lg border border-neon/40 bg-neon/10 p-2 text-[11px] text-neon2">
-                    Desks are full — move to a bigger studio to hire more.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <CrewPanel run={run} setRun={setRun} maxStaff={off.maxStaff} />
         </Modal>
       )}
 
