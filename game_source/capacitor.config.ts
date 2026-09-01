@@ -6,6 +6,9 @@ const config: CapacitorConfig = {
   webDir: "dist",
   android: {
     allowMixedContent: true,
+    /* shrink the webview below the status bar / navigation bar so the HUD
+       (pause button, top bar) is never hidden behind the phone's system UI */
+    adjustMarginsForEdgeToEdge: "force",
   },
 };
 
