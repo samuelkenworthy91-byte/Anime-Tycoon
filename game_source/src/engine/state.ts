@@ -8,16 +8,33 @@ import {
   RIVAL_STUDIOS,
   ROLE_POINT,
   rollContract,
-  rollRivalShows,
   type Contract,
   type Draft,
   type GenreId,
   type PointType,
-  type RivalShow,
   type Arc,
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import {
+  bumpRivalry,
+  computeRankings,
+  creditAward,
+  creditPoach,
+  finalizeYear,
+  initRivalWorld,
+  migrateRivalWorld,
+  pickPoacher,
+  planRivalYear,
+  removeRivalTalent,
+  rivalTalentById,
+  rivalTalentToStaff,
+  rollRivalryEvents,
+  tickRivalWeek,
+  yearRivalReleases,
+  type RankingInput,
+  type RivalWorld,
+} from "./rivals";
 import {
   AWARD_XP,
   CONTRACT_XP,
@@ -87,7 +104,6 @@ import {
   negotiationChance,
   partnerById,
   pruneReleases,
-  rivalPremieres,
   rollCommission,
   rollMarketEvent,
   type Commission,
@@ -198,8 +214,8 @@ export interface RunState {
   awards: number;
   /** money/fans trickling in week by week from aired shows */
   payouts: Payout[];
-  /** this year's rival slate */
-  rivals: RivalShow[];
+  /** the persistent rival-studios simulation */
+  rivalWorld: RivalWorld;
   /** the player's releases this calendar year (for the ceremony) */
   yearShows: AwardNominee[];
   /** results of the most recent awards ceremony */
@@ -293,7 +309,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     notices: [],
     awards: 0,
     payouts: [],
-    rivals: rollRivalShows(1, 0),
+    rivalWorld: initRivalWorld(0),
     yearShows: [],
     awardsCeremony: null,
     incomeThisWeek: 0,
@@ -333,6 +349,7 @@ export function migrateRun(raw: unknown): RunState {
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
+    rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
       Object.entries(r.franchises ?? {}).map(([k, v]) => [k, migrateFranchise(k, v, r.week ?? 0)])
     ),
@@ -354,10 +371,10 @@ export function pendingIncome(r: RunState, weeks: number): number {
 }
 
 /* ------------------------------------------------------------------ year end */
-function runCeremony(year: number, yearShows: AwardNominee[], rivals: RivalShow[]): AwardCeremony {
+function runCeremony(year: number, yearShows: AwardNominee[], rivalWorld: RivalWorld): AwardCeremony {
   const all: AwardNominee[] = [
     ...yearShows,
-    ...rivals.map((r) => ({ title: r.title, studio: r.studio, score: r.score, player: false })),
+    ...yearRivalReleases(rivalWorld, year).map((r) => ({ title: r.title, studio: r.studio, score: r.score, player: false })),
   ];
   const byScore = [...all].sort((a, b) => b.score - a.score);
 
@@ -400,6 +417,17 @@ function runCeremony(year: number, yearShows: AwardNominee[], rivals: RivalShow[
   };
 }
 
+/** the player's stats in the shape the ranking table shares with rivals */
+export const playerRankingInput = (r: RunState): RankingInput => ({
+  name: r.studio,
+  fans: r.fans,
+  revenue: r.totalRevenue,
+  masterpieces: r.hallOfFame.length,
+  hits: r.hits,
+  releases: r.showsMade,
+  awards: r.awards,
+});
+
 /** Advance the calendar: weekly payouts land, wages + rent charged at month end, rival shows air, and each year ends with the awards ceremony. */
 export function advanceWeeks(r: RunState, n: number): RunState {
   let cash = r.cash;
@@ -407,7 +435,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   const notices = [...r.notices];
   let contracts = r.contracts;
   let payouts = r.payouts;
-  let rivals = r.rivals;
+  let rivalWorld = r.rivalWorld;
   let yearShows = r.yearShows;
   let awards = r.awards;
   let awardsCeremony = r.awardsCeremony;
@@ -427,7 +455,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let recentReleases = [...(r.recentReleases ?? [])];
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
-  const partners = { ...(r.partners ?? {}) };
+  rivalWorld = { ...rivalWorld, studios: rivalWorld.studios.map((s) => ({ ...s, talent: [...s.talent] })) };
+  let partners = { ...(r.partners ?? {}) };
   let franchises = { ...(r.franchises ?? {}) };
 
   /* facilities + department heads + retired legends → studio-wide effects */
@@ -538,17 +567,22 @@ export function advanceWeeks(r: RunState, n: number): RunState {
           staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
           notices.push(`${st.name} requests a salary review (£${marketSalary(st).toLocaleString("en-GB")}/wk).`);
         } else if (poachable(st) && Math.random() < 0.35) {
-          const offer = Math.round((st.salary * 1.6) / 10) * 10;
-          events.push({
-            id: `ev${w}_${st.id}`,
-            staffId: st.id,
-            kind: "poach",
-            amount: offer,
-            week: w,
-            expiresWeek: w + 6,
-          });
-          staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
-          notices.push(`A rival studio is courting ${st.name} (£${offer.toLocaleString("en-GB")}/wk offer)!`);
+          const poacher = pickPoacher(rivalWorld);
+          if (poacher) {
+            const offer = Math.round((st.salary * 1.6) / 10) * 10;
+            events.push({
+              id: `ev${w}_${st.id}`,
+              staffId: st.id,
+              kind: "poach",
+              amount: offer,
+              week: w,
+              expiresWeek: w + 6,
+              studio: poacher.name,
+              studioId: poacher.id,
+            });
+            staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
+            notices.push(`${poacher.name} is courting ${st.name} (£${offer.toLocaleString("en-GB")}/wk offer)!`);
+          }
         }
       }
     }
@@ -563,7 +597,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       } else if (moraleOf(st) < 45) {
         staffArr = staffArr.filter((x) => x.id !== st.id);
         projects = projects.map((p) => ({ ...p, staffIds: p.staffIds.filter((id) => id !== st.id) }));
-        notices.push(`${st.name} accepts the rival offer and leaves the studio.`);
+        rivalWorld = creditPoach(rivalWorld, e.studioId);
+        notices.push(`${st.name} accepts the rival offer and leaves for ${e.studio ?? "a rival studio"}.`);
       } else {
         staffArr = staffArr.map((x) => (x.id === st.id ? moraleDelta(x, -15) : x));
         notices.push(`${st.name} turned the rival down — but feels taken for granted.`);
@@ -571,13 +606,19 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     events = events.filter((e) => w <= e.expiresWeek && staffArr.some((x) => x.id === e.staffId));
 
-    /* rival studios premiere their parody shows — and flood their genre */
-    const airing = rivals.filter((r2) => r2.week === w);
-    if (airing.length) {
-      const r2 = airing[0];
-      notices.push(`${r2.studio} premieres “${r2.title}” — the internet has opinions.`);
+    /* rival studios premiere their shows — flooding the market as they go */
+    {
+      const airingGenres = new Set<GenreId>();
+      for (const p of projects) if (p.stage === "airing") p.draft.genres.forEach((g) => airingGenres.add(g));
+      const rivalTick = tickRivalWeek(rivalWorld, w, { playerAiringGenres: airingGenres });
+      rivalWorld = rivalTick.world;
+      notices.push(...rivalTick.notices);
+      recentReleases = [...pruneReleases(recentReleases, w), ...rivalTick.releaseRecords];
+      for (const shift of rivalTick.trendShifts) {
+        const before = market.genres[shift.genre] ?? 0;
+        market = { ...market, genres: { ...market.genres, [shift.genre]: Math.max(-2, Math.min(2, before + shift.delta)) } };
+      }
     }
-    recentReleases = [...pruneReleases(recentReleases, w), ...rivalPremieres(rivals, w)];
 
     /* franchises cool off, rest up — and sometimes find a cult */
     if (w % 4 === 0) {
@@ -634,10 +675,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     if (w % 6 === 0) contracts = [rollContract(w), rollContract(w), rollContract(w)];
 
-    /* end of a calendar year: awards ceremony + fresh rival slate */
+    /* end of a calendar year: awards ceremony + rankings + fresh rival slate */
     if (w % 48 === 0) {
       const year = w / 48;
-      const ceremony = runCeremony(year, yearShows, rivals.filter((r2) => r2.year === year));
+      const ceremony = runCeremony(year, yearShows, rivalWorld);
       awardsCeremony = ceremony;
       awards += ceremony.playerAwards;
       if (ceremony.playerAwards > 0) {
@@ -652,6 +693,26 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       if (ceremony.categories[0]) {
         const w2 = ceremony.categories[0].winner;
         notices.push(`Anime of the Year: “${w2.title}” (${w2.studio}, ${w2.score}/40).`);
+        /* every winner banks an award — rival studios included */
+        for (const cat of ceremony.categories) {
+          if (!cat.winner.player) {
+            const studio = rivalWorld.studios.find((s) => s.name === cat.winner.studio);
+            if (studio) rivalWorld = creditAward(rivalWorld, studio.id);
+          }
+        }
+        /* fighting for Anime of the Year breeds grudges */
+        if (!w2.player) {
+          const studio = rivalWorld.studios.find((s) => s.name === w2.studio);
+          if (studio) rivalWorld = bumpRivalry(rivalWorld, studio.id, 5);
+          notices.push(`The rivalry with ${w2.studio} deepens — they took Anime of the Year.`);
+        } else if (ceremony.categories[0].nominees.some((n) => !n.player)) {
+          /* your win over a rival stings them too */
+          const closestRival = ceremony.categories[0].nominees
+            .filter((n) => !n.player)
+            .sort((a, b) => b.score - a.score)[0];
+          const studio = rivalWorld.studios.find((s) => s.name === closestRival.studio);
+          if (studio) rivalWorld = bumpRivalry(rivalWorld, studio.id, 3);
+        }
       }
       /* the whole studio shares in an award year */
       if (ceremony.playerAwards > 0) {
@@ -675,7 +736,36 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       }
 
       yearShows = [];
-      rivals = rollRivalShows(year + 1, w);
+      /* strong rivalries occasionally boil over into industry events */
+      for (const ev of rollRivalryEvents(rivalWorld, year)) {
+        rivalWorld = bumpRivalry(rivalWorld, ev.studioId, 3);
+        if (ev.kind === "bidwar") {
+          const keys = Object.keys(partners);
+          if (keys.length) {
+            const k = keys[Math.floor(Math.random() * keys.length)];
+            partners = { ...partners, [k]: Math.max(10, (partners[k] ?? REP_START) - 6) };
+          }
+        } else if (ev.kind === "spat") {
+          fans = Math.max(0, fans - Math.round(fans * 0.02));
+        } else if (ev.kind === "smear") {
+          fans = Math.max(0, fans - Math.round(fans * 0.015));
+        }
+        notices.push(ev.text);
+      }
+      /* lock in the annual rankings (movement arrows) and plan the next year */
+      const fy = finalizeYear(rivalWorld, {
+        name: r.studio,
+        fans,
+        revenue: r.totalRevenue,
+        masterpieces: r.hallOfFame.length,
+        hits: r.hits,
+        releases: r.showsMade,
+        awards,
+      });
+      rivalWorld = fy.world;
+      const py = planRivalYear(rivalWorld, year + 1, w);
+      rivalWorld = py.world;
+      notices.push(...py.notices);
     }
   }
 
@@ -687,7 +777,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     rd,
     contracts,
     payouts,
-    rivals,
+    rivalWorld,
     yearShows,
     awards,
     awardsCeremony,
@@ -703,6 +793,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     commissions,
     marketEvents,
     franchises,
+    partners,
     notices: notices.slice(-40),
   };
 }
@@ -1284,6 +1375,34 @@ export function respondPoach(
       ? `You match the rival offer — ${target.name} stays.`
       : `${target.name} stays for the promotion and the trust, not just the money.`;
   return { ...r, staff, staffEvents: r.staffEvents.filter((x) => x.id !== eventId), notices: [...r.notices, note] };
+}
+
+/* ------------------------------------------------------- rival talent */
+
+/** hire a notable away from a rival studio: pay the signing fee, they join
+    your crew with a full career — and the rival studio remembers the insult */
+export function hireRivalTalent(r: RunState, talentId: string): RunState | null {
+  const t = rivalTalentById(r.rivalWorld, talentId);
+  if (!t) return null;
+  if (r.staff.length >= OFFICES[r.officeLevel].maxStaff) return null;
+  if (r.cash < t.cost) return null;
+  const staff = rivalTalentToStaff(t, r.week);
+  const studioName = r.rivalWorld.studios.find((s) => s.id === t.studioId)?.name ?? "a rival studio";
+  return {
+    ...r,
+    cash: r.cash - t.cost,
+    staff: [...r.staff, staff],
+    rivalWorld: bumpRivalry(removeRivalTalent(r.rivalWorld, talentId), t.studioId, 4),
+    notices: [
+      ...r.notices,
+      `🤝 ${t.name} (Lv${t.level} ${staff.role}) leaves ${studioName} and signs with ${r.studio} for £${t.cost.toLocaleString("en-GB")}. They won't forget this.`,
+    ],
+  };
+}
+
+/** the current standings — player + rivals, sorted by shared score */
+export function studioRankings(r: RunState) {
+  return computeRankings(r.rivalWorld, playerRankingInput(r));
 }
 
 export function studioScore(r: RunState): number {

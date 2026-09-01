@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Award,
   Clock,
+  Swords,
 } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -67,6 +68,7 @@ import FacilitiesPanel from "./Facilities";
 import CrewPanel from "./Crew";
 import MarketPanel from "./Market";
 import LibraryPanel, { type ContinuationPlan } from "./Library";
+import RivalsPanel from "./Rivals";
 import { type Commission } from "../engine/market";
 import { cn } from "../utils/cn";
 
@@ -96,7 +98,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels">(null);
+  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
@@ -342,6 +344,9 @@ export default function Office({
           )}
           <Btn variant="ghost" onClick={() => setModal("awards")}>
             <Award size={15} className="text-gold" /> AWARDS
+          </Btn>
+          <Btn variant="ghost" onClick={() => setModal("rivals")}>
+            <Swords size={15} className="text-cyanx" /> RIVALS
           </Btn>
           <Btn variant="ghost" onClick={() => setModal("hof")}>
             <Trophy size={15} className="text-gold" /> RECORDS
@@ -623,7 +628,7 @@ export default function Office({
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Rec k="Awards won" v={String(run.awards)} />
             <Rec k="This year's slate" v={String(run.yearShows.length)} />
-            <Rec k="Rivals in the race" v={String(run.rivals.length)} />
+            <Rec k="Rival premieres this year" v={String(run.rivalWorld.studios.reduce((a, s) => a + s.productions.length, 0))} />
             <Rec k="Best score" v={`${run.bestScore}/40`} />
           </div>
         </Modal>
@@ -640,6 +645,13 @@ export default function Office({
               onContinue(plan);
             }}
           />
+        </Modal>
+      )}
+
+      {/* ---------------------------------------------------------- RIVALS */}
+      {modal === "rivals" && (
+        <Modal title="THE INDUSTRY" onClose={() => setModal(null)}>
+          <RivalsPanel run={run} setRun={setRun} />
         </Modal>
       )}
 

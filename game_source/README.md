@@ -3,8 +3,18 @@
 A game-dev-story-style anime studio tycoon. Plan shows, cast 136 characters
 (40 leads, 32 supporting, 32 pets/mascots, 32 villains), pop the point bubbles
 your staff make, discover secret genre combos and cast chemistry by
-experimenting, and compete for the London Anime Awards against rival studios
-with pun-titled anime.
+experimenting, and compete for the London Anime Awards.
+
+Six persistent rival studios (Toe-i Animation, Sunnyrise, Boneworks, Kyo-Hani,
+Madcap House, Turtle Line) run on the same 48-week industry calendar you do.
+Each has its own personality — a blockbuster action house, a sakuga atelier, an
+experimental studio, a prestige drama house, a high-volume mill and a
+romance/idol house — plus money/strength, reputation, preferred genres, an
+in-flight slate, franchises and momentum. They premiere shows week by week,
+flood genre saturation, chase Anime of the Year, poach your elite staff (you
+can poach their notables back), drift up and down a shared ranking table, build
+rivalries with you, and — rarely — decline, restructure, get acquired, collapse
+and return under new management.
 
 ## Run the game
 
@@ -72,8 +82,9 @@ the `kirameki-studio-apk` artifact.
 
 ## Project layout
 
-- `src/engine/` — data (cast, genres, arcs, rivals), state (calendar, payouts,
-  awards), scoring (reviews, revenue, combos, chemistry)
+- `src/engine/` — data (cast, genres, arcs), rivals (persistent rival studios,
+  rankings, rivalries, poaching), state (calendar, payouts, awards), scoring
+  (reviews, revenue, combos, chemistry)
 - `src/components/` — Title, Office (animated GDS-style scene + management),
   Create (planning + casting), Produce / ProductionFloor (bubble mini-game),
   ContractJob, Release (premiere), GameOver

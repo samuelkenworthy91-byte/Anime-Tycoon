@@ -23,7 +23,9 @@ import {
   saturationPenalty,
   type Commission,
 } from "../engine/market";
-import { negotiateCommission, resolveMarketEvent, type RunState } from "../engine/state";
+import { negotiateCommission, resolveMarketEvent, studioRankings, type RunState } from "../engine/state";
+import { upcomingPremieres } from "../engine/rivals";
+import { RankingsTable } from "./Rivals";
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -60,15 +62,12 @@ export default function MarketPanel({
   setRun: (fn: (r: RunState) => RunState) => void;
   onCommission: (c: Commission) => void;
 }) {
-  const [tab, setTab] = useState<"trends" | "deals" | "partners">("deals");
+  const [tab, setTab] = useState<"trends" | "deals" | "partners" | "rivals">("deals");
   const week = run.week;
   const market = run.market;
   const recs = run.recentReleases ?? [];
 
-  const upcoming = run.rivals
-    .filter((rv) => rv.week > week && rv.week <= week + 20)
-    .sort((a, b) => a.week - b.week)
-    .slice(0, 6);
+  const upcoming = upcomingPremieres(run.rivalWorld, week, 6).filter((rv) => rv.week <= week + 20);
 
   const negotiate = (id: string, ask: "advance" | "share") => {
     sfx.select();
@@ -89,6 +88,7 @@ export default function MarketPanel({
           [
             ["deals", "DEALS"],
             ["trends", "TRENDS"],
+            ["rivals", "RIVALS"],
             ["partners", "PARTNERS"],
           ] as const
         ).map(([id, label]) => (
@@ -276,7 +276,7 @@ export default function MarketPanel({
                 <div className="truncate text-paper/85">“{rv.title}”</div>
                 <div className="text-[10px] text-paper/50">
                   {rv.studio}
-                  {rv.genre ? ` · ${genreLabel(rv.genre)}` : ""}
+                  {rv.genres.length ? ` · ${rv.genres.map(genreLabel).join(" × ")}` : ""}
                 </div>
               </div>
               <div className="shrink-0 text-[10px] text-cyanx">{dateLabel(rv.week)}</div>
@@ -284,6 +284,17 @@ export default function MarketPanel({
           ))}
           <div className="mt-2 text-[10px] text-paper/40">
             Trends shift every season. A brilliant show succeeds in any market — trends move the money, not the reviews.
+          </div>
+        </>
+      )}
+
+      {/* ---------------------------------------------------------- RIVALS */}
+      {tab === "rivals" && (
+        <>
+          <SectionTitle icon={<TrendingUp size={12} />}>STUDIO RANKINGS</SectionTitle>
+          <RankingsTable entries={studioRankings(run)} highlight />
+          <div className="mt-2 text-[10px] text-paper/40">
+            Rankings blend revenue, fans, reviews, awards and franchises. Open the RIVALS screen on the office floor for the full picture.
           </div>
         </>
       )}

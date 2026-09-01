@@ -40,6 +40,7 @@ import {
   startProject,
   type RunState,
 } from "../state";
+import { initRivalWorld } from "../rivals";
 
 /* ------------------------------------------------------------ helpers */
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -449,11 +450,20 @@ describe("market lifecycle", () => {
 
   it("rival premieres flood their genres", () => {
     const r = richRun({ week: 9 });
-    const withRival = {
-      ...r,
-      rivals: [{ studio: "Rival", title: "Big Show", score: 30, week: 10, year: 1, genre: "mecha" as const }],
-    };
-    const out = advanceWeeks(withRival, 1);
+    const world = initRivalWorld(0);
+    world.studios[0].productions.push({
+      id: "test_premiere",
+      title: "Big Show",
+      genres: ["mecha"],
+      medium: "tv",
+      budget: "standard",
+      week: 10,
+      year: 1,
+      franchiseKey: null,
+      kind: "original",
+      score: 30,
+    });
+    const out = advanceWeeks({ ...r, rivalWorld: world }, 1);
     expect(out.recentReleases.some((x) => x.genre === "mecha" && x.weight === 1)).toBe(true);
   });
 
@@ -463,10 +473,16 @@ describe("market lifecycle", () => {
     expect(out.commissions.find((c) => c.id === "test_com")).toBeUndefined();
   });
 
-  it("rollRivalShows attaches a genre to future premieres", () => {
+  it("rival world plans a slate of genre-tagged premieres on the calendar", () => {
     const r = initialRun("S", "steady");
-    expect(r.rivals.length).toBeGreaterThan(0);
-    for (const rv of r.rivals) expect(rv.genre === undefined || GENRES.some((g) => g.id === rv.genre)).toBe(true);
+    expect(r.rivalWorld.studios).toHaveLength(6);
+    const all = r.rivalWorld.studios.flatMap((s) => s.productions);
+    expect(all.length).toBeGreaterThan(0);
+    for (const p of all) {
+      expect(p.genres.length).toBeGreaterThan(0);
+      for (const g of p.genres) expect(GENRES.some((x) => x.id === g)).toBe(true);
+      expect(p.week).toBeGreaterThanOrEqual(0);
+    }
   });
 });
 

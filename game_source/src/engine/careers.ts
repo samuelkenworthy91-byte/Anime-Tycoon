@@ -388,6 +388,9 @@ export interface StaffEvent {
   amount: number;
   week: number;
   expiresWeek: number;
+  /** which rival studio is courting (poach only) */
+  studio?: string;
+  studioId?: string;
 }
 
 /** what this person is worth on the open market */

@@ -284,7 +284,7 @@ export default function OfficeScene({
   const warm = 1 - night;
 
   return (
-    <div ref={wrapRef} className="relative min-h-0 w-full flex-1 overflow-hidden bg-abyss">
+    <div ref={wrapRef} className="relative isolate min-h-0 w-full flex-1 overflow-hidden bg-abyss">
       <div
         className="absolute"
         style={{ width: stage.w, height: stage.h, left: stage.left, top: stage.top }}
