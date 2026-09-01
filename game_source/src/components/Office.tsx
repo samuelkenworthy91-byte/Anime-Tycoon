@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  BarChart3,
   Clapperboard,
   Hammer,
   KanbanSquare,
@@ -64,6 +65,8 @@ import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
 import FacilitiesPanel from "./Facilities";
 import CrewPanel from "./Crew";
+import MarketPanel from "./Market";
+import { type Commission } from "../engine/market";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -72,6 +75,7 @@ export default function Office({
   setRun,
   onNewShow,
   onContract,
+  onCommission,
   onMilestone,
   onShip,
   onSkipWeek,
@@ -82,13 +86,14 @@ export default function Office({
   setRun: (fn: (r: RunState) => RunState) => void;
   onNewShow: (sequelKey?: string) => void;
   onContract: (c: Contract) => void;
+  onCommission: (c: Commission) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
   onSkipWeek: () => void;
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
+  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
@@ -308,6 +313,14 @@ export default function Office({
           <Btn variant="cyan" onClick={() => setModal("contracts")}>
             <Briefcase size={15} /> CONTRACTS
           </Btn>
+          <Btn variant="ghost" className="relative" onClick={() => setModal("market")}>
+            <BarChart3 size={15} className="text-mint" /> MARKET
+            {run.commissions.length + run.marketEvents.length > 0 && (
+              <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cyanx font-display text-[9px] font-extrabold text-ink">
+                {run.commissions.length + run.marketEvents.length}
+              </span>
+            )}
+          </Btn>
           <Btn variant="ghost" className="relative" onClick={() => setModal("staff")}>
             <Users size={15} /> STAFF <span className="text-[10px] opacity-70">({run.staff.length}/{off.maxStaff})</span>
             {run.staffEvents.length > 0 && (
@@ -386,6 +399,19 @@ export default function Office({
       )}
 
       {/* ------------------------------------------------------ FACILITIES */}
+      {modal === "market" && (
+        <Modal title="THE MARKET" onClose={() => setModal(null)}>
+          <MarketPanel
+            run={run}
+            setRun={setRun}
+            onCommission={(c) => {
+              setModal(null);
+              onCommission(c);
+            }}
+          />
+        </Modal>
+      )}
+
       {modal === "facilities" && (
         <Modal title="STUDIO ROOMS" onClose={() => setModal(null)}>
           <FacilitiesPanel

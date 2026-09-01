@@ -54,6 +54,7 @@ import {
 import { arcLockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
+import { partnerById, type Commission } from "../engine/market";
 
 const STEPS = ["CONCEPT", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
 /** CAST is broken into one screen per role, in this order. */
@@ -126,6 +127,7 @@ function CastPick({
 export default function Create({
   run,
   sequelKey,
+  commission,
   paused,
   onBegin,
   onCancel,
@@ -133,6 +135,8 @@ export default function Create({
 }: {
   run: RunState;
   sequelKey?: string;
+  /** producing under contract: brief fields are locked to the partner's terms */
+  commission?: Commission;
   paused?: boolean;
   onBegin: (d: Draft) => void;
   onCancel: () => void;
@@ -141,7 +145,13 @@ export default function Create({
   const [step, setStep] = useState(0);
   /** which cast role is being picked — CAST is split into one screen per role */
   const [castStep, setCastStep] = useState(0);
-  const [d, setD] = useState<Draft>(() => freshDraft(run, sequelKey));
+  const [d, setD] = useState<Draft>(() => {
+    const base = freshDraft(run, sequelKey);
+    return commission
+      ? { ...base, medium: commission.medium, audience: commission.audience, genres: [commission.genre] }
+      : base;
+  });
+  const partner = commission ? partnerById(commission.partnerId) : null;
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
@@ -205,9 +215,11 @@ export default function Create({
   });
 
   const toggleGenre = (id: GenreId) => {
+    if (commission && id === commission.genre) return; // the brief is binding
     sfx.click();
     setD((old) => {
       if (old.genres.includes(id)) return { ...old, genres: old.genres.filter((g) => g !== id) };
+      if (commission && old.genres.length >= 2) return { ...old, genres: [commission.genre, id] };
       if (old.genres.length >= 2) return { ...old, genres: [old.genres[1], id] };
       return { ...old, genres: [...old.genres, id] };
     });
@@ -262,8 +274,13 @@ export default function Create({
             <ChevronLeft size={16} />
           </Btn>
           <div className="font-display text-sm font-extrabold md:text-base">
-            {sequelKey ? "SEASON GREENLIGHT" : "NEW PRODUCTION"}
+            {commission ? "COMMISSIONED PRODUCTION" : sequelKey ? "SEASON GREENLIGHT" : "NEW PRODUCTION"}
           </div>
+          {commission && partner && (
+            <div className="hidden rounded-md border border-gold/40 bg-gold/10 px-2 py-1 text-[10px] text-gold sm:block">
+              {partner.name}: {GENRES.find((g) => g.id === commission.genre)?.label} · +{formatGBP(commission.advance)} · they take {Math.round(commission.share * 100)}%
+            </div>
+          )}
           <div className="ml-auto hidden gap-1 md:flex">
             {STEPS.map((s, i) => (
               <button
@@ -306,7 +323,7 @@ export default function Create({
               <Section title="FORMAT">
                 <div className="grid grid-cols-3 gap-2">
                   {(Object.keys(MEDIUMS) as MediumId[]).map((m) => {
-                    const locked = !run.mediumsUnlocked.includes(m);
+                    const locked = !run.mediumsUnlocked.includes(m) || (!!commission && m !== commission.medium);
                     return (
                       <Pick key={m} active={d.medium === m} disabled={locked} onClick={() => set({ medium: m })}>
                         {m === "tv" ? <Tv size={18} /> : m === "movie" ? <Clapperboard size={18} /> : <Smartphone size={18} />}
@@ -391,7 +408,7 @@ export default function Create({
                       ? d.genres.reduce((acc, g) => acc + (AUDIENCES[a].fit[g] ?? 1), 0) / d.genres.length
                       : 1;
                     return (
-                      <Pick key={a} active={d.audience === a} onClick={() => set({ audience: a })}>
+                      <Pick key={a} active={d.audience === a} disabled={!!commission && a !== commission.audience} onClick={() => set({ audience: a })}>
                         <div className="flex items-center gap-1.5">
                           {a === "kids" ? <Baby size={16} className="text-gold" /> : a === "teens" ? <Zap size={16} className="text-neon" /> : a === "adults" ? <Briefcase size={16} className="text-cyanx" /> : <Users size={16} className="text-mint" />}
                           <span className="font-display text-sm font-extrabold">{AUDIENCES[a].label}</span>
@@ -647,11 +664,24 @@ export default function Create({
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
                   <Row k="UP-FRONT COST" v={formatGBP(cost)} money big />
-                  <div className="text-[10px] text-paper/40">The studio's cash takes the hit — keep an eye on the office.</div>
+                  {commission && partner && (
+                    <>
+                      <div className="my-2 border-t border-line/60" />
+                      <Row k={`${partner.name} advance`} v={`+${formatGBP(commission.advance)}`} money />
+                      <Row k="Their revenue share" v={`${Math.round(commission.share * 100)}%`} />
+                      <Row k="Quality bar" v={`${commission.minQuality}/40 (bonus ${formatGBP(commission.bonus)} at ${commission.minQuality + 6}+)`} />
+                      <Row k="Contract deadline" v={`${commission.maxWeeks} weeks`} />
+                    </>
+                  )}
+                  <div className="text-[10px] text-paper/40">
+                    {commission
+                      ? "The advance lands the moment production starts. Miss the bar or the deadline and the partner remembers."
+                      : "The studio's cash takes the hit — keep an eye on the office."}
+                  </div>
                 </div>
               </Section>
               <Btn big variant="gold" className="w-full" onClick={() => onBegin(d)}>
-                <Gem size={20} /> PAY & START PRODUCTION
+                <Gem size={20} /> {commission ? "SIGN & START PRODUCTION" : "PAY & START PRODUCTION"}
               </Btn>
             </div>
           )}

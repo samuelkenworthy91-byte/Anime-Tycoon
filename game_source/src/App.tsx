@@ -22,6 +22,7 @@ import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
 import Create from "./components/Create";
+import { type Commission } from "./engine/market";
 import Produce from "./components/Produce";
 import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
@@ -33,6 +34,8 @@ type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | 
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
+  /** commission brief carried into the Create screen (null = self-funded) */
+  const [pendingCommission, setPendingCommission] = useState<Commission | null>(null);
   const [run, setRun] = useState<RunState | null>(null);
   const [meta, setMeta] = useState({ studio: "Anime Runner", showrunner: "steady" });
   /** the draft+result of the show whose reviews are on screen */
@@ -221,6 +224,15 @@ export default function App() {
   const newShow = useCallback((key?: string) => {
     sfx.select();
     setSequelKey(key);
+    setPendingCommission(null);
+    setScreen("create");
+  }, []);
+
+  /** a commission brief was accepted on the market screen */
+  const takeCommission = useCallback((c: Commission) => {
+    sfx.select();
+    setSequelKey(undefined);
+    setPendingCommission(c);
     setScreen("create");
   }, []);
 
@@ -243,16 +255,20 @@ export default function App() {
   );
 
   /* greenlight: the show enters the pipeline as a project — no time skip */
-  const beginProduction = useCallback((d: Draft) => {
-    setRun((r) => {
-      if (!r) return r;
-      const next = startProject(r, d);
-      if (!next) return r;
-      sfx.whoosh();
-      return next;
-    });
-    setScreen("office");
-  }, []);
+  const beginProduction = useCallback(
+    (d: Draft) => {
+      setRun((r) => {
+        if (!r) return r;
+        const next = startProject(r, d, pendingCommission ?? undefined);
+        if (!next) return r;
+        sfx.whoosh();
+        return next;
+      });
+      setPendingCommission(null);
+      setScreen("office");
+    },
+    [pendingCommission]
+  );
 
   /* ------------------------------------------------- milestone sprints */
   const openMilestone = useCallback(
@@ -449,6 +465,7 @@ export default function App() {
             setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
             onNewShow={newShow}
             onContract={takeContract}
+            onCommission={takeCommission}
             onMilestone={openMilestone}
             onShip={openShip}
             onSkipWeek={skipWeek}
@@ -460,9 +477,13 @@ export default function App() {
           <Create
             run={run}
             sequelKey={sequelKey}
+            commission={pendingCommission ?? undefined}
             paused={paused}
             onBegin={beginProduction}
-            onCancel={() => setScreen("office")}
+            onCancel={() => {
+              setPendingCommission(null);
+              setScreen("office");
+            }}
             onUnlockArc={unlockArc}
           />
         )}

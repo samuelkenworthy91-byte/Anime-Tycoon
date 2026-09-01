@@ -54,6 +54,32 @@ import {
   type StaffEvent,
 } from "./careers";
 import {
+  REP_DELIVERED,
+  REP_EXCELLENT,
+  REP_LATE,
+  REP_MISSED_QUALITY,
+  REP_START,
+  NEGOTIATE_ADVANCE_MULT,
+  NEGOTIATE_SHARE_DELTA,
+  PARTNERS,
+  adaptationCommission,
+  attentionMult,
+  driftMarket,
+  emergencyCommission,
+  initMarket,
+  marketMult,
+  negotiationChance,
+  partnerById,
+  pruneReleases,
+  rivalPremieres,
+  rollCommission,
+  rollMarketEvent,
+  type Commission,
+  type MarketEvent,
+  type MarketState,
+  type ReleaseRecord,
+} from "./market";
+import {
   MAX_TIER,
   facilityDef,
   facilityFX,
@@ -183,6 +209,18 @@ export interface RunState {
   staffEvents: StaffEvent[];
   /** retired greats — each gives a permanent studio bonus */
   legends: LegendRec[];
+  /** genre/audience/medium demand — shifts every season */
+  market: MarketState;
+  /** recent releases (yours + rivals) flooding their genres */
+  recentReleases: ReleaseRecord[];
+  /** reputation 0..100 with each commissioner */
+  partners: Record<string, number>;
+  /** commission offers currently on the table */
+  commissions: Commission[];
+  /** pending market events awaiting a decision */
+  marketEvents: MarketEvent[];
+  /** overseas licensing deal: +15% revenue until this week */
+  revBoostUntil: number;
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -256,6 +294,12 @@ export function initialRun(studio: string, showrunner: string): RunState {
     heads: {},
     staffEvents: [],
     legends: [],
+    market: initMarket(),
+    recentReleases: [],
+    partners: Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
+    commissions: [],
+    marketEvents: [],
+    revBoostUntil: 0,
   };
 }
 
@@ -270,6 +314,15 @@ export function migrateRun(raw: unknown): RunState {
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
     staffEvents: Array.isArray(r.staffEvents) ? r.staffEvents : [],
     legends: Array.isArray(r.legends) ? r.legends : [],
+    market: r.market && typeof r.market === "object" ? r.market : initMarket(),
+    recentReleases: Array.isArray(r.recentReleases) ? r.recentReleases : [],
+    partners:
+      r.partners && typeof r.partners === "object"
+        ? { ...Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])), ...r.partners }
+        : Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
+    commissions: Array.isArray(r.commissions) ? r.commissions : [],
+    marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
+    revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     /* old staff get a full career, deterministically from their id, so the
        same person comes back with the same personality every load */
     staff: (r.staff ?? []).map((s) => ensureCareer({ ...s }, 0)),
@@ -357,6 +410,11 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let events = [...(r.staffEvents ?? [])];
   let legends = [...(r.legends ?? [])];
   const heads = r.heads ?? {};
+  let market = r.market ?? initMarket();
+  let recentReleases = [...(r.recentReleases ?? [])];
+  let commissions = [...(r.commissions ?? [])];
+  let marketEvents = [...(r.marketEvents ?? [])];
+  const partners = { ...(r.partners ?? {}) };
 
   /* facilities + department heads + retired legends → studio-wide effects */
   const baseFx = facilityFX(r.facilities);
@@ -499,11 +557,40 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     events = events.filter((e) => w <= e.expiresWeek && staffArr.some((x) => x.id === e.staffId));
 
-    /* rival studios premiere their parody shows */
+    /* rival studios premiere their parody shows — and flood their genre */
     const airing = rivals.filter((r2) => r2.week === w);
     if (airing.length) {
       const r2 = airing[0];
       notices.push(`${r2.studio} premieres “${r2.title}” — the internet has opinions.`);
+    }
+    recentReleases = [...pruneReleases(recentReleases, w), ...rivalPremieres(rivals, w)];
+
+    /* the market breathes every season */
+    if (w % 12 === 0) {
+      const drift = driftMarket(market);
+      market = drift.market;
+      notices.push(...drift.notices);
+    }
+
+    /* commissioners refresh their briefs */
+    commissions = commissions.filter((c) => w <= c.expiresWeek);
+    if (w % 10 === 0) {
+      while (commissions.length < 3) commissions.push(rollCommission(w, partners, market));
+      notices.push("New commission briefs are on the table — check the market.");
+    }
+
+    /* the occasional industry event */
+    marketEvents = marketEvents.filter((e) => w <= e.expiresWeek);
+    if (w % 8 === 0 && marketEvents.length === 0 && Math.random() < 0.35) {
+      const ready = projects.find((p) => p.stage === "ready" && !p.commission);
+      const lateStage = projects.find(
+        (p) => (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
+      );
+      const ev = rollMarketEvent(w, partners, ready?.id ?? null, lateStage?.id ?? null);
+      if (ev) {
+        marketEvents = [ev];
+        notices.push("📞 The phone rings — an industry offer needs an answer (see the market screen).");
+      }
     }
 
     if (w % 4 === 0) {
@@ -579,6 +666,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     bonds,
     staffEvents: events,
     legends,
+    market,
+    recentReleases,
+    commissions,
+    marketEvents,
     notices: notices.slice(-40),
   };
 }
@@ -603,17 +694,47 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
   return null;
 }
 
-/** greenlight a new show: pays the upfront cost and enters the pipeline */
-export function startProject(r: RunState, d: Draft): RunState | null {
-  if (startBlockReason(r, d)) return null;
-  const p = makeProject(d, r.week);
+/** greenlight a new show: pays the upfront cost and enters the pipeline.
+    Pass a commission to produce it under contract: the partner's advance
+    lands immediately, but their deadline and revenue share bind the show. */
+export function startProject(r: RunState, d: Draft, commission?: Commission): RunState | null {
+  if (commission) {
+    /* the brief is binding */
+    if (!d.genres.includes(commission.genre)) return null;
+    if (d.audience !== commission.audience) return null;
+    if (d.medium !== commission.medium) return null;
+    if (activeProjects(r.projects).length >= projectCapacity(r)) return null;
+    if (r.cash + commission.advance < projectUpfront(d)) return null;
+  } else if (startBlockReason(r, d)) return null;
+
+  let p = makeProject(d, r.week);
+  const partner = commission ? partnerById(commission.partnerId) : null;
+  if (commission && partner) {
+    p = {
+      ...p,
+      deadlineWeek: r.week + commission.maxWeeks,
+      hype: p.hype + (commission.hypeBonus ?? 0),
+      commission: {
+        partnerId: commission.partnerId,
+        partnerName: partner.name,
+        advance: commission.advance,
+        share: commission.share,
+        minQuality: commission.minQuality,
+        bonus: commission.bonus,
+        deadlineWeek: r.week + commission.maxWeeks,
+      },
+    };
+  }
   return {
     ...r,
-    cash: r.cash - projectUpfront(d),
+    cash: r.cash - projectUpfront(d) + (commission?.advance ?? 0),
     projects: [...r.projects, p],
+    commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
     notices: [
       ...r.notices,
-      `“${d.title}” greenlit — target release ${dateLabel(p.deadlineWeek)}. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+      commission && partner
+        ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 by ${dateLabel(r.week + commission.maxWeeks)}.`
+        : `“${d.title}” greenlit — target release ${dateLabel(p.deadlineWeek)}. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -654,10 +775,25 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
 }
 
 /** score a ready project without committing anything */
+/** trends × saturation × split attention × any licensing boost */
+export function marketMultiplierFor(r: RunState, p: Project): number {
+  const othersAiring = r.projects.filter((x) => x.stage === "airing" && x.id !== p.id).length;
+  const boost = r.week < (r.revBoostUntil ?? 0) ? 1.15 : 1;
+  return (
+    Math.round(
+      marketMult(r.market ?? initMarket(), r.recentReleases ?? [], p.draft, r.week) *
+        attentionMult(othersAiring) *
+        boost *
+        100
+    ) / 100
+  );
+}
+
 export function previewResult(r: RunState, p: Project): ShowResult {
   return computeProjectResult(p, {
     research: r.research,
     merchMult: facilityFX(r.facilities).merchMult,
+    marketMult: marketMultiplierFor(r, p),
     showrunner: r.showrunner,
     comboLevels: r.comboLevels,
     castCombos: r.castCombos,
@@ -678,8 +814,45 @@ export function releaseProject(
   const p0 = projectById(r, projectId);
   if (!p0 || p0.stage !== "ready") return null;
   const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
-  const result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
+  let result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
   const draft = p.draft;
+
+  /* ---- the deal: the commissioner takes their cut, judges the work ---- */
+  const deal = p.commission;
+  let bonusCash = 0;
+  let partners = r.partners ?? {};
+  if (deal) {
+    const cut = Math.round(result.revenue * deal.share);
+    result = {
+      ...result,
+      revenue: result.revenue - cut,
+      breakdown: [
+        ...result.breakdown,
+        { label: `${deal.partnerName} share (${Math.round(deal.share * 100)}%)`, pts: `−£${cut.toLocaleString("en-GB")}` },
+      ],
+    };
+    const late = r.week > deal.deadlineWeek;
+    let rep = partners[deal.partnerId] ?? REP_START;
+    if (result.total >= deal.minQuality) {
+      rep += REP_DELIVERED;
+      if (result.total >= deal.minQuality + 6) {
+        rep += REP_EXCELLENT;
+        bonusCash = deal.bonus;
+        result = {
+          ...result,
+          breakdown: [...result.breakdown, { label: `${deal.partnerName} quality bonus`, pts: `+£${deal.bonus.toLocaleString("en-GB")}` }],
+        };
+      }
+    } else {
+      rep += REP_MISSED_QUALITY;
+      result = {
+        ...result,
+        breakdown: [...result.breakdown, { label: `${deal.partnerName} expected ${deal.minQuality}/40`, pts: "reputation damaged" }],
+      };
+    }
+    if (late) rep += REP_LATE;
+    partners = { ...partners, [deal.partnerId]: Math.max(0, Math.min(100, rep)) };
+  }
 
   const fkey = draft.franchiseKey ?? draft.title;
   const baseTitle = draft.franchiseKey
@@ -687,6 +860,14 @@ export function releaseProject(
     : draft.title;
   const ck = comboKey(draft.genres);
   const notices = [...r.notices];
+  if (deal) {
+    notices.push(
+      result.total >= deal.minQuality
+        ? `${deal.partnerName} is ${result.total >= deal.minQuality + 6 ? "delighted" : "satisfied"} with “${draft.title}” (${result.total}/40 vs ${deal.minQuality} required)${bonusCash ? ` — quality bonus +£${bonusCash.toLocaleString("en-GB")}!` : "."}`
+        : `${deal.partnerName} is furious: “${draft.title}” scored ${result.total}/40, below the contracted ${deal.minQuality}/40.`
+    );
+    if (r.week > deal.deadlineWeek) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
+  }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
   if (p.lateWeeks > 0)
     notices.push(`The network docks “${draft.title}” for delivering ${p.lateWeeks} week${p.lateWeeks > 1 ? "s" : ""} late.`);
@@ -717,7 +898,13 @@ export function releaseProject(
 
   const run: RunState = {
     ...r,
-    cash: r.cash - extra.spent,
+    cash: r.cash - extra.spent + bonusCash,
+    partners,
+    /* your release floods its own genres for a while */
+    recentReleases: [
+      ...pruneReleases(r.recentReleases ?? [], r.week),
+      ...draft.genres.map((g) => ({ genre: g, week: r.week, weight: 2 })),
+    ],
     rd: r.rd + released.rdGained,
     payouts,
     totalRevenue: r.totalRevenue + result.revenue,
@@ -986,3 +1173,119 @@ export function studioScore(r: RunState): number {
 
 export type { TierKey };
 export { PUN_TITLES, RIVAL_STUDIOS, tierOf };
+
+
+/* ============================== market ops ============================== */
+
+/** one-shot haggle over a commission: rep decides your odds. Success sweetens
+    the deal; failure locks it as-is. Either way, no second attempt. */
+export function negotiateCommission(
+  r: RunState,
+  commissionId: string,
+  ask: "advance" | "share"
+): RunState | null {
+  const c = (r.commissions ?? []).find((x) => x.id === commissionId);
+  if (!c || c.negotiated) return null;
+  const rep = (r.partners ?? {})[c.partnerId] ?? REP_START;
+  const partner = partnerById(c.partnerId);
+  const win = Math.random() < negotiationChance(rep);
+  const next: Commission = win
+    ? ask === "advance"
+      ? { ...c, negotiated: true, advance: Math.round((c.advance * NEGOTIATE_ADVANCE_MULT) / 5000) * 5000 }
+      : { ...c, negotiated: true, share: Math.max(0.2, Math.round((c.share + NEGOTIATE_SHARE_DELTA) * 100) / 100) }
+    : { ...c, negotiated: true };
+  return {
+    ...r,
+    commissions: (r.commissions ?? []).map((x) => (x.id === commissionId ? next : x)),
+    notices: [
+      ...r.notices,
+      win
+        ? ask === "advance"
+          ? `${partner?.name ?? "The partner"} agrees to a bigger advance: £${next.advance.toLocaleString("en-GB")}.`
+          : `${partner?.name ?? "The partner"} drops their share to ${Math.round(next.share * 100)}%.`
+        : `${partner?.name ?? "The partner"} won't budge. The terms stand.`,
+    ],
+  };
+}
+
+/** answer a ringing phone: accept or decline a market event */
+export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean): RunState | null {
+  const ev = (r.marketEvents ?? []).find((x) => x.id === eventId);
+  if (!ev) return null;
+  const rest = (r.marketEvents ?? []).filter((x) => x.id !== eventId);
+  if (!accept) {
+    return { ...r, marketEvents: rest, notices: [...r.notices, `You pass on the offer. The phone goes quiet.`] };
+  }
+  switch (ev.kind) {
+    case "emergency": {
+      const c = emergencyCommission(r.week, ev.partnerId ?? "ntv8", r.partners ?? {}, r.market ?? initMarket());
+      return {
+        ...r,
+        marketEvents: rest,
+        commissions: [...(r.commissions ?? []), c],
+        notices: [...r.notices, `Emergency slot accepted — a brutal brief lands on the table (huge advance, no slack).`],
+      };
+    }
+    case "adaptation": {
+      const c = adaptationCommission(r.week, r.partners ?? {}, r.market ?? initMarket());
+      return {
+        ...r,
+        marketEvents: rest,
+        commissions: [...(r.commissions ?? []), c],
+        notices: [...r.notices, `Adaptation rights secured — the source material's fans bring free hype (and expectations).`],
+      };
+    }
+    case "overseas": {
+      if (r.cash < (ev.amount ?? 0)) return null;
+      return {
+        ...r,
+        marketEvents: rest,
+        cash: r.cash - (ev.amount ?? 0),
+        revBoostUntil: r.week + 24,
+        notices: [...r.notices, `Overseas licensing signed: −£${(ev.amount ?? 0).toLocaleString("en-GB")}, +15% revenue on releases for 24 weeks.`],
+      };
+    }
+    case "bidding": {
+      const p = ev.projectId ? r.projects.find((x) => x.id === ev.projectId) : undefined;
+      if (!p || p.stage !== "ready" || p.commission) return null;
+      return {
+        ...r,
+        marketEvents: rest,
+        cash: r.cash + (ev.amount ?? 0),
+        projects: r.projects.map((x) =>
+          x.id === p.id
+            ? {
+                ...x,
+                commission: {
+                  partnerId: ev.partnerId ?? "streamline",
+                  partnerName: partnerById(ev.partnerId ?? "streamline")?.name ?? "Streamline+",
+                  advance: ev.amount ?? 0,
+                  share: 0.5,
+                  minQuality: 0,
+                  bonus: 0,
+                  deadlineWeek: r.week + 999,
+                },
+              }
+            : x
+        ),
+        notices: [...r.notices, `Bidding war won: +£${(ev.amount ?? 0).toLocaleString("en-GB")} now, but they take 50% of “${p.draft.title}”.`],
+      };
+    }
+    case "sponsor": {
+      const p = ev.projectId ? r.projects.find((x) => x.id === ev.projectId) : undefined;
+      if (!p) return null;
+      return {
+        ...r,
+        marketEvents: rest,
+        cash: r.cash + (ev.amount ?? 0),
+        projects: r.projects.map((x) =>
+          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.issues + 2 } : x
+        ),
+        notices: [
+          ...r.notices,
+          `Sponsor money banked: +£${(ev.amount ?? 0).toLocaleString("en-GB")} — but the family-friendly edits cost “${p.draft.title}” hype and cause rework.`,
+        ],
+      };
+    }
+  }
+}

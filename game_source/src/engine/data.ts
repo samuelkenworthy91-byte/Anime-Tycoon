@@ -977,6 +977,8 @@ export interface RivalShow {
   score: number; // 0..40, revealed at the awards ceremony
   week: number;
   year: number;
+  /** what they are flooding the market with */
+  genre?: GenreId;
 }
 
 /** A rival studio rolls out 1-3 shows over the course of a year */
@@ -1003,6 +1005,7 @@ export function rollRivalShows(year: number, yearStartWeek: number): RivalShow[]
       score,
       week: yearStartWeek + 2 + Math.floor(Math.random() * 44),
       year,
+      genre: GENRES[Math.floor(Math.random() * GENRES.length)].id,
     });
   }
   return shows.sort((a, b) => a.week - b.week);

@@ -148,6 +148,20 @@ export interface Project {
   milestonesDone: MilestoneId[];
   result: ShowResult | null;
   airedWeek: number | null;
+  /** the deal financing this show — null/undefined = fully self-funded */
+  commission?: ProjectCommission | null;
+}
+
+/** commission terms attached to a running project */
+export interface ProjectCommission {
+  partnerId: string;
+  partnerName: string;
+  advance: number;
+  /** partner's cut of release revenue, 0..1 */
+  share: number;
+  minQuality: number;
+  bonus: number;
+  deadlineWeek: number;
 }
 
 export const TEAM_MAX = 6;
@@ -446,6 +460,8 @@ export interface ScoringContext {
   research: string[];
   /** merch department revenue multiplier (1 = none) */
   merchMult?: number;
+  /** market demand multiplier (trends + saturation + attention, 1 = neutral) */
+  marketMult?: number;
   showrunner: string;
   comboLevels: Record<string, number>;
   castCombos: string[];
@@ -491,6 +507,17 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   });
 
   let out = res;
+
+  /* the market pays what the market pays — reviews are unaffected */
+  const mkt = ctx.marketMult ?? 1;
+  if (Math.abs(mkt - 1) > 0.001) {
+    out = {
+      ...out,
+      revenue: Math.round(out.revenue * mkt),
+      fans: Math.round(out.fans * Math.min(1.2, Math.max(0.85, mkt))),
+      breakdown: [...out.breakdown, { label: "Market demand", pts: `×${mkt.toFixed(2)} revenue` }],
+    };
+  }
 
   /* the merch department turns every hit into acrylic stands */
   const merch = ctx.merchMult ?? 1;
