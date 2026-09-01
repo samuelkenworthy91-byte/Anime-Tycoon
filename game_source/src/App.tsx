@@ -57,8 +57,7 @@ export default function App() {
         officeLevel: run.officeLevel,
       },
     });
-    setSaveStamp((n) => n + 1);
-  }, [run, meta, screen, clockDay, clockPhase]);
+  }, [run, meta, screen]);
 
   /* a finished career is not resumable — retire the save */
   useEffect(() => {
