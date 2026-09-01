@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, Save } from "lucide-react";
+import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, Save, Smartphone, Sparkles } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
 import { ARCS, GENRES, OFFICES, comboKey, type Contract, type Draft } from "./engine/data";
@@ -34,6 +34,8 @@ import { cn } from "./utils/cn";
 
 type Screen = "title" | "office" | "create" | "produce" | "contract" | "release" | "gameover";
 
+const FIT_LABELS = ["NORMAL", "INSET", "INSET +"] as const;
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
   const [run, setRun] = useState<RunState | null>(null);
@@ -47,6 +49,29 @@ export default function App() {
   const [paused, setPaused] = useState(false);
   const [victory, setVictory] = useState(false);
   const [muteUI, setMuteUI] = useState(isMuted());
+  /* extra top inset the player can dial up if their browser still overlaps */
+  const [fit, setFit] = useState<0 | 1 | 2>(() => {
+    const v = Number(localStorage.getItem("kirameki.fit") ?? 0);
+    return v === 1 || v === 2 ? v : 0;
+  });
+  useEffect(() => {
+    document.documentElement.style.setProperty("--fit-top", `${fit * 16}px`);
+    try {
+      localStorage.setItem("kirameki.fit", String(fit));
+    } catch {
+      /* ignore */
+    }
+  }, [fit]);
+  /* HD-2D costs a few ms a frame; on a slow phone the player can have the
+     flat original back rather than a stutter */
+  const [hd2d, setHd2d] = useState<0 | 1>(() => (localStorage.getItem("kirameki.hd") === "0" ? 0 : 1));
+  useEffect(() => {
+    try {
+      localStorage.setItem("kirameki.hd", String(hd2d));
+    } catch {
+      /* ignore */
+    }
+  }, [hd2d]);
   /* three hand-managed save slots; `slot` is the one this career writes to */
   const [slot, setSlot] = useState<number | null>(null);
   const [saves, setSaves] = useState<SaveSlots>(() => listSaves());
@@ -475,7 +500,7 @@ export default function App() {
 
   const pauseMenu = useMemo(
     () => (
-      <div className="fixed inset-0 z-[80] flex items-center justify-center bg-abyss/85 backdrop-blur-md">
+      <div className="fixed-safe fixed inset-0 z-[80] flex items-center justify-center bg-abyss/85 backdrop-blur-md">
         <div className="anim-pop ink-card w-80 space-y-3 p-5 text-center">
           <div className="font-jp text-[10px] tracking-[0.5em] text-neon">PAUSE</div>
           <h2 className="font-display text-3xl font-extrabold">PAUSED</h2>
@@ -494,6 +519,22 @@ export default function App() {
               }}
             >
               <Save size={16} /> SAVE CAREER{slot !== null ? ` · SLOT ${slot + 1}` : ""}
+            </Btn>
+            <Btn
+              variant="ghost"
+              className="w-full"
+              onClick={() => setFit((f) => (((f + 1) % 3) as 0 | 1 | 2))}
+              title="Push the interface further down if your phone's status bar still covers it"
+            >
+              <Smartphone size={16} /> SCREEN FIT: {FIT_LABELS[fit]}
+            </Btn>
+            <Btn
+              variant="ghost"
+              className="w-full"
+              onClick={() => setHd2d((v) => (v === 1 ? 0 : 1))}
+              title="HD-2D adds bloom, lamplight, depth of field and grain. Turn it off for the flat original."
+            >
+              <Sparkles size={16} /> GRAPHICS: {hd2d === 1 ? "HD-2D" : "CLASSIC"}
             </Btn>
             <Btn variant="gold" className="w-full" onClick={restart}>
               <RotateCcw size={16} /> INSTANT RESTART
@@ -515,12 +556,12 @@ export default function App() {
         </div>
       </div>
     ),
-    [restart, quitToTitle]
+    [restart, quitToTitle, slot, saveTo, fit, hd2d]
   );
 
   return (
     <FxProvider>
-      <div className="relative h-full w-full overflow-hidden bg-ink">
+      <div className="app-shell relative h-full w-full overflow-hidden bg-ink">
         {screen === "title" && (
           <Title onStart={startRun} onContinue={continueRun} onDeleteSave={deleteSlot} saves={saves} />
         )}
@@ -534,6 +575,7 @@ export default function App() {
             clockPhase={clockPhase}
             onSave={() => slot !== null && saveTo(slot)}
             savedLabel={savedAt && Date.now() - savedAt < 4000 ? "SAVED" : "SAVE"}
+            hd2d={hd2d}
           />
         )}
         {screen === "create" && run && (
@@ -560,7 +602,7 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && (
-          <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
+          <div className="top-safe right-safe absolute z-[60] flex gap-1.5">
             <button
               aria-label="Mute"
               onClick={() => {

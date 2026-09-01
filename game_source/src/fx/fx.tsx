@@ -166,6 +166,7 @@ export function Btn({
   className,
   disabled,
   big,
+  title,
 }: {
   children: ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -173,6 +174,7 @@ export function Btn({
   className?: string;
   disabled?: boolean;
   big?: boolean;
+  title?: string;
 }) {
   const { burst } = useFx();
   const styles: Record<string, string> = {
@@ -185,6 +187,7 @@ export function Btn({
   };
   return (
     <button
+      title={title}
       disabled={disabled}
       onClick={(e) => {
         if (disabled) return;

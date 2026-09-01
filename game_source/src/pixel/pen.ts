@@ -126,6 +126,31 @@ export const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.mi
 
 /* ------------------------------------------------------------------- pen */
 
+/** Baked contact shadows, keyed by size/opacity — see Pen.shadow. */
+const shadowCache = new Map<string, HTMLCanvasElement>();
+
+function shadowSprite(w: number, h: number, alpha: number, rgb: string): HTMLCanvasElement {
+  const c = makeCanvas(w, h);
+  const g = c.getContext("2d")!;
+  g.save();
+  g.translate(w / 2, h / 2);
+  g.scale(1, Math.max(0.05, h / w));
+  const r = Math.max(1, w / 2);
+  /* the gradient is resolved against the CTM in force when it is painted, so
+     it has to be built after the translate — otherwise it lands off-canvas
+     and the shadow silently draws nothing */
+  const grd = g.createRadialGradient(0, 0, 0, 0, 0, r);
+  grd.addColorStop(0, `rgba(${rgb},${alpha})`);
+  grd.addColorStop(0.6, `rgba(${rgb},${(alpha * 0.45).toFixed(3)})`);
+  grd.addColorStop(1, `rgba(${rgb},0)`);
+  g.fillStyle = grd;
+  g.beginPath();
+  g.arc(0, 0, r, 0, Math.PI * 2);
+  g.fill();
+  g.restore();
+  return c;
+}
+
 export class Pen {
   g: Ctx;
   constructor(g: Ctx) {
@@ -276,6 +301,29 @@ export class Pen {
       const f = span <= 0 ? (t >= hi[0] ? 1 : 0) : (t - lo[0]) / span;
       this.dither(x, y + j, w, 1, lo[1], hi[1], f);
     }
+  }
+
+  /**
+   * Soft contact shadow. Smooth gradients sitting on top of hard pixels is
+   * exactly the HD-2D trick — the upscale quantises the falloff back into
+   * steps, so it reads as a shadow rather than as a smudge.
+   */
+  shadow(cx: number, cy: number, rx: number, ry: number, alpha = 0.4, rgb = "6,4,14") {
+    const g = this.g;
+    /* A contact shadow is the same blob every time it is asked for, and a
+       floor full of desks and walkers asks for a couple of dozen a frame.
+       Building a radial gradient per call is the single most expensive thing
+       this renderer can do, so bake each distinct blob once and blit it. */
+    const w = Math.max(2, Math.round(rx * 2));
+    const h = Math.max(2, Math.round(ry * 2));
+    const key = `${w}x${h}|${alpha.toFixed(2)}|${rgb}`;
+    let sprite = shadowCache.get(key);
+    if (!sprite) {
+      sprite = shadowSprite(w, h, alpha, rgb);
+      if (shadowCache.size > 96) shadowCache.clear();
+      shadowCache.set(key, sprite);
+    }
+    g.drawImage(sprite, Math.round(cx - w / 2), Math.round(cy - h / 2));
   }
 
   /** deterministic speckle pass — dirt, carpet fibres, screen noise */

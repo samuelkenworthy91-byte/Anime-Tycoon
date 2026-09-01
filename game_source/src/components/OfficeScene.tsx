@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { StudioScene, type StudioStaff } from "../pixel/studio";
 import { clamp } from "../pixel/pen";
+import { Hd2d } from "../pixel/post";
 
 export interface OfficeStaff extends StudioStaff {}
 
@@ -20,6 +21,8 @@ export default function OfficeScene({
   maxStaff,
   timeOfDay,
   awards = 0,
+  /** 0 = classic flat pixels, 1 = full HD-2D */
+  hd2d = 1,
   onDeskClick,
 }: {
   level: number;
@@ -29,12 +32,15 @@ export default function OfficeScene({
   /** 0..1 fraction of the in-game day */
   timeOfDay: number;
   awards?: number;
+  /** 0 = classic flat pixels, 1 = full HD-2D. Read live, so toggling it does
+      not tear down and rebuild the scene. */
+  hd2d?: number;
   onDeskClick?: (deskIndex: number) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const latest = useRef({ level, boss, staff, maxStaff, timeOfDay, awards, onDeskClick });
-  latest.current = { level, boss, staff, maxStaff, timeOfDay, awards, onDeskClick };
+  const latest = useRef({ level, boss, staff, maxStaff, timeOfDay, awards, onDeskClick, hd2d });
+  latest.current = { level, boss, staff, maxStaff, timeOfDay, awards, onDeskClick, hd2d };
 
   useEffect(() => {
     const wrap = wrapRef.current!;
@@ -43,6 +49,7 @@ export default function OfficeScene({
     const low = document.createElement("canvas");
     const lg = low.getContext("2d")!;
     const scene = new StudioScene();
+    const hd = new Hd2d();
 
     let scale = 1;
     let ox = 0;
@@ -109,7 +116,16 @@ export default function OfficeScene({
         awards: l.awards,
       });
       scene.update(dt);
+      /* depth of field is part of the HD look, so it follows the toggle */
+      scene.dof = l.hd2d > 0.5;
       scene.draw(lg);
+
+      /* HD-2D: bloom, lamp light, grade, vignette, grain. All of it runs on
+         the tiny buffer, so the light is shaded per art pixel and the chunky
+         silhouettes survive the upscale untouched. */
+      hd.intensity = l.hd2d;
+      const amb = scene.ambient();
+      hd.render(low, scene.lights(), amb.color, amb.mix, amb.night, now, scene.flicker());
 
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.imageSmoothingEnabled = false;
@@ -117,6 +133,7 @@ export default function OfficeScene({
       g.fillRect(0, 0, canvas.width, canvas.height);
       g.drawImage(low, 0, 0, low.width, low.height, ox, oy, low.width * scale, low.height * scale);
       drawLabels(g, scene, ox, oy, scale);
+      hd.grainPass(g, canvas.width, canvas.height, now); // returns immediately when intensity is 0
 
       raf = requestAnimationFrame(frame);
     };

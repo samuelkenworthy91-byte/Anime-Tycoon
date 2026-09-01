@@ -65,6 +65,7 @@ export default function Office({
   clockPhase = 0,
   onSave,
   savedLabel,
+  hd2d = 1,
 }: {
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
@@ -74,6 +75,8 @@ export default function Office({
   clockPhase?: number;
   onSave: () => void;
   savedLabel: string;
+  /** 0 = classic flat pixels, 1 = full HD-2D */
+  hd2d?: number;
 }) {
   const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "objectives">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
@@ -208,6 +211,7 @@ export default function Office({
         maxStaff={off.maxStaff}
         timeOfDay={(clockPhase + 0.5) / 4}
         awards={run.awards}
+        hd2d={hd2d}
         onDeskClick={() => setModal("staff")}
       />
 
@@ -774,7 +778,7 @@ export function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed-safe fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <div
         className="anim-pop nice-scroll max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
         onClick={(e) => e.stopPropagation()}

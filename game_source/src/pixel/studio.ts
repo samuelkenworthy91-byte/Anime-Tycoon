@@ -42,6 +42,7 @@ import {
   type Theme,
 } from "./props";
 import { clamp, ctx2d, hash, lerp, makeCanvas, mix, Pen, rng, shade } from "./pen";
+import type { HdLight } from "./post";
 
 export interface StudioStaff {
   name: string;
@@ -153,6 +154,8 @@ export class StudioScene {
   private walkers: Walker[] = [];
   private puffs: Puff[] = [];
   private skyline: { x: number; w: number; h: number; seed: number }[] = [];
+  /** depth of field on the background; costs one blurred blit per frame */
+  dof = true;
   private clock = 0;
 
   constructor() {
@@ -447,7 +450,26 @@ export class StudioScene {
     g.imageSmoothingEnabled = false;
 
     this.ensureBg();
-    if (this.bg) g.drawImage(this.bg, 0, 0);
+    if (this.bg) {
+      g.drawImage(this.bg, 0, 0);
+      /* Only the far band goes soft. Blurring the whole plate takes the floor
+         out from under the desks, and the floor is the plane the characters
+         stand on — it has to stay as crisp as they are. */
+      if (this.dof) {
+        g.save();
+        g.beginPath();
+        g.rect(0, 0, this.W, this.wallBottom);
+        g.clip();
+        try {
+          g.filter = "blur(1.1px)";
+        } catch {
+          /* ignore */
+        }
+        g.drawImage(this.bg, 0, 0);
+        g.filter = "none";
+        g.restore();
+      }
+    }
 
     this.drawOutside(p);
     this.drawWindowFrames(p);
@@ -456,6 +478,9 @@ export class StudioScene {
     /* furniture back-to-front, with each sitter sandwiched between their
        chair and their desk so the rows overlap believably */
     const order = this.desks.map((d, i) => ({ d, i })).sort((a, b) => a.d.base - b.d.base);
+    for (const { d } of order) {
+      p.shadow(d.x + DESK_W / 2, d.base + 1, DESK_W * 0.62, 3.2, 0.34);
+    }
     for (const { d, i } of order) {
       g.drawImage(deskBackSprite(this.level, i % 3), d.x, d.base - DESK_H + 1);
       const sitter = this.walkers.find((w) => w.desk === i && w.state === "sit");
@@ -488,6 +513,70 @@ export class StudioScene {
       who ? who.color : "#3a3a55",
       !!who,
     );
+  }
+
+  /** Where the light in this room is coming from, for the HD-2D pass. */
+  lights(): HdLight[] {
+    const sky = skyAt(this.tod);
+    const out: HdLight[] = [];
+
+    /* ceiling lamps: always on a little, full strength after dark */
+    const lampCount = this.level >= 2 ? 3 : 2;
+    const lampOn = Math.max(0.22, sky.night);
+    for (let i = 0; i < lampCount; i++) {
+      const lx = ((i + 1) * this.W) / (lampCount + 1);
+      out.push({
+        x: lx,
+        y: 8,
+        r: this.H * 0.85,
+        color: "#ffcf8a",
+        strength: 0.26 * lampOn,
+        /* a lamp cannot light the sky — keep its pool off the glass */
+        block: this.win.map((w) => ({ x: w.x, y: w.y, w: w.w, h: w.h })),
+      });
+    }
+
+    /* daylight spilling in through the windows */
+    const day = 1 - sky.night;
+    if (day > 0.05) {
+      for (const w of this.win) {
+        out.push({
+          x: w.x + w.w / 2,
+          y: w.y + w.h * 0.7,
+          r: this.W * 0.26,
+          color: "#ffe6b0",
+          strength: 0.11 * day,
+        });
+      }
+    }
+
+    /* monitor glow: cold light where the crew is actually working */
+    for (const d of this.desks) {
+      if (!d.screenKind) continue;
+      out.push({
+        x: d.x + DESK_SCREEN.x + DESK_SCREEN.w / 2,
+        y: d.base - DESK_H + 1 + DESK_SCREEN.y + DESK_SCREEN.h / 2,
+        r: 18,
+        color: "#8fd8ff",
+        strength: 0.07 + sky.night * 0.06,
+      });
+    }
+    return out;
+  }
+
+  /** Lamp flicker. Kept out of `lights()` so the light map can stay cached. */
+  flicker(): number {
+    return 0.94 + 0.06 * Math.sin(this.clock / 90);
+  }
+
+  /** The colour the whole frame is graded toward, and how hard. */
+  ambient(): { color: string; mix: number; night: number } {
+    const sky = skyAt(this.tod);
+    /* cool ambient against warm lamp pools — the classic night read: blue in
+       the shadows, tungsten wherever a lamp reaches */
+    if (sky.night > 0.5) return { color: "#6f82d8", mix: 0.42 * sky.night, night: sky.night };
+    if (this.tod > 0.5) return { color: "#ffb489", mix: 0.16 * (1 - sky.night), night: sky.night };
+    return { color: "#fff2d8", mix: 0.08, night: sky.night };
   }
 
   /** Staff names — the component draws these in screen space so text stays crisp. */
@@ -782,11 +871,13 @@ export class StudioScene {
     /* ---- right-hand wall: shelf of trophies + clock (drawn with the room) */
 
     /* ---- right column: coffee machine, snack machine, plant */
+    p.shadow(W - 14, wb + 8, 12, 3, 0.3);
     g.drawImage(coffeeSprite(), W - 24, wb - 4);
     if (this.level >= 1) g.drawImage(snackSprite(), W - 24, wb + 28);
     g.drawImage(plantSprite(this.level), W - 18, H - 22);
 
     /* ---- left column: water cooler, server rack, sofa, plant */
+    p.shadow(15, wb + 8, 11, 3, 0.3);
     g.drawImage(waterSprite(), 8, wb - 4);
     if (this.level >= 3) g.drawImage(serverSprite(), 6, wb + 20);
     if (this.level >= 2) g.drawImage(sofaSprite(), 2, H - 32);
@@ -820,6 +911,8 @@ export class StudioScene {
     const frame = Math.floor((this.clock + w.seed * 37) / frameMs);
     const spr = charSprite(w.look, mode, w.view, frame);
     const g = p.g;
+    /* ground them: a soft shadow where the feet meet the floor */
+    if (!seated) p.shadow(w.x, w.y - 1, CHAR_W * 0.5, 3, 0.36);
     const x = Math.round(w.x - CHAR_W / 2);
     const y = Math.round(w.y - CHAR_H + 1);
     if (w.view === "side" && w.dir < 0) {
