@@ -13,6 +13,7 @@ import {
   UserRound,
   Users,
   Banknote,
+  Zap,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -28,6 +29,8 @@ import {
   type Staff,
 } from "../engine/data";
 import { projectCapacity, type RunState } from "../engine/state";
+import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
+import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
 import {
   MILESTONE_LABEL,
   PRODUCTION_STAGES,
@@ -60,14 +63,21 @@ function ProjectCard({
   onAssign,
   onMilestone,
   onShip,
+  onDelegate,
+  onTakeOver,
+  onResume,
 }: {
   p: Project;
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
+  onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
+  onTakeOver: (projectId: string) => void;
+  onResume: (projectId: string) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
+  const [delegateOpen, setDelegateOpen] = useState(false);
   const team = run.staff.filter((s) => p.staffIds.includes(s.id));
   const late = weeksToDeadline(p, run.week);
   const inPipeline = p.stage !== "airing" && p.stage !== "done";
@@ -75,6 +85,14 @@ function ProjectCard({
   const plan = p.plan[p.stage] ?? 1;
   const pct = p.stage === "ready" ? 100 : Math.min(100, Math.round((p.progress / plan) * 100));
   const noTeam = inPipeline && team.length === 0;
+  const auto = p.auto;
+  const autoBlock = inPipeline && !auto ? delegationBlockReason(run, p) : null;
+  const heads: [HeadSlot, string | null][] = [
+    ["writer", run.heads.writer ?? null],
+    ["animator", run.heads.animator ?? null],
+    ["composer", run.heads.composer ?? null],
+    ["production", run.heads.production ?? null],
+  ];
 
   return (
     <div className={cn("ink-card p-3", p.milestone && "border-neon/60", p.stage === "ready" && "border-gold/60")}>
@@ -235,8 +253,111 @@ function ProjectCard({
         </div>
       )}
 
+      {/* production automation / intervention */}
+      {inPipeline && (
+        <div className="mt-2">
+          {auto ? (
+            <div className={cn("rounded-lg border px-2.5 py-2", auto.intervention ? "border-neon/60 bg-neon/10" : "border-viol/40 bg-viol/10")}>
+              <div className="flex items-center gap-2">
+                <Zap size={13} className={auto.intervention ? "text-neon" : "text-viol"} />
+                <span className={cn("text-[10px] font-extrabold tracking-wider", auto.intervention ? "text-neon" : "text-viol")}>
+                  {auto.intervention ? "⚠ PRODUCTION CRISIS" : "AUTO MANAGE"}
+                </span>
+                {!auto.intervention && (
+                  <span className="truncate text-[10px] text-paper/60">
+                    {auto.headSlot ? `${HEAD_TITLES[auto.headSlot]}` : "crew-led"}
+                  </span>
+                )}
+              </div>
+              {auto.intervention && (
+                <div className="mt-1 text-[10px] text-paper/70">
+                  The team can't carry on without you. Step in, or tell them to keep going.
+                </div>
+              )}
+              <div className="mt-1.5 flex gap-1.5">
+                <Btn variant="primary" className="!px-2.5 !py-1.5 text-[10px]" onClick={() => onTakeOver(p.id)}>
+                  TAKE OVER
+                </Btn>
+                {auto.intervention ? (
+                  <Btn variant="ghost" className="!px-2.5 !py-1.5 text-[10px]" onClick={() => onResume(p.id)}>
+                    KEEP AUTO
+                  </Btn>
+                ) : (
+                  <Btn variant="ghost" className="!px-2.5 !py-1.5 text-[10px]" onClick={() => setDelegateOpen((o) => !o)}>
+                    CHANGE
+                  </Btn>
+                )}
+              </div>
+            </div>
+          ) : run.officeLevel >= AUTO_MIN_OFFICE ? (
+            <>
+              <button
+                onClick={() => {
+                  sfx.click();
+                  setDelegateOpen((o) => !o);
+                }}
+                className="btn-press flex w-full items-center gap-1.5 rounded-lg border border-viol/40 bg-viol/5 px-2 py-1.5"
+              >
+                <Zap size={12} className="text-viol" />
+                <span className="text-[10px] font-bold text-paper/70">
+                  AUTO MANAGE — hand the sprints to a department head
+                </span>
+                <span className="ml-auto text-paper/40">{delegateOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}</span>
+              </button>
+              {delegateOpen && (
+                <div className="mt-1.5 space-y-1">
+                  <button
+                    onClick={() => {
+                      sfx.click();
+                      onDelegate(p.id, null);
+                      setDelegateOpen(false);
+                    }}
+                    className="btn-press w-full rounded-lg border border-line bg-panel2/60 px-2 py-1.5 text-left text-[10px] font-bold text-paper/80"
+                  >
+                    👥 CREW-LED — the whole team runs each sprint (no head needed)
+                  </button>
+                  {heads.map(([slot, id]) => {
+                    const head = id ? run.staff.find((s) => s.id === id) : undefined;
+                    return (
+                      <button
+                        key={slot}
+                        disabled={!head}
+                        onClick={() => {
+                          sfx.click();
+                          onDelegate(p.id, slot);
+                          setDelegateOpen(false);
+                        }}
+                        className={cn(
+                          "btn-press flex w-full items-center gap-2 rounded-lg border px-2 py-1.5 text-left",
+                          head ? "border-line bg-panel2/60" : "border-line/40 bg-panel2/30 opacity-45"
+                        )}
+                      >
+                        <span className="text-[10px] font-bold text-paper/80">{HEAD_TITLES[slot]}</span>
+                        <span className="ml-auto text-[9px] text-paper/50">
+                          {head ? `${head.name} (Lv ${head.level})` : "vacant — appoint one in STAFF"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {autoBlock && <div className="text-[9px] italic text-paper/40">{autoBlock}</div>}
+                  {!autoBlock && (
+                    <div className="text-[9px] text-paper/45">
+                      Delegated sprints run ~70% as well as a hands-on one. You can always TAKE OVER later.
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-[9px] italic text-paper/35">
+              AUTO MANAGE unlocks with Sakuga Tower — a studio with a real pipeline.
+            </div>
+          )}
+        </div>
+      )}
+
       {/* actions */}
-      {p.milestone && (
+      {!auto && p.milestone && (
         <Btn big variant="primary" className="anim-ring mt-2 w-full" onClick={() => onMilestone(p.id)}>
           <Play size={17} /> PLAY {MILESTONE_LABEL[p.milestone].toUpperCase()}
         </Btn>
@@ -263,6 +384,9 @@ export default function ProjectsPanel({
   onShip,
   onSkipWeek,
   onNewShow,
+  onDelegate,
+  onTakeOver,
+  onResume,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -270,6 +394,9 @@ export default function ProjectsPanel({
   onShip: (projectId: string) => void;
   onSkipWeek: () => void;
   onNewShow: () => void;
+  onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
+  onTakeOver: (projectId: string) => void;
+  onResume: (projectId: string) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
@@ -296,7 +423,17 @@ export default function ProjectsPanel({
       )}
 
       {[...active, ...airing].map((p) => (
-        <ProjectCard key={p.id} p={p} run={run} onAssign={onAssign} onMilestone={onMilestone} onShip={onShip} />
+        <ProjectCard
+          key={p.id}
+          p={p}
+          run={run}
+          onAssign={onAssign}
+          onMilestone={onMilestone}
+          onShip={onShip}
+          onDelegate={onDelegate}
+          onTakeOver={onTakeOver}
+          onResume={onResume}
+        />
       ))}
 
       {active.length < cap && (

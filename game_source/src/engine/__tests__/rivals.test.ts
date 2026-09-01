@@ -201,6 +201,8 @@ describe("market interaction", () => {
 /* --------------------------------------------------------- franchises */
 describe("rival franchises", () => {
   it("a warm franchise spawns sequels in later years", () => {
+    /* a studio with strong momentum reliably doubles down on its IP */
+    vi.spyOn(Math, "random").mockReturnValue(0);
     const world = initRivalWorld(0);
     const s0 = world.studios[0];
     const hit = { id: "h", title: "Neon Saga", genres: ["cyber" as const], medium: "tv" as const, budget: "standard" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 31 };

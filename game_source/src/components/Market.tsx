@@ -24,6 +24,7 @@ import {
   type Commission,
 } from "../engine/market";
 import { negotiateCommission, resolveMarketEvent, studioRankings, type RunState } from "../engine/state";
+import { resolveStudioEvent } from "../engine/events";
 import { upcomingPremieres } from "../engine/rivals";
 import { RankingsTable } from "./Rivals";
 
@@ -80,6 +81,11 @@ export default function MarketPanel({
     setRun((r) => resolveMarketEvent(r, id, accept) ?? r);
   };
 
+  const answerStudio = (id: string, choiceId: string) => {
+    sfx.select();
+    setRun((r) => resolveStudioEvent(r, id, choiceId) ?? r);
+  };
+
   return (
     <div className="space-y-1 text-[12px]">
       {/* ------------------------------------------------------------ tabs */}
@@ -103,8 +109,10 @@ export default function MarketPanel({
             }`}
           >
             {label}
-            {id === "deals" && (run.commissions.length + run.marketEvents.length > 0) && (
-              <span className="ml-1 text-cyanx">({run.commissions.length + run.marketEvents.length})</span>
+            {id === "deals" && (run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0) > 0) && (
+              <span className="ml-1 text-cyanx">
+                ({run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0)})
+              </span>
             )}
           </button>
         ))}
@@ -113,6 +121,30 @@ export default function MarketPanel({
       {/* ----------------------------------------------------------- DEALS */}
       {tab === "deals" && (
         <>
+          {(run.studioEvents?.length ?? 0) > 0 && (
+            <>
+              <SectionTitle icon={<PhoneCall size={12} />}>STUDIO DILEMMA</SectionTitle>
+              {(run.studioEvents ?? []).map((ev) => (
+                <div key={ev.id} className="rounded-lg border border-gold/40 bg-gold/10 p-2.5">
+                  <div className="text-paper/90">{ev.text}</div>
+                  <div className="mt-1 text-[10px] text-paper/50">Decide by {dateLabel(ev.expiresWeek)}</div>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {ev.choices.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => answerStudio(ev.id, c.id)}
+                        className="btn-press flex items-center justify-between gap-2 rounded-lg border border-line bg-panel2 px-2.5 py-2 text-left"
+                      >
+                        <span className="text-[11px] font-bold text-paper">{c.label}</span>
+                        <span className="shrink-0 text-[10px] font-bold text-cyanx">{c.effect}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
           {run.marketEvents.length > 0 && (
             <>
               <SectionTitle icon={<PhoneCall size={12} />}>THE PHONE IS RINGING</SectionTitle>

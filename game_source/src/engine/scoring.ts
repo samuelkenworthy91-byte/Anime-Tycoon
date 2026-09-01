@@ -257,7 +257,7 @@ export function computeResult(opts: {
     franchiseMult *
     merch *
     local *
-    (1 + fanBase / 260_000);
+    (1 + Math.log1p(fanBase / 60_000) * 0.8);
 
   const peak = 90_000 * appeal;
   const weeks = 8;

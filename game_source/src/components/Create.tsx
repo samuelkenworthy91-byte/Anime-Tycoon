@@ -91,13 +91,16 @@ function continuationTitle(fr: Franchise, plan: ContinuationPlan, run: RunState)
 
 export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
   const fr = plan ? run.franchises[plan.key] : undefined;
+  /* remember the settings from your last show — same format, budget,
+     slot and audience, so a new show doesn't start from scratch */
+  const last = run.lastDraft;
   const base: Draft = {
     title: randomTitle(),
-    medium: "tv",
-    budget: "standard",
-    slot: "midnight",
+    medium: last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "tv",
+    budget: last?.budget ?? "standard",
+    slot: last?.slot ?? "midnight",
     genres: [],
-    audience: "teens",
+    audience: last?.audience ?? "teens",
     protag: "kai",
     protagName: "Kai",
     secondary: SECONDARY[0].id,

@@ -53,6 +53,21 @@ One in-game day ≈ 2 real minutes while you're in the office. Seven days =
 one week: wages/rent are charged every 4 weeks and show revenue trickles in
 week by week over the 8-week broadcast.
 
+## Auto manage & studio events
+
+From Sakuga Tower onward you can hand a show's milestone sprints to a
+department head (AUTO MANAGE). Delegated quality scales with the head's
+own skill, the assigned team, your facilities, morale and the project's
+difficulty — and always lands below what a well-played hands-on sprint
+reaches. When a deadline is threatened, a production is drowning in
+issues, or a major film hits a critical stage, the show pauses and asks
+you to step in (or tell the crew to keep going).
+
+The industry also throws real dilemmas at you — a trailer going viral, an
+episode leak, a cast suddenly in demand, a fan backlash. Each offers 2–3
+responses with concrete trade-offs, rolled on a slow cadence so they feel
+like an occasion rather than a weekly nag.
+
 ## Build the Android APK
 
 The repo is set up with [Capacitor](https://capacitorjs.com). You need:

@@ -63,6 +63,8 @@ import {
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
 import { activeProjects } from "../engine/projects";
 import { buyInvestment, computeIndustryRecords, dynastyYear } from "../engine/legacy";
+import { resumeAuto, setDelegation, takeOver } from "../engine/automation";
+import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
 import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
@@ -323,9 +325,9 @@ export default function Office({
           </Btn>
           <Btn variant="ghost" className="relative" onClick={() => setModal("market")}>
             <BarChart3 size={15} className="text-mint" /> MARKET
-            {run.commissions.length + run.marketEvents.length > 0 && (
+            {run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0) > 0 && (
               <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cyanx font-display text-[9px] font-extrabold text-ink">
-                {run.commissions.length + run.marketEvents.length}
+                {run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0)}
               </span>
             )}
           </Btn>
@@ -462,6 +464,18 @@ export default function Office({
             onNewShow={() => {
               setModal(null);
               onNewShow();
+            }}
+            onDelegate={(projectId, headSlot: HeadSlot | null) => {
+              sfx.whoosh();
+              setRun((r) => setDelegation(r, projectId, headSlot) ?? r);
+            }}
+            onTakeOver={(projectId) => {
+              sfx.click();
+              setRun((r) => takeOver(r, projectId));
+            }}
+            onResume={(projectId) => {
+              sfx.click();
+              setRun((r) => resumeAuto(r, projectId));
             }}
           />
         </Modal>

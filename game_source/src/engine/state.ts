@@ -147,6 +147,8 @@ import {
   migrateDynasty,
   type DynastyState,
 } from "./legacy";
+import { tickDelegated } from "./automation";
+import { rollStudioEvent, type StudioEvent } from "./events";
 
 export type { Franchise, EntryKind } from "./franchise";
 
@@ -258,6 +260,8 @@ export interface RunState {
   commissions: Commission[];
   /** pending market events awaiting a decision */
   marketEvents: MarketEvent[];
+  /** pending studio dilemmas — 2–3 responses with real trade-offs */
+  studioEvents: StudioEvent[];
   /** overseas licensing deal: +15% revenue until this week */
   revBoostUntil: number;
 }
@@ -340,6 +344,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     partners: Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
     commissions: [],
     marketEvents: [],
+    studioEvents: [],
     revBoostUntil: 0,
   };
 }
@@ -364,6 +369,7 @@ export function migrateRun(raw: unknown): RunState {
         : Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
+    studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
@@ -448,6 +454,14 @@ export const playerRankingInput = (r: RunState): RankingInput => ({
   awards: r.awards,
 });
 
+/** the player's hottest IP — used to target franchise-flavoured events */
+const topFranchiseFor = (franchises: Record<string, Franchise>) => {
+  const top = Object.values(franchises)
+    .filter((f) => f.popularity >= 50)
+    .sort((a, b) => b.popularity - a.popularity)[0];
+  return top ? { key: top.key, title: top.baseTitle, popularity: top.popularity } : null;
+};
+
 /** Advance the calendar: weekly payouts land, wages + rent charged at month end, rival shows air, and each year ends with the awards ceremony. */
 export function advanceWeeks(r: RunState, n: number): RunState {
   let cash = r.cash;
@@ -476,6 +490,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let recentReleases = [...(r.recentReleases ?? [])];
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
+  let studioEvents = [...(r.studioEvents ?? [])];
   rivalWorld = { ...rivalWorld, studios: rivalWorld.studios.map((s) => ({ ...s, talent: [...s.talent] })) };
   let partners = { ...(r.partners ?? {}) };
   let franchises = { ...(r.franchises ?? {}) };
@@ -522,6 +537,14 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     projects = tick.projects;
     cash += tick.cashDelta;
     notices.push(...tick.notices);
+
+    /* delegated projects run their own milestone sprints automatically */
+    const dlg = tickDelegated(r, projects, staffArr, w, fx);
+    projects = dlg.projects;
+    staffArr = dlg.staff;
+    rd += dlg.rd;
+    cash += dlg.cash;
+    notices.push(...dlg.notices);
 
     /* the archive room quietly files away research */
     rd += fx.rdWeekly;
@@ -691,6 +714,28 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       }
     }
 
+    /* the occasional studio dilemma — slow cadence so it feels special */
+    studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
+    if (w % 9 === 0 && studioEvents.length === 0 && Math.random() < 0.45) {
+      const sev = rollStudioEvent(w, {
+        crew: staffArr.map((s) => ({
+          id: s.id,
+          name: s.name,
+          role: s.role,
+          level: s.level,
+          morale: moraleOf(s),
+        })),
+        active: projects
+          .filter((p) => p.stage !== "airing" && p.stage !== "done")
+          .map((p) => ({ id: p.id, title: p.draft.title, stage: p.stage, hype: p.hype, issues: p.issues })),
+        topFranchise: topFranchiseFor(franchises),
+      });
+      if (sev) {
+        studioEvents = [sev];
+        notices.push("🎬 A studio dilemma lands on your desk — open the market to decide.");
+      }
+    }
+
     if (w % 4 === 0) {
       const bill = perWeek * 4;
       cash -= bill;
@@ -834,6 +879,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     recentReleases,
     commissions,
     marketEvents,
+    studioEvents,
     franchises,
     partners,
     notices: notices.slice(-40),

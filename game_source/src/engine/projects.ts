@@ -150,6 +150,19 @@ export interface Project {
   airedWeek: number | null;
   /** the deal financing this show — null/undefined = fully self-funded */
   commission?: ProjectCommission | null;
+  /** production automation (engine/automation.ts) — null = fully manual */
+  auto?: AutoState | null;
+}
+
+/** delegation state for AUTO MANAGE (see engine/automation.ts) */
+export interface AutoState {
+  /** which department head the project is delegated to (null = team-led) */
+  headSlot: "writer" | "animator" | "composer" | "production" | null;
+  startedWeek: number;
+  /** a crisis has paused automation — the player is being asked to step in */
+  intervention: boolean;
+  /** the critical-stage film prompt has fired once (don't nag) */
+  warnedMovie?: boolean;
 }
 
 /** commission terms attached to a running project */
