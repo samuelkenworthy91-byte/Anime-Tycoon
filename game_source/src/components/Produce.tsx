@@ -78,7 +78,7 @@ export default function Produce({
   const desks = useMemo<FloorDesk[]>(() => {
     const focus: PointType = phase?.type ?? "art";
     const list: FloorDesk[] = [
-      { name: runner.name.split(" ")[0], skill: 46 + run.showsMade * 2, type: focus, isBoss: true, img: runner.img },
+      { name: runner.name.split(" ")[0], skill: 46 + run.showsMade * 2, type: focus, isBoss: true, img: runner.portrait, sprite: runner.sprite },
     ];
     team.forEach((s) =>
       list.push({
@@ -89,7 +89,7 @@ export default function Produce({
       })
     );
     return list;
-  }, [team, run.showsMade, runner.name, runner.img, phase?.type]);
+  }, [team, run.showsMade, runner.name, runner.portrait, runner.sprite, phase?.type]);
 
   const spawnMult = (run.research.includes("pipeline") ? 1.2 : 1) * (1 + run.officeLevel * 0.05);
   const lifeMult = (run.research.includes("storyboard") ? 1.25 : 1) * (run.showrunner === "steady" ? 1.2 : 1);
@@ -293,7 +293,7 @@ export default function Produce({
               onClick={() => takeSpecialist(40 + run.showsMade * 3, 0)}
               className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-neon/50"
             >
-              <img src={runner.img} alt="" className="h-10 w-10 rounded-lg object-cover" />
+              <img src={runner.portrait} alt="" className="h-10 w-10 rounded-lg object-cover" />
               <div className="flex-1">
                 <div className="text-sm font-bold">{runner.name} (you)</div>
                 <div className="text-[10px] text-paper/50">Do it yourself. Free, improves with experience.</div>

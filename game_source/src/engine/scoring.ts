@@ -1,4 +1,5 @@
 import {
+  AIR_WEEKS,
   ARCS,
   AUDIENCES,
   GENRES,
@@ -259,13 +260,25 @@ export function computeResult(opts: {
     local *
     (1 + Math.log1p(fanBase / 60_000) * 0.8);
 
-  const peak = 90_000 * appeal;
-  const weeks = 8;
-  const sales: number[] = [];
-  for (let i = 0; i < weeks; i++) {
-    const shape = Math.exp(-Math.pow(i - 1.1, 2) / 6.2);
-    sales.push(Math.max(0, Math.round(peak * shape * (0.88 + Math.random() * 0.24))));
+  /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
+     peak, then a long tail of re-runs and word of mouth. The gamma-ish
+     shape ramps with t^a and decays exponentially, normalised so the peak
+     week lands exactly at `peak` units. */
+  /* 44k base keeps the 12-week bell's total area ≈ the old 8-week spike,
+     so the same show earns about the same lifetime revenue — only the
+     week-to-week shape (build → peak → tail) matches Game Dev Tycoon. */
+  const peak = 44_000 * appeal;
+  const rampA = 2.2; // how steeply the show climbs
+  const tailB = 2.05; // how long the tail lasts
+  const rawShape: number[] = [];
+  for (let i = 0; i < AIR_WEEKS; i++) {
+    const t = i + 1;
+    rawShape.push(Math.pow(t, rampA) * Math.exp(-t / tailB));
   }
+  const shapeMax = Math.max(...rawShape);
+  const sales = rawShape.map((s) =>
+    Math.max(0, Math.round(peak * (s / shapeMax) * (0.9 + Math.random() * 0.2)))
+  );
   const units = sales.reduce((a, b) => a + b, 0);
   const revenue = Math.round(units * 2.6);
 

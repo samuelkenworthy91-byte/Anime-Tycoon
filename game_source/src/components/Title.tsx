@@ -4,7 +4,8 @@ import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
 import { getScores, newestSave, slotLabel, type SlotId, type ScoreEntry } from "../engine/storage";
 import SaveSlots from "./SaveSlots";
-import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel } from "../engine/data";
+import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel, type Showrunner } from "../engine/data";
+type ShowrunnerId = Showrunner["id"];
 import { cn } from "../utils/cn";
 
 /* ----------------------------------------------------------- score table */
@@ -64,7 +65,7 @@ export default function Title({
   const newest = useMemo(() => newestSave(), [saveTick]);
   const [view, setView] = useState<"menu" | "setup" | "scores" | "load">("menu");
   const [studio, setStudio] = useState("Anime Runner");
-  const [runner, setRunner] = useState<"steady" | "vision">("steady");
+  const [runner, setRunner] = useState<ShowrunnerId>("steady");
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -156,7 +157,7 @@ export default function Title({
                 big
                 variant="cyan"
                 className="w-72"
-                onClick={() => onStart("Anime Runner", Math.random() < 0.5 ? "steady" : "vision")}
+                onClick={() => onStart("Anime Runner", SHOWRUNNERS[Math.floor(Math.random() * SHOWRUNNERS.length)].id)}
               >
                 <Zap size={20} /> QUICK START
               </Btn>

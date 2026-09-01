@@ -28,7 +28,7 @@ import {
   type PointType,
   type Staff,
 } from "../engine/data";
-import { projectCapacity, type RunState } from "../engine/state";
+import { AIR_WEEKS, projectCapacity, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
 import {
@@ -163,7 +163,7 @@ function ProjectCard({
       )}
       {p.stage === "airing" && p.airedWeek !== null && (
         <div className="mt-1.5 text-[10px] font-bold text-mint">
-          ON AIR — week {Math.min(8, run.week - p.airedWeek + 1)}/8
+          ON AIR — week {Math.min(AIR_WEEKS, run.week - p.airedWeek + 1)}/{AIR_WEEKS}
           {p.result && <span className="ml-2 text-gold">{p.result.total}/40</span>}
         </div>
       )}

@@ -172,7 +172,7 @@ export default function Office({
       {/* ---------------------------------------------------- office scene */}
       <OfficeScene
         level={run.officeLevel}
-        boss={{ name: runner.name.split(" ")[0], color: "#ffd166" }}
+        boss={{ name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite }}
         staff={run.staff.map((s) => ({
           name: s.name.split(" ")[0],
           color: POINT_COLOR[ROLE_POINT[s.role]],

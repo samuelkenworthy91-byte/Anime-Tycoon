@@ -50,8 +50,19 @@ each other are all hidden until you ship and read the post-release breakdown.
 ## Time
 
 One in-game day ≈ 2 real minutes while you're in the office. Seven days =
-one week: wages/rent are charged every 4 weeks and show revenue trickles in
-week by week over the 8-week broadcast.
+one week: wages/rent are charged every 4 weeks and show revenue lands over a
+12-week broadcast — a slow build, a decisive peak, then a long tail of
+re-runs and word of mouth, like the Game Dev Tycoon sales chart.
+
+## Showrunners
+
+Four founding showrunners open a studio, each with a painted chibi model who
+walks your office floor and a matching head portrait:
+
+- **Genji Ashida** — Steady Hand: bubbles float longer, editing notes rarer.
+- **Akari Natsume** — Vision: dramatic arcs hit harder, no review below 3/10.
+- **Haruto Mori** — Golden Rolodex: contract jobs pay +40%, commission advances +30%.
+- **Sana Kobayashi** — Buzz Engine: shows open with +10 hype, marketing runs hot (+50% hype).
 
 ## Auto manage & studio events
 

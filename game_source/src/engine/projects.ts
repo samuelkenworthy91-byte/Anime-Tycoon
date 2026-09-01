@@ -25,6 +25,7 @@
  * ==================================================================== */
 
 import {
+  AIR_WEEKS,
   ARCS,
   BUDGETS,
   GENRES,
@@ -345,7 +346,7 @@ export function tickProjectsWeek(
 
     /* ----- airing: the payout schedule does the work; just finish up */
     if (p.stage === "airing") {
-      if (p.airedWeek !== null && week >= p.airedWeek + 8) {
+      if (p.airedWeek !== null && week >= p.airedWeek + AIR_WEEKS) {
         p.stage = "done";
         notices.push(`“${p.draft.title}” finishes its broadcast run.`);
       }

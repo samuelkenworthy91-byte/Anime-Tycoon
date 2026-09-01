@@ -282,9 +282,9 @@ describe("release", () => {
     expect(r.payouts.some((x) => x.week > r.week)).toBe(true);
     expect(r.showsMade).toBe(1);
 
-    // broadcast run ends after 8 weeks
+    // broadcast run ends after AIR_WEEKS weeks
     let projects = r.projects;
-    for (let w = r.week + 1; w <= r.week + 9; w++) {
+    for (let w = r.week + 1; w <= r.week + 13; w++) {
       projects = tickProjectsWeek(projects, r.staff, w).projects;
     }
     expect(projects.find((x) => x.id === id)!.stage).toBe("done");

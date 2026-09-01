@@ -7,6 +7,8 @@ export interface OfficeStaff {
   tired?: boolean;
   /** index into WORKER_LOOKS so each person keeps their own painted model */
   look?: number;
+  /** the showrunner's own painted office sprite */
+  sprite?: string;
 }
 
 /* ------------------------------------------------------------------ art
@@ -323,7 +325,7 @@ export default function OfficeScene({
           return (
             <Character
               key={`${c.name}-${i}`}
-              src={c.boss ? BOSS_SPRITE : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
+              src={c.boss ? (c.sprite ?? BOSS_SPRITE) : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
               body={b}
               scale={SPRITE_H[lvl] * 100}
               label={c.boss ? `${c.name} · showrunner` : c.name}

@@ -699,6 +699,36 @@ export const VILLAINS: CastMember[] = [
   reg({ id: "v_bioform", name: "Bioform IX", archetype: "The Failed Experiment", img: "img/cast-villain-10.jpg", pos: 3, tag: "Built to win. Nobody said at what.", aff: ["mecha", "cyber", "shonen"], role: "villain" }),
 ];
 
+/* ------------------------------------------------- wave three cast
+ * Added to close genre-coverage gaps — every face here gets its own
+ * dedicated Wit-Studio-style portrait. Focus: shojo & isekai combos,
+ * plus the pairs that previously had no dual-affinity cast at all. */
+export const CAST_WAVE_THREE: CastMember[] = [
+  /* --- protagonists: isekai × shojo and other gap pairs --- */
+  reg({ id: "n_aoi", name: "Aoi", archetype: "Otherworld Heiress", img: "img/cast3/aoi.jpg", tag: "Summoned as a heroine, built an empire.", aff: ["isekai", "shojo", "fantasy"], role: "protag" }),
+  reg({ id: "n_saku", name: "Saku", archetype: "Idol Voyager", img: "img/cast3/saku.jpg", tag: "Tours other worlds; sells out arenas.", aff: ["isekai", "idol", "shojo"], role: "protag" }),
+  reg({ id: "n_ryoko", name: "Ryoko", archetype: "Moonlight Mechanic", img: "img/cast3/ryoko.jpg", tag: "Rebuilds fallen stars by hand.", aff: ["mecha", "shojo", "space"], role: "protag" }),
+  reg({ id: "n_chisato", name: "Chisato", archetype: "Heartthrob Striker", img: "img/cast3/chisato.jpg", tag: "Bends it like Beckham, loves like a shoujo.", aff: ["romance", "sports", "shojo"], role: "protag" }),
+  reg({ id: "n_reiwa", name: "Reiwa", archetype: "Noir Diva", img: "img/cast3/reiwa.jpg", tag: "Sings in smoke; nobody asks twice.", aff: ["noir", "idol", "cyber"], role: "protag" }),
+  reg({ id: "n_mikoto", name: "Mikoto", archetype: "Witch's Apprentice", img: "img/cast3/mikoto.jpg", tag: "One spell left, and it's a big one.", aff: ["magical", "shojo", "romance"], role: "protag" }),
+  /* --- secondaries --- */
+  reg({ id: "s_soleil", name: "Soleil", archetype: "Star Knight", img: "img/cast3/soleil.jpg", tag: "Chivalry, but make it cosmic.", aff: ["isekai", "space", "fantasy"], role: "secondary" }),
+  reg({ id: "s_ice", name: "Ice", archetype: "Cold Charm", img: "img/cast3/ice.jpg", tag: "Goth prince with a warm playlist.", aff: ["romance", "supernatural", "idol"], role: "secondary" }),
+  reg({ id: "s_bolt", name: "Bolt", archetype: "Last-Lap Rival", img: "img/cast3/bolt.jpg", tag: "The finish line is personal.", aff: ["racing", "shonen", "sports"], role: "secondary" }),
+  reg({ id: "s_ironmaid", name: "Valkyrie", archetype: "Winged Sergeant", img: "img/cast3/valkyrie.jpg", tag: "Discipline first, hugs after.", aff: ["military", "mecha", "shojo"], role: "secondary" }),
+  /* --- pets --- */
+  reg({ id: "p_loader", name: "Loader", archetype: "Munitions Mutt", img: "img/cast3/loader.jpg", tag: "Digs up more than bones.", aff: ["military", "comedy", "shonen"], role: "pet" }),
+  reg({ id: "p_nitro", name: "Nitro", archetype: "Pit-Crew Ferret", img: "img/cast3/nitro.jpg", tag: "Torque in a tiny body.", aff: ["racing", "sports", "comedy"], role: "pet" }),
+  reg({ id: "p_stellar", name: "Stellar", archetype: "Comet Kitten", img: "img/cast3/stellar.jpg", tag: "Chases starlight, catches it.", aff: ["space", "magical", "shojo"], role: "pet" }),
+  /* --- villains: shojo, isekai, cooking, idol --- */
+  reg({ id: "v_rosethorn", name: "Rosethorn", archetype: "The Wilted Heiress", img: "img/cast3/rosethorn.jpg", tag: "Pretty, poisonous, uninvited.", aff: ["shojo", "magical", "fantasy"], role: "villain" }),
+  reg({ id: "v_overlord", name: "Overlord Zero", archetype: "The Summoned Tyrant", img: "img/cast3/overlord.jpg", tag: "Owns the world you got dropped into.", aff: ["isekai", "shojo", "fantasy"], role: "villain" }),
+  reg({ id: "v_grandfinale", name: "Grand Finale", archetype: "The Final Judge", img: "img/cast3/grandfinale.jpg", tag: "Scores every dish like a duel.", aff: ["cooking", "comedy", "shonen"], role: "villain" }),
+  reg({ id: "v_falsetto", name: "Falsetto", archetype: "The Chart-Topping Threat", img: "img/cast3/falsetto.jpg", tag: "Every note steals a fan.", aff: ["idol", "shojo", "cyber"], role: "villain" }),
+  reg({ id: "v_lovelace", name: "Lovelace", archetype: "The Serial Romantic", img: "img/cast3/lovelace.jpg", tag: "Breaks hearts by contract.", aff: ["romance", "noir", "comedy"], role: "villain" }),
+];
+
+
 /* ------------------------------------------------------------------- arcs */
 export const ARCS: Arc[] = [
   { id: "hook", name: "Cold Open Hook", cost: 8_000, q: 4, f: 0.04, desc: "Start with a bang. Critics rewatch it." },
@@ -817,7 +847,7 @@ export interface WorkerLook {
   sprite: string;
   portrait: string;
 }
-export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11].map((n) => ({
+export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((n) => ({
   sprite: `img/sprite-worker-${n}.png`,
   portrait: `img/portrait-worker-${n}.png`,
 }));
@@ -862,15 +892,21 @@ export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
 /* ------------------------------------------------------------- showrunners */
 export interface Showrunner {
-  id: "steady" | "vision";
+  id: "steady" | "vision" | "producer" | "marketer";
   name: string;
   title: string;
   img: string;
+  /** painted chibi office model — the boss sprite walking the studio floor */
+  sprite: string;
+  /** portrait crop of the very same model, used in menus */
+  portrait: string;
   perk: string;
 }
 export const SHOWRUNNERS: Showrunner[] = [
-  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", perk: "Steady Hand — bubbles float 20% longer and editing notes are rarer." },
-  { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
+  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Steady Hand — bubbles float 20% longer and editing notes are rarer." },
+  { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
+  { id: "producer", name: "Haruto Mori", title: "The Mogul Producer", img: "img/showrunner-c.jpg", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Golden Rolodex — contracts pay 40% more and advances are bigger." },
+  { id: "marketer", name: "Sana Kobayashi", title: "The Hype Machine", img: "img/showrunner-d.jpg", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "Buzz Engine — shows open with +10 hype and marketing runs faster." },
 ];
 
 /* --------------------------------------------------------------- reviewers */
@@ -1063,6 +1099,9 @@ export function formatNum(n: number): string {
 /* -------------------------------------------------------------- calendar */
 /** the length of the career campaign — after this the studio enters Dynasty Mode */
 export const CAREER_WEEKS = 48 * 12;
+/** weeks a released show earns broadcast revenue — Game Dev Tycoon style:
+    a slow build, a peak, then a long tail of re-runs and word of mouth */
+export const AIR_WEEKS = 12;
 export const WEEKS_PER_MONTH = 4;
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export const yearOfWeek = (w: number) => Math.floor(w / 48) + 1;

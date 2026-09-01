@@ -12,6 +12,8 @@ export interface FloorDesk {
       The boss (showrunner) uses their own photo for bubbles. */
   look?: number;
   img?: string;
+  /** the showrunner's own painted office sprite (falls back to BOSS_LOOK) */
+  sprite?: string;
 }
 
 export interface FloorTotals {
@@ -153,7 +155,8 @@ export default function ProductionFloor({
 
     /* painted HD-2D worker sprites, drawn seated behind each desk; one per
        look, with the showrunner's model appended at the end */
-    s._sprites = [...WORKER_LOOKS.map((l) => l.sprite), BOSS_LOOK.sprite].map((src) => {
+    const boss = desks.find((d) => d.isBoss);
+    s._sprites = [...WORKER_LOOKS.map((l) => l.sprite), boss?.sprite || BOSS_LOOK.sprite].map((src) => {
       const im = new Image();
       im.src = src;
       return im;
@@ -161,7 +164,6 @@ export default function ProductionFloor({
 
     /* showrunner portrait is the player avatar */
     const face = new Image();
-    const boss = desks.find((d) => d.isBoss);
     if (boss?.img) face.src = boss.img;
     s.face = face;
 

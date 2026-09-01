@@ -2,6 +2,7 @@ import {
   GENRES,
   OFFICES,
   CAREER_WEEKS,
+  AIR_WEEKS,
   castById,
   comboKey,
   dateLabel,
@@ -291,7 +292,7 @@ export const arcLockReason = (a: Arc, r: RunState): string | null => {
 /** twelve-year career — after this the studio enters Dynasty Mode */
 export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
-export const AIR_WEEKS = 8; // a show earns revenue over 8 broadcast weeks
+export { AIR_WEEKS }; // re-exported for screens that read the broadcast length
 
 export function initialRun(studio: string, showrunner: string): RunState {
   return {
@@ -319,7 +320,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     studioTop: 0,
     franchises: {},
     pendingSequel: null,
-    contracts: [rollContract(0), rollContract(0), rollContract(0)],
+    contracts: [rollContract(0), rollContract(0), rollContract(0)].map((c) => contractForShowrunner(showrunner, c)),
     hallOfFame: [],
     lastResult: null,
     lastDraft: null,
@@ -462,6 +463,18 @@ const topFranchiseFor = (franchises: Record<string, Franchise>) => {
   return top ? { key: top.key, title: top.baseTitle, popularity: top.popularity } : null;
 };
 
+/** the Mogul Producer's golden rolodex sweetens every contract & brief */
+const contractForShowrunner = (showrunner: string, c: Contract): Contract =>
+  showrunner === "producer" ? { ...c, pay: Math.round((c.pay * 1.4) / 100) * 100 } : c;
+const commissionForShowrunner = (showrunner: string, c: Commission): Commission =>
+  showrunner === "producer"
+    ? {
+        ...c,
+        advance: Math.round((c.advance * 1.3) / 5_000) * 5_000,
+        bonus: Math.round((c.bonus * 1.3) / 5_000) * 5_000,
+      }
+    : c;
+
 /** Advance the calendar: weekly payouts land, wages + rent charged at month end, rival shows air, and each year ends with the awards ceremony. */
 export function advanceWeeks(r: RunState, n: number): RunState {
   let cash = r.cash;
@@ -508,6 +521,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     },
     speed: baseFx.speed + dynFx.speed,
     rdWeekly: baseFx.rdWeekly + dynFx.rdWeekly,
+    /* the Hype Machine's marketing office runs hot */
+    hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
   const studio = studioProduction(heads, staffArr);
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
@@ -687,7 +702,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     /* commissioners refresh their briefs */
     commissions = commissions.filter((c) => w <= c.expiresWeek);
     if (w % 10 === 0) {
-      while (commissions.length < 3) commissions.push(rollCommission(w, partners, market));
+      while (commissions.length < 3) commissions.push(commissionForShowrunner(r.showrunner, rollCommission(w, partners, market)));
       notices.push("New commission briefs are on the table — check the market.");
     }
 
@@ -743,7 +758,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
         `Payday: wages + rent${facilityUpkeep(r.facilities) > 0 ? " + facilities" : ""} −£${bill.toLocaleString("en-GB")}.`
       );
     }
-    if (w % 6 === 0) contracts = [rollContract(w), rollContract(w), rollContract(w)];
+    if (w % 6 === 0)
+      contracts = [rollContract(w), rollContract(w), rollContract(w)].map((c) => contractForShowrunner(r.showrunner, c));
 
     /* end of a calendar year: awards ceremony + rankings + fresh rival slate */
     if (w % 48 === 0) {
@@ -938,6 +954,8 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   }
 
   let p = makeProject(d, r.week);
+  /* the Hype Machine opens every show with a ready-made buzz */
+  if (r.showrunner === "marketer") p = { ...p, hype: p.hype + 10 };
   const partner = commission ? partnerById(commission.partnerId) : null;
   if (commission && partner) {
     p = {
@@ -1576,7 +1594,7 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
   }
   switch (ev.kind) {
     case "emergency": {
-      const c = emergencyCommission(r.week, ev.partnerId ?? "ntv8", r.partners ?? {}, r.market ?? initMarket());
+      const c = commissionForShowrunner(r.showrunner, emergencyCommission(r.week, ev.partnerId ?? "ntv8", r.partners ?? {}, r.market ?? initMarket()));
       return {
         ...r,
         marketEvents: rest,
@@ -1585,7 +1603,7 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
       };
     }
     case "adaptation": {
-      const c = adaptationCommission(r.week, r.partners ?? {}, r.market ?? initMarket());
+      const c = commissionForShowrunner(r.showrunner, adaptationCommission(r.week, r.partners ?? {}, r.market ?? initMarket()));
       return {
         ...r,
         marketEvents: rest,
