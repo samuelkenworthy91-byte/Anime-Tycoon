@@ -27,8 +27,10 @@ verifies the art actually made it into the package.
 3. Download the **`anime-tycoon-debug-apk`** artifact from the run summary
 4. Unzip it and install `app-debug.apk`
 
-The workflow fails loudly if `dist/img` is empty or the logo is missing from the
-build, so a broken APK can never be published silently.
+The workflow's `apk:sync` step is what puts the art and logo inside the package.
+To make a bad build fail loudly instead of shipping a blank app, you can paste
+the optional guard step from [`docs/apk-workflow-guards.yml`](docs/apk-workflow-guards.yml)
+into `apk.yml` right after the sync step.
 
 ### Option B — locally
 

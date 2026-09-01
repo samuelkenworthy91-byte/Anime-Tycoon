@@ -1,0 +1,28 @@
+# Optional hardening for .github/workflows/apk.yml.
+# Paste these two steps into the build-apk job, immediately AFTER the
+# "Build web app and sync Capacitor" step. They turn a silently-blank APK into
+# a red CI run.
+#
+# (Workflow files can only be edited by a human account, which is why these
+# live here instead of already being in apk.yml.)
+
+      - name: Type-check
+        working-directory: game_source
+        run: npx tsc --noEmit
+
+      - name: Verify the art and logo made it into the Android project
+        working-directory: game_source
+        run: |
+          set -e
+          test -f dist/index.html || { echo "::error::dist/index.html missing"; exit 1; }
+          test -d dist/img || { echo "::error::dist/img missing - public/ was not copied"; exit 1; }
+          grep -q "img/logo-mark.png" dist/index.html || { echo "::error::logo not referenced by the build"; exit 1; }
+          A=android/app/src/main/assets/public
+          test -f "$A/index.html" || { echo "::error::cap sync did not copy index.html"; exit 1; }
+          test -d "$A/img" || { echo "::error::cap sync did not copy img/"; exit 1; }
+          imgs=$(ls "$A/img" | wc -l)
+          echo "APK payload: $imgs images, $(du -sh "$A" | cut -f1) total"
+          [ "$imgs" -ge 50 ] || { echo "::error::only $imgs images in the APK payload"; exit 1; }
+          for f in logo-mark.png bg-title.jpg cast-protag-9.jpg; do
+            test -f "$A/img/$f" || { echo "::error::$f missing from the APK payload"; exit 1; }
+          done
