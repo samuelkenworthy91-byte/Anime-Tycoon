@@ -4,6 +4,7 @@ import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, PROMOS, formatGBP, type PointType } from "../engine/data";
 import type { RunState } from "../engine/state";
+import { facilityFX } from "../engine/facilities";
 import { lateRevenueMult, type Project } from "../engine/projects";
 import { cn } from "../utils/cn";
 
@@ -26,6 +27,8 @@ export default function Ship({
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
+  const fx = facilityFX(run.facilities);
+  const mktTier = run.facilities.marketing ?? 0;
 
   const buyPromo = (id: string, cost: number, h: number) => {
     sfx.cash();
@@ -84,15 +87,21 @@ export default function Ship({
 
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {PROMOS.map((p) => {
-            const locked = p.locked && !run.research.includes("marketing");
+            const locked = p.locked && !run.research.includes("marketing") && !fx.promoUnlock;
             const isBought = bought.includes(p.id);
-            const afford = run.cash - spent >= p.cost;
+            /* the marketing office negotiates rates and amplifies every campaign */
+            const cost = Math.round(p.cost * (1 - fx.promoDiscount));
+            const hypeGain = Math.round(p.hype * fx.hypeMult);
+            const afford = run.cash - spent >= cost;
             return (
               <div key={p.id} className={cn("ink-card p-3", isBought && "border-mint/60")}>
                 <div className="flex items-center gap-1.5">
                   <Megaphone size={14} className="text-gold" />
                   <span className="font-display text-sm font-extrabold">{p.name}</span>
-                  <span className="ml-auto text-[10px] font-bold text-cyanx">+{p.hype} hype</span>
+                  <span className="ml-auto text-[10px] font-bold text-cyanx">
+                    +{hypeGain} hype
+                    {hypeGain > p.hype && <span className="text-mint"> ↑</span>}
+                  </span>
                 </div>
                 <div className="mt-0.5 text-[10px] text-paper/50">{p.desc}</div>
                 <div className="mt-2">
@@ -101,16 +110,22 @@ export default function Ship({
                       <Check size={12} /> BOOKED
                     </span>
                   ) : locked ? (
-                    <span className="text-[10px] font-bold text-paper/40">Research “Marketing Dept.” to unlock</span>
+                    <span className="text-[10px] font-bold text-paper/40">Research “Marketing Dept.” or build a tier-2 Marketing Office</span>
                   ) : (
-                    <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!afford} onClick={() => buyPromo(p.id, p.cost, p.hype)}>
-                      BOOK {formatGBP(p.cost)}
+                    <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!afford} onClick={() => buyPromo(p.id, cost, hypeGain)}>
+                      BOOK {formatGBP(cost)}
+                      {cost < p.cost && <s className="ml-1 text-[9px] opacity-60">{formatGBP(p.cost)}</s>}
                     </Btn>
                   )}
                 </div>
               </div>
             );
           })}
+          {mktTier > 0 && (
+            <div className="ink-card border-dashed p-2.5 text-[9px] text-paper/45 sm:col-span-2">
+              Marketing Office tier {mktTier}: hype gains ×{fx.hypeMult.toFixed(2)}, campaign prices −{Math.round(fx.promoDiscount * 100)}%.
+            </div>
+          )}
         </div>
 
         <div className="mt-3 flex items-center gap-3 rounded-xl border border-line bg-panel2/70 p-3">

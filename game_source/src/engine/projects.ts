@@ -37,6 +37,7 @@ import {
   type Staff,
 } from "./data";
 import { computeResult, type Points, type ShowResult } from "./scoring";
+import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
 
 /* ------------------------------------------------------------- costs */
 export function draftCost(d: Draft): number {
@@ -251,14 +252,18 @@ export function toggleAssign(projects: Project[], projectId: string, staffId: st
 const staminaF = (s: Staff) => 0.55 + s.stamina / 220;
 
 /** how much stage work the team banks in one week (1 = on schedule) */
-export function teamSpeed(p: Project, team: Staff[]): number {
+export function teamSpeed(p: Project, team: Staff[], fx: FacilityFX = NO_FX): number {
   const focus = STAGE_FOCUS[p.stage];
   let v = 0.35; // the showrunner keeps things moving even solo
   for (const s of team) {
     const rel = focus ? staffPoint(s, focus) : (s.story + s.art + s.sound) / 3;
     v += (0.22 + rel / 280) * staminaF(s);
   }
-  return Math.min(2.2, v);
+  /* render farm speeds everything (blockbusters most); the animation
+     department cuts delays specifically during the animation stage */
+  v += fxSpeedFor(fx, p.draft.budget);
+  if (p.stage === "animation") v += fx.speedAnimation;
+  return Math.min(2.4, v);
 }
 
 export interface WeekTickResult {
@@ -268,7 +273,7 @@ export interface WeekTickResult {
 }
 
 /** advance every project by one calendar week */
-export function tickProjectsWeek(projects: Project[], staff: Staff[], week: number): WeekTickResult {
+export function tickProjectsWeek(projects: Project[], staff: Staff[], week: number, fx: FacilityFX = NO_FX): WeekTickResult {
   let cashDelta = 0;
   const notices: string[] = [];
 
@@ -296,21 +301,21 @@ export function tickProjectsWeek(projects: Project[], staff: Staff[], week: numb
       const focus = STAGE_FOCUS[p.stage];
       if (focus) {
         for (const s of team) {
-          p.points[focus] += Math.round(staffPoint(s, focus) * 0.07 * staminaF(s));
+          p.points[focus] += Math.round(staffPoint(s, focus) * 0.07 * staminaF(s) * fx.pointMult[focus]);
         }
       }
       if (p.stage === "post") {
-        p.issues = Math.max(0, p.issues - Math.round(team.length * 0.6 + 0.4));
+        p.issues = Math.max(0, p.issues - Math.round(team.length * 0.6 + 0.4) - fx.issueFix);
       }
       if (p.stage === "marketing") {
-        p.hype = Math.min(100, p.hype + 3 + team.length * 2);
+        p.hype = Math.min(100, p.hype + Math.round((3 + team.length * 2) * fx.hypeMult));
       }
       if (p.stage === "ready") {
         /* deliberate delay: polish the master, but hype cools */
         p.issues = Math.max(0, p.issues - Math.max(1, Math.round(team.length * 0.5)));
         p.hype = Math.max(0, p.hype - 1);
       } else {
-        p.progress += teamSpeed(p, team);
+        p.progress += teamSpeed(p, team, fx);
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
@@ -403,6 +408,8 @@ export const lateRevenueMult = (p: Project) => Math.max(0.7, 1 - 0.03 * p.lateWe
 
 export interface ScoringContext {
   research: string[];
+  /** merch department revenue multiplier (1 = none) */
+  merchMult?: number;
   showrunner: string;
   comboLevels: Record<string, number>;
   castCombos: string[];
@@ -447,15 +454,28 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     fanBase: ctx.fans,
   });
 
+  let out = res;
+
+  /* the merch department turns every hit into acrylic stands */
+  const merch = ctx.merchMult ?? 1;
+  if (merch > 1) {
+    const extra = Math.round(out.revenue * (merch - 1));
+    out = {
+      ...out,
+      revenue: out.revenue + extra,
+      breakdown: [...out.breakdown, { label: "Merch Department", pts: `+£${extra.toLocaleString("en-GB")}` }],
+    };
+  }
+
   /* the broadcaster docks a late delivery */
   const mult = lateRevenueMult(p);
   if (mult < 1) {
-    return {
-      ...res,
-      revenue: Math.round(res.revenue * mult),
-      fans: Math.round(res.fans * mult),
-      breakdown: [...res.breakdown, { label: `Late delivery (${p.lateWeeks} wk)`, pts: `×${mult.toFixed(2)} revenue` }],
+    out = {
+      ...out,
+      revenue: Math.round(out.revenue * mult),
+      fans: Math.round(out.fans * mult),
+      breakdown: [...out.breakdown, { label: `Late delivery (${p.lateWeeks} wk)`, pts: `×${mult.toFixed(2)} revenue` }],
     };
   }
-  return res;
+  return out;
 }

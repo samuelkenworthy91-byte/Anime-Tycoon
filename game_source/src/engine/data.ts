@@ -296,15 +296,17 @@ export interface Office {
   desks: number;
   /** how many major productions can run at the same time */
   projects: number;
+  /** how many facility rooms can be built here */
+  slots: number;
   blurb: string;
   bg: string;
 }
 export const OFFICES: Office[] = [
-  { id: 0, name: "Bedroom Studio", maxStaff: 2, rent: 400, cost: 0, desks: 3, projects: 1, blurb: "A futon, a tablet and a dream.", bg: "img/bg-office-1.jpg" },
-  { id: 1, name: "Anime Runner Building", maxStaff: 4, rent: 2_200, cost: 220_000, desks: 5, projects: 2, blurb: "Second floor above a ramen shop.", bg: "img/bg-office-2.jpg" },
-  { id: 2, name: "Sakuga Tower", maxStaff: 6, rent: 6_500, cost: 1_100_000, desks: 7, projects: 3, blurb: "Glass walls. Real coffee. Legends work here.", bg: "img/bg-office-3.jpg" },
-  { id: 3, name: "Neo District HQ", maxStaff: 9, rent: 18_000, cost: 4_600_000, desks: 10, projects: 4, blurb: "Rooftop terrace. Ping-pong table. Five coffee machines.", bg: "img/bg-office-3.jpg" },
-  { id: 4, name: "Sakuga Global Campus", maxStaff: 12, rent: 55_000, cost: 18_000_000, desks: 13, projects: 5, blurb: "The whole industry orbits this address.", bg: "img/bg-office-3.jpg" },
+  { id: 0, name: "Bedroom Studio", maxStaff: 2, rent: 400, cost: 0, desks: 3, projects: 1, slots: 1, blurb: "A futon, a tablet and a dream.", bg: "img/bg-office-1.jpg" },
+  { id: 1, name: "Anime Runner Building", maxStaff: 4, rent: 2_200, cost: 220_000, desks: 5, projects: 2, slots: 3, blurb: "Second floor above a ramen shop.", bg: "img/bg-office-2.jpg" },
+  { id: 2, name: "Sakuga Tower", maxStaff: 6, rent: 6_500, cost: 1_100_000, desks: 7, projects: 3, slots: 5, blurb: "Glass walls. Real coffee. Legends work here.", bg: "img/bg-office-3.jpg" },
+  { id: 3, name: "Neo District HQ", maxStaff: 9, rent: 18_000, cost: 4_600_000, desks: 10, projects: 4, slots: 7, blurb: "Rooftop terrace. Ping-pong table. Five coffee machines.", bg: "img/bg-office-3.jpg" },
+  { id: 4, name: "Sakuga Global Campus", maxStaff: 12, rent: 55_000, cost: 18_000_000, desks: 13, projects: 5, slots: 10, blurb: "The whole industry orbits this address.", bg: "img/bg-office-3.jpg" },
 ];
 
 /* --------------------------------------------------------------- research */

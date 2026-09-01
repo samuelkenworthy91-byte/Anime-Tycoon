@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Clapperboard,
+  Hammer,
   KanbanSquare,
   Users,
   Banknote,
@@ -55,11 +56,24 @@ import {
   type GenreId,
   type Staff,
 } from "../engine/data";
-import { assignToProject, office, pendingIncome, projectCapacity, startBlockReason, studioScore, type RunState } from "../engine/state";
+import {
+  assignToProject,
+  buyFacility,
+  office,
+  officeSlots,
+  pendingIncome,
+  projectCapacity,
+  relocateOffice,
+  startBlockReason,
+  studioScore,
+  type RunState,
+} from "../engine/state";
+import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
 import { activeProjects, projectOfStaff } from "../engine/projects";
 import Portrait from "./Portrait";
 import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
+import FacilitiesPanel from "./Facilities";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -84,7 +98,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
+  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
@@ -96,6 +110,10 @@ export default function Office({
   const newShowBlocked = startBlockReason(run);
   /* projects needing the player: a milestone to play or a release decision */
   const projAlerts = run.projects.filter((p) => p.milestone || p.stage === "ready").length;
+  const roomsUsed = slotsUsed(run.facilities);
+  const roomsTotal = officeSlots(run);
+  /* rooms drawn as glowing door signs inside the office scene */
+  const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
 
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= off.maxStaff) return;
@@ -177,12 +195,7 @@ export default function Office({
     if (!nextOffice || run.cash < nextOffice.cost) return;
     sfx.fanfare();
     setModal(null);
-    setRun((r) => ({
-      ...r,
-      cash: r.cash - nextOffice.cost,
-      officeLevel: r.officeLevel + 1,
-      notices: [...r.notices, `Studio relocated to ${nextOffice.name}!`],
-    }));
+    setRun((r) => relocateOffice(r) ?? r);
   };
 
   const roleIcon = (role: Staff["role"]) =>
@@ -214,6 +227,35 @@ export default function Office({
         timeOfDay={(clockPhase + 0.5) / 4}
         onDeskClick={() => setModal("staff")}
       />
+      {/* built rooms glow as neon door signs on the back wall */}
+      {builtRooms.length > 0 && (
+        <div className="pointer-events-none absolute right-[3%] top-[16%] z-10 hidden flex-col items-end gap-1 sm:flex">
+          {builtRooms.slice(0, 6).map((d) => {
+            const tier = run.facilities[d.id] ?? 1;
+            return (
+              <div
+                key={d.id}
+                className="rounded border px-1.5 py-0.5 text-right font-display text-[7px] font-extrabold tracking-widest backdrop-blur-[1px]"
+                style={{
+                  color: d.color,
+                  borderColor: `${d.color}55`,
+                  background: "rgba(9,7,22,.55)",
+                  textShadow: `0 0 6px ${d.color}, 0 0 14px ${d.color}66`,
+                }}
+              >
+                {d.name.toUpperCase()}
+                {tier > 1 && <span className="ml-1 opacity-90">{["", "", "Ⅱ", "Ⅲ"][tier]}</span>}
+              </div>
+            );
+          })}
+          {builtRooms.length > 6 && (
+            <div className="rounded border border-line/50 bg-abyss/60 px-1.5 py-0.5 font-display text-[7px] font-extrabold text-paper/60">
+              +{builtRooms.length - 6} MORE
+            </div>
+          )}
+        </div>
+      )}
+
       {/* hall of fame posters */}
       <div className="absolute left-[4%] top-[8%] z-10 hidden gap-2 sm:flex">
         {run.hallOfFame.slice(-3).map((h, i) => (
@@ -307,6 +349,10 @@ export default function Office({
           >
             <Clapperboard size={19} /> NEW SHOW
           </Btn>
+          <Btn variant="ghost" onClick={() => setModal("facilities")}>
+            <Hammer size={15} className="text-gold" /> STUDIO
+            <span className="text-[10px] opacity-70">({roomsUsed}/{roomsTotal})</span>
+          </Btn>
           {seq && (
             <Btn big variant="gold" className="anim-pop" onClick={() => onNewShow(run.pendingSequel!)}>
               <Zap size={19} /> SEASON {seq.season + 1}
@@ -390,6 +436,19 @@ export default function Office({
               </div>
             ))}
           </div>
+        </Modal>
+      )}
+
+      {/* ------------------------------------------------------ FACILITIES */}
+      {modal === "facilities" && (
+        <Modal title="STUDIO ROOMS" onClose={() => setModal(null)}>
+          <FacilitiesPanel
+            run={run}
+            onBuy={(id) => {
+              sfx.cash();
+              setRun((r) => buyFacility(r, id) ?? r);
+            }}
+          />
         </Modal>
       )}
 
@@ -626,6 +685,7 @@ export default function Office({
               <div className="mt-2 space-y-1 text-xs text-paper/60">
                 <div>Desks: {off.maxStaff} staff</div>
                 <div>Project slots: {off.projects}</div>
+                <div>Room slots: {off.slots}</div>
                 <div>Rent: {formatGBP(off.rent)}/week</div>
               </div>
             </div>
@@ -636,7 +696,11 @@ export default function Office({
               <div className="mt-2 space-y-1 text-xs text-paper/60">
                 <div className="text-mint">Desks: {nextOffice.maxStaff} staff</div>
                 <div className="text-mint">Project slots: {nextOffice.projects}</div>
+                <div className="text-mint">Room slots: {nextOffice.slots}</div>
                 <div>Rent: {formatGBP(nextOffice.rent)}/week</div>
+                {roomsUsed > 0 && (
+                  <div className="text-[10px] text-paper/45">Your {roomsUsed} built room{roomsUsed > 1 ? "s" : ""} and all upgrades move with you — nothing is lost.</div>
+                )}
               </div>
               <Btn variant="gold" className="mt-3 w-full" disabled={run.cash < nextOffice.cost} onClick={relocate}>
                 MOVE IN — {formatGBP(nextOffice.cost)}

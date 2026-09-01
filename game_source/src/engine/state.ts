@@ -11,11 +11,22 @@ import {
   type Contract,
   type Draft,
   type GenreId,
+  type PointType,
   type RivalShow,
   type Arc,
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import {
+  MAX_TIER,
+  facilityDef,
+  facilityFX,
+  facilityUpkeep,
+  nextTier,
+  slotsUsed,
+  type Facilities,
+  type FacilityId,
+} from "./facilities";
 import {
   activeProjects,
   applyMilestoneOutcome,
@@ -124,6 +135,8 @@ export interface RunState {
   fansThisWeek: number;
   /** every show currently in the pipeline (or recently completed) */
   projects: Project[];
+  /** built rooms: facility id → tier */
+  facilities: Facilities;
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -192,6 +205,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     incomeThisWeek: 0,
     fansThisWeek: 0,
     projects: [],
+    facilities: {},
   };
 }
 
@@ -201,13 +215,14 @@ export function migrateRun(raw: unknown): RunState {
   return {
     ...r,
     projects: Array.isArray(r.projects) ? r.projects : [],
+    facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
     staff: (r.staff ?? []).map((s) => ({ ...s })),
   };
 }
 
 export const office = (r: RunState) => OFFICES[r.officeLevel];
 export const weeklyOutgoings = (r: RunState) =>
-  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0);
+  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) + facilityUpkeep(r.facilities);
 
 /** how much cash/fans the state expects to land in the next `weeks` weeks */
 export function pendingIncome(r: RunState, weeks: number): number {
@@ -274,9 +289,11 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let awards = r.awards;
   let awardsCeremony = r.awardsCeremony;
   let projects = r.projects ?? [];
+  let rd = r.rd;
   let incomeThisWeek = 0;
   let fansThisWeek = 0;
   const perWeek = weeklyOutgoings(r);
+  const fx = facilityFX(r.facilities);
 
   for (let i = 1; i <= n; i++) {
     const w = r.week + i;
@@ -299,10 +316,13 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     payouts = payouts.filter((p) => p.week !== w);
 
     /* every project in the pipeline gets a week of work */
-    const tick = tickProjectsWeek(projects, r.staff, w);
+    const tick = tickProjectsWeek(projects, r.staff, w, fx);
     projects = tick.projects;
     cash += tick.cashDelta;
     notices.push(...tick.notices);
+
+    /* the archive room quietly files away research */
+    rd += fx.rdWeekly;
 
     /* rival studios premiere their parody shows */
     const airing = rivals.filter((r2) => r2.week === w);
@@ -314,7 +334,9 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     if (w % 4 === 0) {
       const bill = perWeek * 4;
       cash -= bill;
-      notices.push(`Payday: wages + rent −£${bill.toLocaleString("en-GB")}.`);
+      notices.push(
+        `Payday: wages + rent${facilityUpkeep(r.facilities) > 0 ? " + facilities" : ""} −£${bill.toLocaleString("en-GB")}.`
+      );
     }
     if (w % 6 === 0) contracts = [rollContract(w), rollContract(w), rollContract(w)];
 
@@ -347,6 +369,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     week: r.week + n,
     cash,
     fans,
+    rd,
     contracts,
     payouts,
     rivals,
@@ -359,11 +382,13 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     staff: (() => {
       /* people on a production tire; everyone else recovers */
       const busy = assignedStaffIds(projects);
+      const drain = Math.max(1, 3 - fx.staminaSave);
+      const rest = 9 + fx.staminaRest;
       return r.staff.map((s) => ({
         ...s,
         stamina: busy.has(s.id)
-          ? Math.max(12, s.stamina - n * 3)
-          : Math.min(100, s.stamina + n * 9),
+          ? Math.max(12, s.stamina - n * drain)
+          : Math.min(100, s.stamina + n * rest),
       }));
     })(),
     notices: notices.slice(-40),
@@ -412,15 +437,31 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
 
 /** fold a played milestone sprint back into the run */
 export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutcome): RunState {
-  const team = projectById(r, projectId)?.staffIds ?? [];
+  const proj = projectById(r, projectId);
+  const team = proj?.staffIds ?? [];
+  const done = proj?.milestone ?? null;
+  const fx = facilityFX(r.facilities);
+  /* the QA suite catches problems before they become issues */
+  const guarded: MilestoneOutcome =
+    o.issues > 0 ? { ...o, issues: Math.max(0, o.issues - fx.issueGuard) } : o;
+  /* the training room turns every sprint into a lesson in its discipline */
+  const taught: PointType | null = done === "edit" ? null : done;
   return {
     ...r,
     cash: r.cash - o.spent,
-    rd: r.rd + o.rdGained + (o.squashed ?? 0) * 2,
+    rd: r.rd + Math.round((o.rdGained + (o.squashed ?? 0) * 2) * fx.rdMult),
     staff: r.staff.map((s) =>
-      team.includes(s.id) ? { ...s, stamina: Math.max(12, s.stamina - 8) } : s
+      team.includes(s.id)
+        ? {
+            ...s,
+            stamina: Math.max(12, s.stamina - 8),
+            ...(taught && fx.trainSkill > 0
+              ? { [taught]: Math.min(99, s[taught] + fx.trainSkill) }
+              : {}),
+          }
+        : s
     ),
-    projects: r.projects.map((p) => (p.id === projectId ? applyMilestoneOutcome(p, o) : p)),
+    projects: r.projects.map((p) => (p.id === projectId ? applyMilestoneOutcome(p, guarded) : p)),
   };
 }
 
@@ -428,6 +469,7 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
 export function previewResult(r: RunState, p: Project): ShowResult {
   return computeProjectResult(p, {
     research: r.research,
+    merchMult: facilityFX(r.facilities).merchMult,
     showrunner: r.showrunner,
     comboLevels: r.comboLevels,
     castCombos: r.castCombos,
@@ -511,17 +553,21 @@ export function releaseProject(
     hallOfFame: result.hallOfFame
       ? [...r.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, protag: draft.protag, week: r.week }]
       : r.hallOfFame,
-    staff: r.staff.map((s) =>
-      p.staffIds.includes(s.id)
-        ? {
-            ...s,
-            stamina: Math.max(15, s.stamina - 18),
-            story: Math.min(99, s.story + 1),
-            art: Math.min(99, s.art + 1),
-            sound: Math.min(99, s.sound + 1),
-          }
-        : s
-    ),
+    staff: (() => {
+      /* the training room deepens what shipping a show teaches */
+      const gain = 1 + facilityFX(r.facilities).trainSkill;
+      return r.staff.map((s) =>
+        p.staffIds.includes(s.id)
+          ? {
+              ...s,
+              stamina: Math.max(15, s.stamina - 18),
+              story: Math.min(99, s.story + gain),
+              art: Math.min(99, s.art + gain),
+              sound: Math.min(99, s.sound + gain),
+            }
+          : s
+      );
+    })(),
     yearShows: [...r.yearShows, { title: draft.title, studio: r.studio, score: result.total, player: true }],
     lastResult: result,
     lastDraft: draft,
@@ -531,6 +577,62 @@ export function releaseProject(
   };
 
   return { run, result };
+}
+
+/* =================================================================== */
+/*                         FACILITY OPS                                */
+/* =================================================================== */
+
+/** how many facility rooms this office can hold */
+export const officeSlots = (r: RunState) => OFFICES[r.officeLevel].slots;
+
+/** null = the next tier can be bought; otherwise the blocking reason */
+export function facilityBlockReason(r: RunState, id: FacilityId): string | null {
+  const owned = (r.facilities[id] ?? 0) > 0;
+  const nx = nextTier(r.facilities, id);
+  if (!nx) return "Already at maximum tier";
+  if (!owned && slotsUsed(r.facilities) >= officeSlots(r))
+    return `No free rooms — ${OFFICES[r.officeLevel].name} has ${officeSlots(r)} slot${officeSlots(r) > 1 ? "s" : ""}`;
+  if (r.cash < nx.cost) return `Needs £${nx.cost.toLocaleString("en-GB")}`;
+  if (r.rd < nx.rd) return `Needs ${nx.rd} research data (you have ${r.rd})`;
+  return null;
+}
+
+/** build a new room or upgrade an owned one to the next tier */
+export function buyFacility(r: RunState, id: FacilityId): RunState | null {
+  if (facilityBlockReason(r, id)) return null;
+  const nx = nextTier(r.facilities, id)!;
+  const def = facilityDef(id);
+  return {
+    ...r,
+    cash: r.cash - nx.cost,
+    rd: r.rd - nx.rd,
+    facilities: { ...r.facilities, [id]: nx.tier },
+    notices: [
+      ...r.notices,
+      nx.tier === 1
+        ? `${def.name} built — one of ${officeSlots(r)} rooms in use.`
+        : `${def.name} upgraded to tier ${nx.tier}/${MAX_TIER}.`,
+    ],
+  };
+}
+
+/** move to the next office; every built room is packed up and moves too */
+export function relocateOffice(r: RunState): RunState | null {
+  const next = OFFICES[r.officeLevel + 1];
+  if (!next || r.cash < next.cost) return null;
+  return {
+    ...r,
+    cash: r.cash - next.cost,
+    officeLevel: r.officeLevel + 1,
+    notices: [
+      ...r.notices,
+      `Studio relocated to ${next.name}!` +
+        (slotsUsed(r.facilities) > 0
+          ? ` All ${slotsUsed(r.facilities)} facilit${slotsUsed(r.facilities) > 1 ? "ies" : "y"} moved with you (${next.slots} room slots now).`
+          : ""),
+    ],
+  };
 }
 
 export function studioScore(r: RunState): number {
