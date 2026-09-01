@@ -31,6 +31,7 @@ import ContractJob from "./components/ContractJob";
 import Release, { type MarketNote } from "./components/Release";
 import GameOver from "./components/GameOver";
 import { cn } from "./utils/cn";
+import { applySafeAreaFallback } from "./utils/safeArea";
 
 type Screen = "title" | "office" | "create" | "produce" | "contract" | "release" | "gameover";
 
@@ -49,6 +50,22 @@ export default function App() {
   const [paused, setPaused] = useState(false);
   const [victory, setVictory] = useState(false);
   const [muteUI, setMuteUI] = useState(isMuted());
+  /* What the platform is hiding from us: on iOS env() is filled in and this is
+     0, but Android's WebView reports nothing while still drawing the status
+     bar over the page, so it gets a measured fallback instead. */
+  const [autoInset, setAutoInset] = useState(0);
+  useEffect(() => {
+    const remeasure = () => setAutoInset(applySafeAreaFallback().top);
+    remeasure();
+    /* rotation swaps portrait insets for landscape ones, and a resize can
+       move the game between a phone-sized window and a desktop one */
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("orientationchange", remeasure);
+    return () => {
+      window.removeEventListener("resize", remeasure);
+      window.removeEventListener("orientationchange", remeasure);
+    };
+  }, []);
   /* extra top inset the player can dial up if their browser still overlaps */
   const [fit, setFit] = useState<0 | 1 | 2>(() => {
     const v = Number(localStorage.getItem("kirameki.fit") ?? 0);
@@ -527,6 +544,7 @@ export default function App() {
               title="Push the interface further down if your phone's status bar still covers it"
             >
               <Smartphone size={16} /> SCREEN FIT: {FIT_LABELS[fit]}
+              {autoInset ? <span className="text-paper/40"> +{autoInset} auto</span> : null}
             </Btn>
             <Btn
               variant="ghost"
@@ -556,7 +574,7 @@ export default function App() {
         </div>
       </div>
     ),
-    [restart, quitToTitle, slot, saveTo, fit, hd2d]
+    [restart, quitToTitle, slot, saveTo, fit, hd2d, autoInset]
   );
 
   return (
