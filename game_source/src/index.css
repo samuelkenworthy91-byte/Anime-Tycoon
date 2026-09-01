@@ -26,6 +26,45 @@ body,
   overscroll-behavior: none;
 }
 
+/* ---------- safe areas ----------
+   The page runs under the phone's status bar and notch (viewport-fit=cover),
+   so anything interactive has to be pushed back inside the visible area.
+
+   Three terms, added together:
+     env(safe-area-inset-*)  what the platform reports. Reliable on iOS, and
+                             zero on Android's WebView even when the status
+                             bar is drawn over the page.
+     --auto-top/-bottom      the fallback measured by utils/safeArea for those
+                             platforms that report nothing.
+     --fit-top               the extra inset the player dials up from the
+                             pause menu, for when neither of the above is
+                             quite enough. */
+:root {
+  --fit-top: 0px;
+  --auto-top: 0px;
+  --auto-bottom: 0px;
+}
+.app-shell {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--auto-top) + var(--fit-top));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--auto-bottom));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+/* floating chrome that is positioned rather than in flow needs its own inset,
+   since an absolutely positioned child ignores its ancestor's padding */
+.fixed-safe {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--auto-top) + var(--fit-top));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--auto-bottom));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.top-safe {
+  top: calc(env(safe-area-inset-top, 0px) + var(--auto-top) + var(--fit-top));
+}
+.right-safe {
+  right: calc(env(safe-area-inset-right, 0px) + 0.75rem);
+}
+
 body {
   font-family: var(--font-body);
   background: var(--color-ink);
@@ -72,6 +111,41 @@ select {
   );
   mask-image: radial-gradient(circle at center, transparent 24%, black 78%);
   -webkit-mask-image: radial-gradient(circle at center, transparent 24%, black 78%);
+}
+
+/* ---------- pixel HUD ----------
+   The top bar sits over a bright, moving pixel-art scene, so it is fully
+   opaque with a chunky bevel rather than a translucent blur. Square corners
+   and 2px edges keep it in the same visual language as the art. */
+.hud-bar {
+  background: linear-gradient(180deg, #221a3f 0%, #191231 55%, #140f28 100%);
+  border-bottom: 3px solid #08060f;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 4px 0 rgba(0, 0, 0, 0.45),
+    0 12px 28px rgba(0, 0, 0, 0.5);
+}
+.pxcell {
+  background: #241b45;
+  border: 2px solid #0c0918;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.42);
+}
+.pxcell-dark {
+  background: #150f2b;
+  border: 2px solid #0c0918;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.06);
+}
+.pxfont {
+  font-family: var(--font-jp);
+  letter-spacing: 0.01em;
+}
+.pxbar {
+  background: #0b0817;
+  border: 2px solid #0c0918;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.6);
 }
 
 /* ---------- animation ---------- */

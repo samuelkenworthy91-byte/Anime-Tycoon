@@ -8,10 +8,11 @@ import {
   ROLE_POINT,
   SHOWRUNNERS,
   formatGBP,
-  staffPoint,
+
   type Contract,
 } from "../engine/data";
 import type { RunState } from "../engine/state";
+import { staffOutput } from "../engine/loop";
 import ProductionFloor, { type FloorDesk, type FloorTotals } from "./ProductionFloor";
 import { cn } from "../utils/cn";
 
@@ -35,7 +36,7 @@ export default function ContractJob({
       { name: runner.name.split(" ")[0], skill: 44 + run.showsMade * 2, type: contract.type, isBoss: true, img: runner.img },
     ];
     run.staff.forEach((s) =>
-      list.push({ name: s.name.split(" ")[0], skill: Math.round(staffPoint(s, ROLE_POINT[s.role]) * (0.6 + s.stamina / 250)), type: ROLE_POINT[s.role], portrait: s.portrait })
+      list.push({ name: s.name.split(" ")[0], skill: staffOutput(s, ROLE_POINT[s.role]), type: ROLE_POINT[s.role], portrait: s.portrait })
     );
     return list;
   }, [run.staff, run.showsMade, runner.name, contract.type]);

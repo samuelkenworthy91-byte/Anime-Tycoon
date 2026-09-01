@@ -17,13 +17,27 @@ import { AIR_WEEKS } from "../engine/state";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
+export interface MarketNote {
+  kind: "hot" | "warm" | "cold" | "none";
+  label: string;
+  revenue: number;
+  fans: number;
+  /** reputation multiplier from the studio's rank */
+  rankRevenue: number;
+  rankFans: number;
+  rankName: string;
+  rankColor: string;
+}
+
 export default function Release({
   draft,
   result,
+  market,
   onContinue,
 }: {
   draft: Draft;
   result: ShowResult;
+  market?: MarketNote | null;
   onContinue: () => void;
 }) {
   const [stage, setStage] = useState(0);
@@ -228,6 +242,30 @@ export default function Release({
                 <div className="grid grid-cols-4 gap-2">
                   <Stat icon={<PoundSterling size={13} className="text-gold" />} v={formatGBP(result.revenue)} k="TOTAL REVENUE" cls="text-gold" />
                   <Stat icon={<Flame size={13} className="text-neon" />} v={`+${formatNum(result.fans)}`} k="FANS" cls="text-neon2" />
+                  {market && (market.kind !== "none" || market.rankRevenue > 1) && (
+                    <div className="col-span-2 rounded-xl border border-line bg-panel2/60 p-2.5 text-[11px]">
+                      <div className="mb-1 text-[9px] font-bold tracking-widest text-paper/40">SEASON &amp; REPUTATION</div>
+                      {market.kind !== "none" && (
+                        <div
+                          className={cn(
+                            "font-bold",
+                            market.kind === "hot" && "text-mint",
+                            market.kind === "warm" && "text-cyanx",
+                            market.kind === "cold" && "text-neon"
+                          )}
+                        >
+                          {market.kind === "hot" ? "▲" : market.kind === "warm" ? "▲" : "▼"} {market.label} · revenue ×
+                          {market.revenue.toFixed(2)} · fans ×{market.fans.toFixed(2)}
+                        </div>
+                      )}
+                      {market.rankRevenue > 1 && (
+                        <div className="mt-0.5" style={{ color: market.rankColor }}>
+                          {market.rankName} studio · revenue ×{market.rankRevenue.toFixed(2)} · fans ×
+                          {market.rankFans.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <Stat
                     icon={net >= 0 ? <TrendingUp size={13} className="text-mint" /> : <TrendingDown size={13} className="text-neon" />}
                     v={`${net >= 0 ? "+" : ""}${formatGBP(net)}`}

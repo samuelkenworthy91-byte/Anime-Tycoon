@@ -65,10 +65,9 @@ release builds, icons and signing). The app id is `com.kirameki.studio` (package
 
 ### Build via GitHub Actions
 
-A ready-made workflow lives at `.github/workflows/apk.yml` (not committed —
-the sandbox bot cannot push workflow files). Drop it into the repo and it
-builds the debug APK on every push and on manual dispatch, uploading it as
-the `kirameki-studio-apk` artifact.
+The committed workflow at `.github/workflows/apk.yml` builds the debug APK
+for configured branches and on manual dispatch, uploading it as the
+`anime-tycoon-debug-apk` artifact.
 
 ## Project layout
 

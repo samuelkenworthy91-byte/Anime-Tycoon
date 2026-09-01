@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import {
   Clapperboard,
   Users,
-  Banknote,
-  Flame,
   X,
   PenTool,
   Monitor,
@@ -11,21 +9,18 @@ import {
   Trash2,
   Zap,
   FlaskConical,
-  Crown,
-  Star,
   Briefcase,
   Building2,
   Trophy,
+  Target,
   Database,
   ChevronRight,
-  Calendar,
   Sparkles,
   Lock,
   TrendingUp,
   Award,
-  Clock,
 } from "lucide-react";
-import { Btn, CountUp } from "../fx/fx";
+import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
   ARC_COMBOS,
@@ -53,8 +48,10 @@ import {
   type GenreId,
   type Staff,
 } from "../engine/data";
-import { office, pendingIncome, studioScore, type RunState } from "../engine/state";
+import { office, pendingIncome, weeklyOutgoings, type RunState } from "../engine/state";
 import Portrait from "./Portrait";
+import Hud from "./Hud";
+import { applyTraining, bumpObjectives, objectiveViews, rankView, staffMood, trainCost } from "../engine/loop";
 import OfficeScene from "./OfficeScene";
 import { cn } from "../utils/cn";
 
@@ -66,6 +63,9 @@ export default function Office({
   onContract,
   clockDay = 0,
   clockPhase = 0,
+  onSave,
+  savedLabel,
+  hd2d = 1,
 }: {
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
@@ -73,14 +73,19 @@ export default function Office({
   onContract: (c: Contract) => void;
   clockDay?: number;
   clockPhase?: number;
+  onSave: () => void;
+  savedLabel: string;
+  /** 0 = classic flat pixels, 1 = full HD-2D */
+  hd2d?: number;
 }) {
-  const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards">(null);
+  const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "objectives">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
-  const score = studioScore(run);
   const off = office(run);
   const nextOffice = OFFICES[run.officeLevel + 1];
   const inFlight = pendingIncome(run, 12);
+  const objViews = objectiveViews(run);
+  const rank = rankView(run);
 
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= off.maxStaff) return;
@@ -92,6 +97,7 @@ export default function Office({
       candidates: r.candidates.filter((c) => c.id !== cand.id),
       notices: [...r.notices, `${cand.name} joins as ${ROLE_LABEL[cand.role]}!`],
     }));
+    setRun((r) => bumpObjectives(r, { t: "hire" }));
   };
   const fire = (id: string) => {
     sfx.back();
@@ -118,6 +124,22 @@ export default function Office({
       ),
       notices: [...r.notices, `${s.name} levels up to ${LEVEL_TITLES[s.level - 1]}!`],
     }));
+  };
+  const train = (s: Staff) => {
+    const cost = trainCost(s);
+    if (run.cash < cost || staffMain(s) >= 99) return;
+    sfx.fanfare();
+    setRun((r) =>
+      bumpObjectives(
+        {
+          ...r,
+          cash: r.cash - cost,
+          staff: r.staff.map((x) => (x.id === s.id ? applyTraining(x) : x)),
+          notices: [...r.notices, `${s.name} comes back from a workshop inspired.`],
+        },
+        { t: "train" }
+      )
+    );
   };
   const scout = () => {
     if (run.cash < 8_000) return;
@@ -188,75 +210,24 @@ export default function Office({
         }))}
         maxStaff={off.maxStaff}
         timeOfDay={(clockPhase + 0.5) / 4}
+        awards={run.awards}
+        hd2d={hd2d}
         onDeskClick={() => setModal("staff")}
       />
-      {/* hall of fame posters */}
-      <div className="absolute left-[4%] top-[8%] z-10 hidden gap-2 sm:flex">
-        {run.hallOfFame.slice(-3).map((h, i) => (
-          <div key={i} className="aspect-square w-[52px] -rotate-2 overflow-hidden rounded border-2 border-gold/70 md:w-[68px]">
-            <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-full w-full" />
-            <div className="bg-gold/90 py-0.5 text-center font-display text-[7px] font-extrabold text-ink">{h.score}/40</div>
-          </div>
-        ))}
-        {run.hallOfFame.length === 0 && (
-          <div className="flex h-16 w-14 items-center justify-center rounded border border-dashed border-line bg-abyss/60 text-center text-[8px] text-paper/30 md:w-20">
-            HALL OF
-            <br />
-            FAME POSTER
-          </div>
-        )}
-      </div>
-      {run.research.includes("merch") && (
-        <div className="absolute left-[5%] top-[44%] z-10 hidden sm:block">
-          <div className="flex gap-1.5 rounded border border-line bg-panel2/80 px-1.5 py-1">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className="h-2.5 w-2 rounded-t-full" style={{ background: ["#ff4d8d", "#3be1ff", "#ffd166"][i] }} />
-                <div className="h-3 w-2.5 rounded-b-sm" style={{ background: ["#a12046", "#1a6d80", "#8a6b1a"][i] }} />
-              </div>
-            ))}
-          </div>
-          <div className="h-1.5 w-full rounded bg-[#5e3b24]" />
-        </div>
-      )}
 
       {/* ---------------------------------------------------------- HUD */}
-      <div className="relative z-20 flex items-center gap-2 border-b border-line/60 bg-ink/75 py-2 pl-3 pr-[76px] backdrop-blur-md md:pl-5">
-        <div className="flex min-w-0 items-center gap-2">
-          <Crown size={16} className="shrink-0 text-gold" />
-          <span className="truncate font-display text-sm font-extrabold md:text-base">{run.studio}</span>
-        </div>
-        <div className="ink-chip flex shrink-0 items-center gap-1 px-2 py-1 text-[10px] font-bold text-cyanx md:text-xs">
-          <Calendar size={12} /> {dateLabel(run.week)}
-        </div>
-        <div className="ink-chip hidden shrink-0 items-center gap-1 px-2 py-1 text-[10px] font-bold text-gold sm:flex">
-          <Clock size={12} /> DAY {clockDay + 1} · {["MORNING", "AFTERNOON", "EVENING", "NIGHT"][clockPhase]}{" "}
-          <span className="text-paper/40">({run.incomeThisWeek > 0 ? `+${formatGBPShort(run.incomeThisWeek)} this week` : "no income this week"})</span>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 md:gap-2">
-          {run.incomeThisWeek > 0 && (
-            <div className="ink-chip flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-mint">
-              <TrendingUp size={12} /> +{formatGBPShort(run.incomeThisWeek)}
-            </div>
-          )}
-          <div className={cn("ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold", run.cash < 0 && "border-neon text-neon")}>
-            <Banknote size={13} className={run.cash < 0 ? "text-neon" : "text-mint"} />
-            <CountUp to={run.cash} format={(n) => formatGBPShort(n)} />
-          </div>
-          <div className="ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-viol">
-            <Database size={13} />
-            <CountUp to={run.rd} />
-          </div>
-          <div className="ink-chip hidden items-center gap-1.5 px-2 py-1 text-xs font-bold text-neon2 sm:flex">
-            <Flame size={13} />
-            <CountUp to={run.fans} format={(n) => formatNum(n)} />
-          </div>
-          <div className="ink-chip hidden items-center gap-1.5 px-2 py-1 text-xs font-bold text-gold lg:flex">
-            <Star size={13} />
-            <CountUp to={score} />
-          </div>
-        </div>
-      </div>
+      <Hud
+        run={run}
+        officeName={off.name}
+        clockDay={clockDay}
+        clockPhase={clockPhase}
+        netPerWeek={run.incomeThisWeek - weeklyOutgoings(run)}
+        objectivesDone={objViews.filter((v) => v.done).length}
+        objectivesTotal={objViews.length}
+        onSave={onSave}
+        onObjectives={() => setModal("objectives")}
+        savedLabel={savedLabel}
+      />
 
       {/* -------------------------------------------------------- actions */}
       <div className="relative z-20 border-t border-line/60 bg-ink/85 px-2 py-2.5 backdrop-blur-md md:px-5">
@@ -384,7 +355,7 @@ export default function Office({
                         ))}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
+                    <div className="flex flex-col items-end gap-1">
                       <Btn
                         variant="gold"
                         className="!px-2.5 !py-1 text-[10px]"
@@ -393,8 +364,16 @@ export default function Office({
                       >
                         LEVEL UP · {levelUpCost(s)} RD
                       </Btn>
-                      <span className={cn("text-[10px] font-bold", s.stamina < 45 ? "text-neon" : "text-mint")}>
-                        {Math.round(s.stamina)}% energy
+                      <Btn
+                        variant="cyan"
+                        className="!px-2.5 !py-1 text-[10px]"
+                        disabled={run.cash < trainCost(s) || staffMain(s) >= 99}
+                        onClick={() => train(s)}
+                      >
+                        WORKSHOP · {formatGBPShort(trainCost(s))}
+                      </Btn>
+                      <span className="text-[10px] font-bold" style={{ color: staffMood(s).color }}>
+                        {staffMood(s).label} · {Math.round(s.stamina)}%
                       </span>
                       <button
                         onClick={() => fire(s.id)}
@@ -615,6 +594,67 @@ export default function Office({
         </Modal>
       )}
 
+      {/* ------------------------------------------------------ OBJECTIVES */}
+      {modal === "objectives" && (
+        <Modal title="OBJECTIVES BOARD" onClose={() => setModal(null)}>
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 p-2.5">
+            <Target size={16} className="text-gold" />
+            <span className="text-sm font-bold">{rank.rank.name} studio</span>
+            <span className="text-[11px] text-paper/60">
+              {rank.next
+                ? `${rank.score.toLocaleString("en-GB")} / ${rank.next.min.toLocaleString("en-GB")} score to ${rank.next.name}`
+                : "the highest rank there is"}
+            </span>
+            <span className="ml-auto pxbar h-2 w-24 overflow-hidden">
+              <span
+                className="block h-full"
+                style={{ width: `${Math.round(rank.toNext * 100)}%`, background: rank.rank.color }}
+              />
+            </span>
+          </div>
+          <p className="mb-3 text-xs text-paper/60">
+            Three standing goals from the board — one you can finish this week, one this season, one for the whole
+            career. They pay out the moment they are met and are replaced straight away.
+          </p>
+          <div className="space-y-2">
+            {objViews.map((v) => {
+              const pct = Math.max(0, Math.min(1, v.progress / Math.max(1, v.target)));
+              const tierColor = v.tier === "short" ? "#3be1ff" : v.tier === "season" ? "#5ef0c0" : "#ffd166";
+              const tierLabel = v.tier === "short" ? "THIS WEEK" : v.tier === "season" ? "THIS SEASON" : "CAREER";
+              return (
+                <div key={v.state.def + v.target} className={cn("ink-card p-3", v.done && "border-mint/60")}>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="pxcell px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider"
+                      style={{ color: tierColor }}
+                    >
+                      {tierLabel}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-bold">{v.text}</span>
+                    {v.done ? (
+                      <span className="pxcell px-1.5 py-0.5 text-[10px] font-extrabold text-mint">DONE</span>
+                    ) : (
+                      <span className="pxfont text-xs font-bold text-paper/70">
+                        {Math.min(v.progress, v.target).toLocaleString("en-GB")}/{v.target.toLocaleString("en-GB")}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 pxbar h-2.5 overflow-hidden">
+                    <span className="block h-full transition-all" style={{ width: `${pct * 100}%`, background: tierColor }} />
+                  </div>
+                  <div className="mt-1.5 flex items-center gap-2 text-[10px] text-paper/50">
+                    <span className="min-w-0 flex-1 truncate">{v.hint}</span>
+                    <span className="shrink-0 font-bold text-gold">{formatGBPShort(v.reward.cash)}</span>
+                    <span className="shrink-0 font-bold text-viol">+{v.reward.rd} RD</span>
+                    {v.reward.fans > 0 && <span className="shrink-0 font-bold text-neon2">+{formatNum(v.reward.fans)} fans</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Modal>
+      )}
+
       {/* ------------------------------------------------------------- HOF */}
       {modal === "hof" && (
         <Modal title="STUDIO RECORDS" onClose={() => setModal(null)}>
@@ -738,7 +778,7 @@ export function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed-safe fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <div
         className="anim-pop nice-scroll max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
         onClick={(e) => e.stopPropagation()}

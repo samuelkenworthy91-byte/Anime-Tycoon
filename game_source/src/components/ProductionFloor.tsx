@@ -1,7 +1,10 @@
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import { sfx } from "../engine/audio";
 import { useFx } from "../fx/fx";
-import { POINT_COLOR, STAFF_PORTRAITS, type PointType } from "../engine/data";
+import { POINT_COLOR, type PointType } from "../engine/data";
+import { bubbleSprite, floorRoom, prodDeskBack, prodDeskFront, PROD_H, PROD_W } from "../pixel/floor";
+import { lookFrom } from "../pixel/chars";
+import { deskStats } from "../engine/loop";
 
 export interface FloorDesk {
   name: string;
@@ -39,7 +42,10 @@ interface Bubble {
   born: number;
   wob: number;
   dead: boolean;
+  /** 0..3 — how strong this producer's output is, drives the bubble's look */
+  tier: number;
 }
+
 interface Particle {
   x: number;
   y: number;
@@ -113,9 +119,6 @@ export default function ProductionFloor({
     h: 320,
     raf: 0,
     flash: 0,
-    bg: null as HTMLImageElement | null,
-    face: null as HTMLImageElement | null,
-    _portraits: [] as HTMLImageElement[],
   });
 
   useEffect(() => {
@@ -144,19 +147,14 @@ export default function ProductionFloor({
     const ro = new ResizeObserver(resize);
     ro.observe(box);
 
-    /* background environment art */
-    const bg = new Image();
-    bg.src = "img/bg-floor.jpg";
-    s.bg = bg;
-
-    /* showrunner portrait is the player avatar */
-    const face = new Image();
-    const boss = desks.find((d) => d.isBoss);
-    if (boss?.img) face.src = boss.img;
-    s.face = face;
-
     const deskX = (i: number) => (s.w / desks.length) * (i + 0.5);
-    const deskY = () => s.h - 74;
+    /* one art pixel, in screen pixels — everything snaps to this grid */
+    const cell = () => Math.max(3, Math.min(6, Math.floor((s.w / desks.length - 8) / PROD_W)));
+    const deskTop = () => s.h - 6 - PROD_H * cell();
+    /* each desk gets a stable pixel-art crew member */
+    const looks = desks.map((d, i) => lookFrom(`${d.name}${i}`, POINT_COLOR[d.type], d.isBoss ? 5 : undefined));
+    /* and a production profile derived from their skill */
+    const stats = desks.map((d) => deskStats(d.skill));
 
     const pop = (b: Bubble) => {
       b.dead = true;
@@ -248,29 +246,33 @@ export default function ProductionFloor({
 
     const spawn = (i: number, now: number) => {
       const d = desks[i];
+      const st = stats[i];
       const crunching = now < crunchRef.current;
       const roll = Math.random();
+      const bugChance = bugRate * st.bugMult * (crunching ? 1.9 : 1);
       let kind: Bubble["kind"];
       if (debugMode) kind = roll < 0.72 ? "bug" : (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)];
-      else if (roll < bugRate * (crunching ? 1.9 : 1)) kind = "bug";
-      else if (roll < bugRate + 0.05) kind = "star";
-      else if (roll < bugRate + 0.05 + 0.62) kind = focus;
+      else if (roll < bugChance) kind = "bug";
+      else if (roll < bugChance + st.starChance) kind = "star";
+      else if (roll < bugChance + st.starChance + 0.62) kind = focus;
       else kind = d.type;
-      const value =
-        kind === "star" ? 6 : kind === "bug" ? 0 : 1 + Math.floor(d.skill / 34) + (kind === focus ? 1 : 0);
+
+      const base = st.power + (kind === focus ? 1 : 0);
+      const value = kind === "star" ? Math.max(6, Math.round(base * 2.4)) : kind === "bug" ? 0 : base;
       s.bubbles.push({
         x: deskX(i) + (Math.random() - 0.5) * 26,
-        y: deskY() - 10,
+        y: deskTop() + 2 * cell(),
         vy: -(0.42 + Math.random() * 0.16) / lifeMult,
-        r: kind === "star" ? 24 : 18,
+        r: (kind === "star" ? 22 : 16) + st.tier * 2,
         kind,
         value,
         desk: i,
         born: s.elapsed,
         wob: Math.random() * 6.28,
         dead: false,
+        tier: st.tier,
       });
-      const rate = (2500 - Math.min(1400, d.skill * 13)) / (spawnMult * (crunching ? 2.1 : 1));
+      const rate = st.rate / (spawnMult * (crunching ? 2.1 : 1));
       s.nextSpawn[i] = s.elapsed + rate * (0.75 + Math.random() * 0.5);
     };
 
@@ -320,27 +322,12 @@ export default function ProductionFloor({
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, s.w, s.h);
 
-      /* environment background */
-      if (s.bg && s.bg.complete && s.bg.naturalWidth > 0) {
-        const ratio = Math.max(s.w / s.bg.width, s.h / s.bg.height);
-        const bw = s.bg.width * ratio;
-        const bh = s.bg.height * ratio;
-        g.drawImage(s.bg, (s.w - bw) / 2, (s.h - bh) / 2, bw, bh);
-      } else {
-        const wall = g.createLinearGradient(0, 0, 0, s.h);
-        wall.addColorStop(0, "#171226");
-        wall.addColorStop(0.62, "#1e1733");
-        wall.addColorStop(0.63, "#2a1f47");
-        wall.addColorStop(1, "#160f2a");
-        g.fillStyle = wall;
-        g.fillRect(0, 0, s.w, s.h);
-      }
-      /* darken the top band so bubbles read clearly */
-      const shade = g.createLinearGradient(0, 0, 0, 120);
-      shade.addColorStop(0, "rgba(6,5,14,.72)");
-      shade.addColorStop(1, "rgba(6,5,14,0)");
-      g.fillStyle = shade;
-      g.fillRect(0, 0, s.w, 120);
+      /* pixel-art studio room */
+      g.imageSmoothingEnabled = false;
+      const u = cell();
+      const cw = Math.max(8, Math.ceil(s.w / u));
+      const ch = Math.max(8, Math.ceil(s.h / u));
+      g.drawImage(floorRoom(cw, ch, 0.35), 0, 0, cw, ch, 0, 0, cw * u, ch * u);
 
       if (crunching) {
         g.fillStyle = `rgba(255,77,141,${0.06 + Math.sin(now / 90) * 0.03})`;
@@ -357,143 +344,53 @@ export default function ProductionFloor({
       g.stroke();
       g.setLineDash([]);
 
-      /* desks + chibi staff */
-      const dy = deskY();
+      /* desks + crew, drawn on the pixel grid */
+      const dy = deskTop();
+      const animFrame = Math.floor(now / 200);
       desks.forEach((d, i) => {
         const x = deskX(i);
-        const w = Math.min(96, (s.w / desks.length) * 0.82);
-        /* chair + person */
-        const hairs = ["#ff8fc7", "#ffd166", "#5ef0c0", "#7af0ff", "#f472b6", "#a3e635", "#c084fc"];
-        const hair = d.isBoss ? "#ffd166" : hairs[i % hairs.length];
-        g.fillStyle = hair;
-        g.beginPath();
-        g.arc(x, dy - 26, 12, Math.PI, 0);
-        g.fill();
-        g.fillStyle = "#ffd9b8";
-        g.fillRect(x - 9, dy - 26, 18, 13);
-        g.fillStyle = "#0a0812";
-        g.fillRect(x - 5.5, dy - 21, 2.5, 3);
-        g.fillRect(x + 3, dy - 21, 2.5, 3);
-        g.fillStyle = d.isBoss ? "#5a3f8a" : "#3a3f66";
-        g.beginPath();
-        g.roundRect(x - 13, dy - 13, 26, 14, 5);
-        g.fill();
-
-        /* monitor */
-        g.fillStyle = "#0a0812";
-        g.beginPath();
-        g.roundRect(x - 20, dy - 4, 40, 20, 4);
-        g.fill();
-        g.strokeStyle = "rgba(120,100,220,.5)";
-        g.lineWidth = 1;
-        g.stroke();
-        for (let bI = 0; bI < 4; bI++) {
-          const hgt = 4 + Math.abs(Math.sin(now / 240 + bI + i)) * 10;
-          g.fillStyle = POINT_COLOR[d.type];
-          g.globalAlpha = 0.85;
-          g.fillRect(x - 16 + bI * 8, dy + 13 - hgt, 5, hgt);
-        }
-        g.globalAlpha = 1;
-
-        /* desk slab */
-        const slab = g.createLinearGradient(0, dy + 16, 0, dy + 26);
-        slab.addColorStop(0, "#8a5a3b");
-        slab.addColorStop(1, "#5e3b24");
-        g.fillStyle = slab;
-        g.beginPath();
-        g.roundRect(x - w / 2, dy + 16, w, 10, 3);
-        g.fill();
+        const left = x - (PROD_W * u) / 2;
+        g.drawImage(prodDeskBack(looks[i]), left, dy, PROD_W * u, PROD_H * u);
+        g.drawImage(prodDeskFront(POINT_COLOR[d.type], 2, animFrame + i), left, dy, PROD_W * u, PROD_H * u);
 
         /* label + hotkey */
+        g.textAlign = "center";
+        const label = d.name.slice(0, 10);
         g.fillStyle = "rgba(242,236,223,.75)";
         g.font = `700 10px "Space Grotesk", sans-serif`;
-        g.textAlign = "center";
-        g.fillText(d.name.slice(0, 10), x, dy + 40);
+        g.fillText(label, x, dy + PROD_H * u + 14);
+        /* how much each of this producer's bubbles is worth */
+        g.fillStyle = POINT_COLOR[d.type];
+        g.font = `800 9px "Space Grotesk", sans-serif`;
+        g.fillText(`+${stats[i].power}`, x + g.measureText(label).width / 2 + 9, dy + PROD_H * u + 14);
         if (i < KEYS.length) {
           g.fillStyle = "rgba(10,8,18,.85)";
-          g.beginPath();
-          g.roundRect(x - 8, dy + 45, 16, 14, 4);
-          g.fill();
+          g.fillRect(x - 8, dy + PROD_H * u + 18, 16, 14);
           g.strokeStyle = POINT_COLOR[d.type];
           g.lineWidth = 1;
-          g.stroke();
+          g.strokeRect(x - 8, dy + PROD_H * u + 18, 16, 14);
           g.fillStyle = POINT_COLOR[d.type];
           g.font = `700 9px "Space Grotesk", sans-serif`;
-          g.fillText(KEYS[i], x, dy + 55);
+          g.fillText(KEYS[i], x, dy + PROD_H * u + 28);
         }
       });
 
-      /* bubbles */
+      /* bubbles — pixel sprites with the crew member's face in them */
+      const bubFrame = Math.floor(now / 260);
       for (const b of s.bubbles) {
         const wobX = Math.sin(b.wob) * 7;
         const px = b.x + wobX;
         const grow = Math.min(1, (e - b.born) / 180);
         const r = b.r * (0.6 + grow * 0.4);
         const col = b.kind === "bug" ? "#ff4d4d" : b.kind === "star" ? "#ffd166" : POINT_COLOR[b.kind];
-        /* bubble body */
-        g.beginPath();
-        g.arc(px, b.y, r, 0, Math.PI * 2);
-        const rg = g.createRadialGradient(px - r * 0.35, b.y - r * 0.4, r * 0.15, px, b.y, r);
-        rg.addColorStop(0, "#ffffff");
-        rg.addColorStop(0.42, col);
-        rg.addColorStop(1, b.kind === "bug" ? "#5c0f1c" : "#1b1430");
-        g.fillStyle = rg;
-        g.shadowColor = col;
-        g.shadowBlur = b.kind === "star" ? 22 : 12;
-        g.fill();
-        g.shadowBlur = 0;
-        g.strokeStyle = "rgba(255,255,255,.7)";
-        g.lineWidth = 1.4;
-        g.stroke();
-
-        /* the employee face inside the bubble */
-        if (b.kind !== "bug") {
-          const desk = desks[b.desk];
-          const isBoss = desk?.isBoss;
-          const portrait = desk?.portrait;
-          let img: HTMLImageElement | null = null;
-          if (isBoss) img = s.face;
-          else if (portrait !== undefined && st.current._portraits[portrait]) {
-            img = st.current._portraits[portrait] ?? null;
-          }
-          if (img && img.complete && img.naturalWidth > 0) {
-            g.save();
-            g.beginPath();
-            g.arc(px, b.y, r * 0.72, 0, Math.PI * 2);
-            g.clip();
-            if (isBoss) {
-              g.drawImage(img, px - r * 0.8, b.y - r * 0.8, r * 1.6, r * 1.6);
-            } else if (portrait !== undefined) {
-              const sheet = STAFF_PORTRAITS[portrait];
-              const pw = img.width / 2;
-              const ph = img.height / 2;
-              const sx = (sheet.pos % 2) * pw;
-              const sy = Math.floor(sheet.pos / 2) * ph;
-              /* zoom in on the face, roughly the top half of the quadrant */
-              g.drawImage(img, sx, sy, pw, ph, px - r * 0.8, b.y - r * 0.8, r * 1.6, r * 1.6);
-            }
-            g.restore();
-            g.strokeStyle = "rgba(255,255,255,.75)";
-            g.lineWidth = 1.2;
-            g.beginPath();
-            g.arc(px, b.y, r * 0.72, 0, Math.PI * 2);
-            g.stroke();
-          } else {
-            /* fallback: value number */
-            g.fillStyle = "#0a0812";
-            g.font = `800 ${b.kind === "star" ? 16 : 13}px "Bricolage Grotesque", sans-serif`;
-            g.textAlign = "center";
-            g.textBaseline = "middle";
-            g.fillText(b.kind === "star" ? "★" : String(b.value), px, b.y + 1);
-            g.textBaseline = "alphabetic";
-          }
-        } else {
-          g.fillStyle = "#fff";
-          g.font = `800 13px "Bricolage Grotesque", sans-serif`;
-          g.textAlign = "center";
-          g.textBaseline = "middle";
-          g.fillText("!", px, b.y + 1);
-          g.textBaseline = "alphabetic";
+        const kind = b.kind === "bug" ? "bug" : b.kind === "star" ? "star" : "point";
+        const size = Math.max(15, Math.round((2.05 * r) / 15) * 15);
+        const spr = bubbleSprite(kind, col, looks[b.desk] ?? null, bubFrame + b.desk, b.tier);
+        g.drawImage(spr, Math.round(px - size / 2), Math.round(b.y - size / 2), size, size);
+        if (b.kind === "star") {
+          g.globalAlpha = 0.25 + 0.2 * Math.sin(now / 120);
+          g.drawImage(spr, Math.round(px - size * 0.7), Math.round(b.y - size * 0.7), size * 1.4, size * 1.4);
+          g.globalAlpha = 1;
         }
       }
 
@@ -506,7 +403,8 @@ export default function ProductionFloor({
         p.life -= 0.032;
         g.globalAlpha = Math.max(0, p.life);
         g.fillStyle = p.color;
-        g.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        const ps = Math.max(cell(), Math.round(p.size / cell()) * cell());
+        g.fillRect(Math.round(p.x - ps / 2), Math.round(p.y - ps / 2), ps, ps);
       }
       g.globalAlpha = 1;
 
@@ -552,13 +450,6 @@ export default function ProductionFloor({
       s.raf = requestAnimationFrame(draw);
     };
     s.raf = requestAnimationFrame(draw);
-
-    /* preload staff portrait sheets */
-    st.current._portraits = STAFF_PORTRAITS.map((sp) => {
-      const im = new Image();
-      im.src = sp.img;
-      return im;
-    });
 
     return () => {
       cancelAnimationFrame(s.raf);
