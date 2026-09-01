@@ -78,6 +78,12 @@ export interface Staff {
   salary: number; // per week
   cost: number; // signing fee
   stamina: number; // 0..100, drains with work
+  /** 0..100; falls with crunch, rises with rest, hits and workshops */
+  morale?: number;
+  /** progress toward the next +1 in the staff member's own discipline */
+  xp?: number;
+  /** how many workshops this staff member has been sent on */
+  trained?: number;
   /** index into STAFF_PORTRAITS */
   portrait: number;
 }
@@ -738,6 +744,9 @@ export function rollCandidate(week: number): Staff {
     sound: role === "composer" ? main : off(),
     level: 1,
     stamina: 100,
+    morale: 62 + Math.floor(Math.random() * 27),
+    xp: 0,
+    trained: 0,
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,

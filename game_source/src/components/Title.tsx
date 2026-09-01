@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
-import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices } from "lucide-react";
+import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices, Save, Trash2 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
-import { getScores, type ScoreEntry } from "../engine/storage";
-import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum } from "../engine/data";
+import {
+  formatPlaytime,
+  formatWhen,
+  getScores,
+  SLOT_COUNT,
+  type SaveSlot,
+  type SaveSlots,
+  type ScoreEntry,
+} from "../engine/storage";
+import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBPShort } from "../engine/data";
 import { cn } from "../utils/cn";
 
 /* ----------------------------------------------------------- score table */
@@ -52,10 +60,16 @@ export function HighScoreTable({ highlight }: { highlight?: number }) {
 /* ----------------------------------------------------------------- title */
 export default function Title({
   onStart,
+  onContinue,
+  onDeleteSave,
+  saves,
 }: {
   onStart: (studio: string, showrunner: string) => void;
+  onContinue: (slot: number) => void;
+  onDeleteSave: (slot: number) => void;
+  saves: SaveSlots;
 }) {
-  const [view, setView] = useState<"menu" | "setup" | "scores">("menu");
+  const [view, setView] = useState<"menu" | "setup" | "scores" | "saves">("menu");
   const [studio, setStudio] = useState("Anime Runner");
   const [runner, setRunner] = useState<"steady" | "vision">("steady");
 
@@ -109,6 +123,9 @@ export default function Title({
               <Btn big variant="primary" className="w-72 anim-ring" onClick={() => setView("setup")}>
                 <Play size={20} /> FOUND YOUR STUDIO
               </Btn>
+              <Btn big variant="gold" className="w-72" onClick={() => setView("saves")}>
+                <Save size={20} /> LOAD CAREER
+              </Btn>
               <Btn
                 big
                 variant="cyan"
@@ -124,6 +141,34 @@ export default function Title({
                 Take contracts, plan shows, pop the point bubbles your staff make.
                 <br />
                 ENTER begin · 1-7 desks · SPACE grab · ESC pause
+              </div>
+            </div>
+          )}
+
+          {view === "saves" && (
+            <div className="ink-card p-4 md:p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-display flex items-center gap-2 text-xl font-extrabold text-gold">
+                  <Save size={18} /> SAVE SLOTS
+                </h2>
+                <Btn variant="ghost" onClick={() => setView("menu")}>
+                  <ChevronLeft size={16} /> Back
+                </Btn>
+              </div>
+              <div className="space-y-2">
+                {Array.from({ length: SLOT_COUNT }, (_, i) => (
+                  <SaveRow
+                    key={i}
+                    index={i}
+                    slot={saves[i] ?? null}
+                    onPlay={() => onContinue(i)}
+                    onDelete={() => onDeleteSave(i)}
+                    onNew={() => setView("setup")}
+                  />
+                ))}
+              </div>
+              <div className="mt-3 text-center text-[11px] text-paper/45">
+                Careers save automatically as you play. Three slots, yours to manage.
               </div>
             </div>
           )}
@@ -211,6 +256,13 @@ export default function Title({
                 </div>
               </div>
 
+              {saves.every((v) => v !== null) && (
+                <div className="rounded-xl border border-neon/40 bg-neon/10 p-2.5 text-[11px] text-neon2">
+                  All three save slots are full — opening for business overwrites <b>slot 1</b>. Delete one from
+                  LOAD CAREER first if you want to keep it.
+                </div>
+              )}
+
               <Btn
                 big
                 variant="primary"
@@ -237,6 +289,73 @@ export default function Title({
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- save slots */
+function SaveRow({
+  index,
+  slot,
+  onPlay,
+  onDelete,
+  onNew,
+}: {
+  index: number;
+  slot: SaveSlot | null;
+  onPlay: () => void;
+  onDelete: () => void;
+  onNew: () => void;
+}) {
+  if (!slot) {
+    return (
+      <button
+        onClick={onNew}
+        className="btn-press flex w-full items-center gap-3 rounded-xl border border-dashed border-line bg-panel2/40 p-3 text-left hover:border-gold/60"
+      >
+        <span className="pxcell grid h-9 w-9 shrink-0 place-items-center text-[11px] font-extrabold text-paper/40">
+          {index + 1}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-paper/60">Empty slot</span>
+          <span className="block text-[11px] text-paper/40">Start a twelve-year career here.</span>
+        </span>
+        <span className="text-[11px] font-extrabold text-gold">NEW</span>
+      </button>
+    );
+  }
+  const s = slot.summary;
+  return (
+    <div className="ink-card flex items-center gap-3 p-3">
+      <span className="pxcell grid h-9 w-9 shrink-0 place-items-center text-[11px] font-extrabold text-gold">
+        {index + 1}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-bold">{s.studio}</div>
+        <div className="text-[11px] text-paper/55">
+          <span style={{ color: s.rankColor }}>{s.rankName}</span> · Year {s.year} · {s.showsMade} show
+          {s.showsMade === 1 ? "" : "s"} · {s.staff} crew
+        </div>
+        <div className="text-[10px] text-paper/45">
+          {formatGBPShort(s.cash)} · {formatNum(s.fans)} fans · {s.awards} award{s.awards === 1 ? "" : "s"} ·{" "}
+          {s.officeName}
+        </div>
+        <div className="text-[10px] text-paper/35">
+          {slot.auto ? "autosaved" : "saved"} {formatWhen(slot.savedAt)} · {formatPlaytime(slot.playtime)} played
+        </div>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" onClick={onPlay}>
+          <Play size={13} /> CONTINUE
+        </Btn>
+        <button
+          onClick={onDelete}
+          className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[10px] text-neon/80 hover:bg-neon/10"
+          aria-label={`Delete save slot ${index + 1}`}
+        >
+          <Trash2 size={11} /> Delete
+        </button>
       </div>
     </div>
   );

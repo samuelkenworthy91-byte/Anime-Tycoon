@@ -1,16 +1,34 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard } from "lucide-react";
+import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, Save } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
-import { ARCS, GENRES, comboKey, type Contract, type Draft } from "./engine/data";
+import { ARCS, GENRES, OFFICES, comboKey, type Contract, type Draft } from "./engine/data";
 import { computeResult, type ShowResult } from "./engine/scoring";
-import { advanceWeeks, AIR_WEEKS, initialRun, MAX_WEEKS, type RunState } from "./engine/state";
+import {
+  bumpObjectives,
+  growStaff,
+  marketBonus,
+  rankFanMult,
+  rankRevenueMult,
+  rankView,
+  rollSeasonIfNeeded,
+  settleObjectives,
+} from "./engine/loop";
+import {
+  deleteSave,
+  loadGame,
+  saveGame,
+  listSaves,
+  type SaveSummary,
+  type SaveSlots,
+} from "./engine/storage";
+import { advanceWeeks, AIR_WEEKS, MAX_WEEKS, migrate, initialRun, type RunState } from "./engine/state";
 import Title from "./components/Title";
 import Office from "./components/Office";
 import Create, { draftCost, draftWeeks } from "./components/Create";
 import Produce, { type ProduceResult } from "./components/Produce";
 import ContractJob from "./components/ContractJob";
-import Release from "./components/Release";
+import Release, { type MarketNote } from "./components/Release";
 import GameOver from "./components/GameOver";
 import { cn } from "./utils/cn";
 
@@ -23,10 +41,19 @@ export default function App() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [result, setResult] = useState<ShowResult | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [marketNote, setMarketNote] = useState<MarketNote | null>(null);
+
   const [sequelKey, setSequelKey] = useState<string | undefined>();
   const [paused, setPaused] = useState(false);
   const [victory, setVictory] = useState(false);
   const [muteUI, setMuteUI] = useState(isMuted());
+  /* three hand-managed save slots; `slot` is the one this career writes to */
+  const [slot, setSlot] = useState<number | null>(null);
+  const [saves, setSaves] = useState<SaveSlots>(() => listSaves());
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const playRef = useRef(0);
+  const savesRef = useRef(saves);
+  savesRef.current = saves;
   /* real-time game clock: 1 in-game day = 2 real minutes; 7 days = 1 week */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
@@ -60,8 +87,13 @@ export default function App() {
             if (n.week >= MAX_WEEKS) {
               setVictory(true);
               setScreen("gameover");
+              return n;
             }
-            return n;
+            n = rollSeasonIfNeeded(r, n);
+            if (n.awards > r.awards) n = bumpObjectives(n, { t: "award", n: n.awards - r.awards });
+            const settled = settleObjectives(n);
+            if (settled.completed.length) sfx.fanfare();
+            return settled.run;
           });
         }
         setClockDay(dayCountRef.current);
@@ -71,12 +103,89 @@ export default function App() {
     return () => clearInterval(iv);
   }, [screen, paused, run !== null, run?.week]);
 
+  /* --------------------------------------------------------- save slots */
+  const summaryOf = useCallback((r: RunState): SaveSummary => {
+    const rank = rankView(r);
+    return {
+      studio: r.studio,
+      showrunner: r.showrunner,
+      week: r.week,
+      year: Math.floor(r.week / 48) + 1,
+      cash: r.cash,
+      fans: r.fans,
+      awards: r.awards,
+      showsMade: r.showsMade,
+      officeName: OFFICES[r.officeLevel]?.name ?? "Studio",
+      score: rank.score,
+      rankName: rank.rank.name,
+      rankTier: rank.rank.tier,
+      rankColor: rank.rank.color,
+      staff: r.staff.length,
+    };
+  }, []);
+
+  /** Write the live run into a slot. `auto` marks it as an autosave. */
+  const saveTo = useCallback(
+    (i: number, auto = false) => {
+      if (!run) return;
+      setSaves(saveGame(i, run, meta, summaryOf(run), { auto, playtime: playRef.current }));
+      if (!auto) setSavedAt(Date.now());
+    },
+    [run, meta, summaryOf]
+  );
+
+  /** Autosave: debounced on any state change, plus a heart-beat while idle. */
+  useEffect(() => {
+    if (slot === null || !run || screen === "title" || screen === "gameover") return;
+    const t = setTimeout(() => saveTo(slot, true), 1500);
+    return () => clearTimeout(t);
+  }, [run, slot, screen, saveTo]);
+
+  useEffect(() => {
+    if (slot === null || screen === "title" || screen === "gameover") return;
+    const iv = setInterval(() => {
+      playRef.current += 30;
+      saveTo(slot, true);
+    }, 30_000);
+    return () => clearInterval(iv);
+  }, [slot, screen, saveTo]);
+
+  const deleteSlot = useCallback((i: number) => {
+    sfx.back();
+    setSaves(deleteSave(i));
+    if (i === slot) setSlot(null);
+  }, [slot]);
+
   /* --------------------------------------------------------- lifecycle */
+  const continueRun = useCallback((i: number) => {
+    const found = loadGame(i);
+    if (!found) return;
+    primeAudio();
+    sfx.fanfare();
+    setSaves(listSaves());
+    setMeta(found.meta);
+    setSlot(i);
+    setRun(migrate(found.run));
+    setDraft(null);
+    setResult(null);
+    setContract(null);
+    setSequelKey(undefined);
+    setVictory(false);
+    setPaused(false);
+    setScreen("office");
+  }, []);
+
   const startRun = useCallback((studio: string, showrunner: string) => {
     primeAudio();
     sfx.fanfare();
     setMeta({ studio, showrunner });
     setRun(initialRun(studio, showrunner));
+    const fresh = listSaves();
+    setSaves(fresh);
+    /* a new career takes the first free slot rather than quietly overwriting
+       whatever the player had in there */
+    const free = fresh.findIndex((v) => v === null);
+    setSlot(free >= 0 ? free : 0);
     setDraft(null);
     setResult(null);
     setContract(null);
@@ -107,6 +216,11 @@ export default function App() {
   /** apply time + check for bankruptcy / end of career */
   const settle = useCallback((next: RunState, weeks: number): RunState => {
     let r = advanceWeeks(next, weeks);
+    r = rollSeasonIfNeeded(next, r);
+    if (r.awards > next.awards) r = bumpObjectives(r, { t: "award", n: r.awards - next.awards });
+    const settled = settleObjectives(r);
+    if (settled.completed.length) sfx.fanfare();
+    r = settled.run;
     if (r.cash < 0) {
       if (r.bailouts < 2) {
         r = {
@@ -215,11 +329,26 @@ export default function App() {
     else if (result.tier === "hit") notices.push(`“${draft.title}” is the talk of the season (${result.total}/40).`);
     else if (result.tier === "flop") notices.push(`Critics bury “${draft.title}” (${result.total}/40).`);
 
+    /* the season and the studio's reputation both move the pay-out */
+    const mb = marketBonus(draft.genres, run.market);
+    const rv = rankView(run);
+    const revenue = Math.round(result.revenue * mb.revenue * rankRevenueMult(rv.rank.tier));
+    const fans = Math.round(result.fans * mb.fans * rankFanMult(rv.rank.tier));
+    setMarketNote({
+      kind: mb.kind,
+      label: mb.label,
+      revenue: mb.revenue,
+      fans: mb.fans,
+      rankRevenue: rankRevenueMult(rv.rank.tier),
+      rankFans: rankFanMult(rv.rank.tier),
+      rankName: rv.rank.name,
+      rankColor: rv.rank.color,
+    });
+    if (mb.kind !== "none") notices.push(`The season: ${mb.label}.`);
+
     /* income + fans arrive week by week while the show airs */
     const start = run.week + 1;
     const payouts = [...run.payouts];
-    const revenue = result.revenue;
-    const fans = result.fans;
     const weeks = AIR_WEEKS;
     let acc = 0;
     let accF = 0;
@@ -263,13 +392,14 @@ export default function App() {
       hallOfFame: result.hallOfFame
         ? [...run.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, protag: draft.protag, week: run.week }]
         : run.hallOfFame,
-      staff: run.staff.map((s) => ({
-        ...s,
-        stamina: Math.max(15, s.stamina - 26),
-        story: Math.min(99, s.story + 1),
-        art: Math.min(99, s.art + 1),
-        sound: Math.min(99, s.sound + 1),
-      })),
+      /* shipping a show is how the crew actually gets better — and tired */
+      staff: run.staff.map((s) => {
+        const g = growStaff(s, {
+          hit: result.tier === "hit" || result.hallOfFame,
+          flop: result.tier === "flop",
+        });
+        return { ...g, stamina: Math.max(15, g.stamina - 26) };
+      }),
       yearShows: [
         ...run.yearShows,
         { title: draft.title, studio: run.studio, score: result.total, player: true },
@@ -279,7 +409,16 @@ export default function App() {
       notices,
     };
 
-    const settled = settle(next, draftWeeks(draft));
+    const withEvent = bumpObjectives(next, {
+      t: "show",
+      genres: draft.genres,
+      score: result.total,
+      revenue,
+      fans,
+      hit: result.tier === "hit" || result.hallOfFame,
+      hallOfFame: result.hallOfFame,
+    });
+    const settled = settle(withEvent, draftWeeks(draft));
     setRun(settled);
     if (settled.cash >= 0 && settled.week < MAX_WEEKS) setScreen("office");
   }, [run, draft, result, settle]);
@@ -307,7 +446,7 @@ export default function App() {
         ],
         contracts: run.contracts.filter((x) => x.id !== contract.id),
       };
-      const settled = settle(next, contract.weeks);
+      const settled = settle(bumpObjectives(next, { t: "contract" }), contract.weeks);
       setRun(settled);
       setContract(null);
       if (settled.cash >= 0 && settled.week < MAX_WEEKS) setScreen("office");
@@ -344,11 +483,30 @@ export default function App() {
             <Btn big variant="primary" className="w-full" onClick={() => setPaused(false)}>
               <Play size={18} /> RESUME
             </Btn>
+            <Btn
+              variant="cyan"
+              className="w-full"
+              disabled={slot === null}
+              onClick={() => {
+                if (slot === null) return;
+                saveTo(slot);
+                setSavedAt(Date.now());
+              }}
+            >
+              <Save size={16} /> SAVE CAREER{slot !== null ? ` · SLOT ${slot + 1}` : ""}
+            </Btn>
             <Btn variant="gold" className="w-full" onClick={restart}>
               <RotateCcw size={16} /> INSTANT RESTART
             </Btn>
-            <Btn variant="ghost" className="w-full" onClick={quitToTitle}>
-              <Home size={16} /> QUIT TO TITLE
+            <Btn
+              variant="ghost"
+              className="w-full"
+              onClick={() => {
+                if (slot !== null) saveTo(slot, true);
+                quitToTitle();
+              }}
+            >
+              <Home size={16} /> SAVE &amp; QUIT TO TITLE
             </Btn>
           </div>
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
@@ -363,7 +521,9 @@ export default function App() {
   return (
     <FxProvider>
       <div className="relative h-full w-full overflow-hidden bg-ink">
-        {screen === "title" && <Title onStart={startRun} />}
+        {screen === "title" && (
+          <Title onStart={startRun} onContinue={continueRun} onDeleteSave={deleteSlot} saves={saves} />
+        )}
         {screen === "office" && run && (
           <Office
             run={run}
@@ -372,6 +532,8 @@ export default function App() {
             onContract={takeContract}
             clockDay={clockDay}
             clockPhase={clockPhase}
+            onSave={() => slot !== null && saveTo(slot)}
+            savedLabel={savedAt && Date.now() - savedAt < 4000 ? "SAVED" : "SAVE"}
           />
         )}
         {screen === "create" && run && (
@@ -391,7 +553,7 @@ export default function App() {
           <ContractJob run={run} contract={contract} paused={paused} onDone={finishContract} />
         )}
         {screen === "release" && draft && result && (
-          <Release draft={draft} result={result} onContinue={continueFromRelease} />
+          <Release draft={draft} result={result} market={marketNote} onContinue={continueFromRelease} />
         )}
         {screen === "gameover" && run && (
           <GameOver run={run} victory={victory} onRestart={restart} onTitle={quitToTitle} />

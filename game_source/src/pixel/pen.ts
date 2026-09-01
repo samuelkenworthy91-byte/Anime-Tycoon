@@ -56,8 +56,19 @@ export function rng(seed: number): () => number {
 
 const clamp255 = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
 
-/** Lighten (amount > 0) or darken (amount < 0) a #rrggbb colour. */
-export function shade(hex: string, amount: number): string {
+/**
+ * Shadow and highlight tints.
+ *
+ * Sliding a colour straight to black or white is what makes naive pixel art
+ * look muddy. Ramps in modern pixel art shift hue as well: shadows fall away
+ * to a cool violet, highlights warm up towards candlelight. `shade` mixes a
+ * little of the matching tint in on top of the darken/lighten.
+ */
+const SHADOW_TINT = "#2b1c4a";
+const LIGHT_TINT = "#ffecbf";
+
+/** Darken/lighten with no hue shift. */
+export function flatShade(hex: string, amount: number): string {
   const h = hex.replace("#", "");
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
   const r = (n >> 16) & 255;
@@ -66,6 +77,33 @@ export function shade(hex: string, amount: number): string {
   const f = (v: number) => clamp255(amount >= 0 ? v + (255 - v) * amount : v * (1 + amount));
   return `#${((1 << 24) | (f(r) << 16) | (f(g) << 8) | f(b)).toString(16).slice(1)}`;
 }
+
+/** Lighten (amount > 0) or darken (amount < 0) a #rrggbb colour, hue-shifted. */
+export function shade(hex: string, amount: number): string {
+  const base = flatShade(hex, amount);
+  if (!amount) return base;
+  const t = Math.min(0.32, Math.pow(Math.abs(amount), 0.85) * 0.5);
+  return mix(base, amount > 0 ? LIGHT_TINT : SHADOW_TINT, t);
+}
+
+/**
+ * A three-step ramp (shadow / base / light) with the hue shifted properly.
+ * Handy when a sprite needs a consistent set of tones from one base colour.
+ */
+export function ramp(base: string, shadow = 0.3, light = 0.26) {
+  return { dark: shade(base, -shadow), base, light: shade(base, light) };
+}
+
+/* 4x4 Bayer matrix, the classic ordered-dither threshold map. */
+const BAYER = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+
+/** Dither threshold at (x, y) in 0..1. */
+export const ditherAt = (x: number, y: number) => (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16;
 
 /** Blend two hex colours. */
 export function mix(a: string, b: string, t: number): string {
@@ -199,6 +237,45 @@ export class Pen {
         this.px(x + cx, y + i, edge ? outline : fill);
       }
     });
+  }
+
+  /**
+   * Ordered-dither blend of two colours over an area. `t` is how much of `b`
+   * to show; instead of blending to a muddy third colour it keeps both and
+   * breaks them up in a 4x4 checker, which is how pixel artists fake
+   * gradients without leaving the palette.
+   */
+  dither(x: number, y: number, w: number, h: number, a: string, b: string, t: number) {
+    const x0 = Math.round(x);
+    const y0 = Math.round(y);
+    for (let j = 0; j < Math.round(h); j++) {
+      for (let i = 0; i < Math.round(w); i++) {
+        this.px(x0 + i, y0 + j, t > ditherAt(x0 + i, y0 + j) ? b : a);
+      }
+    }
+  }
+
+  /**
+   * Vertical gradient where the bands between stops are dithered rather than
+   * smoothly blended — reads as a much larger palette than it uses.
+   */
+  dgrad(x: number, y: number, w: number, h: number, stops: [number, string][]) {
+    if (stops.length === 1) return this.rect(x, y, w, h, stops[0][1]);
+    for (let j = 0; j < h; j++) {
+      const t = h <= 1 ? 0 : j / (h - 1);
+      let lo = stops[0];
+      let hi = stops[stops.length - 1];
+      for (let s = 0; s < stops.length - 1; s++) {
+        if (t >= stops[s][0] && t <= stops[s + 1][0]) {
+          lo = stops[s];
+          hi = stops[s + 1];
+          break;
+        }
+      }
+      const span = hi[0] - lo[0];
+      const f = span <= 0 ? (t >= hi[0] ? 1 : 0) : (t - lo[0]) / span;
+      this.dither(x, y + j, w, 1, lo[1], hi[1], f);
+    }
   }
 
   /** deterministic speckle pass — dirt, carpet fibres, screen noise */

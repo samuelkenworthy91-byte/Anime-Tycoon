@@ -14,6 +14,7 @@ import {
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import { rollMarket, rollObjective, type Market, type ObjectiveState } from "./loop";
 
 export interface Franchise {
   baseTitle: string;
@@ -107,6 +108,35 @@ export interface RunState {
   /** income that landed this week (for the HUD) */
   incomeThisWeek: number;
   fansThisWeek: number;
+  /* ------------------------------------------------- career layer (loop) */
+  /** what the audience wants this season */
+  market?: Market;
+  /** always three on the board: short, season, career */
+  objectives?: ObjectiveState[];
+  /** weeks at which the season rolled over (kept for flavour/stats) */
+  seasonLog?: number[];
+}
+
+/**
+ * Fill in anything a save from an older build is missing. Saves are JSON, so
+ * a career written before a system existed must still load without exploding.
+ */
+export function migrate(r: RunState): RunState {
+  return {
+    ...r,
+    staff: r.staff.map((s) => ({
+      ...s,
+      morale: s.morale ?? 70,
+      xp: s.xp ?? 0,
+      trained: s.trained ?? 0,
+    })),
+    market: r.market ?? rollMarket(r.week),
+    objectives:
+      r.objectives && r.objectives.length === 3
+        ? r.objectives
+        : [rollObjective(r, "short"), rollObjective(r, "season"), rollObjective(r, "career")],
+    seasonLog: r.seasonLog ?? [],
+  };
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -136,7 +166,7 @@ export const START_CASH = 90_000;
 export const AIR_WEEKS = 8; // a show earns revenue over 8 broadcast weeks
 
 export function initialRun(studio: string, showrunner: string): RunState {
-  return {
+  const base = {
     studio,
     showrunner,
     cash: START_CASH,
@@ -174,6 +204,13 @@ export function initialRun(studio: string, showrunner: string): RunState {
     awardsCeremony: null,
     incomeThisWeek: 0,
     fansThisWeek: 0,
+    market: rollMarket(0),
+    seasonLog: [],
+  } as RunState;
+  /* the objective board always opens with one of each tier to chase */
+  return {
+    ...base,
+    objectives: [rollObjective(base, "short"), rollObjective(base, "season"), rollObjective(base, "career")],
   };
 }
 
@@ -320,7 +357,12 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     awardsCeremony,
     incomeThisWeek,
     fansThisWeek,
-    staff: r.staff.map((s) => ({ ...s, stamina: Math.min(100, s.stamina + n * 9) })),
+    /* time off restores energy and, more slowly, morale */
+    staff: r.staff.map((s) => ({
+      ...s,
+      stamina: Math.min(100, s.stamina + n * 9),
+      morale: Math.min(100, (s.morale ?? 70) + n * 2),
+    })),
     notices: notices.slice(-40),
   };
 }

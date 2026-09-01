@@ -27,6 +27,7 @@ import {
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
+import { SEASON_NAMES, seasonView } from "../engine/loop";
 import {
   ARCS,
   AUDIENCES,
@@ -143,6 +144,31 @@ export default function Create({
   onCancel: () => void;
   onUnlockArc?: (id: string, cost: number) => void;
 }) {
+  /* what the season wants — shown on the genre grid so the choice means something */
+  const season = useMemo(() => {
+    if (!run.market) return null;
+    const v = seasonView(run.week);
+    const label = (id: GenreId) => GENRES.find((g) => g.id === id)?.label ?? id;
+    return {
+      year: v.year,
+      name: SEASON_NAMES[v.season],
+      weeksLeft: v.weeksLeft,
+      hot: label(run.market.hot),
+      warm: label(run.market.warm),
+      cold: label(run.market.cold),
+    };
+  }, [run.market, run.week]);
+
+  const demand = useMemo(() => {
+    const out: Record<string, { label: string; color: string; arrow: string }> = {};
+    const m = run.market;
+    if (!m) return out;
+    out[m.hot] = { label: "in demand", color: "#5ef0c0", arrow: "▲" };
+    out[m.warm] = { label: "doing well", color: "#3be1ff", arrow: "▲" };
+    out[m.cold] = { label: "audiences are cold", color: "#ff4d8d", arrow: "▼" };
+    return out;
+  }, [run.market]);
+
   const [step, setStep] = useState(0);
   const [d, setD] = useState<Draft>(() => freshDraft(run, sequelKey));
 
@@ -310,6 +336,20 @@ export default function Create({
 
           {step === 1 && (
             <div className="space-y-4 anim-up">
+              {season && (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-panel2/60 p-2.5 text-[11px]">
+                  <span className="pxcell px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider text-cyanx">
+                    {season.name} {season.year}
+                  </span>
+                  <span className="font-bold text-mint">▲ hot: {season.hot}</span>
+                  <span className="font-bold text-cyanx">▲ warm: {season.warm}</span>
+                  <span className="font-bold text-neon">▼ cold: {season.cold}</span>
+                  <span className="text-paper/45">
+                    Shipping into demand pays up to +20% revenue and +28% fans — {season.weeksLeft} week
+                    {season.weeksLeft === 1 ? "" : "s"} left this season.
+                  </span>
+                </div>
+              )}
               <Section title={`PICK 1–2 GENRES (${d.genres.length}/2)`}>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                   {GENRES.map((g) => {
@@ -323,6 +363,11 @@ export default function Create({
                           <span className="font-display text-sm font-extrabold">{g.label}</span>
                         </div>
                         <div className="text-[10px] text-paper/50">{locked ? `Licence: ${g.rd} RD in R&D` : g.desc}</div>
+                        {demand[g.id] && (
+                          <div className="mt-1 text-[10px] font-extrabold" style={{ color: demand[g.id].color }}>
+                            {demand[g.id].arrow} {demand[g.id].label}
+                          </div>
+                        )}
                       </Pick>
                     );
                   })}

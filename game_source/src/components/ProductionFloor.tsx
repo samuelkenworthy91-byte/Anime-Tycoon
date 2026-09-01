@@ -4,6 +4,7 @@ import { useFx } from "../fx/fx";
 import { POINT_COLOR, type PointType } from "../engine/data";
 import { bubbleSprite, floorRoom, prodDeskBack, prodDeskFront, PROD_H, PROD_W } from "../pixel/floor";
 import { lookFrom } from "../pixel/chars";
+import { deskStats } from "../engine/loop";
 
 export interface FloorDesk {
   name: string;
@@ -41,7 +42,10 @@ interface Bubble {
   born: number;
   wob: number;
   dead: boolean;
+  /** 0..3 — how strong this producer's output is, drives the bubble's look */
+  tier: number;
 }
+
 interface Particle {
   x: number;
   y: number;
@@ -149,6 +153,8 @@ export default function ProductionFloor({
     const deskTop = () => s.h - 6 - PROD_H * cell();
     /* each desk gets a stable pixel-art crew member */
     const looks = desks.map((d, i) => lookFrom(`${d.name}${i}`, POINT_COLOR[d.type], d.isBoss ? 5 : undefined));
+    /* and a production profile derived from their skill */
+    const stats = desks.map((d) => deskStats(d.skill));
 
     const pop = (b: Bubble) => {
       b.dead = true;
@@ -240,29 +246,33 @@ export default function ProductionFloor({
 
     const spawn = (i: number, now: number) => {
       const d = desks[i];
+      const st = stats[i];
       const crunching = now < crunchRef.current;
       const roll = Math.random();
+      const bugChance = bugRate * st.bugMult * (crunching ? 1.9 : 1);
       let kind: Bubble["kind"];
       if (debugMode) kind = roll < 0.72 ? "bug" : (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)];
-      else if (roll < bugRate * (crunching ? 1.9 : 1)) kind = "bug";
-      else if (roll < bugRate + 0.05) kind = "star";
-      else if (roll < bugRate + 0.05 + 0.62) kind = focus;
+      else if (roll < bugChance) kind = "bug";
+      else if (roll < bugChance + st.starChance) kind = "star";
+      else if (roll < bugChance + st.starChance + 0.62) kind = focus;
       else kind = d.type;
-      const value =
-        kind === "star" ? 6 : kind === "bug" ? 0 : 1 + Math.floor(d.skill / 34) + (kind === focus ? 1 : 0);
+
+      const base = st.power + (kind === focus ? 1 : 0);
+      const value = kind === "star" ? Math.max(6, Math.round(base * 2.4)) : kind === "bug" ? 0 : base;
       s.bubbles.push({
         x: deskX(i) + (Math.random() - 0.5) * 26,
         y: deskTop() + 2 * cell(),
         vy: -(0.42 + Math.random() * 0.16) / lifeMult,
-        r: kind === "star" ? 24 : 18,
+        r: (kind === "star" ? 22 : 16) + st.tier * 2,
         kind,
         value,
         desk: i,
         born: s.elapsed,
         wob: Math.random() * 6.28,
         dead: false,
+        tier: st.tier,
       });
-      const rate = (2500 - Math.min(1400, d.skill * 13)) / (spawnMult * (crunching ? 2.1 : 1));
+      const rate = st.rate / (spawnMult * (crunching ? 2.1 : 1));
       s.nextSpawn[i] = s.elapsed + rate * (0.75 + Math.random() * 0.5);
     };
 
@@ -344,10 +354,15 @@ export default function ProductionFloor({
         g.drawImage(prodDeskFront(POINT_COLOR[d.type], 2, animFrame + i), left, dy, PROD_W * u, PROD_H * u);
 
         /* label + hotkey */
+        g.textAlign = "center";
+        const label = d.name.slice(0, 10);
         g.fillStyle = "rgba(242,236,223,.75)";
         g.font = `700 10px "Space Grotesk", sans-serif`;
-        g.textAlign = "center";
-        g.fillText(d.name.slice(0, 10), x, dy + PROD_H * u + 14);
+        g.fillText(label, x, dy + PROD_H * u + 14);
+        /* how much each of this producer's bubbles is worth */
+        g.fillStyle = POINT_COLOR[d.type];
+        g.font = `800 9px "Space Grotesk", sans-serif`;
+        g.fillText(`+${stats[i].power}`, x + g.measureText(label).width / 2 + 9, dy + PROD_H * u + 14);
         if (i < KEYS.length) {
           g.fillStyle = "rgba(10,8,18,.85)";
           g.fillRect(x - 8, dy + PROD_H * u + 18, 16, 14);
@@ -370,7 +385,7 @@ export default function ProductionFloor({
         const col = b.kind === "bug" ? "#ff4d4d" : b.kind === "star" ? "#ffd166" : POINT_COLOR[b.kind];
         const kind = b.kind === "bug" ? "bug" : b.kind === "star" ? "star" : "point";
         const size = Math.max(15, Math.round((2.05 * r) / 15) * 15);
-        const spr = bubbleSprite(kind, col, looks[b.desk] ?? null, bubFrame + b.desk);
+        const spr = bubbleSprite(kind, col, looks[b.desk] ?? null, bubFrame + b.desk, b.tier);
         g.drawImage(spr, Math.round(px - size / 2), Math.round(b.y - size / 2), size, size);
         if (b.kind === "star") {
           g.globalAlpha = 0.25 + 0.2 * Math.sin(now / 120);

@@ -26,6 +26,7 @@ import {
   type PointType,
 } from "../engine/data";
 import type { RunState } from "../engine/state";
+import { staffMood, staffOutput } from "../engine/loop";
 import type { Points } from "../engine/scoring";
 import ProductionFloor, { type FloorDesk, type FloorHandle, type FloorTotals } from "./ProductionFloor";
 import { cn } from "../utils/cn";
@@ -82,7 +83,7 @@ export default function Produce({
       { name: runner.name.split(" ")[0], skill: 46 + run.showsMade * 2, type: PHASES[phaseIdx].type, isBoss: true, img: runner.img },
     ];
     run.staff.forEach((s) =>
-      list.push({ name: s.name.split(" ")[0], skill: Math.round(staffPoint(s, ROLE_POINT[s.role]) * (0.6 + s.stamina / 250)), type: ROLE_POINT[s.role], portrait: s.portrait })
+      list.push({ name: s.name.split(" ")[0], skill: staffOutput(s, ROLE_POINT[s.role]), type: ROLE_POINT[s.role], portrait: s.portrait })
     );
     return list;
   }, [run.staff, run.showsMade, runner.name, phaseIdx]);
@@ -97,7 +98,15 @@ export default function Produce({
   const [, setAssigned] = useState<Record<number, string>>({});
   const specialistCandidates = useMemo(() => {
     const t = phase.type;
-    const list = run.staff.map((s) => ({ id: s.id, name: s.name, skill: staffPoint(s, t), stamina: s.stamina, outsource: false }));
+    const list = run.staff.map((s) => ({
+      id: s.id,
+      name: s.name,
+      skill: staffOutput(s, t),
+      raw: staffPoint(s, t),
+      stamina: s.stamina,
+      mood: staffMood(s),
+      outsource: false,
+    }));
     list.sort((a, b) => b.skill - a.skill);
     return list;
   }, [run.staff, phase.type]);
@@ -300,10 +309,10 @@ export default function Produce({
                       <div className="h-full rounded" style={{ width: `${c.skill}%`, background: POINT_COLOR[phase.type] }} />
                     </div>
                     <span className="text-[10px] font-bold text-paper/60">
-                      {POINT_LABEL[phase.type]} {c.skill}
+                      {POINT_LABEL[phase.type]} {c.raw} → {c.skill} today
                     </span>
-                    <span className={cn("text-[10px] font-bold", c.stamina < 45 ? "text-neon" : "text-mint")}>
-                      {c.stamina < 45 ? "BURNT OUT" : "FRESH"} {Math.round(c.stamina)}%
+                    <span className="text-[10px] font-bold" style={{ color: c.mood.color }}>
+                      {c.mood.label.toUpperCase()}
                     </span>
                   </div>
                 </div>

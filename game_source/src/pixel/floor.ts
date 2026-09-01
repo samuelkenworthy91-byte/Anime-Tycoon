@@ -86,8 +86,15 @@ export type BubbleKind = "point" | "star" | "bug";
  * A thought bubble with the crew member's face floating in it (or a sparkle /
  * an angry editing note). Drawn on a 15x15 grid and cached.
  */
-export function bubbleSprite(kind: BubbleKind, color: string, look: Look | null, frame: number): HTMLCanvasElement {
-  return spriteOutlined(`bub|${kind}|${color}|${look?.key ?? "-"}|${frame}`, BUB, BUB, (p) => {
+export function bubbleSprite(
+  kind: BubbleKind,
+  color: string,
+  look: Look | null,
+  frame: number,
+  /** 0..3 — how strong the producer is; stronger bubbles get a brighter rim */
+  tier = 0
+): HTMLCanvasElement {
+  return spriteOutlined(`bub|${kind}|${color}|${look?.key ?? "-"}|${frame}|${tier}`, BUB, BUB, (p) => {
     const fill = kind === "bug" ? "#ff4d4d" : kind === "star" ? "#ffd166" : color;
     const dark = shade(fill, -0.55);
     const light = shade(fill, 0.3);
@@ -98,6 +105,26 @@ export function bubbleSprite(kind: BubbleKind, color: string, look: Look | null,
         p.px(x, y, d > 6.1 ? dark : d > 4.6 ? fill : light);
       }
     }
+    /* skilled producers ship brighter work: a lit rim and extra sparkle */
+    if (tier > 0 && kind !== "bug") {
+      const rim = kind === "star" ? "#fff6cf" : mix0(light, "#ffffff", 0.55);
+      for (let y = 0; y < BUB; y++) {
+        for (let x = 0; x < BUB; x++) {
+          const d = Math.hypot(x - BC, y - BC);
+          if (d > 6.1 && d <= 7.1 && x + y > 13) p.px(x, y, rim);
+        }
+      }
+      if (tier >= 2) {
+        p.px(BC + 3, BC - 4, "#ffffff");
+        p.px(BC + 4, BC - 3, "#ffffff");
+      }
+      if (tier >= 3) {
+        p.px(BC + 3, BC + 4, "#ffffff");
+        p.px(BC + 4, BC + 3, "#ffffff");
+        p.px(BC + 4, BC - 4, mix0(light, "#ffffff", 0.8));
+      }
+    }
+
     /* glass highlight, top left */
     p.px(BC - 3, BC - 4, "#ffffff");
     p.px(BC - 4, BC - 3, "#ffffff");
@@ -180,12 +207,12 @@ export function floorRoom(w: number, h: number, tod: number): HTMLCanvasElement 
     const th = themeFor(1);
     const wb = Math.round(h * 0.38);
     /* ceiling + wall */
-    p.vgrad(0, 0, w, 6, [
+    p.dgrad(0, 0, w, 6, [
       [0, shade(th.ceiling, -0.4)],
       [1, th.ceiling],
     ]);
     p.hline(0, 5, w, shade(th.ceiling, -0.55));
-    p.vgrad(0, 6, w, wb - 6, [
+    p.dgrad(0, 6, w, wb - 6, [
       [0, th.wallL],
       [0.6, th.wall],
       [1, th.wallD],
@@ -201,7 +228,7 @@ export function floorRoom(w: number, h: number, tod: number): HTMLCanvasElement 
     for (let i = 0; i < count; i++) {
       const x = margin + i * (ww + gap);
       /* sky */
-      p.vgrad(x, wy, ww, wh, [
+      p.dgrad(x, wy, ww, wh, [
         [0, tod > 0.7 ? "#0a1030" : tod > 0.45 ? "#ff8a5c" : "#4aa8f0"],
         [1, tod > 0.7 ? "#1a1a3a" : tod > 0.45 ? "#6a3f7a" : "#a7dcff"],
       ]);
@@ -226,7 +253,7 @@ export function floorRoom(w: number, h: number, tod: number): HTMLCanvasElement 
     }
     /* floor */
     p.rect(0, wb, w, 2, th.skirting);
-    p.vgrad(0, wb + 2, w, h - wb - 2, [
+    p.dgrad(0, wb + 2, w, h - wb - 2, [
       [0, th.floorD],
       [0.4, th.floor],
       [1, shade(th.floor, 0.1)],

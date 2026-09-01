@@ -529,26 +529,31 @@ export class StudioScene {
     const c = makeCanvas(W, H);
     const p = new Pen(ctx2d(c));
 
-    /* ceiling */
-    p.vgrad(0, 0, W, 9, [
+    /* ceiling — gradients are dithered between palette colours rather than
+       blended, which is what keeps the room looking like pixel art */
+    p.dgrad(0, 0, W, 9, [
       [0, shade(th.ceiling, -0.4)],
       [1, th.ceiling],
     ]);
     p.hline(0, 8, W, shade(th.ceiling, -0.55));
 
     /* wall */
-    p.vgrad(0, 9, W, wb - 9, [
+    p.dgrad(0, 9, W, wb - 9, [
       [0, th.wallL],
       [0.55, th.wall],
       [1, th.wallD],
     ]);
-    for (let x = 0; x < W; x += 8) p.vline(x, 9, wb - 11, mix(th.wall, th.wallL, 0.22));
+    /* wallpaper stripes: a soft vertical band, not a hard line */
+    for (let x = 0; x < W; x += 8) p.dither(x, 9, 3, wb - 11, th.wall, mix(th.wall, th.wallL, 0.3), 0.42);
+    /* ambient occlusion in the corners */
+    p.dither(0, 9, 6, wb - 9, shade(th.wall, -0.12), shade(th.wall, -0.3), 0.5);
+    p.dither(W - 6, 9, 6, wb - 9, shade(th.wall, -0.12), shade(th.wall, -0.3), 0.5);
 
     /* skirting + floor */
     p.rect(0, wb, W, 3, th.skirting);
     p.hline(0, wb, W, shade(th.skirting, 0.3));
     p.hline(0, wb + 2, W, shade(th.skirting, -0.4));
-    p.vgrad(0, wb + 3, W, H - wb - 3, [
+    p.dgrad(0, wb + 3, W, H - wb - 3, [
       [0, th.floorD],
       [0.35, th.floor],
       [1, shade(th.floor, 0.1)],
@@ -614,10 +619,21 @@ export class StudioScene {
     for (const w of this.win) g.rect(w.x, w.y, w.w, w.h);
     g.clip();
 
-    /* flat sky bands keep the dithered pixel look instead of a smooth ramp */
+    /* The sky is a handful of flat bands with dithered seams — a real gradient
+       would smear, and hard steps would look like a barcode. */
     const bands = 6;
     for (let i = 0; i < bands; i++) {
-      p.rect(0, y0 + Math.round((i * h0) / bands), W, Math.ceil(h0 / bands) + 1, mix(sky.top, sky.bottom, i / (bands - 1)));
+      const by = y0 + Math.round((i * h0) / bands);
+      const bh = Math.ceil(h0 / bands) + 1;
+      const c0 = mix(sky.top, sky.bottom, i / (bands - 1));
+      const c1 = mix(sky.top, sky.bottom, Math.min(1, (i + 1) / (bands - 1)));
+      p.rect(0, by, W, bh, c0);
+      p.dither(0, by + bh - 2, W, 2, c0, c1, 0.5);
+    }
+    /* a warm bloom low in the sky at dawn and dusk */
+    if (sky.glow) {
+      const gy = y0 + Math.round(h0 * 0.62);
+      p.dither(0, gy, W, Math.max(2, Math.round(h0 * 0.3)), mix(sky.top, sky.bottom, 0.6), sky.glow, 0.3);
     }
 
     /* stars */
@@ -800,7 +816,7 @@ export class StudioScene {
     const seated = w.state === "sit";
     const sipping = w.state === "act" && !!w.target && (w.target.kind === "coffee" || w.target.kind === "water" || w.target.kind === "snack");
     const mode = seated ? "sit" : sipping ? "sip" : w.state === "walk" ? "walk" : "idle";
-    const frameMs = mode === "walk" ? 105 : mode === "sit" ? 240 : mode === "sip" ? 300 : 480;
+    const frameMs = mode === "walk" ? 78 : mode === "sit" ? 240 : mode === "sip" ? 300 : 480;
     const frame = Math.floor((this.clock + w.seed * 37) / frameMs);
     const spr = charSprite(w.look, mode, w.view, frame);
     const g = p.g;
