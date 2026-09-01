@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices, Save, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Play, Zap, Trophy, ChevronLeft, Check, Sparkles, Dices, Save, FolderOpen } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
-import { clearGame, getScores, type SaveGame, type ScoreEntry } from "../engine/storage";
+import { getScores, newestSave, slotLabel, type SlotId, type ScoreEntry } from "../engine/storage";
+import SaveSlots from "./SaveSlots";
 import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel } from "../engine/data";
 import { cn } from "../utils/cn";
 
@@ -52,16 +53,16 @@ export function HighScoreTable({ highlight }: { highlight?: number }) {
 /* ----------------------------------------------------------------- title */
 export default function Title({
   onStart,
-  onContinue,
-  save,
+  onLoad,
 }: {
   onStart: (studio: string, showrunner: string) => void;
-  onContinue?: () => void;
-  save?: SaveGame | null;
+  /** resume a specific slot */
+  onLoad?: (id: SlotId) => void;
 }) {
-  const [dismissedSave, setDismissedSave] = useState(false);
-  const resumable = save && !dismissedSave ? save : null;
-  const [view, setView] = useState<"menu" | "setup" | "scores">("menu");
+  /* bumped after a delete so the slot list and CONTINUE re-read storage */
+  const [saveTick, setSaveTick] = useState(0);
+  const newest = useMemo(() => newestSave(), [saveTick]);
+  const [view, setView] = useState<"menu" | "setup" | "scores" | "load">("menu");
   const [studio, setStudio] = useState("Anime Runner");
   const [runner, setRunner] = useState<"steady" | "vision">("steady");
 
@@ -71,8 +72,8 @@ export default function Title({
         primeAudio();
         if (view === "menu") {
           sfx.select();
-          if (resumable && onContinue) {
-            onContinue();
+          if (newest && onLoad) {
+            onLoad(newest.id);
             return;
           }
           setView("setup");
@@ -84,7 +85,7 @@ export default function Title({
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [view, studio, runner, onStart, resumable, onContinue]);
+  }, [view, studio, runner, onStart, newest, onLoad]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-ink">
@@ -122,35 +123,34 @@ export default function Title({
         <div className="w-full max-w-2xl anim-up" style={{ animationDelay: "120ms" }}>
           {view === "menu" && (
             <div className="flex flex-col items-center gap-3">
-              {resumable && (
+              {newest && (
                 <div className="w-72 anim-pop">
-                  <Btn big variant="gold" className="w-full anim-ring" onClick={() => onContinue?.()}>
+                  <Btn
+                    big
+                    variant="gold"
+                    className="w-full anim-ring"
+                    onClick={() => onLoad?.(newest.id)}
+                  >
                     <Save size={20} /> CONTINUE
                   </Btn>
-                  <div className="mt-1 flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/5 px-2.5 py-1.5 text-[10px] leading-tight text-paper/70">
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-bold text-gold">{resumable.summary.studio}</div>
-                      <div className="truncate">
-                        {dateLabel(resumable.summary.week)} · {formatGBP(resumable.summary.cash)} ·{" "}
-                        {formatNum(resumable.summary.fans)} fans · {resumable.summary.shows} shows
-                      </div>
+                  <div className="mt-1 rounded-xl border border-gold/30 bg-gold/5 px-2.5 py-1.5 text-[10px] leading-tight text-paper/70">
+                    <div className="truncate font-bold text-gold">
+                      {newest.save.summary.studio}
+                      <span className="ml-1.5 font-normal text-paper/45">
+                        {slotLabel(newest.id)}
+                      </span>
                     </div>
-                    <button
-                      aria-label="Delete save"
-                      onClick={() => {
-                        sfx.back();
-                        clearGame();
-                        setDismissedSave(true);
-                      }}
-                      className="btn-press shrink-0 rounded-lg border border-line px-1.5 py-1 text-paper/40 hover:text-neon"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                    <div className="truncate">
+                      {dateLabel(newest.save.summary.week)} ·{" "}
+                      {formatGBP(newest.save.summary.cash)} ·{" "}
+                      {formatNum(newest.save.summary.fans)} fans ·{" "}
+                      {newest.save.summary.shows} shows
+                    </div>
                   </div>
                 </div>
               )}
               <Btn big variant="primary" className="w-72 anim-ring" onClick={() => setView("setup")}>
-                <Play size={20} /> {resumable ? "NEW CAREER" : "FOUND YOUR STUDIO"}
+                <Play size={20} /> {newest ? "NEW CAREER" : "FOUND YOUR STUDIO"}
               </Btn>
               <Btn
                 big
@@ -160,16 +160,38 @@ export default function Title({
               >
                 <Zap size={20} /> QUICK START
               </Btn>
+              <Btn big variant="ghost" className="w-72" onClick={() => setView("load")}>
+                <FolderOpen size={20} className="text-cyanx" /> LOAD GAME
+              </Btn>
               <Btn big variant="ghost" className="w-72" onClick={() => setView("scores")}>
                 <Trophy size={20} className="text-gold" /> HALL OF FAME
               </Btn>
               <div className="mt-2 max-w-xs text-center text-[11px] leading-relaxed text-paper/60">
                 Take contracts, plan shows, pop the point bubbles your staff make.
                 <br />
-                {resumable ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
+                {newest ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
                 <br />
-                Your career autosaves after every change.
+                Autosaves as you play · 3 manual slots from the pause menu.
               </div>
+            </div>
+          )}
+
+          {view === "load" && (
+            <div className="ink-card p-4 md:p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-display flex items-center gap-2 text-xl font-extrabold text-cyanx">
+                  <FolderOpen size={18} /> LOAD GAME
+                </h2>
+                <Btn variant="ghost" onClick={() => setView("menu")}>
+                  <ChevronLeft size={16} /> Back
+                </Btn>
+              </div>
+              <SaveSlots
+                mode="load"
+                refreshKey={saveTick}
+                onChanged={() => setSaveTick((n) => n + 1)}
+                onPick={(id) => onLoad?.(id)}
+              />
             </div>
           )}
 
