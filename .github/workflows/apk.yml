@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - arena/01a05c9d-anime-tycoon
+      - arena/01a05d86-anime-tycoon
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
