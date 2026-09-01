@@ -10,7 +10,8 @@
     "apk:add": "cap add android",
     "apk:sync": "npm run build && cap sync android",
     "apk:build": "npm run apk:sync && cd android && ./gradlew assembleDebug",
-    "apk:open": "cap open android"
+    "apk:open": "cap open android",
+    "test": "vitest run"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
@@ -31,6 +32,7 @@
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
     "vite": "7.3.2",
-    "vite-plugin-singlefile": "2.3.0"
+    "vite-plugin-singlefile": "2.3.0",
+    "vitest": "^4.1.11"
   }
 }

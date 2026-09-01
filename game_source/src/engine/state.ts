@@ -1,6 +1,8 @@
 import {
   GENRES,
   OFFICES,
+  comboKey,
+  dateLabel,
   PUN_TITLES,
   RIVAL_STUDIOS,
   rollCandidate,
@@ -14,6 +16,19 @@ import {
   type Staff,
 } from "./data";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import {
+  activeProjects,
+  applyMilestoneOutcome,
+  assignedStaffIds,
+  computeProjectResult,
+  draftCost,
+  makeProject,
+  projectUpfront,
+  tickProjectsWeek,
+  toggleAssign,
+  type MilestoneOutcome,
+  type Project,
+} from "./projects";
 
 export interface Franchise {
   baseTitle: string;
@@ -107,6 +122,8 @@ export interface RunState {
   /** income that landed this week (for the HUD) */
   incomeThisWeek: number;
   fansThisWeek: number;
+  /** every show currently in the pipeline (or recently completed) */
+  projects: Project[];
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -174,6 +191,17 @@ export function initialRun(studio: string, showrunner: string): RunState {
     awardsCeremony: null,
     incomeThisWeek: 0,
     fansThisWeek: 0,
+    projects: [],
+  };
+}
+
+/** bring an older save up to the current shape (additive, non-destructive) */
+export function migrateRun(raw: unknown): RunState {
+  const r = raw as RunState;
+  return {
+    ...r,
+    projects: Array.isArray(r.projects) ? r.projects : [],
+    staff: (r.staff ?? []).map((s) => ({ ...s })),
   };
 }
 
@@ -245,6 +273,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let yearShows = r.yearShows;
   let awards = r.awards;
   let awardsCeremony = r.awardsCeremony;
+  let projects = r.projects ?? [];
   let incomeThisWeek = 0;
   let fansThisWeek = 0;
   const perWeek = weeklyOutgoings(r);
@@ -268,6 +297,12 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       fansThisWeek += wkFans;
     }
     payouts = payouts.filter((p) => p.week !== w);
+
+    /* every project in the pipeline gets a week of work */
+    const tick = tickProjectsWeek(projects, r.staff, w);
+    projects = tick.projects;
+    cash += tick.cashDelta;
+    notices.push(...tick.notices);
 
     /* rival studios premiere their parody shows */
     const airing = rivals.filter((r2) => r2.week === w);
@@ -318,11 +353,184 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     yearShows,
     awards,
     awardsCeremony,
+    projects,
     incomeThisWeek,
     fansThisWeek,
-    staff: r.staff.map((s) => ({ ...s, stamina: Math.min(100, s.stamina + n * 9) })),
+    staff: (() => {
+      /* people on a production tire; everyone else recovers */
+      const busy = assignedStaffIds(projects);
+      return r.staff.map((s) => ({
+        ...s,
+        stamina: busy.has(s.id)
+          ? Math.max(12, s.stamina - n * 3)
+          : Math.min(100, s.stamina + n * 9),
+      }));
+    })(),
     notices: notices.slice(-40),
   };
+}
+
+/* =================================================================== */
+/*                        PROJECT PIPELINE OPS                          */
+/* =================================================================== */
+
+/** how many major productions this office can run at once */
+export const projectCapacity = (r: RunState) => OFFICES[r.officeLevel].projects;
+
+export const projectById = (r: RunState, id: string): Project | null =>
+  r.projects.find((p) => p.id === id) ?? null;
+
+/** null = a new project can be greenlit; otherwise the blocking reason */
+export function startBlockReason(r: RunState, d?: Draft): string | null {
+  const active = activeProjects(r.projects).length;
+  const cap = projectCapacity(r);
+  if (active >= cap)
+    return `${OFFICES[r.officeLevel].name} can only run ${cap} production${cap > 1 ? "s" : ""} at once`;
+  if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
+  return null;
+}
+
+/** greenlight a new show: pays the upfront cost and enters the pipeline */
+export function startProject(r: RunState, d: Draft): RunState | null {
+  if (startBlockReason(r, d)) return null;
+  const p = makeProject(d, r.week);
+  return {
+    ...r,
+    cash: r.cash - projectUpfront(d),
+    projects: [...r.projects, p],
+    notices: [
+      ...r.notices,
+      `“${d.title}” greenlit — target release ${dateLabel(p.deadlineWeek)}. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+    ],
+  };
+}
+
+/** move a staff member onto / off a project (exclusive assignment) */
+export function assignToProject(r: RunState, projectId: string, staffId: string): RunState {
+  return { ...r, projects: toggleAssign(r.projects, projectId, staffId) };
+}
+
+/** fold a played milestone sprint back into the run */
+export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutcome): RunState {
+  const team = projectById(r, projectId)?.staffIds ?? [];
+  return {
+    ...r,
+    cash: r.cash - o.spent,
+    rd: r.rd + o.rdGained + (o.squashed ?? 0) * 2,
+    staff: r.staff.map((s) =>
+      team.includes(s.id) ? { ...s, stamina: Math.max(12, s.stamina - 8) } : s
+    ),
+    projects: r.projects.map((p) => (p.id === projectId ? applyMilestoneOutcome(p, o) : p)),
+  };
+}
+
+/** score a ready project without committing anything */
+export function previewResult(r: RunState, p: Project): ShowResult {
+  return computeProjectResult(p, {
+    research: r.research,
+    showrunner: r.showrunner,
+    comboLevels: r.comboLevels,
+    castCombos: r.castCombos,
+    arcCombos: r.arcCombos,
+    studioTop: r.studioTop,
+    franchises: r.franchises,
+    fans: r.fans,
+  });
+}
+
+/** release a ready project: reviews land, payouts get scheduled over the
+ *  broadcast run, franchises/stats update, the show starts airing */
+export function releaseProject(
+  r: RunState,
+  projectId: string,
+  extra: { spent: number; hype: number }
+): { run: RunState; result: ShowResult } | null {
+  const p0 = projectById(r, projectId);
+  if (!p0 || p0.stage !== "ready") return null;
+  const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
+  const result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
+  const draft = p.draft;
+
+  const fkey = draft.franchiseKey ?? draft.title;
+  const baseTitle = draft.franchiseKey
+    ? r.franchises[draft.franchiseKey]?.baseTitle ?? draft.title
+    : draft.title;
+  const ck = comboKey(draft.genres);
+  const notices = [...r.notices];
+  if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
+  if (p.lateWeeks > 0)
+    notices.push(`The network docks “${draft.title}” for delivering ${p.lateWeeks} week${p.lateWeeks > 1 ? "s" : ""} late.`);
+
+  /* broadcast revenue arrives week by week while the show airs */
+  const start = r.week + 1;
+  const payouts = [...r.payouts];
+  const totalSales = Math.max(1, result.sales.reduce((a, b) => a + b, 0));
+  let acc = 0;
+  let accF = 0;
+  const chunks: { amount: number; fans: number }[] = [];
+  for (let i = 0; i < AIR_WEEKS; i++) {
+    const frac = result.sales[i] / totalSales;
+    const amount = Math.round(result.revenue * frac);
+    const fan = Math.round(result.fans * frac);
+    chunks.push({ amount, fans: fan });
+    acc += amount;
+    accF += fan;
+  }
+  chunks[AIR_WEEKS - 1].amount += result.revenue - acc;
+  chunks[AIR_WEEKS - 1].fans += result.fans - accF;
+  chunks.forEach((c, i) => {
+    if (c.amount > 0 || c.fans > 0)
+      payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: `“${draft.title}” broadcast` });
+  });
+
+  const released: Project = { ...p, stage: "airing", result, airedWeek: start };
+
+  const run: RunState = {
+    ...r,
+    cash: r.cash - extra.spent,
+    rd: r.rd + released.rdGained,
+    payouts,
+    totalRevenue: r.totalRevenue + result.revenue,
+    showsMade: r.showsMade + 1,
+    hits: r.hits + (result.tier === "hit" || result.hallOfFame ? 1 : 0),
+    bestScore: Math.max(r.bestScore, result.total),
+    comboLevels: { ...r.comboLevels, [ck]: Math.min(5, (r.comboLevels[ck] ?? 0) + 1) },
+    castCombos: [...new Set([...r.castCombos, ...result.chemDiscovered])],
+    arcCombos: [...new Set([...r.arcCombos, ...result.arcCombosDiscovered])],
+    arcKnowledge: draft.arcs.reduce(
+      (acc2, id) => ({ ...acc2, [id]: (acc2[id] ?? 0) + 1 }),
+      r.arcKnowledge
+    ),
+    studioTop: Math.max(r.studioTop, result.quality),
+    franchises: {
+      ...r.franchises,
+      [fkey]: { baseTitle, season: draft.season, lastScore: result.total, alive: result.hallOfFame },
+    },
+    pendingSequel:
+      result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
+    hallOfFame: result.hallOfFame
+      ? [...r.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, protag: draft.protag, week: r.week }]
+      : r.hallOfFame,
+    staff: r.staff.map((s) =>
+      p.staffIds.includes(s.id)
+        ? {
+            ...s,
+            stamina: Math.max(15, s.stamina - 18),
+            story: Math.min(99, s.story + 1),
+            art: Math.min(99, s.art + 1),
+            sound: Math.min(99, s.sound + 1),
+          }
+        : s
+    ),
+    yearShows: [...r.yearShows, { title: draft.title, studio: r.studio, score: result.total, player: true }],
+    lastResult: result,
+    lastDraft: draft,
+    notices,
+    /* the finished team is freed for the next production */
+    projects: r.projects.map((x) => (x.id === projectId ? { ...released, staffIds: [] } : x)),
+  };
+
+  return { run, result };
 }
 
 export function studioScore(r: RunState): number {

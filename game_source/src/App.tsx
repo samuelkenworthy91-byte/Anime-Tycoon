@@ -2,28 +2,44 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, HardDriveDownload, ChevronLeft, Check } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
-import { ARCS, GENRES, comboKey, type Contract, type Draft } from "./engine/data";
-import { computeResult, type ShowResult } from "./engine/scoring";
-import { advanceWeeks, AIR_WEEKS, initialRun, MAX_WEEKS, type RunState } from "./engine/state";
+import { ARCS, type Contract, type Draft } from "./engine/data";
+import type { ShowResult } from "./engine/scoring";
+import {
+  advanceWeeks,
+  applyMilestone,
+  initialRun,
+  MAX_WEEKS,
+  migrateRun,
+  projectById,
+  releaseProject,
+  startProject,
+  type RunState,
+} from "./engine/state";
+import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
 import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
-import Create, { draftCost, draftWeeks } from "./components/Create";
-import Produce, { type ProduceResult } from "./components/Produce";
+import Create from "./components/Create";
+import Produce from "./components/Produce";
+import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
 import Release from "./components/Release";
 import GameOver from "./components/GameOver";
 import { cn } from "./utils/cn";
 
-type Screen = "title" | "office" | "create" | "produce" | "contract" | "release" | "gameover";
+type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
   const [run, setRun] = useState<RunState | null>(null);
   const [meta, setMeta] = useState({ studio: "Anime Runner", showrunner: "steady" });
-  const [draft, setDraft] = useState<Draft | null>(null);
-  const [result, setResult] = useState<ShowResult | null>(null);
+  /** the draft+result of the show whose reviews are on screen */
+  const [released, setReleased] = useState<{ draft: Draft; result: ShowResult } | null>(null);
+  /** the milestone sprint currently being played */
+  const [focus, setFocus] = useState<{ projectId: string; milestone: MilestoneId } | null>(null);
+  /** the project on the release-prep screen */
+  const [shipId, setShipId] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
   const [sequelKey, setSequelKey] = useState<string | undefined>();
   const [paused, setPaused] = useState(false);
@@ -124,9 +140,10 @@ export default function App() {
     primeAudio();
     sfx.fanfare();
     setMeta(save.meta);
-    setRun(save.run as RunState);
-    setDraft(null);
-    setResult(null);
+    setRun(migrateRun(save.run));
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
     setContract(null);
     setSequelKey(undefined);
     setVictory(false);
@@ -145,8 +162,9 @@ export default function App() {
     clearAllSaves();
     setMeta({ studio, showrunner });
     setRun(initialRun(studio, showrunner));
-    setDraft(null);
-    setResult(null);
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
     setContract(null);
     setSequelKey(undefined);
     setVictory(false);
@@ -158,8 +176,9 @@ export default function App() {
     sfx.fanfare();
     clearAllSaves();
     setRun(initialRun(meta.studio, meta.showrunner));
-    setDraft(null);
-    setResult(null);
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
     setContract(null);
     setSequelKey(undefined);
     setVictory(false);
@@ -222,136 +241,75 @@ export default function App() {
     [run]
   );
 
+  /* greenlight: the show enters the pipeline as a project — no time skip */
   const beginProduction = useCallback((d: Draft) => {
-    sfx.whoosh();
-    setRun((r) => (r ? { ...r, cash: r.cash - draftCost(d) } : r));
-    setDraft(d);
-    setScreen("produce");
+    setRun((r) => {
+      if (!r) return r;
+      const next = startProject(r, d);
+      if (!next) return r;
+      sfx.whoosh();
+      return next;
+    });
+    setScreen("office");
   }, []);
 
-  const finishProduction = useCallback(
-    (pr: ProduceResult) => {
-      if (!run || !draft) return;
-      const d: Draft = { ...draft, sliders: pr.sliders };
-      const genres = d.genres;
-      const avgOf = (pick: (i: number) => number[]) =>
-        [0, 1, 2].map((i) => pick(i).reduce((a, b) => a + b, 0) / Math.max(1, genres.length));
-      const ideal = avgOf((i) => genres.map((g) => GENRES.find((x) => x.id === g)!.ideal[i])).map(Math.round) as [number, number, number];
-      const ratio = (genres.length
-        ? avgOf((i) => genres.map((g) => GENRES.find((x) => x.id === g)!.ratio[i]))
-        : [0.34, 0.33, 0.33]) as [number, number, number];
+  /* ------------------------------------------------- milestone sprints */
+  const openMilestone = useCallback(
+    (projectId: string) => {
+      if (!run) return;
+      const p = projectById(run, projectId);
+      if (!p?.milestone) return;
+      sfx.select();
+      setFocus({ projectId, milestone: p.milestone });
+      setScreen("produce");
+    },
+    [run]
+  );
 
-      const key = comboKey(genres);
-      const comboLevel = run.comboLevels[key] ?? 0;
-      const franchiseMult = d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1;
-
-      const res = computeResult({
-        draft: d,
-        points: pr.points,
-        issues: pr.issues,
-        hype: pr.hype,
-        research: run.research,
-        showrunner: run.showrunner,
-        genreIdeal: ideal,
-        genreRatio: ratio,
-        comboLevel,
-        newCombo: !(key in run.comboLevels),
-        comboDiscovered: key in run.comboLevels,
-        castCombos: run.castCombos,
-        arcCombos: run.arcCombos,
-        studioTop: run.studioTop,
-        franchiseMult,
-        costs: draftCost(d) + pr.spent,
-        fanBase: run.fans,
-      });
-
+  const finishMilestone = useCallback(
+    (o: MilestoneOutcome) => {
+      if (!focus) return;
       sfx.reveal();
-      setRun((r) => (r ? { ...r, cash: r.cash - pr.spent, rd: r.rd + pr.rdGained } : r));
-      setDraft(d);
-      setResult(res);
+      setRun((r) => (r ? applyMilestone(r, focus.projectId, o) : r));
+      setFocus(null);
+      setScreen("office");
+    },
+    [focus]
+  );
+
+  /* --------------------------------------------------------- release */
+  const openShip = useCallback((projectId: string) => {
+    sfx.select();
+    setShipId(projectId);
+    setScreen("ship");
+  }, []);
+
+  const airShow = useCallback(
+    (spent: number, hype: number) => {
+      if (!run || !shipId) return;
+      const p = projectById(run, shipId);
+      if (!p) return;
+      const out = releaseProject(run, shipId, { spent, hype });
+      if (!out) return;
+      sfx.reveal();
+      setRun(out.run);
+      setReleased({ draft: p.draft, result: out.result });
+      setShipId(null);
       setScreen("release");
     },
-    [run, draft]
+    [run, shipId]
   );
 
   const continueFromRelease = useCallback(() => {
-    if (!run || !draft || !result) return;
-    const fkey = draft.franchiseKey ?? draft.title;
-    const baseTitle = draft.franchiseKey ? run.franchises[draft.franchiseKey]?.baseTitle ?? draft.title : draft.title;
-    const ck = comboKey(draft.genres);
-    const notices = [...run.notices];
-    if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME with ${result.total}/40!`);
-    else if (result.tier === "hit") notices.push(`“${draft.title}” is the talk of the season (${result.total}/40).`);
-    else if (result.tier === "flop") notices.push(`Critics bury “${draft.title}” (${result.total}/40).`);
+    setReleased(null);
+    setScreen("office");
+  }, []);
 
-    /* income + fans arrive week by week while the show airs */
-    const start = run.week + 1;
-    const payouts = [...run.payouts];
-    const revenue = result.revenue;
-    const fans = result.fans;
-    const weeks = AIR_WEEKS;
-    let acc = 0;
-    let accF = 0;
-    const chunks: { amount: number; fans: number }[] = [];
-    for (let i = 0; i < weeks; i++) {
-      const frac = result.sales[i] / Math.max(1, result.sales.reduce((a, b) => a + b, 0));
-      const amount = Math.round(revenue * frac);
-      const fan = Math.round(fans * frac);
-      chunks.push({ amount, fans: fan });
-      acc += amount;
-      accF += fan;
-    }
-    /* rounding drift lands on the final week */
-    chunks[weeks - 1].amount += revenue - acc;
-    chunks[weeks - 1].fans += fans - accF;
-    chunks.forEach((c, i) => {
-      if (c.amount > 0 || c.fans > 0)
-        payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: `“${draft.title}” broadcast` });
-    });
-
-    const next: RunState = {
-      ...run,
-      payouts,
-      totalRevenue: run.totalRevenue + revenue,
-      showsMade: run.showsMade + 1,
-      hits: run.hits + (result.tier === "hit" || result.hallOfFame ? 1 : 0),
-      bestScore: Math.max(run.bestScore, result.total),
-      comboLevels: { ...run.comboLevels, [ck]: Math.min(5, (run.comboLevels[ck] ?? 0) + 1) },
-      castCombos: [...new Set([...run.castCombos, ...result.chemDiscovered])],
-      arcCombos: [...new Set([...run.arcCombos, ...result.arcCombosDiscovered])],
-      arcKnowledge: draft.arcs.reduce(
-        (acc, id) => ({ ...acc, [id]: (acc[id] ?? 0) + 1 }),
-        run.arcKnowledge
-      ),
-      studioTop: Math.max(run.studioTop, result.quality),
-      franchises: {
-        ...run.franchises,
-        [fkey]: { baseTitle, season: draft.season, lastScore: result.total, alive: result.hallOfFame },
-      },
-      pendingSequel: result.total >= 30 ? fkey : draft.franchiseKey === run.pendingSequel ? null : run.pendingSequel,
-      hallOfFame: result.hallOfFame
-        ? [...run.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, protag: draft.protag, week: run.week }]
-        : run.hallOfFame,
-      staff: run.staff.map((s) => ({
-        ...s,
-        stamina: Math.max(15, s.stamina - 26),
-        story: Math.min(99, s.story + 1),
-        art: Math.min(99, s.art + 1),
-        sound: Math.min(99, s.sound + 1),
-      })),
-      yearShows: [
-        ...run.yearShows,
-        { title: draft.title, studio: run.studio, score: result.total, player: true },
-      ],
-      lastResult: result,
-      lastDraft: draft,
-      notices,
-    };
-
-    const settled = settle(next, draftWeeks(draft));
-    setRun(settled);
-    if (settled.cash >= 0 && settled.week < MAX_WEEKS) setScreen("office");
-  }, [run, draft, result, settle]);
+  /* one deliberate week of studio time from the project board */
+  const skipWeek = useCallback(() => {
+    sfx.click();
+    setRun((r) => (r ? settle(r, 1) : r));
+  }, [settle]);
 
   /* ----------------------------------------------------- contract flow */
   const takeContract = useCallback((c: Contract) => {
@@ -489,6 +447,9 @@ export default function App() {
             setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
             onNewShow={newShow}
             onContract={takeContract}
+            onMilestone={openMilestone}
+            onShip={openShip}
+            onSkipWeek={skipWeek}
             clockDay={clockDay}
             clockPhase={clockPhase}
           />
@@ -503,14 +464,37 @@ export default function App() {
             onUnlockArc={unlockArc}
           />
         )}
-        {screen === "produce" && run && draft && (
-          <Produce run={run} draft={draft} paused={paused} onFinish={finishProduction} />
+        {screen === "produce" && run && focus && projectById(run, focus.projectId) && (
+          <Produce
+            run={run}
+            project={projectById(run, focus.projectId)!}
+            milestone={focus.milestone}
+            paused={paused}
+            onDone={finishMilestone}
+            onBack={() => {
+              sfx.back();
+              setFocus(null);
+              setScreen("office");
+            }}
+          />
+        )}
+        {screen === "ship" && run && shipId && projectById(run, shipId) && (
+          <Ship
+            run={run}
+            project={projectById(run, shipId)!}
+            onAir={airShow}
+            onBack={() => {
+              sfx.back();
+              setShipId(null);
+              setScreen("office");
+            }}
+          />
         )}
         {screen === "contract" && run && contract && (
           <ContractJob run={run} contract={contract} paused={paused} onDone={finishContract} />
         )}
-        {screen === "release" && draft && result && (
-          <Release draft={draft} result={result} onContinue={continueFromRelease} />
+        {screen === "release" && released && (
+          <Release draft={released.draft} result={released.result} onContinue={continueFromRelease} />
         )}
         {screen === "gameover" && run && (
           <GameOver run={run} victory={victory} onRestart={restart} onTitle={quitToTitle} />

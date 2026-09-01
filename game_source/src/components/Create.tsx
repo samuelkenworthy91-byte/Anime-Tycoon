@@ -81,15 +81,8 @@ export function freshDraft(run: RunState, sequelKey?: string): Draft {
   };
 }
 
-export function draftCost(d: Draft, _run?: RunState): number {
-  void _run;
-  const arcCost = d.arcs.reduce((a, id) => a + (ARCS.find((x) => x.id === id)?.cost ?? 0), 0);
-  return Math.round(BUDGETS[d.budget].cost * MEDIUMS[d.medium].costMult + SLOTS[d.slot].cost + arcCost);
-}
-
-export function draftWeeks(d: Draft): number {
-  return 11 + MEDIUMS[d.medium].weeks + Math.max(0, d.arcs.length - 3);
-}
+export { draftCost, draftWeeks } from "../engine/projects";
+import { draftCost, draftWeeks } from "../engine/projects";
 
 function CastPick({
   m,
@@ -155,7 +148,7 @@ export default function Create({
   const comboDiscovered = d.genres.length === 2 && (comboKey(d.genres) in run.comboLevels);
   const combo = comboLabel(d.genres, comboDiscovered);
   const comboLv = run.comboLevels[comboKey(d.genres)] ?? 0;
-  const cost = draftCost(d, run);
+  const cost = draftCost(d);
   const weeks = draftWeeks(d);
 
 

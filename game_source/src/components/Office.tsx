@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Clapperboard,
+  KanbanSquare,
   Users,
   Banknote,
   Flame,
@@ -54,9 +55,11 @@ import {
   type GenreId,
   type Staff,
 } from "../engine/data";
-import { office, pendingIncome, studioScore, type RunState } from "../engine/state";
+import { assignToProject, office, pendingIncome, projectCapacity, startBlockReason, studioScore, type RunState } from "../engine/state";
+import { activeProjects, projectOfStaff } from "../engine/projects";
 import Portrait from "./Portrait";
 import OfficeScene from "./OfficeScene";
+import ProjectsPanel from "./Projects";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -65,6 +68,9 @@ export default function Office({
   setRun,
   onNewShow,
   onContract,
+  onMilestone,
+  onShip,
+  onSkipWeek,
   clockDay = 0,
   clockPhase = 0,
 }: {
@@ -72,16 +78,24 @@ export default function Office({
   setRun: (fn: (r: RunState) => RunState) => void;
   onNewShow: (sequelKey?: string) => void;
   onContract: (c: Contract) => void;
+  onMilestone: (projectId: string) => void;
+  onShip: (projectId: string) => void;
+  onSkipWeek: () => void;
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
+  const [modal, setModal] = useState<null | "projects" | "staff" | "research" | "contracts" | "relocate" | "hof" | "awards" | "sequels">(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
   const off = office(run);
   const nextOffice = OFFICES[run.officeLevel + 1];
   const inFlight = pendingIncome(run, 12);
+  const projActive = activeProjects(run.projects);
+  const projCap = projectCapacity(run);
+  const newShowBlocked = startBlockReason(run);
+  /* projects needing the player: a milestone to play or a release decision */
+  const projAlerts = run.projects.filter((p) => p.milestone || p.stage === "ready").length;
 
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= off.maxStaff) return;
@@ -271,7 +285,26 @@ export default function Office({
       {/* -------------------------------------------------------- actions */}
       <div className="relative z-20 border-t border-line/60 bg-ink/85 px-2 py-2.5 backdrop-blur-md md:px-5">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-1.5 md:gap-2.5">
-          <Btn big variant="primary" className="anim-ring" onClick={() => onNewShow()}>
+          <Btn
+            big
+            variant="primary"
+            className={cn(!projAlerts && !newShowBlocked && "anim-ring", "relative")}
+            onClick={() => setModal("projects")}
+          >
+            <KanbanSquare size={19} /> PROJECTS
+            <span className="text-[10px] opacity-70">({projActive.length}/{projCap})</span>
+            {projAlerts > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gold font-display text-[10px] font-extrabold text-ink anim-pop">
+                {projAlerts}
+              </span>
+            )}
+          </Btn>
+          <Btn
+            big
+            variant={newShowBlocked ? "ghost" : "primary"}
+            disabled={!!newShowBlocked}
+            onClick={() => onNewShow()}
+          >
             <Clapperboard size={19} /> NEW SHOW
           </Btn>
           {seq && (
@@ -360,6 +393,32 @@ export default function Office({
         </Modal>
       )}
 
+      {/* -------------------------------------------------------- PROJECTS */}
+      {modal === "projects" && (
+        <Modal title="PROJECT BOARD" onClose={() => setModal(null)}>
+          <ProjectsPanel
+            run={run}
+            onAssign={(projectId, staffId) => {
+              sfx.click();
+              setRun((r) => assignToProject(r, projectId, staffId));
+            }}
+            onMilestone={(id) => {
+              setModal(null);
+              onMilestone(id);
+            }}
+            onShip={(id) => {
+              setModal(null);
+              onShip(id);
+            }}
+            onSkipWeek={onSkipWeek}
+            onNewShow={() => {
+              setModal(null);
+              onNewShow();
+            }}
+          />
+        </Modal>
+      )}
+
       {/* ----------------------------------------------------------- STAFF */}
       {modal === "staff" && (
         <Modal title="STAFF ROOM" onClose={() => setModal(null)}>
@@ -383,6 +442,16 @@ export default function Office({
                         <span className="ink-chip px-1.5 py-0.5 text-[9px] font-bold text-gold">
                           Lv{s.level} {LEVEL_TITLES[s.level - 1]}
                         </span>
+                        {(() => {
+                          const proj = projectOfStaff(run.projects, s.id);
+                          return proj ? (
+                            <span className="ink-chip max-w-[110px] truncate px-1.5 py-0.5 text-[9px] font-bold text-cyanx">
+                              ▶ {proj.draft.title}
+                            </span>
+                          ) : (
+                            <span className="ink-chip px-1.5 py-0.5 text-[9px] font-bold text-paper/35">idle</span>
+                          );
+                        })()}
                         <span className="ml-auto text-[10px] text-paper/50">{formatGBP(s.salary)}/wk</span>
                       </div>
                       <div className="mt-1.5 grid grid-cols-3 gap-1.5">
@@ -556,6 +625,7 @@ export default function Office({
               <div className="font-display text-lg font-extrabold">{off.name}</div>
               <div className="mt-2 space-y-1 text-xs text-paper/60">
                 <div>Desks: {off.maxStaff} staff</div>
+                <div>Project slots: {off.projects}</div>
                 <div>Rent: {formatGBP(off.rent)}/week</div>
               </div>
             </div>
@@ -565,6 +635,7 @@ export default function Office({
               <div className="mt-1 text-[11px] italic text-paper/60">{nextOffice.blurb}</div>
               <div className="mt-2 space-y-1 text-xs text-paper/60">
                 <div className="text-mint">Desks: {nextOffice.maxStaff} staff</div>
+                <div className="text-mint">Project slots: {nextOffice.projects}</div>
                 <div>Rent: {formatGBP(nextOffice.rent)}/week</div>
               </div>
               <Btn variant="gold" className="mt-3 w-full" disabled={run.cash < nextOffice.cost} onClick={relocate}>
