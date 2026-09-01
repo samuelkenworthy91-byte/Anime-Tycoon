@@ -106,6 +106,8 @@ function Character({
   /* WotL-style toddle: while a move is in flight the sprite rocks foot to
      foot; standing still it settles back into the idle breathing bob */
   const [stepping, setStepping] = useState(false);
+  /* sprite art may not be generated yet — fall back to a colored token */
+  const [err, setErr] = useState(false);
   useEffect(() => {
     if (body.dur <= 0) return;
     setStepping(true);
@@ -145,18 +147,30 @@ function Character({
         className={stepping ? "block h-full anim-waddle" : "block h-full anim-bob"}
         style={{ animationDelay: stepping ? "0ms" : `${bobDelay}ms` }}
       >
-        <img
-          src={src}
-          alt={label}
-          draggable={false}
-          className="h-full w-auto select-none drop-shadow-[0_6px_10px_rgba(8,6,20,.55)]"
-          style={{
-            transform: body.flip ? "scaleX(-1)" : undefined,
-            filter: tired
-              ? "saturate(.55) brightness(.82) contrast(1.02)"
-              : "saturate(1.04) contrast(1.03)",
-          }}
-        />
+        {err ? (
+          <span
+            aria-hidden
+            className="mx-auto block h-full aspect-square rounded-full"
+            style={{
+              background: `radial-gradient(circle at 35% 30%, ${color}, ${color}66)`,
+              boxShadow: "0 6px 10px rgba(8,6,20,.55)",
+            }}
+          />
+        ) : (
+          <img
+            src={src}
+            alt={label}
+            draggable={false}
+            onError={() => setErr(true)}
+            className="h-full w-auto select-none drop-shadow-[0_6px_10px_rgba(8,6,20,.55)]"
+            style={{
+              transform: body.flip ? "scaleX(-1)" : undefined,
+              filter: tired
+                ? "saturate(.55) brightness(.82) contrast(1.02)"
+                : "saturate(1.04) contrast(1.03)",
+            }}
+          />
+        )}
       </span>
 
       {/* tired wisp */}

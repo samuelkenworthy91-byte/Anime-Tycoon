@@ -27,6 +27,7 @@ import type { RunState } from "../engine/state";
 import type { Points } from "../engine/scoring";
 import { MILESTONE_LABEL, type MilestoneId, type MilestoneOutcome, type Project } from "../engine/projects";
 import ProductionFloor, { type FloorDesk, type FloorHandle, type FloorTotals } from "./ProductionFloor";
+import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
 /* one sprint = one interactive phase of the old production loop */
@@ -293,7 +294,7 @@ export default function Produce({
               onClick={() => takeSpecialist(40 + run.showsMade * 3, 0)}
               className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-neon/50"
             >
-              <img src={runner.portrait} alt="" className="h-10 w-10 rounded-lg object-cover" />
+              <Portrait img={runner.portrait} name={runner.name} alt="" className="h-10 w-10 rounded-lg" />
               <div className="flex-1">
                 <div className="text-sm font-bold">{runner.name} (you)</div>
                 <div className="text-[10px] text-paper/50">Do it yourself. Free, improves with experience.</div>
