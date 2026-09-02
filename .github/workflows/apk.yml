@@ -1,5 +1,6 @@
 name: Build Android APK
 
+# Playtest rebuild marker: scroll + expanded pun-title update
 on:
   workflow_dispatch:
   push:
