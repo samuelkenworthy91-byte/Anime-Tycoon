@@ -847,7 +847,10 @@ export interface WorkerLook {
   sprite: string;
   portrait: string;
 }
-export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((n) => ({
+/* Looks must only reference art that actually shipped in public/img — a
+   missing file renders as a broken image in menus (6 is the showrunner's
+   dedicated model, reserved; art batch 2 added workers 14-16). */
+export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((n) => ({
   sprite: `img/sprite-worker-${n}.png`,
   portrait: `img/portrait-worker-${n}.png`,
 }));
