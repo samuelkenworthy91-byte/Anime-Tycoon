@@ -10,6 +10,8 @@ import {
   Play,
   Rocket,
   Scissors,
+  TrendingUp,
+  Tv,
   UserRound,
   Users,
   Banknote,
@@ -28,7 +30,7 @@ import {
   type PointType,
   type Staff,
 } from "../engine/data";
-import { AIR_WEEKS, projectCapacity, type RunState } from "../engine/state";
+import { AIR_WEEKS, forecastWeek, projectCapacity, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
 import {
@@ -66,6 +68,7 @@ function ProjectCard({
   onDelegate,
   onTakeOver,
   onResume,
+  onContinueSeason,
 }: {
   p: Project;
   run: RunState;
@@ -75,6 +78,8 @@ function ProjectCard({
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
+  /** jump straight into creating this IP's next season while it's still on air */
+  onContinueSeason?: (franchiseKey: string) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
@@ -167,6 +172,37 @@ function ProjectCard({
           {p.result && <span className="ml-2 text-gold">{p.result.total}/40</span>}
         </div>
       )}
+
+      {/* while the broadcast runs, the studio is free: a good studio starts
+          on the next season straight away instead of waiting for the finale */}
+      {p.stage === "airing" &&
+        onContinueSeason &&
+        (() => {
+          const fkey = p.draft.franchiseKey ?? p.draft.title;
+          const fr = run.franchises[fkey];
+          if (!fr) return null;
+          const nextNo = fr.season + 1;
+          const inFlight = run.projects.some(
+            (x) =>
+              x.id !== p.id &&
+              x.stage !== "done" &&
+              x.stage !== "airing" &&
+              x.draft.franchiseKey === fkey &&
+              x.draft.continuation === "season" &&
+              x.draft.season === nextNo
+          );
+          if (inFlight)
+            return (
+              <div className="mt-1.5 text-[10px] italic text-paper/45">
+                Season {nextNo} is already on the floor — check the board above.
+              </div>
+            );
+          return (
+            <Btn variant="gold" className="mt-1.5 w-full !py-1.5 text-[10px]" onClick={() => onContinueSeason(fkey)}>
+              <Tv size={13} /> START SEASON {nextNo} NOW
+            </Btn>
+          );
+        })()}
 
       {/* indicators */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
@@ -387,6 +423,7 @@ export default function ProjectsPanel({
   onDelegate,
   onTakeOver,
   onResume,
+  onContinueSeason,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -397,11 +434,14 @@ export default function ProjectsPanel({
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
+  /** greenlight the next season of an IP straight from its airing card */
+  onContinueSeason?: (franchiseKey: string) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
   const airing = run.projects.filter((p) => p.stage === "airing");
   const done = run.projects.filter((p) => p.stage === "done").slice(-4).reverse();
+  const fc = forecastWeek(run);
 
   return (
     <div className="space-y-2.5">
@@ -413,6 +453,32 @@ export default function ProjectsPanel({
         <Btn variant="cyan" className="ml-auto !px-2.5 !py-1.5 text-[10px]" onClick={onSkipWeek}>
           <FastForward size={13} /> NEXT WEEK
         </Btn>
+      </div>
+
+      {/* the money next week is expected to move — so you can act before
+          skipping into a week you can't afford */}
+      <div
+        className={cn(
+          "flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] leading-snug",
+          fc.cashAfter < 0 ? "border-neon/60 bg-neon/10 text-neon" : "border-line/60 bg-panel2/40 text-paper/60"
+        )}
+      >
+        {fc.cashAfter < 0 ? <AlertTriangle size={12} className="shrink-0" /> : <TrendingUp size={12} className="shrink-0 text-mint" />}
+        <span>
+          Next week:{" "}
+          {fc.income > 0 && <span className="text-mint">broadcast +{formatGBPShort(fc.income)} · </span>}
+          burn −{formatGBPShort(fc.burn)}
+          {fc.lateFees > 0 && <span className="text-neon"> · penalties −{formatGBPShort(fc.lateFees)}</span>}
+          {fc.payday > 0 && <span className="text-gold"> · payday −{formatGBPShort(fc.payday)}</span>}
+          {" = "}
+          <b className={fc.net >= 0 ? "text-mint" : "text-neon"}>
+            {fc.net >= 0 ? "+" : "−"}
+            {formatGBPShort(Math.abs(fc.net))}
+          </b>
+          {" → "}
+          <b className={fc.cashAfter < 0 ? "text-neon" : "text-paper/90"}>≈{formatGBPShort(fc.cashAfter)} in the bank</b>
+          {fc.cashAfter < 0 && <b className="block font-bold text-neon">BANKRUPT NEXT WEEK — take a contract first!</b>}
+        </span>
       </div>
 
       {active.length === 0 && airing.length === 0 && (
@@ -433,6 +499,7 @@ export default function ProjectsPanel({
           onDelegate={onDelegate}
           onTakeOver={onTakeOver}
           onResume={onResume}
+          onContinueSeason={onContinueSeason}
         />
       ))}
 

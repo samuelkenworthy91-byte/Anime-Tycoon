@@ -4,6 +4,7 @@
  *  fan expectations, fatigue, cult followings and merchandising.
  * ========================================================================== */
 import type { AudienceId, Draft, GenreId, MediumId } from "./data";
+import type { Project } from "./projects";
 
 /* ------------------------------------------------------------ entry kinds */
 export type EntryKind =
@@ -211,8 +212,29 @@ export const continuationDef = (kind: EntryKind): ContinuationDef | null =>
 export function continuationBlock(
   fr: Franchise,
   kind: Exclude<EntryKind, "original">,
-  opts: { week: number; franchiseCount: number; officeLevel: number }
+  opts: {
+    week: number;
+    franchiseCount: number;
+    officeLevel: number;
+    /** in-flight productions — used to stop the same next season being made twice */
+    projects?: Project[];
+  }
 ): string | null {
+  if (kind === "season") {
+    /* one next-season per franchise on the floor at a time: the previous
+       season can be mid-broadcast without blocking anything, but two
+       productions of the SAME season number would corrupt the timeline */
+    const next = fr.season + 1;
+    const dupe = (opts.projects ?? []).find(
+      (p) =>
+        p.stage !== "done" &&
+        p.stage !== "airing" &&
+        p.draft.franchiseKey === fr.key &&
+        p.draft.continuation === "season" &&
+        p.draft.season === next
+    );
+    if (dupe) return `Season ${next} is already in production (“${dupe.draft.title}”)`;
+  }
   if (kind === "reboot") {
     if (fr.entries.length < 2) return "Needs at least 2 entries to reboot";
     if (fr.fatigue < 40 && opts.week - fr.lastEntryWeek < 96)

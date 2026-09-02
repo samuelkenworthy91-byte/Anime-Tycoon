@@ -365,6 +365,7 @@ export default function LibraryPanel({
                 week: run.week,
                 franchiseCount: list.length,
                 officeLevel: run.officeLevel,
+                projects: run.projects,
               });
             const expected = expectedScore(fr, c.kind);
             const needsPick = c.kind === "crossover" || c.kind === "spinoff";

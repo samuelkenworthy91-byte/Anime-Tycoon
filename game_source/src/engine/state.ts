@@ -397,6 +397,39 @@ export function pendingIncome(r: RunState, weeks: number): number {
   return r.payouts.reduce((a, p) => (p.week > r.week && p.week <= end ? a + p.amount : a), 0);
 }
 
+/* -------------------------------------------------------- cash forecast */
+/** one week of cash flow, itemised, before any of it happens. Lets the
+ *  studio see next week's money (bankruptcy included) while there's still
+ *  time to do something about it — a contract, a merch push, cheaper… everything. */
+export interface WeekForecast {
+  /** the week being forecast (always current week + 1) */
+  week: number;
+  /** broadcast payouts due that week */
+  income: number;
+  /** weekly production burn for everything still in the pipeline */
+  burn: number;
+  /** broadcaster penalties for projects already past their deadline */
+  lateFees: number;
+  /** wages + rent + facilities bill (lands every 4th week, 0 otherwise) */
+  payday: number;
+  /** income − burn − lateFees − payday */
+  net: number;
+  /** cash + net — negative means the studio bounces that week */
+  cashAfter: number;
+}
+export function forecastWeek(r: RunState): WeekForecast {
+  const w = r.week + 1;
+  const income = r.payouts.reduce((a, p) => (p.week === w ? a + p.amount : a), 0);
+  const burnMult = studioProduction(r.heads ?? {}, r.staff).burnMult;
+  const burn = activeProjects(r.projects).reduce((a, p) => a + Math.round(p.weeklyBurn * burnMult), 0);
+  const lateFees = activeProjects(r.projects)
+    .filter((p) => w > p.deadlineWeek)
+    .reduce((a, p) => a + 1_500 + Math.round(draftCost(p.draft) * 0.015), 0);
+  const payday = w % 4 === 0 ? weeklyOutgoings(r) * 4 : 0;
+  const net = income - burn - lateFees - payday;
+  return { week: w, income, burn, lateFees, payday, net, cashAfter: r.cash + net };
+}
+
 /* ------------------------------------------------------------------ year end */
 function runCeremony(year: number, yearShows: AwardNominee[], rivalWorld: RivalWorld): AwardCeremony {
   const all: AwardNominee[] = [
@@ -913,13 +946,29 @@ export const projectCapacity = (r: RunState) =>
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
 
-/** null = a new project can be greenlit; otherwise the blocking reason */
+/** null = a new project can be greenlit; otherwise the blocking reason.
+    Covers capacity, cash, and every continuation rule so the UI can say
+    WHY a show can't start instead of silently swallowing the click. */
 export function startBlockReason(r: RunState, d?: Draft): string | null {
   const active = activeProjects(r.projects).length;
   const cap = projectCapacity(r);
   if (active >= cap)
     return `${OFFICES[r.officeLevel].name} can only run ${cap} production${cap > 1 ? "s" : ""} at once`;
   if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
+  if (d?.continuation) {
+    const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
+    if (!fr) return "This franchise doesn't exist any more";
+    const fee = continuationDef(d.continuation)?.fee ?? 0;
+    if (fee > 0 && r.cash < projectUpfront(d) + fee)
+      return `Not enough cash — the rights fee alone is £${fee.toLocaleString("en-GB")}`;
+    const block = continuationBlock(fr, d.continuation, {
+      week: r.week,
+      franchiseCount: Object.keys(r.franchises).length,
+      officeLevel: r.officeLevel,
+      projects: r.projects,
+    });
+    if (block) return block;
+  }
   return null;
 }
 
@@ -946,6 +995,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       week: r.week,
       franchiseCount: Object.keys(r.franchises).length,
       officeLevel: r.officeLevel,
+      projects: r.projects,
     });
     if (block) return null;
     if (d.continuation === "crossover" && (!d.crossKey || !r.franchises[d.crossKey] || d.crossKey === d.franchiseKey))
@@ -978,6 +1028,10 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
     projects: [...r.projects, p],
     commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
+    /* the quick "SEASON N" button is spent the moment that season is greenlit —
+       otherwise it keeps offering a season that's already on the floor */
+    pendingSequel:
+      d.continuation === "season" && d.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
     notices: [
       ...r.notices,
       commission && partner

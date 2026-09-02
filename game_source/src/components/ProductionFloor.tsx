@@ -132,7 +132,9 @@ export default function ProductionFloor({
     s.combo = 0;
     s.done = false;
     s.totals = { story: 0, art: 0, sound: 0, issues: 0, squashed: 0, best: 0, collected: 0, missed: 0 };
-    s.nextSpawn = desks.map((_, i) => 300 + i * 220 + Math.random() * 400);
+    /* desks come to life at scattered moments — a studio floor is not a
+       metronome, and nobody's first bubble should arrive on a schedule */
+    s.nextSpawn = desks.map((_, i) => 450 + i * 150 + Math.random() * 900);
 
     const canvas = canvasRef.current!;
     const g = canvas.getContext("2d")!;
@@ -268,8 +270,14 @@ export default function ProductionFloor({
       else if (roll < bugRate + 0.05) kind = "star";
       else if (roll < bugRate + 0.05 + 0.62) kind = focus;
       else kind = d.type;
+      /* talent pays: a veteran's work is worth more than a junior's —
+         no more flat "everything is exactly +3" on the floor */
       const value =
-        kind === "star" ? 6 : kind === "bug" ? 0 : 1 + Math.floor(d.skill / 34) + (kind === focus ? 1 : 0);
+        kind === "star"
+          ? 10
+          : kind === "bug"
+            ? 0
+            : Math.min(8, 1 + Math.floor(d.skill / 20) + (kind === focus ? 1 : 0));
       s.bubbles.push({
         x: deskX(i) + (Math.random() - 0.5) * 26,
         y: deskY() - 10,
@@ -282,8 +290,10 @@ export default function ProductionFloor({
         wob: Math.random() * 6.28,
         dead: false,
       });
-      const rate = (2500 - Math.min(1400, d.skill * 13)) / (spawnMult * (crunching ? 2.1 : 1));
-      s.nextSpawn[i] = s.elapsed + rate * (0.75 + Math.random() * 0.5);
+      /* …and talent *produces* more often: skill pulls a desk's rhythm from
+         ~2.4s down to ~0.7s per bubble, with a wide organic jitter */
+      const rate = Math.max(650, 2700 - Math.min(1980, d.skill * 22)) / (spawnMult * (crunching ? 2.1 : 1));
+      s.nextSpawn[i] = s.elapsed + rate * (0.55 + Math.random() * 0.9);
     };
 
     const draw = () => {

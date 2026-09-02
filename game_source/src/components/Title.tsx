@@ -94,9 +94,13 @@ export default function Title({
       <div className="absolute inset-0 bg-gradient-to-b from-abyss/70 via-abyss/40 to-abyss/85" />
       <div className="pointer-events-none absolute inset-0 screentone opacity-40" />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-between px-4 py-6 md:py-8">
+      {/* the screen is a fixed game viewport, so the column itself must scroll
+          on small screens or the studio-setup card falls off the bottom and
+          the showrunner can't even be picked */}
+      <div className="nice-scroll relative z-10 h-full w-full overflow-y-auto">
+        <div className="mx-auto flex min-h-full max-w-5xl flex-col items-center justify-between gap-4 px-4 py-6 md:py-8">
         {/* logo lockup — emblem + wordmark (deliberately unisex: no character art) */}
-        <div className="flex flex-col items-center text-center anim-up">
+        <div className="flex shrink-0 flex-col items-center text-center anim-up">
           <img
             src="img/logo-mark.png"
             alt="Anime Runner"
@@ -121,7 +125,7 @@ export default function Title({
         </div>
 
         {/* body */}
-        <div className="w-full max-w-2xl anim-up" style={{ animationDelay: "120ms" }}>
+        <div className="w-full max-w-2xl shrink-0 anim-up" style={{ animationDelay: "120ms" }}>
           {view === "menu" && (
             <div className="flex flex-col items-center gap-3">
               {newest && (
@@ -292,7 +296,7 @@ export default function Title({
         </div>
 
         {/* marquee */}
-        <div className="w-full overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+        <div className="w-full shrink-0 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
           <div className="flex w-max gap-3 pr-3" style={{ animation: "marquee 36s linear infinite" }}>
             {[...PROTAGONISTS.slice(0, 12), ...PROTAGONISTS.slice(0, 12)].map((p, i) => (
               <div key={i} className="ink-card flex items-center gap-2.5 p-2 pr-4">
@@ -304,6 +308,7 @@ export default function Title({
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
     </div>

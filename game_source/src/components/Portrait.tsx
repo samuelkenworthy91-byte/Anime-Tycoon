@@ -31,7 +31,17 @@ export default function Portrait({
   const bg = palette[hash % palette.length];
 
   if (pos === undefined) {
-    /* whole image, cover-cropped */
+    /* whole image, cover-cropped — with an initial-tile fallback if the art
+       file is absent, so a missing asset never shows a broken-image icon */
+    if (err)
+      return (
+        <div
+          className={cn("flex items-center justify-center font-display font-extrabold text-ink", className)}
+          style={{ background: `linear-gradient(135deg, ${bg}, ${bg}99)`, ...style }}
+        >
+          {initial}
+        </div>
+      );
     return (
       <img
         src={img}

@@ -51,7 +51,7 @@ import {
   type MediumId,
   type SlotId,
 } from "../engine/data";
-import { arcLockReason } from "../engine/state";
+import { arcLockReason, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -134,7 +134,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
 }
 
 export { draftCost, draftWeeks } from "../engine/projects";
-import { draftCost, draftWeeks } from "../engine/projects";
+import { draftCost, draftWeeks, projectUpfront } from "../engine/projects";
 
 function CastPick({
   m,
@@ -215,6 +215,8 @@ export default function Create({
   const comboLv = run.comboLevels[comboKey(d.genres)] ?? 0;
   const cost = draftCost(d);
   const weeks = draftWeeks(d);
+  /** why this draft can't be greenlit right now (null = good to go) */
+  const greenlightBlock = startBlockReason(run, d);
 
 
   const stepValid =
@@ -731,7 +733,9 @@ export default function Create({
                   <Row k="Arcs total" v={formatGBP(d.arcs.reduce((a, id) => a + (ARCS.find((x) => x.id === id)?.cost ?? 0), 0))} money />
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
-                  <Row k="UP-FRONT COST" v={formatGBP(cost)} money big />
+                  <Row k="TOTAL BUDGET" v={formatGBP(cost)} money />
+                  <Row k="DUE AT GREENLIGHT (40%)" v={formatGBP(projectUpfront(d))} money big />
+                  <div className="text-[10px] text-paper/40">The rest burns weekly while the show is in production.</div>
                   {plan && planFr && planDef && expectation !== null && (
                     <>
                       <div className="my-2 border-t border-line/60" />
@@ -757,7 +761,12 @@ export default function Create({
                   </div>
                 </div>
               </Section>
-              <Btn big variant="gold" className="w-full" onClick={() => onBegin(d)}>
+              {greenlightBlock && (
+                <div className="rounded-xl border border-neon/50 bg-neon/10 px-3 py-2 text-center text-xs font-bold text-neon">
+                  {greenlightBlock}
+                </div>
+              )}
+              <Btn big variant="gold" className="w-full" disabled={!!greenlightBlock} onClick={() => onBegin(d)}>
                 <Gem size={20} /> {commission ? "SIGN & START PRODUCTION" : "PAY & START PRODUCTION"}
               </Btn>
             </div>
@@ -818,7 +827,7 @@ export default function Create({
             {step === CAST_STEP_INDEX && castStep < CAST_SCREENS - 1 ? "CONTINUE" : "NEXT"} <ChevronRight size={16} />
           </Btn>
         ) : (
-          <Btn variant="gold" onClick={() => onBegin(d)}>
+          <Btn variant="gold" disabled={!!greenlightBlock} onClick={() => onBegin(d)}>
             START <Gem size={16} />
           </Btn>
         )}
