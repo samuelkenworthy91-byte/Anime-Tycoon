@@ -45,7 +45,7 @@ Stem used verbatim in sheet prompts:
 |---|---|---|
 | 1 | sen, zuri, ash, kuro, tsubasa, itsuki | **DONE (turn 11)** — wave-two protags; affinities grew. Wired to `img/cast4/*.jpg`. |
 | 2 | airi, rei, suzume, leo, shiori, daichi | **DONE (turn 11)** — idol x mecha stage pilot, supernatural mecha pilot, foxfire maiden, skater, wispkeeper, military Earthbreaker. Wired. |
-| 3 | sora*, mira*, chisato**, rin, jin, taro | sports/racing cluster + unused main-aff leads from old sheet-2 slot |
+| 3 | sora*, mira*, n_chisato**, rin, jin, taro | **DONE (turn 11)** — space skyblade, nebula idol, striker×racing, racer sprinter, ghost driver, wok-chef. Wired to `img/cast4/*.jpg`. |
 | 4 | kenta, hikari**, emi**, zuri-done, akira, renji | comedy + noir protag extras (zuri-done already shipped; re-slate) |
 | 5 | s_boone, s_peko, s_reina, s_amber, s_kanna, s_alfred | wave-two secondaries |
 | 6 | s_tobi, s_maki, s_haruto, s_takeshi, s_gen, s_chiaki | racing/military/noir/space supports |
