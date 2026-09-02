@@ -208,7 +208,7 @@ export interface PosterOptions {
 }
 
 export function posterDesign(draft: Draft, opts: PosterOptions = {}): PosterDesign {
-  const primary = GENRE(draft.genres[0]);
+  const primary = GENRE(draft.genres[0]) ?? GENRES[0];
   const studio = (opts.studio ?? "YOUR STUDIO").toUpperCase();
 
   /* kicker: the line just above the title */
@@ -222,9 +222,12 @@ export function posterDesign(draft: Draft, opts: PosterOptions = {}): PosterDesi
     ? CONT_RIBBON[draft.continuation].replace("{n}", String(draft.season))
     : null;
 
-  /* billing block (cinema credit strip) */
-  const medium = MEDIUMS[draft.medium].label.toUpperCase();
-  const slot = SLOTS[draft.slot].label.toUpperCase();
+  /* billing block (cinema credit strip) — a draft always carries medium +
+     slot, but hall-of-fame entries and older saves reach here through
+     hofDesign()'s synthetic draft, so degrade gracefully rather than crash
+     the whole office screen */
+  const medium = (MEDIUMS[draft.medium]?.label ?? "TV").toUpperCase();
+  const slot = (SLOTS[draft.slot]?.label ?? "LATE NIGHT").toUpperCase();
   const genreCol = draft.genres.map((g) => GENRE(g).label.toUpperCase()).join(" × ");
   const billing = [
     `${studio} PRESENTS A ${medium} PRODUCTION`,

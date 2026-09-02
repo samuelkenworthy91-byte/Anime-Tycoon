@@ -16,6 +16,7 @@ import {
   titleHash,
   titleLines,
 } from "../poster";
+import { hofDesign } from "../../components/Poster";
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Starfall Blade",
@@ -142,3 +143,25 @@ describe("deterministic tilt/hash", () => {
 /* keep GenreId import meaningful in the type checker */
 const _id: GenreId = "shonen";
 void _id;
+
+describe("hall-of-fame posters must never crash the office", () => {
+  /* regression: hofDesign() fed a fake draft without medium/slot and the
+     wall tiles + list rows crashed the whole office screen after any 32+
+     release; the entry shape below is what saves actually persist */
+  it("designs posters from the sparse hall-of-fame entry shape", () => {
+    const hof = { title: "Moonlit Mecha Rose", genres: ["supernatural", "mecha"] as GenreId[], protag: "n_aoi", score: 36 };
+    const design = hofDesign(hof);
+    expect(design.lines.join(" ")).toBe("Moonlit Mecha Rose");
+    expect(design.primary.id).toBe("supernatural");
+    expect(design.hallOfFame).toBe(true);
+    expect(design.billing).toHaveLength(3);
+  });
+
+  it("posterDesign degrades gracefully on a cast-only draft", () => {
+    const sparse = { title: "T", genres: ["noir"], protagName: "T" } as Draft;
+    const d = posterDesign(sparse);
+    expect(d.primary.id).toBe("noir");
+    expect(d.billing[0]).toContain("TV PRODUCTION");
+    expect(d.ribbon).toBeNull();
+  });
+});

@@ -219,10 +219,26 @@ export function titleTextStyle(d: PosterDesign, px: number): React.CSSProperties
 
 /* ------------------------------------------------------------ poster ---- */
 
-/** reusable design for the office's gold wall tiles */
+/** reusable design for the office's gold wall tiles — hof entries only carry
+    a summary, so patch in neutral production fields for the billing block */
 export function hofDesign(h: HofEntryLite): PosterDesign {
   return posterDesign(
-    { title: h.title, genres: h.genres, protagName: h.protag, season: 1 } as Draft,
+    {
+      title: h.title,
+      genres: h.genres,
+      medium: "tv",
+      budget: "standard",
+      slot: "midnight",
+      audience: "teens",
+      protag: h.protag,
+      protagName: h.protag,
+      secondary: "",
+      pet: "",
+      villain: "",
+      arcs: [],
+      sliders: [50, 50, 50],
+      season: 1,
+    },
     { hallOfFame: true }
   );
 }

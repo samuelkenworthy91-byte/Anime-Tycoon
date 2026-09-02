@@ -463,8 +463,13 @@ export const CAST_ROLE_LABEL: Record<CastRole, string> = {
 
 const CAST: Record<string, CastMember> = {};
 function reg(m: CastMember): CastMember {
-  CAST[m.id] = m;
-  return m;
+  /* newer-genre affinities live in CAST_AFF_EXTRA; merge them at
+     registration so EVERY consumer (pickers, scoring, chips) sees the
+     character's full set */
+  const extra = CAST_AFF_EXTRA[m.id];
+  const merged = extra && extra.length ? { ...m, aff: [...new Set([...m.aff, ...extra])] } : m;
+  CAST[merged.id] = merged;
+  return merged;
 }
 /**
  * Extra genre affinities for the newer genres, mapped by character id.
@@ -498,18 +503,9 @@ export const CAST_AFF_EXTRA: Record<string, GenreId[]> = {
   v_harlequin: ["comedy", "supernatural"], v_onikage: ["supernatural", "military"], v_hollowchild: ["magical", "space"], v_bioform: ["military", "space"],
 };
 
-export const castById = (id: string): CastMember => {
-  const c = CAST[id] ?? CAST.kai;
-  const extra = CAST_AFF_EXTRA[id];
-  return extra ? { ...c, aff: [...c.aff, ...extra] } : c;
-};
+export const castById = (id: string): CastMember => CAST[id] ?? CAST.kai;
 export const castList = (role: CastRole): CastMember[] =>
-  Object.values(CAST)
-    .filter((c) => c.role === role)
-    .map((c) => {
-      const extra = CAST_AFF_EXTRA[c.id];
-      return extra ? { ...c, aff: [...c.aff, ...extra] } : c;
-    });
+  Object.values(CAST).filter((c) => c.role === role);
 
 /* ------------------------------------------------------------ protagonists */
 export const PROTAGONISTS: CastMember[] = [
