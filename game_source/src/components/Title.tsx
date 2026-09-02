@@ -89,12 +89,12 @@ export default function Title({
   }, [view, studio, runner, onStart, newest, onLoad]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink">
+    <div className="relative min-h-full w-full overflow-x-hidden overflow-y-auto overscroll-y-contain bg-ink">
       <img src="img/bg-title.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-b from-abyss/70 via-abyss/40 to-abyss/85" />
       <div className="pointer-events-none absolute inset-0 screentone opacity-40" />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-between px-4 py-6 md:py-8">
+      <div className="relative z-10 mx-auto flex min-h-full max-w-5xl flex-col items-center justify-between gap-6 px-4 py-6 pb-10 md:py-8">
         {/* logo lockup — emblem + wordmark (deliberately unisex: no character art) */}
         <div className="flex flex-col items-center text-center anim-up">
           <img
