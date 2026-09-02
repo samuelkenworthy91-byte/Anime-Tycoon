@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  AlertTriangle,
   BarChart3,
   Clapperboard,
   Hammer,
@@ -50,6 +51,7 @@ import {
 import {
   assignToProject,
   buyFacility,
+  forecastWeek,
   office,
   officeSlots,
   pendingIncome,
@@ -66,6 +68,12 @@ import { buyInvestment, computeIndustryRecords, dynastyYear } from "../engine/le
 import { resumeAuto, setDelegation, takeOver } from "../engine/automation";
 import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
+import Poster from "./Poster";
+import { genreTitleCss } from "../engine/poster";
+import type { HofEntry } from "../engine/state";
+
+/** hall-of-fame list rows speak in the show's genre font too */
+const hofTitleStyle = (h: HofEntry) => genreTitleCss(h.genres[0]);
 import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
 import FacilitiesPanel from "./Facilities";
@@ -104,7 +112,9 @@ export default function Office({
   clockPhase?: number;
 }) {
   const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty">(null);
+  const [fcOpen, setFcOpen] = useState(false);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
+  const fc = forecastWeek(run);
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
   const score = studioScore(run);
   const off = office(run);
@@ -212,13 +222,10 @@ export default function Office({
         </div>
       )}
 
-      {/* hall of fame posters */}
+      {/* hall of fame posters — taped, tilted key visuals in genre type */}
       <div className="absolute left-[4%] top-[8%] z-10 hidden gap-2 sm:flex">
         {run.hallOfFame.slice(-3).map((h, i) => (
-          <div key={i} className="aspect-square w-[52px] -rotate-2 overflow-hidden rounded border-2 border-gold/70 md:w-[68px]">
-            <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-full w-full" />
-            <div className="bg-gold/90 py-0.5 text-center font-display text-[7px] font-extrabold text-ink">{h.score}/40</div>
-          </div>
+          <Poster key={i} variant="mini" hof={h} />
         ))}
         {run.hallOfFame.length === 0 && (
           <div className="flex h-16 w-14 items-center justify-center rounded border border-dashed border-line bg-abyss/60 text-center text-[8px] text-paper/30 md:w-20">
@@ -264,6 +271,88 @@ export default function Office({
           <div className={cn("ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold", run.cash < 0 && "border-neon text-neon")}>
             <Banknote size={13} className={run.cash < 0 ? "text-neon" : "text-mint"} />
             <CountUp to={run.cash} format={(n) => formatGBPShort(n)} />
+          </div>
+          {/* next week's money: broadcast in, burn/bills out, and the cash you
+              would be left holding — tap for the itemised breakdown */}
+          <div className="relative">
+            <button
+              onClick={() => setFcOpen((o) => !o)}
+              title="See next week's money in detail"
+              className={cn(
+                "ink-chip btn-press flex items-center gap-1 px-2 py-1 text-[10px] font-bold",
+                fc.cashAfter < 0
+                  ? "animate-pulse border-neon bg-neon/15 text-neon"
+                  : fc.net >= 0
+                    ? "text-mint"
+                    : "text-gold"
+              )}
+            >
+              {fc.cashAfter < 0 ? <AlertTriangle size={12} /> : <TrendingUp size={12} />}
+              <span className="hidden md:inline">NEXT WK</span> {fc.net >= 0 ? "+" : "−"}
+              {formatGBPShort(Math.abs(fc.net))}
+            </button>
+            {fcOpen && (
+              <>
+                <div className="fixed inset-0 z-[65]" onClick={() => setFcOpen(false)} />
+                <div className="anim-pop absolute left-1/2 top-full z-[70] mt-2 w-72 -translate-x-1/2 rounded-xl border border-line bg-panel p-3 text-left shadow-2xl">
+                  <div className="mb-1.5 font-display text-xs font-extrabold tracking-wider text-paper/80">
+                    NEXT WEEK'S FORECAST — {dateLabel(fc.week)}
+                  </div>
+                  <div className="space-y-0.5 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-paper/60">Broadcast revenue</span>
+                      <span className={cn("font-bold", fc.income > 0 ? "text-mint" : "text-paper/35")}>
+                        {fc.income > 0 ? `+${formatGBPShort(fc.income)}` : "—"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-paper/60">Production burn</span>
+                      <span className={cn("font-bold", fc.burn > 0 ? "text-gold" : "text-paper/35")}>
+                        {fc.burn > 0 ? `−${formatGBPShort(fc.burn)}` : "—"}
+                      </span>
+                    </div>
+                    {fc.lateFees > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-paper/60">Deadline penalties</span>
+                        <span className="font-bold text-neon">−{formatGBPShort(fc.lateFees)}</span>
+                      </div>
+                    )}
+                    {fc.payday > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-paper/60">Payday — wages + rent</span>
+                        <span className="font-bold text-neon">−{formatGBPShort(fc.payday)}</span>
+                      </div>
+                    )}
+                    <div className="my-1 border-t border-line/60" />
+                    <div className="flex justify-between">
+                      <span className="font-bold text-paper/80">Net next week</span>
+                      <span className={cn("font-display font-extrabold", fc.net >= 0 ? "text-mint" : "text-neon")}>
+                        {fc.net >= 0 ? "+" : "−"}
+                        {formatGBPShort(Math.abs(fc.net))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-bold text-paper/80">Studio cash after</span>
+                      <span className={cn("font-display font-extrabold", fc.cashAfter < 0 ? "text-neon" : "text-paper")}>
+                        ≈ {formatGBPShort(fc.cashAfter)}
+                      </span>
+                    </div>
+                  </div>
+                  {fc.cashAfter < 0 ? (
+                    <div className="mt-2 rounded-lg border border-neon/50 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon">
+                      At this rate the studio bounces next week
+                      {run.bailouts < 2
+                        ? " — the fans can crowdfund a rescue, but a contract or a cheaper week buys you time NOW."
+                        : " — no bailouts left. Take a contract or this is the last week."}
+                    </div>
+                  ) : fc.net < 0 && fc.payday > 0 ? (
+                    <div className="mt-2 rounded-lg border border-gold/40 bg-gold/10 px-2 py-1.5 text-[10px] text-gold">
+                      Payday week — make sure there's broadcast money or contract cash to cover it.
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
           </div>
           <div className="ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-viol">
             <Database size={13} />
@@ -369,6 +458,13 @@ export default function Office({
             {formatGBP(run.lastResult.revenue)} · +{formatNum(run.lastResult.fans)} fans
           </div>
         )}
+        {fc.cashAfter < 0 && (
+          <div className="mx-auto mt-1 max-w-4xl animate-pulse text-center text-[11px] font-bold text-neon">
+            <AlertTriangle size={11} className="mr-1 inline" />
+            Next week leaves you at ≈{formatGBPShort(fc.cashAfter)} — act NOW: take a contract
+            {run.bailouts < 2 ? ", or the fans can bail you out once more." : " — no bailouts left, this is the last week."}
+          </div>
+        )}
         {inFlight > 0 && (
           <div className="mx-auto mt-1 max-w-4xl text-center text-[11px] text-mint/80">
             <TrendingUp size={11} className="mr-1 inline" />
@@ -464,6 +560,10 @@ export default function Office({
             onNewShow={() => {
               setModal(null);
               onNewShow();
+            }}
+            onContinueSeason={(key) => {
+              setModal(null);
+              onContinue({ key, kind: "season" });
             }}
             onDelegate={(projectId, headSlot: HeadSlot | null) => {
               sfx.whoosh();
@@ -742,7 +842,7 @@ export default function Office({
                   <div key={i} className="ink-card flex items-center gap-2 p-2">
                     <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-9 w-9 rounded-lg" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-bold">{h.title}</div>
+                      <div className="truncate text-sm font-bold" style={hofTitleStyle(h)}>{h.title}</div>
                       <div className="text-[10px] text-paper/50">
                         {h.genres.map((g) => GENRES.find((x) => x.id === g)?.label).join(" × ")} · {dateLabel(h.week)}
                       </div>

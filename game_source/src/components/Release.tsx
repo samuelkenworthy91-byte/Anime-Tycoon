@@ -15,15 +15,18 @@ import {
 import { TIERS, type ShowResult } from "../engine/scoring";
 import { AIR_WEEKS } from "../engine/state";
 import Portrait from "./Portrait";
+import Poster from "./Poster";
 import { cn } from "../utils/cn";
 
 export default function Release({
   draft,
   result,
+  studio,
   onContinue,
 }: {
   draft: Draft;
   result: ShowResult;
+  studio: string;
   onContinue: () => void;
 }) {
   const [stage, setStage] = useState(0);
@@ -116,37 +119,16 @@ export default function Release({
 
       <div className="nice-scroll relative z-10 mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-3 md:p-5">
         <div className="grid gap-4 md:grid-cols-[minmax(0,260px)_1fr]">
-          {/* poster */}
-          <div className="anim-pop ink-card overflow-hidden">
-            <div className="relative aspect-[4/5]">
-              <Portrait img={protag.img} pos={protag.pos} name={protag.name} alt={protag.name} className="absolute inset-0" />
-              <div className="crt absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-3">
-                <div className="font-display text-xl font-extrabold leading-tight drop-shadow-lg">{draft.title}</div>
-                <div className="text-[11px] font-bold text-cyanx">
-                  {draft.protagName} · {MEDIUMS[draft.medium].label}
-                </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {draft.genres.map((g) => {
-                    const gg = GENRES.find((x) => x.id === g)!;
-                    return (
-                      <span key={g} className="rounded border px-1.5 py-0.5 text-[9px] font-bold" style={{ borderColor: gg.color, color: gg.color }}>
-                        {gg.label}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-              {stage >= 5 && (
-                <div
-                  className="anim-pop absolute left-1/2 top-6 -translate-x-1/2 -rotate-6 rounded-xl border-4 px-3 py-1.5 text-center font-display text-xl font-extrabold tracking-widest"
-                  style={{ borderColor: tier.color, color: tier.color, background: "rgba(6,5,14,.78)", boxShadow: `0 0 30px ${tier.color}55` }}
-                >
-                  {tier.label}
-                </div>
-              )}
-              {/* cast strip */}
-              <div className="absolute left-2 top-2 flex -space-x-3">
+          {/* poster — genre-appropriate type, decorations, billing block */}
+          <Poster
+            draft={draft}
+            studio={studio}
+            score={stage >= 5 ? result.total : null}
+            hallOfFame={result.hallOfFame}
+            portrait={{ img: protag.img, pos: protag.pos, name: protag.name }}
+            stamp={stage >= 5 ? { label: tier.label, color: tier.color } : null}
+            topLeft={
+              <div className="flex -space-x-3">
                 {cast.map((c) => (
                   <Portrait
                     key={c.m.id}
@@ -158,8 +140,25 @@ export default function Release({
                   />
                 ))}
               </div>
-            </div>
-          </div>
+            }
+            footer={
+              <>
+                <div className="mt-0.5 text-center text-[11px] font-bold text-cyanx">
+                  {draft.protagName} · {MEDIUMS[draft.medium].label}
+                </div>
+                <div className="mt-1 flex flex-wrap justify-center gap-1">
+                  {draft.genres.map((g) => {
+                    const gg = GENRES.find((x) => x.id === g)!;
+                    return (
+                      <span key={g} className="rounded border px-1.5 py-0.5 text-[9px] font-bold" style={{ borderColor: gg.color, color: gg.color }}>
+                        {gg.label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </>
+            }
+          />
 
           {/* reviews + numbers */}
           <div className="space-y-2">

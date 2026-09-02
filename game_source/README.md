@@ -123,5 +123,37 @@ the `kirameki-studio-apk` artifact.
   ContractJob, Release (premiere), Retrospective (year-12 evaluation),
   Dynasty (empire investments/records/legacies), GameOver
 - `public/img/` — environment art and character sheets (2x2 portrait grids)
+- `src/engine/poster.ts` + `src/components/Poster.tsx` — the key-visual
+  poster system. `posterDesign(draft)` is the pure design function: it picks
+  a genre-appropriate display font for the title (Anton for shonen/sports/
+  racing, Black Ops One for military, Chakra Petch for mecha/cyber/space,
+  Comfortaa for shojo/idol/magical, Cinzel for fantasy/isekai/supernatural,
+  Playfair Display for romance/noir/mystery, Lilita One for slice/comedy/
+  cooking, Creepster for horror — each with its own casing, tracking, skew
+  and genre-coloured glow), word-balances the title, and decides the extras:
+  a "STUDIO PRESENTS" / "SEASON n — THE CONTINUING STORY" kicker, a
+  SEASON/MOVIE/OVA ribbon tab, the cinema-style billing block, per-genre
+  decorations (speedline bursts, petals, checker strips, reticle corners,
+  runes, drips, steam…), gold laurels for hall-of-famers and a deterministic
+  paper tilt. `Poster.tsx` renders two variants: the full premiere poster
+  (Release screen) and the taped mini wall tiles on the office stage. The
+  hall-of-fame list rows also render in their genre font.
+- `src/fonts.css` — all fonts bundled (OFL, via @fontsource, latin woff2):
+  the eight poster display families plus the UI faces (Bricolage Grotesque,
+  Space Grotesk, DotGothic16). vite-plugin-singlefile base64-inlines them
+  into dist/index.html, so the build has zero CDN dependencies and genre
+  title faces render offline and inside the APK WebView.
+- `tools/strip-fringe.py` — art pipeline: after generating a new
+  `sprite-*.png` / `portrait-*.png`, run
+  `python tools/strip-fringe.py public/img/sprite-new.png`
+  (Pillow). It border-floods any near-white studio backdrop, dissolves the
+  partial-alpha ghost rim (source of the "fuzzy cutout halo" on dark
+  scenes), and autotrims stray catslide padding.
+  `--kill-white-above N` also deletes enclosed neutral-white islands
+  bigger than N px (e.g. backdrop sealed between twin-tails). The script
+  is idempotent — re-running it reports "no change". New arrivals keep
+  sibling proportions (~640 px tall) so every walker matches the office
+  scene scale; a vitest suite (`src/engine/__tests__/assets.test.ts`)
+  fails CI if any referenced portrait/sprite is missing from the build.
 - `android/` — generated Capacitor Android project (regenerate with
   `npm run apk:add` if deleted)

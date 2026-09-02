@@ -13,6 +13,7 @@ import {
   migrateRun,
   projectById,
   releaseProject,
+  startBlockReason,
   startProject,
   type RunState,
 } from "./engine/state";
@@ -267,20 +268,35 @@ export default function App() {
     [run]
   );
 
-  /* greenlight: the show enters the pipeline as a project — no time skip */
+  /* greenlight: the show enters the pipeline as a project — no time skip.
+     If the board refuses (capacity, cash, continuation rules) the player
+     stays on the greenlight screen and gets told why — never a silent kick
+     back to the office. */
   const beginProduction = useCallback(
     (d: Draft) => {
-      setRun((r) => {
-        if (!r) return r;
-        const next = startProject(r, d, pendingCommission ?? undefined);
-        if (!next) return r;
-        sfx.whoosh();
-        return next;
-      });
+      if (!run) return;
+      const next = startProject(run, d, pendingCommission ?? undefined);
+      if (!next) {
+        sfx.back();
+        setRun((r) =>
+          r
+            ? {
+                ...r,
+                notices: [
+                  ...r.notices,
+                  startBlockReason(r, d) ?? "The production board refuses this greenlight right now.",
+                ],
+              }
+            : r
+        );
+        return;
+      }
+      sfx.whoosh();
+      setRun(next);
       setPendingCommission(null);
       setScreen("office");
     },
-    [pendingCommission]
+    [run, pendingCommission]
   );
 
   /* ------------------------------------------------- milestone sprints */
@@ -530,8 +546,8 @@ export default function App() {
         {screen === "contract" && run && contract && (
           <ContractJob run={run} contract={contract} paused={paused} onDone={finishContract} />
         )}
-        {screen === "release" && released && (
-          <Release draft={released.draft} result={released.result} onContinue={continueFromRelease} />
+        {screen === "release" && released && run && (
+          <Release draft={released.draft} result={released.result} studio={run.studio} onContinue={continueFromRelease} />
         )}
         {screen === "retrospective" && run && (
           <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />
