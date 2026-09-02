@@ -1,0 +1,161 @@
+name: Cast aesthetic audit contact sheets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cast-aesthetic-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit-sheets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: python -m pip install pillow
+
+      - name: Build cast manifest and contact sheets
+        run: |
+          cat > /tmp/make_audit.py <<'PY'
+          import csv, math, re, textwrap
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFont
+
+          root = Path('game_source')
+          data_path = root / 'src/engine/data.ts'
+          public = root / 'public'
+          out = Path('audit-output')
+          out.mkdir(exist_ok=True)
+          text = data_path.read_text(encoding='utf-8')
+
+          # Parse final extra affinities applied by reg().
+          extra_match = re.search(r'export const CAST_AFF_EXTRA:[\s\S]*?=\s*\{([\s\S]*?)\n\};\n\nexport const castById', text)
+          extra = {}
+          if extra_match:
+              body = extra_match.group(1)
+              for m in re.finditer(r'(?:^|,|\n)\s*([A-Za-z0-9_]+)\s*:\s*\[([^\]]*)\]', body):
+                  extra[m.group(1)] = re.findall(r'"([^"]+)"', m.group(2))
+
+          members = []
+          seen = set()
+          for m in re.finditer(r'reg\(\{([\s\S]*?)\}\)', text):
+              body = m.group(1)
+              def s(field):
+                  mm = re.search(rf'\b{field}\s*:\s*"([^"]*)"', body)
+                  return mm.group(1) if mm else ''
+              ident = s('id')
+              role = s('role')
+              img = s('img')
+              if not ident or not role or not img or ident in seen:
+                  continue
+              seen.add(ident)
+              name = s('name')
+              archetype = s('archetype')
+              affm = re.search(r'\baff\s*:\s*\[([^\]]*)\]', body)
+              aff = re.findall(r'"([^"]+)"', affm.group(1)) if affm else []
+              for a in extra.get(ident, []):
+                  if a not in aff:
+                      aff.append(a)
+              pm = re.search(r'\bpos\s*:\s*(\d+)', body)
+              pos = int(pm.group(1)) if pm else None
+              members.append(dict(id=ident, name=name, archetype=archetype, img=img, pos=pos, role=role, aff=aff))
+
+          members.sort(key=lambda x: (x['role'], x['name'].lower(), x['id']))
+          print('Parsed cast members:', len(members))
+          if len(members) < 180:
+              raise SystemExit(f'Expected ~186 selectable members, got {len(members)}')
+
+          # Fonts bundled on runner; DejaVu is available on Ubuntu images.
+          font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 17)
+          font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 19)
+          font_small = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 14)
+
+          def crop_display(member):
+              path = public / member['img']
+              if not path.exists():
+                  im = Image.new('RGB', (260,260), 'gray')
+                  d = ImageDraw.Draw(im)
+                  d.text((10,110), 'MISSING\n' + member['img'], fill='black', font=font_small)
+                  return im
+              im = Image.open(path).convert('RGB')
+              if member['pos'] is not None:
+                  w,h = im.size
+                  hw,hh = w//2,h//2
+                  p = member['pos']
+                  x0 = hw if p % 2 else 0
+                  y0 = hh if p >= 2 else 0
+                  im = im.crop((x0,y0,x0+hw,y0+hh))
+              # object-cover style centre crop to square
+              w,h = im.size
+              side = min(w,h)
+              left = (w-side)//2
+              top = (h-side)//2
+              im = im.crop((left,top,left+side,top+side)).resize((240,240), Image.Resampling.LANCZOS)
+              return im
+
+          # CSV manifest for exact mappings.
+          with (out/'cast_manifest.csv').open('w', newline='', encoding='utf-8') as f:
+              wr = csv.writer(f)
+              wr.writerow(['id','name','role','archetype','affinities','img','pos'])
+              for m in members:
+                  wr.writerow([m['id'],m['name'],m['role'],m['archetype'],'|'.join(m['aff']),m['img'],'' if m['pos'] is None else m['pos']])
+
+          # 15 cards/sheet keeps portraits and labels large enough for visual audit.
+          roles = ['protag','secondary','pet','villain']
+          card_w, card_h = 300, 380
+          cols, rows = 5, 3
+          per = cols*rows
+          for role in roles:
+              group = [m for m in members if m['role'] == role]
+              for page in range(math.ceil(len(group)/per)):
+                  subset = group[page*per:(page+1)*per]
+                  sheet = Image.new('RGB', (cols*card_w, rows*card_h), 'white')
+                  d = ImageDraw.Draw(sheet)
+                  for idx,m in enumerate(subset):
+                      cx = (idx % cols)*card_w
+                      cy = (idx // cols)*card_h
+                      portrait = crop_display(m)
+                      sheet.paste(portrait, (cx+30, cy+8))
+                      d.rectangle((cx+4,cy+4,cx+card_w-4,cy+card_h-4), outline='black', width=2)
+                      d.text((cx+12,cy+255), f"{m['name']} [{m['id']}]", fill='black', font=font_bold)
+                      d.text((cx+12,cy+282), m['archetype'][:34], fill='black', font=font_small)
+                      aff = ', '.join(m['aff'])
+                      lines = textwrap.wrap(aff, width=36)[:3]
+                      for li,line in enumerate(lines):
+                          d.text((cx+12,cy+306+li*18), line, fill='black', font=font)
+                  filename = out / f"{role}-{page+1:02d}.jpg"
+                  sheet.save(filename, quality=92)
+
+          # Summary counts.
+          with (out/'summary.txt').open('w', encoding='utf-8') as f:
+              f.write(f"Total cast: {len(members)}\n")
+              for role in roles:
+                  f.write(f"{role}: {sum(1 for m in members if m['role']==role)}\n")
+              f.write(f"individual portraits: {sum(1 for m in members if m['pos'] is None)}\n")
+              f.write(f"sheet-cropped portraits: {sum(1 for m in members if m['pos'] is not None)}\n")
+              missing = [m for m in members if not (public/m['img']).exists()]
+              f.write(f"missing image assets: {len(missing)}\n")
+              for m in missing:
+                  f.write(f"MISSING {m['id']} {m['img']}\n")
+          PY
+          python /tmp/make_audit.py
+          ls -lh audit-output
+
+      - name: Upload audit sheets
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-aesthetic-audit
+          path: audit-output/
+          if-no-files-found: error
+          retention-days: 2
