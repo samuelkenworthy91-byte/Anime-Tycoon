@@ -47,7 +47,7 @@ Stem used verbatim in sheet prompts:
 | 2 | airi, rei, suzume, leo, shiori, daichi | **DONE (turn 11)** — idol x mecha stage pilot, supernatural mecha pilot, foxfire maiden, skater, wispkeeper, military Earthbreaker. Wired. |
 | 3 | sora*, mira*, n_chisato**, rin, jin, taro | **DONE (turn 11)** — space skyblade, nebula idol, striker×racing, racer sprinter, ghost driver, wok-chef. Wired to `img/cast4/*.jpg`. |
 | 4 | hikari**, emi**, kenta, akira, renji, n_ryoko | **DONE (turn 12)** — re-slated (zuri shipped). magical-girl moon, comedy boxer, cottage-witch tea, neon-ronin noir, silent-snow noir, moonlight mechanic. Wired. |
-| 5 | s_boone, s_peko, s_reina, s_amber, s_kanna, s_alfred | wave-two secondaries |
+| 5 | s_boone, s_peko, s_reina, s_amber, s_kanna, s_alfred | **DONE (turn 12)** — wave-two secondaries: grease mentor, hype idol, mil-noir president, spirit-lantern traveller, one-eyed bodyguard, noir butler. Wired. |
 | 6 | s_tobi, s_maki, s_haruto, s_takeshi, s_gen, s_chiaki | racing/military/noir/space supports |
 | 7 | s_shin, s_aoi, s_kiki, s_sosuke, s_koko, s_okada | noir/comedy/cooking supports |
 | 8 | v_tempest, v_kairos, v_plague, v_moth, v_nocturne, v_gravemark | villains whose roles grew |

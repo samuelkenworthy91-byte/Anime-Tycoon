@@ -603,12 +603,12 @@ export const SECONDARY: CastMember[] = [
   reg({ id: "s_koko", name: "Koko", archetype: "The Mystic Cat", img: "img/cast-secondary-8.jpg", pos: 2, tag: "Predicts cliffhangers. Demands tuna.", aff: ["mystery", "fantasy", "horror"], role: "secondary" }),
   reg({ id: "s_sosuke", name: "Sosuke", archetype: "The Automaton Butler", img: "img/cast-secondary-8.jpg", pos: 3, tag: "Polished. Unreadable. Battery at 99%.", aff: ["mystery", "mecha", "slice"], role: "secondary" }),
   /* --- wave two (sheets 9-10) --- */
-  reg({ id: "s_boone", name: "Boone", archetype: "The Grease Mentor", img: "img/cast-secondary-9.jpg", pos: 0, tag: "Fixes engines and egos.", aff: ["mecha", "sports", "slice"], role: "secondary" }),
-  reg({ id: "s_peko", name: "Peko", archetype: "The Hype Friend", img: "img/cast-secondary-9.jpg", pos: 1, tag: "Confetti follows her indoors.", aff: ["idol", "shojo", "slice"], role: "secondary" }),
-  reg({ id: "s_reina", name: "Reina", archetype: "The Council President", img: "img/cast-secondary-9.jpg", pos: 2, tag: "The clipboard is a weapon.", aff: ["mystery", "romance", "slice"], role: "secondary" }),
-  reg({ id: "s_amber", name: "Amber", archetype: "The Hooded Traveller", img: "img/cast-secondary-9.jpg", pos: 3, tag: "Knows every road and none of the rules.", aff: ["isekai", "fantasy", "mystery"], role: "secondary" }),
-  reg({ id: "s_kanna", name: "Kanna", archetype: "The Silent Bodyguard", img: "img/cast-secondary-10.jpg", pos: 0, tag: "One eye. Zero misses.", aff: ["mystery", "horror", "cyber"], role: "secondary" }),
-  reg({ id: "s_alfred", name: "Alfred", archetype: "The Perfect Butler", img: "img/cast-secondary-10.jpg", pos: 1, tag: "Tea at three. Secrets at midnight.", aff: ["mystery", "romance", "shojo"], role: "secondary" }),
+  reg({ id: "s_boone", name: "Boone", archetype: "The Grease Mentor", img: "img/cast4/s_boone.jpg", tag: "Fixes engines and egos.", aff: ["mecha", "sports", "slice"], role: "secondary" }),
+  reg({ id: "s_peko", name: "Peko", archetype: "The Hype Friend", img: "img/cast4/s_peko.jpg", tag: "Confetti follows her indoors.", aff: ["idol", "shojo", "slice"], role: "secondary" }),
+  reg({ id: "s_reina", name: "Reina", archetype: "The Council President", img: "img/cast4/s_reina.jpg", tag: "The clipboard is a weapon.", aff: ["mystery", "romance", "slice"], role: "secondary" }),
+  reg({ id: "s_amber", name: "Amber", archetype: "The Hooded Traveller", img: "img/cast4/s_amber.jpg", tag: "Knows every road and none of the rules.", aff: ["isekai", "fantasy", "mystery"], role: "secondary" }),
+  reg({ id: "s_kanna", name: "Kanna", archetype: "The Silent Bodyguard", img: "img/cast4/s_kanna.jpg", tag: "One eye. Zero misses.", aff: ["mystery", "horror", "cyber"], role: "secondary" }),
+  reg({ id: "s_alfred", name: "Alfred", archetype: "The Perfect Butler", img: "img/cast4/s_alfred.jpg", tag: "Tea at three. Secrets at midnight.", aff: ["mystery", "romance", "shojo"], role: "secondary" }),
   reg({ id: "s_tobi", name: "Tobi", archetype: "The Rookie Reporter", img: "img/cast-secondary-10.jpg", pos: 2, tag: "Shutter first, questions later.", aff: ["slice", "mystery", "cyber"], role: "secondary" }),
   reg({ id: "s_maki", name: "Maki", archetype: "The Rival Ace", img: "img/cast-secondary-10.jpg", pos: 3, tag: "Beats your record, then your excuses.", aff: ["sports", "shonen", "idol"], role: "secondary" }),
 ];
