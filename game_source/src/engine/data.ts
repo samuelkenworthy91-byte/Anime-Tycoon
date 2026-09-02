@@ -496,6 +496,13 @@ export const CAST_AFF_EXTRA: Record<string, GenreId[]> = {
   p_ponta: ["comedy", "cooking"], p_lumen: ["magical", "supernatural"], p_nibi: ["supernatural", "noir"], p_fuwa: ["comedy", "space"],
   v_amethyst: ["magical", "supernatural"], v_gravemark: ["military"], v_kairos: ["noir", "space"], v_plague: ["supernatural", "noir"],
   v_harlequin: ["comedy", "supernatural"], v_onikage: ["supernatural", "military"], v_hollowchild: ["magical", "space"], v_bioform: ["military", "space"],
+  /* --- close remaining GREAT/SECRET combo gaps --- */
+  n_aoi: ["romance"],                 /* isekai × romance */
+  mio: ["cooking"],                   /* cooking × idol */
+  sen: ["sports"],                    /* horror × sports, mystery × sports */
+  airi: ["horror"],                   /* horror × idol */
+  rei: ["romance"],                   /* mecha × romance */
+  s_ironmaid: ["magical"],            /* magical × military */
 };
 
 export const castById = (id: string): CastMember => {
