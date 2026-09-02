@@ -48,11 +48,11 @@ Stem used verbatim in sheet prompts:
 | 3 | sora*, mira*, n_chisato**, rin, jin, taro | **DONE (turn 11)** — space skyblade, nebula idol, striker×racing, racer sprinter, ghost driver, wok-chef. Wired to `img/cast4/*.jpg`. |
 | 4 | hikari**, emi**, kenta, akira, renji, n_ryoko | **DONE (turn 12)** — re-slated (zuri shipped). magical-girl moon, comedy boxer, cottage-witch tea, neon-ronin noir, silent-snow noir, moonlight mechanic. Wired. |
 | 5 | s_boone, s_peko, s_reina, s_amber, s_kanna, s_alfred | **DONE (turn 12)** — wave-two secondaries: grease mentor, hype idol, mil-noir president, spirit-lantern traveller, one-eyed bodyguard, noir butler. Wired. |
-| 6 | s_tobi, s_maki, s_haruto, s_takeshi, s_gen, s_chiaki | racing/military/noir/space supports |
-| 7 | s_shin, s_aoi, s_kiki, s_sosuke, s_koko, s_okada | noir/comedy/cooking supports |
-| 8 | v_tempest, v_kairos, v_plague, v_moth, v_nocturne, v_gravemark | villains whose roles grew |
-| 9 | v_amethyst, v_harlequin, v_onikage, v_hollowchild, v_bioform, v_kurogane | wave-two villains |
-| 10 | chosen pets p_pudding, p_nitro, p_stellar, p_loader, p_baku, p_hachi | mascot genre dressing |
+| 6 | s_tobi, s_maki, s_haruto, s_takeshi, s_gen, s_chiaki | **DONE (turn 13)** — space-noir reporter, racing/military rival ace, streetwise racer cat (solo fix: model humanised him in sheet; regenerated as standalone cat tile), drill coach, lazy ops genius, spectral shadow transfer. Wired. |
+| 7 | s_shin, s_aoi, s_kiki, s_sosuke, s_koko, s_okada | **DONE (turn 13)** — noir blob alien, rooftop storm weather girl, banana-peel klutz, chrome butler wink, cauldron mystic cat, rice-pot sensei. Wired. |
+| 8 | v_tempest, v_kairos, v_plague, v_moth, v_nocturne, v_gravemark | **DONE (turn 13)** — storm-lord racer, noir CEO star-boardroom, plague flask, luring moth matron, violet-moon shadow queen, cracked-plate warlord. Wired. |
+| 9 | v_amethyst, v_harlequin, v_onikage, v_hollowchild, v_bioform, v_kurogane | **DONE (turn 13)** — shard-crown empress, echo-laugh jester, cracked oni half-mask, galaxy-gown void empress, silo experiment, molten-seam iron tyrant. Wired. |
+| 10 | p_pudding, p_nitro, p_stellar, p_loader, p_baku, p_hachi | **DONE (turn 13)** — toque blob dog, pit ferret, comet-soup kitten, mess-tin bulldog, crescent dream-eater, garrison-cap bee. Wired. |
 
 \* still to be finalised against their current tile art
 \** optional — dedicated art already exists; only if budget allows
