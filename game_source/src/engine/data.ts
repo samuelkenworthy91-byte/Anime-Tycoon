@@ -839,10 +839,11 @@ export const STAFF_PORTRAITS: { img: string; pos: number }[] = [
 ];
 
 /* --------------------------------------------------------- worker looks
- * The ten painted chibi staff models. Each look pairs the full-body office
- * sprite with a portrait cropped from the very same painting, so the person
- * you hire from a menu is exactly the person who walks around the office.
- * Sprite 6 is reserved for the showrunner. */
+ * Painted WotL-style staff models (FFT: War of the Lions / Vanillaware).
+ * Each look pairs the full-body office sprite with a portrait cropped from
+ * the very same painting, so the person you hire is the person on the floor.
+ * Sprite 6 is a generic fallback; showrunners have their own models.
+ * Clothes are modern anime-studio wear — no medieval kit. */
 export interface WorkerLook {
   sprite: string;
   portrait: string;
@@ -904,7 +905,7 @@ export interface Showrunner {
 }
 export const SHOWRUNNERS: Showrunner[] = [
   { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — bubbles float 20% longer and editing notes are rarer." },
-  { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
+  { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-showrunner-vision.png", portrait: "img/portrait-showrunner-vision.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
   { id: "producer", name: "Haruto Mori", title: "The Mogul Producer", img: "img/showrunner-c.jpg", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Golden Rolodex — contracts pay 40% more and advances are bigger." },
   { id: "marketer", name: "Sana Kobayashi", title: "The Hype Machine", img: "img/showrunner-d.jpg", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "Buzz Engine — shows open with +10 hype and marketing runs faster." },
 ];
