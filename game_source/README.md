@@ -1,7 +1,8 @@
 # Anime Runner
 
-A game-dev-story-style anime studio tycoon. Plan shows, cast 136 characters
-(40 leads, 32 supporting, 32 pets/mascots, 32 villains), pop the point bubbles
+A game-dev-story-style anime studio tycoon. Plan shows, cast 186 characters
+(54 leads, 44 supporting, 43 pets/mascots, 45 villains — every genre and all
+190 genre pairs castable; see docs/cast-coverage.md), pop the point bubbles
 your staff make, discover secret genre combos and cast chemistry by
 experimenting, and compete for the London Anime Awards.
 

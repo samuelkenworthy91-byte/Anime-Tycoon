@@ -479,28 +479,36 @@ export const CAST_AFF_EXTRA: Record<string, GenreId[]> = {
   /* comedy */
   kenta: ["comedy"], s_kiki: ["comedy"], s_sosuke: ["comedy"], p_chacha: ["comedy"], v_lich: ["comedy"], v_scuttle: ["comedy"],
   /* cooking */
-  taro: ["cooking"], s_koko: ["cooking"], s_okada: ["cooking"], p_pudding: ["cooking"], p_mocha: ["cooking"],
+  taro: ["cooking"], s_koko: ["cooking"], s_okada: ["cooking"], p_pudding: ["cooking", "idol"], p_mocha: ["cooking", "noir"],
   /* racing */
-  rin: ["racing"], jin: ["racing"], s_haruto: ["racing"], p_pochi: ["racing"], v_tempest: ["racing"],
+  rin: ["racing"], jin: ["racing"], s_haruto: ["racing"], p_pochi: ["racing", "magical"], v_tempest: ["racing", "supernatural"],
   /* military */
   daichi: ["military"], s_takeshi: ["military"], s_gen: ["military"], v_warden: ["military"], v_ash: ["military"], v_kurogane: ["military"],
   /* supernatural */
-  shiori: ["supernatural"], s_chiaki: ["supernatural"], p_baku: ["supernatural"], p_kuro: ["supernatural"], v_moth: ["supernatural"], v_nightshade: ["supernatural"],
+  shiori: ["supernatural"], s_chiaki: ["supernatural"], p_baku: ["supernatural", "space"], p_kuro: ["supernatural"], v_moth: ["supernatural", "idol"], v_nightshade: ["supernatural"],
   /* space */
   sora: ["space"], mira: ["space"], p_koro: ["space"], p_tama: ["space"], v_paradox: ["space"], v_zero: ["space"], v_mirage: ["space"],
   /* noir */
-  akira: ["noir"], renji: ["noir"], s_shin: ["noir"], s_aoi: ["noir"], v_nocturne: ["noir"], v_silence: ["noir"],
+  akira: ["noir"], renji: ["noir"], s_shin: ["noir"], s_aoi: ["noir"], v_nocturne: ["noir", "magical"], v_silence: ["noir"],
   /* magical */
-  hikari: ["magical"], emi: ["magical"], s_mimi: ["magical"], p_nya: ["magical"], p_piko: ["magical"], v_hex: ["magical"],
+  hikari: ["magical"], emi: ["magical"], s_mimi: ["magical"], p_nya: ["magical"], p_piko: ["magical", "comedy"], v_hex: ["magical"],
   /* --- wave two cast (sheets 9-10) --- */
-  sen: ["noir", "military"], zuri: ["racing", "cooking"], ash: ["supernatural"], kuro: ["noir", "racing"],
-  tsubasa: ["racing", "military", "space"], itsuki: ["noir", "supernatural"], suzume: ["supernatural", "magical"], leo: ["comedy", "racing"],
+  sen: ["noir", "military", "sports"], zuri: ["racing", "cooking"], ash: ["supernatural", "sports"], kuro: ["noir", "racing"],
+  tsubasa: ["racing", "military", "space"], itsuki: ["noir", "supernatural", "isekai"], suzume: ["supernatural", "magical", "racing"], leo: ["comedy", "racing"],
   s_boone: ["racing", "cooking"], s_peko: ["comedy", "magical"], s_reina: ["military", "noir"], s_amber: ["supernatural", "cooking"],
   s_kanna: ["military", "noir"], s_alfred: ["noir", "comedy"], s_tobi: ["noir", "space"], s_maki: ["racing", "military"],
   p_drakko: ["magical", "comedy"], p_sakumi: ["magical", "supernatural"], p_cogsworth: ["noir", "space"], p_bloop: ["space", "magical"],
   p_ponta: ["comedy", "cooking"], p_lumen: ["magical", "supernatural"], p_nibi: ["supernatural", "noir"], p_fuwa: ["comedy", "space"],
-  v_amethyst: ["magical", "supernatural"], v_gravemark: ["military"], v_kairos: ["noir", "space"], v_plague: ["supernatural", "noir"],
+  v_amethyst: ["magical", "supernatural"], v_gravemark: ["military"], v_kairos: ["noir", "space", "racing"], v_plague: ["supernatural", "noir", "cooking"],
   v_harlequin: ["comedy", "supernatural"], v_onikage: ["supernatural", "military"], v_hollowchild: ["magical", "space"], v_bioform: ["military", "space"],
+  /* --- wave three + full combo coverage: every one of the 190 genre pairs
+     has at least one dual-cover member (measured in docs/cast-coverage.md;
+     enforced by __tests__/cast-coverage.test.ts) --- */
+  n_aoi: ["romance"], n_chisato: ["racing"], n_ryoko: ["romance"], n_mikoto: ["sports"],
+  s_ironmaid: ["romance", "magical"],
+  p_yuzu: ["cooking"], p_puri: ["slice"], p_loader: ["cooking"], p_stellar: ["cooking"],
+  p_nitro: ["magical"], p_hachi: ["military"],
+  airi: ["mecha"], rei: ["supernatural"],
 };
 
 export const castById = (id: string): CastMember => CAST[id] ?? CAST.kai;
@@ -723,6 +731,16 @@ export const CAST_WAVE_THREE: CastMember[] = [
   reg({ id: "v_falsetto", name: "Falsetto", archetype: "The Chart-Topping Threat", img: "img/cast3/falsetto.jpg", tag: "Every note steals a fan.", aff: ["idol", "shojo", "cyber"], role: "villain" }),
   reg({ id: "v_lovelace", name: "Lovelace", archetype: "The Serial Romantic", img: "img/cast3/lovelace.jpg", tag: "Breaks hearts by contract.", aff: ["romance", "noir", "comedy"], role: "villain" }),
 ];
+
+/* fold wave three into the pick lists — before this they were registered in
+   CAST (so portraits + scoring worked) but never selectable in the Create
+   menu */
+for (const m of CAST_WAVE_THREE) {
+  if (m.role === "protag") PROTAGONISTS.push(m);
+  else if (m.role === "secondary") SECONDARY.push(m);
+  else if (m.role === "pet") PETS.push(m);
+  else VILLAINS.push(m);
+}
 
 
 /* ------------------------------------------------------------------- arcs */
