@@ -382,15 +382,15 @@ export interface ResearchItem {
   desc: string;
 }
 export const RESEARCH: ResearchItem[] = [
-  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Work stays available 25% longer before it becomes a miss." },
-  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "Crew automatically clears production work 12% faster." },
-  { id: "qa", name: "Editing Room", rd: 24, desc: "Editing staff clear notes 15% faster and production issues are reduced." },
+  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Story contribution checks gain +15% effective skill." },
+  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "All live contribution checks gain +12% effective skill." },
+  { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
   { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show." },
   { id: "mocap", name: "Motion Reference", rd: 40, desc: "Animation sprint output gains +12% Art quality." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
-  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Automatically clears 35% of outstanding edit notes before final QA." },
+  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%." },
   { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches a starter set of arc-to-genre fits so the Story Arc screen can label them before you risk a production." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },
@@ -656,7 +656,7 @@ export const SECONDARY: CastMember[] = [
 
 /* ------------------------------------------------------------------ pets */
 export const PETS: CastMember[] = [
-  reg({ id: "p_mochi", name: "Mochi", archetype: "Round Cream Cat", img: "img/cast-ready/pet/p_mochi__mochi.webp", tag: "Purrs in stereo.", aff: ["slice", "shojo"], role: "pet" }),
+  reg({ id: "p_mochi", name: "Mochi", archetype: "Round Cream Cat", img: "img/cast-ready/pet/p_mochi__mochi.webp", tag: "Purrs in stereo.", aff: ["slice", "shojo", "romance"], role: "pet" }),
   reg({ id: "p_pudding", name: "Pudding", archetype: "Wobbly Blob Dog", img: "img/cast-ready/pet/p_pudding__pudding.webp", tag: "Jiggles when excited.", aff: ["slice", "romance"], role: "pet" }),
   reg({ id: "p_koro", name: "Koro", archetype: "Space Hamster", img: "img/cast-ready/pet/p_koro__koro.webp", tag: "Cheeks store stardust.", aff: ["mecha", "cyber", "isekai"], role: "pet" }),
   reg({ id: "p_tama", name: "Tama", archetype: "Floating Baby Whale", img: "img/cast-ready/pet/p_tama__tama.webp", tag: "Sings the sky to sleep.", aff: ["fantasy", "slice"], role: "pet" }),
@@ -770,7 +770,7 @@ export const CAST_WAVE_THREE: CastMember[] = [
   reg({ id: "v_overlord", name: "Overlord Zero", archetype: "The Summoned Tyrant", img: "img/cast-ready/villain/v_overlord__overlord-zero.webp", tag: "Owns the world you got dropped into.", aff: ["isekai", "shojo", "fantasy"], role: "villain" }),
   reg({ id: "v_grandfinale", name: "Grand Finale", archetype: "The Final Judge", img: "img/cast-ready/villain/v_grandfinale__grand-finale.webp", tag: "Scores every dish like a duel.", aff: ["cooking", "comedy", "shonen"], role: "villain" }),
   reg({ id: "v_falsetto", name: "Falsetto", archetype: "The Chart-Topping Threat", img: "img/cast-ready/villain/v_falsetto__falsetto.webp", tag: "Every note steals a fan.", aff: ["idol", "shojo", "cyber"], role: "villain" }),
-  reg({ id: "v_lovelace", name: "Lovelace", archetype: "The Serial Romantic", img: "img/cast-ready/villain/v_lovelace__lovelace.webp", tag: "Breaks hearts by contract.", aff: ["romance", "noir", "comedy"], role: "villain" }),
+  reg({ id: "v_lovelace", name: "Lovelace", archetype: "The Serial Romantic", img: "img/cast-ready/villain/v_lovelace__lovelace.webp", tag: "Breaks hearts by contract.", aff: ["romance", "shojo", "noir", "comedy"], role: "villain" }),
 ];
 
 /* fold wave three into the pick lists — before this they were registered in
@@ -1042,7 +1042,7 @@ export interface Showrunner {
   perk: string;
 }
 export const SHOWRUNNERS: Showrunner[] = [
-  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — bubbles float 20% longer and editing notes are rarer." },
+  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — all contribution checks are 25% more impactful and production creates fewer editing notes." },
   { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
   { id: "producer", name: "Haruto Mori", title: "The Mogul Producer", img: "img/showrunner-c.jpg", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Golden Rolodex — contracts pay 40% more and advances are bigger." },
   { id: "marketer", name: "Sana Kobayashi", title: "The Hype Machine", img: "img/showrunner-d.jpg", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "Buzz Engine — shows open with +10 hype and marketing runs faster." },

@@ -23,7 +23,7 @@ import {
   studioProduction,
   toLegend,
 } from "../careers";
-import { makeProject, tickProjectsWeek, teamSpeed, type Project, type StaffModFn } from "../projects";
+import { makeProject, teamSpeed, type Project, type StaffModFn } from "../projects";
 import {
   advanceWeeks,
   appointHead,
@@ -32,6 +32,7 @@ import {
   grantContractXp,
   headBlockReason,
   initialRun,
+  contributionEffectiveSkill,
   migrateRun,
   releaseProject,
   respondPoach,
@@ -236,13 +237,14 @@ describe("specialisations", () => {
     expect(s2.out).toBeCloseTo(s1.out * 1.25);
   });
 
-  it("spec bonuses flow into weekly production", () => {
-    const s = worker("s", { spec: "w_action" });
+  it("spec bonuses flow into live percentile production", () => {
+    const s = worker("s", { spec: "w_action", stamina: 100 });
     const p = { ...proj({ genres: ["shonen"] }), staffIds: ["s"] };
-    const mods: StaffModFn = (st, pr, team) => personMod(st, pr, team, noBonds);
-    const withSpec = tickProjectsWeek([p], [s], 1, undefined, mods).projects[0];
-    const noSpec = tickProjectsWeek([p], [{ ...s, spec: "w_comedy" }], 1, undefined, mods).projects[0];
-    expect(withSpec.points.story).toBeGreaterThan(noSpec.points.story);
+    const run = { ...initialRun("Spec", "producer"), staff: [s], projects: [p] };
+    const withSpec = contributionEffectiveSkill(run, s, "story");
+    const off = { ...s, spec: "w_comedy" };
+    const noSpec = contributionEffectiveSkill({ ...run, staff: [off] }, off, "story");
+    expect(withSpec).toBeGreaterThan(noSpec);
   });
 });
 

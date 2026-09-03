@@ -54,7 +54,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 140_000, rd: 15, upkeep: 600 },
       { cost: 420_000, rd: 45, upkeep: 900 },
     ],
-    effects: (t) => [`Story production +${[15, 30, 50][t - 1]}%`],
+    effects: (t) => [`Story contribution effective skill +${[15, 30, 50][t - 1]}%`],
   },
   {
     id: "animation",
@@ -68,7 +68,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 560_000, rd: 55, upkeep: 1_200 },
     ],
     effects: (t) => [
-      `Art production +${[15, 30, 50][t - 1]}%`,
+      `Art contribution effective skill +${[15, 30, 50][t - 1]}%`,
       `Animation stage speed +${[10, 20, 35][t - 1]}% (fewer delays)`,
     ],
   },
@@ -83,7 +83,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 155_000, rd: 15, upkeep: 600 },
       { cost: 470_000, rd: 45, upkeep: 900 },
     ],
-    effects: (t) => [`Sound & voice production +${[15, 30, 50][t - 1]}%`],
+    effects: (t) => [`Sound contribution effective skill +${[15, 30, 50][t - 1]}%`],
   },
   {
     id: "editing",
@@ -97,7 +97,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 500_000, rd: 50, upkeep: 1_050 },
     ],
     effects: (t) => [
-      `Post-production fixes +${t} issue${t > 1 ? "s" : ""}/week`,
+      `Live editing effective skill +${t * 15}%`,
       `New production issues reduced by ${t} per sprint`,
     ],
   },
@@ -193,7 +193,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
     ],
     effects: (t) => [
       `+${[1, 2, 4][t - 1]} research point${t > 1 ? "s" : ""}/week`,
-      `Research earned from sprints +${[25, 50, 100][t - 1]}%`,
+      `Research projects finish ${t} week${t > 1 ? "s" : ""} sooner`,
     ],
   },
 ];

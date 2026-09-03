@@ -63,6 +63,8 @@ import {
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
 import { activeProjects } from "../engine/projects";
+import ProjectTracker from "./ProjectTracker";
+import KnowledgeDossier, { type KnowledgeSelection } from "./KnowledgeDossier";
 import { buyInvestment, computeIndustryRecords } from "../engine/legacy";
 import { resumeAuto, setDelegation, takeOver } from "../engine/automation";
 import { type HeadSlot } from "../engine/careers";
@@ -113,6 +115,7 @@ export default function Office({
 }) {
   const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more">(null);
   const [fcOpen, setFcOpen] = useState(false);
+  const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const fc = forecastWeek(run);
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
@@ -378,6 +381,8 @@ export default function Office({
         </div>
       </div>
 
+      <ProjectTracker run={run} clockDay={clockDay} onOpen={() => setModal("projects")} />
+
       {/* ---------------------------------------------------- compact dock */}
       <div className="relative z-20 shrink-0 border-t border-line/60 bg-ink/90 px-2 py-1.5 backdrop-blur-md">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
@@ -594,7 +599,8 @@ export default function Office({
             </span>
             <span className="ml-auto text-[11px] text-paper/50">Earn RD by shipping shows, fixing editing notes and taking contracts.</span>
           </div>
-          <div className="mb-2 text-xs font-bold tracking-widest text-paper/50">STUDIO TECH</div>
+          <KnowledgeDossier run={run} selection={knowledge} onSelect={setKnowledge} />
+          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO TECH</div>
           <div className="grid gap-2 sm:grid-cols-2">
             {RESEARCH.map((u) => {
               const owned = run.research.includes(u.id);

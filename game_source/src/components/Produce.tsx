@@ -14,7 +14,7 @@ import {
   staffPoint,
   type PointType,
 } from "../engine/data";
-import type { RunState } from "../engine/state";
+import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
 import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport } from "../engine/studioOps";
 import { MILESTONE_LABEL } from "../engine/projects";
@@ -27,11 +27,12 @@ const PHASES: Record<Exclude<MilestoneId, "edit">, { idx: 0 | 1 | 2; name: strin
   sound: { idx: 2, name: "RECORDING RUSH", icon: Music4, a: "Soundtrack", b: "Voice Cast", type: "sound" },
 };
 
-export default function Produce({ run, project, milestone, onDone, onBack }: {
+export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {
   run: RunState;
   project: Project;
   milestone: MilestoneId;
   paused: boolean;
+  workPulses?: DeskPulse[];
   onDone: (o: MilestoneOutcome) => void;
   onBack: () => void;
 }) {
@@ -93,6 +94,13 @@ export default function Produce({ run, project, milestone, onDone, onBack }: {
             <div className="text-[9px] font-extrabold tracking-[0.3em] text-paper/45">EDITOR NOTES REMAINING</div>
             <div className={cn("mt-1 font-display text-6xl font-extrabold tabular-nums", remaining === 0 ? "text-mint" : "text-gold")}>{remaining}</div>
             <div className="mt-2 text-[10px] font-bold text-cyanx">✂ EVERY CLEARED NOTE = +1 RD</div>
+            <div className="mt-3 min-h-10 space-y-1">
+              {workPulses.filter((p) => p.source === "edit").slice(-3).map((p) => (
+                <div key={p.nonce} className="anim-pop mx-auto flex w-fit items-center gap-2 rounded-full border border-mint/50 bg-mint/10 px-3 py-1 text-[10px] font-extrabold text-mint">
+                  <span>{p.name.split(" ")[0]}</span><span>−{p.points} NOTE{p.points === 1 ? "" : "S"}</span><span className="text-viol">+{p.points} RD</span>
+                </div>
+              ))}
+            </div>
             <div className="mt-2 text-[9px] text-paper/45">Calendar: {dateLabel(run.week)} · use the time controls above to keep editing</div>
           </div>
 

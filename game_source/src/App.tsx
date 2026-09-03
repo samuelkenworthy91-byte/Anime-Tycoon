@@ -11,6 +11,7 @@ import {
   initialRun,
   tickStudioDay,
   tickStudioWorkPulse,
+  tickEditWorkPulse,
   tickEditDay,
   MAX_WEEKS,
   type DeskPulse,
@@ -159,21 +160,22 @@ export default function App() {
     return () => clearInterval(iv);
   }, [screen, paused, timeSpeed, run !== null, run?.week, focus?.milestone, focus?.projectId]);
 
-  /* Desk bursts now change the game state at the same instant as the bubble. */
+  /* Visible desk/edit bubbles are the actual unit of work. */
   useEffect(() => {
-    if (screen !== "office" || paused || timeSpeed === 0 || !run) return;
+    const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+    if ((screen !== "office" && !liveEditing) || paused || timeSpeed === 0 || !run) return;
     const gap = Math.max(180, Math.round(1750 / Math.max(1, timeSpeed)));
     const iv = window.setInterval(() => {
       setRun((current) => {
         if (!current) return current;
-        const live = tickStudioWorkPulse(current);
+        const live = liveEditing && focus ? tickEditWorkPulse(current, focus.projectId) : tickStudioWorkPulse(current);
         setWorkPulses(live.pulses);
         if (live.attention) setTimeSpeed(0);
         return live.run;
       });
     }, gap);
     return () => window.clearInterval(iv);
-  }, [screen, paused, timeSpeed, run !== null]);
+  }, [screen, paused, timeSpeed, run !== null, focus?.milestone, focus?.projectId]);
 
   /* --------------------------------------------------------- lifecycle */
   const loadRun = useCallback((slot: SlotId) => {
@@ -524,6 +526,7 @@ export default function App() {
             project={projectById(run, focus.projectId)!}
             milestone={focus.milestone}
             paused={paused}
+            workPulses={workPulses}
             onDone={finishMilestone}
             onBack={() => {
               sfx.back();

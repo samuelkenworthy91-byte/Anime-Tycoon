@@ -17,6 +17,7 @@ import {
   buyFacility,
   facilityBlockReason,
   initialRun,
+  contributionEffectiveSkill,
   migrateRun,
   officeSlots,
   previewResult,
@@ -162,12 +163,13 @@ describe("facility bonuses", () => {
     expect(fx.pointMult.art).toBe(1);
     expect(fx.pointMult.sound).toBe(1);
 
-    const team = [worker("a", { story: 80 })];
-    const base = makeProject(draft(), 0); // concept stage focuses story
+    const team = [worker("a", { story: 80, stamina: 100 })];
+    const base = makeProject(draft(), 0);
     const p = { ...base, staffIds: ["a"] };
-    const plain = tickProjectsWeek([p], team, 1).projects[0];
-    const boosted = tickProjectsWeek([p], team, 1, fx).projects[0];
-    expect(boosted.points.story).toBeGreaterThan(plain.points.story);
+    const run = { ...richRun(), staff: team, projects: [p], facilities: {} };
+    const plain = contributionEffectiveSkill(run, team[0], "story");
+    const boosted = contributionEffectiveSkill({ ...run, facilities: { writers: 2 } }, team[0], "story");
+    expect(boosted).toBeGreaterThan(plain);
   });
 
   it("render farm speeds all projects — blockbusters double", () => {
@@ -330,10 +332,13 @@ describe("interaction with simultaneous projects", () => {
     r = assignToProject(r, r.projects[1].id, "b");
 
     const boosted = buyFacility(r, "writers")!;
-    const plainTick = tickProjectsWeek(r.projects, r.staff, 1);
-    const richTick = tickProjectsWeek(boosted.projects, boosted.staff, 1, facilityFX(boosted.facilities));
     for (let i = 0; i < 2; i++) {
-      expect(richTick.projects[i].points.story).toBeGreaterThan(plainTick.projects[i].points.story);
+      const id = r.projects[i].staffIds[0];
+      const plainStaff = r.staff.find((s) => s.id === id)!;
+      const boostedStaff = boosted.staff.find((s) => s.id === id)!;
+      expect(contributionEffectiveSkill(boosted, boostedStaff, "story")).toBeGreaterThan(
+        contributionEffectiveSkill(r, plainStaff, "story")
+      );
     }
   });
 });

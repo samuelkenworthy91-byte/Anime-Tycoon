@@ -16,6 +16,7 @@ import {
   releaseProject,
   staffCapacity,
   startProject,
+  tickStudioWorkPulse,
   type RunState,
 } from "../state";
 
@@ -119,6 +120,9 @@ function playCareer(seedLabel: string): RunState {
     /* keep teams staffed and staff hired */
     r = botAssign(r);
     r = botHire(r);
+    /* A real player sees ~40 work-check cycles in a seven-day week at 1x.
+       Simulate those visible contributions explicitly before the calendar tick. */
+    for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;
     /* advance one week */
     r = advanceWeeks(r, 1);
     /* a sane player avoids runaway debt: cap one measurement point */

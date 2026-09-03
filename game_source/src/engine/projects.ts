@@ -414,7 +414,7 @@ export function tickProjectsWeek(
 
   const next = projects.map((p0) => {
     if (p0.stage === "done") return p0;
-    const p = { ...p0, points: { ...p0.points }, liveQuality: { story: 0, art: 0, sound: 0, ...(p0.liveQuality ?? {}) } };
+    const p = { ...p0, points: { ...p0.points } };
     const team = staff.filter((s) => p.staffIds.includes(s.id));
 
     /* ----- airing: the payout schedule does the work; just finish up */
@@ -434,21 +434,10 @@ export function tickProjectsWeek(
     /* ----- work happens unless the team is waiting on a milestone */
     if (!p.milestone) {
       const plan = p.plan[p.stage] ?? 1;
-      const focus = STAGE_FOCUS[p.stage];
+      /* Story / Art / Sound are deliberately NOT generated here. Quality now
+         comes only from visible Kairosoft-style desk bubbles, rushes and explicit
+         events. The weekly engine controls schedule, burn, deadlines and rework. */
       const qualityMult = teamQualityMultiplier(p, team, fx, mods, studio);
-      if (focus) {
-        let weeklyTarget = 0;
-        for (const s of team) {
-          const m = mods?.(s, p, team);
-          weeklyTarget += Math.round(staffPoint(s, focus) * 0.07 * (m ? m.out : staminaF(s)) * fx.pointMult[focus] * qualityMult);
-        }
-        /* Desk bubbles now bank real quality immediately. The weekly tick only
-           tops up whatever part of the established baseline was not already
-           earned live, so the same work is never counted twice. */
-        const live = p.liveQuality?.[focus] ?? 0;
-        p.points[focus] += Math.max(0, weeklyTarget - live);
-      }
-      p.liveQuality = { story: 0, art: 0, sound: 0 };
       if (p.stage === "post") {
         const surplusFix = Math.max(0, Math.floor((qualityMult - 1) * 8));
         p.issues = Math.max(0, p.issues - Math.round(team.length * 0.6 + 0.4) - fx.issueFix - surplusFix);
