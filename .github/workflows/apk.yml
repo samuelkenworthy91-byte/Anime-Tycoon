@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - arena/01a0615b-anime-tycoon
     paths:
       - "game_source/**"
