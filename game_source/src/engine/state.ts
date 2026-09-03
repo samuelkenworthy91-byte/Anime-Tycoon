@@ -1,5 +1,8 @@
 import {
   GENRES,
+  ARC_COMBOS,
+  ARC_RESEARCH_COMBOS,
+  ARC_RESEARCH_GENRE_KEYS,
   OFFICES,
   PRODUCTION_SCOPES,
   RESEARCH,
@@ -226,6 +229,8 @@ export interface RunState {
   arcUnlocked: string[];
   /** how many times each arc id has been shipped (stats stay hidden until then) */
   arcKnowledge: Record<string, number>;
+  /** arc×genre relationships learned by shipping that exact pairing or by research */
+  arcGenreKnowledge: Record<string, number>;
   /** best raw quality ever shipped — reviews compare against this */
   studioTop: number;
   franchises: Record<string, Franchise>;
@@ -334,6 +339,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     arcCombos: [],
     arcUnlocked: [],
     arcKnowledge: {},
+    arcGenreKnowledge: {},
     studioTop: 0,
     franchises: {},
     pendingSequel: null,
@@ -394,6 +400,10 @@ export function migrateRun(raw: unknown): RunState {
     contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
+    arcCombos: Array.isArray(r.arcCombos) ? r.arcCombos : [],
+    arcUnlocked: Array.isArray(r.arcUnlocked) ? r.arcUnlocked : [],
+    arcKnowledge: r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {},
+    arcGenreKnowledge: r.arcGenreKnowledge && typeof r.arcGenreKnowledge === "object" ? r.arcGenreKnowledge : {},
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
@@ -545,6 +555,9 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let projects = r.projects ?? [];
   let rd = r.rd;
   let research = [...(r.research ?? [])];
+  let arcCombos = [...(r.arcCombos ?? [])];
+  let arcKnowledge = { ...(r.arcKnowledge ?? {}) };
+  let arcGenreKnowledge = { ...(r.arcGenreKnowledge ?? {}) };
   let contractJobs = [...(r.contractJobs ?? [])];
   let trainingJobs = [...(r.trainingJobs ?? [])];
   let researchJobs = [...(r.researchJobs ?? [])];
@@ -672,6 +685,18 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       for (const job of researchJobs) {
         if (w < job.completesWeek) { keep.push(job); continue; }
         if (!research.includes(job.researchId)) research.push(job.researchId);
+        if (job.researchId === "narrative_analytics") {
+          arcCombos = [...new Set([...arcCombos, ...ARC_RESEARCH_COMBOS])];
+          for (const id of ARC_RESEARCH_COMBOS) {
+            const combo = ARC_COMBOS.find((c) => c.id === id);
+            for (const arcId of combo?.arcs ?? []) arcKnowledge[arcId] = Math.max(1, arcKnowledge[arcId] ?? 0);
+          }
+          notices.push("📚 Narrative Analytics adds several proven structures to the Studio Bible.");
+        }
+        if (job.researchId === "genre_studies") {
+          for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
+          notices.push("📚 Genre Studies reveals a starter set of arc-to-genre relationships.");
+        }
         notices.push(`🔬 Research complete: ${job.name}!`);
       }
       researchJobs = keep;
@@ -1009,6 +1034,9 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     awardsCeremony,
     projects,
     research,
+    arcCombos,
+    arcKnowledge,
+    arcGenreKnowledge,
     contractJobs,
     trainingJobs,
     researchJobs,
@@ -1424,6 +1452,10 @@ export function releaseProject(
     if (r.week > deal.deadlineWeek) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
   }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
+  for (const id of result.arcCombosDiscovered) {
+    const combo = ARC_COMBOS.find((c) => c.id === id);
+    if (combo) notices.push(`🧠 STORY BREAKTHROUGH: ${combo.name} discovered — its structure rating is now visible whenever you plan it.`);
+  }
   if (p.lateWeeks > 0)
     notices.push(`The network docks “${draft.title}” for delivering ${p.lateWeeks} week${p.lateWeeks > 1 ? "s" : ""} late.`);
 
@@ -1471,8 +1503,15 @@ export function releaseProject(
     arcCombos: [...new Set([...r.arcCombos, ...result.arcCombosDiscovered])],
     arcKnowledge: draft.arcs.reduce(
       (acc2, id) => ({ ...acc2, [id]: (acc2[id] ?? 0) + 1 }),
-      r.arcKnowledge
+      r.arcKnowledge ?? {}
     ),
+    arcGenreKnowledge: draft.arcs.reduce((acc2, id) => {
+      for (const genre of draft.genres) {
+        const key = `${id}|${genre}`;
+        acc2[key] = (acc2[key] ?? 0) + 1;
+      }
+      return acc2;
+    }, { ...(r.arcGenreKnowledge ?? {}) } as Record<string, number>),
     studioTop: Math.max(r.studioTop, result.quality),
     franchises,
     pendingSequel:

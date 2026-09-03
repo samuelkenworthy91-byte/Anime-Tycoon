@@ -170,6 +170,10 @@ export function computeResult(opts: {
       arcsF += arc.synF ?? 0;
       if (showrunner === "vision" && (arc.id === "twist" || arc.id === "lore")) arcQ += 2;
     }
+    if (arc.anti?.some((s) => draft.genres.includes(s))) {
+      arcQ += arc.antiQ ?? -2;
+      arcsF += arc.antiF ?? -0.01;
+    }
     /* arcs that shine with the right cast member */
     if (arc.cast && arc.castQ) {
       const m = castOf(arc.cast);
