@@ -5,6 +5,7 @@ on:
     branches:
       - feature/kairosoft-production-pass
     paths:
+      - tools/fix_day_audience_source_anchor.py
       - tools/apply_day_audience_mechanics.py
       - tools/apply_records_audience_ui.py
       - .github/workflows/records-audience-days-ci.yml
@@ -24,6 +25,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: game_source/package-lock.json
+      - name: Normalise source migration anchor
+        run: python tools/fix_day_audience_source_anchor.py
       - name: Apply day and audience mechanics
         run: python tools/apply_day_audience_mechanics.py
       - name: Apply Records and audience UI
