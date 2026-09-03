@@ -28,12 +28,12 @@ jobs:
         run: |
           python <<'PY'
           from pathlib import Path
-          from textwrap import dedent
 
           source = Path('.github/workflows/kairosoft-edit-balance-once.yml').read_text()
           start = source.index("          python <<'PY'\n") + len("          python <<'PY'\n")
           end = source.index("\n          PY", start)
-          code = dedent(source[start:end])
+          lines = source[start:end].splitlines()
+          code = "\n".join(line[10:] if line.startswith("          ") else line for line in lines)
           exec(compile(code, 'embedded-kairosoft-balance-patch.py', 'exec'))
           PY
 
