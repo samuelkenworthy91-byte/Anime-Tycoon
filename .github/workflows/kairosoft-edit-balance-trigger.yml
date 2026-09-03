@@ -1,0 +1,60 @@
+name: Trigger Kairosoft edit balance patch
+
+on:
+  push:
+    branches:
+      - feature/kairosoft-production-pass
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/kairosoft-production-pass
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply embedded balance patch
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          source = Path('.github/workflows/kairosoft-edit-balance-once.yml').read_text()
+          start = source.index("          python <<'PY'\n") + len("          python <<'PY'\n")
+          end = source.index("\n          PY", start)
+          code = dedent(source[start:end])
+          exec(compile(code, 'embedded-kairosoft-balance-patch.py', 'exec'))
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated source patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/kairosoft-edit-balance-once.yml .github/workflows/kairosoft-edit-balance-trigger.yml
+          git add game_source/src
+          git commit -m "Apply editing tradeoff and showrunner balance patch"
+          git push origin HEAD:feature/kairosoft-production-pass
