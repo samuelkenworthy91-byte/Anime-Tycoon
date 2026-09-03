@@ -1,0 +1,337 @@
+name: One-shot Kairosoft edit balance patch
+
+on:
+  push:
+    branches:
+      - feature/kairosoft-production-pass
+    paths:
+      - .github/workflows/kairosoft-edit-balance-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/kairosoft-production-pass
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply balance patch
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              actual = text.count(old)
+              if actual != count:
+                  raise RuntimeError(f"{path}: expected {count} occurrence(s), found {actual}: {old[:100]!r}")
+              p.write_text(text.replace(old, new, count))
+
+          # ------------------------------------------------ projects.ts
+          path = "game_source/src/engine/projects.ts"
+          replace(path,
+          '''export interface StudioMod {
+            speed: number;
+            burnMult: number;
+          }
+          export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1 };''',
+          '''export interface StudioMod {
+            speed: number;
+            burnMult: number;
+            /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
+            issueChanceMult?: number;
+          }
+          export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };''')
+
+          replace(path,
+          '''        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post")) p.issues += 1;''',
+          '''        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;''')
+
+          replace(path,
+          '''      if (p.lateWeeks % 2 === 0) p.issues += 1;
+''',
+          '''''')
+
+          replace(path,
+          '''        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post")) p.issues += 1;''',
+          '''        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;''')
+
+          replace(path,
+          '''      if (lateDays % 14 === 0) p.issues += 1;
+''',
+          '''''')
+
+          replace(path,
+          '''    issues: done === "edit" ? Math.max(0, p.issues + o.issues - (o.squashed ?? 0)) : p.issues + o.issues,''',
+          '''    /* Final editing is a one-way quality pass: notes may be cleared, never manufactured. */
+            issues: done === "edit" ? Math.max(0, p.issues - (o.squashed ?? 0)) : p.issues + o.issues,''')
+
+          # ------------------------------------------------ state.ts
+          path = "game_source/src/engine/state.ts"
+          replace(path,
+          '''  contractWeeklyOutput,
+          ''',
+          '''  contractWeeklyOutput,
+            showrunnerBubbleOutput,
+          ''')
+
+          replace(path,
+          '''  const studio = studioProduction(heads, staffArr);''',
+          '''  const studio = { ...studioProduction(heads, staffArr), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };''')
+
+          replace(path,
+          '''  const studio = studioProduction(nx.heads ?? {}, nx.staff);''',
+          '''  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };''')
+
+          replace(path,
+          '''    const points = percentileSkillOutput(showrunnerEffectiveSkill(r, type));''',
+          '''    const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));''',
+          count=2)
+
+          replace(path,
+          '''      const lateStage = projects.find(
+                (p) => (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
+              );''',
+          '''      const lateStage = projects.find(
+                (p) => p.milestone !== "edit" && (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
+              );''')
+
+          replace(path,
+          '''          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.issues + 2 } : x''',
+          '''          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.milestone === "edit" ? x.issues : x.issues + 2 } : x''')
+
+          # ------------------------------------------------ studioOps.ts
+          path = "game_source/src/engine/studioOps.ts"
+          marker = '''export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {'''
+          helper = '''/** Showrunners are senior contributors, not another junior desk roll.
+           * Every personal showrunner bubble gets +1 on top of the normal percentile output. */
+          export function showrunnerBubbleOutput(effectiveSkill: number, roll = Math.random()): number {
+            const skill = Math.max(0, effectiveSkill);
+            const guaranteed = Math.floor(skill / 100);
+            const remainder = skill - guaranteed * 100;
+            return 1 + guaranteed + (roll * 100 < remainder ? 1 : 0);
+          }
+
+          export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {'''
+          replace(path, marker, helper)
+
+          replace(path,
+          '''  const runner = showrunnerSkill > 0 ? showrunnerSkill * 0.16 : 0;''',
+          '''  /* Legacy/headless cadence mirrors the live senior-bubble floor. */
+            const runner = showrunnerSkill > 0 ? 6 + showrunnerSkill * 0.16 : 0;''')
+
+          replace(path,
+          '''  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) : 0;''',
+          '''  /* Projection includes the showrunner's guaranteed senior +1 floor. */
+            const runner = showrunnerSkill > 0 ? one(showrunnerSkill) * 1.25 : 0;''')
+
+          # ------------------------------------------------ Produce.tsx
+          path = "game_source/src/components/Produce.tsx"
+          replace(path,
+          '''import { MILESTONE_LABEL } from "../engine/projects";''',
+          '''import { MILESTONE_LABEL, draftCost } from "../engine/projects";''')
+
+          replace(path,
+          '''    const remaining = project.issues;
+              const late = run.week > project.deadlineWeek;''',
+          '''    const remaining = project.issues;
+              const liveDay = run.day ?? run.week * 7;
+              const deadlineDay = project.deadlineDay ?? project.deadlineWeek * 7;
+              const lateDays = Math.max(project.lateDays ?? 0, Math.max(0, liveDay - deadlineDay));
+              const late = lateDays > 0;
+              const dailyLateFee = Math.max(1, Math.round((1_500 + Math.round(draftCost(project.draft) * 0.015)) / 7));
+              const revenuePenalty = Math.min(30, Math.max(0, project.lateWeeks) * 3);''')
+
+          replace(path,
+          '''            <p className="mt-1 text-xs text-paper/55">There is no edit-note timer. Let the calendar run and the team keeps clearing notes; every note removed earns +1 RD. Lock whenever you choose.</p>''',
+          '''            <p className="mt-1 text-xs text-paper/55">Editing notes only move one way: down. Keep the calendar running to chase a cleaner master; every cleared note improves final quality and earns +1 RD. The trade-off is time and money.</p>''')
+
+          replace(path,
+          '''          {late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · every extra week now costs cash, hype and can create further issues.</div>}''',
+          '''          {late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · {lateDays} day{lateDays === 1 ? "" : "s"} late · £{dailyLateFee.toLocaleString("en-GB")}/day late fee · current release payout −{revenuePenalty}%. Notes cannot increase, but burn, fees and hype loss keep running.</div>}''')
+
+          replace(path,
+          '''    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1);''',
+          '''    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === "steady" ? 0.75 : 1);''')
+
+          # ------------------------------------------------ ProductionFloor.tsx (legacy/future editing view)
+          path = "game_source/src/components/ProductionFloor.tsx"
+          replace(path,
+          '''          if (b.kind === "bug") {
+                    s.totals.issues++;
+                    sfx.miss();
+                    shake(4);
+                    s.floats.push({ x: b.x, y: 54, txt: "EDITING NOTE!", color: "#ff4d4d", t0: e });
+                  } else {''',
+          '''          if (b.kind === "bug") {
+                    sfx.miss();
+                    if (editingMode) {
+                      /* Missing an edit bubble leaves an existing note open; it never creates a new one. */
+                      s.totals.missed++;
+                      s.combo = 0;
+                      shake(2);
+                      s.floats.push({ x: b.x, y: 54, txt: "NOTE STILL OPEN", color: "#ff8b6b", t0: e });
+                    } else {
+                      s.totals.issues++;
+                      shake(4);
+                      s.floats.push({ x: b.x, y: 54, txt: "EDITING NOTE!", color: "#ff4d4d", t0: e });
+                    }
+                  } else {''')
+
+          # ------------------------------------------------ events.ts
+          path = "game_source/src/engine/events.ts"
+          replace(path,
+          '''    projects = projects.map((p) => (p.id === proj.id ? fn(p) : p));''',
+          '''    projects = projects.map((p) => {
+              if (p.id !== proj.id) return p;
+              const patched = fn(p);
+              /* Once final editing starts, outside events may change cash/hype/points but cannot add notes. */
+              return p.milestone === "edit" && patched.issues > p.issues ? { ...patched, issues: p.issues } : patched;
+            });''')
+
+          # ------------------------------------------------ data.ts perk copy
+          path = "game_source/src/engine/data.ts"
+          replace(path,
+          '''perk: "Steady Hand — all contribution checks are 25% more impactful and production creates fewer editing notes."''',
+          '''perk: "Steady Hand — all contribution checks are 25% stronger and pre-edit production creates 25% fewer editing notes."''')
+
+          # ------------------------------------------------ scoring.ts clarity
+          path = "game_source/src/engine/scoring.ts"
+          replace(path,
+          '''{ label: `Production issues (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },''',
+          '''{ label: `Unresolved editing notes (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },''')
+
+          # ------------------------------------------------ tests
+          path = "game_source/src/engine/__tests__/rush-edit-tuning.test.ts"
+          replace(path,
+          '''import { describe, expect, it } from "vitest";''',
+          '''import { describe, expect, it, vi } from "vitest";''')
+          replace(path,
+          '''import { makeProject } from "../projects";''',
+          '''import { applyMilestoneOutcome, makeProject, tickProjectsDay } from "../projects";''')
+          replace(path,
+          '''import { rushOutcomeRange } from "../studioOps";''',
+          '''import { rushOutcomeRange, showrunnerBubbleOutput } from "../studioOps";
+          import { resolveStudioEvent } from "../events";''')
+
+          p = Path(path)
+          text = p.read_text()
+          tail = '''  it("live editing clears notes and awards one RD for every note removed", () => {
+              let r = initialRun("Edit Test", "steady");
+              const st = { ...r.candidates[0], story: 99, art: 99, sound: 99, stamina: 100 };
+              let project = makeProject(draft(), 0);
+              project = { ...project, stage: "post", milestone: "edit", issues: 6, staffIds: [st.id] };
+              r = { ...r, staff: [st], projects: [project], rd: 0 };
+              const out = tickEditWorkPulse(r, project.id).run;
+              const remaining = out.projects[0].issues;
+              const cleared = 6 - remaining;
+              expect(cleared).toBeGreaterThan(0);
+              expect(out.rd).toBe(cleared);
+              expect(out.projects[0].rdGained).toBe(0); // no second payout at release
+            });
+          });'''
+          addition = '''  it("live editing clears notes and awards one RD for every note removed", () => {
+              let r = initialRun("Edit Test", "steady");
+              const st = { ...r.candidates[0], story: 99, art: 99, sound: 99, stamina: 100 };
+              let project = makeProject(draft(), 0);
+              project = { ...project, stage: "post", milestone: "edit", issues: 6, staffIds: [st.id] };
+              r = { ...r, staff: [st], projects: [project], rd: 0 };
+              const out = tickEditWorkPulse(r, project.id).run;
+              const remaining = out.projects[0].issues;
+              const cleared = 6 - remaining;
+              expect(cleared).toBeGreaterThan(0);
+              expect(out.rd).toBe(cleared);
+              expect(out.projects[0].rdGained).toBe(0); // no second payout at release
+            });
+
+            it("showrunner bubbles always have a senior +1 floor", () => {
+              expect(showrunnerBubbleOutput(0, 0.99)).toBe(1);
+              expect(showrunnerBubbleOutput(77.5, 0.99)).toBe(1);
+              expect(showrunnerBubbleOutput(77.5, 0)).toBe(2);
+              expect(showrunnerBubbleOutput(175, 0.99)).toBe(2);
+            });
+
+            it("final editing outcomes can only reduce the note count", () => {
+              const project = { ...makeProject(draft(), 0), stage: "post" as const, milestone: "edit" as const, issues: 3 };
+              const out = applyMilestoneOutcome(project, {
+                points: { story: 0, art: 0, sound: 0 }, issues: 5, spent: 0, rdGained: 0, squashed: 1,
+              });
+              expect(out.issues).toBe(2);
+            });
+
+            it("late delivery drains cash without manufacturing new notes", () => {
+              const project = {
+                ...makeProject(draft(), 0, 0), stage: "ready" as const, issues: 2,
+                deadlineDay: 0, deadlineWeek: 0, lateDays: 13, lateWeeks: 2,
+              };
+              const out = tickProjectsDay([project], [], 14);
+              expect(out.projects[0].issues).toBe(2);
+              expect(out.projects[0].lateDays).toBe(14);
+              expect(out.cashDelta).toBeLessThan(0);
+            });
+
+            it("Steady Hand reduces pre-edit rework creation by 25 percent", () => {
+              const random = vi.spyOn(Math, "random").mockReturnValue(0.8);
+              const base = { ...makeProject(draft(), 0, 0), stage: "animation" as const, issues: 0 };
+              const load = { [base.id]: 0.5 };
+              const normal = tickProjectsDay([base], [], 14, undefined, undefined, { speed: 0, burnMult: 1, issueChanceMult: 1 }, load);
+              const steady = tickProjectsDay([base], [], 14, undefined, undefined, { speed: 0, burnMult: 1, issueChanceMult: 0.75 }, load);
+              expect(normal.projects[0].issues).toBe(1);
+              expect(steady.projects[0].issues).toBe(0);
+              random.mockRestore();
+            });
+
+            it("studio dilemmas cannot add notes after final editing starts", () => {
+              let r = initialRun("Event Edit Test", "steady");
+              const project = { ...makeProject(draft(), 0), stage: "post" as const, milestone: "edit" as const, issues: 3, hype: 5 };
+              r = {
+                ...r,
+                projects: [project],
+                studioEvents: [{
+                  id: "sev-edit-lock", kind: "viral", week: 0, expiresWeek: 3, projectId: project.id,
+                  text: "Test event", choices: [{ id: "meme", label: "LEAN INTO THE MEME", effect: "+12 hype · +2 issues" }],
+                }],
+              };
+              const out = resolveStudioEvent(r, "sev-edit-lock", "meme")!;
+              expect(out.projects[0].issues).toBe(3);
+              expect(out.projects[0].hype).toBeGreaterThan(project.hype);
+            });
+          });'''
+          if text.count(tail) != 1:
+              raise RuntimeError("rush-edit-tuning.test.ts: expected test tail not found exactly once")
+          p.write_text(text.replace(tail, addition, 1))
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated patch and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/kairosoft-edit-balance-once.yml
+          git add game_source/src
+          git commit --amend -m "Rebalance editing tradeoff and showrunner contributions"
+          git push --force-with-lease origin HEAD:feature/kairosoft-production-pass
