@@ -35,7 +35,7 @@ const draft = (over: Partial<Draft>): Draft => ({
 /** resolve milestone gates hands-off until the project is ready */
 function driveToReady(r: RunState, p: Project): RunState {
   let guard = 0;
-  while (guard++ < 50) {
+  while (guard++ < 120) {
     const cur = r.projects.find((x) => x.id === p.id);
     if (!cur || cur.stage !== "ready") {
       if (!cur?.milestone) {
@@ -98,7 +98,7 @@ describe("multi-season airing loop", () => {
 
     /* weeks tick by: S2 progresses while S1 finishes broadcasting */
     let guard = 0;
-    while (guard++ < 40) {
+    while (guard++ < 120) {
       r = advanceWeeks(r, 1);
       const p2now = r.projects.find((x) => x.id === p2.id)!;
       if (p2now.milestone) {

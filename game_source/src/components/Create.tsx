@@ -34,6 +34,7 @@ import {
   GENRES,
   MEDIUMS,
   PETS,
+  PRODUCTION_SCOPES,
   PROTAGONISTS,
   SECONDARY,
   SLOTS,
@@ -43,12 +44,14 @@ import {
   comboLevelBonus,
   formatGBP,
   randomTitle,
+  scopeLabel,
   type AudienceId,
   type BudgetId,
   type CastMember,
   type Draft,
   type GenreId,
   type MediumId,
+  type ScopeId,
   type SlotId,
 } from "../engine/data";
 import { arcLockReason, startBlockReason } from "../engine/state";
@@ -98,6 +101,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     title: randomTitle(),
     medium: last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "tv",
     budget: last?.budget ?? "standard",
+    scope: last?.scope ?? "standard",
     slot: last?.slot ?? "midnight",
     genres: [],
     audience: last?.audience ?? "teens",
@@ -414,6 +418,21 @@ export default function Create({
                       <div className="text-[10px] text-paper/50">{BUDGETS[b].desc}</div>
                     </Pick>
                   ))}
+                </div>
+              </Section>
+              <Section title="PRODUCTION SCOPE">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                  {(Object.keys(PRODUCTION_SCOPES) as ScopeId[]).map((scope) => {
+                    const def = PRODUCTION_SCOPES[scope];
+                    const locked = run.officeLevel < def.minOffice || run.staff.length < def.minStaff;
+                    return (
+                      <Pick key={scope} active={(d.scope ?? "standard") === scope} disabled={locked} onClick={() => set({ scope })}>
+                        <div className="font-display text-sm font-extrabold">{scopeLabel(scope, d.medium)}</div>
+                        <div className="text-[10px] font-bold text-gold">×{def.costMult.toFixed(2)} cost · ×{def.weeksMult.toFixed(2)} time</div>
+                        <div className="text-[10px] text-paper/50">{locked ? `Needs office Lv${def.minOffice + 1} and ${def.minStaff} staff` : def.desc}</div>
+                      </Pick>
+                    );
+                  })}
                 </div>
               </Section>
               <Section title="BROADCAST SLOT">

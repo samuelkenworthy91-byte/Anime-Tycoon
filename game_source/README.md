@@ -34,8 +34,9 @@ npm run preview    # serve the production build
 
 ## Controls
 
-- Production-floor work is handled automatically by your crew; more staff and
-  higher relevant skill increase throughput while missed work lowers the result
+- Production-floor work is handled automatically by your crew; more staff and higher relevant skill increase throughput while missed work lowers the result
+- Small contracts run in the background with 1–3 assigned staff instead of teleporting the calendar
+- Production Scope (short / standard / extended / prestige) raises cost, duration, audience ceiling and departmental demand; elite teams convert excess capacity into quality rather than infinite speed
 - `ENTER` advances through create/release flows
 - `M` mute, `ESC`/`P` pause
 
@@ -50,7 +51,7 @@ each other are all hidden until you ship and read the post-release breakdown.
 
 ## Time
 
-One in-game day ≈ 2 real minutes while you're in the office. Seven days =
+Office time now has 0× / 1× / 4× / 12× controls. Important milestones, completed contracts/training/research, crises and dangerous cash forecasts automatically stop the clock. At 1×, one in-game day ≈ 2 real minutes. Seven days =
 one week: wages/rent are charged every 4 weeks and show revenue lands over a
 12-week broadcast — a slow build, a decisive peak, then a long tail of
 re-runs and word of mouth, like the Game Dev Tycoon sales chart.

@@ -419,10 +419,18 @@ describe("training", () => {
     r = buyFacility(r, "training")!;
     expect(trainBlockReason(r, "a")).toBeNull();
     const t1 = trainStaff(r, "a", "story")!;
-    expect(t1.staff.find((s) => s.id === "a")!.story).toBe(61);
-    expect(t1.staff.find((s) => s.id === "a")!.xp).toBe(XP_LEVELS[1] + 50);
-    expect(trainBlockReason(t1, "a")).toMatch(/cooldown/i);
+    /* courses now occupy real calendar time; no instant skill point */
+    expect(t1.staff.find((s) => s.id === "a")!.story).toBe(60);
+    expect(t1.trainingJobs).toHaveLength(1);
+    expect(trainBlockReason(t1, "a")).toMatch(/Training/i);
     expect(trainStaff(t1, "a", "story")).toBeNull();
+    const weeks = t1.trainingJobs[0].completesWeek - t1.week;
+    const t2 = advanceWeeks(t1, weeks);
+    expect(t2.staff.find((s) => s.id === "a")!.story).toBe(61);
+    /* training is still productive work, so the staff member also earns a small
+       amount of weekly operation XP before the course-completion XP lands. */
+    expect(t2.staff.find((s) => s.id === "a")!.xp).toBeGreaterThanOrEqual(XP_LEVELS[1] + 50);
+    expect(trainBlockReason(t2, "a")).toMatch(/cooldown/i);
   });
 });
 

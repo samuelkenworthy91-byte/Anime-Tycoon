@@ -59,6 +59,7 @@ import {
   relocateOffice,
   staffCapacity,
   startBlockReason,
+  startResearchProject,
   studioScore,
   type RunState,
 } from "../engine/state";
@@ -133,12 +134,7 @@ export default function Office({
   const research = (id: string, rd: number) => {
     if (run.rd < rd) return;
     sfx.fanfare();
-    setRun((r) => ({
-      ...r,
-      rd: r.rd - rd,
-      research: [...r.research, id],
-      notices: [...r.notices, `Research complete: ${RESEARCH.find((x) => x.id === id)?.name}!`],
-    }));
+    setRun((r) => startResearchProject(r, id, rd) ?? r);
   };
   const unlockGenre = (g: GenreId, rd: number) => {
     if (run.rd < rd) return;
@@ -602,6 +598,7 @@ export default function Office({
           <div className="grid gap-2 sm:grid-cols-2">
             {RESEARCH.map((u) => {
               const owned = run.research.includes(u.id);
+              const pending = run.researchJobs.find((j) => j.researchId === u.id);
               return (
                 <div key={u.id} className={cn("ink-card p-3", owned && "border-mint/50")}>
                   <div className="flex items-center gap-1.5">
@@ -612,9 +609,11 @@ export default function Office({
                   <div className="mt-2">
                     {owned ? (
                       <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
+                    ) : pending ? (
+                      <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, pending.completesWeek - run.week)} WK</span>
                     ) : (
                       <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={run.rd < u.rd} onClick={() => research(u.id, u.rd)}>
-                        {u.rd} RD
+                        START · {u.rd} RD
                       </Btn>
                     )}
                   </div>

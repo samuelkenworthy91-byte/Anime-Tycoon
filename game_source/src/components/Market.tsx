@@ -16,6 +16,7 @@ import {
   HEAT_LABEL,
   PARTNERS,
   effectiveHeat,
+  partnerTier,
   negotiationChance,
   partnerById,
   repLabel,
@@ -341,8 +342,9 @@ export default function MarketPanel({
               <div key={p.id} className="rounded-lg border border-paper/15 bg-paper/5 p-2.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="font-bold text-paper">{p.name}</div>
-                  <div className="shrink-0 text-[10px] font-bold text-cyanx">
-                    {repLabel(rep)} · {rep}/100
+                  <div className="shrink-0 text-right text-[10px] font-bold text-cyanx">
+                    <div>{partnerTier(rep).label}</div>
+                    <div className="text-paper/45">{repLabel(rep)} · {rep}/100</div>
                   </div>
                 </div>
                 <div className="mt-0.5 text-[10px] text-paper/50">{p.blurb}</div>

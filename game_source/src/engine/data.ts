@@ -46,6 +46,7 @@ export type GenreId =
 
 export type MediumId = "tv" | "movie" | "ona";
 export type BudgetId = "indie" | "standard" | "blockbuster";
+export type ScopeId = "short" | "standard" | "extended" | "prestige";
 export type SlotId = "midnight" | "evening" | "prime" | "stream";
 export type AudienceId = "kids" | "teens" | "adults" | "family";
 export type StaffRole = "writer" | "animator" | "composer";
@@ -149,6 +150,8 @@ export interface Draft {
   title: string;
   medium: MediumId;
   budget: BudgetId;
+  /** production ambition: larger scopes cost more, take longer and strain departments */
+  scope?: ScopeId;
   slot: SlotId;
   genres: GenreId[];
   audience: AudienceId;
@@ -292,6 +295,32 @@ export const MEDIUMS: Record<MediumId, { label: string; desc: string; costMult: 
   movie: { label: "Theatrical Film", desc: "Big screen, big risk, big reward.", costMult: 1.7, reach: 1.5, weeks: 4, rd: 40 },
 };
 
+export interface ProductionScope {
+  label: string;
+  shortLabel: string;
+  desc: string;
+  weeksMult: number;
+  costMult: number;
+  workMult: number;
+  audienceMult: number;
+  minOffice: number;
+  minStaff: number;
+}
+
+export const PRODUCTION_SCOPES: Record<ScopeId, ProductionScope> = {
+  short: { label: "Short Run", shortLabel: "SHORT", desc: "Lean, focused and forgiving — ideal for a small crew.", weeksMult: 0.78, costMult: 0.78, workMult: 0.72, audienceMult: 0.78, minOffice: 0, minStaff: 0 },
+  standard: { label: "Standard Production", shortLabel: "STANDARD", desc: "The normal seasonal production target.", weeksMult: 1, costMult: 1, workMult: 1, audienceMult: 1, minOffice: 0, minStaff: 0 },
+  extended: { label: "Extended Production", shortLabel: "EXTENDED", desc: "More episodes, more cuts and a much heavier pipeline.", weeksMult: 1.42, costMult: 1.5, workMult: 1.45, audienceMult: 1.18, minOffice: 1, minStaff: 3 },
+  prestige: { label: "Prestige Production", shortLabel: "PRESTIGE", desc: "An event-scale slate anchor. Huge ceiling, brutal departmental demand.", weeksMult: 1.82, costMult: 2.15, workMult: 1.9, audienceMult: 1.38, minOffice: 2, minStaff: 5 },
+};
+
+export const scopeLabel = (scope: ScopeId, medium: MediumId) => {
+  if (scope === "short") return medium === "movie" ? "Short Feature" : medium === "ona" ? "Short Run" : "Short Cour";
+  if (scope === "standard") return medium === "movie" ? "Standard Feature" : medium === "ona" ? "Streaming Season" : "Standard Cour";
+  if (scope === "extended") return medium === "movie" ? "Major Feature" : medium === "ona" ? "Full Streaming Season" : "Double Cour";
+  return medium === "movie" ? "Event Film" : medium === "ona" ? "Prestige Streaming Event" : "Prestige Series";
+};
+
 export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: number; desc: string; heat: number }> = {
   indie: { label: "Ink & Paper Indie", cost: 40_000, scope: 0.85, desc: "Tiny team, huge heart.", heat: 0 },
   standard: { label: "Standard Production", cost: 120_000, scope: 1.0, desc: "Full pipeline, sane deadlines.", heat: 0.15 },
@@ -343,15 +372,15 @@ export interface ResearchItem {
   desc: string;
 }
 export const RESEARCH: ResearchItem[] = [
-  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Bubbles linger 25% longer on the floor." },
-  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "+20% bubble spawn rate in every phase." },
-  { id: "qa", name: "Editing Room", rd: 24, desc: "30% fewer editing notes appear on the floor." },
+  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Work stays available 25% longer before it becomes a miss." },
+  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "Crew automatically clears production work 12% faster." },
+  { id: "qa", name: "Editing Room", rd: 24, desc: "Editing staff clear notes 15% faster and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
   { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show." },
-  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art bubbles are worth +1 point." },
-  { id: "cg", name: "CG Assist", rd: 44, desc: "+25% bubble spawn rate in every phase." },
+  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Animation sprint output gains +12% Art quality." },
+  { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
-  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "50% fewer editing notes appear." },
+  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Automatically clears 35% of outstanding edit notes before final QA." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%." },
 ];
 

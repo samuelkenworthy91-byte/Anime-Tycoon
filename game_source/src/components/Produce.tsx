@@ -16,6 +16,7 @@ import { sfx } from "../engine/audio";
 import {
   POINT_COLOR,
   POINT_LABEL,
+  PRODUCTION_SCOPES,
   ROLE_POINT,
   SHOWRUNNERS,
   formatGBP,
@@ -92,7 +93,11 @@ export default function Produce({
     return list;
   }, [team, run.showsMade, runner.name, runner.portrait, runner.sprite, phase?.type]);
 
-  const spawnMult = (run.research.includes("pipeline") ? 1.2 : 1) * (1 + run.officeLevel * 0.05);
+  const scopeWork = PRODUCTION_SCOPES[project.draft.scope ?? "standard"].workMult;
+  /* project ambition creates somewhat more floor work; technology makes the CREW faster,
+     never the player's fingers busier. */
+  const spawnMult = 1 + Math.max(0, scopeWork - 1) * 0.22;
+  const autoSpeedMult = (run.research.includes("pipeline") ? 1.12 : 1) * (isEdit && run.research.includes("qa") ? 1.15 : 1);
   const lifeMult = (run.research.includes("storyboard") ? 1.25 : 1) * (run.showrunner === "steady" ? 1.2 : 1);
   const bugRate =
     0.11 *
@@ -148,7 +153,7 @@ export default function Produce({
       onDone({
         points: {
           story: t.story + boost.story,
-          art: t.art + boost.art,
+          art: t.art + boost.art + (run.research.includes("mocap") ? Math.round(t.art * 0.12) : 0),
           sound: t.sound + boost.sound,
         },
         issues: t.issues,
@@ -339,6 +344,7 @@ export default function Produce({
               focus={phase?.type ?? "art"}
               spawnMult={isEdit ? 1.5 : spawnMult}
               lifeMult={lifeMult}
+              autoSpeedMult={autoSpeedMult}
               bugRate={isEdit ? 1 : bugRate}
               editingMode={isEdit}
               paused={paused}

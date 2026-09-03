@@ -7,13 +7,14 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
-  grantContractXp,
+  forecastWeek,
   initialRun,
   MAX_WEEKS,
   migrateRun,
   projectById,
   releaseProject,
   startBlockReason,
+  startContractAssignment,
   startProject,
   type RunState,
 } from "./engine/state";
@@ -51,6 +52,7 @@ export default function App() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
+  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 12>(1);
   const [muteUI, setMuteUI] = useState(isMuted());
   /* real-time game clock: 1 in-game day = 2 real minutes; 7 days = 1 week */
   const [clockDay, setClockDay] = useState(0);
@@ -108,7 +110,8 @@ export default function App() {
   useEffect(() => {
     if (screen !== "office" || paused || !run) return;
     const iv = setInterval(() => {
-      dayAccRef.current += 1000;
+      if (timeSpeed === 0) return;
+      dayAccRef.current += 1000 * timeSpeed;
       if (dayAccRef.current >= 120_000) {
         dayAccRef.current -= 120_000;
         dayCountRef.current += 1;
@@ -116,7 +119,17 @@ export default function App() {
           dayCountRef.current = 0;
           setRun((r) => {
             if (!r) return r;
+            if (forecastWeek(r).cashAfter < 0) {
+              setTimeSpeed(0);
+              return { ...r, notices: [...r.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
+            }
             let n = advanceWeeks(r, 1);
+            const attention =
+              n.projects.some((p) => p.milestone && !r.projects.find((x) => x.id === p.id)?.milestone) ||
+              n.projects.some((p) => p.stage === "ready" && r.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
+              n.marketEvents.length > r.marketEvents.length || n.studioEvents.length > r.studioEvents.length || n.staffEvents.length > r.staffEvents.length ||
+              n.contractJobs.length < r.contractJobs.length || n.trainingJobs.length < r.trainingJobs.length || n.researchJobs.length < r.researchJobs.length;
+            if (attention) setTimeSpeed(0);
             if (n.cash < 0) {
               if (n.bailouts < 2) {
                 n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
@@ -136,7 +149,7 @@ export default function App() {
       setClockPhase(Math.floor((dayAccRef.current / 120_000) * 4));
     }, 1000);
     return () => clearInterval(iv);
-  }, [screen, paused, run !== null, run?.week]);
+  }, [screen, paused, timeSpeed, run !== null, run?.week]);
 
   /* --------------------------------------------------------- lifecycle */
   const loadRun = useCallback((slot: SlotId) => {
@@ -153,6 +166,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setSavePicker(false);
     dayAccRef.current = save.clock?.acc ?? 0;
     dayCountRef.current = save.clock?.dayCount ?? 0;
@@ -174,6 +188,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setScreen("office");
   }, []);
 
@@ -187,6 +202,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setScreen("office");
   }, [meta]);
 
@@ -365,28 +381,15 @@ export default function App() {
   }, []);
 
   const finishContract = useCallback(
-    (success: boolean, scored: number) => {
+    (staffIds: string[]) => {
       if (!run || !contract) return;
-      const base = success ? grantContractXp(run) : run;
-      const next: RunState = {
-        ...base,
-        cash: base.cash + (success ? contract.pay : 0),
-        rd: base.rd + (success ? contract.rd : Math.max(1, Math.round(contract.rd / 3))),
-        staff: base.staff.map((s) => ({ ...s, stamina: Math.max(20, s.stamina - 10) })),
-        notices: [
-          ...base.notices,
-          success
-            ? `Contract delivered: ${contract.name} (+£${contract.pay.toLocaleString("en-GB")}).`
-            : `Contract failed: ${contract.name} — ${scored}/${contract.target} points.`,
-        ],
-        contracts: base.contracts.filter((x) => x.id !== contract.id),
-      };
-      const settled = settle(next, contract.weeks);
-      setRun(settled);
+      const next = startContractAssignment(run, contract, staffIds);
+      if (!next) { sfx.back(); return; }
+      setRun(next);
       setContract(null);
-      if (settled.cash >= 0 && (settled.week < MAX_WEEKS || settled.dynasty)) setScreen("office");
+      setScreen("office");
     },
-    [run, contract, settle]
+    [run, contract]
   );
 
   /* --------------------------------------------------------- hotkeys */
@@ -558,6 +561,11 @@ export default function App() {
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
           <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
+            {screen === "office" && ([0, 1, 4, 12] as const).map((speed) => (
+              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
+                {speed === 0 ? "Ⅱ" : `${speed}×`}
+              </button>
+            ))}
             <button
               aria-label="Mute"
               onClick={() => {

@@ -1,6 +1,8 @@
 import {
   GENRES,
   OFFICES,
+  PRODUCTION_SCOPES,
+  RESEARCH,
   CAREER_WEEKS,
   AIR_WEEKS,
   castById,
@@ -149,6 +151,15 @@ import {
   type DynastyState,
 } from "./legacy";
 import { tickDelegated } from "./automation";
+import { projectLoadMap } from "./capacity";
+import {
+  contractWeeklyOutput,
+  researchWeeks,
+  trainingWeeks,
+  type ContractAssignment,
+  type ResearchJob,
+  type TrainingJob,
+} from "./studioOps";
 import { rollStudioEvent, type StudioEvent } from "./events";
 
 export type { Franchise, EntryKind } from "./franchise";
@@ -263,6 +274,12 @@ export interface RunState {
   marketEvents: MarketEvent[];
   /** pending studio dilemmas — 2–3 responses with real trade-offs */
   studioEvents: StudioEvent[];
+  /** small freelance jobs now occupy real staff over real calendar weeks */
+  contractJobs: ContractAssignment[];
+  /** staff courses finish after several weeks instead of instantly */
+  trainingJobs: TrainingJob[];
+  /** studio technologies unlock after a timed research project */
+  researchJobs: ResearchJob[];
   /** overseas licensing deal: +15% revenue until this week */
   revBoostUntil: number;
 }
@@ -346,6 +363,9 @@ export function initialRun(studio: string, showrunner: string): RunState {
     commissions: [],
     marketEvents: [],
     studioEvents: [],
+    contractJobs: [],
+    trainingJobs: [],
+    researchJobs: [],
     revBoostUntil: 0,
   };
 }
@@ -371,6 +391,9 @@ export function migrateRun(raw: unknown): RunState {
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
+    contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs : [],
+    trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
+    researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
@@ -521,6 +544,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
   let awardsCeremony = r.awardsCeremony;
   let projects = r.projects ?? [];
   let rd = r.rd;
+  let research = [...(r.research ?? [])];
+  let contractJobs = [...(r.contractJobs ?? [])];
+  let trainingJobs = [...(r.trainingJobs ?? [])];
+  let researchJobs = [...(r.researchJobs ?? [])];
   let incomeThisWeek = 0;
   let fansThisWeek = 0;
   const perWeek = weeklyOutgoings(r);
@@ -580,8 +607,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     payouts = payouts.filter((p) => p.week !== w);
 
-    /* every project in the pipeline gets a week of work */
-    const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio);
+    /* every project in the pipeline gets a week of work. Multiple shows in
+       the same department now contend for finite studio capacity. */
+    const loadMap = projectLoadMap(projects, staffArr, r.facilities, research);
+    const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio, loadMap);
     projects = tick.projects;
     cash += tick.cashDelta;
     notices.push(...tick.notices);
@@ -593,6 +622,60 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     rd += dlg.rd;
     cash += dlg.cash;
     notices.push(...dlg.notices);
+
+    /* ------- background contract work: real staff, real weeks ------- */
+    {
+      const keep: ContractAssignment[] = [];
+      for (const job of contractJobs) {
+        const crew = staffArr.filter((s) => job.staffIds.includes(s.id));
+        const progress = job.progress + contractWeeklyOutput(job.contract, crew, research);
+        if (progress >= job.contract.target) {
+          cash += job.contract.pay;
+          rd += job.contract.rd;
+          staffArr = staffArr.map((s) => {
+            if (!job.staffIds.includes(s.id)) return s;
+            return gainXp(s, CONTRACT_XP).staff;
+          });
+          notices.push(`✅ Contract delivered in the background: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
+        } else if (w >= job.dueWeek) {
+          const consolation = Math.max(1, Math.round(job.contract.rd / 3));
+          rd += consolation;
+          notices.push(`❌ Contract missed: ${job.contract.name} — ${progress}/${job.contract.target} progress (+${consolation} RD learned).`);
+        } else {
+          keep.push({ ...job, progress });
+        }
+      }
+      contractJobs = keep;
+    }
+
+    /* ------- courses complete after occupying the employee for weeks ------- */
+    {
+      const keep: TrainingJob[] = [];
+      for (const job of trainingJobs) {
+        const exists = staffArr.some((s) => s.id === job.staffId);
+        if (!exists) continue;
+        if (w < job.completesWeek) { keep.push(job); continue; }
+        staffArr = staffArr.map((s) => {
+          if (s.id !== job.staffId) return s;
+          let nx = ensureCareer({ ...s, [job.focus]: Math.min(99, s[job.focus] + 1), lastTrainedWeek: w }, w);
+          nx = moraleDelta(nx, 3);
+          return gainXp(nx, trainXp(job.tier)).staff;
+        });
+        notices.push(`🎓 ${job.staffName} completes ${job.focus} training (+1 ${job.focus}, +${trainXp(job.tier)} XP).`);
+      }
+      trainingJobs = keep;
+    }
+
+    /* ------- research projects mature over calendar time ------- */
+    {
+      const keep: ResearchJob[] = [];
+      for (const job of researchJobs) {
+        if (w < job.completesWeek) { keep.push(job); continue; }
+        if (!research.includes(job.researchId)) research.push(job.researchId);
+        notices.push(`🔬 Research complete: ${job.name}!`);
+      }
+      researchJobs = keep;
+    }
 
     /* the archive room quietly files away research */
     rd += fx.rdWeekly;
@@ -610,6 +693,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     /* ------- stamina, morale and experience, person by person ------- */
     {
       const busy = assignedStaffIds(projects);
+      const opBusy = new Set([
+        ...contractJobs.flatMap((j) => j.staffIds),
+        ...trainingJobs.map((j) => j.staffId),
+      ]);
       const drain = Math.max(1, 3 - fx.staminaSave);
       const rest = 9 + fx.staminaRest;
       staffArr = staffArr.map((st) => {
@@ -633,6 +720,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
           nx = g.staff;
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
+        } else if (opBusy.has(st.id)) {
+          nx.stamina = Math.max(12, nx.stamina - Math.max(1, drain - 1));
+          const g = gainXp(nx, Math.max(1, WEEKLY_XP - 1) * dynFx.xpMult);
+          nx = g.staff;
         } else {
           nx.stamina = Math.min(100, nx.stamina + rest);
           const cur = moraleOf(nx);
@@ -917,6 +1008,10 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     awards,
     awardsCeremony,
     projects,
+    research,
+    contractJobs,
+    trainingJobs,
+    researchJobs,
     incomeThisWeek,
     fansThisWeek,
     staff: staffArr,
@@ -954,6 +1049,11 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
   const cap = projectCapacity(r);
   if (active >= cap)
     return `${OFFICES[r.officeLevel].name} can only run ${cap} production${cap > 1 ? "s" : ""} at once`;
+  if (d) {
+    const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
+    if (r.officeLevel < scope.minOffice) return `${scope.label} requires ${OFFICES[scope.minOffice].name} or larger`;
+    if (r.staff.length < scope.minStaff) return `${scope.label} needs at least ${scope.minStaff} staff on the books`;
+  }
   if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
   if (d?.continuation) {
     const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
@@ -1041,9 +1141,48 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   };
 }
 
-/** move a staff member onto / off a project (exclusive assignment) */
+/** work outside major productions also occupies staff. */
+export function staffOperationReason(r: RunState, staffId: string): string | null {
+  const c = (r.contractJobs ?? []).find((j) => j.staffIds.includes(staffId));
+  if (c) return `Contract: ${c.contract.name}`;
+  const t = (r.trainingJobs ?? []).find((j) => j.staffId === staffId);
+  if (t) return `Training until ${dateLabel(t.completesWeek)}`;
+  return null;
+}
+
+export function staffBusyReason(r: RunState, staffId: string): string | null {
+  const p = projectOfStaff(r.projects, staffId);
+  return p ? `On “${p.draft.title}”` : staffOperationReason(r, staffId);
+}
+
+/** move a staff member onto / off a project (exclusive assignment). */
 export function assignToProject(r: RunState, projectId: string, staffId: string): RunState {
+  const p = projectById(r, projectId);
+  const already = !!p?.staffIds.includes(staffId);
+  const op = !already ? staffOperationReason(r, staffId) : null;
+  if (op) return { ...r, notices: [...r.notices, `${r.staff.find((s) => s.id === staffId)?.name ?? "That employee"} is unavailable — ${op}.`] };
   return { ...r, projects: toggleAssign(r.projects, projectId, staffId) };
+}
+
+export function startContractAssignment(r: RunState, contract: Contract, staffIds: string[]): RunState | null {
+  const ids = [...new Set(staffIds)].slice(0, 3);
+  if (ids.length < 1) return null;
+  if (!r.contracts.some((c) => c.id === contract.id)) return null;
+  for (const id of ids) if (staffBusyReason(r, id)) return null;
+  const job: ContractAssignment = {
+    id: `job_${contract.id}_${r.week}`,
+    contract,
+    staffIds: ids,
+    startWeek: r.week,
+    dueWeek: r.week + contract.weeks,
+    progress: 0,
+  };
+  return {
+    ...r,
+    contracts: r.contracts.filter((c) => c.id !== contract.id),
+    contractJobs: [...(r.contractJobs ?? []), job],
+    notices: [...r.notices, `📋 ${contract.name} assigned to ${ids.length} staff — due ${dateLabel(job.dueWeek)}. The calendar does not jump.`],
+  };
 }
 
 /** fold a played milestone sprint back into the run */
@@ -1052,9 +1191,11 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
   const team = proj?.staffIds ?? [];
   const done = proj?.milestone ?? null;
   const fx = facilityFX(r.facilities);
+  const autoClean = done === "edit" && r.research.includes("autoclean") ? Math.ceil((proj?.issues ?? 0) * 0.35) : 0;
+  const withCleanup: MilestoneOutcome = autoClean > 0 ? { ...o, squashed: (o.squashed ?? 0) + autoClean } : o;
   /* the QA suite catches problems before they become issues */
   const guarded: MilestoneOutcome =
-    o.issues > 0 ? { ...o, issues: Math.max(0, o.issues - fx.issueGuard) } : o;
+    withCleanup.issues > 0 ? { ...withCleanup, issues: Math.max(0, withCleanup.issues - fx.issueGuard) } : withCleanup;
   /* the training room turns every sprint into a lesson in its discipline */
   const taught: PointType | null = done === "edit" ? null : done;
   return {
@@ -1109,6 +1250,15 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r),
   });
+  const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
+  if (scope.audienceMult !== 1) {
+    out = {
+      ...out,
+      revenue: Math.round(out.revenue * scope.audienceMult),
+      fans: Math.round(out.fans * Math.sqrt(scope.audienceMult)),
+      breakdown: [...out.breakdown, { label: `${scope.label} reach`, pts: `×${scope.audienceMult.toFixed(2)} revenue ceiling` }],
+    };
+  }
   /* dynasty-era empire buffs apply after the core review lands */
   const dfx = dynastyFX(r);
   if (dfx.revenueMult !== 1) {
@@ -1471,6 +1621,8 @@ export function trainBlockReason(r: RunState, staffId: string): string | null {
   if (tier < 1) return "Build a Training Room first";
   const s = r.staff.find((x) => x.id === staffId);
   if (!s) return "No such staff member";
+  const busy = staffBusyReason(r, staffId);
+  if (busy) return busy;
   if (r.week - (s.lastTrainedWeek ?? -99) < TRAIN_COOLDOWN)
     return `On cooldown (${TRAIN_COOLDOWN - (r.week - (s.lastTrainedWeek ?? 0))} wk left)`;
   const cost = trainCost(tier);
@@ -1479,29 +1631,34 @@ export function trainBlockReason(r: RunState, staffId: string): string | null {
   return null;
 }
 
-/** a course: costs money, RD and energy — pays out XP and +1 to one skill */
+/** training now occupies the employee for calendar time; the reward lands on completion. */
 export function trainStaff(r: RunState, staffId: string, focus: PointType): RunState | null {
   if (trainBlockReason(r, staffId)) return null;
   const tier = r.facilities.training ?? 0;
   const cost = trainCost(tier);
-  const notices = [...r.notices];
-  const staff = r.staff.map((s) => {
-    if (s.id !== staffId) return s;
-    let nx = ensureCareer({ ...s }, r.week);
-    nx = {
-      ...nx,
-      [focus]: Math.min(99, nx[focus] + 1),
-      stamina: Math.max(12, nx.stamina - 12),
-      lastTrainedWeek: r.week,
-    };
-    nx = moraleDelta(nx, 3);
-    const g = gainXp(nx, trainXp(tier));
-    if (g.levelsGained > 0)
-      notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
-    notices.push(`${g.staff.name} completes a ${focus} masterclass (+1 ${focus}, +${trainXp(tier)} XP).`);
-    return g.staff;
-  });
-  return { ...r, cash: r.cash - cost.cash, rd: r.rd - cost.rd, staff, notices };
+  const s = r.staff.find((x) => x.id === staffId)!;
+  const weeks = trainingWeeks(tier);
+  const job: TrainingJob = {
+    id: `train_${staffId}_${r.week}`, staffId, staffName: s.name, focus, tier, startWeek: r.week, completesWeek: r.week + weeks,
+  };
+  return {
+    ...r, cash: r.cash - cost.cash, rd: r.rd - cost.rd,
+    trainingJobs: [...(r.trainingJobs ?? []), job],
+    notices: [...r.notices, `🎓 ${s.name} starts ${focus} training for ${weeks} weeks — unavailable until ${dateLabel(job.completesWeek)}.`],
+  };
+}
+
+export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {
+  if (r.research.includes(id) || (r.researchJobs ?? []).some((j) => j.researchId === id)) return null;
+  if (r.rd < rdCost) return null;
+  const def = RESEARCH.find((x) => x.id === id);
+  if (!def) return null;
+  const weeks = researchWeeks(rdCost, r.facilities.archive ?? 0);
+  const job: ResearchJob = { id: `research_${id}_${r.week}`, researchId: id, name: def.name, startWeek: r.week, completesWeek: r.week + weeks, rdCost };
+  return {
+    ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],
+    notices: [...r.notices, `🔬 Research started: ${def.name} — ${weeks} weeks to completion.`],
+  };
 }
 
 /* ------------------------------------------------------ salary politics */

@@ -30,7 +30,7 @@ import {
   type PointType,
   type Staff,
 } from "../engine/data";
-import { AIR_WEEKS, forecastWeek, projectCapacity, type RunState } from "../engine/state";
+import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
 import {
@@ -44,6 +44,7 @@ import {
   type Project,
 } from "../engine/projects";
 import Portrait from "./Portrait";
+import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
 
 const STAGE_COLOR: Record<string, string> = {
@@ -261,6 +262,7 @@ function ProjectCard({
               {run.staff.map((s: Staff) => {
                 const mine = p.staffIds.includes(s.id);
                 const other = !mine ? projectOfStaff(run.projects, s.id) : null;
+                const opBusy = !mine ? staffOperationReason(run, s.id) : null;
                 const full = !mine && p.staffIds.length >= TEAM_MAX;
                 return (
                   <div key={s.id} className={cn("flex items-center gap-2 rounded-lg border px-2 py-1.5", mine ? "border-mint/50 bg-mint/[0.06]" : "border-line bg-panel2/40")}>
@@ -270,16 +272,17 @@ function ProjectCard({
                       <div className="text-[9px] text-paper/50">
                         {ROLE_LABEL[s.role]} · {staffMain(s)} <span style={{ color: POINT_COLOR[ROLE_POINT[s.role]] }}>●</span>
                         {other && <span className="ml-1 text-gold">on “{other.draft.title}”</span>}
+                        {opBusy && <span className="ml-1 text-viol">{opBusy}</span>}
                         {s.stamina < 45 && <span className="ml-1 text-neon">tired</span>}
                       </div>
                     </div>
                     <Btn
                       variant={mine ? "ghost" : "cyan"}
                       className="!px-2 !py-1 text-[9px]"
-                      disabled={full}
+                      disabled={full || !!opBusy}
                       onClick={() => onAssign(p.id, s.id)}
                     >
-                      {mine ? "REMOVE" : other ? "PULL OVER" : "ASSIGN"}
+                      {mine ? "REMOVE" : opBusy ? "BUSY" : other ? "PULL OVER" : "ASSIGN"}
                     </Btn>
                   </div>
                 );
@@ -445,6 +448,7 @@ export default function ProjectsPanel({
 
   return (
     <div className="space-y-2.5">
+      <StudioSlate run={run} />
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold tracking-[0.25em] text-paper/45">
           SLOTS {active.length}/{cap}
