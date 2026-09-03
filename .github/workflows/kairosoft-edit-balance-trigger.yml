@@ -23,18 +23,150 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
 
-      - name: Apply embedded balance patch
+      - name: Apply balance patch
         shell: bash
         run: |
           python <<'PY'
           from pathlib import Path
+          import re
 
-          source = Path('.github/workflows/kairosoft-edit-balance-once.yml').read_text()
-          start = source.index("          python <<'PY'\n") + len("          python <<'PY'\n")
-          end = source.index("\n          PY", start)
-          lines = source[start:end].splitlines()
-          code = "\n".join(line[10:] if line.startswith("          ") else line for line in lines)
-          exec(compile(code, 'embedded-kairosoft-balance-patch.py', 'exec'))
+          def rep(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              found = text.count(old)
+              if found != count:
+                  raise RuntimeError(f"{path}: expected {count} occurrence(s), found {found}: {old[:120]!r}")
+              p.write_text(text.replace(old, new, count))
+
+          def sub(path, pattern, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              text2, n = re.subn(pattern, new, text, count=count, flags=re.MULTILINE)
+              if n != count:
+                  raise RuntimeError(f"{path}: expected {count} regex match(es), found {n}: {pattern[:120]!r}")
+              p.write_text(text2)
+
+          # Core editing invariant and pre-edit rework tuning.
+          path = "game_source/src/engine/projects.ts"
+          rep(path, "export interface StudioMod {\n  speed: number;\n  burnMult: number;\n}\nexport const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1 };", "export interface StudioMod {\n  speed: number;\n  burnMult: number;\n  /** Multiplier on NEW production-note creation. Editing itself never creates notes. */\n  issueChanceMult?: number;\n}\nexport const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };")
+          rep(path, "        if (load < 0.72 && week % 2 === 0 && (p.stage === \"animation\" || p.stage === \"post\")) p.issues += 1;", "        if (load < 0.72 && week % 2 === 0 && (p.stage === \"animation\" || p.stage === \"post\") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;")
+          rep(path, "      if (p.lateWeeks % 2 === 0) p.issues += 1;\n", "")
+          rep(path, "        if (load < 0.72 && day % 14 === 0 && (p.stage === \"animation\" || p.stage === \"post\")) p.issues += 1;", "        if (load < 0.72 && day % 14 === 0 && (p.stage === \"animation\" || p.stage === \"post\") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;")
+          rep(path, "      if (lateDays % 14 === 0) p.issues += 1;\n", "")
+          rep(path, "    issues: done === \"edit\" ? Math.max(0, p.issues + o.issues - (o.squashed ?? 0)) : p.issues + o.issues,", "    /* Final editing is a one-way quality pass: notes may be cleared, never manufactured. */\n    issues: done === \"edit\" ? Math.max(0, p.issues - (o.squashed ?? 0)) : p.issues + o.issues,")
+
+          # Live state: Steady Hand reduces new pre-edit notes; showrunner gets senior bubbles.
+          path = "game_source/src/engine/state.ts"
+          rep(path, "  contractWeeklyOutput,\n", "  contractWeeklyOutput,\n  showrunnerBubbleOutput,\n")
+          rep(path, "  const studio = studioProduction(heads, staffArr);", "  const studio = { ...studioProduction(heads, staffArr), issueChanceMult: r.showrunner === \"steady\" ? 0.75 : 1 };")
+          rep(path, "  const studio = studioProduction(nx.heads ?? {}, nx.staff);", "  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff), issueChanceMult: nx.showrunner === \"steady\" ? 0.75 : 1 };")
+          rep(path, "    const points = percentileSkillOutput(showrunnerEffectiveSkill(r, type));", "    const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));", 2)
+          sub(path, r'      const lateStage = projects\.find\(\s*\(p\) => \(p\.stage === "post" \|\| p\.stage === "marketing" \|\| p\.stage === "ready"\) && p\.hype > 0\s*\);', '      const lateStage = projects.find(\n        (p) => p.milestone !== "edit" && (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0\n      );')
+          rep(path, "          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.issues + 2 } : x", "          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.milestone === \"edit\" ? x.issues : x.issues + 2 } : x")
+
+          # Showrunner personal contribution floor and contract projection.
+          path = "game_source/src/engine/studioOps.ts"
+          marker = "export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {"
+          helper = "/** Showrunners are senior contributors, not another junior desk roll.\n * Every personal showrunner bubble gets +1 on top of the normal percentile output. */\nexport function showrunnerBubbleOutput(effectiveSkill: number, roll = Math.random()): number {\n  const skill = Math.max(0, effectiveSkill);\n  const guaranteed = Math.floor(skill / 100);\n  const remainder = skill - guaranteed * 100;\n  return 1 + guaranteed + (roll * 100 < remainder ? 1 : 0);\n}\n\n" + marker
+          rep(path, marker, helper)
+          rep(path, "  const runner = showrunnerSkill > 0 ? showrunnerSkill * 0.16 : 0;", "  /* Legacy/headless cadence mirrors the live senior-bubble floor. */\n  const runner = showrunnerSkill > 0 ? 6 + showrunnerSkill * 0.16 : 0;")
+          rep(path, "  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) : 0;", "  /* Projection includes the showrunner's guaranteed senior +1 floor. */\n  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) * 1.25 : 0;")
+
+          # Editing UI makes the quality-vs-money trade-off explicit.
+          path = "game_source/src/components/Produce.tsx"
+          rep(path, 'import { MILESTONE_LABEL } from "../engine/projects";', 'import { MILESTONE_LABEL, draftCost } from "../engine/projects";')
+          rep(path, "    const remaining = project.issues;\n    const late = run.week > project.deadlineWeek;", "    const remaining = project.issues;\n    const liveDay = run.day ?? run.week * 7;\n    const deadlineDay = project.deadlineDay ?? project.deadlineWeek * 7;\n    const lateDays = Math.max(project.lateDays ?? 0, Math.max(0, liveDay - deadlineDay));\n    const late = lateDays > 0;\n    const dailyLateFee = Math.max(1, Math.round((1_500 + Math.round(draftCost(project.draft) * 0.015)) / 7));\n    const revenuePenalty = Math.min(30, Math.max(0, project.lateWeeks) * 3);")
+          rep(path, '<p className="mt-1 text-xs text-paper/55">There is no edit-note timer. Let the calendar run and the team keeps clearing notes; every note removed earns +1 RD. Lock whenever you choose.</p>', '<p className="mt-1 text-xs text-paper/55">Editing notes only move one way: down. Keep the calendar running to chase a cleaner master; every cleared note improves final quality and earns +1 RD. The trade-off is time and money.</p>')
+          rep(path, '{late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · every extra week now costs cash, hype and can create further issues.</div>}', '{late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · {lateDays} day{lateDays === 1 ? "" : "s"} late · £{dailyLateFee.toLocaleString("en-GB")}/day late fee · current release payout −{revenuePenalty}%. Notes cannot increase, but burn, fees and hype loss keep running.</div>}')
+          rep(path, "    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1);", "    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === \"steady\" ? 0.75 : 1);")
+
+          # Legacy editing-floor behaviour also respects the one-way invariant.
+          path = "game_source/src/components/ProductionFloor.tsx"
+          old = "          if (b.kind === \"bug\") {\n            s.totals.issues++;\n            sfx.miss();\n            shake(4);\n            s.floats.push({ x: b.x, y: 54, txt: \"EDITING NOTE!\", color: \"#ff4d4d\", t0: e });\n          } else {"
+          new = "          if (b.kind === \"bug\") {\n            sfx.miss();\n            if (editingMode) {\n              /* Missing an edit bubble leaves an existing note open; it never creates a new one. */\n              s.totals.missed++;\n              s.combo = 0;\n              shake(2);\n              s.floats.push({ x: b.x, y: 54, txt: \"NOTE STILL OPEN\", color: \"#ff8b6b\", t0: e });\n            } else {\n              s.totals.issues++;\n              shake(4);\n              s.floats.push({ x: b.x, y: 54, txt: \"EDITING NOTE!\", color: \"#ff4d4d\", t0: e });\n            }\n          } else {"
+          rep(path, old, new)
+
+          # Studio dilemmas cannot inject new notes during final editing.
+          path = "game_source/src/engine/events.ts"
+          rep(path, "    projects = projects.map((p) => (p.id === proj.id ? fn(p) : p));", "    projects = projects.map((p) => {\n      if (p.id !== proj.id) return p;\n      const patched = fn(p);\n      /* Once final editing starts, outside events may change cash/hype/points but cannot add notes. */\n      return p.milestone === \"edit\" && patched.issues > p.issues ? { ...patched, issues: p.issues } : patched;\n    });")
+
+          # Player-facing terminology.
+          rep("game_source/src/engine/data.ts", 'perk: "Steady Hand — all contribution checks are 25% more impactful and production creates fewer editing notes."', 'perk: "Steady Hand — all contribution checks are 25% stronger and pre-edit production creates 25% fewer editing notes."')
+          rep("game_source/src/engine/scoring.ts", '{ label: `Production issues (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },', '{ label: `Unresolved editing notes (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },')
+
+          # Focused regression coverage for the new balance rules.
+          tests = r'''import { describe, expect, it, vi } from "vitest";
+          import type { Draft } from "../data";
+          import { applyMilestoneOutcome, makeProject, tickProjectsDay } from "../projects";
+          import { showrunnerBubbleOutput } from "../studioOps";
+
+          const draft = (): Draft => ({
+            title: "Balance Test",
+            medium: "tv",
+            budget: "standard",
+            scope: "standard",
+            slot: "midnight",
+            genres: ["shonen"],
+            audience: "teens",
+            protag: "kai",
+            protagName: "Kai",
+            secondary: "s_ren",
+            pet: "none",
+            villain: "v_oni",
+            arcs: [],
+            sliders: [50, 50, 50],
+            season: 1,
+          });
+
+          describe("editing tradeoff and showrunner balance", () => {
+            it("gives every showrunner personal bubble a senior +1 floor", () => {
+              expect(showrunnerBubbleOutput(0, 0.99)).toBe(1);
+              expect(showrunnerBubbleOutput(77.5, 0.99)).toBe(1);
+              expect(showrunnerBubbleOutput(77.5, 0)).toBe(2);
+              expect(showrunnerBubbleOutput(175, 0.99)).toBe(2);
+            });
+
+            it("allows final editing outcomes to reduce notes but never add them", () => {
+              const project = { ...makeProject(draft(), 0), stage: "post" as const, milestone: "edit" as const, issues: 3 };
+              const out = applyMilestoneOutcome(project, {
+                points: { story: 0, art: 0, sound: 0 },
+                issues: 5,
+                spent: 0,
+                rdGained: 0,
+                squashed: 1,
+              });
+              expect(out.issues).toBe(2);
+            });
+
+            it("lets lateness drain cash without manufacturing another note", () => {
+              const project = {
+                ...makeProject(draft(), 0, 0),
+                stage: "ready" as const,
+                issues: 2,
+                deadlineDay: 0,
+                deadlineWeek: 0,
+                lateDays: 13,
+                lateWeeks: 2,
+              };
+              const out = tickProjectsDay([project], [], 14);
+              expect(out.projects[0].issues).toBe(2);
+              expect(out.projects[0].lateDays).toBe(14);
+              expect(out.cashDelta).toBeLessThan(0);
+            });
+
+            it("lets Steady Hand suppress a pre-edit overload note at its 25% boundary", () => {
+              const base = { ...makeProject(draft(), 0, 0), stage: "animation" as const, issues: 0 };
+              const load = { [base.id]: 0.5 };
+              const random = vi.spyOn(Math, "random").mockReturnValue(0.8);
+              const normal = tickProjectsDay([base], [], 14, undefined, undefined, { speed: 0, burnMult: 1, issueChanceMult: 1 }, load);
+              const steady = tickProjectsDay([base], [], 14, undefined, undefined, { speed: 0, burnMult: 1, issueChanceMult: 0.75 }, load);
+              random.mockRestore();
+              expect(normal.projects[0].issues).toBe(1);
+              expect(steady.projects[0].issues).toBe(0);
+            });
+          });
+          '''
+          Path("game_source/src/engine/__tests__/edit-balance.test.ts").write_text(tests)
           PY
 
       - name: Install dependencies
@@ -54,7 +186,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/kairosoft-edit-balance-once.yml .github/workflows/kairosoft-edit-balance-trigger.yml
+          git rm .github/workflows/kairosoft-edit-balance-once.yml .github/workflows/kairosoft-edit-balance-trigger.yml .github/kairosoft-edit-balance-trigger.txt
           git add game_source/src
           git commit -m "Apply editing tradeoff and showrunner balance patch"
           git push origin HEAD:feature/kairosoft-production-pass
