@@ -1308,10 +1308,9 @@ export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
  * energy. When energy bottoms out they enter a recovery state, wander around
  * the office, and only return to their desk once they are comfortably charged.
  *
- * Normal show work also has a small real quality contribution here so the
- * bubbles over employees are truthful rather than decorative. The weekly
- * contribution in projects.ts is deliberately halved to keep long-run scoring
- * near its previous balance.
+ * Normal scored production remains in the proven weekly engine; these daily
+ * pulses make that skill-driven work legible throughout the office day without
+ * double-counting quality.
  */
 export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
   const pulses: DeskPulse[] = [];
@@ -1394,7 +1393,7 @@ export function tickEditDay(r: RunState, projectId: string): { run: RunState; pu
     if (stamina <= 0) resting[st.id] = true;
     return { ...st, stamina };
   });
-  const projects = r.projects.map((pr) => pr.id === projectId ? { ...pr, issues: remaining, rdGained: pr.rdGained + cleared } : pr);
+  const projects = r.projects.map((pr) => pr.id === projectId ? { ...pr, issues: remaining } : pr);
   return {
     run: {
       ...r,

@@ -40,5 +40,6 @@ describe("rush spectacle and live editing tuning", () => {
     const cleared = 6 - remaining;
     expect(cleared).toBeGreaterThan(0);
     expect(out.rd).toBe(cleared);
+    expect(out.projects[0].rdGained).toBe(0); // no second payout at release
   });
 });
