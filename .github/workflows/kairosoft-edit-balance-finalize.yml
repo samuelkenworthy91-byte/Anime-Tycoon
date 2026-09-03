@@ -1,0 +1,75 @@
+name: Finalize Kairosoft edit balance patch
+
+on:
+  push:
+    branches:
+      - feature/kairosoft-production-pass
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-build-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/kairosoft-production-pass
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply audited patch and update obsolete deadline test
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          # Reuse the already-successful audited source patch embedded in the existing trigger workflow.
+          source = Path('.github/workflows/kairosoft-edit-balance-trigger.yml').read_text()
+          start = source.index("          python <<'PY'\n") + len("          python <<'PY'\n")
+          end = source.index("\n          PY", start)
+          lines = source[start:end].splitlines()
+          code = "\n".join(line[10:] if line.startswith("          ") else line for line in lines)
+          exec(compile(code, 'kairosoft-edit-balance-patch.py', 'exec'))
+
+          # The old test encoded the behaviour we intentionally removed.
+          test_path = Path('game_source/src/engine/__tests__/projects.test.ts')
+          text = test_path.read_text()
+          old_name = 'it("missing the deadline costs cash and hype and can add issues", () => {'
+          new_name = 'it("missing the deadline costs cash and hype without adding issues", () => {'
+          old_assert = '    expect(late.issues).toBeGreaterThan(p0.issues);'
+          new_assert = '    expect(late.issues).toBe(p0.issues);'
+          if text.count(old_name) != 1 or text.count(old_assert) != 1:
+              raise RuntimeError('projects.test.ts deadline expectation was not found exactly once')
+          test_path.write_text(text.replace(old_name, new_name, 1).replace(old_assert, new_assert, 1))
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated patch and clean temporary validation files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/kairosoft-edit-balance-once.yml \
+                 .github/workflows/kairosoft-edit-balance-trigger.yml \
+                 .github/workflows/kairosoft-edit-balance-finalize.yml \
+                 .github/kairosoft-edit-balance-trigger.txt
+          git add game_source/src
+          git commit -m "Apply editing tradeoff and showrunner balance patch"
+          git push origin HEAD:feature/kairosoft-production-pass
