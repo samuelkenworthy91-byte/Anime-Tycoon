@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { initialRun, tickStudioDay } from "../state";
+import { initialRun, startContractAssignment, tickStudioDay, tickStudioWorkPulse } from "../state";
 import { makeProject } from "../projects";
 import type { Draft } from "../data";
 
@@ -33,10 +33,29 @@ describe("visible daily studio work", () => {
     const staff = { ...r.candidates[0], story:99, stamina:100 };
     const pr = { ...makeProject(draft(), 0), staffIds:[staff.id] };
     r = { ...r, staff:[staff], projects:[pr], candidates:r.candidates.slice(1) };
+    const before = r.projects[0].points.story;
     const out = tickStudioDay(r);
     expect(out.pulses.length).toBeGreaterThan(0);
     expect(out.pulses[0].type).toBe("story");
     expect(out.pulses[0].points).toBeGreaterThan(0);
+    expect(out.run.projects[0].points.story).toBeGreaterThan(before);
+    expect(out.run.projects[0].liveQuality?.story ?? 0).toBeGreaterThan(0);
+    vi.restoreAllMocks();
+  });
+
+  it("contract bubbles advance the bar immediately and may deliver before a week boundary", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    let r = initialRun("Test", "producer");
+    const staff = { ...r.candidates[0], art:99, stamina:100 };
+    const contract = { id:"instant", name:"One-Day Cleanup", type:"art" as const, target:1, weeks:2, pay:12000, rd:3 };
+    r = { ...r, staff:[staff], candidates:r.candidates.slice(1), contracts:[contract] };
+    r = startContractAssignment(r, contract, [staff.id], false)!;
+    const cash = r.cash;
+    const out = tickStudioWorkPulse(r);
+    expect(out.pulses.some((p) => p.source === "contract")).toBe(true);
+    expect(out.run.contractJobs).toHaveLength(0);
+    expect(out.run.cash).toBe(cash + contract.pay);
+    expect(out.run.rd).toBeGreaterThan(r.rd);
     vi.restoreAllMocks();
   });
 });

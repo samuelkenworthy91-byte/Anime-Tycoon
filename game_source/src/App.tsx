@@ -10,8 +10,8 @@ import {
   forecastWeek,
   initialRun,
   tickStudioDay,
+  tickStudioWorkPulse,
   tickEditDay,
-  rollStudioWorkPulses,
   MAX_WEEKS,
   type DeskPulse,
   migrateRun,
@@ -159,15 +159,17 @@ export default function App() {
     return () => clearInterval(iv);
   }, [screen, paused, timeSpeed, run !== null, run?.week, focus?.milestone, focus?.projectId]);
 
-  /* Frequent office work bubbles: the calendar still advances daily, but the
-     staff should LOOK busy throughout that day rather than only once every 10s. */
+  /* Desk bursts now change the game state at the same instant as the bubble. */
   useEffect(() => {
     if (screen !== "office" || paused || timeSpeed === 0 || !run) return;
-    const gap = timeSpeed >= 12 ? 700 : timeSpeed >= 4 ? 1050 : 1750;
+    const gap = Math.max(180, Math.round(1750 / Math.max(1, timeSpeed)));
     const iv = window.setInterval(() => {
       setRun((current) => {
-        if (current) setWorkPulses(rollStudioWorkPulses(current));
-        return current;
+        if (!current) return current;
+        const live = tickStudioWorkPulse(current);
+        setWorkPulses(live.pulses);
+        if (live.attention) setTimeSpeed(0);
+        return live.run;
       });
     }, gap);
     return () => window.clearInterval(iv);
@@ -562,7 +564,7 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
-          <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
+          <div className="game-controls absolute right-3 top-2.5 z-[60] flex gap-1.5">
             {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 12] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}

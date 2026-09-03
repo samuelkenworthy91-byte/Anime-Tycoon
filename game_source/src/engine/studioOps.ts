@@ -9,6 +9,8 @@ export interface ContractAssignment {
   startWeek: number;
   dueWeek: number;
   progress: number;
+  /** progress already produced by live desk bubbles in the current week */
+  liveProgressThisWeek?: number;
 }
 
 export interface TrainingJob {
@@ -54,8 +56,23 @@ export function contractWeeklyOutput(contract: Contract, crew: Staff[], research
   );
 }
 
+/** Approximate live desk-bubble output per in-game day for the Jobs UI.
+ * Actual delivery remains RNG-driven and can be faster or slower. */
+export function contractDailyOutputEstimate(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
+  const pipeline = research.includes("pipeline") ? 1.12 : 1;
+  const one = (skill: number) => {
+    const s = Math.max(1, Math.min(99, skill));
+    const chance = Math.min(0.97, 0.62 + s / 300);
+    const avgBubble = Math.min(6, 1 + s / 34 + 0.9);
+    return 5.7 * chance * avgBubble;
+  };
+  const staff = crew.reduce((a, s) => a + one(staffPoint(s, contract.type)), 0);
+  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) : 0;
+  return Math.max(1, Math.round((staff + runner) * pipeline));
+}
+
 export const projectedContractTotal = (contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0) =>
-  contractWeeklyOutput(contract, crew, research, showrunnerSkill) * contract.weeks;
+  contractDailyOutputEstimate(contract, crew, research, showrunnerSkill) * contract.weeks * 7;
 
 /** Better staff need less Research Data to reach the same boost confidence. */
 export function rushResearchCost(skill: number, chance: number): number {

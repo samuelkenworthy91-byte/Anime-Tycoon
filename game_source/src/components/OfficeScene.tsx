@@ -57,9 +57,9 @@ const SPRITE_H = [0.28, 0.24, 0.19, 0.19, 0.19];
 
 /* ------------------------------------------------------------- geometry */
 /** lay out n anchors as staggered isometric rows inside the floor zone */
-function anchors(zone: FloorZone, n: number): { x: number; y: number }[] {
+function anchors(zone: FloorZone, n: number, portrait = false): { x: number; y: number }[] {
   if (n <= 0) return [];
-  const perRow = Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
+  const perRow = portrait ? Math.min(2, Math.max(1, n)) : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
   const rows = Math.ceil(n / perRow);
   const out: { x: number; y: number }[] = [];
   for (let i = 0; i < n; i++) {
@@ -253,7 +253,7 @@ export default function OfficeScene({
   onDeskClick?: (deskIndex: number) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [stage, setStage] = useState({ w: 0, h: 0, left: 0, top: 0 });
+  const [stage, setStage] = useState({ w: 0, h: 0, left: 0, top: 0, viewW: 0, viewH: 0, portrait: false });
 
   const lvl = Math.max(0, Math.min(SCENES.length - 1, level));
   const zone = FLOORS[lvl];
@@ -271,17 +271,33 @@ export default function OfficeScene({
     const measure = () => {
       const { width: cw, height: ch } = el.getBoundingClientRect();
       if (!cw || !ch) return;
-      /* cover: fill the box, overflow the excess axis */
+      const portrait = ch > cw * 1.12;
       const scale = Math.max(cw / STAGE_AR, ch);
       const w = scale * STAGE_AR;
       const h = scale;
-      setStage({ w, h, left: (cw - w) / 2, top: (ch - h) / 2 });
+      let left = (cw - w) / 2;
+      if (portrait && w > cw) {
+        const floorMid = ((zone.x0 + zone.x1) / 2 / 100) * w;
+        left = Math.max(cw - w, Math.min(0, cw / 2 - floorMid));
+      }
+      setStage({ w, h, left, top: (ch - h) / 2, viewW: cw, viewH: ch, portrait });
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [lvl]);
+
+  const layoutZone = useMemo<FloorZone>(() => {
+    if (!stage.portrait || !stage.w || !stage.viewW) return zone;
+    const visibleX0 = Math.max(0, (-stage.left / stage.w) * 100);
+    const visibleX1 = Math.min(100, ((stage.viewW - stage.left) / stage.w) * 100);
+    const span = Math.max(1, visibleX1 - visibleX0);
+    let x0 = Math.max(zone.x0, visibleX0 + span * 0.07);
+    let x1 = Math.min(zone.x1, visibleX1 - span * 0.07);
+    if (x1 - x0 < 5) { x0 = visibleX0 + span * 0.09; x1 = visibleX1 - span * 0.09; }
+    return { x0, x1, y0: Math.max(60, zone.y0 - 5), y1: Math.min(94, zone.y1) };
+  }, [stage.portrait, stage.w, stage.viewW, stage.left, zone]);
 
   /* ------------------------------------------------------------ movement */
   const [bodies, setBodies] = useState<Body[]>([]);
@@ -290,7 +306,7 @@ export default function OfficeScene({
 
   /* rebuild anchors whenever the cast size or the room changes */
   useEffect(() => {
-    const spots = anchors(zone, Math.max(cast.length, Math.min(maxStaff + 1, 13)));
+    const spots = anchors(layoutZone, Math.max(cast.length, Math.min(maxStaff + 1, 13)), stage.portrait);
     setBodies((prev) =>
       cast.map((_, i) => {
         const home = spots[i] ?? spots[spots.length - 1] ?? { x: 50, y: 80 };
@@ -300,7 +316,7 @@ export default function OfficeScene({
           : { home, pos: { ...home }, target: { ...home }, dur: 0, flip: i % 2 === 1 };
       })
     );
-  }, [cast.length, maxStaff, lvl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cast.length, maxStaff, lvl, layoutZone.x0, layoutZone.x1, layoutZone.y0, layoutZone.y1, stage.portrait]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* employees who finish recovering walk straight back to their workstation */
   useEffect(() => {
@@ -332,8 +348,8 @@ export default function OfficeScene({
           const atHome = Math.abs(b.pos.x - b.home.x) < 0.6 && Math.abs(b.pos.y - b.home.y) < 0.6;
           const to = recovering || atHome
             ? {
-                x: zone.x0 + Math.random() * (zone.x1 - zone.x0),
-                y: zone.y0 + Math.random() * (zone.y1 - zone.y0),
+                x: layoutZone.x0 + Math.random() * (layoutZone.x1 - layoutZone.x0),
+                y: layoutZone.y0 + Math.random() * (layoutZone.y1 - layoutZone.y0),
               }
             : { ...b.home };
           const dist = Math.hypot(to.x - b.pos.x, to.y - b.pos.y);
@@ -348,7 +364,7 @@ export default function OfficeScene({
       );
     }, 1150);
     return () => window.clearInterval(tick);
-  }, [bodies.length, zone, cast]);
+  }, [bodies.length, layoutZone, cast]);
 
   /* --------------------------------------------------------------- light */
   /* 0 = dawn, .5 = midday, 1 = night — warms up at noon, goes indigo at night */
@@ -397,7 +413,7 @@ export default function OfficeScene({
               key={`${c.name}-${i}`}
               src={c.boss ? (c.sprite ?? BOSS_SPRITE) : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
               body={b}
-              scale={SPRITE_H[lvl] * 100}
+              scale={SPRITE_H[lvl] * 100 * (stage.portrait ? 0.82 : 1)}
               label={c.boss ? `${c.name} · showrunner` : c.name}
               color={c.color}
               tired={c.tired}

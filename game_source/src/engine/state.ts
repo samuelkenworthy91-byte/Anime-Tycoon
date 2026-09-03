@@ -389,7 +389,7 @@ export function migrateRun(raw: unknown): RunState {
   const r = raw as RunState;
   return {
     ...r,
-    projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({ ...pr, rush: null })) : [],
+    projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({ ...pr, rush: null, liveQuality: { ...(pr.liveQuality ?? { story: 0, art: 0, sound: 0 }) } })) : [],
     facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
     bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
@@ -405,7 +405,7 @@ export function migrateRun(raw: unknown): RunState {
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
-    contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner })) : [],
+    contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 })) : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
@@ -645,13 +645,15 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     cash += dlg.cash;
     notices.push(...dlg.notices);
 
-    /* ------- background contract work: real staff, real weeks ------- */
+    /* ------- background contract work: live bubbles first, weekly fallback ------- */
     {
       const keep: ContractAssignment[] = [];
       for (const job of contractJobs) {
         const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !(r.staffResting ?? {})[s.id]);
         const runnerSkill = job.showrunner ? showrunnerContractSkill(r.showrunner, r.showsMade, job.contract.type) : 0;
-        const progress = job.progress + contractWeeklyOutput(job.contract, crew, research, runnerSkill);
+        const baseline = contractWeeklyOutput(job.contract, crew, research, runnerSkill);
+        const live = job.liveProgressThisWeek ?? 0;
+        const progress = Math.min(job.contract.target, job.progress + Math.max(0, baseline - live));
         if (progress >= job.contract.target) {
           cash += job.contract.pay;
           rd += job.contract.rd;
@@ -659,13 +661,13 @@ export function advanceWeeks(r: RunState, n: number): RunState {
             if (!job.staffIds.includes(s.id)) return s;
             return gainXp(s, CONTRACT_XP).staff;
           });
-          notices.push(`✅ Contract delivered in the background: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
+          notices.push(`✅ Contract delivered: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
         } else if (w >= job.dueWeek) {
           const consolation = Math.max(1, Math.round(job.contract.rd / 3));
           rd += consolation;
           notices.push(`❌ Contract missed: ${job.contract.name} — ${progress}/${job.contract.target} progress (+${consolation} RD learned).`);
         } else {
-          keep.push({ ...job, progress });
+          keep.push({ ...job, progress, liveProgressThisWeek: 0 });
         }
       }
       contractJobs = keep;
@@ -1216,6 +1218,7 @@ export function startContractAssignment(r: RunState, contract: Contract, staffId
     startWeek: r.week,
     dueWeek: r.week + contract.weeks,
     progress: 0,
+    liveProgressThisWeek: 0,
   };
   const seats = ids.length + (showrunner ? 1 : 0);
   return {
@@ -1268,39 +1271,79 @@ export interface DeskPulse {
   points: number;
   nonce: number;
   source?: "project" | "contract";
+  projectId?: string;
+  jobId?: string;
 }
 
-/**
- * Frequent visible work units for the office. These are a readable animation of
- * the skill-driven production work already banked by the weekly scoring engine,
- * not an extra duplicate score award. Higher skill produces larger bubbles.
- */
 export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
   const pulses: DeskPulse[] = [];
+  const pipeline = r.research.includes("pipeline") ? 1.12 : 1;
   for (const st of r.staff) {
     if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) continue;
-    const project = projectOfStaff(r.projects, st.id);
     const contract = (r.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
-    const type: PointType | null = project && !project.milestone
-      ? (project.stage === "concept" || project.stage === "preprod" ? "story" : project.stage === "animation" ? "art" : project.stage === "sound" ? "sound" : null)
-      : contract?.contract.type ?? null;
+    if (contract) {
+      const skill = staffPoint(st, contract.contract.type);
+      const chance = Math.min(0.97, 0.62 + skill / 300);
+      if (Math.random() <= chance) {
+        const raw = Math.round((1 + skill / 34 + Math.random() * 1.8) * pipeline);
+        pulses.push({ actorId: st.id, name: st.name, type: contract.contract.type, points: Math.max(1, Math.min(6, raw)), nonce: Date.now() + pulses.length, source: "contract", jobId: contract.id });
+      }
+      continue;
+    }
+    const project = projectOfStaff(r.projects, st.id);
+    if (!project || project.milestone) continue;
+    const type: PointType | null = project.stage === "concept" || project.stage === "preprod" ? "story" : project.stage === "animation" ? "art" : project.stage === "sound" ? "sound" : null;
     if (!type) continue;
     const skill = staffPoint(st, type);
-    const chance = Math.min(0.96, 0.62 + skill / 280);
-    if (Math.random() > chance) continue;
-    const points = Math.max(2, Math.min(10, Math.round(1 + skill * 0.07 + Math.random() * 2.4)));
-    pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: contract ? "contract" : "project" });
+    const chance = Math.min(0.22, 0.06 + skill / 650);
+    if (Math.random() <= chance) {
+      const points = skill >= 80 && Math.random() < 0.28 ? 2 : 1;
+      pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: "project", projectId: project.id });
+    }
   }
-
   const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
-  const active = r.projects.find((pr) => !pr.milestone && pr.stage !== "airing" && pr.stage !== "done" && pr.stage !== "ready");
-  const runnerType: PointType | null = runnerJob?.contract.type
-    ?? (active ? (active.stage === "concept" || active.stage === "preprod" ? "story" : active.stage === "animation" ? "art" : active.stage === "sound" ? "sound" : null) : null);
-  if (runnerType && Math.random() < 0.72) {
-    const skill = showrunnerContractSkill(r.showrunner, r.showsMade, runnerType);
-    pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type: runnerType, points: Math.max(3, Math.round(skill * 0.065)), nonce: Date.now() + 900 + pulses.length, source: runnerJob ? "contract" : "project" });
+  if (runnerJob) {
+    const skill = showrunnerContractSkill(r.showrunner, r.showsMade, runnerJob.contract.type);
+    if (Math.random() < 0.78) {
+      const raw = Math.round((1 + skill / 34 + Math.random() * 1.8) * pipeline);
+      pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type: runnerJob.contract.type, points: Math.max(1, Math.min(6, raw)), nonce: Date.now() + 900 + pulses.length, source: "contract", jobId: runnerJob.id });
+    }
+  } else {
+    const active = r.projects.find((pr) => !pr.milestone && pr.stage !== "airing" && pr.stage !== "done" && pr.stage !== "ready");
+    const type: PointType | null = active ? active.stage === "concept" || active.stage === "preprod" ? "story" : active.stage === "animation" ? "art" : active.stage === "sound" ? "sound" : null : null;
+    if (active && type && Math.random() < 0.10) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points: 1, nonce: Date.now() + 900 + pulses.length, source: "project", projectId: active.id });
   }
   return pulses;
+}
+
+export function tickStudioWorkPulse(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
+  const pulses = rollStudioWorkPulses(r);
+  if (!pulses.length) return { run: r, pulses, attention: false };
+  let projects = r.projects.map((p) => ({ ...p, points: { ...p.points }, liveQuality: { ...(p.liveQuality ?? { story: 0, art: 0, sound: 0 }) } }));
+  let contractJobs = (r.contractJobs ?? []).map((j) => ({ ...j, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 }));
+  let cash = r.cash;
+  let rd = r.rd;
+  let staff = r.staff;
+  const notices = [...r.notices];
+  for (const pulse of pulses) {
+    if (pulse.source === "project" && pulse.projectId) {
+      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points }, liveQuality: { ...(p.liveQuality ?? { story: 0, art: 0, sound: 0 }), [pulse.type]: (p.liveQuality?.[pulse.type] ?? 0) + pulse.points } }));
+    } else if (pulse.source === "contract" && pulse.jobId) {
+      contractJobs = contractJobs.map((j) => j.id === pulse.jobId ? ({ ...j, progress: Math.min(j.contract.target, j.progress + pulse.points), liveProgressThisWeek: (j.liveProgressThisWeek ?? 0) + pulse.points }) : j);
+    }
+  }
+  const completed = contractJobs.filter((j) => j.progress >= j.contract.target);
+  for (const job of completed) {
+    cash += job.contract.pay;
+    rd += job.contract.rd;
+    staff = staff.map((s) => job.staffIds.includes(s.id) ? gainXp(s, CONTRACT_XP).staff : s);
+    notices.push(`🎉 CONTRACT DELIVERED: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
+  }
+  if (completed.length) {
+    const ids = new Set(completed.map((j) => j.id));
+    contractJobs = contractJobs.filter((j) => !ids.has(j.id));
+  }
+  return { run: { ...r, projects, contractJobs, cash, rd, staff, notices: notices.slice(-40) }, pulses, attention: completed.length > 0 };
 }
 
 /**
@@ -1313,53 +1356,30 @@ export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
  * double-counting quality.
  */
 export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
-  const pulses: DeskPulse[] = [];
-  let projects = r.projects.map((p) => ({ ...p, points: { ...p.points } }));
+  const projects = r.projects.map((p) => ({ ...p, points: { ...p.points } }));
   const resting = { ...(r.staffResting ?? {}) };
   const fx = facilityFX(r.facilities);
-
   const staff = r.staff.map((st0) => {
-    let st = { ...st0 };
+    const st = { ...st0 };
     const project = projectOfStaff(projects, st.id);
     const contract = (r.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
-    const projectFocus = project && !project.milestone ? (project.stage === "concept" || project.stage === "preprod" ? "story" : project.stage === "animation" ? "art" : project.stage === "sound" ? "sound" : null) : null;
+    const projectFocus = project && !project.milestone ? project.stage === "concept" || project.stage === "preprod" ? "story" : project.stage === "animation" ? "art" : project.stage === "sound" ? "sound" : null : null;
     const busy = !!projectFocus || !!contract;
-
     if (resting[st.id]) {
-      /* recovery is deliberately brisk: roughly two game-days from empty */
       st.stamina = Math.min(100, st.stamina + 50 + fx.staminaRest * 2);
       if (st.stamina >= 100) delete resting[st.id];
       return st;
     }
-
     if (!busy) {
       st.stamina = Math.min(100, st.stamina + 18 + fx.staminaRest);
       return st;
     }
-
     const drain = Math.max(5, 9 - fx.staminaSave);
     st.stamina = Math.max(0, st.stamina - drain);
-    if (st.stamina <= 0) {
-      resting[st.id] = true;
-      return st;
-    }
-
-    if (project && projectFocus) {
-      const team = r.staff.filter((x) => project.staffIds.includes(x.id));
-      const mod = personMod(st, project, team, { bonds: r.bonds });
-      const chance = Math.max(0.08, Math.min(0.94, (staffPoint(st, projectFocus) / 200) * mod.out * fx.pointMult[projectFocus]));
-      if (Math.random() < chance) {
-        pulses.push({ actorId: st.id, name: st.name, type: projectFocus, points: 1, nonce: Date.now() + pulses.length, source: "project" });
-      }
-    } else if (contract) {
-      const pts = Math.max(1, Math.round(staffPoint(st, contract.contract.type) / 32));
-      pulses.push({ actorId: st.id, name: st.name, type: contract.contract.type, points: pts, nonce: Date.now() + pulses.length, source: "contract" });
-    }
+    if (st.stamina <= 0) resting[st.id] = true;
     return st;
   });
-
-  const visible = rollStudioWorkPulses({ ...r, projects, staff, staffResting: resting });
-  return { run: { ...r, projects, staff, staffResting: resting }, pulses: visible.length ? visible : pulses, attention: false };
+  return tickStudioWorkPulse({ ...r, projects, staff, staffResting: resting });
 }
 
 /**

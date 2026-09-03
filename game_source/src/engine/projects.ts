@@ -180,6 +180,8 @@ export interface Project {
   /** ids of staff on this project (exclusive — one project per person) */
   staffIds: string[];
   points: Points;
+  /** quality already banked by live desk bubbles since the last week boundary */
+  liveQuality?: Points;
   issues: number;
   hype: number;
   /** everything spent on this show so far (upfront + burn + sprints) */
@@ -274,6 +276,7 @@ export function makeProject(draft: Draft, week: number): Project {
     lateWeeks: 0,
     staffIds: [],
     points: { story: 0, art: 0, sound: 0 },
+    liveQuality: { story: 0, art: 0, sound: 0 },
     issues: 0,
     hype: 0,
     spent: upfront,
@@ -411,7 +414,7 @@ export function tickProjectsWeek(
 
   const next = projects.map((p0) => {
     if (p0.stage === "done") return p0;
-    const p = { ...p0, points: { ...p0.points } };
+    const p = { ...p0, points: { ...p0.points }, liveQuality: { story: 0, art: 0, sound: 0, ...(p0.liveQuality ?? {}) } };
     const team = staff.filter((s) => p.staffIds.includes(s.id));
 
     /* ----- airing: the payout schedule does the work; just finish up */
@@ -434,11 +437,18 @@ export function tickProjectsWeek(
       const focus = STAGE_FOCUS[p.stage];
       const qualityMult = teamQualityMultiplier(p, team, fx, mods, studio);
       if (focus) {
+        let weeklyTarget = 0;
         for (const s of team) {
           const m = mods?.(s, p, team);
-          p.points[focus] += Math.round(staffPoint(s, focus) * 0.07 * (m ? m.out : staminaF(s)) * fx.pointMult[focus] * qualityMult);
+          weeklyTarget += Math.round(staffPoint(s, focus) * 0.07 * (m ? m.out : staminaF(s)) * fx.pointMult[focus] * qualityMult);
         }
+        /* Desk bubbles now bank real quality immediately. The weekly tick only
+           tops up whatever part of the established baseline was not already
+           earned live, so the same work is never counted twice. */
+        const live = p.liveQuality?.[focus] ?? 0;
+        p.points[focus] += Math.max(0, weeklyTarget - live);
       }
+      p.liveQuality = { story: 0, art: 0, sound: 0 };
       if (p.stage === "post") {
         const surplusFix = Math.max(0, Math.floor((qualityMult - 1) * 8));
         p.issues = Math.max(0, p.issues - Math.round(team.length * 0.6 + 0.4) - fx.issueFix - surplusFix);
@@ -536,6 +546,7 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
     progress: 0,
     milestone: null,
     milestonesDone: [...p.milestonesDone, done],
+    liveQuality: { story: 0, art: 0, sound: 0 },
     points: {
       story: p.points.story + o.points.story,
       art: p.points.art + o.points.art,

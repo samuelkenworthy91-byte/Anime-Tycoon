@@ -82,7 +82,7 @@ import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
 import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
-import { contractWeeklyOutput, showrunnerContractSkill } from "../engine/studioOps";
+import { contractDailyOutputEstimate, showrunnerContractSkill } from "../engine/studioOps";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -192,7 +192,7 @@ export default function Office({
         onDeskClick={() => setModal("staff")}
       />
       {run.contractJobs.length > 0 && (
-        <div className="pointer-events-none absolute bottom-[54px] left-2 z-20 hidden w-56 rounded-lg border border-cyanx/35 bg-abyss/88 p-2 shadow-xl backdrop-blur-sm sm:block">
+        <div className="pointer-events-none absolute bottom-[56px] left-2 right-2 z-20 rounded-lg border border-cyanx/35 bg-abyss/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:w-56">
           <div className="mb-1 flex items-center gap-1 text-[8px] font-extrabold tracking-widest text-cyanx"><Briefcase size={10}/> ACTIVE CONTRACT{run.contractJobs.length > 1 ? "S" : ""}</div>
           {run.contractJobs.slice(0, 2).map((job) => (
             <div key={job.id} className="mt-1">
@@ -259,31 +259,31 @@ export default function Office({
       )}
 
       {/* ---------------------------------------------------------- HUD */}
-      <div className="relative z-20 flex items-center gap-2 border-b border-line/60 bg-ink/75 py-2 pl-3 pr-[76px] backdrop-blur-md md:pl-5">
+      <div className="office-hud relative z-20 flex items-center gap-2 border-b border-line/60 bg-ink/75 py-2 pl-3 pr-[76px] backdrop-blur-md md:pl-5">
         <div className="flex min-w-0 items-center gap-2">
           <Crown size={16} className="shrink-0 text-gold" />
           <span className="truncate font-display text-sm font-extrabold md:text-base">{run.studio}</span>
         </div>
-        <div className="ink-chip flex shrink-0 items-center gap-1 px-2 py-1 text-[10px] font-bold text-cyanx md:text-xs">
+        <div className="office-hud-date ink-chip flex shrink-0 items-center gap-1 px-2 py-1 text-[10px] font-bold text-cyanx md:text-xs">
           <Calendar size={12} /> {dateLabel(run.week)}
         </div>
         <div className="ink-chip hidden shrink-0 items-center gap-1 px-2 py-1 text-[10px] font-bold text-gold sm:flex">
           <Clock size={12} /> DAY {clockDay + 1} · {["MORNING", "AFTERNOON", "EVENING", "NIGHT"][clockPhase]}{" "}
           <span className="text-paper/40">({run.incomeThisWeek > 0 ? `+${formatGBPShort(run.incomeThisWeek)} this week` : "no income this week"})</span>
         </div>
-        <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+        <div className="office-hud-stats ml-auto flex items-center gap-1.5 md:gap-2">
           {run.incomeThisWeek > 0 && (
-            <div className="ink-chip flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-mint">
+            <div className="hidden ink-chip items-center gap-1 px-2 py-1 text-[10px] font-bold text-mint sm:flex">
               <TrendingUp size={12} /> +{formatGBPShort(run.incomeThisWeek)}
             </div>
           )}
-          <div className={cn("ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold", run.cash < 0 && "border-neon text-neon")}>
+          <div className={cn("office-hud-cash ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold", run.cash < 0 && "border-neon text-neon")}>
             <Banknote size={13} className={run.cash < 0 ? "text-neon" : "text-mint"} />
             <CountUp to={run.cash} format={(n) => formatGBPShort(n)} />
           </div>
           {/* next week's money: broadcast in, burn/bills out, and the cash you
               would be left holding — tap for the itemised breakdown */}
-          <div className="relative">
+          <div className="office-hud-forecast relative">
             <button
               onClick={() => setFcOpen((o) => !o)}
               title="See next week's money in detail"
@@ -363,7 +363,7 @@ export default function Office({
               </>
             )}
           </div>
-          <div className="ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-viol">
+          <div className="office-hud-rd ink-chip flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-viol">
             <Database size={13} />
             <CountUp to={run.rd} />
           </div>
@@ -458,7 +458,7 @@ export default function Office({
             <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-paper/60 sm:grid-cols-4">
               <div><b className="text-paper">1 · PICK</b><br/>Choose up to 3 contributors.</div>
               <div><b className="text-paper">2 · COMMIT</b><br/>They are unavailable for shows while assigned.</div>
-              <div><b className="text-paper">3 · WORK</b><br/>Skill + energy generate contract progress each in-game week.</div>
+              <div><b className="text-paper">3 · WORK</b><br/>Every desk bubble advances the bar instantly. Strong crews can finish in a day.</div>
               <div><b className="text-paper">4 · DELIVER</b><br/>Hit the target before the deadline for cash + RD. Jobs can finish early.</div>
             </div>
           </div>
@@ -469,14 +469,15 @@ export default function Office({
                 {run.contractJobs.map((job) => {
                   const crew = run.staff.filter((st) => job.staffIds.includes(st.id));
                   const runnerSkill = job.showrunner ? showrunnerContractSkill(run.showrunner, run.showsMade, job.contract.type) : 0;
-                  const rate = contractWeeklyOutput(job.contract, crew.filter((st) => !run.staffResting?.[st.id]), run.research, runnerSkill);
-                  const weeksLeft = Math.max(0, job.dueWeek - run.week);
-                  const projected = job.progress + rate * weeksLeft;
+                  const rate = contractDailyOutputEstimate(job.contract, crew.filter((st) => !run.staffResting?.[st.id]), run.research, runnerSkill);
+                  const daysLeft = Math.max(0, (job.dueWeek - run.week) * 7 - clockDay);
+                  const projected = job.progress + rate * daysLeft;
+                  const eta = Math.max(1, Math.ceil(Math.max(0, job.contract.target - job.progress) / Math.max(1, rate)));
                   return (
                     <div key={job.id} className="ink-card p-3">
-                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · due {dateLabel(job.dueWeek)}</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/wk</div></div></div>
+                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · due {dateLabel(job.dueWeek)}</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/day · LIVE</div></div></div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel3"><div className="h-full rounded-full bg-cyanx transition-all" style={{ width: `${Math.min(100, job.progress / Math.max(1, job.contract.target) * 100)}%` }} /></div>
-                      <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace to deliver${weeksLeft ? ` within ${weeksLeft} wk` : ""}.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
+                      <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace · roughly ${eta} workday${eta === 1 ? "" : "s"} at this crew strength. Every bubble moves this bar.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
                     </div>
                   );
                 })}
