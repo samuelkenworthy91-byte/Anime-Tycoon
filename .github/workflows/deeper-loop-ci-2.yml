@@ -1,0 +1,51 @@
+name: Deeper Studio Loop CI 2
+
+on:
+  push:
+    branches:
+      - feature/deeper-studio-loop
+    paths:
+      - ".github/workflows/deeper-loop-ci-2.yml"
+      - "tools/run_deeper_loop.py"
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/deeper-studio-loop
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Apply implementation
+        run: python tools/run_deeper_loop.py
+
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated implementation
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source
+          git commit -m "Deepen studio progression and scheduling loop"
+          git push origin HEAD:feature/deeper-studio-loop
