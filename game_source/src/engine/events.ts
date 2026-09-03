@@ -199,7 +199,12 @@ export function resolveStudioEvent(run: RunState, eventId: string, choiceId: str
 
   const patchProject = (fn: (p: Project) => Project) => {
     if (!proj) return;
-    projects = projects.map((p) => (p.id === proj.id ? fn(p) : p));
+    projects = projects.map((p) => {
+      if (p.id !== proj.id) return p;
+      const patched = fn(p);
+      /* Once final editing starts, outside events may change cash/hype/points but cannot add notes. */
+      return p.milestone === "edit" && patched.issues > p.issues ? { ...patched, issues: p.issues } : patched;
+    });
   };
 
   switch (ev.kind) {

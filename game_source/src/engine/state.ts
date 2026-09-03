@@ -162,6 +162,7 @@ import { tickDelegated } from "./automation";
 import { projectLoadMap } from "./capacity";
 import {
   contractWeeklyOutput,
+  showrunnerBubbleOutput,
   rushBoostPoint,
   rushResearchCost,
   showrunnerContractSkill,
@@ -646,7 +647,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
-  const studio = studioProduction(heads, staffArr);
+  const studio = { ...studioProduction(heads, staffArr), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
 
   for (let i = 1; i <= n; i++) {
@@ -915,7 +916,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     if (w % 8 === 0 && marketEvents.length === 0 && Math.random() < 0.35) {
       const ready = projects.find((p) => p.stage === "ready" && !p.commission);
       const lateStage = projects.find(
-        (p) => (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
+        (p) => p.milestone !== "edit" && (p.stage === "post" || p.stage === "marketing" || p.stage === "ready") && p.hype > 0
       );
       const top = Object.values(franchises)
         .filter((f) => f.popularity >= 50)
@@ -1590,14 +1591,14 @@ export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
   const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
   if (runnerJob && Math.random() < 0.34) {
     const type = runnerJob.contract.type;
-    const points = percentileSkillOutput(showrunnerEffectiveSkill(r, type));
+    const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
     if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "contract", jobId: runnerJob.id });
   } else if (!runnerJob && Math.random() < 0.22) {
     const active = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
     if (active) {
       const skills = POINT_TYPES.map((type) => ({ type, skill: showrunnerEffectiveSkill(r, type) })).sort((a, b) => b.skill - a.skill);
       const type = Math.random() < 0.62 ? skills[0].type : POINT_TYPES[Math.floor(Math.random() * POINT_TYPES.length)];
-      const points = percentileSkillOutput(showrunnerEffectiveSkill(r, type));
+      const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
       if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "project", projectId: active.id });
     }
   }
@@ -1658,7 +1659,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
   }
 
-  const studio = studioProduction(nx.heads ?? {}, nx.staff);
+  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds: nx.bonds ?? {} });
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
   const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
@@ -2611,7 +2612,7 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
         marketEvents: rest,
         cash: r.cash + (ev.amount ?? 0),
         projects: r.projects.map((x) =>
-          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.issues + 2 } : x
+          x.id === p.id ? { ...x, hype: Math.max(0, x.hype - 8), issues: x.milestone === "edit" ? x.issues : x.issues + 2 } : x
         ),
         notices: [
           ...r.notices,

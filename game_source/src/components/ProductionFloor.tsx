@@ -287,10 +287,18 @@ export default function ProductionFloor({
         if (b.y < 46) {
           b.dead = true;
           if (b.kind === "bug") {
-            s.totals.issues++;
             sfx.miss();
-            shake(4);
-            s.floats.push({ x: b.x, y: 54, txt: "EDITING NOTE!", color: "#ff4d4d", t0: e });
+            if (editingMode) {
+              /* Missing an edit bubble leaves an existing note open; it never creates a new one. */
+              s.totals.missed++;
+              s.combo = 0;
+              shake(2);
+              s.floats.push({ x: b.x, y: 54, txt: "NOTE STILL OPEN", color: "#ff8b6b", t0: e });
+            } else {
+              s.totals.issues++;
+              shake(4);
+              s.floats.push({ x: b.x, y: 54, txt: "EDITING NOTE!", color: "#ff4d4d", t0: e });
+            }
           } else {
             s.totals.missed++;
             s.combo = 0;

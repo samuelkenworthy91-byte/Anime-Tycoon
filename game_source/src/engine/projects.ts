@@ -356,8 +356,10 @@ export type StaffModFn = (s: Staff, p: Project, team: Staff[]) => StaffWorkMod;
 export interface StudioMod {
   speed: number;
   burnMult: number;
+  /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
+  issueChanceMult?: number;
 }
-export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1 };
+export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
 
 /** raw studio capacity. Capacity above the schedule ceiling becomes quality
  * and consistency rather than endlessly shortening the campaign. */
@@ -460,7 +462,7 @@ export function tickProjectsWeek(
         p.progress += teamSpeed(p, team, fx, mods, studio) * load;
         /* sustained over-capacity creates rework instead of making a fifth simultaneous
            prestige show free. */
-        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post")) p.issues += 1;
+        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
@@ -486,7 +488,6 @@ export function tickProjectsWeek(
       cashDelta -= fee;
       p.spent += fee;
       p.hype = Math.max(0, p.hype - 2);
-      if (p.lateWeeks % 2 === 0) p.issues += 1;
       if (p.lateWeeks === 1)
         notices.push(`“${p.draft.title}” has missed its broadcast deadline — the network wants penalties (−£${fee.toLocaleString("en-GB")}/wk).`);
       else if (p.lateWeeks % 4 === 0)
@@ -539,7 +540,7 @@ export function tickProjectsDay(
       } else {
         const load = departmentLoad[p.id] ?? 1;
         p.progress += (teamSpeed(p, team, fx, mods, studio) * load) / 7;
-        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post")) p.issues += 1;
+        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
@@ -572,7 +573,6 @@ export function tickProjectsDay(
       cashDelta -= fee;
       p.spent += fee;
       p.hype = Math.max(0, p.hype - 2 / 7);
-      if (lateDays % 14 === 0) p.issues += 1;
       if (lateDays === 1) notices.push(`“${p.draft.title}” misses its broadcast deadline — late fees now accrue every day.`);
       else if (lateDays % 7 === 0) notices.push(`“${p.draft.title}” is ${lateDays} days late. Hype and cash are bleeding.`);
     }
@@ -630,7 +630,8 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
       art: p.points.art + o.points.art,
       sound: p.points.sound + o.points.sound,
     },
-    issues: done === "edit" ? Math.max(0, p.issues + o.issues - (o.squashed ?? 0)) : p.issues + o.issues,
+    /* Final editing is a one-way quality pass: notes may be cleared, never manufactured. */
+    issues: done === "edit" ? Math.max(0, p.issues - (o.squashed ?? 0)) : p.issues + o.issues,
     spent: p.spent + o.spent,
     rdGained: p.rdGained + o.rdGained + (done === "edit" ? (o.squashed ?? 0) : 0),
   };

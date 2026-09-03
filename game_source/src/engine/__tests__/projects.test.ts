@@ -221,7 +221,7 @@ describe("weekly progression", () => {
 
 /* ------------------------------------------------------------- deadlines */
 describe("deadlines", () => {
-  it("missing the deadline costs cash and hype and can add issues", () => {
+  it("missing the deadline costs cash and hype without adding issues", () => {
     let r = richRun();
     r = startProject(r, draft())!;
     const id = r.projects[0].id;
@@ -235,7 +235,7 @@ describe("deadlines", () => {
     expect(late.lateWeeks).toBe(2);
     expect(t1.cashDelta).toBeLessThan(-late.weeklyBurn); // burn + late fee
     expect(late.hype).toBeLessThan(20);
-    expect(late.issues).toBeGreaterThan(p0.issues);
+    expect(late.issues).toBe(p0.issues);
   });
 
   it("deadline includes planned weeks plus slack", () => {

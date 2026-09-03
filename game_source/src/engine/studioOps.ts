@@ -53,10 +53,20 @@ export function showrunnerContractSkill(showrunner: string, showsMade: number, t
   return Math.min(99, base + speciality);
 }
 
+/** Showrunners are senior contributors, not another junior desk roll.
+ * Every personal showrunner bubble gets +1 on top of the normal percentile output. */
+export function showrunnerBubbleOutput(effectiveSkill: number, roll = Math.random()): number {
+  const skill = Math.max(0, effectiveSkill);
+  const guaranteed = Math.floor(skill / 100);
+  const remainder = skill - guaranteed * 100;
+  return 1 + guaranteed + (roll * 100 < remainder ? 1 : 0);
+}
+
 export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
   const pipeline = research.includes("pipeline") ? 1.12 : 1;
   const base = 4;
-  const runner = showrunnerSkill > 0 ? showrunnerSkill * 0.16 : 0;
+  /* Legacy/headless cadence mirrors the live senior-bubble floor. */
+  const runner = showrunnerSkill > 0 ? 6 + showrunnerSkill * 0.16 : 0;
   return Math.max(
     1,
     Math.round((base + runner + crew.reduce((a, s) => a + staffPoint(s, contract.type) * (0.14 + s.stamina / 1000), 0)) * pipeline)
@@ -74,7 +84,8 @@ export function contractDailyOutputEstimate(contract: Contract, crew: Staff[], r
     return 5.7 * chance * avgBubble;
   };
   const staff = crew.reduce((a, s) => a + one(staffPoint(s, contract.type)), 0);
-  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) : 0;
+  /* Projection includes the showrunner's guaranteed senior +1 floor. */
+  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) * 1.25 : 0;
   return Math.max(1, Math.round((staff + runner) * pipeline));
 }
 

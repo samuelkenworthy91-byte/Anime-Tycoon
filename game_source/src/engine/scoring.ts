@@ -298,7 +298,7 @@ export function computeResult(opts: {
     { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${(Math.max(0, arcQ) * 0.35).toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? "+2.0" : "+0.0" },
     { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${(comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel)).toFixed(2)}` },
-    { label: `Production issues (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },
+    { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
   ];
   if (chemMult !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemMult.toFixed(2)}` });
