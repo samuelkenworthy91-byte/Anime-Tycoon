@@ -141,7 +141,8 @@ export default function Produce({
         issues: 0,
         spent,
         rdGained: 0,
-        squashed: t.squashed,
+        /* Never farm extra RD by clearing more visual notes than the project owns. */
+        squashed: Math.min(project.issues, t.squashed),
       });
     } else {
       onDone({
@@ -312,7 +313,9 @@ export default function Produce({
         <div className="relative z-10 flex min-h-0 flex-1 flex-col">
           <div className="flex items-center gap-2 border-b border-line/40 bg-panel2/60 px-3 py-1.5">
             <span className="text-[10px] text-paper/60">
-              {isEdit ? "EDITING — pop the red notes to fix them!" : `tap bubbles · keys 1-${Math.min(7, desks.length)} · SPACE grabs the top one`}
+              {isEdit
+                ? "EDITING — your crew fixes notes automatically; higher skill means faster cleanup"
+                : "AUTO PRODUCTION — staff handle incoming work; larger, trained teams clear more"}
             </span>
             {!isEdit && (
               <button
@@ -337,7 +340,7 @@ export default function Produce({
               spawnMult={isEdit ? 1.5 : spawnMult}
               lifeMult={lifeMult}
               bugRate={isEdit ? 1 : bugRate}
-              debugMode={isEdit}
+              editingMode={isEdit}
               paused={paused}
               onProgress={(t) => setLive(t)}
               onDone={onFloorDone}
@@ -374,8 +377,8 @@ export default function Produce({
               </div>
             )}
             <div className="mt-3 flex justify-center gap-3 text-[10px] font-bold text-paper/50">
-              <span>BEST CHAIN <b className="text-gold">{totals.best}</b></span>
-              <span>MISSED <b className="text-neon">{totals.missed}</b></span>
+              <span>BEST FLOW <b className="text-gold">{totals.best}</b></span>
+              <span>{isEdit ? "NOTES ESCAPED" : "MISSED"} <b className="text-neon">{isEdit ? totals.issues : totals.missed}</b></span>
               {crunches > 0 && <span>CRUNCH <b className="text-gold">×{crunches}</b></span>}
             </div>
             <Btn big variant="primary" className="mt-4 w-full" onClick={finish}>

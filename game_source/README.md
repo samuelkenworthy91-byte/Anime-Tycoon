@@ -2,8 +2,8 @@
 
 A game-dev-story-style anime studio tycoon. Plan shows, cast 186 characters
 (54 leads, 44 supporting, 43 pets/mascots, 45 villains — every genre and all
-190 genre pairs castable; see docs/cast-coverage.md), pop the point bubbles
-your staff make, discover secret genre combos and cast chemistry by
+190 genre pairs castable; see docs/cast-coverage.md), build and train a crew
+that automatically handles production workload, discover secret genre combos and cast chemistry by
 experimenting, and compete for the London Anime Awards.
 
 Six persistent rival studios (Toe-i Animation, Sunnyrise, Boneworks, Kyo-Hani,
@@ -34,8 +34,8 @@ npm run preview    # serve the production build
 
 ## Controls
 
-- Click / tap bubbles on the production floor — keys `1`–`7` pop the top
-  bubble of each desk, `SPACE` grabs the top bubble on screen
+- Production-floor work is handled automatically by your crew; more staff and
+  higher relevant skill increase throughput while missed work lowers the result
 - `ENTER` advances through create/release flows
 - `M` mute, `ESC`/`P` pause
 

@@ -172,9 +172,9 @@ export default function Title({
                 <Trophy size={20} className="text-gold" /> HALL OF FAME
               </Btn>
               <div className="mt-2 max-w-xs text-center text-[11px] leading-relaxed text-paper/60">
-                Take contracts, plan shows, pop the point bubbles your staff make.
+                Take contracts, plan shows, build and train a crew that can handle the production load.
                 <br />
-                {newest ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
+                {newest ? "ENTER resume" : "ENTER begin"} · ENTER next · ESC pause
                 <br />
                 Autosaves as you play · 3 manual slots from the pause menu.
               </div>
