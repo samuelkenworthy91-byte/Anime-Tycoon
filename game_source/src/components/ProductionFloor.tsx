@@ -2,6 +2,7 @@ import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import { sfx } from "../engine/audio";
 import { useFx } from "../fx/fx";
 import { POINT_COLOR, WORKER_LOOKS, BOSS_LOOK, type PointType } from "../engine/data";
+import { autoPopInterval, floorBubbleValue, floorChainMultiplier, floorSpawnInterval } from "../engine/floor";
 
 export interface FloorDesk {
   name: string;
@@ -60,8 +61,6 @@ interface Float {
   t0: number;
 }
 
-const KEYS = ["1", "2", "3", "4", "5", "6", "7"];
-
 export default function ProductionFloor({
   desks,
   duration,
@@ -73,7 +72,7 @@ export default function ProductionFloor({
   onProgress,
   onDone,
   handleRef,
-  debugMode,
+  editingMode,
 }: {
   desks: FloorDesk[];
   duration: number;
@@ -85,7 +84,7 @@ export default function ProductionFloor({
   onProgress?: (t: FloorTotals, pct: number) => void;
   onDone: (t: FloorTotals) => void;
   handleRef?: Ref<FloorHandle>;
-  debugMode?: boolean;
+  editingMode?: boolean;
 }) {
   const { shake } = useFx();
   const boxRef = useRef<HTMLDivElement>(null);
@@ -107,7 +106,8 @@ export default function ProductionFloor({
     bubbles: [] as Bubble[],
     parts: [] as Particle[],
     floats: [] as Float[],
-    nextSpawn: [] as number[],
+    nextSpawn: 0,
+    nextAuto: [] as number[],
     combo: 0,
     comboT: 0,
     totals: { story: 0, art: 0, sound: 0, issues: 0, squashed: 0, best: 0, collected: 0, missed: 0 } as FloorTotals,
@@ -132,9 +132,10 @@ export default function ProductionFloor({
     s.combo = 0;
     s.done = false;
     s.totals = { story: 0, art: 0, sound: 0, issues: 0, squashed: 0, best: 0, collected: 0, missed: 0 };
-    /* desks come to life at scattered moments — a studio floor is not a
-       metronome, and nobody's first bubble should arrive on a schedule */
-    s.nextSpawn = desks.map((_, i) => 450 + i * 150 + Math.random() * 900);
+    /* Incoming work is shared by the studio. More staff do not create
+       more player workload; they create more capacity to clear it. */
+    s.nextSpawn = 300 + Math.random() * 400;
+    s.nextAuto = desks.map(() => 200 + Math.random() * 450);
 
     const canvas = canvasRef.current!;
     const g = canvas.getContext("2d")!;
@@ -188,7 +189,7 @@ export default function ProductionFloor({
       s.combo = now - s.comboT < 1600 ? s.combo + 1 : 1;
       s.comboT = now;
       t.best = Math.max(t.best, s.combo);
-      const mult = 1 + Math.floor(Math.min(s.combo, 20) / 5) * 0.25;
+      const mult = floorChainMultiplier(s.combo);
       const gained = Math.round(b.value * mult);
       const key = (b.kind === "star" ? focus : b.kind) as PointType;
       t[key] += gained;
@@ -214,86 +215,49 @@ export default function ProductionFloor({
       });
     };
 
-    const hitTest = (px: number, py: number) => {
-      let best: Bubble | null = null;
-      let bestD = Infinity;
-      for (const b of s.bubbles) {
-        if (b.dead) continue;
-        const d = Math.hypot(b.x - px, b.y - py);
-        if (d < b.r + 16 && d < bestD) {
-          bestD = d;
-          best = b;
-        }
-      }
-      if (best) pop(best);
-      else sfx.type();
+    const targetForAutoWork = (): Bubble | null => {
+      const alive = s.bubbles.filter((b) => !b.dead);
+      if (!alive.length) return null;
+      const priority = (b: Bubble) => (b.kind === "bug" ? 0 : b.kind === "star" ? 1 : 2);
+      alive.sort((a, b) => priority(a) - priority(b) || a.y - b.y || a.born - b.born);
+      return alive[0];
     };
 
-    const popDesk = (i: number) => {
-      const candidates = s.bubbles.filter((b) => !b.dead && b.desk === i);
-      if (!candidates.length) return;
-      candidates.sort((a, b) => a.y - b.y);
-      pop(candidates[0]);
+    const autoWork = (i: number) => {
+      const target = targetForAutoWork();
+      if (!target) return; // stay ready: pick up the next item immediately
+      pop(target);
+      const d = desks[i];
+      s.nextAuto[i] = s.elapsed + autoPopInterval(d.skill) * (0.88 + Math.random() * 0.24);
     };
 
-    const onKey = (e: KeyboardEvent) => {
-      if (pausedRef.current || s.done) return;
-      const k = e.key.toLowerCase();
-      const idx = KEYS.indexOf(k);
-      if (idx >= 0 && idx < desks.length) {
-        e.preventDefault();
-        popDesk(idx);
-      } else if (k === " " || k === "f" || k === "j") {
-        e.preventDefault();
-        const alive = s.bubbles.filter((b) => !b.dead);
-        if (!alive.length) return;
-        alive.sort((a, b) => (a.kind === "star" ? -1 : b.kind === "star" ? 1 : a.y - b.y));
-        pop(alive[0]);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-
-    const onPointer = (e: PointerEvent) => {
-      if (pausedRef.current || s.done) return;
-      const rect = canvas.getBoundingClientRect();
-      hitTest(e.clientX - rect.left, e.clientY - rect.top);
-    };
-    canvas.addEventListener("pointerdown", onPointer);
-
-    const spawn = (i: number, now: number) => {
+    const spawn = (now: number) => {
+      const i = Math.floor(Math.random() * desks.length);
       const d = desks[i];
       const crunching = now < crunchRef.current;
       const roll = Math.random();
       let kind: Bubble["kind"];
-      if (debugMode) kind = roll < 0.72 ? "bug" : (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)];
+      if (editingMode) kind = "bug";
       else if (roll < bugRate * (crunching ? 1.9 : 1)) kind = "bug";
       else if (roll < bugRate + 0.05) kind = "star";
       else if (roll < bugRate + 0.05 + 0.62) kind = focus;
       else kind = d.type;
-      /* talent pays: a veteran's work is worth more than a junior's —
-         no more flat "everything is exactly +3" on the floor */
-      const value =
-        kind === "star"
-          ? 10
-          : kind === "bug"
-            ? 0
-            : Math.min(8, 1 + Math.floor(d.skill / 20) + (kind === focus ? 1 : 0));
+
       s.bubbles.push({
         x: deskX(i) + (Math.random() - 0.5) * 26,
         y: deskY() - 10,
         vy: -(0.42 + Math.random() * 0.16) / lifeMult,
         r: kind === "star" ? 24 : 18,
         kind,
-        value,
+        value: floorBubbleValue(kind, focus),
         desk: i,
         born: s.elapsed,
         wob: Math.random() * 6.28,
         dead: false,
       });
-      /* …and talent *produces* more often: skill pulls a desk's rhythm from
-         ~2.4s down to ~0.7s per bubble, with a wide organic jitter */
-      const rate = Math.max(650, 2700 - Math.min(1980, d.skill * 22)) / (spawnMult * (crunching ? 2.1 : 1));
-      s.nextSpawn[i] = s.elapsed + rate * (0.55 + Math.random() * 0.9);
+
+      const rate = floorSpawnInterval(spawnMult, crunching);
+      s.nextSpawn = s.elapsed + rate * (0.72 + Math.random() * 0.56);
     };
 
     const draw = () => {
@@ -305,8 +269,9 @@ export default function ProductionFloor({
       const crunching = now < crunchRef.current;
 
       if (!pausedRef.current && !s.done) {
+        if (e >= s.nextSpawn) spawn(now);
         desks.forEach((_, i) => {
-          if (e >= s.nextSpawn[i]) spawn(i, now);
+          if (e >= s.nextAuto[i]) autoWork(i);
         });
       }
 
@@ -455,23 +420,14 @@ export default function ProductionFloor({
         g.roundRect(x - w / 2, dy + 16, w, 10, 3);
         g.fill();
 
-        /* label + hotkey */
+        /* name + production skill: skill now controls automatic throughput */
         g.fillStyle = "rgba(242,236,223,.75)";
         g.font = `700 10px "Space Grotesk", sans-serif`;
         g.textAlign = "center";
         g.fillText(d.name.slice(0, 10), x, dy + 40);
-        if (i < KEYS.length) {
-          g.fillStyle = "rgba(10,8,18,.85)";
-          g.beginPath();
-          g.roundRect(x - 8, dy + 45, 16, 14, 4);
-          g.fill();
-          g.strokeStyle = POINT_COLOR[d.type];
-          g.lineWidth = 1;
-          g.stroke();
-          g.fillStyle = POINT_COLOR[d.type];
-          g.font = `700 9px "Space Grotesk", sans-serif`;
-          g.fillText(KEYS[i], x, dy + 55);
-        }
+        g.fillStyle = POINT_COLOR[d.type];
+        g.font = `700 9px "Space Grotesk", sans-serif`;
+        g.fillText(`${Math.round(d.skill)} SKILL`, x, dy + 55);
       });
 
       /* bubbles */
@@ -604,12 +560,10 @@ export default function ProductionFloor({
 
     return () => {
       cancelAnimationFrame(s.raf);
-      window.removeEventListener("keydown", onKey);
-      canvas.removeEventListener("pointerdown", onPointer);
       ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [desks, duration, focus, spawnMult, lifeMult, bugRate, debugMode]);
+  }, [desks, duration, focus, spawnMult, lifeMult, bugRate, editingMode]);
 
   return (
     <div ref={boxRef} className="relative h-full w-full touch-none overflow-hidden">

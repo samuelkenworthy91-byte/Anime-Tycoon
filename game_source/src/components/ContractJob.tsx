@@ -86,7 +86,7 @@ export default function ContractJob({
       {mode === "work" && (
         <div className="relative z-10 flex min-h-0 flex-1 flex-col">
           <div className="border-b border-line/40 bg-panel2/60 px-3 py-1.5 text-[10px] text-paper/60">
-            Pop the {POINT_LABEL[contract.type].toLowerCase()} bubbles — tap or press 1-{Math.min(7, desks.length)} / SPACE
+            Your crew handles the {POINT_LABEL[contract.type].toLowerCase()} workload automatically — skill and team size determine throughput
           </div>
           <div className="min-h-0 flex-1">
             <ProductionFloor

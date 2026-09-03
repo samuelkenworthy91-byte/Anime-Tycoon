@@ -440,7 +440,7 @@ export default function App() {
             Autosaving continuously — SAVE GAME writes a slot you can come back to.
           </div>
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
-            <Keyboard size={12} /> Tap bubbles · keys 1-7 per desk · SPACE top bubble · ENTER next · M mute · ESC pause
+            <Keyboard size={12} /> Staff run production automatically · ENTER next · M mute · ESC pause
           </div>
         </div>
       </div>
