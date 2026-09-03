@@ -27,7 +27,15 @@ jobs:
         working-directory: game_source
         run: npm ci
       - name: Apply UI repair
-        run: python tools/fix_projects_dock.py
+        run: |
+          python tools/fix_projects_dock.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('game_source/src/components/Office.tsx')
+          s = p.read_text()
+          s = s.replace('  officeSlots,\n', '').replace('  pendingIncome,\n', '')
+          p.write_text(s)
+          PY
       - name: Typecheck
         working-directory: game_source
         run: npx tsc --noEmit
