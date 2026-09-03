@@ -1,0 +1,9 @@
+Anime Tycoon individual cast portrait package
+All portraits are already split into individual files and named by cast ID and character name.
+Compressed WEBP images for easy GitHub upload.
+
+Total portraits: 186
+protag: 54
+secondary: 44
+pet: 43
+villain: 45

@@ -1,0 +1,187 @@
+id,name,role,archetype,affinities,action,staged_file,old_img,old_pos,source_set,source_sheet,source_panel
+p_baku,Baku,pet,Dream Eater,fantasy|horror|supernatural|space,REPLACE,portrait_staging/pet/p_baku__baku.webp,img/cast4/p_baku.jpg,,set4,six_enchanted_creatures_in_action.png,1
+p_bloop,Bloop,pet,Prism Jelly,fantasy|slice|cyber|space|magical,REPLACE,portrait_staging/pet/p_bloop__bloop.webp,img/cast-pet-9.jpg,3,new_39_completion,sheet1,1
+p_chacha,Chacha,pet,Monkey,shonen|slice|comedy,REPLACE,portrait_staging/pet/p_chacha__chacha.webp,img/cast-pet-7.jpg,2,set1,anthropomorphic_animal_action_collage.png,1
+p_chibi,Chibi,pet,Tuxedo Penguin,slice|mystery,REPLACE,portrait_staging/pet/p_chibi__chibi.webp,img/cast-pet-3.jpg,2,set4,six_enchanted_creatures_in_action.png,2
+p_cogsworth,Cogsworth,pet,Clockwork Owl,mystery|mecha|cyber|noir|space,REPLACE,portrait_staging/pet/p_cogsworth__cogsworth.webp,img/cast-pet-9.jpg,2,set4,six_enchanted_creatures_in_action.png,3
+p_drakko,Drakko,pet,Dragon Hatchling,fantasy|isekai|shonen|magical|comedy,REPLACE,portrait_staging/pet/p_drakko__drakko.webp,img/cast-pet-9.jpg,0,set4,six_enchanted_creatures_in_action.png,4
+p_fuu,Fuu,pet,Wind Spirit,fantasy|mystery,REPLACE,portrait_staging/pet/p_fuu__fuu.webp,img/cast-pet-5.jpg,3,set3,six_magical_creatures_across_worlds.png,1
+p_fuwa,Fuwa,pet,Cloud Sheep,slice|shojo|sports|comedy|space,REPLACE,portrait_staging/pet/p_fuwa__fuwa.webp,img/cast-pet-10.jpg,3,set1,fantasy_mascots_six_panel_adventure.png,5
+p_goma,Goma,pet,Sesame Dog,slice|romance,REPLACE,portrait_staging/pet/p_goma__goma.webp,img/cast-pet-8.jpg,2,set4,six_enchanted_creatures_in_action.png,5
+p_gon,Gon,pet,Baby Dinosaur,shonen|fantasy,REPLACE,portrait_staging/pet/p_gon__gon.webp,img/cast-pet-3.jpg,1,set4,six_enchanted_creatures_in_action.png,6
+p_hachi,Hachi,pet,Bumblebee,slice|sports|military,REPLACE,portrait_staging/pet/p_hachi__hachi.webp,img/cast4/p_hachi.jpg,,set4,six_enchanted_character_vignettes.png,1
+p_kiki2,Kiki,pet,Fire Salamander,fantasy|shonen,REPLACE,portrait_staging/pet/p_kiki2__kiki.webp,img/cast-pet-6.jpg,3,set3,six_whimsical_fantasy_animal_adventures.png,6
+p_kona,Kona,pet,Snow Yeti Cub,slice|horror,REPLACE,portrait_staging/pet/p_kona__kona.webp,img/cast-pet-6.jpg,0,set3,fantastical_six_panel_character_showcase.png,1
+p_koro,Koro,pet,Space Hamster,mecha|cyber|isekai|space,REPLACE,portrait_staging/pet/p_koro__koro.webp,img/cast-pet-1.jpg,2,set3,six_magical_creatures_across_worlds.png,3
+p_kuro,Kuro,pet,Shadow Fox,mystery|horror|cyber|supernatural,REPLACE,portrait_staging/pet/p_kuro__kuro.webp,img/cast-pet-2.jpg,3,set3,six_magical_creatures_across_worlds.png,2
+p_loader,Loader,pet,Munitions Mutt,military|comedy|shonen|cooking,REPLACE,portrait_staging/pet/p_loader__loader.webp,img/cast4/p_loader.jpg,,set4,six_enchanted_character_vignettes.png,2
+p_lumen,Lumen,pet,Crystal Fawn,fantasy|mystery|shojo|magical|supernatural,REPLACE,portrait_staging/pet/p_lumen__lumen.webp,img/cast-pet-10.jpg,1,set4,six_enchanted_character_vignettes.png,3
+p_maru,Maru,pet,Round Owl,mystery|fantasy,REPLACE,portrait_staging/pet/p_maru__maru.webp,img/cast-pet-6.jpg,1,set3,fantastical_six_panel_character_showcase.png,2
+p_mocha,Mocha,pet,Coffee Ferret,slice|cyber|cooking|noir,REPLACE,portrait_staging/pet/p_mocha__mocha.webp,img/cast-pet-8.jpg,0,set4,six_enchanted_character_vignettes.png,4
+p_mochi,Mochi,pet,Round Cream Cat,slice|shojo,REPLACE,portrait_staging/pet/p_mochi__mochi.webp,img/cast-pet-1.jpg,0,set4,six_enchanted_character_vignettes.png,5
+p_momo2,Momo,pet,Peach Rabbit,shojo|slice,REPLACE,portrait_staging/pet/p_momo2__momo.webp,img/cast-pet-3.jpg,0,set3,six_whimsical_fantasy_animal_adventures.png,1
+p_mugi,Mugi,pet,Bear Cub,slice|shonen,REPLACE,portrait_staging/pet/p_mugi__mugi.webp,img/cast-pet-5.jpg,0,set1,fantasy_mascots_six_panel_adventure.png,1
+p_nemu,Nemu,pet,Sleepy Sloth,slice|romance,REPLACE,portrait_staging/pet/p_nemu__nemu.webp,img/cast-pet-7.jpg,0,set1,fantasy_mascots_six_panel_adventure.png,2
+p_nibi,Nibi,pet,Two-Tail Cat,horror|mystery|fantasy|supernatural|noir,REPLACE,portrait_staging/pet/p_nibi__nibi.webp,img/cast-pet-10.jpg,2,set4,six_enchanted_character_vignettes.png,6
+p_nitro,Nitro,pet,Pit-Crew Ferret,racing|sports|comedy|magical,REPLACE,portrait_staging/pet/p_nitro__nitro.webp,img/cast4/p_nitro.jpg,,set4,six_panel_fantasy_animal_adventure.png,1
+p_nya,Nya,pet,Witch Cat,fantasy|shojo|magical,REPLACE,portrait_staging/pet/p_nya__nya.webp,img/cast-pet-3.jpg,3,set3,six_magical_creatures_across_worlds.png,4
+p_peko,Peko,pet,Leaf Chick,slice|shojo,REPLACE,portrait_staging/pet/p_peko__peko.webp,img/cast-pet-2.jpg,0,set3,six_whimsical_fantasy_animal_adventures.png,2
+p_piko,Piko,pet,Pixel Slime,cyber|isekai|magical|comedy,REPLACE,portrait_staging/pet/p_piko__piko.webp,img/cast-pet-4.jpg,3,set4,six_panel_fantasy_animal_adventure.png,2
+p_pochi,Pochi,pet,Robot Puppy,mecha|cyber|racing|magical,REPLACE,portrait_staging/pet/p_pochi__pochi.webp,img/cast-pet-4.jpg,0,set4,six_panel_fantasy_animal_adventure.png,3
+p_pomu,Pomu,pet,Apple Squirrel,slice|shojo,REPLACE,portrait_staging/pet/p_pomu__pomu.webp,img/cast-pet-7.jpg,1,set3,six_whimsical_fantasy_animal_adventures.png,3
+p_ponta,Ponta,pet,Grumpy Red Panda,slice|romance|comedy|cooking,REPLACE,portrait_staging/pet/p_ponta__ponta.webp,img/cast-pet-10.jpg,0,set4,six_panel_fantasy_animal_adventure.png,4
+p_pudding,Pudding,pet,Wobbly Blob Dog,slice|romance|cooking|idol,REPLACE,portrait_staging/pet/p_pudding__pudding.webp,img/cast4/p_pudding.jpg,,set4,six_panel_fantasy_animal_adventure.png,5
+p_puri,Puri,pet,Cream Dragon,fantasy|shonen|isekai|slice,REPLACE,portrait_staging/pet/p_puri__puri.webp,img/cast-pet-8.jpg,3,set3,fantastical_six_panel_character_showcase.png,3
+p_rin2,Rin,pet,Pearl Koi,fantasy|shojo,REPLACE,portrait_staging/pet/p_rin2__rin.webp,img/cast-pet-7.jpg,3,set3,six_whimsical_fantasy_animal_adventures.png,5
+p_ruri,Ruri,pet,Crystal Bird,fantasy|idol,REPLACE,portrait_staging/pet/p_ruri__ruri.webp,img/cast-pet-4.jpg,1,set3,fantastical_six_panel_character_showcase.png,4
+p_sakumi,Sakumi,pet,Blossom Ferret,shojo|slice|romance|magical|supernatural,REPLACE,portrait_staging/pet/p_sakumi__sakumi.webp,img/cast-pet-9.jpg,1,new_39_completion,sheet1,2
+p_sora,Sora,pet,Cloud Sheep,slice|fantasy,REPLACE,portrait_staging/pet/p_sora__sora.webp,img/cast-pet-5.jpg,1,set3,six_whimsical_fantasy_animal_adventures.png,4
+p_stellar,Stellar,pet,Comet Kitten,space|magical|shojo|cooking,REPLACE,portrait_staging/pet/p_stellar__stellar.webp,img/cast4/p_stellar.jpg,,set4,six_panel_fantasy_animal_adventure.png,6
+p_tama,Tama,pet,Floating Baby Whale,fantasy|slice|space,REPLACE,portrait_staging/pet/p_tama__tama.webp,img/cast-pet-1.jpg,3,set3,six_magical_creatures_across_worlds.png,5
+p_teto,Teto,pet,Frog,slice|sports,REPLACE,portrait_staging/pet/p_teto__teto.webp,img/cast-pet-6.jpg,2,set3,fantastical_six_panel_character_showcase.png,6
+p_toro,Toro,pet,Tanuki,slice|fantasy,REPLACE,portrait_staging/pet/p_toro__toro.webp,img/cast-pet-4.jpg,2,set3,fantastical_six_panel_character_showcase.png,5
+p_umi,Umi,pet,Blue Axolotl,slice|mystery,REPLACE,portrait_staging/pet/p_umi__umi.webp,img/cast-pet-2.jpg,1,set3,six_magical_creatures_across_worlds.png,6
+p_yuzu,Yuzu,pet,Citrus Cat,slice|shojo|cooking,REPLACE,portrait_staging/pet/p_yuzu__yuzu.webp,img/cast-pet-8.jpg,1,set1,fantasy_mascots_six_panel_adventure.png,6
+airi,Airi,protag,Center Stage,idol|shonen|slice|mecha,REPLACE,portrait_staging/protag/airi__airi.webp,img/cast4/airi.jpg,,set2,six_anime_worlds_in_motion.png,1
+akira,Akira,protag,Neon Ronin,cyber|shonen|horror|noir,REPLACE,portrait_staging/protag/akira__akira.webp,img/cast4/akira.jpg,,set2,six_anime_worlds_in_motion.png,2
+ash,Ash,protag,Green Arrow,fantasy|isekai|mystery|supernatural|sports,REPLACE,portrait_staging/protag/ash__ash.webp,img/cast4/ash.jpg,,set2,six_anime_worlds_in_motion.png,4
+aya,Aya,protag,Rose Thorn,shojo|romance|mystery,REPLACE,portrait_staging/protag/aya__aya.webp,img/cast-protag-1.jpg,3,set2,six_anime_worlds_in_motion.png,5
+daichi,Daichi,protag,Earthbreaker,shonen|fantasy|sports|military,REPLACE,portrait_staging/protag/daichi__daichi.webp,img/cast4/daichi.jpg,,set4,six_heroes_one_epic_journey.png,1
+emi,Emi,protag,Cottage Witch,fantasy|slice|romance|magical,REPLACE,portrait_staging/protag/emi__emi.webp,img/cast4/emi.jpg,,set4,six_heroes_one_epic_journey.png,2
+fumi,Fumi,protag,Brushstroke,slice|idol|shojo,REPLACE,portrait_staging/protag/fumi__fumi.webp,img/cast-protag-7.jpg,2,set1,six_dynamic_anime_moments.png,6
+goro,Goro,protag,Sumo Spirit,sports|shonen|slice,REPLACE,portrait_staging/protag/goro__goro.webp,img/cast-protag-4.jpg,0,set4,six_heroes_one_epic_journey.png,3
+hana,Hana,protag,Petalfall,shojo|fantasy|romance,REPLACE,portrait_staging/protag/hana__hana.webp,img/cast-protag-4.jpg,1,new_39_completion,sheet1,3
+haru,Haru,protag,Sunrise Sprinter,sports|slice|shonen,REPLACE,portrait_staging/protag/haru__haru.webp,img/cast-protag-6.jpg,3,set4,six_heroes_one_epic_journey.png,4
+hikari,Hikari,protag,Prism Wish,shojo|fantasy|romance|magical,REPLACE,portrait_staging/protag/hikari__hikari.webp,img/cast4/hikari.jpg,,set2,six_panels_of_anime_nightfall.png,1
+itsuki,Itsuki,protag,Ink & Lamplight,romance|mystery|slice|noir|supernatural|isekai,REPLACE,portrait_staging/protag/itsuki__itsuki.webp,img/cast4/itsuki.jpg,,set4,six_panel_anime_character_showcase.png,5
+jin,Jin,protag,Ghost Driver,mecha|cyber|sports|racing,REPLACE,portrait_staging/protag/jin__jin.webp,img/cast4/jin.jpg,,set2,six_panels_of_anime_nightfall.png,3
+jun,Jun,protag,Foxfire,fantasy|isekai|mystery,REPLACE,portrait_staging/protag/jun__jun.webp,img/cast-protag-8.jpg,1,set2,six_panels_of_anime_nightfall.png,4
+kaede,Kaede,protag,Autumn Verse,slice|romance|fantasy,REPLACE,portrait_staging/protag/kaede__kaede.webp,img/cast-protag-8.jpg,2,set4,six_heroes_one_epic_journey.png,5
+kage,Kage,protag,Shadow Edge,horror|mystery|cyber,REPLACE,portrait_staging/protag/kage__kage.webp,img/protag-kage.jpg,,set2,six_panels_of_anime_nightfall.png,6
+kai,Kai,protag,Battle Heart,shonen|sports|fantasy,REPLACE,portrait_staging/protag/kai__kai.webp,img/protag-kai.jpg,,set2,anime_action_heroes_collage.png,1
+kaito,Kaito,protag,Sky Pirate,fantasy|shonen|isekai,REPLACE,portrait_staging/protag/kaito__kaito.webp,img/cast-protag-5.jpg,1,set2,anime_action_heroes_collage.png,2
+kenta,Kenta,protag,Punchline,shonen|sports|idol|comedy,REPLACE,portrait_staging/protag/kenta__kenta.webp,img/cast4/kenta.jpg,,set2,anime_action_heroes_collage.png,3
+kota,Kota,protag,Oak Heart,shonen|fantasy|sports,REPLACE,portrait_staging/protag/kota__kota.webp,img/cast-protag-7.jpg,1,set4,six_heroes_one_epic_journey.png,6
+kuro,Kuro,protag,Red Coat,cyber|shonen|horror|noir|racing,REPLACE,portrait_staging/protag/kuro__kuro.webp,img/cast4/kuro.jpg,,set2,anime_action_heroes_collage.png,5
+leo,Leo,protag,No Rules,sports|slice|idol|comedy|racing,REPLACE,portrait_staging/protag/leo__leo.webp,img/cast4/leo.jpg,,set2,anime_action_heroes_collage.png,6
+mako,Mako,protag,Tidecaller,fantasy|shonen|sports,REPLACE,portrait_staging/protag/mako__mako.webp,img/cast-protag-1.jpg,0,set4,six_panel_anime_character_showcase.png,1
+mio,Mio,protag,Moonlit Dancer,idol|slice|romance,REPLACE,portrait_staging/protag/mio__mio.webp,img/cast-protag-2.jpg,1,set4,six_panel_anime_character_showcase.png,2
+mira,Mira,protag,Nebula Singer,idol|cyber|fantasy|space,REPLACE,portrait_staging/protag/mira__mira.webp,img/cast4/mira.jpg,,set2,six_panel_anime_fantasy_showcase.png,4
+momo,Momo,protag,Peach Bomb,shojo|idol|shonen,REPLACE,portrait_staging/protag/momo__momo.webp,img/cast-protag-6.jpg,0,set4,six_panel_anime_character_showcase.png,3
+n_aoi,Aoi,protag,Otherworld Heiress,isekai|shojo|fantasy|romance,REPLACE,portrait_staging/protag/n_aoi__aoi.webp,img/cast3/aoi.jpg,,set2,six_anime_worlds_in_motion.png,3
+n_chisato,Chisato,protag,Heartthrob Striker,romance|sports|shojo|racing,REPLACE,portrait_staging/protag/n_chisato__chisato.webp,img/cast4/n_chisato.jpg,,set2,six_anime_worlds_in_motion.png,6
+n_mikoto,Mikoto,protag,Witch's Apprentice,magical|shojo|romance|sports,REPLACE,portrait_staging/protag/n_mikoto__mikoto.webp,img/cast3/mikoto.jpg,,set2,six_panel_anime_fantasy_showcase.png,2
+n_reiwa,Reiwa,protag,Noir Diva,noir|idol|cyber,REPLACE,portrait_staging/protag/n_reiwa__reiwa.webp,img/cast3/reiwa.jpg,,set2,cyberpunk_anime_character_montage.png,3
+n_ryoko,Ryoko,protag,Moonlight Mechanic,mecha|shojo|space|romance,REPLACE,portrait_staging/protag/n_ryoko__ryoko.webp,img/cast4/n_ryoko.jpg,,set2,epic_anime_fantasy_character_gallery.png,1
+n_saku,Saku,protag,Idol Voyager,isekai|idol|shojo,REPLACE,portrait_staging/protag/n_saku__saku.webp,img/cast3/saku.jpg,,set2,epic_anime_fantasy_character_gallery.png,4
+nana,Nana,protag,Bubblegum Punk,idol|cyber|shojo,REPLACE,portrait_staging/protag/nana__nana.webp,img/cast-protag-3.jpg,1,set2,six_panel_anime_fantasy_showcase.png,6
+niko,Niko,protag,Gadget Ghost,cyber|mystery|mecha,REPLACE,portrait_staging/protag/niko__niko.webp,img/cast-protag-1.jpg,2,set2,cyberpunk_anime_character_montage.png,1
+rei,Rei,protag,Steel Resolve,mecha|cyber|mystery|supernatural,REPLACE,portrait_staging/protag/rei__rei.webp,img/cast4/rei.jpg,,set2,cyberpunk_anime_character_montage.png,2
+renji,Renji,protag,Silent Snow,mystery|romance|cyber|noir,REPLACE,portrait_staging/protag/renji__renji.webp,img/cast4/renji.jpg,,set2,cyberpunk_anime_character_montage.png,4
+riko,Riko,protag,Clockwork Heart,mystery|mecha|cyber,REPLACE,portrait_staging/protag/riko__riko.webp,img/cast-protag-5.jpg,2,set2,cyberpunk_anime_character_montage.png,5
+rin,Rin,protag,Thunderstep,sports|shonen|slice|racing,REPLACE,portrait_staging/protag/rin__rin.webp,img/cast4/rin.jpg,,set2,cyberpunk_anime_character_montage.png,6
+ryu,Ryu,protag,Dragonheart,shonen|fantasy|isekai,REPLACE,portrait_staging/protag/ryu__ryu.webp,img/cast-protag-3.jpg,0,set2,epic_anime_fantasy_character_gallery.png,2
+saki,Saki,protag,Paper Crane,slice|mystery|shojo,REPLACE,portrait_staging/protag/saki__saki.webp,img/cast-protag-2.jpg,3,set4,six_panel_anime_character_showcase.png,4
+sakura,Sakura,protag,Blossom Blade,shonen|shojo|fantasy,REPLACE,portrait_staging/protag/sakura__sakura.webp,img/cast-protag-8.jpg,0,set2,epic_anime_fantasy_character_gallery.png,5
+sen,Sen,protag,Scarred Blade,shonen|mystery|horror|noir|military|sports,REPLACE,portrait_staging/protag/sen__sen.webp,img/cast4/sen.jpg,,set2,epic_anime_fantasy_character_gallery.png,6
+shiori,Shiori,protag,Wispkeeper,horror|fantasy|mystery|supernatural,REPLACE,portrait_staging/protag/shiori__shiori.webp,img/cast4/shiori.jpg,,new_39_completion,sheet1,4
+shiro,Shiro,protag,Keen Mind,mystery|horror|slice,REPLACE,portrait_staging/protag/shiro__shiro.webp,img/protag-shiro.jpg,,set3,six_vignettes_of_shadows_and_light.png,1
+sora,Sora,protag,Skyblade,isekai|fantasy|shonen|space,REPLACE,portrait_staging/protag/sora__sora.webp,img/cast4/sora.jpg,,new_39_completion,sheet1,5
+sota,Sota,protag,Debugger,cyber|mystery|mecha,REPLACE,portrait_staging/protag/sota__sota.webp,img/cast-protag-8.jpg,3,set2,six_heroes_across_worlds.png,1
+suzume,Suzume,protag,Foxfire Maiden,fantasy|horror|shojo|supernatural|magical|racing,REPLACE,portrait_staging/protag/suzume__suzume.webp,img/cast4/suzume.jpg,,set2,six_heroes_across_worlds.png,2
+takumi,Takumi,protag,Paper Thin,mystery|slice|romance,REPLACE,portrait_staging/protag/takumi__takumi.webp,img/cast-protag-6.jpg,1,set2,six_heroes_across_worlds.png,3
+taro,Taro,protag,Iron Chef,slice|sports|fantasy|cooking,REPLACE,portrait_staging/protag/taro__taro.webp,img/cast4/taro.jpg,,set2,six_heroes_across_worlds.png,4
+tsubasa,Tsubasa,protag,Sky Wrench,mecha|isekai|sports|racing|military|space,REPLACE,portrait_staging/protag/tsubasa__tsubasa.webp,img/cast4/tsubasa.jpg,,set2,six_heroes_across_worlds.png,5
+yui,Yui,protag,Everyday Warmth,slice|romance|shojo,REPLACE,portrait_staging/protag/yui__yui.webp,img/protag-yui.jpg,,set2,six_heroes_across_worlds.png,6
+yuki,Yuki,protag,Frostbite,horror|mystery|slice,REPLACE,portrait_staging/protag/yuki__yuki.webp,img/cast-protag-4.jpg,3,set2,six_cinematic_fantasy_character_panels.png,1
+yuzuki,Yuzuki,protag,Lantern Guide,shojo|slice|mystery,REPLACE,portrait_staging/protag/yuzuki__yuzuki.webp,img/cast-protag-7.jpg,0,set4,six_panel_anime_character_showcase.png,6
+zuri,Zuri,protag,Gearsmith,mecha|sports|fantasy|racing|cooking,REPLACE,portrait_staging/protag/zuri__zuri.webp,img/cast4/zuri.jpg,,set2,six_cinematic_fantasy_character_panels.png,3
+s_akane,Akane,secondary,The Cool Senpai,sports|idol|shojo,REPLACE,portrait_staging/secondary/s_akane__akane.webp,img/cast-secondary-2.jpg,0,set2,six_cinematic_fantasy_character_panels.png,4
+s_alfred,Alfred,secondary,The Perfect Butler,mystery|romance|shojo|noir|comedy,REPLACE,portrait_staging/secondary/s_alfred__alfred.webp,img/cast4/s_alfred.jpg,,set2,six_cinematic_fantasy_character_panels.png,5
+s_amber,Amber,secondary,The Hooded Traveller,isekai|fantasy|mystery|supernatural|cooking,REPLACE,portrait_staging/secondary/s_amber__amber.webp,img/cast4/s_amber.jpg,,set4,six_worlds_one_reaching_hand.png,1
+s_anna,Anna,secondary,The Walking Encyclopedia,mystery|slice|fantasy,REPLACE,portrait_staging/secondary/s_anna__anna.webp,img/cast-secondary-3.jpg,0,set4,six_worlds_one_reaching_hand.png,2
+s_aoi,Aoi,secondary,The Weather Girl,slice|romance|shojo|noir,REPLACE,portrait_staging/secondary/s_aoi__aoi.webp,img/cast4/s_aoi.jpg,,set2,anime_character_worlds_poster_grid.png,2
+s_bolt,Bolt,secondary,Last-Lap Rival,racing|shonen|sports,REPLACE,portrait_staging/secondary/s_bolt__bolt.webp,img/cast3/bolt.jpg,,set4,six_worlds_one_reaching_hand.png,3
+s_boone,Boone,secondary,The Grease Mentor,mecha|sports|slice|racing|cooking,REPLACE,portrait_staging/secondary/s_boone__boone.webp,img/cast4/s_boone.jpg,,set4,six_worlds_one_reaching_hand.png,4
+s_chiaki,Chiaki,secondary,The Transfer Student,mystery|horror|cyber|supernatural,REPLACE,portrait_staging/secondary/s_chiaki__chiaki.webp,img/cast4/s_chiaki.jpg,,set2,anime_character_worlds_poster_grid.png,5
+s_chika,Chika,secondary,The Pastry Dragon,slice|fantasy|romance,REPLACE,portrait_staging/secondary/s_chika__chika.webp,img/cast-secondary-6.jpg,2,set4,six_worlds_one_reaching_hand.png,5
+s_daiki,Daiki,secondary,The Night Owl Gamer,cyber|mecha|slice,REPLACE,portrait_staging/secondary/s_daiki__daiki.webp,img/cast-secondary-4.jpg,1,set3,six_anime_character_portraits.png,1
+s_eiji,Eiji,secondary,The Big Brother,shonen|slice|sports,REPLACE,portrait_staging/secondary/s_eiji__eiji.webp,img/cast-secondary-8.jpg,1,set3,six_anime_character_portraits.png,2
+s_gen,Gen,secondary,The Lazy Genius,mystery|cyber|slice|military,REPLACE,portrait_staging/secondary/s_gen__gen.webp,img/cast4/s_gen.jpg,,set4,six_heroes_reaching_through_worlds.png,3
+s_haruto,Nyanko,secondary,The Streetwise Cat,slice|shonen|mystery|racing,REPLACE,portrait_staging/secondary/s_haruto__nyanko.webp,img/cast4/s_haruto.jpg,,set4,six_heroes_reaching_through_worlds.png,1
+s_hina,Hina,secondary,The Timid Artist,slice|shojo|romance,REPLACE,portrait_staging/secondary/s_hina__hina.webp,img/cast-secondary-7.jpg,2,set4,six_worlds_one_reaching_hand.png,6
+s_ice,Ice,secondary,Cold Charm,romance|supernatural|idol,REPLACE,portrait_staging/secondary/s_ice__ice.webp,img/cast3/ice.jpg,,new_39_completion,sheet1,6
+s_ichiro,Ichiro,secondary,Soft-Hearted Delinquent,shonen|slice|romance,REPLACE,portrait_staging/secondary/s_ichiro__ichiro.webp,img/cast-secondary-2.jpg,3,set4,six_panel_anime_character_collage.png,1
+s_ironmaid,Valkyrie,secondary,Winged Sergeant,military|mecha|shojo|romance|magical,REPLACE,portrait_staging/secondary/s_ironmaid__valkyrie.webp,img/cast3/valkyrie.jpg,,new_39_completion,sheet3,4
+s_kanna,Kanna,secondary,The Silent Bodyguard,mystery|horror|cyber|military|noir,REPLACE,portrait_staging/secondary/s_kanna__kanna.webp,img/cast4/s_kanna.jpg,,set4,six_panel_anime_character_collage.png,2
+s_kazuki,Kazuki,secondary,The Drama Club Star,idol|romance|shojo,REPLACE,portrait_staging/secondary/s_kazuki__kazuki.webp,img/cast-secondary-7.jpg,3,set4,six_panel_anime_character_collage.png,3
+s_ken,Ken,secondary,Strong & Silent,shonen|mecha|sports,REPLACE,portrait_staging/secondary/s_ken__ken.webp,img/cast-secondary-5.jpg,1,set1,six_panel_anime_action_collage.png,3
+s_kiki,Kiki,secondary,The Comedic Engine,slice|shonen|idol|comedy,REPLACE,portrait_staging/secondary/s_kiki__kiki.webp,img/cast4/s_kiki.jpg,,new_39_completion,sheet2,1
+s_koko,Koko,secondary,The Mystic Cat,mystery|fantasy|horror|cooking,REPLACE,portrait_staging/secondary/s_koko__koko.webp,img/cast4/s_koko.jpg,,new_39_completion,sheet2,2
+s_lulu,Lulu,secondary,The Superfan,idol|shojo|slice,REPLACE,portrait_staging/secondary/s_lulu__lulu.webp,img/cast-secondary-3.jpg,2,set4,six_panel_anime_character_collage.png,4
+s_maki,Maki,secondary,The Rival Ace,sports|shonen|idol|racing|military,REPLACE,portrait_staging/secondary/s_maki__maki.webp,img/cast4/s_maki.jpg,,new_39_completion,sheet2,3
+s_megu,Megu,secondary,The Class Rep,slice|mystery|shojo,REPLACE,portrait_staging/secondary/s_megu__megu.webp,img/cast-secondary-7.jpg,0,set3,six_anime_character_portraits.png,3
+s_mika,Mika,secondary,The Sass Master,shojo|romance|slice,REPLACE,portrait_staging/secondary/s_mika__mika.webp,img/cast-secondary-1.jpg,1,set3,six_anime_character_portraits.png,4
+s_mimi,Mimi,secondary,The Fashion Queen,shojo|idol|romance|magical,REPLACE,portrait_staging/secondary/s_mimi__mimi.webp,img/cast-secondary-5.jpg,2,set3,six_anime_character_portraits.png,5
+s_momoko,Momoko,secondary,The Team Manager,slice|sports|idol,REPLACE,portrait_staging/secondary/s_momoko__momoko.webp,img/cast-secondary-2.jpg,2,set4,six_panel_anime_character_collage.png,5
+s_nanami,Nanami,secondary,The Gossip Columnist,slice|mystery|romance,REPLACE,portrait_staging/secondary/s_nanami__nanami.webp,img/cast-secondary-8.jpg,0,set4,six_panel_anime_character_collage.png,6
+s_nozomi,Nozomi,secondary,The Childhood Friend,romance|slice|shojo,REPLACE,portrait_staging/secondary/s_nozomi__nozomi.webp,img/cast-secondary-4.jpg,0,set3,six_anime_character_portraits.png,6
+s_okada,Okada,secondary,The Old Sensei,sports|shonen|slice|cooking,REPLACE,portrait_staging/secondary/s_okada__okada.webp,img/cast4/s_okada.jpg,,set4,six_heroes_reaching_through_worlds.png,2
+s_peko,Peko,secondary,The Hype Friend,idol|shojo|slice|comedy|magical,REPLACE,portrait_staging/secondary/s_peko__peko.webp,img/cast4/s_peko.jpg,,new_39_completion,sheet2,4
+s_reina,Reina,secondary,The Council President,mystery|romance|slice|military|noir,REPLACE,portrait_staging/secondary/s_reina__reina.webp,img/cast4/s_reina.jpg,,set4,six_heroes_reaching_through_worlds.png,4
+s_ren,Ren,secondary,The Trusty Sidekick,shonen|slice|sports,REPLACE,portrait_staging/secondary/s_ren__ren.webp,img/cast-secondary-1.jpg,0,set1,six_panel_anime_action_showcase.png,1
+s_riku,Riku,secondary,The Rival Ace,sports|shonen|mecha,REPLACE,portrait_staging/secondary/s_riku__riku.webp,img/cast-secondary-5.jpg,3,set1,six_panel_anime_action_showcase.png,2
+s_ryo,Ryo,secondary,The Street Performer,idol|slice|romance,REPLACE,portrait_staging/secondary/s_ryo__ryo.webp,img/cast-secondary-6.jpg,3,set4,six_heroes_reaching_through_worlds.png,5
+s_sakurako,Sakurako,secondary,The Elegant Rival,shojo|idol|mystery,REPLACE,portrait_staging/secondary/s_sakurako__sakurako.webp,img/cast-secondary-4.jpg,2,set1,six_panel_anime_action_showcase.png,4
+s_shin,Pip,secondary,The Alien Analyst,mystery|cyber|horror|noir,REPLACE,portrait_staging/secondary/s_shin__pip.webp,img/cast4/s_shin.jpg,,new_39_completion,sheet2,5
+s_soleil,Soleil,secondary,Star Knight,isekai|space|fantasy,REPLACE,portrait_staging/secondary/s_soleil__soleil.webp,img/cast3/soleil.jpg,,new_39_completion,sheet2,6
+s_sosuke,Sosuke,secondary,The Automaton Butler,mystery|mecha|slice|comedy,REPLACE,portrait_staging/secondary/s_sosuke__sosuke.webp,img/cast4/s_sosuke.jpg,,set4,six_heroes_reaching_through_worlds.png,6
+s_takeshi,Takeshi,secondary,The Drill Coach,sports|shonen|mecha|military,REPLACE,portrait_staging/secondary/s_takeshi__takeshi.webp,img/cast4/s_takeshi.jpg,,new_39_completion,sheet3,1
+s_tobi,Tobi,secondary,The Rookie Reporter,slice|mystery|cyber|noir|space,REPLACE,portrait_staging/secondary/s_tobi__tobi.webp,img/cast4/s_tobi.jpg,,new_39_completion,sheet3,2
+s_tora,Tora,secondary,The Tiger Bruiser,shonen|sports|fantasy,REPLACE,portrait_staging/secondary/s_tora__tora.webp,img/cast-secondary-7.jpg,1,new_39_completion,sheet3,3
+s_yuna,Yuna,secondary,The Cheer Captain,sports|idol|shonen,REPLACE,portrait_staging/secondary/s_yuna__yuna.webp,img/cast-secondary-5.jpg,0,set1,six_panel_anime_action_showcase.png,5
+v_amethyst,Empress Amethyst,villain,The Violet Crown,fantasy|shojo|horror|magical|supernatural,REPLACE,portrait_staging/villain/v_amethyst__empress-amethyst.webp,img/cast4/v_amethyst.jpg,,new_39_completion,sheet4,3
+v_ash,Warlord Ash,villain,The Scorched March,shonen|fantasy|sports|military,REPLACE,portrait_staging/villain/v_ash__warlord-ash.webp,img/cast-villain-7.jpg,0,new_39_completion,sheet7,3
+v_baron,Baron Skull,villain,The Bone Baron,horror|fantasy,REPLACE,portrait_staging/villain/v_baron__baron-skull.webp,img/cast-villain-1.jpg,2,set4,six_dark_fantasy_villains_in_shadow.png,1
+v_bioform,Bioform IX,villain,The Failed Experiment,mecha|cyber|shonen|military|space,REPLACE,portrait_staging/villain/v_bioform__bioform-ix.webp,img/cast4/v_bioform.jpg,,set4,six_dark_fantasy_villains_in_shadow.png,2
+v_blackout,Blackout,villain,The Power Failure,cyber|mecha|horror,REPLACE,portrait_staging/villain/v_blackout__blackout.webp,img/cast-villain-6.jpg,2,set1,villains_of_the_gothic_multiverse.png,6
+v_carnage,King Carnage,villain,The Arena Tyrant,shonen|sports|fantasy,REPLACE,portrait_staging/villain/v_carnage__king-carnage.webp,img/cast-villain-5.jpg,0,new_39_completion,sheet5,1
+v_collector,The Collector,villain,The Hoard,mystery|fantasy|shojo,REPLACE,portrait_staging/villain/v_collector__the-collector.webp,img/cast-villain-6.jpg,3,set1,villains_of_the_gothic_multiverse.png,4
+v_dread,Duchess Dread,villain,The Velvet Doom,shojo|mystery|horror,REPLACE,portrait_staging/villain/v_dread__duchess-dread.webp,img/cast-villain-7.jpg,1,new_39_completion,sheet4,2
+v_falsetto,Falsetto,villain,The Chart-Topping Threat,idol|shojo|cyber,REPLACE,portrait_staging/villain/v_falsetto__falsetto.webp,img/cast3/falsetto.jpg,,new_39_completion,sheet4,5
+v_fang,Count Fang,villain,The Midnight Peer,horror|romance|mystery,REPLACE,portrait_staging/villain/v_fang__count-fang.webp,img/cast-villain-4.jpg,0,set4,six_dark_fantasy_villains_in_shadow.png,4
+v_frostbite,Lady Frostbite,villain,The Cold Court,horror|shojo|fantasy,REPLACE,portrait_staging/villain/v_frostbite__lady-frostbite.webp,img/cast-villain-5.jpg,3,set4,anime_fantasy_comic_grid_panels.png,2
+v_glitch,Overlord Glitch,villain,The System Error,cyber|mecha|mystery,REPLACE,portrait_staging/villain/v_glitch__overlord-glitch.webp,img/cast-villain-4.jpg,2,new_39_completion,sheet6,3
+v_grandfinale,Grand Finale,villain,The Final Judge,cooking|comedy|shonen,REPLACE,portrait_staging/villain/v_grandfinale__grand-finale.webp,img/cast3/grandfinale.jpg,,set1,villainous_fantasies_six_dark_rulers.png,3
+v_gravemark,Gravemark,villain,The Cracked Warlord,shonen|fantasy|horror|military,REPLACE,portrait_staging/villain/v_gravemark__gravemark.webp,img/cast4/v_gravemark.jpg,,new_39_completion,sheet4,6
+v_harlequin,Harlequin,villain,The Laughing Trick,horror|mystery|slice|comedy|supernatural,REPLACE,portrait_staging/villain/v_harlequin__harlequin.webp,img/cast4/v_harlequin.jpg,,set4,anime_fantasy_comic_grid_panels.png,1
+v_hex,Mistress Hex,villain,The Curse Weaver,fantasy|horror|shojo|magical,REPLACE,portrait_staging/villain/v_hex__mistress-hex.webp,img/cast-villain-4.jpg,3,new_39_completion,sheet5,5
+v_hollow,The Hollow King,villain,Crown of Nothing,horror|mystery,REPLACE,portrait_staging/villain/v_hollow__the-hollow-king.webp,img/cast-villain-2.jpg,1,new_39_completion,sheet6,5
+v_hollowchild,The Pale Empress,villain,The Quiet Void,horror|shojo|mystery|magical|space,REPLACE,portrait_staging/villain/v_hollowchild__the-pale-empress.webp,img/cast4/v_hollowchild.jpg,,new_39_completion,sheet6,6
+v_inquisitor,The Grand Inquisitor,villain,The Perfect Verdict,mystery|mecha|horror,REPLACE,portrait_staging/villain/v_inquisitor__the-grand-inquisitor.webp,img/cast-villain-8.jpg,1,new_39_completion,sheet6,4
+v_kairos,CEO Kairos,villain,The Friendly Contract,cyber|mecha|mystery|noir|space|racing,REPLACE,portrait_staging/villain/v_kairos__ceo-kairos.webp,img/cast4/v_kairos.jpg,,new_39_completion,sheet3,5
+v_kurogane,Kurogane,villain,The Iron Tyrant,shonen|fantasy|mecha|military,REPLACE,portrait_staging/villain/v_kurogane__kurogane.webp,img/cast4/v_kurogane.jpg,,new_39_completion,sheet5,2
+v_lich,Lich of Laughter,villain,The Joke That Kills,horror|fantasy|slice|comedy,REPLACE,portrait_staging/villain/v_lich__lich-of-laughter.webp,img/cast-villain-7.jpg,2,new_39_completion,sheet5,3
+v_lovelace,Lovelace,villain,The Serial Romantic,romance|noir|comedy,REPLACE,portrait_staging/villain/v_lovelace__lovelace.webp,img/cast3/lovelace.jpg,,set1,villains_of_the_gothic_multiverse.png,2
+v_magus,Chaos Magus,villain,The Wild Spell,fantasy|isekai|horror,REPLACE,portrait_staging/villain/v_magus__chaos-magus.webp,img/cast-villain-6.jpg,1,set4,six_dark_fantasy_villains_in_shadow.png,3
+v_mirage,Doctor Mirage,villain,The Illusionist,mystery|cyber|fantasy|space,REPLACE,portrait_staging/villain/v_mirage__doctor-mirage.webp,img/cast-villain-2.jpg,3,new_39_completion,sheet4,1
+v_moth,Mother Moth,villain,The Light That Lures,horror|fantasy|shojo|supernatural|idol,REPLACE,portrait_staging/villain/v_moth__mother-moth.webp,img/cast4/v_moth.jpg,,set1,villainous_fantasies_six_dark_rulers.png,2
+v_nightshade,Nightshade,villain,The Poison Garden,horror|mystery|shojo|supernatural,REPLACE,portrait_staging/villain/v_nightshade__nightshade.webp,img/cast-villain-8.jpg,2,new_39_completion,sheet5,6
+v_nocturne,Nocturne,villain,Queen of Shadows,horror|mystery|shojo|noir|magical,REPLACE,portrait_staging/villain/v_nocturne__nocturne.webp,img/cast4/v_nocturne.jpg,,new_39_completion,sheet6,1
+v_obsidian,Empress Obsidian,villain,The Glass Throne,shojo|fantasy|horror,REPLACE,portrait_staging/villain/v_obsidian__empress-obsidian.webp,img/cast-villain-3.jpg,0,new_39_completion,sheet4,4
+v_onikage,Onikage,villain,The Cursed Blade,shonen|horror|fantasy|supernatural|military,REPLACE,portrait_staging/villain/v_onikage__onikage.webp,img/cast4/v_onikage.jpg,,new_39_completion,sheet6,2
+v_overlord,Overlord Zero,villain,The Summoned Tyrant,isekai|shojo|fantasy,REPLACE,portrait_staging/villain/v_overlord__overlord-zero.webp,img/cast3/overlord.jpg,,set1,villainous_fantasies_six_dark_rulers.png,5
+v_paradox,Professor Paradox,villain,The Timeline Breaker,mecha|cyber|mystery|space,REPLACE,portrait_staging/villain/v_paradox__professor-paradox.webp,img/cast-villain-5.jpg,2,set4,anime_fantasy_comic_grid_panels.png,3
+v_plague,The Green Doctor,villain,The Cure That Isn't,horror|mystery|fantasy|supernatural|noir|cooking,REPLACE,portrait_staging/villain/v_plague__the-green-doctor.webp,img/cast4/v_plague.jpg,,set1,villainous_fantasies_six_dark_rulers.png,4
+v_puppeteer,The Puppeteer,villain,Strings of Fate,mystery|horror|cyber,REPLACE,portrait_staging/villain/v_puppeteer__the-puppeteer.webp,img/cast-villain-3.jpg,3,set3,six_vignettes_of_shadows_and_light.png,6
+v_reaper,Crimson Reaper,villain,The Red Harvest,horror|shonen,REPLACE,portrait_staging/villain/v_reaper__crimson-reaper.webp,img/cast-villain-2.jpg,2,new_39_completion,sheet3,6
+v_rosethorn,Rosethorn,villain,The Wilted Heiress,shojo|magical|fantasy,REPLACE,portrait_staging/villain/v_rosethorn__rosethorn.webp,img/cast3/rosethorn.jpg,,set4,six_dark_fantasy_villains_in_shadow.png,5
+v_scuttle,Captain Scuttlebutt,villain,The Rumour Raider,fantasy|shonen|mystery|comedy,REPLACE,portrait_staging/villain/v_scuttle__captain-scuttlebutt.webp,img/cast-villain-7.jpg,3,set1,villains_of_the_gothic_multiverse.png,1
+v_silence,The Silence,villain,The Unspoken,horror|mystery|noir,REPLACE,portrait_staging/villain/v_silence__the-silence.webp,img/cast-villain-5.jpg,1,set3,six_vignettes_of_shadows_and_light.png,5
+v_sinister,Sister Sinister,villain,The Sweet Fang,shojo|horror|mystery,REPLACE,portrait_staging/villain/v_sinister__sister-sinister.webp,img/cast-villain-3.jpg,2,set1,villains_of_the_gothic_multiverse.png,3
+v_tempest,Lord Tempest,villain,The Storm Court,fantasy|sports|shonen|racing|supernatural,REPLACE,portrait_staging/villain/v_tempest__lord-tempest.webp,img/cast4/v_tempest.jpg,,set1,villainous_fantasies_six_dark_rulers.png,1
+v_titanus,Titanus Rex,villain,The Apex Monster,shonen|mecha|horror,REPLACE,portrait_staging/villain/v_titanus__titanus-rex.webp,img/cast-villain-8.jpg,3,new_39_completion,sheet7,2
+v_venom,Madame Venom,villain,The Poison Tongue,mystery|shojo|horror,REPLACE,portrait_staging/villain/v_venom__madame-venom.webp,img/cast-villain-1.jpg,3,new_39_completion,sheet5,4
+v_volt,General Volt,villain,The Thunder Warlord,mecha|shonen|cyber,REPLACE,portrait_staging/villain/v_volt__general-volt.webp,img/cast-villain-2.jpg,0,set4,six_dark_fantasy_villains_in_shadow.png,6
+v_warden,The Warden,villain,The Locked Door,mystery|horror|military,REPLACE,portrait_staging/villain/v_warden__the-warden.webp,img/cast-villain-6.jpg,0,new_39_completion,sheet7,1
+v_zero,Zero,villain,The Erased One,cyber|mystery|horror|space,REPLACE,portrait_staging/villain/v_zero__zero.webp,img/cast-villain-4.jpg,1,set3,six_vignettes_of_shadows_and_light.png,4
