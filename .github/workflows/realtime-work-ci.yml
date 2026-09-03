@@ -6,6 +6,7 @@ on:
       - feature/deeper-studio-loop
     paths:
       - "tools/apply_realtime_work.py"
+      - "tools/fix_realtime_ts.py"
       - "tools/anime_runner_icon.b64"
       - ".github/workflows/realtime-work-ci.yml"
 
@@ -36,7 +37,9 @@ jobs:
         run: python -m pip install pillow
 
       - name: Apply realtime work migration
-        run: python tools/apply_realtime_work.py
+        run: |
+          python tools/apply_realtime_work.py
+          python tools/fix_realtime_ts.py
 
       - name: Install dependencies
         working-directory: game_source
