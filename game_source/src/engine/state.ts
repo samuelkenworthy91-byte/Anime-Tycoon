@@ -1232,8 +1232,8 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
   const team = proj?.staffIds ?? [];
   const done = proj?.milestone ?? null;
   const fx = facilityFX(r.facilities);
-  const autoClean = done === "edit" && r.research.includes("autoclean") ? Math.ceil((proj?.issues ?? 0) * 0.35) : 0;
-  const withCleanup: MilestoneOutcome = autoClean > 0 ? { ...o, squashed: (o.squashed ?? 0) + autoClean } : o;
+  /* Auto-Cleanup now speeds the live Edit Bay instead of erasing notes for free on LOCK. */
+  const withCleanup: MilestoneOutcome = o;
   /* the QA suite catches problems before they become issues */
   const guarded: MilestoneOutcome =
     withCleanup.issues > 0 ? { ...withCleanup, issues: Math.max(0, withCleanup.issues - fx.issueGuard) } : withCleanup;
@@ -1271,6 +1271,39 @@ export interface DeskPulse {
 }
 
 /**
+ * Frequent visible work units for the office. These are a readable animation of
+ * the skill-driven production work already banked by the weekly scoring engine,
+ * not an extra duplicate score award. Higher skill produces larger bubbles.
+ */
+export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
+  const pulses: DeskPulse[] = [];
+  for (const st of r.staff) {
+    if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) continue;
+    const project = projectOfStaff(r.projects, st.id);
+    const contract = (r.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
+    const type: PointType | null = project && !project.milestone
+      ? (project.stage === "concept" || project.stage === "preprod" ? "story" : project.stage === "animation" ? "art" : project.stage === "sound" ? "sound" : null)
+      : contract?.contract.type ?? null;
+    if (!type) continue;
+    const skill = staffPoint(st, type);
+    const chance = Math.min(0.96, 0.62 + skill / 280);
+    if (Math.random() > chance) continue;
+    const points = Math.max(2, Math.min(10, Math.round(1 + skill * 0.07 + Math.random() * 2.4)));
+    pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: contract ? "contract" : "project" });
+  }
+
+  const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
+  const active = r.projects.find((pr) => !pr.milestone && pr.stage !== "airing" && pr.stage !== "done" && pr.stage !== "ready");
+  const runnerType: PointType | null = runnerJob?.contract.type
+    ?? (active ? (active.stage === "concept" || active.stage === "preprod" ? "story" : active.stage === "animation" ? "art" : active.stage === "sound" ? "sound" : null) : null);
+  if (runnerType && Math.random() < 0.72) {
+    const skill = showrunnerContractSkill(r.showrunner, r.showsMade, runnerType);
+    pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type: runnerType, points: Math.max(3, Math.round(skill * 0.065)), nonce: Date.now() + 900 + pulses.length, source: runnerJob ? "contract" : "project" });
+  }
+  return pulses;
+}
+
+/**
  * One visible in-game day in the office. Staff assigned to real work spend
  * energy. When energy bottoms out they enter a recovery state, wander around
  * the office, and only return to their desk once they are comfortably charged.
@@ -1294,13 +1327,14 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     const busy = !!projectFocus || !!contract;
 
     if (resting[st.id]) {
-      st.stamina = Math.min(100, st.stamina + 22 + fx.staminaRest);
-      if (st.stamina >= 82) delete resting[st.id];
+      /* recovery is deliberately brisk: roughly two game-days from empty */
+      st.stamina = Math.min(100, st.stamina + 50 + fx.staminaRest * 2);
+      if (st.stamina >= 100) delete resting[st.id];
       return st;
     }
 
     if (!busy) {
-      st.stamina = Math.min(100, st.stamina + 13 + fx.staminaRest);
+      st.stamina = Math.min(100, st.stamina + 18 + fx.staminaRest);
       return st;
     }
 
@@ -1325,7 +1359,54 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return st;
   });
 
-  return { run: { ...r, projects, staff, staffResting: resting }, pulses, attention: false };
+  const visible = rollStudioWorkPulses({ ...r, projects, staff, staffResting: resting });
+  return { run: { ...r, projects, staff, staffResting: resting }, pulses: visible.length ? visible : pulses, attention: false };
+}
+
+/**
+ * The Edit Bay is an open-ended live phase. Every game-day spent here can clear
+ * notes; every cleared note immediately earns 1 RD. There is no artificial edit
+ * timer, so the player can chase a clean master at the cost of calendar time,
+ * weekly burn and potential late-delivery penalties.
+ */
+export function tickEditDay(r: RunState, projectId: string): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
+  const target = projectById(r, projectId);
+  if (!target || target.milestone !== "edit" || target.issues <= 0)
+    return { run: r, pulses: [], attention: !!target && target.milestone === "edit" && target.issues <= 0 };
+
+  const fx = facilityFX(r.facilities);
+  const team = r.staff.filter((st) => target.staffIds.includes(st.id));
+  const capacity =
+    0.8
+    + team.reduce((a, st) => {
+        const craft = (st.story + st.art + st.sound) / 3;
+        return a + (craft / 95) * (0.62 + st.stamina / 260);
+      }, 0)
+    + fx.issueFix * 0.45
+    + (r.research.includes("autoclean") ? 0.8 : 0);
+  const whole = Math.max(1, Math.floor(capacity));
+  const cleared = Math.min(target.issues, whole + (Math.random() < capacity - Math.floor(capacity) ? 1 : 0));
+  const remaining = Math.max(0, target.issues - cleared);
+  const resting = { ...(r.staffResting ?? {}) };
+  const staff = r.staff.map((st) => {
+    if (!target.staffIds.includes(st.id)) return st;
+    const stamina = Math.max(0, st.stamina - 3);
+    if (stamina <= 0) resting[st.id] = true;
+    return { ...st, stamina };
+  });
+  const projects = r.projects.map((pr) => pr.id === projectId ? { ...pr, issues: remaining, rdGained: pr.rdGained + cleared } : pr);
+  return {
+    run: {
+      ...r,
+      rd: r.rd + cleared,
+      staff,
+      staffResting: resting,
+      projects,
+      notices: [...r.notices, `✂ Edit Bay clears ${cleared} note${cleared === 1 ? "" : "s"} on “${target.draft.title}” (+${cleared} RD, ${remaining} remaining).`].slice(-40),
+    },
+    pulses: [],
+    attention: remaining === 0,
+  };
 }
 
 /* ------------------------------------------------------ live rush system */

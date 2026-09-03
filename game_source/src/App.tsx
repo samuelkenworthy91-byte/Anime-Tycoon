@@ -10,6 +10,8 @@ import {
   forecastWeek,
   initialRun,
   tickStudioDay,
+  tickEditDay,
+  rollStudioWorkPulses,
   MAX_WEEKS,
   type DeskPulse,
   migrateRun,
@@ -111,7 +113,8 @@ export default function App() {
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
-    if (screen !== "office" || paused || !run) return;
+    const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+    if ((screen !== "office" && !liveEditing) || paused || !run) return;
     const DAY_MS = 10_000;
     const iv = setInterval(() => {
       if (timeSpeed === 0) return;
@@ -124,7 +127,8 @@ export default function App() {
         setClockDay(dayCountRef.current);
         setRun((current) => {
           if (!current) return current;
-          const daily = tickStudioDay(current);
+          const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+          const daily = liveEditing && focus ? tickEditDay(current, focus.projectId) : tickStudioDay(current);
           let n = daily.run;
           setWorkPulses(daily.pulses);
           if (daily.attention) setTimeSpeed(0);
@@ -153,7 +157,21 @@ export default function App() {
       setClockPhase(Math.floor((dayAccRef.current / DAY_MS) * 4));
     }, 250);
     return () => clearInterval(iv);
-  }, [screen, paused, timeSpeed, run !== null, run?.week]);
+  }, [screen, paused, timeSpeed, run !== null, run?.week, focus?.milestone, focus?.projectId]);
+
+  /* Frequent office work bubbles: the calendar still advances daily, but the
+     staff should LOOK busy throughout that day rather than only once every 10s. */
+  useEffect(() => {
+    if (screen !== "office" || paused || timeSpeed === 0 || !run) return;
+    const gap = timeSpeed >= 12 ? 700 : timeSpeed >= 4 ? 1050 : 1750;
+    const iv = window.setInterval(() => {
+      setRun((current) => {
+        if (current) setWorkPulses(rollStudioWorkPulses(current));
+        return current;
+      });
+    }, gap);
+    return () => window.clearInterval(iv);
+  }, [screen, paused, timeSpeed, run !== null]);
 
   /* --------------------------------------------------------- lifecycle */
   const loadRun = useCallback((slot: SlotId) => {
@@ -545,7 +563,7 @@ export default function App() {
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
           <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
-            {screen === "office" && ([0, 1, 4, 12] as const).map((speed) => (
+            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 12] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>

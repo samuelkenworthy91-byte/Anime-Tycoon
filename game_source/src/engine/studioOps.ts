@@ -68,3 +68,15 @@ export const rushStreamPoint = (skill: number, roll: number) =>
   Math.max(2, Math.round(Math.min(99, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));
 
 export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(99, skill) * 0.13));
+
+/** Stronger rush specialists now have a substantially higher floor AND ceiling. */
+export function rushOutcomeRange(skill: number): { min: number; max: number } {
+  const s = Math.max(1, Math.min(99, Math.round(skill)));
+  const min = Math.max(4, Math.round(8 + s * 0.45));
+  const max = Math.max(min + 6, Math.round(18 + s * 0.90));
+  return { min, max };
+}
+
+/** The rest of the assigned production team still matters during a lead spotlight. */
+export const rushTeamSupport = (skills: number[]) =>
+  Math.min(30, Math.round(skills.reduce((a, v) => a + Math.max(0, Math.min(99, v)) * 0.08, 0)));

@@ -216,7 +216,7 @@ function Character({
       {/* tired wisp */}
       {tired && (
         <span className="pointer-events-none absolute -top-1 left-[62%] text-[10px] font-bold text-cyanx/80 anim-floaty">
-          z
+          {resting ? "☕" : "z"}
         </span>
       )}
 
@@ -318,14 +318,19 @@ export default function OfficeScene({
     const tick = window.setInterval(() => {
       const list = bodiesRef.current;
       if (!list.length) return;
-      const movable = list.map((_, i) => i).filter((i) => !cast[i]?.working);
+      const resters = list.map((_, i) => i).filter((i) => !!cast[i]?.resting);
+      const movable = resters.length ? resters : list.map((_, i) => i).filter((i) => !cast[i]?.working);
       if (!movable.length) return;
-      const i = movable[Math.floor(Math.random() * movable.length)];
+      if (!resters.length && Math.random() < 0.45) return;
+      const picked = new Set<number>();
+      const moves = resters.length ? Math.min(2, movable.length) : 1;
+      while (picked.size < moves) picked.add(movable[Math.floor(Math.random() * movable.length)]);
       setBodies((prev) =>
         prev.map((b, j) => {
-          if (j !== i) return b;
+          if (!picked.has(j)) return b;
+          const recovering = !!cast[j]?.resting;
           const atHome = Math.abs(b.pos.x - b.home.x) < 0.6 && Math.abs(b.pos.y - b.home.y) < 0.6;
-          const to = atHome
+          const to = recovering || atHome
             ? {
                 x: zone.x0 + Math.random() * (zone.x1 - zone.x0),
                 y: zone.y0 + Math.random() * (zone.y1 - zone.y0),
@@ -336,13 +341,12 @@ export default function OfficeScene({
             ...b,
             target: to,
             pos: to,
-            /* a steady walking pace rather than a fixed animation time */
-            dur: Math.max(1.4, dist / 5.5),
+            dur: recovering ? Math.max(0.75, dist / 8) : Math.max(1.4, dist / 5.5),
             flip: to.x < b.pos.x,
           };
         })
       );
-    }, 2600);
+    }, 1150);
     return () => window.clearInterval(tick);
   }, [bodies.length, zone, cast]);
 
