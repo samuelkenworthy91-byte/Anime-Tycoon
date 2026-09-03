@@ -9,6 +9,7 @@ on:
       - tools/apply_day_audience_mechanics.py
       - tools/apply_records_audience_ui.py
       - tools/fix_records_audience_imports.py
+      - tools/fix_day_compat_tests.py
       - .github/workflows/records-audience-days-ci.yml
 
 permissions:
@@ -34,6 +35,8 @@ jobs:
         run: python tools/apply_records_audience_ui.py
       - name: Clean generated imports
         run: python tools/fix_records_audience_imports.py
+      - name: Preserve calendar compatibility
+        run: python tools/fix_day_compat_tests.py
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
