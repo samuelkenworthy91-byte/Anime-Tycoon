@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/staff-energy-rush-reveal-ci.yml"
       - "tools/apply_staff_energy_rush_reveal.py"
+      - "tools/fix_staff_energy_balance.py"
 
 permissions:
   contents: write
@@ -27,7 +28,9 @@ jobs:
         working-directory: game_source
         run: npm ci
       - name: Apply rework
-        run: python tools/apply_staff_energy_rush_reveal.py
+        run: |
+          python tools/apply_staff_energy_rush_reveal.py
+          python tools/fix_staff_energy_balance.py
       - name: Typecheck
         working-directory: game_source
         run: npx tsc --noEmit
