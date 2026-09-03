@@ -1,0 +1,93 @@
+name: Portrait Framing Audit
+
+on:
+  push:
+    branches:
+      - fix/portrait-framing-editing-loop
+    paths:
+      - ".github/workflows/portrait-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: pip install pillow
+
+      - name: Generate framing contact sheets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          import json
+
+          root = Path('game_source/public/img/cast-ready')
+          out = Path('portrait-audit')
+          out.mkdir(exist_ok=True)
+          roles = ['protag', 'secondary', 'pet', 'villain']
+          report = []
+
+          def cover(img, size=(160, 160), y_bias=0.5):
+              iw, ih = img.size
+              tw, th = size
+              scale = max(tw / iw, th / ih)
+              nw, nh = round(iw * scale), round(ih * scale)
+              resized = img.resize((nw, nh), Image.Resampling.LANCZOS)
+              left = max(0, round((nw - tw) * 0.5))
+              top = max(0, round((nh - th) * y_bias))
+              top = min(top, max(0, nh - th))
+              return resized.crop((left, top, left + tw, top + th))
+
+          def contain(img, size=(160, 160)):
+              canvas = Image.new('RGB', size, '#15111f')
+              fitted = ImageOps.contain(img.convert('RGB'), size, Image.Resampling.LANCZOS)
+              x = (size[0] - fitted.width) // 2
+              y = (size[1] - fitted.height) // 2
+              canvas.paste(fitted, (x, y))
+              return canvas
+
+          for role in roles:
+              files = sorted((root / role).glob('*.webp'))
+              cols = 5
+              cell_w, cell_h = 520, 210
+              rows = (len(files) + cols - 1) // cols
+              sheet = Image.new('RGB', (cols * cell_w, rows * cell_h), '#0d0a13')
+              draw = ImageDraw.Draw(sheet)
+              for idx, path in enumerate(files):
+                  im = Image.open(path).convert('RGB')
+                  w, h = im.size
+                  current = cover(im, (150, 150), 0.5)
+                  head_bias = cover(im, (150, 150), 0.25)
+                  full = contain(im, (150, 150))
+                  x0 = (idx % cols) * cell_w
+                  y0 = (idx // cols) * cell_h
+                  sheet.paste(current, (x0 + 5, y0 + 5))
+                  sheet.paste(head_bias, (x0 + 165, y0 + 5))
+                  sheet.paste(full, (x0 + 325, y0 + 5))
+                  name = path.stem
+                  draw.text((x0 + 6, y0 + 160), name[:43], fill='white')
+                  draw.text((x0 + 6, y0 + 178), f'{w}x{h} | current / y25 / contain', fill='#a9a2b5')
+                  report.append({'role': role, 'file': path.name, 'width': w, 'height': h, 'aspect': round(w/h, 4)})
+              sheet.save(out / f'{role}_framing.png', optimize=True)
+
+          (out / 'dimensions.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+          print(f'Audited {len(report)} portraits')
+          PY
+
+      - name: Upload audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: portrait-framing-audit
+          path: portrait-audit/
+          retention-days: 2
