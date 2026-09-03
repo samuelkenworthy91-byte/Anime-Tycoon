@@ -29,7 +29,9 @@ import {
 import { Btn, CountUp } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
+  ARCS,
   ARC_COMBOS,
+  arcComboRating,
   CAST_CHEMS,
   castById,
   GENRES,
@@ -58,6 +60,11 @@ import {
   staffCapacity,
   startBlockReason,
   startResearchProject,
+  startTestAudience,
+  AUDIENCE_TEST_DAYS,
+  AUDIENCE_TEST_RD,
+  AUDIENCE_TEST_MAX_FINDINGS,
+  audienceShowKey,
   studioScore,
   type RunState,
 } from "../engine/state";
@@ -475,12 +482,12 @@ export default function Office({
                   const crew = run.staff.filter((st) => job.staffIds.includes(st.id));
                   const runnerSkill = job.showrunner ? showrunnerContractSkill(run.showrunner, run.showsMade, job.contract.type) : 0;
                   const rate = contractDailyOutputEstimate(job.contract, crew.filter((st) => !run.staffResting?.[st.id]), run.research, runnerSkill);
-                  const daysLeft = Math.max(0, (job.dueWeek - run.week) * 7 - clockDay);
+                  const daysLeft = Math.max(0, (job.dueDay ?? job.dueWeek * 7) - (run.day ?? run.week * 7));
                   const projected = job.progress + rate * daysLeft;
                   const eta = Math.max(1, Math.ceil(Math.max(0, job.contract.target - job.progress) / Math.max(1, rate)));
                   return (
                     <div key={job.id} className="ink-card p-3">
-                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · due {dateLabel(job.dueWeek)}</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/day · LIVE</div></div></div>
+                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · {daysLeft} day{daysLeft===1?"":"s"} left</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/day · LIVE</div></div></div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel3"><div className="h-full rounded-full bg-cyanx transition-all" style={{ width: `${Math.min(100, job.progress / Math.max(1, job.contract.target) * 100)}%` }} /></div>
                       <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace · roughly ${eta} workday${eta === 1 ? "" : "s"} at this crew strength. Every bubble moves this bar.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
                     </div>
@@ -499,7 +506,7 @@ export default function Office({
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-bold">{c.name}</div>
                   <div className="text-[11px] text-paper/55">
-                    Needs <b style={{ color: POINT_COLOR[c.type] }}>{c.target} {c.type}</b> points · {c.weeks} weeks
+                    Needs <b style={{ color: POINT_COLOR[c.type] }}>{c.target} {c.type}</b> points · {c.weeks * 7} days
                   </div>
                 </div>
                 <div className="text-right">
@@ -600,6 +607,29 @@ export default function Office({
             <span className="ml-auto text-[11px] text-paper/50">Earn RD by shipping shows, fixing editing notes and taking contracts.</span>
           </div>
           <KnowledgeDossier run={run} selection={knowledge} onSelect={setKnowledge} />
+          <div className="mt-4 rounded-xl border border-cyanx/45 bg-cyanx/5 p-3">
+            {(() => {
+              const key = audienceShowKey(run);
+              const tested = key ? (run.audienceTestCounts?.[key] ?? 0) : 0;
+              const exhausted = tested >= AUDIENCE_TEST_MAX_FINDINGS;
+              const blocked = !run.lastDraft || !run.lastResult || run.staff.length === 0 || !!run.audienceTest || run.trainingJobs.length > 0 || exhausted;
+              return <>
+                <div className="flex items-center gap-2"><Users size={15} className="text-cyanx"/><div className="font-display text-sm font-extrabold">TEST AUDIENCE LAB</div><span className="ml-auto rounded bg-panel3 px-2 py-0.5 text-[9px] font-bold text-mint">REPEATABLE</span></div>
+                <div className="mt-1 text-[10px] text-paper/60">Study your latest release. The whole studio stops normal production for <b className="text-paper">{AUDIENCE_TEST_DAYS} days</b>; project and contract deadlines keep moving. Each completed panel gives <b className="text-viol">+{AUDIENCE_TEST_RD} RD</b> and one concrete finding about sliders, quality mix, cast or arcs.</div>
+                {run.lastDraft && <div className="mt-2 rounded-lg border border-line bg-panel2/60 px-2 py-1.5 text-[10px]"><b>LATEST: “{run.lastDraft.title}”</b><span className="ml-2 text-paper/45">{tested}/{AUDIENCE_TEST_MAX_FINDINGS} findings extracted</span></div>}
+                {run.audienceTest ? (
+                  <div className="mt-2 text-xs font-bold text-cyanx">PANEL RUNNING · {Math.max(0, run.audienceTest.completesDay - (run.day ?? run.week*7))} DAYS LEFT · ALL STAFF OCCUPIED</div>
+                ) : exhausted ? (
+                  <div className="mt-2 text-xs font-bold text-mint">THIS RELEASE IS FULLY TESTED ✓ · Ship another show for a fresh panel.</div>
+                ) : (
+                  <Btn variant="cyan" className="mt-2 !px-3 !py-1.5 text-xs" disabled={blocked} onClick={() => setRun((r) => startTestAudience(r) ?? r)}>
+                    <Users size={13}/> RUN PANEL · ALL STAFF · {AUDIENCE_TEST_DAYS} DAYS
+                  </Btn>
+                )}
+                {run.trainingJobs.length > 0 && !run.audienceTest && <div className="mt-1 text-[9px] text-gold">Finish current staff training first — a panel needs the whole team available.</div>}
+              </>;
+            })()}
+          </div>
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO TECH</div>
           <div className="grid gap-2 sm:grid-cols-2">
             {RESEARCH.map((u) => {
@@ -616,7 +646,7 @@ export default function Office({
                     {owned ? (
                       <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
                     ) : pending ? (
-                      <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, pending.completesWeek - run.week)} WK</span>
+                      <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, (pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7))} DAYS</span>
                     ) : (
                       <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={run.rd < u.rd} onClick={() => research(u.id, u.rd)}>
                         START · {u.rd} RD
@@ -918,17 +948,28 @@ export default function Office({
               {run.arcCombos.map((id) => {
                 const c = ARC_COMBOS.find((x) => x.id === id);
                 if (!c) return null;
+                const rating = arcComboRating(c);
+                const names = c.arcs.map((arcId) => ARCS.find((a) => a.id === arcId)?.name ?? arcId);
                 return (
-                  <div key={id} className="flex items-center gap-2 rounded-lg border border-cyanx/40 bg-cyanx/5 px-2.5 py-1.5">
-                    <span className="truncate text-xs font-bold text-cyanx">{c.name}</span>
-                    <span className="ml-auto text-[10px] font-extrabold text-gold">
-                      {c.q >= 0 ? "+" : ""}
-                      {c.q} Q{c.f ? ` · +${Math.round(c.f * 100)}% fans` : ""}
-                    </span>
+                  <div key={id} className="rounded-lg border border-cyanx/40 bg-cyanx/5 px-2.5 py-2">
+                    <div className="flex items-center gap-2"><span className="truncate text-xs font-bold text-cyanx">{c.name}</span><span className={cn("ml-auto text-[9px] font-extrabold", rating.cls)}>{rating.label}</span></div>
+                    <div className="mt-1 text-[10px] text-paper/65"><b className="text-paper/80">RECIPE:</b> {names.join(c.ordered ? " → " : " + ")}{c.ordered ? " · order matters" : ""}</div>
+                    <div className="mt-1 text-[10px] font-bold text-gold"><b className="text-paper/70">IMPACT:</b> {c.q >= 0 ? "+" : ""}{c.q} arc quality{c.f ? ` · ${c.f >= 0 ? "+" : ""}${Math.round(c.f * 100)}% fan response` : ""}</div>
                   </div>
                 );
               })}
             </div>
+          )}
+
+          <div className="mb-2 mt-4 flex items-center gap-2 text-xs font-bold tracking-widest text-viol">
+            <Users size={14} /> TEST AUDIENCE FINDINGS
+          </div>
+          {(run.audienceInsights ?? []).length === 0 ? (
+            <div className="text-sm text-paper/40">Run panels in R&amp;D after a release to turn audience reactions into permanent studio knowledge.</div>
+          ) : (
+            <div className="space-y-1.5">{[...(run.audienceInsights ?? [])].reverse().slice(0, 12).map((ins, i) => (
+              <div key={`${ins.showKey}_${ins.day}_${i}`} className="rounded-lg border border-viol/30 bg-viol/5 px-2.5 py-2"><div className="text-[9px] font-extrabold tracking-wider text-viol">“{ins.title}” · DAY {ins.day}</div><div className="mt-0.5 text-[10px] text-paper/70">{ins.text}</div></div>
+            ))}</div>
           )}
 
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

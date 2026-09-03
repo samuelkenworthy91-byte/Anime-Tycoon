@@ -24,8 +24,18 @@ export default function KnowledgeDossier({ run, selection, onSelect }: { run: Ru
       <div className="flex items-center gap-2"><g.icon size={18} style={{color:g.color}}/><div><div className="font-display text-lg font-extrabold">{g.label}</div><div className="text-[9px] font-extrabold tracking-widest text-gold">{levelLabel(k)} · KNOWLEDGE {k}</div></div></div>
       <p className="mt-2 text-[11px] text-paper/60">{g.desc}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>PRODUCTION LEAN</b><br/><span className="text-paper/60">{emphasis.map(([n,v]) => `${n} ${Math.round(Number(v)*100)}%`).join(" · ")}</span></div>
-        <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>STORY KNOWLEDGE</b><br/><span className="text-paper/60">{learnedArcs} arc relationship{learnedArcs===1?"":"s"} learned for this genre.</span></div>
+        <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>PRODUCTION LEAN</b><br/><span className="text-paper/60">{
+          k <= 0 ? "Untested — ship a show or run a test audience to learn what matters." :
+          k <= 2 ? `Early read: ${emphasis[0][0]} appears most important.` :
+          k <= 5 ? emphasis.map(([n,v]) => `${n} ≈${Math.round(Number(v)*100/5)*5}%`).join(" · ") :
+          emphasis.map(([n,v]) => `${n} ${Math.round(Number(v)*100)}%`).join(" · ")
+        }</span></div>
+        <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>DIRECTION MEMO</b><br/><span className="text-paper/60">{
+          k < 3 ? "Audience direction preferences are still fuzzy." :
+          k < 6 ? `The studio has a working read on this genre. More releases narrow the slider targets.` :
+          `Plot ${g.ideal[0]}% · Sakuga ${g.ideal[1]}% · Music ${g.ideal[2]}%`
+        }</span></div>
+        <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px] sm:col-span-2"><b>STORY KNOWLEDGE</b><br/><span className="text-paper/60">{learnedArcs} arc relationship{learnedArcs===1?"":"s"} learned for this genre. Test audiences and repeated releases add more evidence.</span></div>
       </div>
       <div className="mt-3 text-[9px] font-extrabold tracking-widest text-paper/45">KNOWN PAIRINGS</div>
       <div className="mt-1 grid gap-1 sm:grid-cols-2">{knownPairs.length ? knownPairs.map(([key,lv]) => {

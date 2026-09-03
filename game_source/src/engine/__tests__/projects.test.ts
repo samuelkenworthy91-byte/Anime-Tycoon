@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Draft, Staff } from "../data";
 import {
   DEADLINE_SLACK,
@@ -247,6 +247,7 @@ describe("deadlines", () => {
   });
 
   it("late delivery docks release revenue", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
     let r = richRun();
     r = startProject(r, draft())!;
     const id = r.projects[0].id;

@@ -387,7 +387,7 @@ export const RESEARCH: ResearchItem[] = [
   { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
   { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show." },
-  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Animation sprint output gains +12% Art quality." },
+  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art contribution checks gain +12% effective skill." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },

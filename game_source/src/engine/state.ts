@@ -1,5 +1,6 @@
 import {
   GENRES,
+  ARCS,
   ARC_COMBOS,
   ARC_RESEARCH_COMBOS,
   ARC_RESEARCH_GENRE_KEYS,
@@ -9,6 +10,7 @@ import {
   CAREER_WEEKS,
   AIR_WEEKS,
   castById,
+  arcGenreFit,
   comboKey,
   dateLabel,
   PUN_TITLES,
@@ -140,6 +142,7 @@ import {
   makeProject,
   projectUpfront,
   tickProjectsWeek,
+  tickProjectsDay,
   toggleAssign,
   type MilestoneOutcome,
   type Project,
@@ -208,12 +211,31 @@ export interface AwardCeremony {
   playerAwards: number;
 }
 
+export interface AudienceInsight {
+  showKey: string;
+  title: string;
+  text: string;
+  day: number;
+}
+
+export interface AudienceTestJob {
+  showKey: string;
+  title: string;
+  startDay: number;
+  completesDay: number;
+  round: number;
+  draft: Draft;
+  result: ShowResult;
+}
+
 export interface RunState {
   studio: string;
   showrunner: string;
   cash: number;
   fans: number;
   rd: number; // research data
+  /** exact live-clock day; week remains the seven-day finance/industry cadence */
+  day: number;
   week: number;
   officeLevel: number;
   showsMade: number;
@@ -292,6 +314,12 @@ export interface RunState {
   trainingJobs: TrainingJob[];
   /** studio technologies unlock after a timed research project */
   researchJobs: ResearchJob[];
+  /** optional repeatable focus-group study of the most recently released show */
+  audienceTest: AudienceTestJob | null;
+  /** how many distinct findings have been extracted from each release */
+  audienceTestCounts: Record<string, number>;
+  /** persistent findings that can be consulted later in R&D / Records */
+  audienceInsights: AudienceInsight[];
   /** employees who have exhausted their energy and are actively recuperating */
   staffResting: Record<string, boolean>;
   /** overseas licensing deal: +15% revenue until this week */
@@ -332,6 +360,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     cash: START_CASH,
     fans: 0,
     rd: 12,
+    day: 0,
     week: 0,
     officeLevel: 0,
     showsMade: 0,
@@ -382,6 +411,9 @@ export function initialRun(studio: string, showrunner: string): RunState {
     contractJobs: [],
     trainingJobs: [],
     researchJobs: [],
+    audienceTest: null,
+    audienceTestCounts: {},
+    audienceInsights: [],
     staffResting: {},
     revBoostUntil: 0,
   };
@@ -411,6 +443,10 @@ export function migrateRun(raw: unknown): RunState {
     contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 })) : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
+    audienceTest: r.audienceTest && typeof r.audienceTest === "object" ? r.audienceTest : null,
+    audienceTestCounts: r.audienceTestCounts && typeof r.audienceTestCounts === "object" ? r.audienceTestCounts : {},
+    audienceInsights: Array.isArray(r.audienceInsights) ? r.audienceInsights : [],
+    day: typeof r.day === "number" ? r.day : (r.week ?? 0) * 7,
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
     genreKnowledge: r.genreKnowledge && typeof r.genreKnowledge === "object" ? r.genreKnowledge : {},
     arcCombos: Array.isArray(r.arcCombos) ? r.arcCombos : [],
@@ -555,7 +591,7 @@ const commissionForShowrunner = (showrunner: string, c: Commission): Commission 
     : c;
 
 /** Advance the calendar: weekly payouts land, wages + rent charged at month end, rival shows air, and each year ends with the awards ceremony. */
-export function advanceWeeks(r: RunState, n: number): RunState {
+export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyApplied?: boolean } = {}): RunState {
   let cash = r.cash;
   let fans = r.fans;
   const notices = [...r.notices];
@@ -633,13 +669,15 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
     payouts = payouts.filter((p) => p.week !== w);
 
-    /* every project in the pipeline gets a week of work. Multiple shows in
-       the same department now contend for finite studio capacity. */
-    const loadMap = projectLoadMap(projects, staffArr, r.facilities, research);
-    const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio, loadMap);
-    projects = tick.projects;
-    cash += tick.cashDelta;
-    notices.push(...tick.notices);
+    /* Headless/legacy callers can still advance a whole week at once. The live
+       app has already banked seven daily project ticks, so it skips this fallback. */
+    if (!opts.liveDaysAlreadyApplied) {
+      const loadMap = projectLoadMap(projects, staffArr, r.facilities, research);
+      const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio, loadMap);
+      projects = tick.projects;
+      cash += tick.cashDelta;
+      notices.push(...tick.notices);
+    }
 
     /* delegated projects run their own milestone sprints automatically */
     const dlg = tickDelegated(r, projects, staffArr, w, fx);
@@ -649,8 +687,9 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     cash += dlg.cash;
     notices.push(...dlg.notices);
 
-    /* ------- background contract work: live bubbles first, weekly fallback ------- */
-    {
+    /* ------- background contract work: live bubbles are authoritative in the app;
+       weekly fallback remains only for headless/legacy week jumps ------- */
+    if (!opts.liveDaysAlreadyApplied) {
       const keep: ContractAssignment[] = [];
       for (const job of contractJobs) {
         const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !(r.staffResting ?? {})[s.id]);
@@ -678,7 +717,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
 
     /* ------- courses complete after occupying the employee for weeks ------- */
-    {
+    if (!opts.liveDaysAlreadyApplied) {
       const keep: TrainingJob[] = [];
       for (const job of trainingJobs) {
         const exists = staffArr.some((s) => s.id === job.staffId);
@@ -696,7 +735,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
     }
 
     /* ------- research projects mature over calendar time ------- */
-    {
+    if (!opts.liveDaysAlreadyApplied) {
       const keep: ResearchJob[] = [];
       for (const job of researchJobs) {
         if (w < job.completesWeek) { keep.push(job); continue; }
@@ -744,7 +783,7 @@ export function advanceWeeks(r: RunState, n: number): RunState {
         let nx = { ...st };
         const proj = busy.has(st.id) ? projectOfStaff(projects, st.id) : null;
         if (proj) {
-          nx.stamina = Math.max(12, nx.stamina - drain);
+          if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.max(12, nx.stamina - drain);
           /* morale while working */
           let dm = 0;
           if (nx.stamina < 35) dm -= 2; // overworked
@@ -762,11 +801,11 @@ export function advanceWeeks(r: RunState, n: number): RunState {
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
         } else if (opBusy.has(st.id)) {
-          nx.stamina = Math.max(12, nx.stamina - Math.max(1, drain - 1));
+          if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.max(12, nx.stamina - Math.max(1, drain - 1));
           const g = gainXp(nx, Math.max(1, WEEKLY_XP - 1) * dynFx.xpMult);
           nx = g.staff;
         } else {
-          nx.stamina = Math.min(100, nx.stamina + rest);
+          if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.min(100, nx.stamina + rest);
           const cur = moraleOf(nx);
           let dm = cur < 70 ? 2 : cur > 70 ? -1 : 0;
           dm += fx.moraleRest;
@@ -1147,7 +1186,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     if (r.cash + (commission?.advance ?? 0) < projectUpfront(d) + contFee) return null;
   }
 
-  let p = makeProject(d, r.week);
+  let p = makeProject(d, r.week, r.day ?? r.week * 7);
   /* the Hype Machine opens every show with a ready-made buzz */
   if (r.showrunner === "marketer") p = { ...p, hype: p.hype + 10 };
   const partner = commission ? partnerById(commission.partnerId) : null;
@@ -1155,6 +1194,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     p = {
       ...p,
       deadlineWeek: r.week + commission.maxWeeks,
+      deadlineDay: (r.day ?? r.week * 7) + commission.maxWeeks * 7,
       hype: p.hype + (commission.hypeBonus ?? 0),
       commission: {
         partnerId: commission.partnerId,
@@ -1164,6 +1204,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
         minQuality: commission.minQuality,
         bonus: commission.bonus,
         deadlineWeek: r.week + commission.maxWeeks,
+        deadlineDay: (r.day ?? r.week * 7) + commission.maxWeeks * 7,
       },
     };
   }
@@ -1179,14 +1220,15 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     notices: [
       ...r.notices,
       commission && partner
-        ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 by ${dateLabel(r.week + commission.maxWeeks)}.`
-        : `“${d.title}” greenlit — target release ${dateLabel(p.deadlineWeek)}. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
+        : `“${d.title}” greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
 
 /** work outside major productions also occupies staff. */
 export function staffOperationReason(r: RunState, staffId: string): string | null {
+  if (r.audienceTest) return `Test audience study: ${r.audienceTest.title}`;
   const c = (r.contractJobs ?? []).find((j) => j.staffIds.includes(staffId));
   if (c) return `Contract: ${c.contract.name}`;
   const t = (r.trainingJobs ?? []).find((j) => j.staffId === staffId);
@@ -1221,6 +1263,8 @@ export function startContractAssignment(r: RunState, contract: Contract, staffId
     showrunner,
     startWeek: r.week,
     dueWeek: r.week + contract.weeks,
+    startDay: r.day ?? r.week * 7,
+    dueDay: (r.day ?? r.week * 7) + contract.weeks * 7,
     progress: 0,
     liveProgressThisWeek: 0,
   };
@@ -1229,7 +1273,7 @@ export function startContractAssignment(r: RunState, contract: Contract, staffId
     ...r,
     contracts: r.contracts.filter((c) => c.id !== contract.id),
     contractJobs: [...(r.contractJobs ?? []), job],
-    notices: [...r.notices, `📋 ${contract.name} assigned to ${seats} contributor${seats === 1 ? "" : "s"}${showrunner ? " including the showrunner" : ""} — due ${dateLabel(job.dueWeek)}.`],
+    notices: [...r.notices, `📋 ${contract.name} assigned to ${seats} contributor${seats === 1 ? "" : "s"}${showrunner ? " including the showrunner" : ""} — ${contract.weeks * 7} days to deliver.`],
   };
 }
 
@@ -1280,6 +1324,178 @@ export interface DeskPulse {
 }
 
 const POINT_TYPES: PointType[] = ["story", "art", "sound"];
+
+export const AUDIENCE_TEST_DAYS = 2;
+export const AUDIENCE_TEST_RD = 4;
+export const AUDIENCE_TEST_MAX_FINDINGS = 6;
+
+export const audienceShowKey = (r: Pick<RunState, "showsMade" | "lastDraft">) =>
+  r.lastDraft ? `${r.showsMade}:${r.lastDraft.title}` : "";
+
+const blendedGenreMemo = (draft: Draft) => {
+  const defs = draft.genres.map((id) => GENRES.find((g) => g.id === id)).filter(Boolean) as typeof GENRES;
+  const n = Math.max(1, defs.length);
+  const ideal: [number, number, number] = [0, 1, 2].map((i) => Math.round(defs.reduce((a, g) => a + g.ideal[i], 0) / n)) as [number, number, number];
+  const ratio: [number, number, number] = [0, 1, 2].map((i) => defs.reduce((a, g) => a + g.ratio[i], 0) / n) as [number, number, number];
+  return { ideal, ratio };
+};
+
+function audienceFinding(job: AudienceTestJob): { text: string; learnArcGenre?: string } {
+  const { draft } = job;
+  const memo = blendedGenreMemo(draft);
+  const genres = draft.genres.map((id) => GENRES.find((g) => g.id === id)?.label ?? id).join(" × ");
+  const dirs = [
+    ["Story direction", "Plot", "Characters"],
+    ["Animation direction", "Sakuga", "Consistency"],
+    ["Sound direction", "Music", "Voice acting"],
+  ] as const;
+  if (job.round <= 2) {
+    const i = job.round as 0 | 1 | 2;
+    const target = memo.ideal[i];
+    return { text: `${dirs[i][0]}: ${genres} viewers preferred about ${target}% ${dirs[i][1]} / ${100 - target}% ${dirs[i][2]}. Your last cut used ${draft.sliders[i]}%.` };
+  }
+  if (job.round === 3) {
+    const pct = memo.ratio.map((v) => Math.round(v * 100));
+    return { text: `Quality mix: this genre blend responds best around ${pct[0]}% Story · ${pct[1]}% Art · ${pct[2]}% Sound. Staff can contribute across all three, so shape the team rather than hard-locking roles.` };
+  }
+  if (job.round === 4) {
+    const cast = [
+      ["lead", draft.protag], ["support", draft.secondary], ["mascot", draft.pet], ["villain", draft.villain],
+    ] as const;
+    const ranked = cast.map(([role, id]) => {
+      const m = castById(id);
+      const fit = m.aff.filter((g) => draft.genres.includes(g as GenreId)).length;
+      return { role, m, fit };
+    }).sort((a, b) => a.fit - b.fit);
+    const weak = ranked[0];
+    return { text: `Cast response: ${weak.m.name} (${weak.role}) was the weakest genre fit in this version — ${weak.fit}/${draft.genres.length} selected genre affinities matched. A better-matched ${weak.role} should review more consistently.` };
+  }
+  const arc = draft.arcs.map((id) => ARCS.find((a) => a.id === id)).find(Boolean);
+  if (arc && draft.genres.length) {
+    const genre = draft.genres[0];
+    const fit = arcGenreFit(arc, genre);
+    const gl = GENRES.find((g) => g.id === genre)?.label ?? genre;
+    return { text: `Arc test: ${arc.name} measured as ${fit.label} with ${gl}${fit.score ? ` (${fit.score > 0 ? "+" : ""}${fit.score} quality-side synergy)` : ""}.`, learnArcGenre: `${arc.id}|${genre}` };
+  }
+  return { text: `Editing response: every unresolved editor note costs roughly 0.9 raw quality before critic scoring. A clean master is measurably safer if the deadline allows it.` };
+}
+
+export function startTestAudience(r: RunState): RunState | null {
+  if (!r.lastDraft || !r.lastResult || r.audienceTest || r.staff.length === 0) return null;
+  if ((r.trainingJobs ?? []).length > 0) return null; // all employees must be available for the study
+  const showKey = audienceShowKey(r);
+  const round = r.audienceTestCounts?.[showKey] ?? 0;
+  if (!showKey || round >= AUDIENCE_TEST_MAX_FINDINGS) return null;
+  const startDay = r.day ?? r.week * 7;
+  return {
+    ...r,
+    audienceTest: { showKey, title: r.lastDraft.title, startDay, completesDay: startDay + AUDIENCE_TEST_DAYS, round, draft: r.lastDraft, result: r.lastResult },
+    notices: [...r.notices, `👥 Test audience booked for “${r.lastDraft.title}” — the whole studio is tied up for ${AUDIENCE_TEST_DAYS} days.`],
+  };
+}
+
+function finishResearchJob(r: RunState, job: ResearchJob): RunState {
+  let research = [...r.research];
+  let arcCombos = [...r.arcCombos];
+  const arcKnowledge = { ...r.arcKnowledge };
+  const arcGenreKnowledge = { ...r.arcGenreKnowledge };
+  const notices = [...r.notices];
+  if (!research.includes(job.researchId)) research.push(job.researchId);
+  if (job.researchId === "narrative_analytics") {
+    arcCombos = [...new Set([...arcCombos, ...ARC_RESEARCH_COMBOS])];
+    for (const id of ARC_RESEARCH_COMBOS) {
+      const combo = ARC_COMBOS.find((c) => c.id === id);
+      for (const arcId of combo?.arcs ?? []) arcKnowledge[arcId] = Math.max(1, arcKnowledge[arcId] ?? 0);
+    }
+    notices.push("📚 Narrative Analytics adds several proven structures to the Studio Bible.");
+  }
+  if (job.researchId === "genre_studies") {
+    for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
+    notices.push("📚 Genre Studies reveals a starter set of arc-to-genre relationships.");
+  }
+  notices.push(`🔬 Research complete: ${job.name}!`);
+  return { ...r, research, arcCombos, arcKnowledge, arcGenreKnowledge, notices };
+}
+
+function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; studioLocked: boolean } {
+  let nx = r;
+  let attention = false;
+  const studioLocked = !!r.audienceTest;
+
+  /* contract deadlines are exact days now; testing the audience does not stop the clock. */
+  if ((nx.contractJobs ?? []).length) {
+    const keep: ContractAssignment[] = [];
+    let rd = nx.rd;
+    const notices = [...nx.notices];
+    for (const job of nx.contractJobs) {
+      const dueDay = job.dueDay ?? job.dueWeek * 7;
+      if ((nx.day ?? nx.week * 7) >= dueDay && job.progress < job.contract.target) {
+        const consolation = Math.max(1, Math.round(job.contract.rd / 3));
+        rd += consolation;
+        attention = true;
+        notices.push(`❌ Contract missed: ${job.contract.name} — ${job.progress}/${job.contract.target} progress (+${consolation} RD learned).`);
+      } else keep.push(job);
+    }
+    nx = { ...nx, contractJobs: keep, rd, notices };
+  }
+
+  /* courses and technology can finish on any day instead of waiting for Sunday. */
+  if ((nx.trainingJobs ?? []).length) {
+    const keep: TrainingJob[] = [];
+    let staff = nx.staff;
+    const notices = [...nx.notices];
+    for (const job of nx.trainingJobs) {
+      if (!staff.some((s) => s.id === job.staffId)) continue;
+      const due = job.completesDay ?? job.completesWeek * 7;
+      if ((nx.day ?? nx.week * 7) < due) { keep.push(job); continue; }
+      staff = staff.map((s) => {
+        if (s.id !== job.staffId) return s;
+        let out = ensureCareer({ ...s, [job.focus]: Math.min(99, s[job.focus] + 1), lastTrainedWeek: nx.week }, nx.week);
+        out = moraleDelta(out, 3);
+        return gainXp(out, trainXp(job.tier)).staff;
+      });
+      attention = true;
+      notices.push(`🎓 ${job.staffName} completes ${job.focus} training (+1 ${job.focus}, +${trainXp(job.tier)} XP).`);
+    }
+    nx = { ...nx, staff, trainingJobs: keep, notices };
+  }
+
+  if ((nx.researchJobs ?? []).length) {
+    const keep: ResearchJob[] = [];
+    for (const job of nx.researchJobs) {
+      const due = job.completesDay ?? job.completesWeek * 7;
+      if ((nx.day ?? nx.week * 7) < due) { keep.push(job); continue; }
+      nx = finishResearchJob(nx, job);
+      attention = true;
+    }
+    nx = { ...nx, researchJobs: keep };
+  }
+
+  if (r.audienceTest && (nx.day ?? nx.week * 7) >= r.audienceTest.completesDay) {
+    const found = audienceFinding(r.audienceTest);
+    const counts = { ...(nx.audienceTestCounts ?? {}), [r.audienceTest.showKey]: r.audienceTest.round + 1 };
+    const insight: AudienceInsight = { showKey: r.audienceTest.showKey, title: r.audienceTest.title, text: found.text, day: nx.day ?? nx.week * 7 };
+    const genreKnowledge = r.audienceTest.draft.genres.reduce((acc, genre) => {
+      acc[genre] = Math.min(12, (acc[genre] ?? 0) + 1);
+      return acc;
+    }, { ...(nx.genreKnowledge ?? {}) });
+    const arcGenreKnowledge = { ...(nx.arcGenreKnowledge ?? {}) };
+    if (found.learnArcGenre) arcGenreKnowledge[found.learnArcGenre] = Math.max(1, arcGenreKnowledge[found.learnArcGenre] ?? 0);
+    nx = {
+      ...nx,
+      rd: nx.rd + AUDIENCE_TEST_RD,
+      genreKnowledge,
+      arcGenreKnowledge,
+      audienceTestCounts: counts,
+      audienceInsights: [...(nx.audienceInsights ?? []), insight].slice(-30),
+      audienceTest: null,
+      notices: [...nx.notices, `👥 TEST AUDIENCE: ${found.text} (+${AUDIENCE_TEST_RD} RD)`].slice(-40),
+    };
+    attention = true;
+  }
+
+  return { run: nx, attention, studioLocked };
+}
 
 /** Kairosoft-style percentile output. 65 effective skill = 65% chance of +1;
  *  175 = guaranteed +1 plus 75% chance of +2; 247 = guaranteed +2 plus 47% +3. */
@@ -1346,6 +1562,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
  *  cycle so a full office stays readable; skill determines whether their check
  *  fires and whether 100+/200+ effective skill creates multi-point bubbles. */
 export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
+  if (r.audienceTest) return [];
   const pulses: DeskPulse[] = [];
   const eligible = r.staff.filter((st) => {
     if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
@@ -1420,36 +1637,61 @@ export function tickStudioWorkPulse(r: RunState): { run: RunState; pulses: DeskP
 /** A calendar day handles energy only; quality is created solely by the visible
  *  work-check bubbles above, never by an invisible weekly score injection. */
 export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
-  const projects = r.projects.map((p) => ({ ...p, points: { ...p.points } }));
-  const resting = { ...(r.staffResting ?? {}) };
-  const fx = facilityFX(r.facilities);
-  const staff = r.staff.map((st0) => {
+  const bg = tickDailyBackground(r);
+  let nx = bg.run;
+  const resting = { ...(nx.staffResting ?? {}) };
+  const baseFx = facilityFX(nx.facilities);
+  const spm = studioPointMult(nx.heads ?? {}, nx.staff, nx.legends ?? []);
+  const dynFx = dynastyFX(nx);
+  const fx = {
+    ...baseFx,
+    pointMult: {
+      story: baseFx.pointMult.story * spm.story * dynFx.pointMult,
+      art: baseFx.pointMult.art * spm.art * dynFx.pointMult,
+      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult,
+    },
+    speed: baseFx.speed + dynFx.speed,
+  };
+
+  if (bg.studioLocked) {
+    const staff = nx.staff.map((s) => ({ ...s, stamina: Math.max(0, s.stamina - 3) }));
+    return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
+  }
+
+  const studio = studioProduction(nx.heads ?? {}, nx.staff);
+  const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds: nx.bonds ?? {} });
+  const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
+  const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
+  nx = { ...nx, projects: dayTick.projects, cash: nx.cash + dayTick.cashDelta, notices: [...nx.notices, ...dayTick.notices].slice(-40) };
+
+  const staff = nx.staff.map((st0) => {
     const st = { ...st0 };
-    const project = projectOfStaff(projects, st.id);
-    const contract = (r.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
+    const project = projectOfStaff(nx.projects, st.id);
+    const contract = (nx.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
     const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
     const busy = production || !!contract;
     if (resting[st.id]) {
-      st.stamina = Math.min(100, st.stamina + 50 + fx.staminaRest * 2);
+      st.stamina = Math.min(100, st.stamina + 50 + baseFx.staminaRest * 2);
       if (st.stamina >= 100) delete resting[st.id];
       return st;
     }
     if (!busy) {
-      st.stamina = Math.min(100, st.stamina + 18 + fx.staminaRest);
+      st.stamina = Math.min(100, st.stamina + 18 + baseFx.staminaRest);
       return st;
     }
-    const drain = Math.max(5, 9 - fx.staminaSave);
+    const drain = Math.max(5, 9 - baseFx.staminaSave);
     st.stamina = Math.max(0, st.stamina - drain);
     if (st.stamina <= 0) resting[st.id] = true;
     return st;
   });
-  return { run: { ...r, projects, staff, staffResting: resting }, pulses: [], attention: false };
+  return { run: { ...nx, staff, staffResting: resting }, pulses: [], attention: bg.attention || dayTick.attention };
 }
 
 /** One live editing work check. Editors roll one of their three craft skills;
  *  successful bubbles remove exactly that many notes and award exactly 1 RD per
  *  cleared note. The same >100/>200 percentile rule applies. */
 export function tickEditWorkPulse(r: RunState, projectId: string): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
+  if (r.audienceTest) return { run: r, pulses: [], attention: false };
   const target = projectById(r, projectId);
   if (!target || target.milestone !== "edit" || target.issues <= 0)
     return { run: r, pulses: [], attention: !!target && target.milestone === "edit" && target.issues <= 0 };
@@ -1484,11 +1726,14 @@ export function tickEditWorkPulse(r: RunState, projectId: string): { run: RunSta
 /** Editing has no artificial timer. Calendar days only drain/recover energy;
  *  note removal is performed by visible edit bubbles from tickEditWorkPulse. */
 export function tickEditDay(r: RunState, projectId: string): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
-  const target = projectById(r, projectId);
-  if (!target || target.milestone !== "edit") return { run: r, pulses: [], attention: false };
-  const resting = { ...(r.staffResting ?? {}) };
-  const fx = facilityFX(r.facilities);
-  const staff = r.staff.map((st0) => {
+  const bg = tickDailyBackground(r);
+  const nx = bg.run;
+  const target = projectById(nx, projectId);
+  if (!target || target.milestone !== "edit") return { run: nx, pulses: [], attention: bg.attention };
+  if (bg.studioLocked) return { run: nx, pulses: [], attention: bg.attention };
+  const resting = { ...(nx.staffResting ?? {}) };
+  const fx = facilityFX(nx.facilities);
+  const staff = nx.staff.map((st0) => {
     if (!target.staffIds.includes(st0.id)) return st0;
     const st = { ...st0 };
     if (resting[st.id]) {
@@ -1500,7 +1745,7 @@ export function tickEditDay(r: RunState, projectId: string): { run: RunState; pu
     if (st.stamina <= 0) resting[st.id] = true;
     return st;
   });
-  return { run: { ...r, staff, staffResting: resting }, pulses: [], attention: target.issues <= 0 };
+  return { run: { ...nx, staff, staffResting: resting }, pulses: [], attention: bg.attention || target.issues <= 0 };
 }
 
 /* ------------------------------------------------------ live rush system */
@@ -1742,7 +1987,7 @@ export function releaseProject(
         { label: `${deal.partnerName} share (${Math.round(deal.share * 100)}%)`, pts: `−£${cut.toLocaleString("en-GB")}` },
       ],
     };
-    const late = r.week > deal.deadlineWeek;
+    const late = Math.max(r.day ?? r.week * 7, r.week * 7) > (deal.deadlineDay ?? deal.deadlineWeek * 7);
     let rep = partners[deal.partnerId] ?? REP_START;
     if (result.total >= deal.minQuality) {
       rep += REP_DELIVERED;
@@ -1858,15 +2103,17 @@ export function releaseProject(
         ? `${deal.partnerName} is ${result.total >= deal.minQuality + 6 ? "delighted" : "satisfied"} with “${draft.title}” (${result.total}/40 vs ${deal.minQuality} required)${bonusCash ? ` — quality bonus +£${bonusCash.toLocaleString("en-GB")}!` : "."}`
         : `${deal.partnerName} is furious: “${draft.title}” scored ${result.total}/40, below the contracted ${deal.minQuality}/40.`
     );
-    if (r.week > deal.deadlineWeek) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
+    if (Math.max(r.day ?? r.week * 7, r.week * 7) > (deal.deadlineDay ?? deal.deadlineWeek * 7)) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
   }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
   for (const id of result.arcCombosDiscovered) {
     const combo = ARC_COMBOS.find((c) => c.id === id);
     if (combo) notices.push(`🧠 STORY BREAKTHROUGH: ${combo.name} discovered — its structure rating is now visible whenever you plan it.`);
   }
-  if (p.lateWeeks > 0)
-    notices.push(`The network docks “${draft.title}” for delivering ${p.lateWeeks} week${p.lateWeeks > 1 ? "s" : ""} late.`);
+  if ((p.lateDays ?? 0) > 0 || p.lateWeeks > 0) {
+    const lateDays = p.lateDays ?? p.lateWeeks * 7;
+    notices.push(`The network docks “${draft.title}” for delivering ${lateDays} day${lateDays === 1 ? "" : "s"} late.`);
+  }
 
   /* broadcast revenue arrives week by week while the show airs */
   const start = r.week + 1;
@@ -2092,12 +2339,14 @@ export function trainStaff(r: RunState, staffId: string, focus: PointType): RunS
   const s = r.staff.find((x) => x.id === staffId)!;
   const weeks = trainingWeeks(tier);
   const job: TrainingJob = {
-    id: `train_${staffId}_${r.week}`, staffId, staffName: s.name, focus, tier, startWeek: r.week, completesWeek: r.week + weeks,
+    id: `train_${staffId}_${r.week}`, staffId, staffName: s.name, focus, tier,
+    startWeek: r.week, completesWeek: r.week + weeks,
+    startDay: r.day ?? r.week * 7, completesDay: (r.day ?? r.week * 7) + weeks * 7,
   };
   return {
     ...r, cash: r.cash - cost.cash, rd: r.rd - cost.rd,
     trainingJobs: [...(r.trainingJobs ?? []), job],
-    notices: [...r.notices, `🎓 ${s.name} starts ${focus} training for ${weeks} weeks — unavailable until ${dateLabel(job.completesWeek)}.`],
+    notices: [...r.notices, `🎓 ${s.name} starts ${focus} training — ${weeks * 7} days of studio time.`],
   };
 }
 
@@ -2107,10 +2356,15 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
   const weeks = researchWeeks(rdCost, r.facilities.archive ?? 0);
-  const job: ResearchJob = { id: `research_${id}_${r.week}`, researchId: id, name: def.name, startWeek: r.week, completesWeek: r.week + weeks, rdCost };
+  const job: ResearchJob = {
+    id: `research_${id}_${r.week}`, researchId: id, name: def.name,
+    startWeek: r.week, completesWeek: r.week + weeks,
+    startDay: r.day ?? r.week * 7, completesDay: (r.day ?? r.week * 7) + weeks * 7,
+    rdCost,
+  };
   return {
     ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],
-    notices: [...r.notices, `🔬 Research started: ${def.name} — ${weeks} weeks to completion.`],
+    notices: [...r.notices, `🔬 ${def.name} begins — ${weeks * 7} days in R&D (cost ${rdCost} RD).`],
   };
 }
 

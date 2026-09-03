@@ -128,8 +128,9 @@ export default function App() {
         setClockDay(dayCountRef.current);
         setRun((current) => {
           if (!current) return current;
+          const dayRun = { ...current, day: (current.day ?? current.week * 7) + 1 };
           const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
-          const daily = liveEditing && focus ? tickEditDay(current, focus.projectId) : tickStudioDay(current);
+          const daily = liveEditing && focus ? tickEditDay(dayRun, focus.projectId) : tickStudioDay(dayRun);
           let n = daily.run;
           setWorkPulses(daily.pulses);
           if (daily.attention) setTimeSpeed(0);
@@ -139,7 +140,7 @@ export default function App() {
               return { ...n, notices: [...n.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
             }
             const before = n;
-            n = advanceWeeks(n, 1);
+            n = advanceWeeks(n, 1, { liveDaysAlreadyApplied: true });
             const attention =
               n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
               n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||

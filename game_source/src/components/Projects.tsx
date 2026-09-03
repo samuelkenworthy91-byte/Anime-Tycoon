@@ -22,7 +22,6 @@ import {
   POINT_COLOR,
   ROLE_LABEL,
   ROLE_POINT,
-  dateLabel,
   formatGBPShort,
   staffMain,
   workerLook,
@@ -39,7 +38,7 @@ import {
   TEAM_MAX,
   activeProjects,
   projectOfStaff,
-  weeksToDeadline,
+  daysToDeadline,
   type Project,
 } from "../engine/projects";
 import Portrait from "./Portrait";
@@ -84,7 +83,7 @@ function ProjectCard({
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
   const team = run.staff.filter((s) => p.staffIds.includes(s.id));
-  const late = weeksToDeadline(p, run.week);
+  const late = daysToDeadline(p, run.day ?? run.week * 7);
   const inPipeline = p.stage !== "airing" && p.stage !== "done";
   const stageIdx = PRODUCTION_STAGES.indexOf(p.stage);
   const plan = p.plan[p.stage] ?? 1;
@@ -118,7 +117,7 @@ function ProjectCard({
           )}
           {inPipeline && late < 0 && (
             <span className="flex items-center gap-0.5 rounded-md bg-neon/20 px-1.5 py-0.5 text-[9px] font-extrabold text-neon">
-              <AlertTriangle size={10} /> {-late} WK LATE
+              <AlertTriangle size={10} /> {-late}D LATE
             </span>
           )}
         </span>
@@ -155,16 +154,15 @@ function ProjectCard({
               ? p.milestone
                 ? ""
                 : "Master complete"
-              : `${STAGE_LABEL[p.stage]} ${Math.min(Math.floor(p.progress), plan)}/${plan} wk`}
+              : `${STAGE_LABEL[p.stage]} ${Math.min(Math.floor(p.progress * 7), Math.round(plan * 7))}/${Math.round(plan * 7)} days`}
             {p.rush ? (
               <b className="text-cyanx"> {MILESTONE_LABEL[p.rush.milestone]} · day {p.rush.daysWorked}/{p.rush.durationDays}</b>
             ) : p.milestone ? (
               <b className="text-neon"> {MILESTONE_LABEL[p.milestone]} waiting</b>
             ) : null}
           </span>
-          <span className={cn("flex items-center gap-1 font-bold", late < 0 ? "text-neon" : late <= 2 ? "text-gold" : "text-paper/55")}>
-            <Calendar size={10} /> {dateLabel(p.deadlineWeek)}
-            {late >= 0 ? ` · ${late} wk left` : ""}
+          <span className={cn("flex items-center gap-1 font-bold", late < 0 ? "text-neon" : late <= 14 ? "text-gold" : "text-paper/55")}>
+            <Calendar size={10} /> {late >= 0 ? `${late} days left` : `${-late} days late`}
           </span>
         </div>
       )}

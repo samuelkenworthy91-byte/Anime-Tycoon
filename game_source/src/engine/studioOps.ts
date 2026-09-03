@@ -8,6 +8,9 @@ export interface ContractAssignment {
   showrunner?: boolean;
   startWeek: number;
   dueWeek: number;
+  /** day-accurate deadline used by the live studio clock */
+  startDay?: number;
+  dueDay?: number;
   progress: number;
   /** progress already produced by live desk bubbles in the current week */
   liveProgressThisWeek?: number;
@@ -21,6 +24,8 @@ export interface TrainingJob {
   tier: number;
   startWeek: number;
   completesWeek: number;
+  startDay?: number;
+  completesDay?: number;
 }
 
 export interface ResearchJob {
@@ -29,6 +34,8 @@ export interface ResearchJob {
   name: string;
   startWeek: number;
   completesWeek: number;
+  startDay?: number;
+  completesDay?: number;
   rdCost: number;
 }
 

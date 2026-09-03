@@ -188,13 +188,15 @@ describe("facility bonuses", () => {
     expect(teamSpeed(anim, [], fx)).toBeCloseTo(teamSpeed(anim, []) + 0.1);
   });
 
-  it("editing suite fixes more issues in post and guards sprints", () => {
-    const fx = facilityFX({ editing: 2 });
+  it("editing suite strengthens live note-clearing checks and guards sprints", () => {
     const base = makeProject(draft(), 0);
-    const p: Project = { ...base, stage: "post", issues: 8 };
-    const plain = tickProjectsWeek([p], [], 1).projects[0];
-    const suite = tickProjectsWeek([p], [], 1, fx).projects[0];
-    expect(suite.issues).toBe(plain.issues - 2);
+    const editor = worker("edit", { story: 70, art: 70, sound: 70, stamina: 100 });
+    const p: Project = { ...base, stage: "post", milestone: "edit", issues: 8, staffIds: [editor.id] };
+    const plainRun = { ...richRun(), staff: [editor], projects: [p], facilities: {} };
+    const suiteRun = { ...plainRun, facilities: { editing: 2 as const } };
+    expect(contributionEffectiveSkill(suiteRun, editor, "art", true)).toBeGreaterThan(
+      contributionEffectiveSkill(plainRun, editor, "art", true)
+    );
 
     // sprint issue guard
     let r = richRun();
