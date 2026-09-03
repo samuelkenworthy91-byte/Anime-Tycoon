@@ -31,9 +31,41 @@ more_modal = '''      {/* ------------------------------------------------------
 anchor = '      {/* ------------------------------------------------------- CONTRACTS */}'
 text = text.replace(anchor, more_modal + anchor)
 
+# Remove dead UI leftovers so strict typechecking protects this shell going forward.
+text = text.replace('import { buyInvestment, computeIndustryRecords, dynastyYear } from "../engine/legacy";', 'import { buyInvestment, computeIndustryRecords } from "../engine/legacy";')
+text = text.replace('  const inFlight = pendingIncome(run, 12);\n', '')
+text = text.replace('  const roomsTotal = officeSlots(run);\n', '')
 path.write_text(text)
+
+# The manual skip-week helper became dead code when the continuous clock landed.
+app_path = ROOT / "game_source/src/App.tsx"
+app = app_path.read_text()
+app = re.sub(
+    r'\n  /\*\* apply time \+ check for bankruptcy / end of career \*/\n  const settle = useCallback\(\(next: RunState, weeks: number\): RunState => \{.*?\n  \}, \[\]\);\n',
+    '\n',
+    app,
+    flags=re.S,
+)
+app_path.write_text(app)
+
+# Laurel SVG was intentionally removed from posters; delete the now-dead helper too.
+poster_path = ROOT / "game_source/src/components/Poster.tsx"
+poster = poster_path.read_text()
+poster = re.sub(
+    r'\nfunction Laurel\(\{ side \}: \{ side: "l" \| "r" \}\) \{.*?\n\}\n\n/\* ------------------------------------------------------------- fonts ---- \*/',
+    '\n/* ------------------------------------------------------------- fonts ---- */',
+    poster,
+    flags=re.S,
+)
+poster_path.write_text(poster)
+
+# Draft belongs to data.ts, not projects.ts. Vite had been masking this type-only mistake.
+gds_test = ROOT / "game_source/src/engine/__tests__/gds-production.test.ts"
+gds = gds_test.read_text()
+gds = gds.replace('import { makeProject, type Draft } from "../projects";', 'import { makeProject } from "../projects";\nimport type { Draft } from "../data";')
+gds_test.write_text(gds)
 
 # Static regression test catches the exact browser-only failure that Vite transpilation missed.
 test = ROOT / "game_source/src/engine/__tests__/office-shell.test.ts"
 test.write_text('''import { describe, expect, it } from "vitest";\nimport { readFileSync } from "node:fs";\nimport { fileURLToPath } from "node:url";\nimport { dirname, resolve } from "node:path";\n\nconst here = dirname(fileURLToPath(import.meta.url));\nconst office = readFileSync(resolve(here, "../../components/Office.tsx"), "utf8");\n\ndescribe("office shell regressions", () => {\n  it("does not reference the removed skip-week callback", () => {\n    expect(office).not.toContain("onSkipWeek={onSkipWeek}");\n  });\n  it("wires live rush crunch into the Projects board", () => {\n    expect(office).toContain("onRushCrunch={onRushCrunch}");\n  });\n  it("uses the compact five-action management dock", () => {\n    expect(office).toContain("grid-cols-5");\n    expect(office).toContain('setModal("more")');\n  });\n});\n''')
-print("Fixed Projects runtime crash and compacted management dock")
+print("Fixed Projects runtime crash, compacted dock, and cleared strict typecheck blockers")
