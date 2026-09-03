@@ -13,5 +13,6 @@ replacement = '''replace(produce,
 ''' + "'''export default function Produce({ run, project, milestone, onDone, onBack }: {''',\n'''export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {''')" + '''
 '''
 s = s[:start] + replacement + s[end + 1:]
+s = s.replace('import { COMBO, GENRES, comboKey, type GenreId } from "../engine/data";', 'import { COMBO, GENRES, type GenreId } from "../engine/data";')
 p.write_text(s)
-print("fixed Produce migration signature anchor")
+print("fixed Produce migration signature anchor and dossier import")
