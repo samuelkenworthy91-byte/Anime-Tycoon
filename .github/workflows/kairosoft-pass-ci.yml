@@ -24,6 +24,7 @@ jobs:
         run: |
           python tools/fix_apply_kairosoft.py
           python tools/apply_kairosoft_pass.py
+          python tools/apply_kairosoft_followup.py
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
