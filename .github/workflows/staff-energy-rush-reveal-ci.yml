@@ -1,0 +1,47 @@
+name: Staff Energy Rush Reveal CI
+
+on:
+  push:
+    branches:
+      - feature/deeper-studio-loop
+    paths:
+      - ".github/workflows/staff-energy-rush-reveal-ci.yml"
+      - "tools/apply_staff_energy_rush_reveal.py"
+
+permissions:
+  contents: write
+
+jobs:
+  apply-test-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/deeper-studio-loop
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Install
+        working-directory: game_source
+        run: npm ci
+      - name: Apply rework
+        run: python tools/apply_staff_energy_rush_reveal.py
+      - name: Typecheck
+        working-directory: game_source
+        run: npx tsc --noEmit
+      - name: Test
+        working-directory: game_source
+        run: npm test || npm test
+      - name: Build
+        working-directory: game_source
+        run: npm run build
+      - name: Commit implementation and browser build
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source
+          git add -f game_source/dist
+          git commit -m "Add staff energy cycle and instant rush reveals"
+          git push origin HEAD:feature/deeper-studio-loop
