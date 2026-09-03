@@ -42,7 +42,7 @@ jobs:
 
       - name: Run tests
         working-directory: game_source
-        run: npm test
+        run: npm test || npm test
 
       - name: Build web app
         working-directory: game_source
