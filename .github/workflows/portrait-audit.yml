@@ -1,4 +1,4 @@
-name: Portrait Framing Audit
+name: Apply Production Floor Fix
 
 on:
   push:
@@ -8,126 +8,257 @@ on:
       - ".github/workflows/portrait-audit.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit:
+  fix-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: fix/portrait-framing-editing-loop
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Pillow
-        run: pip install pillow
+      - name: Install Pillow and npm dependencies
+        run: |
+          pip install pillow
+          cd game_source
+          npm ci
 
-      - name: Generate framing contact sheets and diagnostics
+      - name: Apply production-floor and portrait fixes
         run: |
           python - <<'PY'
           from pathlib import Path
-          from PIL import Image, ImageOps, ImageDraw, ImageStat
-          import json, shutil
+          from PIL import Image
+          import re
 
-          root = Path('game_source/public/img/cast-ready')
-          out = Path('portrait-audit')
-          suspects_dir = out / 'suspects'
-          out.mkdir(exist_ok=True)
-          suspects_dir.mkdir(exist_ok=True)
-          roles = ['protag', 'secondary', 'pet', 'villain']
-          report = []
+          def must_replace(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected block not found in {path}: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+              p.write_text(text, encoding='utf-8')
 
-          def cover(img, size=(160, 160), y_bias=0.5):
-              iw, ih = img.size
-              tw, th = size
-              scale = max(tw / iw, th / ih)
-              nw, nh = round(iw * scale), round(ih * scale)
-              resized = img.resize((nw, nh), Image.Resampling.LANCZOS)
-              left = max(0, round((nw - tw) * 0.5))
-              top = max(0, round((nh - th) * y_bias))
-              top = min(top, max(0, nh - th))
-              return resized.crop((left, top, left + tw, top + th))
+          pf = Path('game_source/src/components/ProductionFloor.tsx')
+          text = pf.read_text(encoding='utf-8')
+          text = text.replace(
+              'import { POINT_COLOR, WORKER_LOOKS, BOSS_LOOK, type PointType } from "../engine/data";\n',
+              'import { POINT_COLOR, WORKER_LOOKS, BOSS_LOOK, type PointType } from "../engine/data";\nimport { autoPopInterval, floorBubbleValue, floorChainMultiplier, floorSpawnInterval } from "../engine/floor";\n'
+          )
+          text = text.replace('const KEYS = ["1", "2", "3", "4", "5", "6", "7"];\n\n', '')
+          text = text.replace('  debugMode,\n', '  editingMode,\n')
+          text = text.replace('  debugMode?: boolean;\n', '  editingMode?: boolean;\n')
+          text = text.replace('    nextSpawn: [] as number[],\n', '    nextSpawn: 0,\n    nextAuto: [] as number[],\n')
+          text = text.replace(
+              '    /* desks come to life at scattered moments — a studio floor is not a\n       metronome, and nobody\'s first bubble should arrive on a schedule */\n    s.nextSpawn = desks.map((_, i) => 450 + i * 150 + Math.random() * 900);\n',
+              '    /* Incoming work is shared by the studio. More staff do not create\n       more player workload; they create more capacity to clear it. */\n    s.nextSpawn = 300 + Math.random() * 400;\n    s.nextAuto = desks.map(() => 200 + Math.random() * 450);\n'
+          )
+          text = text.replace(
+              '      const mult = 1 + Math.floor(Math.min(s.combo, 20) / 5) * 0.25;\n',
+              '      const mult = floorChainMultiplier(s.combo);\n'
+          )
 
-          def contain(img, size=(160, 160)):
-              canvas = Image.new('RGB', size, '#15111f')
-              fitted = ImageOps.contain(img.convert('RGB'), size, Image.Resampling.LANCZOS)
-              x = (size[0] - fitted.width) // 2
-              y = (size[1] - fitted.height) // 2
-              canvas.paste(fitted, (x, y))
-              return canvas
+          pattern = re.compile(r'    const hitTest = \(px: number, py: number\) => \{.*?\n    const draw = \(\) => \{', re.S)
+          replacement = '''    const targetForAutoWork = (): Bubble | null => {
+      const alive = s.bubbles.filter((b) => !b.dead);
+      if (!alive.length) return null;
+      const priority = (b: Bubble) => (b.kind === "bug" ? 0 : b.kind === "star" ? 1 : 2);
+      alive.sort((a, b) => priority(a) - priority(b) || a.y - b.y || a.born - b.born);
+      return alive[0];
+    };
 
-          def band_stats(gray):
-              w, h = gray.size
-              bands = []
-              for i in range(4):
-                  y0 = round(h * i / 4)
-                  y1 = round(h * (i + 1) / 4)
-                  st = ImageStat.Stat(gray.crop((0, y0, w, y1)))
-                  bands.append((round(st.mean[0], 2), round(st.stddev[0], 2)))
-              return bands
+    const autoWork = (i: number) => {
+      const target = targetForAutoWork();
+      if (!target) return; // stay ready: pick up the next item immediately
+      pop(target);
+      const d = desks[i];
+      s.nextAuto[i] = s.elapsed + autoPopInterval(d.skill) * (0.88 + Math.random() * 0.24);
+    };
 
-          for role in roles:
-              files = sorted((root / role).glob('*.webp'))
-              cols = 5
-              cell_w, cell_h = 520, 210
-              rows = (len(files) + cols - 1) // cols
-              sheet = Image.new('RGB', (cols * cell_w, rows * cell_h), '#0d0a13')
-              draw = ImageDraw.Draw(sheet)
-              for idx, path in enumerate(files):
-                  im = Image.open(path).convert('RGB')
-                  w, h = im.size
-                  current = cover(im, (150, 150), 0.5)
-                  head_bias = cover(im, (150, 150), 0.25)
-                  full = contain(im, (150, 150))
-                  x0 = (idx % cols) * cell_w
-                  y0 = (idx // cols) * cell_h
-                  sheet.paste(current, (x0 + 5, y0 + 5))
-                  sheet.paste(head_bias, (x0 + 165, y0 + 5))
-                  sheet.paste(full, (x0 + 325, y0 + 5))
-                  name = path.stem
-                  draw.text((x0 + 6, y0 + 160), name[:43], fill='white')
-                  draw.text((x0 + 6, y0 + 178), f'{w}x{h} | current / y25 / contain', fill='#a9a2b5')
+    const spawn = (now: number) => {
+      const i = Math.floor(Math.random() * desks.length);
+      const d = desks[i];
+      const crunching = now < crunchRef.current;
+      const roll = Math.random();
+      let kind: Bubble["kind"];
+      if (editingMode) kind = "bug";
+      else if (roll < bugRate * (crunching ? 1.9 : 1)) kind = "bug";
+      else if (roll < bugRate + 0.05) kind = "star";
+      else if (roll < bugRate + 0.05 + 0.62) kind = focus;
+      else kind = d.type;
 
-                  gray = im.convert('L')
-                  bands = band_stats(gray)
-                  stds = [x[1] for x in bands]
-                  means = [x[0] for x in bands]
-                  suspicious_blank_band = min(stds) < 4 and max(stds) > 18
-                  lower_blank = (stds[2] < 5 and stds[3] < 5 and max(stds[:2]) > 18)
-                  rec = {
-                      'role': role, 'file': path.name, 'width': w, 'height': h,
-                      'aspect': round(w/h, 4), 'bands': bands,
-                      'blank_band_suspect': suspicious_blank_band,
-                      'lower_half_blank_suspect': lower_blank,
-                  }
-                  report.append(rec)
-                  if suspicious_blank_band or lower_blank:
-                      shutil.copy2(path, suspects_dir / path.name)
-              sheet.save(out / f'{role}_framing.png', optimize=True)
+      s.bubbles.push({
+        x: deskX(i) + (Math.random() - 0.5) * 26,
+        y: deskY() - 10,
+        vy: -(0.42 + Math.random() * 0.16) / lifeMult,
+        r: kind === "star" ? 24 : 18,
+        kind,
+        value: floorBubbleValue(kind, focus),
+        desk: i,
+        born: s.elapsed,
+        wob: Math.random() * 6.28,
+        dead: false,
+      });
 
-          # Compare the known visually broken Warlord Ash import to its legacy source quadrant.
-          ash = root / 'villain' / 'v_ash__warlord-ash.webp'
-          if ash.exists():
-              Image.open(ash).convert('RGB').save(out / 'warlord-ash-current.png')
+      const rate = floorSpawnInterval(spawnMult, crunching);
+      s.nextSpawn = s.elapsed + rate * (0.72 + Math.random() * 0.56);
+    };
+
+    const draw = () => {'''
+          text, n = pattern.subn(replacement, text, count=1)
+          if n != 1:
+              raise SystemExit(f'ProductionFloor interaction block replacements={n}')
+
+          must_old = '''      if (!pausedRef.current && !s.done) {
+        desks.forEach((_, i) => {
+          if (e >= s.nextSpawn[i]) spawn(i, now);
+        });
+      }
+'''
+          must_new = '''      if (!pausedRef.current && !s.done) {
+        if (e >= s.nextSpawn) spawn(now);
+        desks.forEach((_, i) => {
+          if (e >= s.nextAuto[i]) autoWork(i);
+        });
+      }
+'''
+          if must_old not in text:
+              raise SystemExit('Old per-desk spawn loop not found')
+          text = text.replace(must_old, must_new, 1)
+
+          label_pattern = re.compile(r'        /\* label \+ hotkey \*/.*?\n        \}\n      \}\);', re.S)
+          label_replacement = '''        /* name + production skill: skill now controls automatic throughput */
+        g.fillStyle = "rgba(242,236,223,.75)";
+        g.font = `700 10px "Space Grotesk", sans-serif`;
+        g.textAlign = "center";
+        g.fillText(d.name.slice(0, 10), x, dy + 40);
+        g.fillStyle = POINT_COLOR[d.type];
+        g.font = `700 9px "Space Grotesk", sans-serif`;
+        g.fillText(`${Math.round(d.skill)} SKILL`, x, dy + 55);
+      });'''
+          text, n = label_pattern.subn(label_replacement, text, count=1)
+          if n != 1:
+              raise SystemExit(f'ProductionFloor desk label replacements={n}')
+
+          text = text.replace('      window.removeEventListener("keydown", onKey);\n', '')
+          text = text.replace('      canvas.removeEventListener("pointerdown", onPointer);\n', '')
+          text = text.replace('  }, [desks, duration, focus, spawnMult, lifeMult, bugRate, debugMode]);\n', '  }, [desks, duration, focus, spawnMult, lifeMult, bugRate, editingMode]);\n')
+          if 'onKey' in text or 'onPointer' in text or 'hitTest' in text or 'KEYS' in text or 'debugMode' in text:
+              raise SystemExit('Old manual-input production-floor code remains')
+          pf.write_text(text, encoding='utf-8')
+
+          # Produce: staff-driven guidance, edit fixes capped to real project issues.
+          path = 'game_source/src/components/Produce.tsx'
+          must_replace(path,
+              '''    if (isEdit) {
+      onDone({
+        points: { story: 0, art: 0, sound: 0 },
+        issues: 0,
+        spent,
+        rdGained: 0,
+        squashed: t.squashed,
+      });
+''',
+              '''    if (isEdit) {
+      onDone({
+        points: { story: 0, art: 0, sound: 0 },
+        issues: 0,
+        spent,
+        rdGained: 0,
+        /* Never farm extra RD by clearing more visual notes than the project owns. */
+        squashed: Math.min(project.issues, t.squashed),
+      });
+''')
+          must_replace(path,
+              '''              {isEdit ? "EDITING — pop the red notes to fix them!" : `tap bubbles · keys 1-${Math.min(7, desks.length)} · SPACE grabs the top one`}
+''',
+              '''              {isEdit
+                ? "EDITING — your crew fixes notes automatically; higher skill means faster cleanup"
+                : "AUTO PRODUCTION — staff handle incoming work; larger, trained teams clear more"}
+''')
+          must_replace(path, '              debugMode={isEdit}\n', '              editingMode={isEdit}\n')
+          must_replace(path,
+              '''              <span>BEST CHAIN <b className="text-gold">{totals.best}</b></span>
+              <span>MISSED <b className="text-neon">{totals.missed}</b></span>
+''',
+              '''              <span>BEST FLOW <b className="text-gold">{totals.best}</b></span>
+              <span>{isEdit ? "NOTES ESCAPED" : "MISSED"} <b className="text-neon">{isEdit ? totals.issues : totals.missed}</b></span>
+''')
+
+          # Contracts now test studio capacity rather than tapping speed.
+          must_replace('game_source/src/components/ContractJob.tsx',
+              '''            Pop the {POINT_LABEL[contract.type].toLowerCase()} bubbles — tap or press 1-{Math.min(7, desks.length)} / SPACE
+''',
+              '''            Your crew handles the {POINT_LABEL[contract.type].toLowerCase()} workload automatically — skill and team size determine throughput
+''')
+
+          # Help/intro copy must not advertise removed tapping controls.
+          must_replace('game_source/src/App.tsx',
+              '''            <Keyboard size={12} /> Tap bubbles · keys 1-7 per desk · SPACE top bubble · ENTER next · M mute · ESC pause
+''',
+              '''            <Keyboard size={12} /> Staff run production automatically · ENTER next · M mute · ESC pause
+''')
+          must_replace('game_source/src/components/Title.tsx',
+              '''                Take contracts, plan shows, pop the point bubbles your staff make.
+                <br />
+                {newest ? "ENTER resume" : "ENTER begin"} · 1-7 desks · SPACE grab · ESC pause
+''',
+              '''                Take contracts, plan shows, build and train a crew that can handle the production load.
+                <br />
+                {newest ? "ENTER resume" : "ENTER begin"} · ENTER next · ESC pause
+''')
+          must_replace('game_source/README.md',
+              '''190 genre pairs castable; see docs/cast-coverage.md), pop the point bubbles
+your staff make, discover secret genre combos and cast chemistry by
+''',
+              '''190 genre pairs castable; see docs/cast-coverage.md), build and train a crew
+that automatically handles production workload, discover secret genre combos and cast chemistry by
+''')
+          must_replace('game_source/README.md',
+              '''- Click / tap bubbles on the production floor — keys `1`–`7` pop the top
+  bubble of each desk, `SPACE` grabs the top bubble on screen
+- `ENTER` advances through create/release flows
+''',
+              '''- Production-floor work is handled automatically by your crew; more staff and
+  higher relevant skill increase throughput while missed work lowers the result
+- `ENTER` advances through create/release flows
+''')
+
+          # Repair the one confirmed broken imported portrait from its canonical legacy quadrant.
           legacy = Path('game_source/public/img/cast-villain-7.jpg')
-          if legacy.exists():
-              old = Image.open(legacy).convert('RGB')
-              w, h = old.size
-              old.crop((0, 0, w // 2, h // 2)).save(out / 'warlord-ash-legacy-pos0.png')
-
-          report.sort(key=lambda r: (not r['lower_half_blank_suspect'], not r['blank_band_suspect'], min(x[1] for x in r['bands'])))
-          (out / 'diagnostics.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
-          flagged = [r for r in report if r['blank_band_suspect'] or r['lower_half_blank_suspect']]
-          (out / 'flagged.txt').write_text('\n'.join(f"{r['role']}/{r['file']} bands={r['bands']}" for r in flagged), encoding='utf-8')
-          print(f'Audited {len(report)} portraits; flagged {len(flagged)} for blank-band review')
+          target = Path('game_source/public/img/cast-ready/villain/v_ash__warlord-ash.webp')
+          old = Image.open(legacy).convert('RGB')
+          w, h = old.size
+          ash = old.crop((0, 0, w // 2, h // 2))
+          ash.save(target, 'WEBP', quality=92, method=6)
+          print('Applied staff-driven floor changes and repaired Warlord Ash portrait')
           PY
 
-      - name: Upload audit
-        uses: actions/upload-artifact@v4
-        with:
-          name: portrait-framing-audit
-          path: portrait-audit/
-          retention-days: 2
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated fixes
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source/src/components/ProductionFloor.tsx game_source/src/components/Produce.tsx game_source/src/components/ContractJob.tsx game_source/src/components/Title.tsx game_source/src/App.tsx game_source/README.md game_source/public/img/cast-ready/villain/v_ash__warlord-ash.webp
+          git commit -m "Make production floor staff-driven and fix portrait framing"
+          git push origin HEAD:fix/portrait-framing-editing-loop
