@@ -244,6 +244,15 @@ export const partnerById = (id: string): Partner => PARTNERS.find((p) => p.id ==
 export const repAdvanceMult = (rep: number) => 1 + Math.max(-0.2, Math.min(0.3, (rep - 45) / 150));
 export const repShareDelta = (rep: number) => Math.max(-0.08, Math.min(0.06, (45 - rep) / 400));
 
+export type PartnerTierId = "unknown" | "trusted" | "preferred" | "strategic";
+export interface PartnerTier { id: PartnerTierId; label: string; slack: number; desc: string; }
+export function partnerTier(rep: number): PartnerTier {
+  if (rep < 40) return { id: "unknown", label: "UNKNOWN", slack: 0, desc: "They will hear the pitch, but nothing is guaranteed." };
+  if (rep < 60) return { id: "trusted", label: "TRUSTED", slack: 0, desc: "Regular calls and fair terms." };
+  if (rep < 80) return { id: "preferred", label: "PREFERRED", slack: 1, desc: "Extra deadline flexibility and stronger deal flow." };
+  return { id: "strategic", label: "STRATEGIC PARTNER", slack: 2, desc: "They plan around your studio and protect your delivery windows." };
+}
+
 /* ---------------------------------------------------------- commissions */
 export interface Commission {
   id: string;
@@ -280,6 +289,7 @@ export function rollCommission(
   const pool = PARTNERS.filter((p) => (partners[p.id] ?? 45) >= 25);
   const partner = (pool.length ? pool : PARTNERS)[Math.floor(Math.random() * (pool.length || PARTNERS.length))];
   const rep = partners[partner.id] ?? 45;
+  const tier = partnerTier(rep);
 
   /* they mostly want what they like — with a bias toward whatever is hot */
   const hot = partner.likesGenres.filter((g) => (market.genres[g] ?? 0) >= 1);
@@ -295,7 +305,7 @@ export function rollCommission(
   const share = Math.round((partner.baseShare + repShareDelta(rep) + (Math.random() * 0.06 - 0.03)) * 100) / 100;
   const minQuality = Math.max(14, Math.min(30, 16 + partner.fussiness + Math.floor(Math.random() * 5)));
   const planWeeks = medium === "movie" ? 19 : medium === "tv" ? 15 : 12; // typical pipeline length
-  const maxWeeks = planWeeks + partner.slack + Math.floor(Math.random() * 3) - 1;
+  const maxWeeks = planWeeks + partner.slack + tier.slack + Math.floor(Math.random() * 3) - 1;
 
   return {
     id: `com${++commissionSeq}_${week}`,

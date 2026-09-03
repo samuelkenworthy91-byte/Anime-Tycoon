@@ -29,11 +29,16 @@ import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
 import {
   ARCS,
+  arcCombosFor,
+  arcComboRating,
+  arcGenreFit,
+  arcGenreKey,
   AUDIENCES,
   BUDGETS,
   GENRES,
   MEDIUMS,
   PETS,
+  PRODUCTION_SCOPES,
   PROTAGONISTS,
   SECONDARY,
   SLOTS,
@@ -43,12 +48,14 @@ import {
   comboLevelBonus,
   formatGBP,
   randomTitle,
+  scopeLabel,
   type AudienceId,
   type BudgetId,
   type CastMember,
   type Draft,
   type GenreId,
   type MediumId,
+  type ScopeId,
   type SlotId,
 } from "../engine/data";
 import { arcLockReason, startBlockReason } from "../engine/state";
@@ -98,6 +105,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     title: randomTitle(),
     medium: last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "tv",
     budget: last?.budget ?? "standard",
+    scope: last?.scope ?? "standard",
     slot: last?.slot ?? "midnight",
     genres: [],
     audience: last?.audience ?? "teens",
@@ -217,7 +225,9 @@ export default function Create({
   const weeks = draftWeeks(d);
   /** why this draft can't be greenlit right now (null = good to go) */
   const greenlightBlock = startBlockReason(run, d);
-
+  const arcLimit = PRODUCTION_SCOPES[d.scope ?? "standard"].arcLimit;
+  const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
+  const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));
 
   const stepValid =
     [
@@ -225,7 +235,7 @@ export default function Create({
       d.genres.length >= 1,
       true,
       !!d[CAST_ORDER[Math.min(castStep, CAST_ORDER.length - 1)]],
-      d.arcs.length >= 3,
+      d.arcs.length >= 3 && d.arcs.length <= arcLimit,
     ][step] ?? true;
 
   /** NEXT / CONTINUE — walks through the cast sub-screens before leaving step 3. */
@@ -286,7 +296,8 @@ export default function Create({
     sfx.click();
     setD((old) => {
       if (old.arcs.includes(id)) return { ...old, arcs: old.arcs.filter((a) => a !== id) };
-      if (old.arcs.length >= 6) return old;
+      const limit = PRODUCTION_SCOPES[old.scope ?? "standard"].arcLimit;
+      if (old.arcs.length >= limit) return old;
       return { ...old, arcs: [...old.arcs, id] };
     });
   };
@@ -294,19 +305,29 @@ export default function Create({
   const arcTotals = useMemo(() => {
     let q = 0;
     let f = 0;
+    let known = true;
     d.arcs.forEach((id, idx) => {
       const a = ARCS.find((x) => x.id === id)!;
+      if ((run.arcKnowledge[id] ?? 0) <= 0) known = false;
       q += a.q;
       f += a.f;
-      if (a.syn?.some((s) => d.genres.includes(s))) {
-        q += a.synQ ?? 0;
-        f += a.synF ?? 0;
+      const hasPositive = a.syn?.some((s) => d.genres.includes(s));
+      const hasNegative = a.anti?.some((s) => d.genres.includes(s));
+      if (hasPositive) { q += a.synQ ?? 0; f += a.synF ?? 0; }
+      if (hasNegative) { q += a.antiQ ?? -2; f += a.antiF ?? -0.01; }
+      for (const genre of d.genres)
+        if ((run.arcGenreKnowledge[arcGenreKey(id, genre)] ?? 0) <= 0) known = false;
+      if (a.id === "finale" && idx === d.arcs.length - 1) {
+        if (d.arcs.length >= 6) q += 6;
+        else if (d.arcs.length >= 4) q += 4;
       }
-      if (a.id === "finale" && idx === d.arcs.length - 1 && d.arcs.length >= 4) q += 3;
     });
-    const known = d.arcs.every((id) => (run.arcKnowledge[id] ?? 0) > 0);
+    const combos = arcCombosFor(d.arcs);
+    q += combos.reduce((sum, c) => sum + c.q, 0);
+    f += combos.reduce((sum, c) => sum + c.f, 0);
+    if (combos.some((c) => !run.arcCombos.includes(c.id))) known = false;
     return { q, f, known };
-  }, [d.arcs, d.genres, run.arcKnowledge]);
+  }, [d.arcs, d.genres, run.arcKnowledge, run.arcGenreKnowledge, run.arcCombos]);
 
   const castRows: { role: "protag" | "secondary" | "pet" | "villain"; title: string; hint: string; icon: React.ReactNode; list: CastMember[] }[] = [
     { role: "protag", title: "LEAD ROLE", hint: "The face of the show — everything is built around them.", icon: <Users size={14} />, list: PROTAGONISTS },
@@ -414,6 +435,21 @@ export default function Create({
                       <div className="text-[10px] text-paper/50">{BUDGETS[b].desc}</div>
                     </Pick>
                   ))}
+                </div>
+              </Section>
+              <Section title="PRODUCTION SCOPE">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                  {(Object.keys(PRODUCTION_SCOPES) as ScopeId[]).map((scope) => {
+                    const def = PRODUCTION_SCOPES[scope];
+                    const locked = run.officeLevel < def.minOffice || run.staff.length < def.minStaff;
+                    return (
+                      <Pick key={scope} active={(d.scope ?? "standard") === scope} disabled={locked} onClick={() => set({ scope, arcs: d.arcs.slice(0, def.arcLimit) })}>
+                        <div className="font-display text-sm font-extrabold">{scopeLabel(scope, d.medium)}</div>
+                        <div className="text-[10px] font-bold text-gold">×{def.costMult.toFixed(2)} cost · ×{def.weeksMult.toFixed(2)} time · {def.arcLimit} arcs</div>
+                        <div className="text-[10px] text-paper/50">{locked ? `Needs office Lv${def.minOffice + 1} and ${def.minStaff} staff` : def.desc}</div>
+                      </Pick>
+                    );
+                  })}
                 </div>
               </Section>
               <Section title="BROADCAST SLOT">
@@ -569,7 +605,9 @@ export default function Create({
                   onClick={() => {
                     sfx.click();
                     const pool = castRow.list;
-                    set({ [castRow.role]: pool[Math.floor(Math.random() * pool.length)].id } as Partial<Draft>);
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    if (castRow.role === "protag") set({ protag: pick.id, protagName: pick.name });
+                    else set({ [castRow.role]: pick.id } as Partial<Draft>);
                   }}
                   aria-label="Random pick"
                 >
@@ -586,21 +624,16 @@ export default function Create({
                     on={d[castRow.role] === m.id}
                     onPick={() => {
                       sfx.select();
-                      set({ [castRow.role]: m.id } as Partial<Draft>);
+                      if (castRow.role === "protag") set({ protag: m.id, protagName: m.name });
+                      else set({ [castRow.role]: m.id } as Partial<Draft>);
                     }}
                   />
                 ))}
               </div>
 
               {castRow.role === "protag" && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-xs font-bold text-paper/50">HERO NAME:</span>
-                  <input
-                    value={d.protagName}
-                    onChange={(e) => set({ protagName: e.target.value.slice(0, 18) })}
-                    className="ink-input w-48 px-3 py-2 text-sm font-bold"
-                  />
-                  <span className="text-[10px] italic text-paper/40">“{protag.tag}”</span>
+                <div className="rounded-xl border border-cyanx/25 bg-cyanx/5 px-3 py-2 text-[10px] text-paper/55">
+                  Cast use their working names during production. After the edit bay you can rename the lead, support, mascot, villain and the show itself before marketing begins.
                 </div>
               )}
 
@@ -620,7 +653,7 @@ export default function Create({
 
           {step === 4 && (
             <div className="space-y-4 anim-up">
-              <Section title={`PLAN THE SEASON — PICK 3–6 ARCS (${d.arcs.length}/6)`}>
+              <Section title={`PLAN THE SEASON — PICK 3–${arcLimit} ARCS (${d.arcs.length}/${arcLimit})`}>
                 {/* timeline */}
                 <div className="ink-card flex min-h-[4.5rem] flex-wrap items-center gap-1.5 p-2.5">
                   {d.arcs.length === 0 && <span className="px-2 text-xs text-paper/40">Episode board is empty… add arcs below.</span>}
@@ -647,6 +680,25 @@ export default function Create({
                     <span className="ml-auto text-[10px] italic text-viol">some payoffs unknown — ship them to learn</span>
                   )}
                 </div>
+                {d.arcs.length >= 2 && (
+                  <div className="rounded-xl border border-line bg-panel2/60 p-2.5">
+                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/45">STUDIO STORY KNOWLEDGE</div>
+                    {learnedArcCombos.length > 0 ? (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {learnedArcCombos.map((c) => {
+                          const rating = arcComboRating(c);
+                          return (
+                            <span key={c.id} className={cn("rounded-lg border border-line px-2 py-1 text-[10px] font-extrabold", rating.cls)}>
+                              {rating.label} · {c.name}{c.ordered ? " ↦" : ""}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="mt-1 text-[10px] italic text-viol">No proven structure here yet — release it, or research narrative analytics.</div>
+                    )}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {ARCS.map((a) => {
                     const on = d.arcs.includes(a.id);
@@ -654,6 +706,11 @@ export default function Create({
                     const baseLocked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
                     const locked = baseLocked || reason !== null;
                     const known = (run.arcKnowledge[a.id] ?? 0) > 0;
+                    const genreFits = d.genres.map((genre) => ({
+                      genre,
+                      known: (run.arcGenreKnowledge[arcGenreKey(a.id, genre)] ?? 0) > 0,
+                      fit: arcGenreFit(a, genre),
+                    }));
                     const study = reason?.startsWith("Study") && onUnlockArc;
                     return (
                       <div
@@ -702,6 +759,22 @@ export default function Create({
                           </div>
                         ) : (
                           <div className="mt-1 text-[9px] italic text-viol">Payoff unknown — ship it to find out</div>
+                        )}
+                        {!locked && d.genres.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {genreFits.map(({ genre, known: fitKnown, fit }) => {
+                              const g = GENRES.find((x) => x.id === genre)!;
+                              return fitKnown ? (
+                                <span key={genre} className={cn("rounded border border-line px-1.5 py-0.5 text-[8px] font-extrabold", fit.cls)}>
+                                  {g.label}: {fit.label}
+                                </span>
+                              ) : (
+                                <span key={genre} className="rounded border border-line/50 px-1.5 py-0.5 text-[8px] italic text-paper/35">
+                                  {g.label}: FIT ?
+                                </span>
+                              );
+                            })}
+                          </div>
                         )}
                         {!on && !locked && <Plus size={13} className="absolute right-2 top-2 text-paper/30" />}
                       </div>

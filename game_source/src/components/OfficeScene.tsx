@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WORKER_LOOKS, BOSS_LOOK } from "../engine/data";
 
 export interface OfficeStaff {
+  id?: string;
   name: string;
   color: string;
   tired?: boolean;
@@ -9,6 +10,10 @@ export interface OfficeStaff {
   look?: number;
   /** the showrunner's own painted office sprite */
   sprite?: string;
+  working?: boolean;
+  energy?: number;
+  resting?: boolean;
+  pulse?: { actorId: string; name: string; type: string; points: number; nonce: number };
 }
 
 /* ------------------------------------------------------------------ art
@@ -52,9 +57,9 @@ const SPRITE_H = [0.28, 0.24, 0.19, 0.19, 0.19];
 
 /* ------------------------------------------------------------- geometry */
 /** lay out n anchors as staggered isometric rows inside the floor zone */
-function anchors(zone: FloorZone, n: number): { x: number; y: number }[] {
+function anchors(zone: FloorZone, n: number, portrait = false): { x: number; y: number }[] {
   if (n <= 0) return [];
-  const perRow = Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
+  const perRow = portrait ? Math.min(2, Math.max(1, n)) : Math.max(2, Math.ceil(Math.sqrt(n * 1.6)));
   const rows = Math.ceil(n / perRow);
   const out: { x: number; y: number }[] = [];
   for (let i = 0; i < n; i++) {
@@ -91,6 +96,10 @@ function Character({
   label,
   color,
   tired,
+  working,
+  energy,
+  resting,
+  pulse,
   onClick,
   bobDelay,
 }: {
@@ -100,6 +109,10 @@ function Character({
   label: string;
   color: string;
   tired?: boolean;
+  working?: boolean;
+  energy?: number;
+  resting?: boolean;
+  pulse?: { points: number; type: string; nonce: number };
   onClick?: () => void;
   bobDelay: number;
 }) {
@@ -173,10 +186,37 @@ function Character({
         )}
       </span>
 
+      {working && (
+        <>
+          {/* compact production desk: monitor, stand and drawing tablet — no faux laptop/SVG */}
+          <span className="pointer-events-none absolute bottom-[1%] left-1/2 z-20 block h-[10%] w-[94%] -translate-x-1/2 rounded-[3px] border border-[#8a6248]/70 bg-[#674630] shadow-[0_5px_12px_rgba(0,0,0,.45)]" />
+          <span className="pointer-events-none absolute bottom-[10%] left-[51%] z-10 block h-[20%] w-[49%] -translate-x-1/2 rounded-[3px] border border-paper/20 bg-[#17182a] shadow-[0_0_10px_rgba(59,225,255,.16)]">
+            <span className="absolute inset-[10%] overflow-hidden rounded-[2px] bg-[#252844]">
+              <span className="absolute left-[8%] right-[8%] top-[18%] h-[8%] rounded bg-cyanx/65" />
+              <span className="absolute left-[8%] right-[25%] top-[40%] h-[7%] rounded bg-neon/55" />
+              <span className="absolute bottom-[18%] left-[8%] right-[12%] h-[6%] rounded bg-gold/45" />
+            </span>
+          </span>
+          <span className="pointer-events-none absolute bottom-[7%] left-1/2 z-20 block h-[5%] w-[5%] -translate-x-1/2 bg-paper/25" />
+          <span className="pointer-events-none absolute bottom-[3%] left-[48%] z-30 block h-[4%] w-[34%] -translate-x-1/2 -skew-x-6 rounded-[2px] border border-paper/10 bg-[#222235]" />
+        </>
+      )}
+      {energy !== undefined && (
+        <span className="pointer-events-none absolute -top-[5%] left-1/2 z-40 block w-[74%] -translate-x-1/2">
+          <span className="mb-[2px] flex items-center justify-between text-[7px] font-extrabold text-paper/70"><span>{resting ? "RECOVERING" : working ? "ENERGY" : "REST"}</span><span>{Math.round(energy)}%</span></span>
+          <span className="block h-[5px] overflow-hidden rounded-full border border-paper/20 bg-abyss/90"><span className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.max(0, Math.min(100, energy))}%`, background: energy < 25 ? "#ff4d6d" : energy < 55 ? "#ffd166" : "#73f2b5" }} /></span>
+        </span>
+      )}
+      {pulse && (
+        <span key={pulse.nonce} className="pointer-events-none absolute -top-[20%] left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-gold/50 bg-abyss/95 px-2 py-1 font-display text-[10px] font-extrabold text-gold shadow-xl anim-floaty">
+          +{pulse.points} {pulse.type.toUpperCase()}
+        </span>
+      )}
+
       {/* tired wisp */}
       {tired && (
         <span className="pointer-events-none absolute -top-1 left-[62%] text-[10px] font-bold text-cyanx/80 anim-floaty">
-          z
+          {resting ? "☕" : "z"}
         </span>
       )}
 
@@ -213,7 +253,7 @@ export default function OfficeScene({
   onDeskClick?: (deskIndex: number) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [stage, setStage] = useState({ w: 0, h: 0, left: 0, top: 0 });
+  const [stage, setStage] = useState({ w: 0, h: 0, left: 0, top: 0, viewW: 0, viewH: 0, portrait: false });
 
   const lvl = Math.max(0, Math.min(SCENES.length - 1, level));
   const zone = FLOORS[lvl];
@@ -231,17 +271,33 @@ export default function OfficeScene({
     const measure = () => {
       const { width: cw, height: ch } = el.getBoundingClientRect();
       if (!cw || !ch) return;
-      /* cover: fill the box, overflow the excess axis */
+      const portrait = ch > cw * 1.12;
       const scale = Math.max(cw / STAGE_AR, ch);
       const w = scale * STAGE_AR;
       const h = scale;
-      setStage({ w, h, left: (cw - w) / 2, top: (ch - h) / 2 });
+      let left = (cw - w) / 2;
+      if (portrait && w > cw) {
+        const floorMid = ((zone.x0 + zone.x1) / 2 / 100) * w;
+        left = Math.max(cw - w, Math.min(0, cw / 2 - floorMid));
+      }
+      setStage({ w, h, left, top: (ch - h) / 2, viewW: cw, viewH: ch, portrait });
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [lvl]);
+
+  const layoutZone = useMemo<FloorZone>(() => {
+    if (!stage.portrait || !stage.w || !stage.viewW) return zone;
+    const visibleX0 = Math.max(0, (-stage.left / stage.w) * 100);
+    const visibleX1 = Math.min(100, ((stage.viewW - stage.left) / stage.w) * 100);
+    const span = Math.max(1, visibleX1 - visibleX0);
+    let x0 = Math.max(zone.x0, visibleX0 + span * 0.07);
+    let x1 = Math.min(zone.x1, visibleX1 - span * 0.07);
+    if (x1 - x0 < 5) { x0 = visibleX0 + span * 0.09; x1 = visibleX1 - span * 0.09; }
+    return { x0, x1, y0: Math.max(60, zone.y0 - 5), y1: Math.min(94, zone.y1) };
+  }, [stage.portrait, stage.w, stage.viewW, stage.left, zone]);
 
   /* ------------------------------------------------------------ movement */
   const [bodies, setBodies] = useState<Body[]>([]);
@@ -250,7 +306,7 @@ export default function OfficeScene({
 
   /* rebuild anchors whenever the cast size or the room changes */
   useEffect(() => {
-    const spots = anchors(zone, Math.max(cast.length, Math.min(maxStaff + 1, 13)));
+    const spots = anchors(layoutZone, Math.max(cast.length, Math.min(maxStaff + 1, 13)), stage.portrait);
     setBodies((prev) =>
       cast.map((_, i) => {
         const home = spots[i] ?? spots[spots.length - 1] ?? { x: 50, y: 80 };
@@ -260,7 +316,17 @@ export default function OfficeScene({
           : { home, pos: { ...home }, target: { ...home }, dur: 0, flip: i % 2 === 1 };
       })
     );
-  }, [cast.length, maxStaff, lvl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cast.length, maxStaff, lvl, layoutZone.x0, layoutZone.x1, layoutZone.y0, layoutZone.y1, stage.portrait]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* employees who finish recovering walk straight back to their workstation */
+  useEffect(() => {
+    setBodies((prev) => prev.map((b, i) => {
+      if (!cast[i]?.working) return b;
+      const dist = Math.hypot(b.home.x - b.pos.x, b.home.y - b.pos.y);
+      if (dist < 0.6) return b;
+      return { ...b, target: { ...b.home }, pos: { ...b.home }, dur: Math.max(1.2, dist / 5.5), flip: b.home.x < b.pos.x };
+    }));
+  }, [cast.map((c) => !!c.working).join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* every so often somebody wanders off and comes back */
   useEffect(() => {
@@ -268,15 +334,22 @@ export default function OfficeScene({
     const tick = window.setInterval(() => {
       const list = bodiesRef.current;
       if (!list.length) return;
-      const i = Math.floor(Math.random() * list.length);
+      const resters = list.map((_, i) => i).filter((i) => !!cast[i]?.resting);
+      const movable = resters.length ? resters : list.map((_, i) => i).filter((i) => !cast[i]?.working);
+      if (!movable.length) return;
+      if (!resters.length && Math.random() < 0.45) return;
+      const picked = new Set<number>();
+      const moves = resters.length ? Math.min(2, movable.length) : 1;
+      while (picked.size < moves) picked.add(movable[Math.floor(Math.random() * movable.length)]);
       setBodies((prev) =>
         prev.map((b, j) => {
-          if (j !== i) return b;
+          if (!picked.has(j)) return b;
+          const recovering = !!cast[j]?.resting;
           const atHome = Math.abs(b.pos.x - b.home.x) < 0.6 && Math.abs(b.pos.y - b.home.y) < 0.6;
-          const to = atHome
+          const to = recovering || atHome
             ? {
-                x: zone.x0 + Math.random() * (zone.x1 - zone.x0),
-                y: zone.y0 + Math.random() * (zone.y1 - zone.y0),
+                x: layoutZone.x0 + Math.random() * (layoutZone.x1 - layoutZone.x0),
+                y: layoutZone.y0 + Math.random() * (layoutZone.y1 - layoutZone.y0),
               }
             : { ...b.home };
           const dist = Math.hypot(to.x - b.pos.x, to.y - b.pos.y);
@@ -284,15 +357,14 @@ export default function OfficeScene({
             ...b,
             target: to,
             pos: to,
-            /* a steady walking pace rather than a fixed animation time */
-            dur: Math.max(1.4, dist / 5.5),
+            dur: recovering ? Math.max(0.75, dist / 8) : Math.max(1.4, dist / 5.5),
             flip: to.x < b.pos.x,
           };
         })
       );
-    }, 2600);
+    }, 1150);
     return () => window.clearInterval(tick);
-  }, [bodies.length, zone]);
+  }, [bodies.length, layoutZone, cast]);
 
   /* --------------------------------------------------------------- light */
   /* 0 = dawn, .5 = midday, 1 = night — warms up at noon, goes indigo at night */
@@ -341,10 +413,14 @@ export default function OfficeScene({
               key={`${c.name}-${i}`}
               src={c.boss ? (c.sprite ?? BOSS_SPRITE) : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
               body={b}
-              scale={SPRITE_H[lvl] * 100}
+              scale={SPRITE_H[lvl] * 100 * (stage.portrait ? 0.82 : 1)}
               label={c.boss ? `${c.name} · showrunner` : c.name}
               color={c.color}
               tired={c.tired}
+              working={c.working}
+              energy={c.energy}
+              resting={c.resting}
+              pulse={c.pulse}
               bobDelay={i * 370}
               onClick={() => onDeskClick?.(i)}
             />

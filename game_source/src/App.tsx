@@ -7,13 +7,18 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
-  grantContractXp,
+  forecastWeek,
   initialRun,
+  tickStudioDay,
+  tickStudioWorkPulse,
+  tickEditDay,
   MAX_WEEKS,
+  type DeskPulse,
   migrateRun,
   projectById,
   releaseProject,
   startBlockReason,
+  startContractAssignment,
   startProject,
   type RunState,
 } from "./engine/state";
@@ -51,8 +56,10 @@ export default function App() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
+  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 12>(1);
+  const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
-  /* real-time game clock: 1 in-game day = 2 real minutes; 7 days = 1 week */
+  /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
   const dayAccRef = useRef(0);
@@ -106,37 +113,67 @@ export default function App() {
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
-    if (screen !== "office" || paused || !run) return;
+    const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+    if ((screen !== "office" && !liveEditing) || paused || !run) return;
+    const DAY_MS = 10_000;
     const iv = setInterval(() => {
-      dayAccRef.current += 1000;
-      if (dayAccRef.current >= 120_000) {
-        dayAccRef.current -= 120_000;
+      if (timeSpeed === 0) return;
+      dayAccRef.current += 250 * timeSpeed;
+      if (dayAccRef.current >= DAY_MS) {
+        dayAccRef.current -= DAY_MS;
         dayCountRef.current += 1;
-        if (dayCountRef.current >= 7) {
-          dayCountRef.current = 0;
-          setRun((r) => {
-            if (!r) return r;
-            let n = advanceWeeks(r, 1);
-            if (n.cash < 0) {
-              if (n.bailouts < 2) {
-                n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
-              } else {
-                setScreen("gameover");
-                return n;
-              }
-            }
-            if (n.week >= MAX_WEEKS && !n.dynasty) {
-              setScreen("retrospective");
-            }
-            return n;
-          });
-        }
+        const weekBoundary = dayCountRef.current >= 7;
+        if (weekBoundary) dayCountRef.current = 0;
         setClockDay(dayCountRef.current);
+        setRun((current) => {
+          if (!current) return current;
+          const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+          const daily = liveEditing && focus ? tickEditDay(current, focus.projectId) : tickStudioDay(current);
+          let n = daily.run;
+          setWorkPulses(daily.pulses);
+          if (daily.attention) setTimeSpeed(0);
+          if (weekBoundary) {
+            if (forecastWeek(n).cashAfter < 0) {
+              setTimeSpeed(0);
+              return { ...n, notices: [...n.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
+            }
+            const before = n;
+            n = advanceWeeks(n, 1);
+            const attention =
+              n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
+              n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
+              n.marketEvents.length > before.marketEvents.length || n.studioEvents.length > before.studioEvents.length || n.staffEvents.length > before.staffEvents.length ||
+              n.contractJobs.length < before.contractJobs.length || n.trainingJobs.length < before.trainingJobs.length || n.researchJobs.length < before.researchJobs.length;
+            if (attention) setTimeSpeed(0);
+            if (n.cash < 0) {
+              if (n.bailouts < 2) n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
+              else { setScreen("gameover"); return n; }
+            }
+            if (n.week >= MAX_WEEKS && !n.dynasty) setScreen("retrospective");
+          }
+          return n;
+        });
       }
-      setClockPhase(Math.floor((dayAccRef.current / 120_000) * 4));
-    }, 1000);
+      setClockPhase(Math.floor((dayAccRef.current / DAY_MS) * 4));
+    }, 250);
     return () => clearInterval(iv);
-  }, [screen, paused, run !== null, run?.week]);
+  }, [screen, paused, timeSpeed, run !== null, run?.week, focus?.milestone, focus?.projectId]);
+
+  /* Desk bursts now change the game state at the same instant as the bubble. */
+  useEffect(() => {
+    if (screen !== "office" || paused || timeSpeed === 0 || !run) return;
+    const gap = Math.max(180, Math.round(1750 / Math.max(1, timeSpeed)));
+    const iv = window.setInterval(() => {
+      setRun((current) => {
+        if (!current) return current;
+        const live = tickStudioWorkPulse(current);
+        setWorkPulses(live.pulses);
+        if (live.attention) setTimeSpeed(0);
+        return live.run;
+      });
+    }, gap);
+    return () => window.clearInterval(iv);
+  }, [screen, paused, timeSpeed, run !== null]);
 
   /* --------------------------------------------------------- lifecycle */
   const loadRun = useCallback((slot: SlotId) => {
@@ -153,6 +190,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setSavePicker(false);
     dayAccRef.current = save.clock?.acc ?? 0;
     dayCountRef.current = save.clock?.dayCount ?? 0;
@@ -174,6 +212,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setScreen("office");
   }, []);
 
@@ -187,6 +226,7 @@ export default function App() {
     setContract(null);
     setContPlan(null);
     setPaused(false);
+    setTimeSpeed(1);
     setScreen("office");
   }, [meta]);
 
@@ -204,27 +244,6 @@ export default function App() {
     setScreen("office");
   }, [run]);
 
-  /** apply time + check for bankruptcy / end of career */
-  const settle = useCallback((next: RunState, weeks: number): RunState => {
-    let r = advanceWeeks(next, weeks);
-    if (r.cash < 0) {
-      if (r.bailouts < 2) {
-        r = {
-          ...r,
-          bailouts: r.bailouts + 1,
-          cash: r.cash + 150_000,
-          notices: [...r.notices, "Emergency crowdfunding from the fans! (+£150,000)"],
-        };
-      } else {
-        setScreen("gameover");
-        return r;
-      }
-    }
-    if (r.week >= MAX_WEEKS && !r.dynasty) {
-      setScreen("retrospective");
-    }
-    return r;
-  }, []);
 
   /* --------------------------------------------------------- show flow */
   const newShow = useCallback((key?: string) => {
@@ -351,11 +370,6 @@ export default function App() {
     setScreen("office");
   }, []);
 
-  /* one deliberate week of studio time from the project board */
-  const skipWeek = useCallback(() => {
-    sfx.click();
-    setRun((r) => (r ? settle(r, 1) : r));
-  }, [settle]);
 
   /* ----------------------------------------------------- contract flow */
   const takeContract = useCallback((c: Contract) => {
@@ -365,28 +379,15 @@ export default function App() {
   }, []);
 
   const finishContract = useCallback(
-    (success: boolean, scored: number) => {
+    (selection: { staffIds: string[]; showrunner: boolean }) => {
       if (!run || !contract) return;
-      const base = success ? grantContractXp(run) : run;
-      const next: RunState = {
-        ...base,
-        cash: base.cash + (success ? contract.pay : 0),
-        rd: base.rd + (success ? contract.rd : Math.max(1, Math.round(contract.rd / 3))),
-        staff: base.staff.map((s) => ({ ...s, stamina: Math.max(20, s.stamina - 10) })),
-        notices: [
-          ...base.notices,
-          success
-            ? `Contract delivered: ${contract.name} (+£${contract.pay.toLocaleString("en-GB")}).`
-            : `Contract failed: ${contract.name} — ${scored}/${contract.target} points.`,
-        ],
-        contracts: base.contracts.filter((x) => x.id !== contract.id),
-      };
-      const settled = settle(next, contract.weeks);
-      setRun(settled);
+      const next = startContractAssignment(run, contract, selection.staffIds, selection.showrunner);
+      if (!next) { sfx.back(); return; }
+      setRun(next);
       setContract(null);
-      if (settled.cash >= 0 && (settled.week < MAX_WEEKS || settled.dynasty)) setScreen("office");
+      setScreen("office");
     },
-    [run, contract, settle]
+    [run, contract]
   );
 
   /* --------------------------------------------------------- hotkeys */
@@ -498,7 +499,7 @@ export default function App() {
             onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
-            onSkipWeek={skipWeek}
+            workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
           />
@@ -544,7 +545,13 @@ export default function App() {
           />
         )}
         {screen === "contract" && run && contract && (
-          <ContractJob run={run} contract={contract} paused={paused} onDone={finishContract} />
+          <ContractJob
+            run={run}
+            contract={contract}
+            paused={paused}
+            onDone={finishContract}
+            onBack={() => { setContract(null); setScreen("office"); }}
+          />
         )}
         {screen === "release" && released && run && (
           <Release draft={released.draft} result={released.result} studio={run.studio} onContinue={continueFromRelease} />
@@ -557,7 +564,12 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
-          <div className="absolute right-3 top-2.5 z-[60] flex gap-1.5">
+          <div className="game-controls absolute right-3 top-2.5 z-[60] flex gap-1.5">
+            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 12] as const).map((speed) => (
+              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
+                {speed === 0 ? "Ⅱ" : `${speed}×`}
+              </button>
+            ))}
             <button
               aria-label="Mute"
               onClick={() => {

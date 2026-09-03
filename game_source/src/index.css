@@ -383,3 +383,18 @@ input[type="range"].ink-range::-moz-range-thumb {
   animation: scan 6s linear infinite;
   mix-blend-mode: overlay;
 }
+
+
+/* ---------- phone portrait shell ---------- */
+@supports (height: 100dvh) {
+  html, body, #root { height: 100dvh; }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .office-hud { min-height: 62px; padding: 4px 6px 31px !important; padding-right: 6px !important; gap: 4px !important; }
+  .office-hud-date { position: absolute; left: 6px; bottom: 4px; padding: 3px 7px !important; font-size: 9px !important; }
+  .office-hud-stats { gap: 3px !important; }
+  .office-hud-forecast { display: none !important; }
+  .office-hud-cash, .office-hud-rd { padding: 3px 7px !important; font-size: 10px !important; }
+  .game-controls { top: 34px !important; right: 5px !important; gap: 2px !important; }
+  .game-controls button { min-height: 25px !important; padding: 4px 6px !important; border-radius: 8px !important; font-size: 9px !important; }
+}

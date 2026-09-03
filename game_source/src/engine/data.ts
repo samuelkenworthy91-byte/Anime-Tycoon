@@ -46,6 +46,7 @@ export type GenreId =
 
 export type MediumId = "tv" | "movie" | "ona";
 export type BudgetId = "indie" | "standard" | "blockbuster";
+export type ScopeId = "short" | "standard" | "extended" | "prestige";
 export type SlotId = "midnight" | "evening" | "prime" | "stream";
 export type AudienceId = "kids" | "teens" | "adults" | "family";
 export type StaffRole = "writer" | "animator" | "composer";
@@ -141,6 +142,10 @@ export interface Arc {
   /** synergy bonus if the matching cast slot's affinities fit the genres */
   cast?: CastRole;
   castQ?: number;
+  /** genres where this beat tends to fight the tone — hidden until learned */
+  anti?: GenreId[];
+  antiQ?: number;
+  antiF?: number;
   /** what must be true before this arc can be picked */
   unlock?: ArcUnlock;
 }
@@ -149,11 +154,17 @@ export interface Draft {
   title: string;
   medium: MediumId;
   budget: BudgetId;
+  /** production ambition: larger scopes cost more, take longer and strain departments */
+  scope?: ScopeId;
   slot: SlotId;
   genres: GenreId[];
   audience: AudienceId;
   protag: string;
   protagName: string;
+  /** Final billing names are locked after editing; optional keeps old saves valid. */
+  secondaryName?: string;
+  petName?: string;
+  villainName?: string;
   secondary: string;
   pet: string;
   villain: string;
@@ -292,6 +303,34 @@ export const MEDIUMS: Record<MediumId, { label: string; desc: string; costMult: 
   movie: { label: "Theatrical Film", desc: "Big screen, big risk, big reward.", costMult: 1.7, reach: 1.5, weeks: 4, rd: 40 },
 };
 
+export interface ProductionScope {
+  label: string;
+  shortLabel: string;
+  desc: string;
+  weeksMult: number;
+  costMult: number;
+  workMult: number;
+  audienceMult: number;
+  minOffice: number;
+  minStaff: number;
+  /** how many major story beats this format can carry without feeling crammed */
+  arcLimit: number;
+}
+
+export const PRODUCTION_SCOPES: Record<ScopeId, ProductionScope> = {
+  short: { label: "Short Run", shortLabel: "SHORT", desc: "Lean, focused and forgiving — ideal for a small crew.", weeksMult: 0.78, costMult: 0.78, workMult: 0.72, audienceMult: 0.78, minOffice: 0, minStaff: 0, arcLimit: 3 },
+  standard: { label: "Standard Production", shortLabel: "STANDARD", desc: "The normal seasonal production target.", weeksMult: 1, costMult: 1, workMult: 1, audienceMult: 1, minOffice: 0, minStaff: 0, arcLimit: 4 },
+  extended: { label: "Extended Production", shortLabel: "EXTENDED", desc: "More episodes, more cuts and a much heavier pipeline.", weeksMult: 1.42, costMult: 1.5, workMult: 1.45, audienceMult: 1.18, minOffice: 1, minStaff: 3, arcLimit: 5 },
+  prestige: { label: "Prestige Production", shortLabel: "PRESTIGE", desc: "An event-scale slate anchor. Huge ceiling, brutal departmental demand.", weeksMult: 1.82, costMult: 2.15, workMult: 1.9, audienceMult: 1.38, minOffice: 2, minStaff: 5, arcLimit: 6 },
+};
+
+export const scopeLabel = (scope: ScopeId, medium: MediumId) => {
+  if (scope === "short") return medium === "movie" ? "Short Feature" : medium === "ona" ? "Short Run" : "Short Cour";
+  if (scope === "standard") return medium === "movie" ? "Standard Feature" : medium === "ona" ? "Streaming Season" : "Standard Cour";
+  if (scope === "extended") return medium === "movie" ? "Major Feature" : medium === "ona" ? "Full Streaming Season" : "Double Cour";
+  return medium === "movie" ? "Event Film" : medium === "ona" ? "Prestige Streaming Event" : "Prestige Series";
+};
+
 export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: number; desc: string; heat: number }> = {
   indie: { label: "Ink & Paper Indie", cost: 40_000, scope: 0.85, desc: "Tiny team, huge heart.", heat: 0 },
   standard: { label: "Standard Production", cost: 120_000, scope: 1.0, desc: "Full pipeline, sane deadlines.", heat: 0.15 },
@@ -343,16 +382,18 @@ export interface ResearchItem {
   desc: string;
 }
 export const RESEARCH: ResearchItem[] = [
-  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Bubbles linger 25% longer on the floor." },
-  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "+20% bubble spawn rate in every phase." },
-  { id: "qa", name: "Editing Room", rd: 24, desc: "30% fewer editing notes appear on the floor." },
+  { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Work stays available 25% longer before it becomes a miss." },
+  { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "Crew automatically clears production work 12% faster." },
+  { id: "qa", name: "Editing Room", rd: 24, desc: "Editing staff clear notes 15% faster and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
   { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show." },
-  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art bubbles are worth +1 point." },
-  { id: "cg", name: "CG Assist", rd: 44, desc: "+25% bubble spawn rate in every phase." },
+  { id: "mocap", name: "Motion Reference", rd: 40, desc: "Animation sprint output gains +12% Art quality." },
+  { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
-  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "50% fewer editing notes appear." },
+  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Automatically clears 35% of outstanding edit notes before final QA." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%." },
+  { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches a starter set of arc-to-genre fits so the Story Arc screen can label them before you risk a production." },
+  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },
 ];
 
 /* -------------------------------------------------------------- contracts */
@@ -786,16 +827,38 @@ export const ARCS: Arc[] = [
   { id: "guildwar", name: "Guild War", cost: 34_000, q: 5, f: 0.07, syn: ["fantasy", "shonen"], synQ: 4, desc: "Factions, betrayals, and a siege that spans two episodes.", unlock: { kind: "hits", n: 3 } },
   { id: "expansion", name: "Studio Expansion Arc", cost: 24_000, q: 3, f: 0.05, desc: "The meta-narrative: your own studio, animated.", unlock: { kind: "staff", n: 6 } },
   { id: "idolfest", name: "Idol Festival", cost: 22_000, q: 2, f: 0.1, syn: ["idol"], synQ: 4, desc: "Three nights. One stage. Zero dry eyes.", unlock: { kind: "genre", genre: "idol" } },
+  /* --------------------------------------- discovery-era narrative beats */
+  { id: "narr_slowburn", name: "Slow-Burn Introduction", cost: 9_000, q: 4, f: 0.01, syn: ["slice", "romance", "noir"], synQ: 3, anti: ["racing", "shonen"], antiQ: -2, desc: "Let the cast breathe before the plot starts squeezing." },
+  { id: "narr_flashforward", name: "Flash-Forward Teaser", cost: 13_000, q: 3, f: 0.04, syn: ["mystery", "cyber", "noir"], synQ: 3, anti: ["slice"], antiQ: -1, desc: "Show the destination first and dare viewers to work out the road.", unlock: { kind: "shows", n: 2 } },
+  { id: "narr_mediasres", name: "In Medias Res", cost: 15_000, q: 4, f: 0.03, syn: ["shonen", "military", "racing"], synQ: 3, anti: ["slice", "cooking"], antiQ: -2, desc: "Open halfway through the disaster and explain later.", unlock: { kind: "score", n: 22 } },
+  { id: "narr_rivalintro", name: "Rival Introduction", cost: 12_000, q: 3, f: 0.05, syn: ["shonen", "sports", "racing"], synQ: 4, cast: "secondary", castQ: 2, desc: "A perfect foil arrives and immediately steals the frame." },
+  { id: "narr_mentor", name: "Mentor Arc", cost: 14_000, q: 4, f: 0.03, syn: ["shonen", "fantasy", "military"], synQ: 3, cast: "secondary", castQ: 2, desc: "Wisdom, bad habits, and one lesson that matters later." },
+  { id: "narr_foundfamily", name: "Found Family", cost: 13_000, q: 4, f: 0.05, syn: ["slice", "fantasy", "shojo"], synQ: 3, anti: ["noir"], antiQ: -1, desc: "The team slowly becomes the home they were missing.", unlock: { kind: "genre", genre: "slice" } },
+  { id: "narr_journey", name: "Journey Arc", cost: 16_000, q: 3, f: 0.05, syn: ["fantasy", "isekai", "space"], synQ: 4, desc: "New places, new problems, increasingly questionable maps." },
+  { id: "narr_politics", name: "Political Intrigue", cost: 19_000, q: 5, f: 0.01, syn: ["military", "noir", "fantasy"], synQ: 4, anti: ["idol", "cooking"], antiQ: -2, desc: "Factions smile politely while sharpening knives.", unlock: { kind: "rd", cost: 16 } },
+  { id: "narr_explore", name: "Exploration Expedition", cost: 15_000, q: 3, f: 0.04, syn: ["space", "fantasy", "isekai"], synQ: 3, desc: "Put something impossible beyond the next horizon." },
+  { id: "narr_siege", name: "Siege Arc", cost: 31_000, q: 6, f: 0.06, syn: ["military", "fantasy", "mecha"], synQ: 4, anti: ["slice", "romance"], antiQ: -3, desc: "One location, no escape, every department working overtime.", unlock: { kind: "hits", n: 2 } },
+  { id: "narr_survival", name: "Survival Game", cost: 22_000, q: 3, f: 0.08, syn: ["horror", "mystery", "shonen"], synQ: 4, anti: ["shojo", "cooking"], antiQ: -2, desc: "Rules are announced. Half the cast immediately breaks them.", unlock: { kind: "genre", genre: "horror" } },
+  { id: "narr_rescue", name: "Rescue Mission", cost: 18_000, q: 3, f: 0.06, syn: ["shonen", "military", "space"], synQ: 3, desc: "Someone is missing; everyone else gets one shot." },
+  { id: "narr_revenge", name: "Revenge Arc", cost: 19_000, q: 4, f: 0.04, syn: ["noir", "shonen", "horror"], synQ: 3, anti: ["idol", "cooking"], antiQ: -2, desc: "A clean objective gradually becomes a terrible idea.", unlock: { kind: "shows", n: 3 } },
+  { id: "narr_betrayal", name: "Betrayal", cost: 17_000, q: 5, f: 0.02, syn: ["mystery", "military", "noir"], synQ: 3, desc: "The trusted ally was taking notes for somebody else.", unlock: { kind: "hits", n: 1 } },
+  { id: "narr_secretid", name: "Secret Identity", cost: 14_000, q: 4, f: 0.04, syn: ["mystery", "magical", "supernatural"], synQ: 4, desc: "Two lives, one increasingly impossible calendar.", unlock: { kind: "genre", genre: "mystery" } },
+  { id: "narr_falsewin", name: "False Victory", cost: 20_000, q: 5, f: 0.03, syn: ["shonen", "horror", "military"], synQ: 3, desc: "They won. Which is exactly why something feels wrong.", unlock: { kind: "score", n: 26 } },
+  { id: "narr_villainreveal", name: "Villain Reveal", cost: 18_000, q: 5, f: 0.05, syn: ["mystery", "horror", "noir"], synQ: 4, cast: "villain", castQ: 3, desc: "The camera finally turns toward the person behind it all." },
+  { id: "narr_quiet", name: "Quiet Character Episode", cost: 8_000, q: 4, f: 0.02, syn: ["slice", "romance", "shojo"], synQ: 4, anti: ["racing", "military"], antiQ: -2, desc: "No explosions. One conversation. Somehow the episode everyone quotes." },
+  { id: "narr_pov", name: "POV Switch", cost: 16_000, q: 5, f: 0.01, syn: ["mystery", "noir", "horror"], synQ: 3, desc: "Retell the conflict through the eyes of somebody the audience mistrusted.", unlock: { kind: "rd", cost: 22 } },
+  { id: "narr_sacrifice", name: "Heroic Sacrifice", cost: 24_000, q: 6, f: 0.03, syn: ["shonen", "fantasy", "military"], synQ: 4, anti: ["comedy", "cooking"], antiQ: -3, desc: "One character pays the bill for everybody else's tomorrow.", unlock: { kind: "score", n: 30 } },
 ];
 
 /* ------------------------------------------- hidden arc synergies (shipped to discover) */
 export interface ArcCombo {
   id: string;
   name: string;
-  /** every arc in this list must be in the season for the synergy to fire */
+  /** required beats. `ordered` combos only fire when they appear in this sequence. */
   arcs: string[];
   q: number;
   f: number;
+  ordered?: boolean;
 }
 
 export const ARC_COMBOS: ArcCombo[] = [
@@ -815,11 +878,70 @@ export const ARC_COMBOS: ArcCombo[] = [
   { id: "orbit", name: "Orbital Launch", arcs: ["orbital", "launch"], q: 2, f: 0.01 },
   { id: "crime", name: "Crime & Rain", arcs: ["raincity", "case", "twist"], q: 2, f: 0.01 },
   { id: "magicgirl", name: "Magical Rising", arcs: ["transformation", "live", "confession"], q: 2, f: 0.01 },
+  /* ordered structures: sequencing now matters, not just the shopping list */
+  { id: "earned_victory", name: "Earned Victory", arcs: ["montage", "tournament", "finale"], q: 4, f: 0.03, ordered: true },
+  { id: "rival_payoff", name: "Rivalry Payoff", arcs: ["narr_rivalintro", "tournament", "finale"], q: 4, f: 0.04, ordered: true },
+  { id: "mentor_legacy", name: "Mentor's Legacy", arcs: ["narr_mentor", "narr_sacrifice", "finale"], q: 5, f: 0.02, ordered: true },
+  { id: "mystery_reveal", name: "The Long Reveal", arcs: ["hook", "case", "narr_villainreveal", "twist"], q: 5, f: 0.02, ordered: true },
+  { id: "false_betrayal", name: "Victory Was a Lie", arcs: ["narr_falsewin", "narr_betrayal", "finale"], q: 4, f: 0.03, ordered: true },
+  { id: "journey_family", name: "Road Becomes Home", arcs: ["narr_journey", "narr_foundfamily", "finale"], q: 3, f: 0.04, ordered: true },
+  { id: "political_siege", name: "War by Other Means", arcs: ["narr_politics", "narr_siege", "war"], q: 5, f: 0.01, ordered: true },
+  { id: "identity_confession", name: "Mask Comes Off", arcs: ["narr_secretid", "confession"], q: 3, f: 0.03, ordered: true },
+  { id: "survival_rescue", name: "No One Left Behind", arcs: ["narr_survival", "narr_rescue", "finale"], q: 4, f: 0.03, ordered: true },
+  { id: "revenge_redemption", name: "Break the Cycle", arcs: ["narr_revenge", "redemption", "finale"], q: 4, f: 0.02, ordered: true },
+  { id: "slowburn_payoff", name: "Slow Fuse", arcs: ["narr_slowburn", "twist", "finale"], q: 4, f: 0.02, ordered: true },
+  { id: "pov_mystery", name: "Other Side of the Case", arcs: ["narr_pov", "case", "twist"], q: 4, f: 0.01, ordered: true },
+  { id: "flashforward_loop", name: "Promise Kept", arcs: ["narr_flashforward", "origin", "finale"], q: 3, f: 0.02, ordered: true },
+  /* deliberately bad structures teach the player that order can hurt too */
+  { id: "backwards_training", name: "Training After the Test", arcs: ["tournament", "montage"], q: -3, f: -0.01, ordered: true },
+  { id: "spoiled_mystery", name: "Mystery Spoiled Early", arcs: ["narr_villainreveal", "case"], q: -3, f: -0.01, ordered: true },
 ];
 
-/** synergies whose arcs are all present in the season */
+const containsInOrder = (haystack: string[], needles: string[]) => {
+  let at = -1;
+  return needles.every((id) => {
+    at = haystack.indexOf(id, at + 1);
+    return at >= 0;
+  });
+};
+
+/** hidden story structures. Some only work when the beats are in the right order. */
 export const arcCombosFor = (arcIds: string[]): ArcCombo[] =>
-  ARC_COMBOS.filter((c) => c.arcs.every((a) => arcIds.includes(a)));
+  ARC_COMBOS.filter((c) => c.ordered ? containsInOrder(arcIds, c.arcs) : c.arcs.every((a) => arcIds.includes(a)));
+
+export const arcGenreKey = (arcId: string, genre: GenreId) => `${arcId}|${genre}`;
+
+export const arcGenreFit = (arc: Arc, genre: GenreId) => {
+  if (arc.anti?.includes(genre)) return { label: "RISKY FIT", cls: "text-neon", score: arc.antiQ ?? -2 };
+  if (arc.syn?.includes(genre)) {
+    const score = arc.synQ ?? 0;
+    if (score >= 4 || (arc.synF ?? 0) >= 0.03) return { label: "GREAT FIT", cls: "text-gold", score };
+    return { label: "GOOD FIT", cls: "text-mint", score };
+  }
+  return { label: "NEUTRAL", cls: "text-paper/50", score: 0 };
+};
+
+export const arcComboRating = (combo: ArcCombo) => {
+  if (combo.q < 0 || combo.f < 0) return { label: "RISKY STRUCTURE", cls: "text-neon" };
+  if (combo.q >= 4 || combo.f >= 0.035) return { label: "GREAT COMBO!", cls: "text-gold" };
+  if (combo.q >= 2 || combo.f >= 0.015) return { label: "GOOD SYNERGY", cls: "text-mint" };
+  return { label: "WORKABLE", cls: "text-cyanx" };
+};
+
+/** Creative research can reveal a starter library without forcing blind releases. */
+export const ARC_RESEARCH_COMBOS = ["rivalry", "suspense", "deep", "earned_victory", "heart"] as const;
+export const ARC_RESEARCH_GENRE_KEYS = [
+  arcGenreKey("hook", "shonen"),
+  arcGenreKey("lore", "fantasy"),
+  arcGenreKey("montage", "shonen"),
+  arcGenreKey("tournament", "sports"),
+  arcGenreKey("festival", "shojo"),
+  arcGenreKey("case", "mystery"),
+  arcGenreKey("narr_slowburn", "slice"),
+  arcGenreKey("narr_rivalintro", "sports"),
+  arcGenreKey("narr_politics", "noir"),
+  arcGenreKey("narr_quiet", "slice"),
+] as const;
 
 /* ------------------------------------------------------------------ staff */
 const FIRST = ["Hana", "Yuto", "Mei", "Ren", "Sakura", "Daichi", "Aoi", "Kenji", "Mio", "Sota", "Rin", "Takeshi", "Nao", "Haru", "Yuki", "Kenta", "Asuka", "Shun", "Emi", "Taiga", "Kira", "Masa", "Noa", "Goro"];

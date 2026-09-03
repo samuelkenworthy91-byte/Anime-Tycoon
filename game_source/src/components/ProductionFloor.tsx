@@ -67,6 +67,7 @@ export default function ProductionFloor({
   focus,
   spawnMult,
   lifeMult,
+  autoSpeedMult = 1,
   bugRate,
   paused,
   onProgress,
@@ -79,6 +80,7 @@ export default function ProductionFloor({
   focus: PointType;
   spawnMult: number;
   lifeMult: number;
+  autoSpeedMult?: number;
   bugRate: number;
   paused: boolean;
   onProgress?: (t: FloorTotals, pct: number) => void;
@@ -228,7 +230,7 @@ export default function ProductionFloor({
       if (!target) return; // stay ready: pick up the next item immediately
       pop(target);
       const d = desks[i];
-      s.nextAuto[i] = s.elapsed + autoPopInterval(d.skill) * (0.88 + Math.random() * 0.24);
+      s.nextAuto[i] = s.elapsed + (autoPopInterval(d.skill) / Math.max(0.5, autoSpeedMult)) * (0.88 + Math.random() * 0.24);
     };
 
     const spawn = (now: number) => {
