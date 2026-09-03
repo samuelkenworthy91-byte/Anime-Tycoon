@@ -65,7 +65,6 @@ function ProjectCard({
   onAssign,
   onMilestone,
   onShip,
-  onRushCrunch,
   onDelegate,
   onTakeOver,
   onResume,
@@ -76,7 +75,6 @@ function ProjectCard({
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
-  onRushCrunch: (projectId: string) => void;
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
@@ -404,12 +402,6 @@ function ProjectCard({
           <Play size={17} /> ASSIGN {MILESTONE_LABEL[p.milestone].toUpperCase()} LEAD
         </Btn>
       )}
-      {p.rush && (
-        <div className="mt-2 rounded-xl border border-cyanx/40 bg-cyanx/5 p-2.5">
-          <div className="flex items-center gap-2"><UserRound size={13} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-[11px] font-extrabold text-cyanx">{p.rush.leadName} · SKILL {p.rush.skill}</div><div className="text-[9px] text-paper/45">+{p.rush.pointsAdded} {p.rush.type} so far · work lands each in-game day</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" disabled={run.cash < 9000} onClick={() => onRushCrunch(p.id)}><Zap size={11}/> CRUNCH</Btn></div>
-          <div className="mt-1 text-[9px] text-paper/40">Crunch costs £9,000: +35% lead output for the next two rush days, with almost double mistake risk.</div>
-        </div>
-      )}
       {p.stage === "ready" && (
         <div className="mt-2">
           <Btn big variant="gold" className="anim-ring w-full" onClick={() => onShip(p.id)}>
@@ -430,7 +422,6 @@ export default function ProjectsPanel({
   onAssign,
   onMilestone,
   onShip,
-  onRushCrunch,
   onNewShow,
   onDelegate,
   onTakeOver,
@@ -441,7 +432,6 @@ export default function ProjectsPanel({
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
-  onRushCrunch: (projectId: string) => void;
   onNewShow: () => void;
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
@@ -506,7 +496,6 @@ export default function ProjectsPanel({
           onAssign={onAssign}
           onMilestone={onMilestone}
           onShip={onShip}
-          onRushCrunch={onRushCrunch}
           onDelegate={onDelegate}
           onTakeOver={onTakeOver}
           onResume={onResume}

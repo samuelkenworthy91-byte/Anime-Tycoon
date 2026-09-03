@@ -11,6 +11,8 @@ export interface OfficeStaff {
   /** the showrunner's own painted office sprite */
   sprite?: string;
   working?: boolean;
+  energy?: number;
+  resting?: boolean;
   pulse?: { actorId: string; name: string; type: string; points: number; nonce: number };
 }
 
@@ -95,6 +97,8 @@ function Character({
   color,
   tired,
   working,
+  energy,
+  resting,
   pulse,
   onClick,
   bobDelay,
@@ -106,6 +110,8 @@ function Character({
   color: string;
   tired?: boolean;
   working?: boolean;
+  energy?: number;
+  resting?: boolean;
   pulse?: { points: number; type: string; nonce: number };
   onClick?: () => void;
   bobDelay: number;
@@ -182,14 +188,27 @@ function Character({
 
       {working && (
         <>
-          <span className="pointer-events-none absolute bottom-[2%] left-1/2 z-20 block h-[13%] w-[92%] -translate-x-1/2 rounded-sm border border-[#9b6a48]/70 bg-gradient-to-b from-[#9b6a48] to-[#5e3b24] shadow-lg" />
-          <span className="pointer-events-none absolute bottom-[12%] left-1/2 z-10 block h-[18%] w-[42%] -translate-x-1/2 rounded border border-cyanx/30 bg-abyss/90 shadow-[0_0_12px_rgba(59,225,255,.18)]">
-            <span className="absolute inset-x-[18%] bottom-[18%] h-[12%] rounded bg-cyanx/60 anim-blink" />
+          {/* compact production desk: monitor, stand and drawing tablet — no faux laptop/SVG */}
+          <span className="pointer-events-none absolute bottom-[1%] left-1/2 z-20 block h-[10%] w-[94%] -translate-x-1/2 rounded-[3px] border border-[#8a6248]/70 bg-[#674630] shadow-[0_5px_12px_rgba(0,0,0,.45)]" />
+          <span className="pointer-events-none absolute bottom-[10%] left-[51%] z-10 block h-[20%] w-[49%] -translate-x-1/2 rounded-[3px] border border-paper/20 bg-[#17182a] shadow-[0_0_10px_rgba(59,225,255,.16)]">
+            <span className="absolute inset-[10%] overflow-hidden rounded-[2px] bg-[#252844]">
+              <span className="absolute left-[8%] right-[8%] top-[18%] h-[8%] rounded bg-cyanx/65" />
+              <span className="absolute left-[8%] right-[25%] top-[40%] h-[7%] rounded bg-neon/55" />
+              <span className="absolute bottom-[18%] left-[8%] right-[12%] h-[6%] rounded bg-gold/45" />
+            </span>
           </span>
+          <span className="pointer-events-none absolute bottom-[7%] left-1/2 z-20 block h-[5%] w-[5%] -translate-x-1/2 bg-paper/25" />
+          <span className="pointer-events-none absolute bottom-[3%] left-[48%] z-30 block h-[4%] w-[34%] -translate-x-1/2 -skew-x-6 rounded-[2px] border border-paper/10 bg-[#222235]" />
         </>
       )}
+      {energy !== undefined && (
+        <span className="pointer-events-none absolute -top-[5%] left-1/2 z-40 block w-[74%] -translate-x-1/2">
+          <span className="mb-[2px] flex items-center justify-between text-[7px] font-extrabold text-paper/70"><span>{resting ? "RECOVERING" : working ? "ENERGY" : "REST"}</span><span>{Math.round(energy)}%</span></span>
+          <span className="block h-[5px] overflow-hidden rounded-full border border-paper/20 bg-abyss/90"><span className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.max(0, Math.min(100, energy))}%`, background: energy < 25 ? "#ff4d6d" : energy < 55 ? "#ffd166" : "#73f2b5" }} /></span>
+        </span>
+      )}
       {pulse && (
-        <span key={pulse.nonce} className="pointer-events-none absolute -top-[8%] left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-lg border border-gold/50 bg-abyss/90 px-2 py-1 font-display text-[10px] font-extrabold text-gold shadow-xl anim-floaty">
+        <span key={pulse.nonce} className="pointer-events-none absolute -top-[20%] left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-gold/50 bg-abyss/95 px-2 py-1 font-display text-[10px] font-extrabold text-gold shadow-xl anim-floaty">
           +{pulse.points} {pulse.type.toUpperCase()}
         </span>
       )}
@@ -283,6 +302,16 @@ export default function OfficeScene({
     );
   }, [cast.length, maxStaff, lvl]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* employees who finish recovering walk straight back to their workstation */
+  useEffect(() => {
+    setBodies((prev) => prev.map((b, i) => {
+      if (!cast[i]?.working) return b;
+      const dist = Math.hypot(b.home.x - b.pos.x, b.home.y - b.pos.y);
+      if (dist < 0.6) return b;
+      return { ...b, target: { ...b.home }, pos: { ...b.home }, dur: Math.max(1.2, dist / 5.5), flip: b.home.x < b.pos.x };
+    }));
+  }, [cast.map((c) => !!c.working).join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* every so often somebody wanders off and comes back */
   useEffect(() => {
     if (!bodies.length) return;
@@ -369,6 +398,8 @@ export default function OfficeScene({
               color={c.color}
               tired={c.tired}
               working={c.working}
+              energy={c.energy}
+              resting={c.resting}
               pulse={c.pulse}
               bobDelay={i * 370}
               onClick={() => onDeskClick?.(i)}

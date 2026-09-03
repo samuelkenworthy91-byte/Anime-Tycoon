@@ -1,54 +1,42 @@
 import { describe, expect, it, vi } from "vitest";
-import { initialRun, startMilestoneRush, tickRushDay, respondRushBoost, crunchRush, RUSH_CRUNCH_COST } from "../state";
+import { initialRun, tickStudioDay } from "../state";
 import { makeProject } from "../projects";
 import type { Draft } from "../data";
 
-const draft = (): Draft => ({ title:"Rush Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", genres:["shonen"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
+const draft = (): Draft => ({ title:"Desk Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", genres:["shonen"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
 
-describe("continuous GDS-style production", () => {
-  it("starts a live rush instead of resolving the milestone immediately", () => {
-    const r = initialRun("Test", "producer");
-    const pr = { ...makeProject(draft(), 0), milestone: "story" as const, progress: 1 };
-    const run = { ...r, projects:[pr] };
-    const out = startMilestoneRush(run, pr.id, { leadId:"showrunner", leadName:"Runner", skill:60, type:"story", cost:0, slider:65 });
-    expect(out?.projects[0].rush?.daysWorked).toBe(0);
-    expect(out?.projects[0].milestone).toBe("story");
-    expect(out?.projects[0].draft.sliders[0]).toBe(65);
-  });
-
-  it("adds bounded lead points each day and completes after four days", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
+describe("visible daily studio work", () => {
+  it("drains energy while assigned and eventually sends an employee to recover", () => {
     let r = initialRun("Test", "producer");
-    const pr = { ...makeProject(draft(), 0), milestone: "story" as const, progress: 1 };
-    r = { ...r, projects:[pr] };
-    r = startMilestoneRush(r, pr.id, { leadId:"showrunner", leadName:"Runner", skill:60, type:"story", cost:0, slider:50 })!;
-    for (let i=0;i<4;i++) r = tickRushDay(r).run;
-    expect(r.projects[0].points.story).toBeGreaterThan(0);
-    expect(r.projects[0].rush).toBeNull();
-    expect(r.projects[0].milestonesDone).toContain("story");
-    vi.restoreAllMocks();
+    const staff = { ...r.candidates[0], stamina: 12 };
+    const pr = { ...makeProject(draft(), 0), staffIds:[staff.id] };
+    r = { ...r, staff:[staff], projects:[pr], candidates:r.candidates.slice(1) };
+    r = tickStudioDay(r).run;
+    r = tickStudioDay(r).run;
+    expect(r.staffResting[staff.id]).toBe(true);
+    expect(r.staff[0].stamina).toBe(0);
   });
 
-  it("research boost spends RD and resolves the pending idea", () => {
+  it("recovers an exhausted employee before returning them to work", () => {
+    let r = initialRun("Test", "producer");
+    const staff = { ...r.candidates[0], stamina: 0 };
+    const pr = { ...makeProject(draft(), 0), staffIds:[staff.id] };
+    r = { ...r, staff:[staff], projects:[pr], candidates:r.candidates.slice(1), staffResting:{ [staff.id]: true } };
+    for (let i=0;i<4;i++) r = tickStudioDay(r).run;
+    expect(r.staff[0].stamina).toBeGreaterThanOrEqual(82);
+    expect(r.staffResting[staff.id]).toBeUndefined();
+  });
+
+  it("ordinary desk work emits a visible contribution bubble of the correct type", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
     let r = initialRun("Test", "producer");
-    const pr = { ...makeProject(draft(), 0), milestone:"story" as const, rush:{ milestone:"story" as const, type:"story" as const, leadId:"showrunner", leadName:"Runner", skill:70, cost:0, slider:50, daysWorked:1, durationDays:4, pointsAdded:4, boostAsked:false, boostPrompt:{actorId:"showrunner",name:"Runner",skill:70,type:"story" as const}, crunchDays:0 } };
-    r = { ...r, rd:50, projects:[pr] };
-    const before = r.rd;
-    r = respondRushBoost(r, pr.id, 0.8);
-    expect(r.rd).toBeLessThan(before);
-    expect(r.projects[0].rush?.boostPrompt).toBeNull();
-    expect(r.projects[0].rush?.boostAsked).toBe(true);
+    const staff = { ...r.candidates[0], story:99, stamina:100 };
+    const pr = { ...makeProject(draft(), 0), staffIds:[staff.id] };
+    r = { ...r, staff:[staff], projects:[pr], candidates:r.candidates.slice(1) };
+    const out = tickStudioDay(r);
+    expect(out.pulses.length).toBeGreaterThan(0);
+    expect(out.pulses[0].type).toBe("story");
+    expect(out.pulses[0].points).toBeGreaterThan(0);
     vi.restoreAllMocks();
-  });
-
-  it("crunch costs cash and powers the next two rush days", () => {
-    let r = initialRun("Test", "producer");
-    const pr = { ...makeProject(draft(), 0), milestone:"art" as const, rush:{ milestone:"art" as const, type:"art" as const, leadId:"showrunner", leadName:"Runner", skill:70, cost:0, slider:50, daysWorked:1, durationDays:4, pointsAdded:4, boostAsked:true, boostPrompt:null, crunchDays:0 } };
-    r = { ...r, projects:[pr] };
-    const cash = r.cash;
-    r = crunchRush(r, pr.id);
-    expect(r.cash).toBe(cash - RUSH_CRUNCH_COST);
-    expect(r.projects[0].rush?.crunchDays).toBe(2);
   });
 });

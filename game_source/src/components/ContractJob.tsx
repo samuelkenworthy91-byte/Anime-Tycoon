@@ -54,7 +54,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-panel3" style={{ color: POINT_COLOR[contract.type] }}><Briefcase size={21} /></span>
               <div className="min-w-0 flex-1">
                 <h2 className="font-display text-xl font-extrabold">Assign a contract team</h2>
-                <p className="mt-1 text-xs text-paper/65">Pick up to three contributors. Staff are unavailable elsewhere until it finishes; your showrunner can personally take one seat too.</p>
+                <p className="mt-1 text-xs text-paper/65">This is background work, not an instant payout. Assign up to three people, return to the office, then watch the contract fill as weeks pass. Assigned staff cannot work on your shows until the job delivers or misses its deadline.</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <span className="ink-chip px-2 py-1 font-bold text-gold">{formatGBP(contract.pay)}</span>
                   <span className="ink-chip flex items-center gap-1 px-2 py-1 font-bold text-viol"><Database size={12} /> +{contract.rd} RD</span>
@@ -92,7 +92,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
 
           <div className={cn("rounded-xl border p-3", likely ? "border-mint/50 bg-mint/10" : "border-gold/50 bg-gold/10")}>
             <div className="flex items-center justify-between text-xs"><span className="font-bold">Projected output by deadline</span><span className={cn("font-display text-lg font-extrabold", likely ? "text-mint" : "text-gold")}>{projected}/{contract.target}</span></div>
-            <div className="mt-1 text-[10px] text-paper/55">Estimate uses current skill, stamina, showrunner contribution and Digital Pipeline research. The job can finish early.</div>
+            <div className="mt-1 text-[10px] text-paper/55">Each in-game week, selected contributors turn their relevant skill + current energy into progress. Digital Pipeline improves output. Reach the target early and the job pays immediately; miss the deadline and you only recover a little learning RD.</div>
           </div>
 
           <div className="grid grid-cols-[auto_1fr] gap-2">

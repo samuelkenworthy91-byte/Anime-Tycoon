@@ -10,8 +10,9 @@ describe("office shell regressions", () => {
   it("does not reference the removed skip-week callback", () => {
     expect(office).not.toContain("onSkipWeek={onSkipWeek}");
   });
-  it("wires live rush crunch into the Projects board", () => {
-    expect(office).toContain("onRushCrunch={onRushCrunch}");
+  it("shows persistent staff energy in the office scene", () => {
+    expect(office).toContain("energy: s.stamina");
+    expect(office).toContain("staffResting");
   });
   it("uses the compact five-action management dock", () => {
     expect(office).toContain("grid-cols-5");

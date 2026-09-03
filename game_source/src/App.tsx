@@ -7,13 +7,10 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
-  crunchRush,
   forecastWeek,
   initialRun,
+  tickStudioDay,
   MAX_WEEKS,
-  respondRushBoost,
-  startMilestoneRush,
-  tickRushDay,
   type DeskPulse,
   migrateRun,
   projectById,
@@ -23,7 +20,7 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
-import type { MilestoneId, MilestoneOutcome, RushAssignment } from "./engine/projects";
+import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
 import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
@@ -35,7 +32,6 @@ import Produce from "./components/Produce";
 import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
 import Release from "./components/Release";
-import RushBoostModal from "./components/RushBoostModal";
 import GameOver from "./components/GameOver";
 import Retrospective from "./components/Retrospective";
 import { beginDynastyMode } from "./engine/legacy";
@@ -128,7 +124,7 @@ export default function App() {
         setClockDay(dayCountRef.current);
         setRun((current) => {
           if (!current) return current;
-          const daily = tickRushDay(current);
+          const daily = tickStudioDay(current);
           let n = daily.run;
           setWorkPulses(daily.pulses);
           if (daily.attention) setTimeSpeed(0);
@@ -326,24 +322,6 @@ export default function App() {
     [focus]
   );
 
-  const beginRush = useCallback((a: RushAssignment) => {
-    if (!focus) return;
-    setRun((r) => (r ? (startMilestoneRush(r, focus.projectId, a) ?? r) : r));
-    setFocus(null);
-    setScreen("office");
-    setTimeSpeed(1);
-  }, [focus]);
-
-  const pushRush = useCallback((projectId: string) => {
-    sfx.phase();
-    setRun((r) => (r ? crunchRush(r, projectId) : r));
-  }, []);
-
-  const answerRushBoost = useCallback((projectId: string, chance: number | null) => {
-    setRun((r) => (r ? respondRushBoost(r, projectId, chance) : r));
-    setTimeSpeed(1);
-  }, []);
-
   /* --------------------------------------------------------- release */
   const openShip = useCallback((projectId: string) => {
     sfx.select();
@@ -501,7 +479,6 @@ export default function App() {
             onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
-            onRushCrunch={pushRush}
             workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
@@ -528,7 +505,6 @@ export default function App() {
             milestone={focus.milestone}
             paused={paused}
             onDone={finishMilestone}
-            onStartRush={beginRush}
             onBack={() => {
               sfx.back();
               setFocus(null);
@@ -595,8 +571,6 @@ export default function App() {
             </button>
           </div>
         )}
-
-        {screen === "office" && run && <RushBoostModal run={run} onRespond={answerRushBoost} />}
 
         {paused && pauseMenu}
         {paused && savePicker && savePickerOverlay}

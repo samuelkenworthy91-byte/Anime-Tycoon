@@ -82,6 +82,7 @@ import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
 import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
+import { contractWeeklyOutput, showrunnerContractSkill } from "../engine/studioOps";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -94,7 +95,6 @@ export default function Office({
   onContinue,
   onMilestone,
   onShip,
-  onRushCrunch,
   workPulses = [],
   clockDay = 0,
   clockPhase = 0,
@@ -107,7 +107,6 @@ export default function Office({
   onContinue: (plan: ContinuationPlan) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
-  onRushCrunch: (projectId: string) => void;
   workPulses?: import("../engine/state").DeskPulse[];
   clockDay?: number;
   clockPhase?: number;
@@ -176,20 +175,33 @@ export default function Office({
       {/* ---------------------------------------------------- office scene */}
       <OfficeScene
         level={run.officeLevel}
-        boss={{ id: "showrunner", name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite, working: projActive.length > 0, pulse: workPulses.find((x) => x.actorId === "showrunner") }}
+        boss={{ id: "showrunner", name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite, working: projActive.length > 0 || run.contractJobs.some((j) => j.showrunner), pulse: workPulses.find((x) => x.actorId === "showrunner") }}
         staff={run.staff.map((s) => ({
           id: s.id,
           name: s.name.split(" ")[0],
           color: POINT_COLOR[ROLE_POINT[s.role]],
-          tired: s.stamina < 45,
+          tired: !!run.staffResting?.[s.id] || s.stamina < 28,
           look: workerLookIndex(s),
-          working: projActive.some((pr) => pr.staffIds.includes(s.id)),
+          working: !run.staffResting?.[s.id] && s.stamina > 0 && (projActive.some((pr) => pr.staffIds.includes(s.id)) || run.contractJobs.some((j) => j.staffIds.includes(s.id))),
+          energy: s.stamina,
+          resting: !!run.staffResting?.[s.id],
           pulse: workPulses.find((x) => x.actorId === s.id),
         }))}
         maxStaff={staffCapacity(run)}
         timeOfDay={(clockPhase + 0.5) / 4}
         onDeskClick={() => setModal("staff")}
       />
+      {run.contractJobs.length > 0 && (
+        <div className="pointer-events-none absolute bottom-[54px] left-2 z-20 hidden w-56 rounded-lg border border-cyanx/35 bg-abyss/88 p-2 shadow-xl backdrop-blur-sm sm:block">
+          <div className="mb-1 flex items-center gap-1 text-[8px] font-extrabold tracking-widest text-cyanx"><Briefcase size={10}/> ACTIVE CONTRACT{run.contractJobs.length > 1 ? "S" : ""}</div>
+          {run.contractJobs.slice(0, 2).map((job) => (
+            <div key={job.id} className="mt-1">
+              <div className="flex items-center justify-between gap-2 text-[9px]"><span className="truncate font-bold text-paper/75">{job.contract.name}</span><span className="shrink-0 text-mint">{job.progress}/{job.contract.target}</span></div>
+              <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-panel3"><div className="h-full rounded-full bg-cyanx" style={{ width: `${Math.min(100, job.progress / Math.max(1, job.contract.target) * 100)}%` }} /></div>
+            </div>
+          ))}
+        </div>
+      )}
       {/* built rooms glow as neon door signs on the back wall */}
       {builtRooms.length > 0 && (
         <div className="pointer-events-none absolute right-[3%] top-[16%] z-10 hidden flex-col items-end gap-1 sm:flex">
@@ -389,7 +401,7 @@ export default function Office({
             <Clapperboard size={15} /> NEW SHOW
           </Btn>
           <Btn variant="cyan" className="!min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("contracts")}>
-            <Briefcase size={15} /> JOBS
+            <Briefcase size={15} /> JOBS{run.contractJobs.length > 0 && <span className="text-[8px] text-mint">{run.contractJobs.length}</span>}
           </Btn>
           <Btn variant="ghost" className="relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("staff")}>
             <Users size={15} /> STAFF
@@ -441,9 +453,37 @@ export default function Office({
       {/* ------------------------------------------------------- CONTRACTS */}
       {modal === "contracts" && (
         <Modal title="CONTRACT WORK" onClose={() => setModal(null)}>
-          <p className="mb-3 text-xs text-paper/60">
-            Small jobs for other studios. Quick money and research data — the classic way to keep the lights on between shows.
-          </p>
+          <div className="mb-3 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3">
+            <div className="text-[10px] font-extrabold tracking-widest text-cyanx">HOW CONTRACTS WORK</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-paper/60 sm:grid-cols-4">
+              <div><b className="text-paper">1 · PICK</b><br/>Choose up to 3 contributors.</div>
+              <div><b className="text-paper">2 · COMMIT</b><br/>They are unavailable for shows while assigned.</div>
+              <div><b className="text-paper">3 · WORK</b><br/>Skill + energy generate contract progress each in-game week.</div>
+              <div><b className="text-paper">4 · DELIVER</b><br/>Hit the target before the deadline for cash + RD. Jobs can finish early.</div>
+            </div>
+          </div>
+          {run.contractJobs.length > 0 && (
+            <div className="mb-4">
+              <div className="mb-2 text-[10px] font-extrabold tracking-widest text-mint">ACTIVE JOBS</div>
+              <div className="space-y-2">
+                {run.contractJobs.map((job) => {
+                  const crew = run.staff.filter((st) => job.staffIds.includes(st.id));
+                  const runnerSkill = job.showrunner ? showrunnerContractSkill(run.showrunner, run.showsMade, job.contract.type) : 0;
+                  const rate = contractWeeklyOutput(job.contract, crew.filter((st) => !run.staffResting?.[st.id]), run.research, runnerSkill);
+                  const weeksLeft = Math.max(0, job.dueWeek - run.week);
+                  const projected = job.progress + rate * weeksLeft;
+                  return (
+                    <div key={job.id} className="ink-card p-3">
+                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · due {dateLabel(job.dueWeek)}</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/wk</div></div></div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel3"><div className="h-full rounded-full bg-cyanx transition-all" style={{ width: `${Math.min(100, job.progress / Math.max(1, job.contract.target) * 100)}%` }} /></div>
+                      <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace to deliver${weeksLeft ? ` within ${weeksLeft} wk` : ""}.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <div className="mb-2 text-[10px] font-extrabold tracking-widest text-paper/45">AVAILABLE CONTRACTS</div>
           <div className="space-y-2">
             {run.contracts.map((c) => (
               <div key={c.id} className="ink-card flex items-center gap-3 p-3">
@@ -512,7 +552,6 @@ export default function Office({
               setModal(null);
               onShip(id);
             }}
-            onRushCrunch={onRushCrunch}
             onNewShow={() => {
               setModal(null);
               onNewShow();
