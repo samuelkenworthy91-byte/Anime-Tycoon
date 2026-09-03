@@ -1,9 +1,17 @@
 from pathlib import Path
-p = Path('tools/apply_kairosoft_pass.py')
+
+p = Path("tools/apply_kairosoft_pass.py")
 s = p.read_text()
-bad = '''replace(produce,\n''' + "'''  milestone: MilestoneId;\\n  paused: boolean;\\n  onDone:''',\n'''  milestone: MilestoneId;\\n  paused: boolean;\\n  workPulses = [],\\n  onDone:''')" + '''\n'''
-if bad not in s:
-    raise SystemExit('bad Produce signature patch block not found')
-s = s.replace(bad, '''replace(produce,\n''' + "'''export default function Produce({ run, project, milestone, onDone, onBack }: {''',\n'''export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {''')" + '''\n''')
+needle = "replace(produce,\n'''  milestone: MilestoneId;"
+start = s.find(needle)
+if start < 0:
+    raise SystemExit("bad Produce signature patch start not found")
+end = s.find("\nreplace(produce,", start + len(needle))
+if end < 0:
+    raise SystemExit("next Produce patch boundary not found")
+replacement = '''replace(produce,
+''' + "'''export default function Produce({ run, project, milestone, onDone, onBack }: {''',\n'''export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {''')" + '''
+'''
+s = s[:start] + replacement + s[end + 1:]
 p.write_text(s)
-print('fixed Produce migration signature anchor')
+print("fixed Produce migration signature anchor")
