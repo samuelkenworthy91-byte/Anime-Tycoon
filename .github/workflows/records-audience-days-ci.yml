@@ -1,0 +1,49 @@
+name: Records Audience Days CI
+
+on:
+  push:
+    branches:
+      - feature/kairosoft-production-pass
+    paths:
+      - tools/apply_day_audience_mechanics.py
+      - tools/apply_records_audience_ui.py
+      - .github/workflows/records-audience-days-ci.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply day and audience mechanics
+        run: python tools/apply_day_audience_mechanics.py
+      - name: Apply Records and audience UI
+        run: python tools/apply_records_audience_ui.py
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Strict TypeScript check
+        working-directory: game_source
+        run: npx tsc -b
+      - name: Run full tests
+        working-directory: game_source
+        run: npm test
+      - name: Build production browser app
+        working-directory: game_source
+        run: npm run build
+      - name: Commit validated game files
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source
+          git diff --cached --quiet || git commit -m "Make studio clock day-driven and add audience research"
+          git push
