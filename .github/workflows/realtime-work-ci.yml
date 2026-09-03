@@ -1,0 +1,63 @@
+name: Realtime Work CI
+
+on:
+  push:
+    branches:
+      - feature/deeper-studio-loop
+    paths:
+      - "tools/apply_realtime_work.py"
+      - "tools/anime_runner_icon.b64"
+      - ".github/workflows/realtime-work-ci.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: python -m pip install pillow
+
+      - name: Apply realtime work migration
+        run: python tools/apply_realtime_work.py
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Strict TypeScript check
+        working-directory: game_source
+        run: npx tsc -b
+
+      - name: Run full tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build browser app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated game files
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source
+          git diff --cached --quiet || git commit -m "Make desk bubbles drive live work and fix portrait layout"
+          git push
