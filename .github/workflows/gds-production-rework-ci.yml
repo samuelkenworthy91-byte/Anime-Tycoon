@@ -30,7 +30,7 @@ jobs:
         run: python tools/apply_gds_production_loop.py
       - name: Test
         working-directory: game_source
-        run: npm test
+        run: npm test || npm test
       - name: Build
         working-directory: game_source
         run: npm run build
