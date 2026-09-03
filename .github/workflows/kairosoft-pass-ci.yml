@@ -21,7 +21,9 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
       - name: Apply migration
-        run: python tools/apply_kairosoft_pass.py
+        run: |
+          python tools/fix_apply_kairosoft.py
+          python tools/apply_kairosoft_pass.py
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
