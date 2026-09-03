@@ -25,16 +25,18 @@ jobs:
       - name: Install Pillow
         run: pip install pillow
 
-      - name: Generate framing contact sheets
+      - name: Generate framing contact sheets and diagnostics
         run: |
           python - <<'PY'
           from pathlib import Path
-          from PIL import Image, ImageOps, ImageDraw, ImageFont
-          import json
+          from PIL import Image, ImageOps, ImageDraw, ImageStat
+          import json, shutil
 
           root = Path('game_source/public/img/cast-ready')
           out = Path('portrait-audit')
+          suspects_dir = out / 'suspects'
           out.mkdir(exist_ok=True)
+          suspects_dir.mkdir(exist_ok=True)
           roles = ['protag', 'secondary', 'pet', 'villain']
           report = []
 
@@ -57,6 +59,16 @@ jobs:
               canvas.paste(fitted, (x, y))
               return canvas
 
+          def band_stats(gray):
+              w, h = gray.size
+              bands = []
+              for i in range(4):
+                  y0 = round(h * i / 4)
+                  y1 = round(h * (i + 1) / 4)
+                  st = ImageStat.Stat(gray.crop((0, y0, w, y1)))
+                  bands.append((round(st.mean[0], 2), round(st.stddev[0], 2)))
+              return bands
+
           for role in roles:
               files = sorted((root / role).glob('*.webp'))
               cols = 5
@@ -78,11 +90,39 @@ jobs:
                   name = path.stem
                   draw.text((x0 + 6, y0 + 160), name[:43], fill='white')
                   draw.text((x0 + 6, y0 + 178), f'{w}x{h} | current / y25 / contain', fill='#a9a2b5')
-                  report.append({'role': role, 'file': path.name, 'width': w, 'height': h, 'aspect': round(w/h, 4)})
+
+                  gray = im.convert('L')
+                  bands = band_stats(gray)
+                  stds = [x[1] for x in bands]
+                  means = [x[0] for x in bands]
+                  suspicious_blank_band = min(stds) < 4 and max(stds) > 18
+                  lower_blank = (stds[2] < 5 and stds[3] < 5 and max(stds[:2]) > 18)
+                  rec = {
+                      'role': role, 'file': path.name, 'width': w, 'height': h,
+                      'aspect': round(w/h, 4), 'bands': bands,
+                      'blank_band_suspect': suspicious_blank_band,
+                      'lower_half_blank_suspect': lower_blank,
+                  }
+                  report.append(rec)
+                  if suspicious_blank_band or lower_blank:
+                      shutil.copy2(path, suspects_dir / path.name)
               sheet.save(out / f'{role}_framing.png', optimize=True)
 
-          (out / 'dimensions.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
-          print(f'Audited {len(report)} portraits')
+          # Compare the known visually broken Warlord Ash import to its legacy source quadrant.
+          ash = root / 'villain' / 'v_ash__warlord-ash.webp'
+          if ash.exists():
+              Image.open(ash).convert('RGB').save(out / 'warlord-ash-current.png')
+          legacy = Path('game_source/public/img/cast-villain-7.jpg')
+          if legacy.exists():
+              old = Image.open(legacy).convert('RGB')
+              w, h = old.size
+              old.crop((0, 0, w // 2, h // 2)).save(out / 'warlord-ash-legacy-pos0.png')
+
+          report.sort(key=lambda r: (not r['lower_half_blank_suspect'], not r['blank_band_suspect'], min(x[1] for x in r['bands'])))
+          (out / 'diagnostics.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+          flagged = [r for r in report if r['blank_band_suspect'] or r['lower_half_blank_suspect']]
+          (out / 'flagged.txt').write_text('\n'.join(f"{r['role']}/{r['file']} bands={r['bands']}" for r in flagged), encoding='utf-8')
+          print(f'Audited {len(report)} portraits; flagged {len(flagged)} for blank-band review')
           PY
 
       - name: Upload audit
