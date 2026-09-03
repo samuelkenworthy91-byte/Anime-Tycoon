@@ -53,8 +53,6 @@ import {
   buyFacility,
   forecastWeek,
   office,
-  officeSlots,
-  pendingIncome,
   projectCapacity,
   relocateOffice,
   staffCapacity,
@@ -65,7 +63,7 @@ import {
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
 import { activeProjects } from "../engine/projects";
-import { buyInvestment, computeIndustryRecords, dynastyYear } from "../engine/legacy";
+import { buyInvestment, computeIndustryRecords } from "../engine/legacy";
 import { resumeAuto, setDelegation, takeOver } from "../engine/automation";
 import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
@@ -114,7 +112,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty">(null);
+  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more">(null);
   const [fcOpen, setFcOpen] = useState(false);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const fc = forecastWeek(run);
@@ -122,14 +120,12 @@ export default function Office({
   const score = studioScore(run);
   const off = office(run);
   const nextOffice = OFFICES[run.officeLevel + 1];
-  const inFlight = pendingIncome(run, 12);
   const projActive = activeProjects(run.projects);
   const projCap = projectCapacity(run);
   const newShowBlocked = startBlockReason(run);
   /* projects needing the player: a milestone to play or a release decision */
   const projAlerts = run.projects.filter((p) => (p.milestone && !p.rush) || p.stage === "ready").length;
   const roomsUsed = slotsUsed(run.facilities);
-  const roomsTotal = officeSlots(run);
   /* rooms drawn as glowing door signs inside the office scene */
   const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
 
@@ -370,118 +366,77 @@ export default function Office({
         </div>
       </div>
 
-      {/* -------------------------------------------------------- actions */}
-      <div className="relative z-20 border-t border-line/60 bg-ink/85 px-2 py-2.5 backdrop-blur-md md:px-5">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-1.5 md:gap-2.5">
+      {/* ---------------------------------------------------- compact dock */}
+      <div className="relative z-20 shrink-0 border-t border-line/60 bg-ink/90 px-2 py-1.5 backdrop-blur-md">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
           <Btn
-            big
             variant="primary"
-            className={cn(!projAlerts && !newShowBlocked && "anim-ring", "relative")}
+            className={cn("relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]", !projAlerts && !newShowBlocked && "anim-ring")}
             onClick={() => setModal("projects")}
           >
-            <KanbanSquare size={19} /> PROJECTS
-            <span className="text-[10px] opacity-70">({projActive.length}/{projCap})</span>
+            <KanbanSquare size={15} /> <span className="hidden xs:inline">PROJECTS</span><span className="xs:hidden">WORK</span>
+            <span className="text-[8px] opacity-65">{projActive.length}/{projCap}</span>
             {projAlerts > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gold font-display text-[10px] font-extrabold text-ink anim-pop">
-                {projAlerts}
-              </span>
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-display text-[8px] font-extrabold text-ink">{projAlerts}</span>
             )}
           </Btn>
           <Btn
-            big
             variant={newShowBlocked ? "ghost" : "primary"}
             disabled={!!newShowBlocked}
+            className="!min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]"
             onClick={() => onNewShow()}
           >
-            <Clapperboard size={19} /> NEW SHOW
+            <Clapperboard size={15} /> NEW SHOW
           </Btn>
-          <Btn variant="ghost" onClick={() => setModal("facilities")}>
-            <Hammer size={15} className="text-gold" /> STUDIO
-            <span className="text-[10px] opacity-70">({roomsUsed}/{roomsTotal})</span>
+          <Btn variant="cyan" className="!min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("contracts")}>
+            <Briefcase size={15} /> JOBS
           </Btn>
-          {seq && (
-            <Btn big variant="gold" className="anim-pop" onClick={() => onNewShow(run.pendingSequel!)}>
-              <Zap size={19} /> SEASON {seq.season + 1}
-            </Btn>
-          )}
-          {seriesList.length > 0 && (
-            <Btn variant="ghost" onClick={() => setModal("sequels")}>
-              <Clapperboard size={15} className="text-gold" /> LIBRARY
-              <span className="text-[10px] opacity-70">({seriesList.length})</span>
-            </Btn>
-          )}
-          <Btn variant="cyan" onClick={() => setModal("contracts")}>
-            <Briefcase size={15} /> CONTRACTS
-          </Btn>
-          <Btn variant="ghost" className="relative" onClick={() => setModal("market")}>
-            <BarChart3 size={15} className="text-mint" /> MARKET
-            {run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0) > 0 && (
-              <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cyanx font-display text-[9px] font-extrabold text-ink">
-                {run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0)}
-              </span>
-            )}
-          </Btn>
-          <Btn variant="ghost" className="relative" onClick={() => setModal("staff")}>
-            <Users size={15} /> STAFF <span className="text-[10px] opacity-70">({run.staff.length}/{staffCapacity(run)})</span>
+          <Btn variant="ghost" className="relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("staff")}>
+            <Users size={15} /> STAFF
             {run.staffEvents.length > 0 && (
-              <span className="anim-pop absolute -right-1.5 -top-1.5 flex h-4.5 w-4.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold font-display text-[9px] font-extrabold text-ink">
-                {run.staffEvents.length}
-              </span>
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-display text-[8px] font-extrabold text-ink">{run.staffEvents.length}</span>
             )}
           </Btn>
-          <Btn variant="ghost" onClick={() => setModal("research")}>
-            <FlaskConical size={15} className="text-viol" /> R&amp;D
-          </Btn>
-          {nextOffice && (
-            <Btn variant="ghost" onClick={() => setModal("relocate")}>
-              <Building2 size={15} className="text-cyanx" /> MOVE
-            </Btn>
-          )}
-          <Btn variant="ghost" onClick={() => setModal("awards")}>
-            <Award size={15} className="text-gold" /> AWARDS
-          </Btn>
-          <Btn variant="ghost" onClick={() => setModal("rivals")}>
-            <Swords size={15} className="text-cyanx" /> RIVALS
-          </Btn>
-          {run.dynasty && (
-            <Btn variant="gold" className="anim-pop" onClick={() => setModal("dynasty")}>
-              <Crown size={15} /> DYNASTY
-              <span className="text-[10px] opacity-70">Y{dynastyYear(run) + 1}</span>
-            </Btn>
-          )}
-          <Btn variant="ghost" onClick={() => setModal("hof")}>
-            <Trophy size={15} className="text-gold" /> RECORDS
+          <Btn variant="ghost" className="relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("more")}>
+            <Sparkles size={15} /> MORE
+            {(run.commissions.length + run.marketEvents.length + (run.studioEvents?.length ?? 0) > 0 || !!seq) && (
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-cyanx" />
+            )}
           </Btn>
         </div>
-        {run.lastResult && run.lastDraft && (
-          <div className="mx-auto mt-1.5 max-w-4xl text-center text-[11px] text-paper/50">
-            Last: <b className="text-paper/80">{run.lastDraft.title}</b> — {run.lastResult.total}/40 ·{" "}
-            {formatGBP(run.lastResult.revenue)} · +{formatNum(run.lastResult.fans)} fans
-          </div>
-        )}
         {fc.cashAfter < 0 && (
-          <div className="mx-auto mt-1 max-w-4xl animate-pulse text-center text-[11px] font-bold text-neon">
-            <AlertTriangle size={11} className="mr-1 inline" />
-            Next week leaves you at ≈{formatGBPShort(fc.cashAfter)} — act NOW: take a contract
-            {run.bailouts < 2 ? ", or the fans can bail you out once more." : " — no bailouts left, this is the last week."}
-          </div>
-        )}
-        {inFlight > 0 && (
-          <div className="mx-auto mt-1 max-w-4xl text-center text-[11px] text-mint/80">
-            <TrendingUp size={11} className="mr-1 inline" />
-            Broadcast revenue still landing — the box office will tell you what it was
+          <div className="mx-auto mt-1 max-w-xl truncate text-center text-[9px] font-bold text-neon">
+            <AlertTriangle size={9} className="mr-1 inline" /> Forecast: ≈{formatGBPShort(fc.cashAfter)} next week — take work or cut costs.
           </div>
         )}
       </div>
 
       {/* ticker */}
-      <div className="relative z-20 border-t border-line/40 bg-panel2/70 py-1.5 backdrop-blur-md">
+      <div className="relative z-20 shrink-0 border-t border-line/40 bg-panel2/70 py-0.5 backdrop-blur-md">
         <div className="overflow-hidden whitespace-nowrap [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
-          <div className="inline-block text-[11px] text-paper/60" style={{ animation: "marquee 46s linear infinite" }}>
+          <div className="inline-block text-[9px] text-paper/55" style={{ animation: "marquee 46s linear infinite" }}>
             {ticker} ✦ {ticker}
           </div>
         </div>
       </div>
+
+      {/* ----------------------------------------------------------- MORE */}
+      {modal === "more" && (
+        <Modal title="STUDIO MENU" onClose={() => setModal(null)}>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("facilities")}><Hammer size={16} className="text-gold"/><span className="text-xs font-bold">STUDIO ROOMS</span></button>
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("market")}><BarChart3 size={16} className="text-mint"/><span className="text-xs font-bold">MARKET</span></button>
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("research")}><FlaskConical size={16} className="text-viol"/><span className="text-xs font-bold">R&amp;D</span></button>
+            {seriesList.length > 0 && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("sequels")}><Clapperboard size={16} className="text-gold"/><span className="text-xs font-bold">LIBRARY</span></button>}
+            {nextOffice && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("relocate")}><Building2 size={16} className="text-cyanx"/><span className="text-xs font-bold">MOVE STUDIO</span></button>}
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("awards")}><Award size={16} className="text-gold"/><span className="text-xs font-bold">AWARDS</span></button>
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("rivals")}><Swords size={16} className="text-cyanx"/><span className="text-xs font-bold">RIVALS</span></button>
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("hof")}><Trophy size={16} className="text-gold"/><span className="text-xs font-bold">RECORDS</span></button>
+            {run.dynasty && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("dynasty")}><Crown size={16} className="text-gold"/><span className="text-xs font-bold">DYNASTY</span></button>}
+          </div>
+          {seq && <Btn variant="gold" className="mt-3 w-full" onClick={() => { setModal(null); onNewShow(run.pendingSequel!); }}><Zap size={15}/> START SEASON {seq.season + 1}</Btn>}
+        </Modal>
+      )}
 
       {/* ------------------------------------------------------- CONTRACTS */}
       {modal === "contracts" && (
@@ -557,7 +512,7 @@ export default function Office({
               setModal(null);
               onShip(id);
             }}
-            onSkipWeek={onSkipWeek}
+            onRushCrunch={onRushCrunch}
             onNewShow={() => {
               setModal(null);
               onNewShow();

@@ -184,17 +184,6 @@ function Deco({ kind, color, title, i }: { kind: PosterDeco; color: string; titl
   }
 }
 
-function Laurel({ side }: { side: "l" | "r" }) {
-  /* gold laurel branch for hall-of-fame posters */
-  return (
-    <svg viewBox="0 0 20 60" className={cn("h-14 w-5", side === "r" && "-scale-x-100")} aria-hidden>
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <ellipse key={i} cx={11 - i * 0.8} cy={8 + i * 8.4} rx={4.4} ry={2.1} fill="#ffd166" opacity={0.95} transform={`rotate(${34 - i * 4} ${11 - i * 0.8} ${8 + i * 8.4})`} />
-      ))}
-    </svg>
-  );
-}
-
 /* ------------------------------------------------------------- fonts ---- */
 
 export function titleTextStyle(d: PosterDesign, px: number): React.CSSProperties {

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { initialRun, startMilestoneRush, tickRushDay, respondRushBoost, crunchRush, RUSH_CRUNCH_COST } from "../state";
-import { makeProject, type Draft } from "../projects";
+import { makeProject } from "../projects";
+import type { Draft } from "../data";
 
 const draft = (): Draft => ({ title:"Rush Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", genres:["shonen"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
 

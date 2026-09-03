@@ -228,27 +228,6 @@ export default function App() {
     setScreen("office");
   }, [run]);
 
-  /** apply time + check for bankruptcy / end of career */
-  const settle = useCallback((next: RunState, weeks: number): RunState => {
-    let r = advanceWeeks(next, weeks);
-    if (r.cash < 0) {
-      if (r.bailouts < 2) {
-        r = {
-          ...r,
-          bailouts: r.bailouts + 1,
-          cash: r.cash + 150_000,
-          notices: [...r.notices, "Emergency crowdfunding from the fans! (+£150,000)"],
-        };
-      } else {
-        setScreen("gameover");
-        return r;
-      }
-    }
-    if (r.week >= MAX_WEEKS && !r.dynasty) {
-      setScreen("retrospective");
-    }
-    return r;
-  }, []);
 
   /* --------------------------------------------------------- show flow */
   const newShow = useCallback((key?: string) => {
