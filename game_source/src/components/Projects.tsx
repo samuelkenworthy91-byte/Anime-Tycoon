@@ -5,7 +5,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clapperboard,
-  FastForward,
   Flame,
   Play,
   Rocket,
@@ -66,6 +65,7 @@ function ProjectCard({
   onAssign,
   onMilestone,
   onShip,
+  onRushCrunch,
   onDelegate,
   onTakeOver,
   onResume,
@@ -76,6 +76,7 @@ function ProjectCard({
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
+  onRushCrunch: (projectId: string) => void;
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
@@ -157,9 +158,11 @@ function ProjectCard({
                 ? ""
                 : "Master complete"
               : `${STAGE_LABEL[p.stage]} ${Math.min(Math.floor(p.progress), plan)}/${plan} wk`}
-            {p.milestone && (
+            {p.rush ? (
+              <b className="text-cyanx"> {MILESTONE_LABEL[p.rush.milestone]} · day {p.rush.daysWorked}/{p.rush.durationDays}</b>
+            ) : p.milestone ? (
               <b className="text-neon"> {MILESTONE_LABEL[p.milestone]} waiting</b>
-            )}
+            ) : null}
           </span>
           <span className={cn("flex items-center gap-1 font-bold", late < 0 ? "text-neon" : late <= 2 ? "text-gold" : "text-paper/55")}>
             <Calendar size={10} /> {dateLabel(p.deadlineWeek)}
@@ -396,10 +399,16 @@ function ProjectCard({
       )}
 
       {/* actions */}
-      {!auto && p.milestone && (
+      {!auto && p.milestone && !p.rush && (
         <Btn big variant="primary" className="anim-ring mt-2 w-full" onClick={() => onMilestone(p.id)}>
-          <Play size={17} /> PLAY {MILESTONE_LABEL[p.milestone].toUpperCase()}
+          <Play size={17} /> ASSIGN {MILESTONE_LABEL[p.milestone].toUpperCase()} LEAD
         </Btn>
+      )}
+      {p.rush && (
+        <div className="mt-2 rounded-xl border border-cyanx/40 bg-cyanx/5 p-2.5">
+          <div className="flex items-center gap-2"><UserRound size={13} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-[11px] font-extrabold text-cyanx">{p.rush.leadName} · SKILL {p.rush.skill}</div><div className="text-[9px] text-paper/45">+{p.rush.pointsAdded} {p.rush.type} so far · work lands each in-game day</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" disabled={run.cash < 9000} onClick={() => onRushCrunch(p.id)}><Zap size={11}/> CRUNCH</Btn></div>
+          <div className="mt-1 text-[9px] text-paper/40">Crunch costs £9,000: +35% lead output for the next two rush days, with almost double mistake risk.</div>
+        </div>
       )}
       {p.stage === "ready" && (
         <div className="mt-2">
@@ -421,7 +430,7 @@ export default function ProjectsPanel({
   onAssign,
   onMilestone,
   onShip,
-  onSkipWeek,
+  onRushCrunch,
   onNewShow,
   onDelegate,
   onTakeOver,
@@ -432,7 +441,7 @@ export default function ProjectsPanel({
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
-  onSkipWeek: () => void;
+  onRushCrunch: (projectId: string) => void;
   onNewShow: () => void;
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
@@ -454,9 +463,6 @@ export default function ProjectsPanel({
           SLOTS {active.length}/{cap}
         </span>
         <span className="text-[9px] text-paper/35">· bigger offices run more shows at once</span>
-        <Btn variant="cyan" className="ml-auto !px-2.5 !py-1.5 text-[10px]" onClick={onSkipWeek}>
-          <FastForward size={13} /> NEXT WEEK
-        </Btn>
       </div>
 
       {/* the money next week is expected to move — so you can act before
@@ -500,6 +506,7 @@ export default function ProjectsPanel({
           onAssign={onAssign}
           onMilestone={onMilestone}
           onShip={onShip}
+          onRushCrunch={onRushCrunch}
           onDelegate={onDelegate}
           onTakeOver={onTakeOver}
           onResume={onResume}

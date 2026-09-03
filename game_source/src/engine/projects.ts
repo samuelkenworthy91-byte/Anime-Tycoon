@@ -72,6 +72,41 @@ export type ProjectStage =
   | "done";
 
 export type MilestoneId = "story" | "art" | "sound" | "edit";
+export type RushMilestoneId = Exclude<MilestoneId, "edit">;
+
+export interface RushBoostPrompt {
+  actorId: string;
+  name: string;
+  skill: number;
+  type: PointType;
+}
+
+/** A key creative phase now unfolds on the live studio clock instead of in a
+ * detached minigame. One lead owns the rush and contributes once per day. */
+export interface ProjectRush {
+  milestone: RushMilestoneId;
+  type: PointType;
+  leadId: string;
+  leadName: string;
+  skill: number;
+  cost: number;
+  slider: number;
+  daysWorked: number;
+  durationDays: number;
+  pointsAdded: number;
+  boostAsked: boolean;
+  boostPrompt?: RushBoostPrompt | null;
+  crunchDays?: number;
+}
+
+export interface RushAssignment {
+  leadId: string;
+  leadName: string;
+  skill: number;
+  type: PointType;
+  cost: number;
+  slider: number;
+}
 
 export const PRODUCTION_STAGES: ProjectStage[] = ["concept", "preprod", "animation", "sound", "post", "marketing"];
 
@@ -152,8 +187,10 @@ export interface Project {
   /** production cost charged every week while in the pipeline */
   weeklyBurn: number;
   rdGained: number;
-  /** milestone sprint waiting to be played, if any */
+  /** milestone sprint waiting for a lead/decision, if any */
   milestone: MilestoneId | null;
+  /** live Game-Dev-Story-style rush currently unfolding on the studio clock */
+  rush?: ProjectRush | null;
   milestonesDone: MilestoneId[];
   result: ShowResult | null;
   airedWeek: number | null;
@@ -243,6 +280,7 @@ export function makeProject(draft: Draft, week: number): Project {
     weeklyBurn: Math.max(500, Math.round((cost * 0.6) / totalPlan / 100) * 100),
     rdGained: 0,
     milestone: null,
+    rush: null,
     milestonesDone: [],
     result: null,
     airedWeek: null,

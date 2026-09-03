@@ -96,7 +96,8 @@ export default function Office({
   onContinue,
   onMilestone,
   onShip,
-  onSkipWeek,
+  onRushCrunch,
+  workPulses = [],
   clockDay = 0,
   clockPhase = 0,
 }: {
@@ -108,7 +109,8 @@ export default function Office({
   onContinue: (plan: ContinuationPlan) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
-  onSkipWeek: () => void;
+  onRushCrunch: (projectId: string) => void;
+  workPulses?: import("../engine/state").DeskPulse[];
   clockDay?: number;
   clockPhase?: number;
 }) {
@@ -125,7 +127,7 @@ export default function Office({
   const projCap = projectCapacity(run);
   const newShowBlocked = startBlockReason(run);
   /* projects needing the player: a milestone to play or a release decision */
-  const projAlerts = run.projects.filter((p) => p.milestone || p.stage === "ready").length;
+  const projAlerts = run.projects.filter((p) => (p.milestone && !p.rush) || p.stage === "ready").length;
   const roomsUsed = slotsUsed(run.facilities);
   const roomsTotal = officeSlots(run);
   /* rooms drawn as glowing door signs inside the office scene */
@@ -178,12 +180,15 @@ export default function Office({
       {/* ---------------------------------------------------- office scene */}
       <OfficeScene
         level={run.officeLevel}
-        boss={{ name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite }}
+        boss={{ id: "showrunner", name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite, working: projActive.length > 0, pulse: workPulses.find((x) => x.actorId === "showrunner") }}
         staff={run.staff.map((s) => ({
+          id: s.id,
           name: s.name.split(" ")[0],
           color: POINT_COLOR[ROLE_POINT[s.role]],
           tired: s.stamina < 45,
           look: workerLookIndex(s),
+          working: projActive.some((pr) => pr.staffIds.includes(s.id)),
+          pulse: workPulses.find((x) => x.actorId === s.id),
         }))}
         maxStaff={staffCapacity(run)}
         timeOfDay={(clockPhase + 0.5) / 4}

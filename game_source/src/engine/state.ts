@@ -14,6 +14,7 @@ import {
   PUN_TITLES,
   RIVAL_STUDIOS,
   ROLE_POINT,
+  staffPoint,
   rollContract,
   type Contract,
   type Draft,
@@ -142,6 +143,7 @@ import {
   toggleAssign,
   type MilestoneOutcome,
   type Project,
+  type RushAssignment,
 } from "./projects";
 import {
   computeIndustryRecords,
@@ -157,6 +159,8 @@ import { tickDelegated } from "./automation";
 import { projectLoadMap } from "./capacity";
 import {
   contractWeeklyOutput,
+  rushBoostPoint,
+  rushResearchCost,
   showrunnerContractSkill,
   researchWeeks,
   trainingWeeks,
@@ -382,7 +386,7 @@ export function migrateRun(raw: unknown): RunState {
   const r = raw as RunState;
   return {
     ...r,
-    projects: Array.isArray(r.projects) ? r.projects : [],
+    projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({ ...pr, rush: pr.rush ?? null })) : [],
     facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
     bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
@@ -1247,6 +1251,167 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
         : s
     ),
     projects: r.projects.map((p) => (p.id === projectId ? applyMilestoneOutcome(p, guarded) : p)),
+  };
+}
+
+
+
+/* ------------------------------------------------------ live rush system */
+export interface DeskPulse {
+  actorId: string;
+  name: string;
+  type: PointType;
+  points: number;
+  nonce: number;
+}
+
+export const RUSH_CRUNCH_COST = 9_000;
+
+const rushRoll = (skill: number, crunching = false) => {
+  const s = Math.max(1, Math.min(99, skill));
+  const lo = Math.max(1, Math.floor(s * 0.035));
+  const hi = Math.max(lo + 1, Math.ceil(s * 0.105));
+  const raw = lo + Math.floor(Math.random() * (hi - lo + 1));
+  return Math.max(1, Math.round(raw * (crunching ? 1.35 : 1)));
+};
+
+/** Pick a lead, then return to the office: the actual work now happens as days pass. */
+export function startMilestoneRush(r: RunState, projectId: string, a: RushAssignment): RunState | null {
+  const target = r.projects.find((x) => x.id === projectId);
+  if (!target || !target.milestone || target.milestone === "edit" || target.rush) return null;
+  if (r.cash < a.cost) return null;
+  const isOutsource = a.leadId.startsWith("outsource:");
+  if (!isOutsource && a.leadId !== "showrunner" && !target.staffIds.includes(a.leadId)) return null;
+  const idx = target.milestone === "story" ? 0 : target.milestone === "art" ? 1 : 2;
+  const projects = r.projects.map((pr) => {
+    if (pr.id !== projectId) return pr;
+    const draft = {
+      ...pr.draft,
+      sliders: pr.draft.sliders.map((v, i) => (i === idx ? a.slider : v)) as [number, number, number],
+    };
+    return {
+      ...pr,
+      draft,
+      spent: pr.spent + a.cost,
+      rush: {
+        milestone: pr.milestone as "story" | "art" | "sound",
+        type: a.type,
+        leadId: a.leadId,
+        leadName: a.leadName,
+        skill: Math.max(1, Math.min(99, Math.round(a.skill))),
+        cost: a.cost,
+        slider: a.slider,
+        daysWorked: 0,
+        durationDays: 4,
+        pointsAdded: 0,
+        boostAsked: false,
+        boostPrompt: null,
+        crunchDays: 0,
+      },
+    };
+  });
+  return {
+    ...r,
+    cash: r.cash - a.cost,
+    projects,
+    notices: [...r.notices, `🎬 ${a.leadName} takes charge of ${target.draft.title}'s ${target.milestone} rush. Watch the studio — their work lands day by day.`],
+  };
+}
+
+/** Crunch is still available, but it now pushes the next two live workdays instead of flooding a bubble minigame. */
+export function crunchRush(r: RunState, projectId: string): RunState {
+  const target = r.projects.find((x) => x.id === projectId);
+  if (!target?.rush || r.cash < RUSH_CRUNCH_COST) return r;
+  return {
+    ...r,
+    cash: r.cash - RUSH_CRUNCH_COST,
+    projects: r.projects.map((pr) => pr.id === projectId ? {
+      ...pr,
+      spent: pr.spent + RUSH_CRUNCH_COST,
+      rush: { ...pr.rush!, crunchDays: Math.max(pr.rush!.crunchDays ?? 0, 2) },
+    } : pr),
+    notices: [...r.notices, `⚡ Crunch called on “${target.draft.title}” — the next two rush days hit harder, but mistake risk rises.`],
+  };
+}
+
+/** One in-game day of special-section work. Normal production remains the team's
+ * background job; this is the visible lead contribution that makes a rush special. */
+export function tickRushDay(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
+  const pulses: DeskPulse[] = [];
+  const notices = [...r.notices];
+  let attention = false;
+  let projects = r.projects.map((pr0) => {
+    const rush0 = pr0.rush;
+    if (!rush0 || rush0.boostPrompt) return pr0;
+    const crunching = (rush0.crunchDays ?? 0) > 0;
+    const pts = rushRoll(rush0.skill, crunching);
+    let pr: Project = {
+      ...pr0,
+      points: { ...pr0.points, [rush0.type]: pr0.points[rush0.type] + pts },
+    };
+    let rush = {
+      ...rush0,
+      daysWorked: rush0.daysWorked + 1,
+      pointsAdded: rush0.pointsAdded + pts,
+      crunchDays: Math.max(0, (rush0.crunchDays ?? 0) - 1),
+    };
+    pulses.push({ actorId: rush.leadId, name: rush.leadName, type: rush.type, points: pts, nonce: Date.now() + pulses.length });
+
+    /* Weak leads are more volatile; Crunch almost doubles that risk. */
+    const issueChance = Math.max(0.012, 0.085 - rush.skill * 0.00072) * (crunching ? 1.9 : 1);
+    if (Math.random() < issueChance) pr = { ...pr, issues: pr.issues + 1 };
+
+    /* A staff member may walk over with one optional experiment during the rush. */
+    if (!rush.boostAsked && rush.daysWorked >= 1 && rush.daysWorked < rush.durationDays && Math.random() < 0.24) {
+      const team = r.staff.filter((s) => pr.staffIds.includes(s.id));
+      const candidates = team.map((s) => ({ actorId: s.id, name: s.name, skill: Math.round(staffPoint(s, rush.type)), type: rush.type }));
+      candidates.push({ actorId: "showrunner", name: r.studio + " showrunner", skill: showrunnerContractSkill(r.showrunner, r.showsMade, rush.type), type: rush.type });
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      rush = { ...rush, boostPrompt: pick };
+      attention = true;
+    }
+
+    pr = { ...pr, rush };
+    if (rush.daysWorked >= rush.durationDays) {
+      const done = applyMilestoneOutcome({ ...pr, rush: null }, { points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 0, rdGained: 0 });
+      notices.push(`✅ ${rush.leadName} finishes the ${rush.milestone} rush on “${pr.draft.title}” (+${rush.pointsAdded} ${rush.type} across ${rush.durationDays} days).`);
+      return done;
+    }
+    return pr;
+  });
+  return { run: { ...r, projects, notices }, pulses, attention };
+}
+
+export function respondRushBoost(r: RunState, projectId: string, chance: number | null): RunState {
+  const target = r.projects.find((x) => x.id === projectId);
+  const prompt = target?.rush?.boostPrompt;
+  if (!target?.rush || !prompt) return r;
+  if (chance === null) {
+    return {
+      ...r,
+      projects: r.projects.map((pr) => pr.id === projectId ? { ...pr, rush: { ...pr.rush!, boostPrompt: null, boostAsked: true } } : pr),
+      notices: [...r.notices, `${prompt.name}'s experiment is passed over — the rush keeps to plan.`],
+    };
+  }
+  const cost = rushResearchCost(prompt.skill, chance);
+  if (r.rd < cost) return r;
+  const success = Math.random() < chance;
+  const reward = success ? rushBoostPoint(prompt.skill) : 0;
+  return {
+    ...r,
+    rd: r.rd - cost,
+    projects: r.projects.map((pr) => {
+      if (pr.id !== projectId || !pr.rush) return pr;
+      return {
+        ...pr,
+        points: success ? { ...pr.points, [prompt.type]: pr.points[prompt.type] + reward } : pr.points,
+        issues: success ? pr.issues : pr.issues + 1,
+        rush: { ...pr.rush, boostPrompt: null, boostAsked: true, pointsAdded: pr.rush.pointsAdded + reward },
+      };
+    }),
+    notices: [...r.notices, success
+      ? `💡 ${prompt.name}'s experiment works: +${reward} ${prompt.type} for ${cost} RD.`
+      : `💥 ${prompt.name}'s experiment fails: ${cost} RD spent and one extra editing note.`],
   };
 }
 

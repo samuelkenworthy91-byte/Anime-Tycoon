@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WORKER_LOOKS, BOSS_LOOK } from "../engine/data";
 
 export interface OfficeStaff {
+  id?: string;
   name: string;
   color: string;
   tired?: boolean;
@@ -9,6 +10,8 @@ export interface OfficeStaff {
   look?: number;
   /** the showrunner's own painted office sprite */
   sprite?: string;
+  working?: boolean;
+  pulse?: { actorId: string; name: string; type: string; points: number; nonce: number };
 }
 
 /* ------------------------------------------------------------------ art
@@ -91,6 +94,8 @@ function Character({
   label,
   color,
   tired,
+  working,
+  pulse,
   onClick,
   bobDelay,
 }: {
@@ -100,6 +105,8 @@ function Character({
   label: string;
   color: string;
   tired?: boolean;
+  working?: boolean;
+  pulse?: { points: number; type: string; nonce: number };
   onClick?: () => void;
   bobDelay: number;
 }) {
@@ -172,6 +179,20 @@ function Character({
           />
         )}
       </span>
+
+      {working && (
+        <>
+          <span className="pointer-events-none absolute bottom-[2%] left-1/2 z-20 block h-[13%] w-[92%] -translate-x-1/2 rounded-sm border border-[#9b6a48]/70 bg-gradient-to-b from-[#9b6a48] to-[#5e3b24] shadow-lg" />
+          <span className="pointer-events-none absolute bottom-[12%] left-1/2 z-10 block h-[18%] w-[42%] -translate-x-1/2 rounded border border-cyanx/30 bg-abyss/90 shadow-[0_0_12px_rgba(59,225,255,.18)]">
+            <span className="absolute inset-x-[18%] bottom-[18%] h-[12%] rounded bg-cyanx/60 anim-blink" />
+          </span>
+        </>
+      )}
+      {pulse && (
+        <span key={pulse.nonce} className="pointer-events-none absolute -top-[8%] left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-lg border border-gold/50 bg-abyss/90 px-2 py-1 font-display text-[10px] font-extrabold text-gold shadow-xl anim-floaty">
+          +{pulse.points} {pulse.type.toUpperCase()}
+        </span>
+      )}
 
       {/* tired wisp */}
       {tired && (
@@ -268,7 +289,9 @@ export default function OfficeScene({
     const tick = window.setInterval(() => {
       const list = bodiesRef.current;
       if (!list.length) return;
-      const i = Math.floor(Math.random() * list.length);
+      const movable = list.map((_, i) => i).filter((i) => !cast[i]?.working);
+      if (!movable.length) return;
+      const i = movable[Math.floor(Math.random() * movable.length)];
       setBodies((prev) =>
         prev.map((b, j) => {
           if (j !== i) return b;
@@ -292,7 +315,7 @@ export default function OfficeScene({
       );
     }, 2600);
     return () => window.clearInterval(tick);
-  }, [bodies.length, zone]);
+  }, [bodies.length, zone, cast]);
 
   /* --------------------------------------------------------------- light */
   /* 0 = dawn, .5 = midday, 1 = night — warms up at noon, goes indigo at night */
@@ -345,6 +368,8 @@ export default function OfficeScene({
               label={c.boss ? `${c.name} · showrunner` : c.name}
               color={c.color}
               tired={c.tired}
+              working={c.working}
+              pulse={c.pulse}
               bobDelay={i * 370}
               onClick={() => onDeskClick?.(i)}
             />

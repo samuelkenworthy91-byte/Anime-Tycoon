@@ -289,10 +289,10 @@ function PosterFull(props: FullProps & { design: PosterDesign }) {
   const { design, portrait } = props;
   return (
     <div className={cn("anim-pop ink-card overflow-hidden", props.className)}>
-      <div className="relative aspect-[4/5]">
+      <div className="relative aspect-[4/5]" style={{ boxShadow: `inset 0 0 0 1px ${design.primary.color}55, inset 0 -80px 80px rgba(6,5,14,.35)` }}>
+        <div className="pointer-events-none absolute inset-x-[8%] top-2 z-20 h-px" style={{ background: `linear-gradient(90deg, transparent, ${design.primary.color}, transparent)` }} />
         <Portrait img={portrait.img} pos={portrait.pos} name={portrait.name} alt={portrait.name} className="absolute inset-0" />
         <div className="crt absolute inset-0 bg-gradient-to-t from-abyss via-abyss/10 to-transparent" />
-        <PosterDecorationLayer design={design} />
 
         {/* continuation ribbon, diagonal top-left */}
         {design.ribbon && (
@@ -323,13 +323,11 @@ function PosterFull(props: FullProps & { design: PosterDesign }) {
         {/* title block */}
         <div className="absolute inset-x-0 bottom-0 p-3">
           <div className="flex items-end justify-center gap-1">
-            {design.hallOfFame && <Laurel side="l" />}
             <div className="min-w-0 text-center" style={titleTextStyle(design, 21)}>
               {design.lines.map((l, i) => (
                 <div key={i} className="whitespace-nowrap">{l}</div>
               ))}
             </div>
-            {design.hallOfFame && <Laurel side="r" />}
           </div>
           {props.footer}
           {/* billing block — cinema credit strip */}

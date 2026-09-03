@@ -7,9 +7,14 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
+  crunchRush,
   forecastWeek,
   initialRun,
   MAX_WEEKS,
+  respondRushBoost,
+  startMilestoneRush,
+  tickRushDay,
+  type DeskPulse,
   migrateRun,
   projectById,
   releaseProject,
@@ -18,7 +23,7 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
-import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
+import type { MilestoneId, MilestoneOutcome, RushAssignment } from "./engine/projects";
 import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
@@ -30,6 +35,7 @@ import Produce from "./components/Produce";
 import Ship from "./components/Ship";
 import ContractJob from "./components/ContractJob";
 import Release from "./components/Release";
+import RushBoostModal from "./components/RushBoostModal";
 import GameOver from "./components/GameOver";
 import Retrospective from "./components/Retrospective";
 import { beginDynastyMode } from "./engine/legacy";
@@ -53,8 +59,9 @@ export default function App() {
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 12>(1);
+  const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
-  /* real-time game clock: 1 in-game day = 2 real minutes; 7 days = 1 week */
+  /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
   const dayAccRef = useRef(0);
@@ -109,45 +116,46 @@ export default function App() {
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
     if (screen !== "office" || paused || !run) return;
+    const DAY_MS = 10_000;
     const iv = setInterval(() => {
       if (timeSpeed === 0) return;
-      dayAccRef.current += 1000 * timeSpeed;
-      if (dayAccRef.current >= 120_000) {
-        dayAccRef.current -= 120_000;
+      dayAccRef.current += 250 * timeSpeed;
+      if (dayAccRef.current >= DAY_MS) {
+        dayAccRef.current -= DAY_MS;
         dayCountRef.current += 1;
-        if (dayCountRef.current >= 7) {
-          dayCountRef.current = 0;
-          setRun((r) => {
-            if (!r) return r;
-            if (forecastWeek(r).cashAfter < 0) {
+        const weekBoundary = dayCountRef.current >= 7;
+        if (weekBoundary) dayCountRef.current = 0;
+        setClockDay(dayCountRef.current);
+        setRun((current) => {
+          if (!current) return current;
+          const daily = tickRushDay(current);
+          let n = daily.run;
+          setWorkPulses(daily.pulses);
+          if (daily.attention) setTimeSpeed(0);
+          if (weekBoundary) {
+            if (forecastWeek(n).cashAfter < 0) {
               setTimeSpeed(0);
-              return { ...r, notices: [...r.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
+              return { ...n, notices: [...n.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
             }
-            let n = advanceWeeks(r, 1);
+            const before = n;
+            n = advanceWeeks(n, 1);
             const attention =
-              n.projects.some((p) => p.milestone && !r.projects.find((x) => x.id === p.id)?.milestone) ||
-              n.projects.some((p) => p.stage === "ready" && r.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
-              n.marketEvents.length > r.marketEvents.length || n.studioEvents.length > r.studioEvents.length || n.staffEvents.length > r.staffEvents.length ||
-              n.contractJobs.length < r.contractJobs.length || n.trainingJobs.length < r.trainingJobs.length || n.researchJobs.length < r.researchJobs.length;
+              n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
+              n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
+              n.marketEvents.length > before.marketEvents.length || n.studioEvents.length > before.studioEvents.length || n.staffEvents.length > before.staffEvents.length ||
+              n.contractJobs.length < before.contractJobs.length || n.trainingJobs.length < before.trainingJobs.length || n.researchJobs.length < before.researchJobs.length;
             if (attention) setTimeSpeed(0);
             if (n.cash < 0) {
-              if (n.bailouts < 2) {
-                n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
-              } else {
-                setScreen("gameover");
-                return n;
-              }
+              if (n.bailouts < 2) n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
+              else { setScreen("gameover"); return n; }
             }
-            if (n.week >= MAX_WEEKS && !n.dynasty) {
-              setScreen("retrospective");
-            }
-            return n;
-          });
-        }
-        setClockDay(dayCountRef.current);
+            if (n.week >= MAX_WEEKS && !n.dynasty) setScreen("retrospective");
+          }
+          return n;
+        });
       }
-      setClockPhase(Math.floor((dayAccRef.current / 120_000) * 4));
-    }, 1000);
+      setClockPhase(Math.floor((dayAccRef.current / DAY_MS) * 4));
+    }, 250);
     return () => clearInterval(iv);
   }, [screen, paused, timeSpeed, run !== null, run?.week]);
 
@@ -339,6 +347,24 @@ export default function App() {
     [focus]
   );
 
+  const beginRush = useCallback((a: RushAssignment) => {
+    if (!focus) return;
+    setRun((r) => (r ? (startMilestoneRush(r, focus.projectId, a) ?? r) : r));
+    setFocus(null);
+    setScreen("office");
+    setTimeSpeed(1);
+  }, [focus]);
+
+  const pushRush = useCallback((projectId: string) => {
+    sfx.phase();
+    setRun((r) => (r ? crunchRush(r, projectId) : r));
+  }, []);
+
+  const answerRushBoost = useCallback((projectId: string, chance: number | null) => {
+    setRun((r) => (r ? respondRushBoost(r, projectId, chance) : r));
+    setTimeSpeed(1);
+  }, []);
+
   /* --------------------------------------------------------- release */
   const openShip = useCallback((projectId: string) => {
     sfx.select();
@@ -367,11 +393,6 @@ export default function App() {
     setScreen("office");
   }, []);
 
-  /* one deliberate week of studio time from the project board */
-  const skipWeek = useCallback(() => {
-    sfx.click();
-    setRun((r) => (r ? settle(r, 1) : r));
-  }, [settle]);
 
   /* ----------------------------------------------------- contract flow */
   const takeContract = useCallback((c: Contract) => {
@@ -501,7 +522,8 @@ export default function App() {
             onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
-            onSkipWeek={skipWeek}
+            onRushCrunch={pushRush}
+            workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
           />
@@ -527,6 +549,7 @@ export default function App() {
             milestone={focus.milestone}
             paused={paused}
             onDone={finishMilestone}
+            onStartRush={beginRush}
             onBack={() => {
               sfx.back();
               setFocus(null);
@@ -593,6 +616,8 @@ export default function App() {
             </button>
           </div>
         )}
+
+        {screen === "office" && run && <RushBoostModal run={run} onRespond={answerRushBoost} />}
 
         {paused && pauseMenu}
         {paused && savePicker && savePickerOverlay}
