@@ -472,6 +472,10 @@ export interface MilestoneOutcome {
   issues: number;
   spent: number;
   rdGained: number;
+  /** Research Data deliberately invested in rush boost attempts. */
+  rdSpent?: number;
+  /** Final title/cast billing locked after the edit bay. */
+  rename?: Partial<Pick<Draft, "title" | "protagName" | "secondaryName" | "petName" | "villainName">>;
   /** direction slider set during the sprint's planning meeting */
   slider?: { index: 0 | 1 | 2; value: number };
   /** bugs fixed during the edit bay */
@@ -482,9 +486,10 @@ export interface MilestoneOutcome {
 export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project {
   const done = p.milestone;
   if (!done) return p;
-  const draft: Draft = o.slider
+  const directed: Draft = o.slider
     ? { ...p.draft, sliders: p.draft.sliders.map((v, i) => (i === o.slider!.index ? o.slider!.value : v)) as [number, number, number] }
     : p.draft;
+  const draft: Draft = o.rename ? { ...directed, ...o.rename } : directed;
   const nx = NEXT_STAGE[p.stage] ?? p.stage;
   return {
     ...p,

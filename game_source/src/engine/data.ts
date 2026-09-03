@@ -161,6 +161,10 @@ export interface Draft {
   audience: AudienceId;
   protag: string;
   protagName: string;
+  /** Final billing names are locked after editing; optional keeps old saves valid. */
+  secondaryName?: string;
+  petName?: string;
+  villainName?: string;
   secondary: string;
   pet: string;
   villain: string;

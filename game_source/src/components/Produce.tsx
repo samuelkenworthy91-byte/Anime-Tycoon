@@ -10,6 +10,9 @@ import {
   Building2,
   ChevronLeft,
   Check,
+  Database,
+  HelpCircle,
+  Lightbulb,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -19,6 +22,7 @@ import {
   PRODUCTION_SCOPES,
   ROLE_POINT,
   SHOWRUNNERS,
+  castById,
   formatGBP,
   staffPoint,
   workerLookIndex,
@@ -30,6 +34,7 @@ import { MILESTONE_LABEL, type MilestoneId, type MilestoneOutcome, type Project 
 import ProductionFloor, { type FloorDesk, type FloorHandle, type FloorTotals } from "./ProductionFloor";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
+import { rushBoostPoint, rushResearchCost, rushStreamPoint } from "../engine/studioOps";
 
 /* one sprint = one interactive phase of the old production loop */
 const PHASES: Record<
@@ -42,6 +47,9 @@ const PHASES: Record<
 };
 
 const CRUNCH_COST = 9_000;
+
+type SectionLead = { name: string; skill: number; type: PointType; cost: number };
+type BoostPrompt = { name: string; skill: number; type: PointType } | null;
 
 export default function Produce({
   run,
@@ -68,6 +76,21 @@ export default function Produce({
   const [totals, setTotals] = useState<FloorTotals | null>(null);
   const [live, setLive] = useState<FloorTotals | null>(null);
   const [crunches, setCrunches] = useState(0);
+  const [lead, setLead] = useState<SectionLead | null>(null);
+  const [leadToast, setLeadToast] = useState<{ name: string; pts: number } | null>(null);
+  const [rdSpent, setRdSpent] = useState(0);
+  const [rushIssues, setRushIssues] = useState(0);
+  const [boostPrompt, setBoostPrompt] = useState<BoostPrompt>(null);
+  const [boostResult, setBoostResult] = useState<{ success: boolean; text: string } | null>(null);
+  const streamTriggered = useRef(new Set<number>());
+  const boostAsked = useRef(false);
+  const [finalNames, setFinalNames] = useState(() => ({
+    title: project.draft.title,
+    protagName: project.draft.protagName || castById(project.draft.protag).name,
+    secondaryName: project.draft.secondaryName ?? castById(project.draft.secondary).name,
+    petName: project.draft.petName ?? (project.draft.pet === "none" ? "" : castById(project.draft.pet).name),
+    villainName: project.draft.villainName ?? castById(project.draft.villain).name,
+  }));
   const floorRef = useRef<FloorHandle>(null);
 
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner)!;
@@ -115,11 +138,10 @@ export default function Produce({
 
   const outsourceCost = 18_000 + (phase?.idx ?? 0) * 6_000;
 
-  const takeSpecialist = (skill: number, cost: number) => {
+  const takeSpecialist = (name: string, skill: number, cost: number) => {
     if (!phase) return;
     sfx.select();
-    const add = Math.round(skill * 0.42 + 4);
-    setBoost((b) => ({ ...b, [phase.type]: b[phase.type] + add }));
+    setLead({ name, skill: Math.round(skill), type: phase.type, cost });
     setSpent((s) => s + cost);
     setMode("floor");
   };
@@ -137,6 +159,49 @@ export default function Produce({
     floorRef.current?.crunch();
   };
 
+  const handleProgress = (t: FloorTotals, pct: number) => {
+    setLive(t);
+    if (isEdit || !phase || !lead) return;
+    const thresholds = [0.12, 0.26, 0.40, 0.56, 0.72];
+    thresholds.forEach((th, i) => {
+      if (pct < th || streamTriggered.current.has(i)) return;
+      streamTriggered.current.add(i);
+      const pts = rushStreamPoint(lead.skill, Math.random());
+      setBoost((b) => ({ ...b, [lead.type]: b[lead.type] + pts }));
+      setLeadToast({ name: lead.name, pts });
+      window.setTimeout(() => setLeadToast((x) => x?.name === lead.name && x.pts === pts ? null : x), 900);
+      sfx.coin();
+    });
+    if (!boostAsked.current && pct >= 0.50 && !boostPrompt) {
+      boostAsked.current = true;
+      const candidates = team.map((s) => ({ name: s.name, skill: Math.round(staffPoint(s, phase.type)), type: phase.type }));
+      candidates.push({ name: runner.name, skill: Math.min(99, 46 + run.showsMade * 2), type: phase.type });
+      candidates.sort((a, b) => b.skill - a.skill);
+      setBoostPrompt(candidates[0] ?? { name: lead.name, skill: lead.skill, type: lead.type });
+      sfx.select();
+    }
+  };
+
+  const attemptBoost = (chance: number) => {
+    if (!boostPrompt) return;
+    const cost = rushResearchCost(boostPrompt.skill, chance);
+    if (run.rd - rdSpent < cost) return;
+    setRdSpent((v) => v + cost);
+    const success = Math.random() < chance;
+    if (success) {
+      const reward = rushBoostPoint(boostPrompt.skill);
+      setBoost((b) => ({ ...b, [boostPrompt.type]: b[boostPrompt.type] + reward }));
+      setBoostResult({ success: true, text: `${boostPrompt.name}'s experiment lands: +${reward} ${POINT_LABEL[boostPrompt.type]} points.` });
+      sfx.fanfare();
+    } else {
+      setRushIssues((v) => v + 1);
+      setBoostResult({ success: false, text: `${boostPrompt.name}'s experiment misses and creates an extra editing note.` });
+      sfx.fail();
+    }
+  };
+
+  const closeBoost = () => { setBoostPrompt(null); setBoostResult(null); sfx.phase(); };
+
   const finish = () => {
     sfx.whoosh();
     const t = totals!;
@@ -146,6 +211,13 @@ export default function Produce({
         issues: 0,
         spent,
         rdGained: 0,
+        rename: {
+          title: finalNames.title.trim() || project.draft.title,
+          protagName: finalNames.protagName.trim() || castById(project.draft.protag).name,
+          secondaryName: finalNames.secondaryName.trim() || castById(project.draft.secondary).name,
+          petName: finalNames.petName.trim() || (project.draft.pet === "none" ? "" : castById(project.draft.pet).name),
+          villainName: finalNames.villainName.trim() || castById(project.draft.villain).name,
+        },
         /* Never farm extra RD by clearing more visual notes than the project owns. */
         squashed: Math.min(project.issues, t.squashed),
       });
@@ -156,9 +228,10 @@ export default function Produce({
           art: t.art + boost.art + (run.research.includes("mocap") ? Math.round(t.art * 0.12) : 0),
           sound: t.sound + boost.sound,
         },
-        issues: t.issues,
+        issues: t.issues + rushIssues,
         spent,
         rdGained: t.squashed,
+        rdSpent,
         slider: { index: phase!.idx, value: slider },
       });
     }
@@ -244,14 +317,14 @@ export default function Produce({
             <div className="text-[11px] tracking-[0.4em] text-cyanx">{title}</div>
             <h2 className="font-display text-3xl font-extrabold md:text-4xl">LEAD {POINT_LABEL[phase.type].toUpperCase()}</h2>
             <p className="mt-1 text-xs text-paper/60">
-              Who leads the {POINT_LABEL[phase.type].toLowerCase()} work? They set the opening point bonus.
+              Choose the section lead. They contribute their work in up to five point bursts while the full team keeps production moving.
             </p>
           </div>
           <div className="mt-4 space-y-2">
             {specialistCandidates.map((c) => (
               <button
                 key={c.id}
-                onClick={() => takeSpecialist(c.skill * (0.55 + c.stamina / 220), 0)}
+                onClick={() => takeSpecialist(c.name, c.skill * (0.55 + c.stamina / 220), 0)}
                 className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-neon/50"
               >
                 <span className="rounded-lg bg-panel3 p-2 text-cyanx">
@@ -277,7 +350,7 @@ export default function Produce({
               </button>
             ))}
             <button
-              onClick={() => takeSpecialist(78, outsourceCost)}
+              onClick={() => takeSpecialist("Famous Studio", 78, outsourceCost)}
               disabled={run.cash - spent < outsourceCost}
               className={cn(
                 "btn-press ink-card flex w-full items-center gap-3 border-gold/40 p-3 text-left hover:border-gold",
@@ -297,7 +370,7 @@ export default function Produce({
               </div>
             </button>
             <button
-              onClick={() => takeSpecialist(40 + run.showsMade * 3, 0)}
+              onClick={() => takeSpecialist(runner.name, 40 + run.showsMade * 3, 0)}
               className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-neon/50"
             >
               <Portrait img={runner.portrait} name={runner.name} alt="" className="h-10 w-10 rounded-lg" />
@@ -323,19 +396,15 @@ export default function Produce({
                 : "AUTO PRODUCTION — staff handle incoming work; larger, trained teams clear more"}
             </span>
             {!isEdit && (
-              <button
-                onClick={crunch}
-                disabled={run.cash - spent < CRUNCH_COST}
-                className={cn(
-                  "btn-press ml-auto flex items-center gap-1 rounded-lg border border-gold/60 bg-gold/15 px-2.5 py-1 text-[10px] font-extrabold text-gold",
-                  run.cash - spent < CRUNCH_COST && "pointer-events-none opacity-40"
-                )}
-              >
-                <Zap size={12} /> CRUNCH {formatGBP(CRUNCH_COST)}
-              </button>
+              <div className="ml-auto flex items-center gap-1.5">
+                <span className="cursor-help text-paper/45 hover:text-gold" title="Crunch spends £9,000 to flood the team with extra work for six seconds. It can generate more points if the crew keeps up, but bug risk nearly doubles and overwhelmed teams may miss work." aria-label="What does Crunch do?"><HelpCircle size={13} /></span>
+                <button onClick={crunch} disabled={run.cash - spent < CRUNCH_COST} className={cn("btn-press flex items-center gap-1 rounded-lg border border-gold/60 bg-gold/15 px-2.5 py-1 text-[10px] font-extrabold text-gold", run.cash - spent < CRUNCH_COST && "pointer-events-none opacity-40")}>
+                  <Zap size={12} /> CRUNCH {formatGBP(CRUNCH_COST)}
+                </button>
+              </div>
             )}
           </div>
-          <div className="min-h-0 flex-1">
+          <div className="relative min-h-0 flex-1">
             <ProductionFloor
               key={milestone}
               handleRef={floorRef}
@@ -347,10 +416,40 @@ export default function Produce({
               autoSpeedMult={autoSpeedMult}
               bugRate={isEdit ? 1 : bugRate}
               editingMode={isEdit}
-              paused={paused}
-              onProgress={(t) => setLive(t)}
+              paused={paused || !!boostPrompt}
+              onProgress={handleProgress}
               onDone={onFloorDone}
             />
+            {leadToast && (
+              <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 anim-pop rounded-xl border border-gold/60 bg-abyss/90 px-4 py-2 text-center shadow-xl">
+                <div className="text-[9px] font-bold tracking-widest text-paper/45">SECTION LEAD</div>
+                <div className="font-display text-sm font-extrabold text-gold">{leadToast.name} +{leadToast.pts} {phase ? POINT_LABEL[phase.type] : ""}</div>
+              </div>
+            )}
+            {boostPrompt && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-abyss/82 p-3 backdrop-blur-sm">
+                <div className="anim-pop ink-card w-full max-w-md p-4">
+                  <div className="flex items-center gap-2 text-viol"><Lightbulb size={17} /><span className="text-[10px] font-extrabold tracking-[0.25em]">STAFF BOOST IDEA</span></div>
+                  <h3 className="mt-1 font-display text-xl font-extrabold">{boostPrompt.name} wants to try something</h3>
+                  <p className="mt-1 text-xs text-paper/60">Back the experiment with Research Data. Skilled staff need less RD for the same confidence. Success adds quality; failure creates an editing note.</p>
+                  {boostResult ? (
+                    <div className={cn("mt-3 rounded-xl border p-3 text-sm font-bold", boostResult.success ? "border-mint/50 bg-mint/10 text-mint" : "border-neon/50 bg-neon/10 text-neon2")}>
+                      {boostResult.text}
+                      <Btn big variant="primary" className="mt-3 w-full" onClick={closeBoost}>BACK TO THE RUSH</Btn>
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      {([0.2, 0.5, 0.8] as const).map((chance) => {
+                        const cost = rushResearchCost(boostPrompt.skill, chance);
+                        return <button key={chance} disabled={run.rd - rdSpent < cost} onClick={() => attemptBoost(chance)} className={cn("btn-press flex w-full items-center gap-3 rounded-xl border border-line bg-panel2/70 p-3 text-left hover:border-viol/60", run.rd - rdSpent < cost && "pointer-events-none opacity-40")}><Database size={17} className="text-viol" /><div className="flex-1"><div className="text-sm font-extrabold">{Math.round(chance * 100)}% CONFIDENCE</div><div className="text-[10px] text-paper/45">Skill {boostPrompt.skill}</div></div><span className="font-display text-sm font-extrabold text-viol">{cost} RD</span></button>;
+                      })}
+                      <button onClick={closeBoost} className="btn-press w-full rounded-xl border border-line px-3 py-2 text-xs font-bold text-paper/55">PASS — KEEP THE PLAN</button>
+                      <div className="text-center text-[10px] text-paper/40">Research available: {Math.max(0, run.rd - rdSpent)} RD</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -362,9 +461,26 @@ export default function Produce({
             <div className="text-[10px] tracking-[0.4em] text-mint">SPRINT COMPLETE</div>
             <div className="mt-1 font-display text-2xl font-extrabold">{title}</div>
             {isEdit ? (
-              <div className="mt-3">
-                <div className="font-display text-3xl font-extrabold text-mint">{totals.squashed}</div>
-                <div className="text-[10px] font-bold text-paper/50">EDITING NOTES FIXED</div>
+              <div className="mt-3 text-left">
+                <div className="text-center"><div className="font-display text-3xl font-extrabold text-mint">{totals.squashed}</div><div className="text-[10px] font-bold text-paper/50">EDITING NOTES FIXED</div></div>
+                <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 p-3">
+                  <div className="text-center text-[10px] font-extrabold tracking-[0.2em] text-cyanx">LOCK PICTURE · FINAL BILLING</div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {[
+                      ["title", "SHOW TITLE", 32],
+                      ["protagName", "LEAD", 18],
+                      ["secondaryName", "SUPPORT", 18],
+                      ["petName", "MASCOT", 18],
+                      ["villainName", "VILLAIN", 18],
+                    ].map(([key, label, max]) => (
+                      <label key={String(key)} className={key === "title" ? "sm:col-span-2" : ""}>
+                        <span className="mb-1 block text-[9px] font-bold text-paper/45">{label}</span>
+                        <input value={finalNames[key as keyof typeof finalNames]} maxLength={Number(max)} onChange={(e) => setFinalNames((n) => ({ ...n, [key]: e.target.value }))} className="ink-input w-full px-2.5 py-2 text-sm font-bold" />
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-center text-[9px] text-paper/40">These names go on the poster, franchise history and future sequels.</div>
+                </div>
               </div>
             ) : (
               <div className="mt-3 grid grid-cols-4 gap-2">
@@ -388,7 +504,7 @@ export default function Produce({
               {crunches > 0 && <span>CRUNCH <b className="text-gold">×{crunches}</b></span>}
             </div>
             <Btn big variant="primary" className="mt-4 w-full" onClick={finish}>
-              <Check size={18} /> BACK TO THE STUDIO
+              <Check size={18} /> {isEdit ? "LOCK NAMES & RETURN TO STUDIO" : "BACK TO THE STUDIO"}
             </Btn>
           </div>
         </div>

@@ -95,10 +95,10 @@ export default function Release({
   const shownUnits = result.sales.slice(0, salesWeek).reduce((a, b) => a + b, 0);
   const shownRevenue = Math.round(shownUnits * 2.6);
   const cast = [
-    { m: protag, tag: "LEAD" },
-    { m: sec, tag: "SUPPORT" },
-    { m: pet, tag: "MASCOT" },
-    { m: vil, tag: "VILLAIN" },
+    { m: protag, tag: "LEAD", name: draft.protagName || protag.name },
+    { m: sec, tag: "SUPPORT", name: draft.secondaryName ?? sec.name },
+    { m: pet, tag: "MASCOT", name: draft.petName ?? pet.name },
+    { m: vil, tag: "VILLAIN", name: draft.villainName ?? vil.name },
   ];
 
   return (
@@ -134,8 +134,8 @@ export default function Release({
                     key={c.m.id}
                     img={c.m.img}
                     pos={c.m.pos}
-                    name={c.m.name}
-                    alt={c.m.name}
+                    name={c.name}
+                    alt={c.name}
                     className="h-9 w-9 rounded-full border-2 border-abyss object-cover"
                   />
                 ))}
@@ -146,6 +146,7 @@ export default function Release({
                 <div className="mt-0.5 text-center text-[11px] font-bold text-cyanx">
                   {draft.protagName} · {MEDIUMS[draft.medium].label}
                 </div>
+                <div className="mt-0.5 text-center text-[8px] text-paper/45">{draft.secondaryName ?? sec.name} · {draft.petName ?? pet.name} · {draft.villainName ?? vil.name}</div>
                 <div className="mt-1 flex flex-wrap justify-center gap-1">
                   {draft.genres.map((g) => {
                     const gg = GENRES.find((x) => x.id === g)!;

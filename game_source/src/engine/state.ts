@@ -157,6 +157,7 @@ import { tickDelegated } from "./automation";
 import { projectLoadMap } from "./capacity";
 import {
   contractWeeklyOutput,
+  showrunnerContractSkill,
   researchWeeks,
   trainingWeeks,
   type ContractAssignment,
@@ -397,7 +398,7 @@ export function migrateRun(raw: unknown): RunState {
     commissions: Array.isArray(r.commissions) ? r.commissions : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
-    contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs : [],
+    contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner })) : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
     arcCombos: Array.isArray(r.arcCombos) ? r.arcCombos : [],
@@ -641,7 +642,8 @@ export function advanceWeeks(r: RunState, n: number): RunState {
       const keep: ContractAssignment[] = [];
       for (const job of contractJobs) {
         const crew = staffArr.filter((s) => job.staffIds.includes(s.id));
-        const progress = job.progress + contractWeeklyOutput(job.contract, crew, research);
+        const runnerSkill = job.showrunner ? showrunnerContractSkill(r.showrunner, r.showsMade, job.contract.type) : 0;
+        const progress = job.progress + contractWeeklyOutput(job.contract, crew, research, runnerSkill);
         if (progress >= job.contract.target) {
           cash += job.contract.pay;
           rd += job.contract.rd;
@@ -1192,24 +1194,27 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
   return { ...r, projects: toggleAssign(r.projects, projectId, staffId) };
 }
 
-export function startContractAssignment(r: RunState, contract: Contract, staffIds: string[]): RunState | null {
-  const ids = [...new Set(staffIds)].slice(0, 3);
-  if (ids.length < 1) return null;
+export function startContractAssignment(r: RunState, contract: Contract, staffIds: string[], showrunner = false): RunState | null {
+  const ids = [...new Set(staffIds)].slice(0, showrunner ? 2 : 3);
+  if (ids.length + (showrunner ? 1 : 0) < 1) return null;
   if (!r.contracts.some((c) => c.id === contract.id)) return null;
   for (const id of ids) if (staffBusyReason(r, id)) return null;
+  if (showrunner && (r.contractJobs ?? []).some((j) => j.showrunner)) return null;
   const job: ContractAssignment = {
     id: `job_${contract.id}_${r.week}`,
     contract,
     staffIds: ids,
+    showrunner,
     startWeek: r.week,
     dueWeek: r.week + contract.weeks,
     progress: 0,
   };
+  const seats = ids.length + (showrunner ? 1 : 0);
   return {
     ...r,
     contracts: r.contracts.filter((c) => c.id !== contract.id),
     contractJobs: [...(r.contractJobs ?? []), job],
-    notices: [...r.notices, `📋 ${contract.name} assigned to ${ids.length} staff — due ${dateLabel(job.dueWeek)}. The calendar does not jump.`],
+    notices: [...r.notices, `📋 ${contract.name} assigned to ${seats} contributor${seats === 1 ? "" : "s"}${showrunner ? " including the showrunner" : ""} — due ${dateLabel(job.dueWeek)}.`],
   };
 }
 
@@ -1229,7 +1234,7 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
   return {
     ...r,
     cash: r.cash - o.spent,
-    rd: r.rd + Math.round((o.rdGained + (o.squashed ?? 0) * 2) * fx.rdMult),
+    rd: Math.max(0, r.rd - (o.rdSpent ?? 0)) + Math.round((o.rdGained + (o.squashed ?? 0) * 2) * fx.rdMult),
     staff: r.staff.map((s) =>
       team.includes(s.id)
         ? {
@@ -1370,11 +1375,11 @@ export function releaseProject(
     protag: draft.protag,
     protagName: draft.protagName,
     secondary: draft.secondary,
-    secondaryName: castById(draft.secondary).name,
+    secondaryName: draft.secondaryName ?? castById(draft.secondary).name,
     pet: draft.pet,
-    petName: draft.pet === "none" ? "" : castById(draft.pet).name,
+    petName: draft.petName ?? (draft.pet === "none" ? "" : castById(draft.pet).name),
     villain: draft.villain,
-    villainName: castById(draft.villain).name,
+    villainName: draft.villainName ?? castById(draft.villain).name,
   };
   const frNotices: string[] = [];
   if (prevFr) {

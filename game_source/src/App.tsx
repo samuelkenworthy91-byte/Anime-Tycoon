@@ -381,9 +381,9 @@ export default function App() {
   }, []);
 
   const finishContract = useCallback(
-    (staffIds: string[]) => {
+    (selection: { staffIds: string[]; showrunner: boolean }) => {
       if (!run || !contract) return;
-      const next = startContractAssignment(run, contract, staffIds);
+      const next = startContractAssignment(run, contract, selection.staffIds, selection.showrunner);
       if (!next) { sfx.back(); return; }
       setRun(next);
       setContract(null);
@@ -547,7 +547,13 @@ export default function App() {
           />
         )}
         {screen === "contract" && run && contract && (
-          <ContractJob run={run} contract={contract} paused={paused} onDone={finishContract} />
+          <ContractJob
+            run={run}
+            contract={contract}
+            paused={paused}
+            onDone={finishContract}
+            onBack={() => { setContract(null); setScreen("office"); }}
+          />
         )}
         {screen === "release" && released && run && (
           <Release draft={released.draft} result={released.result} studio={run.studio} onContinue={continueFromRelease} />

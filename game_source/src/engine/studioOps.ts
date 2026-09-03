@@ -4,6 +4,8 @@ export interface ContractAssignment {
   id: string;
   contract: Contract;
   staffIds: string[];
+  /** Founding showrunner can personally take one of the three seats. */
+  showrunner?: boolean;
   startWeek: number;
   dueWeek: number;
   progress: number;
@@ -31,16 +33,38 @@ export interface ResearchJob {
 export const trainingWeeks = (tier: number) => Math.max(2, 5 - Math.max(1, tier));
 export const researchWeeks = (rd: number, archiveTier: number) => Math.max(2, Math.round(2 + rd / 18) - archiveTier);
 
-export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = []): number {
+export function showrunnerContractSkill(showrunner: string, showsMade: number, type: PointType): number {
+  const base = Math.min(90, 50 + showsMade * 2);
+  const speciality =
+    showrunner === "steady" && type === "art" ? 12
+    : showrunner === "vision" && type === "story" ? 12
+    : showrunner === "producer" ? 8
+    : showrunner === "marketer" && type === "sound" ? 8
+    : 0;
+  return Math.min(99, base + speciality);
+}
+
+export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
   const pipeline = research.includes("pipeline") ? 1.12 : 1;
-  const base = 4; // showrunner / producer coordination
+  const base = 4;
+  const runner = showrunnerSkill > 0 ? showrunnerSkill * 0.16 : 0;
   return Math.max(
     1,
-    Math.round(
-      (base + crew.reduce((a, s) => a + staffPoint(s, contract.type) * (0.14 + s.stamina / 1000), 0)) * pipeline
-    )
+    Math.round((base + runner + crew.reduce((a, s) => a + staffPoint(s, contract.type) * (0.14 + s.stamina / 1000), 0)) * pipeline)
   );
 }
 
-export const projectedContractTotal = (contract: Contract, crew: Staff[], research: string[] = []) =>
-  contractWeeklyOutput(contract, crew, research) * contract.weeks;
+export const projectedContractTotal = (contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0) =>
+  contractWeeklyOutput(contract, crew, research, showrunnerSkill) * contract.weeks;
+
+/** Better staff need less Research Data to reach the same boost confidence. */
+export function rushResearchCost(skill: number, chance: number): number {
+  const base = chance >= 0.8 ? 14 : chance >= 0.5 ? 8 : 4;
+  const expertise = Math.max(0.48, 1.15 - Math.min(99, skill) / 160);
+  return Math.max(1, Math.round(base * expertise));
+}
+
+export const rushStreamPoint = (skill: number, roll: number) =>
+  Math.max(2, Math.round(Math.min(99, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));
+
+export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(99, skill) * 0.13));

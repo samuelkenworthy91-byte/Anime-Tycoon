@@ -605,7 +605,9 @@ export default function Create({
                   onClick={() => {
                     sfx.click();
                     const pool = castRow.list;
-                    set({ [castRow.role]: pool[Math.floor(Math.random() * pool.length)].id } as Partial<Draft>);
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    if (castRow.role === "protag") set({ protag: pick.id, protagName: pick.name });
+                    else set({ [castRow.role]: pick.id } as Partial<Draft>);
                   }}
                   aria-label="Random pick"
                 >
@@ -622,21 +624,16 @@ export default function Create({
                     on={d[castRow.role] === m.id}
                     onPick={() => {
                       sfx.select();
-                      set({ [castRow.role]: m.id } as Partial<Draft>);
+                      if (castRow.role === "protag") set({ protag: m.id, protagName: m.name });
+                      else set({ [castRow.role]: m.id } as Partial<Draft>);
                     }}
                   />
                 ))}
               </div>
 
               {castRow.role === "protag" && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-xs font-bold text-paper/50">HERO NAME:</span>
-                  <input
-                    value={d.protagName}
-                    onChange={(e) => set({ protagName: e.target.value.slice(0, 18) })}
-                    className="ink-input w-48 px-3 py-2 text-sm font-bold"
-                  />
-                  <span className="text-[10px] italic text-paper/40">“{protag.tag}”</span>
+                <div className="rounded-xl border border-cyanx/25 bg-cyanx/5 px-3 py-2 text-[10px] text-paper/55">
+                  Cast use their working names during production. After the edit bay you can rename the lead, support, mascot, villain and the show itself before marketing begins.
                 </div>
               )}
 
