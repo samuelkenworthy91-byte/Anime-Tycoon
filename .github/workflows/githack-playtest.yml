@@ -1,0 +1,47 @@
+name: Build GitHack Playtest
+
+on:
+  push:
+    branches:
+      - feature/deeper-studio-loop
+    paths:
+      - ".github/workflows/githack-playtest.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-playtest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/deeper-studio-loop
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build browser version
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit GitHack playtest build
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add -f game_source/dist
+          git commit -m "Add browser playtest build for deeper studio loop"
+          git push origin HEAD:feature/deeper-studio-loop
