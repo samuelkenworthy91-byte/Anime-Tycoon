@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - arena/01a0615b-anime-tycoon
+      - feature/deeper-studio-loop
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
