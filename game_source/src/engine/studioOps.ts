@@ -39,6 +39,19 @@ export interface ResearchJob {
   rdCost: number;
 }
 
+/** Live-clock constants shared by playback, ETA maths and tests. */
+export const LIVE_DAY_MS = 10_000;
+export const LIVE_WORK_PULSE_BASE_MS = 1_750;
+export const LIVE_WORK_PULSES_PER_DAY = LIVE_DAY_MS / LIVE_WORK_PULSE_BASE_MS;
+export const SHOWRUNNER_CONTRACT_PULSE_CHANCE = 0.34;
+
+/** Playback speed changes real time only. Every speed therefore gets the same
+ * expected number of contribution checks per in-game day. */
+export function liveWorkPulseGapMs(speed: number): number {
+  if (speed <= 0) return LIVE_WORK_PULSE_BASE_MS;
+  return Math.max(80, Math.round(LIVE_WORK_PULSE_BASE_MS / speed));
+}
+
 export const trainingWeeks = (tier: number) => Math.max(2, 5 - Math.max(1, tier));
 export const researchWeeks = (rd: number, archiveTier: number) => Math.max(2, Math.round(2 + rd / 18) - archiveTier);
 
@@ -77,20 +90,16 @@ export function contractWeeklyOutput(contract: Contract, crew: Staff[], research
  * Actual delivery remains RNG-driven and can be faster or slower. */
 export function contractDailyOutputEstimate(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
   const pipeline = research.includes("pipeline") ? 1.12 : 1;
-  const one = (skill: number) => {
-    const s = Math.max(1, Math.min(99, skill));
-    const chance = Math.min(0.97, 0.62 + s / 300);
-    const avgBubble = Math.min(6, 1 + s / 34 + 0.9);
-    return 5.7 * chance * avgBubble;
-  };
-  const staff = crew.reduce((a, s) => a + one(staffPoint(s, contract.type)), 0);
-  /* Projection includes the showrunner's guaranteed senior +1 floor. */
-  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) * 1.25 : 0;
-  return Math.max(1, Math.round((staff + runner) * pipeline));
+  const staffPerPulse = crew.reduce((a, s) => a + (staffPoint(s, contract.type) * pipeline) / 100, 0);
+  const runnerEffective = showrunnerSkill * pipeline;
+  const runnerPerPulse = showrunnerSkill > 0
+    ? SHOWRUNNER_CONTRACT_PULSE_CHANCE * (1 + runnerEffective / 100)
+    : 0;
+  return Math.max(0.1, Math.round((staffPerPulse + runnerPerPulse) * LIVE_WORK_PULSES_PER_DAY * 10) / 10);
 }
 
 export const projectedContractTotal = (contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0) =>
-  contractDailyOutputEstimate(contract, crew, research, showrunnerSkill) * contract.weeks * 7;
+  Math.round(contractDailyOutputEstimate(contract, crew, research, showrunnerSkill) * contract.weeks * 7);
 
 /** Better staff need less Research Data to reach the same boost confidence. */
 export function rushResearchCost(skill: number, chance: number): number {

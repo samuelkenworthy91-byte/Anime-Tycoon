@@ -1042,7 +1042,7 @@ export interface Showrunner {
   perk: string;
 }
 export const SHOWRUNNERS: Showrunner[] = [
-  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — all contribution checks are 25% stronger and pre-edit production creates 25% fewer editing notes." },
+  { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — all contribution checks are 50% stronger and pre-edit production creates 25% fewer editing notes." },
   { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
   { id: "producer", name: "Haruto Mori", title: "The Mogul Producer", img: "img/showrunner-c.jpg", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Golden Rolodex — contracts pay 40% more and advances are bigger." },
   { id: "marketer", name: "Sana Kobayashi", title: "The Hype Machine", img: "img/showrunner-d.jpg", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "Buzz Engine — shows open with +10 hype and marketing runs faster." },

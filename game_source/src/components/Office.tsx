@@ -66,6 +66,7 @@ import {
   AUDIENCE_TEST_MAX_FINDINGS,
   audienceShowKey,
   studioScore,
+  contractDailyOutputEstimateForRun,
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
@@ -91,7 +92,6 @@ import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
 import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
-import { contractDailyOutputEstimate, showrunnerContractSkill } from "../engine/studioOps";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -480,16 +480,16 @@ export default function Office({
               <div className="space-y-2">
                 {run.contractJobs.map((job) => {
                   const crew = run.staff.filter((st) => job.staffIds.includes(st.id));
-                  const runnerSkill = job.showrunner ? showrunnerContractSkill(run.showrunner, run.showsMade, job.contract.type) : 0;
-                  const rate = contractDailyOutputEstimate(job.contract, crew.filter((st) => !run.staffResting?.[st.id]), run.research, runnerSkill);
+                  const rate = contractDailyOutputEstimateForRun(run, job);
+                  const rateLabel = rate >= 10 ? Math.round(rate).toString() : rate.toFixed(1);
                   const daysLeft = Math.max(0, (job.dueDay ?? job.dueWeek * 7) - (run.day ?? run.week * 7));
-                  const projected = job.progress + rate * daysLeft;
-                  const eta = Math.max(1, Math.ceil(Math.max(0, job.contract.target - job.progress) / Math.max(1, rate)));
+                  const projected = Math.round(job.progress + rate * daysLeft);
+                  const eta = Math.max(1, Math.ceil(Math.max(0, job.contract.target - job.progress) / Math.max(0.1, rate)));
                   return (
                     <div key={job.id} className="ink-card p-3">
-                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · {daysLeft} day{daysLeft===1?"":"s"} left</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rate}/day · LIVE</div></div></div>
+                      <div className="flex items-center gap-2"><Briefcase size={14} className="text-cyanx"/><div className="min-w-0 flex-1"><div className="truncate text-xs font-bold">{job.contract.name}</div><div className="text-[9px] text-paper/45">{[...crew.map((st) => st.name), ...(job.showrunner ? [runner.name] : [])].join(", ")} · {daysLeft} day{daysLeft===1?"":"s"} left</div></div><div className="text-right"><div className="font-display text-sm font-extrabold text-mint">{job.progress}/{job.contract.target}</div><div className="text-[8px] text-paper/40">≈ +{rateLabel}/day · LIVE</div></div></div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel3"><div className="h-full rounded-full bg-cyanx transition-all" style={{ width: `${Math.min(100, job.progress / Math.max(1, job.contract.target) * 100)}%` }} /></div>
-                      <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace · roughly ${eta} workday${eta === 1 ? "" : "s"} at this crew strength. Every bubble moves this bar.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
+                      <div className={cn("mt-1 text-[9px] font-bold", projected >= job.contract.target ? "text-mint" : "text-gold")}>{projected >= job.contract.target ? `On pace · ≈${eta} average workday${eta === 1 ? "" : "s"} at this crew strength. Every bubble moves this bar.` : `At current pace: ${projected}/${job.contract.target} by deadline — add stronger staff next time.`}</div>
                     </div>
                   );
                 })}

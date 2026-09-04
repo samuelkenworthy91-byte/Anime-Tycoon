@@ -163,6 +163,8 @@ import { projectLoadMap } from "./capacity";
 import {
   contractWeeklyOutput,
   showrunnerBubbleOutput,
+  LIVE_WORK_PULSES_PER_DAY,
+  SHOWRUNNER_CONTRACT_PULSE_CHANCE,
   rushBoostPoint,
   rushResearchCost,
   showrunnerContractSkill,
@@ -1542,9 +1544,9 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     if (r.research.includes("qa")) effective *= 1.15;
     if (r.research.includes("autoclean")) effective += 35;
   }
-  /* Genji's Steady Hand now has a mechanical purpose: expected contribution
-     output is 25% higher everywhere, including contract and edit work. */
-  if (r.showrunner === "steady") effective *= 1.25;
+  /* Genji's Steady Hand is deliberately obvious: all staff contribution
+     output is 50% stronger everywhere, including contract and edit work. */
+  if (r.showrunner === "steady") effective *= 1.5;
   return Math.max(0, effective);
 }
 
@@ -1555,8 +1557,55 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
   if (r.research.includes("pipeline")) skill *= 1.12;
   if (type === "story" && r.research.includes("storyboard")) skill *= 1.15;
   if (type === "art" && r.research.includes("mocap")) skill *= 1.12;
-  if (r.showrunner === "steady") skill *= 1.25;
+  if (r.showrunner === "steady") skill *= 1.5;
   return skill;
+}
+
+function liveWorkEligible(r: RunState, st: Staff, pendingIds: Set<string> = new Set()): boolean {
+  if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
+  if (pendingIds.has(st.id)) return true;
+  const contract = (r.contractJobs ?? []).some((j) => j.staffIds.includes(st.id));
+  const project = projectOfStaff(r.projects, st.id);
+  const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
+  return contract || production;
+}
+
+function expectedContractDailyRate(
+  r: RunState,
+  contract: Contract,
+  staffIds: string[],
+  hasShowrunner: boolean,
+  pendingSelection = false,
+): number {
+  const pendingIds = pendingSelection ? new Set(staffIds) : new Set<string>();
+  const eligible = r.staff.filter((st) => liveWorkEligible(r, st, pendingIds));
+  const sampleChance = eligible.length <= 2 ? 1 : 2 / eligible.length;
+  const assigned = new Set(staffIds);
+  const staffPerPulse = eligible.reduce((sum, st) => {
+    if (!assigned.has(st.id)) return sum;
+    return sum + sampleChance * (contributionEffectiveSkill(r, st, contract.type) / 100);
+  }, 0);
+  const runnerPerPulse = hasShowrunner
+    ? SHOWRUNNER_CONTRACT_PULSE_CHANCE * (1 + showrunnerEffectiveSkill(r, contract.type) / 100)
+    : 0;
+  return Math.max(0, (staffPerPulse + runnerPerPulse) * LIVE_WORK_PULSES_PER_DAY);
+}
+
+/** Exact expectation for an ACTIVE live contract. This mirrors the same sampling,
+ * percentile output and showrunner activation used by rollStudioWorkPulses. */
+export function contractDailyOutputEstimateForRun(r: RunState, job: ContractAssignment): number {
+  return expectedContractDailyRate(r, job.contract, job.staffIds, !!job.showrunner, false);
+}
+
+/** Preview expectation before a contract is assigned. Selected idle workers are
+ * treated as live contributors so the assignment screen uses the same maths. */
+export function contractSelectionDailyOutputEstimate(
+  r: RunState,
+  contract: Contract,
+  staffIds: string[],
+  hasShowrunner: boolean,
+): number {
+  return expectedContractDailyRate(r, contract, staffIds, hasShowrunner, true);
 }
 
 /** One visible production-check cycle. At most two hired staff are sampled per
@@ -1589,7 +1638,7 @@ export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
   }
 
   const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
-  if (runnerJob && Math.random() < 0.34) {
+  if (runnerJob && Math.random() < SHOWRUNNER_CONTRACT_PULSE_CHANCE) {
     const type = runnerJob.contract.type;
     const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
     if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "contract", jobId: runnerJob.id });

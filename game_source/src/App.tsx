@@ -38,6 +38,7 @@ import Release from "./components/Release";
 import GameOver from "./components/GameOver";
 import Retrospective from "./components/Retrospective";
 import { beginDynastyMode } from "./engine/legacy";
+import { liveWorkPulseGapMs } from "./engine/studioOps";
 import { cn } from "./utils/cn";
 
 type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective";
@@ -57,7 +58,7 @@ export default function App() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [paused, setPaused] = useState(false);
-  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 12>(1);
+  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
   /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
@@ -165,7 +166,7 @@ export default function App() {
   useEffect(() => {
     const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
     if ((screen !== "office" && !liveEditing) || paused || timeSpeed === 0 || !run) return;
-    const gap = Math.max(180, Math.round(1750 / Math.max(1, timeSpeed)));
+    const gap = liveWorkPulseGapMs(timeSpeed);
     const iv = window.setInterval(() => {
       setRun((current) => {
         if (!current) return current;
@@ -569,7 +570,7 @@ export default function App() {
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
           <div className="game-controls absolute right-3 top-2.5 z-[60] flex gap-1.5">
-            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 12] as const).map((speed) => (
+            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>
