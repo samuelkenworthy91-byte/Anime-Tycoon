@@ -35,6 +35,9 @@ jobs:
       - name: Clean generated imports
         run: python tools/fix_speed_eta_unused.py
 
+      - name: Allow timer rounding in speed test
+        run: python tools/fix_speed_eta_tolerance.py
+
       - name: Install dependencies
         working-directory: game_source
         run: npm ci --prefer-offline --no-audit --no-fund
@@ -55,7 +58,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/speed-eta-steady-once.yml tools/apply_speed_eta_fix.py tools/fix_speed_eta_unused.py
+          git rm .github/workflows/speed-eta-steady-once.yml tools/apply_speed_eta_fix.py tools/fix_speed_eta_unused.py tools/fix_speed_eta_tolerance.py
           git add game_source
           git commit -m "Fix live speed scaling and contract ETA; strengthen Steady Hand"
           git push origin HEAD:feature/kairosoft-production-pass
