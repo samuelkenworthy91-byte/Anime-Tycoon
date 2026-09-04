@@ -7,6 +7,10 @@ on:
     paths:
       - .github/workflows/speed-eta-steady-once.yml
 
+concurrency:
+  group: speed-eta-steady-hand
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -33,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: game_source
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Strict TypeScript check
         working-directory: game_source
