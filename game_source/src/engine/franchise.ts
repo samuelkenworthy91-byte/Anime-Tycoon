@@ -3,7 +3,8 @@
  *  Every released show becomes an IP record with a timeline, cast popularity,
  *  fan expectations, fatigue, cult followings and merchandising.
  * ========================================================================== */
-import type { AudienceId, Draft, GenreId, MediumId } from "./data";
+import type { AnimeType, AudienceId, Draft, GenreId, MediumId } from "./data";
+import { inferAnimeType, migrateGenreList } from "./castV2Migration";
 import type { Project } from "./projects";
 
 /* ------------------------------------------------------------ entry kinds */
@@ -26,6 +27,7 @@ export interface FranchiseEntry {
   revenue: number; // the studio's net take
   fans: number;
   week: number;
+  animeType?: AnimeType;
   /** what the fans expected going in (continuations only) */
   expected?: number;
   disappointment?: boolean;
@@ -44,6 +46,9 @@ export interface Franchise {
   key: string;
   baseTitle: string;
   genres: GenreId[];
+  animeType: AnimeType;
+  /** archived labels from a pre-V2 franchise; display only */
+  legacyGenres?: string[];
   audience: AudienceId;
   cast: FranchiseChar[];
   /** original release week */
@@ -352,6 +357,7 @@ export function createFranchise(
     key,
     baseTitle: d.title,
     genres: [...d.genres],
+    animeType: d.animeType,
     audience: d.audience,
     cast: seedCast(seed, result.total),
     createdWeek: week,
@@ -363,6 +369,7 @@ export function createFranchise(
         revenue: result.revenue,
         fans: result.fans,
         week,
+        animeType: d.animeType,
         hallOfFame: result.hallOfFame,
       },
     ],
@@ -419,6 +426,7 @@ export function recordContinuation(
         revenue: result.revenue,
         fans,
         week,
+        animeType: d.animeType,
         expected: verdict.expected,
         disappointment: verdict.verdict === "disappointment",
         hallOfFame: result.hallOfFame,
@@ -536,6 +544,10 @@ export function migrateFranchise(key: string, raw: unknown, week: number): Franc
     /* already the new shape — just backfill anything missing */
     const fr: Franchise = {
       ...maybe,
+      genres: migrateGenreList(maybe.genres),
+      animeType: inferAnimeType(maybe.animeType, maybe.legacyGenres ?? maybe.genres, maybe.cast?.find((c) => c.role === "protag")?.id),
+      legacyGenres: maybe.legacyGenres ?? (maybe.genres as unknown as string[]),
+      entries: maybe.entries.map((entry) => ({ ...entry, animeType: entry.animeType ?? inferAnimeType(undefined, maybe.legacyGenres ?? maybe.genres, maybe.cast?.find((c) => c.role === "protag")?.id) })),
       merchCooldown: maybe.merchCooldown ?? {},
       cast: maybe.cast ?? [],
       cult: !!maybe.cult,
@@ -549,6 +561,8 @@ export function migrateFranchise(key: string, raw: unknown, week: number): Franc
     key,
     baseTitle: maybe.baseTitle ?? key,
     genres: [],
+    animeType: "shonen",
+    legacyGenres: [],
     audience: "teens",
     cast: [],
     createdWeek: Math.max(0, week - 48 * season),
@@ -559,6 +573,7 @@ export function migrateFranchise(key: string, raw: unknown, week: number): Franc
       revenue: 0,
       fans: 0,
       week: Math.max(0, week - 48 * (season - i)),
+      animeType: "shonen",
     })),
     season,
     totalRevenue: 0,

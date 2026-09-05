@@ -90,24 +90,24 @@ export const SPEC_SPEED_BONUS = 0.1; // production-speed spec: +10% pace, always
 export const SPEC_DEFS: SpecDef[] = [
   /* writers */
   { id: "w_comedy", role: "writer", name: "Comedy", genres: ["comedy", "slice", "cooking"] },
-  { id: "w_drama", role: "writer", name: "Drama", genres: ["noir", "supernatural", "military"] },
-  { id: "w_romance", role: "writer", name: "Romance", genres: ["romance", "shojo", "idol"] },
-  { id: "w_action", role: "writer", name: "Action", genres: ["shonen", "sports", "mecha"] },
-  { id: "w_mystery", role: "writer", name: "Mystery", genres: ["mystery", "horror", "noir"] },
+  { id: "w_drama", role: "writer", name: "Drama", genres: ["survival", "supernatural", "military", "nordic"] },
+  { id: "w_romance", role: "writer", name: "Romance", genres: ["romance", "slice", "idol"] },
+  { id: "w_action", role: "writer", name: "Action", genres: ["martial", "sports", "mecha", "pirate"] },
+  { id: "w_mystery", role: "writer", name: "Mystery", genres: ["mystery", "horror", "cyber"] },
   { id: "w_adapt", role: "writer", name: "Adaptation", special: "sequel" },
   /* animators */
-  { id: "a_sakuga", role: "animator", name: "Action Sakuga", genres: ["shonen", "sports", "military"] },
-  { id: "a_char", role: "animator", name: "Character Animation", genres: ["slice", "romance", "shojo", "idol"] },
+  { id: "a_sakuga", role: "animator", name: "Action Sakuga", genres: ["martial", "sports", "military", "pirate"] },
+  { id: "a_char", role: "animator", name: "Character Animation", genres: ["slice", "romance", "idol"] },
   { id: "a_fx", role: "animator", name: "Effects", genres: ["magical", "supernatural", "space", "cyber"] },
-  { id: "a_mecha", role: "animator", name: "Mecha", genres: ["mecha", "racing", "military"] },
-  { id: "a_bg", role: "animator", name: "Backgrounds", genres: ["fantasy", "isekai", "noir"] },
+  { id: "a_mecha", role: "animator", name: "Mecha", genres: ["mecha", "sports", "military"] },
+  { id: "a_bg", role: "animator", name: "Backgrounds", genres: ["fantasy", "isekai", "nordic", "survival"] },
   { id: "a_speed", role: "animator", name: "Production Speed", special: "speed" },
   /* composers */
   { id: "c_orch", role: "composer", name: "Orchestral", genres: ["fantasy", "space", "military"] },
-  { id: "c_elec", role: "composer", name: "Electronic", genres: ["cyber", "racing", "mecha"] },
-  { id: "c_idol", role: "composer", name: "Idol / Pop", genres: ["idol", "shojo", "comedy"] },
+  { id: "c_elec", role: "composer", name: "Electronic", genres: ["cyber", "sports", "mecha"] },
+  { id: "c_idol", role: "composer", name: "Idol / Pop", genres: ["idol", "romance", "comedy"] },
   { id: "c_horror", role: "composer", name: "Horror Atmosphere", genres: ["horror", "mystery", "supernatural"] },
-  { id: "c_battle", role: "composer", name: "Battle Themes", genres: ["shonen", "mecha", "sports"] },
+  { id: "c_battle", role: "composer", name: "Battle Themes", genres: ["martial", "mecha", "sports", "military"] },
   { id: "c_emote", role: "composer", name: "Emotional Scoring", genres: ["slice", "romance", "magical"] },
 ];
 

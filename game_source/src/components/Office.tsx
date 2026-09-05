@@ -875,7 +875,7 @@ export default function Office({
                 );
                 return (
                   <div key={i} className="ink-card flex items-center gap-2 p-2">
-                    <Portrait img={castById(h.protag).img} pos={castById(h.protag).pos} alt="" className="h-9 w-9 rounded-lg" />
+                    <Portrait img={castById(h.protag).img} alt="" className="h-9 w-9 rounded-lg" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-bold" style={hofTitleStyle(h)}>{h.title}</div>
                       <div className="text-[10px] text-paper/50">
