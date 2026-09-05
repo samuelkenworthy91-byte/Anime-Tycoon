@@ -5,8 +5,8 @@ import { rushOutcomeRange } from "../studioOps";
 import type { Draft } from "../data";
 
 const draft = (): Draft => ({
-  title: "Cut Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight",
-  genres: ["shonen"], audience: "teens", protag: "kai", protagName: "Kai",
+  title: "Cut Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight", animeType:"shonen",
+  genres: ["sports"], audience: "teens", protag: "kai", protagName: "Kai",
   secondary: "s_ren", pet: "none", villain: "v_oni", arcs: [], sliders: [50, 50, 50], season: 1,
 });
 

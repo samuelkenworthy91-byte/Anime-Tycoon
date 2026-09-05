@@ -31,7 +31,7 @@ const botDraft = (r: RunState, i: number): Draft => {
     title: `Sim Show ${i}`,
     medium: "tv",
     budget,
-    slot: r.cash > 1_500_000 ? "prime" : r.cash > 300_000 ? "evening" : "midnight",
+    slot: r.cash > 1_500_000 ? "prime" : r.cash > 300_000 ? "evening" : "midnight", animeType:"shonen",
     genres: [g],
     audience: "teens",
     protag: "hero",

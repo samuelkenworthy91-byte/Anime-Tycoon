@@ -5,7 +5,7 @@ import { partnerTier } from "../market";
 import { draftCost, draftWeeks, makeProject, rawTeamCapacity, teamSpeed } from "../projects";
 import { advanceWeeks, buyFacility, initialRun, startContractAssignment, startResearchProject, trainStaff, type RunState } from "../state";
 
-const draft = (over: Partial<Draft> = {}): Draft => ({ title: "Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight", genres: ["shonen"], audience: "teens", protag: "kai", protagName: "Kai", secondary: "none", pet: "none", villain: "none", arcs: ["origin", "rival", "finale"], sliders: [50, 50, 50], season: 1, ...over });
+const draft = (over: Partial<Draft> = {}): Draft => ({ title: "Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight", animeType: "shonen", genres: ["sports"], audience: "teens", protag: "kai", protagName: "Kai", secondary: "none", pet: "none", villain: "none", arcs: ["origin", "rival", "finale"], sliders: [50, 50, 50], season: 1, ...over });
 const worker = (id: string, role: Staff["role"], n = 80): Staff => ({ id, name: id, role, story: n, art: n, sound: n, level: 6, salary: 1000, cost: 0, stamina: 100, portrait: 0 });
 
 describe("deeper studio loop", () => {

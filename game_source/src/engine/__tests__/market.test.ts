@@ -47,8 +47,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "indie",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen" as const,
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -72,7 +72,7 @@ const richRun = (over: Partial<RunState> = {}): RunState => ({
 const com = (over: Partial<Commission> = {}): Commission => ({
   id: "test_com",
   partnerId: "ntv8",
-  genre: "shonen",
+  genre: "sports",
   audience: "teens",
   medium: "tv",
   advance: 200_000,
@@ -143,15 +143,15 @@ describe("market trends", () => {
 /* --------------------------------------------------------- saturation */
 describe("saturation", () => {
   const recs: ReleaseRecord[] = [
-    { genre: "shonen", week: 10, weight: 2 },
-    { genre: "shonen", week: 12, weight: 1 },
+    { genre: "sports", week: 10, weight: 2 },
+    { genre: "sports", week: 12, weight: 1 },
     { genre: "mecha", week: 12, weight: 1 },
   ];
 
   it("counts weighted releases inside the window only", () => {
-    expect(saturationOf(recs, "shonen", 14)).toBe(3);
+    expect(saturationOf(recs, "sports", 14)).toBe(3);
     expect(saturationOf(recs, "mecha", 14)).toBe(1);
-    expect(saturationOf(recs, "shonen", 10 + SATURATION_WINDOW + 1)).toBe(1);
+    expect(saturationOf(recs, "sports", 10 + SATURATION_WINDOW + 1)).toBe(1);
   });
 
   it("prunes expired records", () => {
@@ -168,12 +168,12 @@ describe("saturation", () => {
 
   it("drags effective heat down but never below the floor", () => {
     const m = flatMarket();
-    m.genres.shonen = 1;
-    const flood: ReleaseRecord[] = Array.from({ length: 5 }, (_, i) => ({ genre: "shonen" as const, week: 10 + i, weight: 2 }));
-    expect(effectiveHeat(m, [], "shonen", 20)).toBe(1);
-    expect(effectiveHeat(m, flood, "shonen", 20)).toBe(-1); // 10 weight → −2
-    m.genres.shonen = -2;
-    expect(effectiveHeat(m, flood, "shonen", 20)).toBe(-2); // clamped
+    m.genres.sports = 1;
+    const flood: ReleaseRecord[] = Array.from({ length: 5 }, (_, i) => ({ genre: "sports" as const, week: 10 + i, weight: 2 }));
+    expect(effectiveHeat(m, [], "sports", 20)).toBe(1);
+    expect(effectiveHeat(m, flood, "sports", 20)).toBe(-1); // 10 weight → −2
+    m.genres.sports = -2;
+    expect(effectiveHeat(m, flood, "sports", 20)).toBe(-2); // clamped
   });
 });
 
@@ -185,9 +185,9 @@ describe("market multipliers", () => {
 
   it("pays more for booming genres than oversaturated ones, within clamps", () => {
     const hot = flatMarket();
-    hot.genres.shonen = 2;
+    hot.genres.sports = 2;
     const cold = flatMarket();
-    cold.genres.shonen = -2;
+    cold.genres.sports = -2;
     const up = marketMult(hot, [], draft(), 10);
     const down = marketMult(cold, [], draft(), 10);
     expect(up).toBeGreaterThan(1);
@@ -201,7 +201,7 @@ describe("market multipliers", () => {
     for (const k of Object.keys(worst.genres)) worst.genres[k as keyof typeof worst.genres] = -2;
     for (const k of Object.keys(worst.audiences)) worst.audiences[k as keyof typeof worst.audiences] = -1;
     for (const k of Object.keys(worst.mediums)) worst.mediums[k as keyof typeof worst.mediums] = -1;
-    const flood: ReleaseRecord[] = Array.from({ length: 10 }, (_, i) => ({ genre: "shonen" as const, week: i, weight: 2 }));
+    const flood: ReleaseRecord[] = Array.from({ length: 10 }, (_, i) => ({ genre: "sports" as const, week: i, weight: 2 }));
     expect(marketMult(worst, flood, draft(), 5)).toBeGreaterThanOrEqual(0.6);
   });
 
@@ -347,7 +347,7 @@ describe("releasing under contract", () => {
   it("your release floods its own genre", () => {
     const base = readyRun();
     const out = releaseProject(base, base.projects[0].id, { spent: 0, hype: 30 })!;
-    const rec = out.run.recentReleases.find((x) => x.genre === "shonen");
+    const rec = out.run.recentReleases.find((x) => x.genre === "sports");
     expect(rec).toBeTruthy();
     expect(rec!.weight).toBe(2);
   });
@@ -455,6 +455,7 @@ describe("market lifecycle", () => {
       id: "test_premiere",
       title: "Big Show",
       genres: ["mecha"],
+      animeType: "shonen",
       medium: "tv",
       budget: "standard",
       week: 10,

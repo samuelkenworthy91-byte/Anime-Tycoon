@@ -22,8 +22,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Starfall Blade",
   medium: "tv",
   budget: "standard",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "kai",
   protagName: "Kai",
@@ -51,14 +51,13 @@ describe("genre font table", () => {
     expect(families.size).toBeGreaterThanOrEqual(8);
   });
 
-  it("genre voices are unmistakable: loud shonen caps vs flowing romance serif", () => {
-    const sh = posterFontFor("shonen");
+  it("genre voices are unmistakable: kinetic sports caps vs flowing romance serif", () => {
+    const sh = posterFontFor("sports");
     const ro = posterFontFor("romance");
     expect(sh.upperCase).toBe(true);
     expect(ro.italic).toBe(true);
     expect(sh.family).not.toBe(ro.family);
-    /* every genre keeps its own colour-tinted glow or none at all */
-    expect(sh.glow).toBeTruthy();
+    expect(sh.skew).toBeLessThan(0);
   });
 
   it("genreTitleCss reflects the same table", () => {
@@ -92,7 +91,7 @@ describe("posterDesign extras", () => {
     expect(d.kicker).toBe("MAGICLAMP PRESENTS");
     expect(d.ribbon).toBeNull();
     expect(d.lines.join(" ")).toBe("Starfall Blade");
-    expect(d.font.family).toBe(posterFontFor("shonen").family);
+    expect(d.font.family).toBe(posterFontFor("sports").family);
   });
 
   it("season 2 announces itself in kicker and ribbon", () => {
@@ -110,15 +109,15 @@ describe("posterDesign extras", () => {
     const d = posterDesign(draft(), { studio: "Magiclamp" });
     expect(d.billing[0]).toContain("MAGICLAMP PRESENTS");
     expect(d.billing[1]).toContain("KAI");
-    expect(d.billing[2]).toContain(GENRE("shonen").label.toUpperCase());
+    expect(d.billing[2]).toContain(GENRE("sports").label.toUpperCase());
   });
 
   it("decorations come from the primary genre first, then blend others in", () => {
-    const d = posterDesign(draft({ genres: ["racing", "cooking"] }));
-    expect(d.decos.slice(0, 2)).toEqual(POSTER_DECOS.racing);
+    const d = posterDesign(draft({ genres: ["sports", "cooking"] }));
+    expect(d.decos.slice(0, 2)).toEqual(POSTER_DECOS.sports);
     expect(d.decos).toContain("steam");
     /* no duplicates even when genres overlap */
-    const d2 = posterDesign(draft({ genres: ["shonen", "sports"] }));
+    const d2 = posterDesign(draft({ genres: ["sports", "sports"] }));
     expect(new Set(d2.decos).size).toBe(d2.decos.length);
   });
 
@@ -141,7 +140,7 @@ describe("deterministic tilt/hash", () => {
 });
 
 /* keep GenreId import meaningful in the type checker */
-const _id: GenreId = "shonen";
+const _id: GenreId = "sports";
 void _id;
 
 describe("hall-of-fame posters must never crash the office", () => {
@@ -158,9 +157,9 @@ describe("hall-of-fame posters must never crash the office", () => {
   });
 
   it("posterDesign degrades gracefully on a cast-only draft", () => {
-    const sparse = { title: "T", genres: ["noir"], protagName: "T" } as Draft;
+    const sparse = { title: "T", genres: ["mystery"], protagName: "T" } as Draft;
     const d = posterDesign(sparse);
-    expect(d.primary.id).toBe("noir");
+    expect(d.primary.id).toBe("mystery");
     expect(d.billing[0]).toContain("TV PRODUCTION");
     expect(d.ribbon).toBeNull();
   });

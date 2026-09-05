@@ -3,7 +3,7 @@ import { initialRun, migrateRun, percentileSkillOutput, tickEditWorkPulse, tickS
 import { makeProject } from "../projects";
 import { GENRES, PROTAGONISTS, SECONDARY, PETS, VILLAINS, type Draft } from "../data";
 
-const draft = (): Draft => ({ title:"Test", medium:"tv", budget:"indie", scope:"standard", slot:"midnight", genres:["shojo","romance"], audience:"teens", protag:PROTAGONISTS[0].id, protagName:"Lead", secondary:SECONDARY[0].id, pet:PETS[0].id, villain:VILLAINS[0].id, arcs:[], sliders:[50,50,50], season:1 });
+const draft = (): Draft => ({ title:"Test", medium:"tv", budget:"indie", scope:"standard", slot:"midnight", animeType: "shonen", genres:["romance","slice"], audience:"teens", protag:PROTAGONISTS[0].id, protagName:"Lead", secondary:SECONDARY[0].id, pet:PETS[0].id, villain:VILLAINS[0].id, arcs:[], sliders:[50,50,50], season:1 });
 
 describe("Kairosoft live production", () => {
   it("percentile skill scales cleanly beyond 100 and 200", () => {
@@ -50,11 +50,16 @@ describe("Kairosoft live production", () => {
     expect(migrateRun(old).genreKnowledge).toEqual({});
   });
 
-  it("Shojo x Romance has a dual-affinity option in every cast role", () => {
+  it("Romance is practical in every role and Romance x Slice is covered", () => {
     for (const pool of [PROTAGONISTS, SECONDARY, PETS, VILLAINS]) {
-      expect(pool.some((m)=>m.aff.includes("shojo") && m.aff.includes("romance"))).toBe(true);
+      expect(pool.some((m) => [...m.visibleAff, m.hiddenAff].includes("romance"))).toBe(true);
     }
+    const all = [...PROTAGONISTS, ...SECONDARY, ...PETS, ...VILLAINS];
+    expect(all.some((m) => {
+      const affinity = [...m.visibleAff, m.hiddenAff];
+      return affinity.includes("romance") && affinity.includes("slice");
+    })).toBe(true);
   });
 
-  it("all twenty genres remain present", () => expect(GENRES).toHaveLength(20));
+  it("all twenty-one active genres remain present", () => expect(GENRES).toHaveLength(21));
 });

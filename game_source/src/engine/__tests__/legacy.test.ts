@@ -42,8 +42,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "standard",
-  slot: "prime",
-  genres: ["shonen"],
+  slot: "prime", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -72,7 +72,7 @@ const worker = (id: string, over: Partial<Staff> = {}): Staff => ({
   morale: 70,
   traits: [],
   spec: "w_action",
-  favGenre: "shonen",
+  favGenre: "sports",
   joinedWeek: 0,
   shows: [],
   awardsWon: 0,
@@ -109,7 +109,8 @@ const legend = (name: string, role: StaffRole): LegendRec => ({
 const hof = (i: number): HofEntry => ({
   title: `Masterpiece ${i}`,
   score: 34,
-  genres: ["shonen"],
+  genres: ["sports"],
+  animeType: "shonen",
   protag: "hero",
   week: i * 48,
 });
@@ -332,7 +333,7 @@ describe("the long haul", () => {
       /* long-serving staff retire — keep a living crew through the years */
       if (r.staff.length < 4) r = { ...r, staff: [...r.staff, rollHire(r.week), rollHire(r.week)] };
 
-      const started = startProject(r, draft({ genres: ["shonen", "fantasy"], budget: "standard", slot: "prime" }));
+      const started = startProject(r, draft({ genres: ["sports", "fantasy"], budget: "standard", slot: "prime" }));
       if (started) {
         r = started;
         const pid = r.projects[r.projects.length - 1].id;

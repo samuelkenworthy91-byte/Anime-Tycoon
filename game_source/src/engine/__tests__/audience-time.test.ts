@@ -13,8 +13,8 @@ import {
 } from "../state";
 
 const draft = (): Draft => ({
-  title:"Panel Show", medium:"tv", budget:"standard", scope:"standard", slot:"midnight",
-  genres:["shojo","romance"], audience:"teens", protag:"hana", protagName:"Hana",
+  title:"Panel Show", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", animeType:"shonen",
+  genres:["romance","slice"], audience:"teens", protag:"hana", protagName:"Hana",
   secondary:"s_ice", pet:"p_mochi", villain:"v_lovelace", arcs:["festival","confession"], sliders:[50,50,50], season:1,
 });
 
@@ -64,7 +64,7 @@ describe("repeatable test audience", () => {
     expect(r.rd).toBe(beforeRD + AUDIENCE_TEST_RD);
     expect(r.audienceInsights.length).toBe(1);
     expect(r.audienceInsights[0].text).toContain("Plot");
-    expect(r.genreKnowledge.shojo).toBe(1);
+    expect(r.genreKnowledge.romance).toBe(1);
   });
 
   it("can be repeated on the same latest release for a different finding", () => {

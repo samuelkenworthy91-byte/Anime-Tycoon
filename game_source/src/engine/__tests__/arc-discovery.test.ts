@@ -32,7 +32,7 @@ describe("creative discovery", () => {
   it("arc-to-genre fit can be positive, neutral or risky", () => {
     const slow = ARCS.find((a) => a.id === "narr_slowburn")!;
     expect(arcGenreFit(slow, "slice").label).toMatch(/GREAT|GOOD/);
-    expect(arcGenreFit(slow, "racing").label).toMatch(/RISKY/);
+    expect(arcGenreFit(slow, "sports").label).toMatch(/RISKY/);
     expect(arcGenreFit(slow, "space").label).toBe("NEUTRAL");
     expect(arcGenreKey(slow.id, "slice")).toBe("narr_slowburn|slice");
   });

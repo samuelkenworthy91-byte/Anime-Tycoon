@@ -3,7 +3,7 @@ import { initialRun, startContractAssignment, tickStudioDay, tickStudioWorkPulse
 import { makeProject } from "../projects";
 import type { Draft } from "../data";
 
-const draft = (): Draft => ({ title:"Desk Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", genres:["shonen"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
+const draft = (): Draft => ({ title:"Desk Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", animeType: "shonen", genres:["sports"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
 
 describe("visible daily studio work", () => {
   it("drains energy while assigned and eventually sends an employee to recover", () => {
