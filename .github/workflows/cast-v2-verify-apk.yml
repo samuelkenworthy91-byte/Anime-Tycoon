@@ -1,0 +1,133 @@
+name: Cast V2 verify portraits and build APK
+
+on:
+  push:
+    branches: [design/cast-v2-canonical]
+    paths: [.github/workflows/cast-v2-verify-apk.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/cast-v2-canonical
+          fetch-depth: 0
+
+      - name: Verify all 192 Cast V2 portraits and runtime mappings
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          root = Path('game_source')
+          runtime_path = root / 'src/engine/generated/castV2.json'
+          portrait_dir = root / 'public/cast/v2'
+          data = json.loads(runtime_path.read_text(encoding='utf-8'))
+          cast = data['cast']
+
+          assert len(cast) == 192, f'Expected 192 cast members, found {len(cast)}'
+          ids = [m['id'] for m in cast]
+          imgs = [m['img'] for m in cast]
+          assert len(set(ids)) == 192, 'Duplicate stable cast IDs detected'
+          assert len(set(imgs)) == 192, 'Duplicate portrait mappings detected'
+
+          role_counts = Counter(m['role'] for m in cast)
+          expected_roles = {'protag': 48, 'secondary': 48, 'pet': 48, 'villain': 48}
+          assert dict(role_counts) == expected_roles, f'Role counts differ: {dict(role_counts)}'
+
+          expected_files = set()
+          bad = []
+          for member in cast:
+              cast_id = member['id']
+              img = member['img']
+              if not img.startswith('cast/v2/') or not img.endswith('.webp'):
+                  bad.append(f'{cast_id}: invalid runtime path {img}')
+                  continue
+              filename = Path(img).name
+              if f'__{cast_id}.webp' not in filename:
+                  bad.append(f'{cast_id}: filename is not stable-ID based: {filename}')
+              target = root / 'public' / img
+              expected_files.add(filename)
+              if not target.is_file():
+                  bad.append(f'{cast_id}: missing {target}')
+                  continue
+              size = target.stat().st_size
+              if size <= 0:
+                  bad.append(f'{cast_id}: empty file {target}')
+                  continue
+              header = target.read_bytes()[:12]
+              if len(header) < 12 or header[:4] != b'RIFF' or header[8:12] != b'WEBP':
+                  bad.append(f'{cast_id}: invalid WebP header {target}')
+
+          actual_files = {p.name for p in portrait_dir.iterdir() if p.is_file() and p.suffix.lower() == '.webp'}
+          non_webp = sorted(p.name for p in portrait_dir.iterdir() if p.is_file() and p.suffix.lower() != '.webp')
+          missing = sorted(expected_files - actual_files)
+          extra = sorted(actual_files - expected_files)
+          assert not bad, '\n'.join(bad)
+          assert not non_webp, f'Unexpected non-WebP runtime files: {non_webp}'
+          assert len(actual_files) == 192, f'Expected 192 runtime WebPs, found {len(actual_files)}'
+          assert not missing, f'Missing mapped portraits: {missing}'
+          assert not extra, f'Unmapped extra portraits: {extra}'
+
+          report = {
+              'status': 'PASS',
+              'cast_members': len(cast),
+              'unique_ids': len(set(ids)),
+              'unique_portrait_paths': len(set(imgs)),
+              'runtime_webps': len(actual_files),
+              'role_counts': expected_roles,
+              'missing': missing,
+              'extra': extra,
+          }
+          Path('cast-v2-portrait-verification.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(report, indent=2))
+          PY
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Sync Android project
+        working-directory: game_source
+        run: npm run apk:sync
+
+      - name: Build debug APK
+        working-directory: game_source/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload portrait verification report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-v2-portrait-verification
+          path: cast-v2-portrait-verification.json
+          if-no-files-found: error
+
+      - name: Upload Cast V2 debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-tycoon-cast-v2-debug-apk
+          path: game_source/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
