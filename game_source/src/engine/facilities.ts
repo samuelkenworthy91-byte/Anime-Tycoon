@@ -77,7 +77,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
     name: "Recording Booth",
     category: "production",
     color: "#ffd166",
-    blurb: "Soundproofed to survive even the loudest shonen scream.",
+    blurb: "Soundproofed to survive even the loudest battle cry.",
     tiers: [
       { cost: 50_000, rd: 0, upkeep: 300 },
       { cost: 155_000, rd: 15, upkeep: 600 },
