@@ -50,7 +50,7 @@ export function clearScores() {
  * from a LOAD GAME / SAVE GAME menu. Every slot is an independent key so a
  * corrupt or version-stale slot can never take the others down with it.   */
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 export type SlotId = "auto" | "1" | "2" | "3";
 export const SLOT_IDS: SlotId[] = ["auto", "1", "2", "3"];
 
@@ -58,7 +58,7 @@ export function slotLabel(id: SlotId): string {
   return id === "auto" ? "AUTOSAVE" : `SLOT ${id}`;
 }
 
-const slotKey = (id: SlotId) => `kirameki.save.v3.${id}`;
+const slotKey = (id: SlotId, version = SAVE_VERSION) => `kirameki.save.v${version}.${id}`;
 
 export interface SaveGame {
   v: number;
@@ -93,10 +93,12 @@ export function saveSlot(id: SlotId, save: SaveData): boolean {
 
 export function loadSlot(id: SlotId): SaveGame | null {
   try {
-    const raw = localStorage.getItem(slotKey(id));
+    /* V3 is read-only compatibility. The next ordinary save writes V4 while
+       retaining the V3 key as a recoverable pre-migration backup. */
+    const raw = localStorage.getItem(slotKey(id)) ?? localStorage.getItem(slotKey(id, 3));
     if (!raw) return null;
     const s = JSON.parse(raw) as SaveGame;
-    if (!s || s.v !== SAVE_VERSION || !s.run || !s.summary) return null;
+    if (!s || (s.v !== SAVE_VERSION && s.v !== 3) || !s.run || !s.summary) return null;
     return s;
   } catch {
     return null;
@@ -106,6 +108,7 @@ export function loadSlot(id: SlotId): SaveGame | null {
 export function clearSlot(id: SlotId): void {
   try {
     localStorage.removeItem(slotKey(id));
+    localStorage.removeItem(slotKey(id, 3));
   } catch {
     /* ignore */
   }
