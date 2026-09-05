@@ -1,0 +1,19 @@
+{
+  "source_commit": "63e072d310670b6cb19dbef77d2d13526f7d5317",
+  "source_count": 186,
+  "count": 192,
+  "preserved_ids": 186,
+  "new_ids": [
+    "p_brine",
+    "p_silt",
+    "s_amina",
+    "s_linh",
+    "s_pranav",
+    "v_einar"
+  ],
+  "covered_pairs": 210,
+  "pairs_measured": 210,
+  "single_witness_pairs": 57,
+  "minimum_group_complete": 2,
+  "minimum_group_visible": 1
+}

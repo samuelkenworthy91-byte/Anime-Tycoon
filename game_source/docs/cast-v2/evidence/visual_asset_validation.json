@@ -1,0 +1,172 @@
+{
+  "status": "PASS",
+  "errors": [],
+  "master_sheets": 24,
+  "runtime_portraits": 192,
+  "unique_master_hashes": 24,
+  "unique_runtime_hashes": 192,
+  "all_dimensions": [
+    "512x512"
+  ],
+  "formats": [
+    "WEBP"
+  ],
+  "all_qc_pass": true,
+  "nearest_perceptual_pairs": [
+    {
+      "left": "s_takeshi",
+      "right": "p_ponta",
+      "distance": 58
+    },
+    {
+      "left": "kaede",
+      "right": "n_aoi",
+      "distance": 60
+    },
+    {
+      "left": "s_takeshi",
+      "right": "v_volt",
+      "distance": 60
+    },
+    {
+      "left": "p_ponta",
+      "right": "v_volt",
+      "distance": 60
+    },
+    {
+      "left": "kage",
+      "right": "v_inquisitor",
+      "distance": 65
+    },
+    {
+      "left": "n_aoi",
+      "right": "s_ironmaid",
+      "distance": 65
+    },
+    {
+      "left": "s_takeshi",
+      "right": "s_ice",
+      "distance": 66
+    },
+    {
+      "left": "s_takeshi",
+      "right": "s_reina",
+      "distance": 66
+    },
+    {
+      "left": "s_takeshi",
+      "right": "v_sinister",
+      "distance": 66
+    },
+    {
+      "left": "s_ice",
+      "right": "p_ponta",
+      "distance": 66
+    },
+    {
+      "left": "s_ice",
+      "right": "v_scuttle",
+      "distance": 66
+    },
+    {
+      "left": "s_nanami",
+      "right": "s_haruto",
+      "distance": 66
+    },
+    {
+      "left": "yuki",
+      "right": "haru",
+      "distance": 67
+    },
+    {
+      "left": "s_kanna",
+      "right": "p_ponta",
+      "distance": 67
+    },
+    {
+      "left": "n_aoi",
+      "right": "s_ice",
+      "distance": 68
+    },
+    {
+      "left": "n_aoi",
+      "right": "v_sinister",
+      "distance": 68
+    },
+    {
+      "left": "s_gen",
+      "right": "s_sakurako",
+      "distance": 68
+    },
+    {
+      "left": "s_ice",
+      "right": "v_sinister",
+      "distance": 68
+    },
+    {
+      "left": "p_ponta",
+      "right": "v_inquisitor",
+      "distance": 69
+    },
+    {
+      "left": "kage",
+      "right": "s_mika",
+      "distance": 70
+    },
+    {
+      "left": "mira",
+      "right": "v_carnage",
+      "distance": 70
+    },
+    {
+      "left": "kaede",
+      "right": "v_scuttle",
+      "distance": 70
+    },
+    {
+      "left": "p_yuzu",
+      "right": "p_bloop",
+      "distance": 70
+    },
+    {
+      "left": "v_scuttle",
+      "right": "v_sinister",
+      "distance": 70
+    },
+    {
+      "left": "yuki",
+      "right": "s_ice",
+      "distance": 71
+    },
+    {
+      "left": "yuki",
+      "right": "v_sinister",
+      "distance": 71
+    },
+    {
+      "left": "ash",
+      "right": "v_nightshade",
+      "distance": 71
+    },
+    {
+      "left": "v_carnage",
+      "right": "v_glitch",
+      "distance": 71
+    },
+    {
+      "left": "rei",
+      "right": "p_mugi",
+      "distance": 72
+    },
+    {
+      "left": "airi",
+      "right": "v_paradox",
+      "distance": 72
+    }
+  ],
+  "mobile_contact_sheets": [
+    "game_source/docs/cast-v2/evidence/mobile_previews/cast_v2_mobile_audit_batch_1.png",
+    "game_source/docs/cast-v2/evidence/mobile_previews/cast_v2_mobile_audit_batch_2.png",
+    "game_source/docs/cast-v2/evidence/mobile_previews/cast_v2_mobile_audit_batch_3.png"
+  ]
+}

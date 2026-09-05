@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "roster": 192,
+  "roles": "48 each",
+  "role_type": "24 each",
+  "role_type_gender": "12 each ledger cell",
+  "unique_ids": 192,
+  "preserved_source_ids": 186,
+  "affinity_slots": "2 visible + 1 hidden, all distinct",
+  "genres": 21,
+  "pairs": "210/210",
+  "minimum_visible_per_role_type_genre": 1,
+  "minimum_complete_per_role_type_genre": 2,
+  "mechanics": [
+    "0x no match",
+    "1x visible",
+    "1x two-visible",
+    "2x hidden",
+    "2x visible+hidden",
+    "hidden active before discovery",
+    "release-only idempotent discovery"
+  ],
+  "constants": {
+    "base": 0.5,
+    "quality": 0.6,
+    "sales": 0.025
+  }
+}
