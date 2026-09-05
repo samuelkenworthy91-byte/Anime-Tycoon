@@ -1,0 +1,1 @@
+Cast V2 engine transfer staging placeholder. Binary payload chunks are uploaded as Git objects and will be materialized by a checksum-gated one-use workflow.
