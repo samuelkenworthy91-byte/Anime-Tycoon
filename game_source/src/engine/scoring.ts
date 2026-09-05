@@ -13,10 +13,12 @@ import {
   SLOTS,
   castById,
   castChemFor,
+  affinityTier,
   comboKey,
   comboLevelBonus,
   comboMult,
   type CastRole,
+  type CastMember,
   type Draft,
   type PointType,
 } from "./data";
@@ -59,6 +61,8 @@ export interface ShowResult {
   quality: number;
   /** arc synergies newly discovered by shipping this season */
   arcCombosDiscovered: string[];
+  /** populated only by the release transaction, never by draft preview */
+  castBreakthroughs?: { castId: string; name: string; genre: string }[];
 }
 
 export type TierKey = "masterpiece" | "hit" | "solid" | "mixed" | "flop";
@@ -76,6 +80,32 @@ export const tierOf = (total: number): TierKey =>
   total >= 32 ? "masterpiece" : total >= 27 ? "hit" : total >= 21 ? "solid" : total >= 15 ? "mixed" : "flop";
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+export const CAST_BASE_QUALITY = 0.5;
+export const VISIBLE_CAST_QUALITY = 0.6;
+export const VISIBLE_CAST_SALES = 0.025;
+export const HIDDEN_AFFINITY_MULTIPLIER = 2;
+export const TYPE_MATCH_MULTIPLIER = 1.1;
+
+export interface CastContribution {
+  tier: 0 | 1 | 2;
+  typeModifier: number;
+  baseQuality: number;
+  affinityQuality: number;
+  salesBonus: number;
+  totalQuality: number;
+}
+
+/** One bounded role contribution. Discovery is intentionally absent. */
+export function castContribution(member: CastMember, role: CastRole, draft: Pick<Draft, "genres" | "animeType">): CastContribution {
+  const tier = affinityTier(member, draft.genres);
+  const typeModifier = member.legacyPlaceholder || member.type !== draft.animeType ? 1 : TYPE_MATCH_MULTIPLIER;
+  const weight = member.legacyPlaceholder ? 0 : CAST_WEIGHTS[role];
+  const baseQuality = weight * CAST_BASE_QUALITY * typeModifier;
+  const affinityQuality = weight * VISIBLE_CAST_QUALITY * tier * typeModifier;
+  const salesBonus = weight * VISIBLE_CAST_SALES * tier * typeModifier;
+  return { tier, typeModifier, baseQuality, affinityQuality, salesBonus, totalQuality: baseQuality + affinityQuality };
+}
 
 export function computeResult(opts: {
   draft: Draft;
@@ -101,6 +131,8 @@ export function computeResult(opts: {
   fanBase: number;
   /** dynasty-era audience expectations — raises the review bar */
   audienceBar?: number;
+  /** knowledge affects explanation only; never affinity mechanics */
+  castAffinityDiscovered?: string[];
 }): ShowResult {
   const {
     draft,
@@ -121,6 +153,7 @@ export function computeResult(opts: {
     costs,
     fanBase,
     audienceBar,
+    castAffinityDiscovered = [],
   } = opts;
 
   const totalPts = points.story + points.art + points.sound;
@@ -147,15 +180,26 @@ export function computeResult(opts: {
   const sec = castById(draft.secondary);
   const pet = castById(draft.pet);
   const vil = castById(draft.villain);
-  const castFit = (m: { aff: string[] }, w: number) => {
-    const n = m.aff.filter((g) => draft.genres.includes(g as never)).length;
-    return Math.min(6, n * 2.6) * w;
+  const castSlots: [CastRole, CastMember][] = [
+    ["protag", protag], ["secondary", sec], ["pet", pet], ["villain", vil],
+  ];
+  const castParts = castSlots.map(([role, member]) => ({ role, member, ...castContribution(member, role, draft) }));
+  const casting = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
+  const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
+  const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
+    if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
+    return part.member.visibleAff.some((genre) => draft.genres.includes(genre)) ? 1 : 0;
   };
-  const casting =
-    castFit(protag, CAST_WEIGHTS.protag) +
-    castFit(sec, CAST_WEIGHTS.secondary) +
-    castFit(vil, CAST_WEIGHTS.villain) +
-    castFit(pet, CAST_WEIGHTS.pet);
+  const publicCasting = castParts.reduce(
+    (sum, part) => sum + part.baseQuality
+      + CAST_WEIGHTS[part.role] * VISIBLE_CAST_QUALITY * publicTier(part) * part.typeModifier,
+    0,
+  );
+  const publicSalesMultiplier = 1 + castParts.reduce(
+    (sum, part) => sum
+      + CAST_WEIGHTS[part.role] * VISIBLE_CAST_SALES * publicTier(part) * part.typeModifier,
+    0,
+  );
 
   /* ---- arcs (greater impact: cast synergy + bigger finale payoff) */
   let arcQ = 0;
@@ -177,7 +221,7 @@ export function computeResult(opts: {
     /* arcs that shine with the right cast member */
     if (arc.cast && arc.castQ) {
       const m = castOf(arc.cast);
-      if (m && m.aff.some((g) => draft.genres.includes(g as never))) {
+      if (m && m.visibleAff.some((genre) => draft.genres.includes(genre))) {
         arcQ += arc.castQ;
         arcsF += 0.02;
       }
@@ -202,7 +246,7 @@ export function computeResult(opts: {
 
   /* ---- raw quality on a 0..40 curve: rookie teams land ~29, legends ~40 */
   const pointScore = Math.pow(totalPts / 170, 1.35) * 12 * scope;
-  let raw = 4 + pointScore * ratioMatch + sliderPart * 0.5 + casting * 0.35 + Math.max(0, arcQ) * 0.35 + slotFit * 0.8;
+  let raw = 4 + pointScore * ratioMatch + sliderPart * 0.5 + casting + Math.max(0, arcQ) * 0.35 + slotFit * 0.8;
   raw *= comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel);
   raw -= issues * 0.9;
 
@@ -271,7 +315,7 @@ export function computeResult(opts: {
   /* 44k base keeps the 12-week bell's total area ≈ the old 8-week spike,
      so the same show earns about the same lifetime revenue — only the
      week-to-week shape (build → peak → tail) matches Game Dev Tycoon. */
-  const peak = 44_000 * appeal;
+  const peak = 44_000 * appeal * castSalesMultiplier;
   const rampA = 2.2; // how steeply the show climbs
   const tailB = 2.05; // how long the tail lasts
   const rawShape: number[] = [];
@@ -294,7 +338,7 @@ export function computeResult(opts: {
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)}` },
     { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
     { label: "Direction sliders", pts: `+${(sliderPart * 0.5).toFixed(1)}` },
-    { label: `Casting · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${(casting * 0.35).toFixed(1)}` },
+    { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
     { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${(Math.max(0, arcQ) * 0.35).toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? "+2.0" : "+0.0" },
     { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${(comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel)).toFixed(2)}` },
@@ -306,10 +350,16 @@ export function computeResult(opts: {
     breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ} Q` });
   const affNotes: string[] = [];
   for (const m of [protag, sec, pet, vil]) {
-    const hit = m.aff.filter((g) => draft.genres.includes(g as never));
-    if (hit.length) affNotes.push(`${m.name} ↔ ${hit.map((g) => GENRES.find((x) => x.id === g)!.label).join("/")}`);
+    const visibleHit = m.visibleAff.filter((g) => draft.genres.includes(g));
+    const knownHidden = castAffinityDiscovered.includes(m.id) && draft.genres.includes(m.hiddenAff) ? [m.hiddenAff] : [];
+    const hit = [...new Set([...visibleHit, ...knownHidden])];
+    if (hit.length) affNotes.push(`${m.name} ↔ ${hit.map((g) => `${GENRES.find((x) => x.id === g)!.label}${knownHidden.includes(g) ? " ✦" : ""}`).join("/")}`);
   }
-  if (affNotes.length) breakdown.push({ label: "Affinity", pts: affNotes.join(" · ") });
+  if (affNotes.length) breakdown.push({ label: "Known cast fit", pts: affNotes.join(" · ") });
+  if (castParts.some((part) => part.typeModifier === TYPE_MATCH_MULTIPLIER))
+    breakdown.push({ label: "Anime Type casting", pts: "Matching traditions strengthen individual cast contributions" });
+  if (publicSalesMultiplier > 1)
+    breakdown.push({ label: "Known Correct Cast commercial lift", pts: `×${publicSalesMultiplier.toFixed(3)} sales` });
   if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: "✦" });
 
   return {
