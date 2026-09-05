@@ -658,6 +658,7 @@ export interface ScoringContext {
   fans: number;
   /** dynasty-era audience expectations — raises the review bar */
   audienceBar?: number;
+  castAffinityDiscovered?: string[];
 }
 
 /** compute the review result for a project from its accumulated state */
@@ -694,6 +695,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     costs: p.spent,
     fanBase: ctx.fans,
     audienceBar: ctx.audienceBar,
+    castAffinityDiscovered: ctx.castAffinityDiscovered,
   });
 
   let out = res;

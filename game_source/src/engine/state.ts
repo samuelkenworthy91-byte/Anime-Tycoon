@@ -19,12 +19,24 @@ import {
   staffPoint,
   rollContract,
   type Contract,
+  type AnimeType,
   type Draft,
   type GenreId,
   type PointType,
   type Arc,
   type Staff,
 } from "./data";
+import {
+  inferAnimeType,
+  isActiveGenre,
+  migrateActiveGenre,
+  migrateComboLevels,
+  migrateDraftV2,
+  migrateGenreList,
+  migrateGenreRecord,
+  migrateStaffGenre,
+  migrateUnlockedGenres,
+} from "./castV2Migration";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import {
   bumpRivalry,
@@ -182,6 +194,8 @@ export interface HofEntry {
   title: string;
   score: number;
   genres: GenreId[];
+  animeType: AnimeType;
+  legacyGenres?: string[];
   protag: string;
   week: number;
 }
@@ -232,6 +246,8 @@ export interface AudienceTestJob {
 }
 
 export interface RunState {
+  /** locked canonical Cast/Genre schema marker */
+  castGenreV2: 2;
   studio: string;
   showrunner: string;
   cash: number;
@@ -251,10 +267,14 @@ export interface RunState {
   genresUnlocked: GenreId[];
   mediumsUnlocked: string[];
   comboLevels: Record<string, number>;
+  /** old Shonen/Shojo/removed-genre combo knowledge retained for archive/debug migration only */
+  legacyComboLevels: Record<string, number>;
   /** studio familiarity with each individual genre; information unlocks as this rises */
   genreKnowledge: Partial<Record<GenreId, number>>;
   /** discovered cast chemistry ids */
   castCombos: string[];
+  /** stable cast IDs whose fixed hidden affinity the player has discovered */
+  castAffinityDiscovered: string[];
   /** discovered arc synergy ids */
   arcCombos: string[];
   /** arc ids bought with research data (rd-gated arcs) */
@@ -358,6 +378,7 @@ export { AIR_WEEKS }; // re-exported for screens that read the broadcast length
 
 export function initialRun(studio: string, showrunner: string): RunState {
   return {
+    castGenreV2: 2,
     studio,
     showrunner,
     cash: START_CASH,
@@ -373,11 +394,13 @@ export function initialRun(studio: string, showrunner: string): RunState {
     staff: [],
     candidates: [rollHire(0), rollHire(0), rollHire(0)],
     research: [],
-    genresUnlocked: ["shonen", "shojo", "slice", "fantasy"],
+    genresUnlocked: ["slice", "fantasy"],
     mediumsUnlocked: ["tv", "ona"],
     comboLevels: {},
+    legacyComboLevels: {},
     genreKnowledge: {},
     castCombos: [],
+    castAffinityDiscovered: [],
     arcCombos: [],
     arcUnlocked: [],
     arcKnowledge: {},
@@ -425,46 +448,98 @@ export function initialRun(studio: string, showrunner: string): RunState {
 /** bring an older save up to the current shape (additive, non-destructive) */
 export function migrateRun(raw: unknown): RunState {
   const r = raw as RunState;
+  const unlocked = migrateUnlockedGenres(r.genresUnlocked);
+  const combos = migrateComboLevels(r.comboLevels);
+  const marketBase = initMarket();
+  const marketRaw = r.market && typeof r.market === "object" ? r.market : marketBase;
+  const market: MarketState = {
+    genres: { ...marketBase.genres, ...migrateGenreRecord(marketRaw.genres) },
+    audiences: { ...marketBase.audiences, ...(marketRaw.audiences ?? {}) },
+    mediums: { ...marketBase.mediums, ...(marketRaw.mediums ?? {}) },
+  };
+  const migrateArcGenreKnowledge = (record: Record<string, number> | undefined) => {
+    const next: Record<string, number> = {};
+    for (const [key, value] of Object.entries(record ?? {})) {
+      const split = key.lastIndexOf("|");
+      const genre = migrateActiveGenre(split >= 0 ? key.slice(split + 1) : "");
+      if (!genre) continue;
+      const migrated = `${key.slice(0, split)}|${genre}`;
+      next[migrated] = Math.max(next[migrated] ?? 0, value);
+    }
+    return next;
+  };
+  const wasV2 = r.castGenreV2 === 2;
   return {
     ...r,
-    projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({ ...pr, rush: null, liveQuality: { ...(pr.liveQuality ?? { story: 0, art: 0, sound: 0 }) } })) : [],
+    castGenreV2: 2,
+    genresUnlocked: unlocked,
+    comboLevels: combos.active,
+    legacyComboLevels: { ...(r.legacyComboLevels ?? {}), ...combos.legacy },
+    castAffinityDiscovered: Array.isArray(r.castAffinityDiscovered)
+      ? [...new Set(r.castAffinityDiscovered.filter((id) => typeof id === "string" && !castById(id).legacyPlaceholder))]
+      : [],
+    projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({
+      ...pr,
+      draft: migrateDraftV2(pr.draft, unlocked),
+      rush: null,
+      liveQuality: { ...(pr.liveQuality ?? { story: 0, art: 0, sound: 0 }) },
+    })) : [],
     facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
     bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
     staffEvents: Array.isArray(r.staffEvents) ? r.staffEvents : [],
     legends: Array.isArray(r.legends) ? r.legends : [],
     dynasty: migrateDynasty((r as { dynasty?: unknown }).dynasty, r.week ?? 0) ?? null,
-    market: r.market && typeof r.market === "object" ? r.market : initMarket(),
-    recentReleases: Array.isArray(r.recentReleases) ? r.recentReleases : [],
+    market,
+    recentReleases: Array.isArray(r.recentReleases) ? r.recentReleases.flatMap((release) => {
+      const genre = migrateActiveGenre((release as { genre?: unknown }).genre);
+      return genre ? [{ ...release, genre }] : [];
+    }) : [],
     partners:
       r.partners && typeof r.partners === "object"
         ? { ...Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])), ...r.partners }
         : Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START])),
-    commissions: Array.isArray(r.commissions) ? r.commissions : [],
+    commissions: Array.isArray(r.commissions) ? r.commissions.flatMap((commission) => {
+      const genre = migrateActiveGenre((commission as { genre?: unknown }).genre);
+      return genre ? [{ ...commission, genre }] : [];
+    }) : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
     contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 })) : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
-    audienceTest: r.audienceTest && typeof r.audienceTest === "object" ? r.audienceTest : null,
+    audienceTest: r.audienceTest && typeof r.audienceTest === "object"
+      ? { ...r.audienceTest, draft: migrateDraftV2(r.audienceTest.draft, unlocked) }
+      : null,
     audienceTestCounts: r.audienceTestCounts && typeof r.audienceTestCounts === "object" ? r.audienceTestCounts : {},
     audienceInsights: Array.isArray(r.audienceInsights) ? r.audienceInsights : [],
     day: typeof r.day === "number" ? r.day : (r.week ?? 0) * 7,
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
-    genreKnowledge: r.genreKnowledge && typeof r.genreKnowledge === "object" ? r.genreKnowledge : {},
+    genreKnowledge: migrateGenreRecord(r.genreKnowledge),
     arcCombos: Array.isArray(r.arcCombos) ? r.arcCombos : [],
     arcUnlocked: Array.isArray(r.arcUnlocked) ? r.arcUnlocked : [],
     arcKnowledge: r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {},
-    arcGenreKnowledge: r.arcGenreKnowledge && typeof r.arcGenreKnowledge === "object" ? r.arcGenreKnowledge : {},
+    arcGenreKnowledge: migrateArcGenreKnowledge(r.arcGenreKnowledge),
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
       Object.entries(r.franchises ?? {}).map(([k, v]) => [k, migrateFranchise(k, v, r.week ?? 0)])
     ),
+    hallOfFame: Array.isArray(r.hallOfFame) ? r.hallOfFame.map((entry) => {
+      const legacyGenres = Array.isArray(entry.genres) ? entry.genres as unknown as string[] : [];
+      return {
+        ...entry,
+        animeType: inferAnimeType((entry as { animeType?: unknown }).animeType, legacyGenres, entry.protag),
+        genres: migrateGenreList(legacyGenres, entry.protag),
+        legacyGenres: entry.legacyGenres ?? legacyGenres,
+      };
+    }) : [],
+    lastDraft: r.lastDraft ? migrateDraftV2(r.lastDraft, unlocked) : null,
+    notices: wasV2 ? (r.notices ?? []) : [...(r.notices ?? []), "Cast V2 migration complete: Anime Type, 21 active genres and hidden affinities are ready."],
     /* old staff get a full career, deterministically from their id, so the
        same person comes back with the same personality every load */
-    staff: (r.staff ?? []).map((s) => ensureCareer({ ...s }, 0)),
-    candidates: (r.candidates ?? []).map((s) => ensureCareer({ ...s }, r.week ?? 0)),
+    staff: (r.staff ?? []).map((s) => ensureCareer(migrateStaffGenre({ ...s }), 0)),
+    candidates: (r.candidates ?? []).map((s) => ensureCareer(migrateStaffGenre({ ...s }), r.week ?? 0)),
   };
 }
 
@@ -1136,6 +1211,9 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
   if (active >= cap)
     return `${OFFICES[r.officeLevel].name} can only run ${cap} production${cap > 1 ? "s" : ""} at once`;
   if (d) {
+    if (d.animeType !== "shonen" && d.animeType !== "shojo") return "Choose an Anime Type";
+    if (d.genres.length < 1 || d.genres.length > 2 || d.genres.some((genre) => !isActiveGenre(genre)))
+      return "Choose one or two active genres";
     const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
     if (r.officeLevel < scope.minOffice) return `${scope.label} requires ${OFFICES[scope.minOffice].name} or larger`;
     if (r.staff.length < scope.minStaff) return `${scope.label} needs at least ${scope.minStaff} staff on the books`;
@@ -1367,7 +1445,10 @@ function audienceFinding(job: AudienceTestJob): { text: string; learnArcGenre?: 
     ] as const;
     const ranked = cast.map(([role, id]) => {
       const m = castById(id);
-      const fit = m.aff.filter((g) => draft.genres.includes(g as GenreId)).length;
+      const visibleFit = m.visibleAff.filter((g) => draft.genres.includes(g)).length;
+      /* Test-audience previews may assess only public affinities. Hidden
+         talent remains secret until a qualifying release. */
+      const fit = Math.min(1, visibleFit);
       return { role, m, fit };
     }).sort((a, b) => a.fit - b.fit);
     const weak = ranked[0];
@@ -1981,6 +2062,7 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     franchises: r.franchises,
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r),
+    castAffinityDiscovered: r.castAffinityDiscovered,
   });
   const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
   if (scope.audienceMult !== 1) {
@@ -2010,6 +2092,20 @@ export function previewResult(r: RunState, p: Project): ShowResult {
   return out;
 }
 
+/** Release-only hidden-affinity discovery. Calling this helper does not
+    mutate knowledge; releaseProject is the sole transaction that persists it. */
+export function castBreakthroughsForRelease(
+  draft: Draft,
+  discovered: readonly string[],
+): { castId: string; name: string; genre: GenreId }[] {
+  const releasedCastIds = [draft.protag, draft.secondary, draft.pet, draft.villain];
+  return [...new Set(releasedCastIds)].flatMap((castId) => {
+    const member = castById(castId);
+    if (member.legacyPlaceholder || discovered.includes(castId) || !draft.genres.includes(member.hiddenAff)) return [];
+    return [{ castId, name: member.name, genre: member.hiddenAff }];
+  });
+}
+
 /** release a ready project: reviews land, payouts get scheduled over the
  *  broadcast run, franchises/stats update, the show starts airing */
 export function releaseProject(
@@ -2022,6 +2118,8 @@ export function releaseProject(
   const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
   let result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
   const draft = p.draft;
+  const breakthroughs = castBreakthroughsForRelease(draft, r.castAffinityDiscovered);
+  result = { ...result, castBreakthroughs: breakthroughs };
 
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */
   const deal = p.commission;
@@ -2134,7 +2232,7 @@ export function releaseProject(
         ...partner,
         entries: [
           ...partner.entries,
-          { kind: "crossover", title: draft.title, score: result.total, revenue: 0, fans: 0, week: r.week },
+          { kind: "crossover", title: draft.title, score: result.total, revenue: 0, fans: 0, week: r.week, animeType: draft.animeType },
         ],
         fatigue: Math.min(100, partner.fatigue + 14),
         popularity: Math.min(100, partner.popularity + (result.total >= 28 ? 6 : 0)),
@@ -2156,6 +2254,10 @@ export function releaseProject(
     if (Math.max(r.day ?? r.week * 7, r.week * 7) > (deal.deadlineDay ?? deal.deadlineWeek * 7)) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
   }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
+  for (const breakthrough of breakthroughs) {
+    const genre = GENRES.find((item) => item.id === breakthrough.genre)?.label ?? breakthrough.genre;
+    notices.push(`✦ CASTING BREAKTHROUGH! ${breakthrough.name} was unexpectedly brilliant in ${genre}. Hidden Affinity discovered: ${genre} ✦`);
+  }
   for (const id of result.arcCombosDiscovered) {
     const combo = ARC_COMBOS.find((c) => c.id === id);
     if (combo) notices.push(`🧠 STORY BREAKTHROUGH: ${combo.name} discovered — its structure rating is now visible whenever you plan it.`);
@@ -2211,6 +2313,7 @@ export function releaseProject(
       return acc;
     }, { ...(r.genreKnowledge ?? {}) }),
     castCombos: [...new Set([...r.castCombos, ...result.chemDiscovered])],
+    castAffinityDiscovered: [...new Set([...r.castAffinityDiscovered, ...breakthroughs.map((item) => item.castId)])],
     arcCombos: [...new Set([...r.arcCombos, ...result.arcCombosDiscovered])],
     arcKnowledge: draft.arcs.reduce(
       (acc2, id) => ({ ...acc2, [id]: (acc2[id] ?? 0) + 1 }),
@@ -2228,7 +2331,7 @@ export function releaseProject(
     pendingSequel:
       result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
     hallOfFame: result.hallOfFame
-      ? [...r.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, protag: draft.protag, week: r.week }]
+      ? [...r.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, animeType: draft.animeType, protag: draft.protag, week: r.week }]
       : r.hallOfFame,
     staff: (() => {
       /* the training room deepens what shipping a show teaches */
