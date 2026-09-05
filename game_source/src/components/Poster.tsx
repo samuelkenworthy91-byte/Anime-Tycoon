@@ -19,8 +19,6 @@ import { cn } from "../utils/cn";
 
 export interface PosterPortraitProps {
   img: string;
-  /** 2×2 tile quadrant index (see Portrait) */
-  pos?: number;
   name: string;
 }
 
@@ -218,6 +216,7 @@ export function hofDesign(h: HofEntryLite): PosterDesign {
       medium: "tv",
       budget: "standard",
       slot: "midnight",
+      animeType: h.animeType ?? "shonen",
       audience: "teens",
       protag: h.protag,
       protagName: h.protag,
@@ -280,7 +279,7 @@ function PosterFull(props: FullProps & { design: PosterDesign }) {
     <div className={cn("anim-pop ink-card overflow-hidden", props.className)}>
       <div className="relative aspect-[4/5]" style={{ boxShadow: `inset 0 0 0 1px ${design.primary.color}55, inset 0 -80px 80px rgba(6,5,14,.35)` }}>
         <div className="pointer-events-none absolute inset-x-[8%] top-2 z-20 h-px" style={{ background: `linear-gradient(90deg, transparent, ${design.primary.color}, transparent)` }} />
-        <Portrait img={portrait.img} pos={portrait.pos} name={portrait.name} alt={portrait.name} className="absolute inset-0" />
+        <Portrait img={portrait.img} name={portrait.name} alt={portrait.name} className="absolute inset-0" />
         <div className="crt absolute inset-0 bg-gradient-to-t from-abyss via-abyss/10 to-transparent" />
 
         {/* continuation ribbon, diagonal top-left */}
@@ -344,7 +343,7 @@ function PosterMini({ design, hof, className }: { design: PosterDesign; hof: Hof
       <div className="absolute -top-1.5 left-1/2 z-10 h-3 w-8 -translate-x-1/2 -rotate-2 rounded-[1px] bg-paper/40 shadow-sm backdrop-blur-[1px]" />
       <div className="aspect-[4/5] overflow-hidden rounded border-2 border-gold/70 bg-abyss">
         <div className="relative h-full w-full">
-          <Portrait img={protag.img} pos={protag.pos} alt="" className="absolute inset-0 h-full w-full" />
+          <Portrait img={protag.img} alt="" className="absolute inset-0 h-full w-full" />
           <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-abyss/40" />
           <div
             className="absolute inset-x-0 bottom-0 p-0.5 text-center leading-none"

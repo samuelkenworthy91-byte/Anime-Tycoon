@@ -29,6 +29,8 @@ import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
 import {
   ARCS,
+  ANIME_TYPE_DESCRIPTION,
+  ANIME_TYPE_LABEL,
   arcCombosFor,
   arcComboRating,
   arcGenreFit,
@@ -50,6 +52,7 @@ import {
   randomTitle,
   scopeLabel,
   type AudienceId,
+  type AnimeType,
   type BudgetId,
   type CastMember,
   type Draft,
@@ -65,10 +68,10 @@ import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
 
-const STEPS = ["CONCEPT", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
+const STEPS = ["CONCEPT", "TYPE", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
 /** CAST is broken into one screen per role, in this order. */
 const CAST_ORDER = ["protag", "secondary", "pet", "villain"] as const;
-const CAST_STEP_INDEX = 3;
+const CAST_STEP_INDEX = 4;
 
 /** the working title each continuation type suggests */
 function continuationTitle(fr: Franchise, plan: ContinuationPlan, run: RunState): string {
@@ -107,6 +110,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     budget: last?.budget ?? "standard",
     scope: last?.scope ?? "standard",
     slot: last?.slot ?? "midnight",
+    animeType: fr && plan?.kind !== "crossover" ? fr.animeType : last?.animeType ?? "shonen",
     genres: [],
     audience: last?.audience ?? "teens",
     protag: "kai",
@@ -164,7 +168,6 @@ function CastPick({
     >
       <Portrait
         img={m.img}
-        pos={m.pos}
         name={m.name}
         alt={m.name}
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -172,7 +175,7 @@ function CastPick({
       <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-2">
         <div className="font-display text-sm font-extrabold leading-tight">{m.name}</div>
-        <div className="text-[10px] font-bold text-cyanx">{m.archetype}</div>
+        <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {m.archetype}</div>
       </div>
       {on && (
         <div className="absolute left-1.5 top-1.5 rounded-full bg-neon p-1 text-white">
@@ -208,7 +211,7 @@ export default function Create({
   const [d, setD] = useState<Draft>(() => {
     const base = freshDraft(run, plan);
     return commission
-      ? { ...base, medium: commission.medium, audience: commission.audience, genres: [commission.genre] }
+      ? { ...base, animeType: commission.preferredAnimeType ?? base.animeType, medium: commission.medium, audience: commission.audience, genres: [commission.genre] }
       : base;
   });
   const partner = commission ? partnerById(commission.partnerId) : null;
@@ -232,6 +235,7 @@ export default function Create({
   const stepValid =
     [
       d.title.trim().length > 0,
+      d.animeType === "shonen" || d.animeType === "shojo",
       d.genres.length >= 1,
       true,
       !!d[CAST_ORDER[Math.min(castStep, CAST_ORDER.length - 1)]],
@@ -469,6 +473,27 @@ export default function Create({
 
           {step === 1 && (
             <div className="space-y-4 anim-up">
+              <Section title="CHOOSE ANIME TYPE">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {(["shonen", "shojo"] as AnimeType[]).map((type) => (
+                    <Pick key={type} active={d.animeType === type} onClick={() => set({ animeType: type })}>
+                      <div className="font-display text-xl font-extrabold">{ANIME_TYPE_LABEL[type]}</div>
+                      <div className="text-xs text-paper/60">{ANIME_TYPE_DESCRIPTION[type]}</div>
+                      <div className="mt-1 text-[10px] text-paper/40">A production tradition, not a gender restriction.</div>
+                    </Pick>
+                  ))}
+                </div>
+                {commission?.preferredAnimeType && (
+                  <div className="rounded-xl border border-gold/35 bg-gold/10 px-3 py-2 text-xs text-gold">
+                    {partner?.name} prefers {ANIME_TYPE_LABEL[commission.preferredAnimeType]}, but it is not mandatory.
+                  </div>
+                )}
+              </Section>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4 anim-up">
               <Section title={`PICK 1–2 GENRES (${d.genres.length}/2)`}>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                   {GENRES.map((g) => {
@@ -505,7 +530,7 @@ export default function Create({
                           </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-4 anim-up">
               <Section title="TARGET AUDIENCE">
                 <div className="grid grid-cols-2 gap-2">
@@ -531,7 +556,7 @@ export default function Create({
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div key={castRow.role} className="space-y-4 anim-up">
               {/* which slot are we casting? */}
               <div className="flex flex-wrap items-center gap-2">
@@ -571,7 +596,6 @@ export default function Create({
               <div className="ink-card flex items-center gap-3 p-2.5">
                 <Portrait
                   img={castPicked.img}
-                  pos={castPicked.pos}
                   name={castPicked.name}
                   alt={castPicked.name}
                   className="h-16 w-16 shrink-0 rounded-xl border border-neon/50 object-cover"
@@ -579,9 +603,9 @@ export default function Create({
                 <div className="min-w-0 flex-1">
                   <div className="font-display text-base font-extrabold leading-tight">{castPicked.name}</div>
                   <div className="text-[11px] font-bold text-cyanx">{castPicked.archetype}</div>
-                  <div className="truncate text-[10px] italic text-paper/50">“{castPicked.tag}”</div>
+                  <div className="truncate text-[10px] italic text-paper/50">“{castPicked.personality}”</div>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {castPicked.aff.map((a) => {
+                    {castPicked.visibleAff.map((a) => {
                       const gg = GENRES.find((x) => x.id === a);
                       const hit = d.genres.includes(a);
                       return (
@@ -598,6 +622,17 @@ export default function Create({
                         </span>
                       );
                     })}
+                    <span className="rounded-full border border-line px-1.5 py-0.5 text-[9px] font-bold text-paper/40">
+                      {run.castAffinityDiscovered.includes(castPicked.id)
+                        ? `${GENRES.find((g) => g.id === castPicked.hiddenAff)?.label ?? castPicked.hiddenAff} ✦`
+                        : "???"}
+                    </span>
+                    <span className={cn(
+                      "rounded-full border px-1.5 py-0.5 text-[9px] font-bold",
+                      castPicked.type === d.animeType ? "border-cyanx text-cyanx" : "border-line text-paper/40",
+                    )}>
+                      {ANIME_TYPE_LABEL[castPicked.type]}{castPicked.type === d.animeType ? " · TYPE MATCH" : ""}
+                    </span>
                   </div>
                 </div>
                 <Btn
@@ -651,7 +686,7 @@ export default function Create({
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="space-y-4 anim-up">
               <Section title={`PLAN THE SEASON — PICK 3–${arcLimit} ARCS (${d.arcs.length}/${arcLimit})`}>
                 {/* timeline */}
@@ -785,12 +820,13 @@ export default function Create({
             </div>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <div className="space-y-4 anim-up">
               <Section title="GREENLIGHT REVIEW">
                 <div className="ink-card space-y-1.5 p-4 text-sm">
                   <Row k="Title" v={`${d.title}${d.franchiseKey ? ` — Season ${d.season}` : ""}`} />
                   <Row k="Format" v={MEDIUMS[d.medium].label} />
+                  <Row k="Anime Type" v={ANIME_TYPE_LABEL[d.animeType]} />
                   <Row k="Genre" v={d.genres.map((g) => GENRES.find((x) => x.id === g)!.label).join(" × ")} />
                   <Row k="Audience" v={AUDIENCES[d.audience].label} />
                   <Row k="Lead" v={`${d.protagName} (${protag.archetype})`} />
@@ -850,7 +886,7 @@ export default function Create({
         <div className="hidden w-64 shrink-0 lg:block">
           <div className="ink-card sticky top-0 overflow-hidden">
             <div className="relative aspect-square">
-              <Portrait img={protag.img} pos={protag.pos} name={protag.name} alt={protag.name} className="h-full w-full object-cover" />
+              <Portrait img={protag.img} name={protag.name} alt={protag.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-panel via-transparent to-transparent" />
               <div className="absolute bottom-2 left-3 right-3">
                 <div className="font-display text-lg font-extrabold leading-tight drop-shadow">{d.title || "Untitled"}</div>
@@ -859,6 +895,7 @@ export default function Create({
             </div>
             <div className="space-y-2 p-3 text-xs">
               <div className="flex flex-wrap gap-1">
+                <span className="rounded-full border border-cyanx px-2 py-0.5 font-bold text-cyanx">{ANIME_TYPE_LABEL[d.animeType]}</span>
                 {d.genres.map((g) => {
                   const gg = GENRES.find((x) => x.id === g)!;
                   return (

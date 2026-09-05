@@ -255,7 +255,7 @@ export default function LibraryPanel({
           <div className="grid grid-cols-2 gap-1.5">
             {fr.cast.map((c) => (
               <div key={c.role} className="flex items-center gap-2 rounded-md border border-paper/10 bg-paper/5 p-1.5">
-                <Portrait img={castById(c.id).img} pos={castById(c.id).pos} alt="" className="h-8 w-8 rounded-md" />
+                <Portrait img={castById(c.id).img} alt="" className="h-8 w-8 rounded-md" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[11px] font-bold">
                     {c.name}
