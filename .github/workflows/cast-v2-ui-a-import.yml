@@ -1,0 +1,37 @@
+name: Cast V2 UI batch A import
+
+on:
+  push:
+    branches:
+      - design/cast-v2-canonical
+    paths:
+      - .github/workflows/cast-v2-ui-a-import.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/cast-v2-canonical
+          fetch-depth: 0
+
+      - name: Reconstruct and verify recovered UI archive
+        run: |
+          cat .transfer/runtimeA-* | base64 -d > /tmp/cast-v2-ui-a.tar.gz
+          echo "5600530cfd74a67efbb02d5bba2f963db2a0f09be95a440ad8576c91ad70d58e  /tmp/cast-v2-ui-a.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/cast-v2-ui-a.tar.gz
+
+      - name: Commit recovered Cast V2 UI files and clean staging
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/components/Create.tsx game_source/src/components/Library.tsx game_source/src/components/Poster.tsx game_source/src/components/Release.tsx
+          rm -rf .transfer
+          git rm .github/workflows/cast-v2-ui-a-import.yml
+          git add -A
+          git commit -m "Cast V2 transfer: creation, library, poster and release UI"
+          git push origin HEAD:design/cast-v2-canonical
