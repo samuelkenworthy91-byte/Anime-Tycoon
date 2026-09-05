@@ -1,0 +1,42 @@
+name: Cast V2 generated runtime import
+
+on:
+  push:
+    branches:
+      - design/cast-v2-canonical
+    paths:
+      - .github/workflows/cast-v2-generated-import.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-generated-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/cast-v2-canonical
+          fetch-depth: 0
+
+      - name: Reconstruct verified Cast V2 generated runtime data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p game_source/src/engine/generated
+          cat .cast-v2-transfer/castV2.part-* | base64 -d | gzip -dc > game_source/src/engine/generated/castV2.json
+          base64 -d .cast-v2-transfer/genreV2.gz.b64 | gzip -dc > game_source/src/engine/generated/genreV2.json
+          echo "1908303662582fae81e077f9d888aed216aa309aeae9dc687144ff63ecec37e4  game_source/src/engine/generated/castV2.json" | sha256sum -c -
+          echo "d9257644fc59483f644b643e029735bdaa4edc204ed197d2d8f4327fe15b8dc8  game_source/src/engine/generated/genreV2.json" | sha256sum -c -
+
+      - name: Commit generated data and remove transfer scaffolding
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf .cast-v2-transfer
+          rm .github/workflows/cast-v2-generated-import.yml
+          git add -A
+          git commit -m "Cast V2 transfer: generated 192-member roster and 21-genre runtime data"
+          git push origin HEAD:design/cast-v2-canonical
