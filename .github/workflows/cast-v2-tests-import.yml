@@ -1,0 +1,33 @@
+name: Cast V2 tests and validation import
+on:
+  push:
+    branches:
+      - design/cast-v2-canonical
+    paths:
+      - '.github/workflows/cast-v2-tests-import.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/cast-v2-canonical
+          fetch-depth: 0
+      - name: Reconstruct and verify recovered tests archive
+        shell: bash
+        run: |
+          cat .transfer/tests-* | base64 -d > /tmp/cv2-tests.tar.gz
+          echo "adf04503b0333e6552ce06fc4e5f80e5f91dad77199eca8422632fd7178c555f  /tmp/cv2-tests.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/cv2-tests.tar.gz
+      - name: Commit recovered tests and validation files and clean staging
+        shell: bash
+        run: |
+          rm -rf .transfer
+          rm -f .github/workflows/cast-v2-tests-import.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A game_source .transfer .github/workflows/cast-v2-tests-import.yml
+          git commit -m "Cast V2 transfer: tests and validation layer"
+          git push origin HEAD:design/cast-v2-canonical
