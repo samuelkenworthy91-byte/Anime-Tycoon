@@ -1,0 +1,1086 @@
+{
+  "sheets": {
+    "LEAD_SHONEN_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "LEAD_SHONEN_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "LEAD_SHONEN_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "LEAD_SHOJO_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "LEAD_SHOJO_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "LEAD_SHOJO_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHONEN_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHONEN_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHONEN_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHOJO_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHOJO_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "SIDEKICK_SHOJO_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHONEN_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHONEN_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHONEN_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHOJO_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHOJO_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "MASCOT_SHOJO_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHONEN_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHONEN_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHONEN_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHOJO_01": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHOJO_02": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "VILLAIN_SHOJO_03": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    }
+  },
+  "characters": {
+    "kai": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "rei": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "sora": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kage": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kenta": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "ryu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "jin": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "goro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "daichi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kaito": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "akira": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kuro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "rin": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "niko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "mako": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "zuri": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "sakura": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "suzume": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "yuki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "riko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "momo": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_ryoko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_mikoto": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "airi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "hikari": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "shiro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "takumi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "haru": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kota": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "renji": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "jun": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "sota": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "itsuki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "leo": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_saku": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_chisato": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "yui": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "mio": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "saki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "nana": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "emi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "hana": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "mira": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "shiori": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "kaede": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_aoi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "n_reiwa": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "ash": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ren": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_okada": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ichiro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_takeshi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_daiki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_gen": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ken": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_riku": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_tora": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_eiji": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_boone": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "tsubasa": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_kiki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_akane": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_chiaki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_momoko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_yuna": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_kanna": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_maki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_bolt": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ironmaid": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_amber": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_peko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_amina": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_lulu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_shin": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_sosuke": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_alfred": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_tobi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "taro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_soleil": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ice": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_ryo": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_kazuki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_pranav": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "fumi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_mika": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_anna": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_nozomi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_sakurako": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_mimi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_aoi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_megu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_hina": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_nanami": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_reina": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "yuzuki": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_linh": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_koro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_baku": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_gon": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_pochi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_toro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_mugi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_hachi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_kiki2": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_chacha": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_drakko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_loader": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_haruto": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_umi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_kuro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_ruri": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_piko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_fuu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_kona": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_teto": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_pomu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_cogsworth": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_nibi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_nitro": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_silt": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_mochi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_tama": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_chibi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_maru": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_sora": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_nemu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_mocha": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_goma": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_puri": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_ponta": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_koko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_brine": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_pudding": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_peko": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_momo2": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_nya": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_rin2": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_yuzu": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_sakumi": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_bloop": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_lumen": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_fuwa": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "p_stellar": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "s_chika": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_kurogane": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_volt": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_carnage": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_ash": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_scuttle": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_gravemark": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_onikage": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_baron": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_magus": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_blackout": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "sen": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_grandfinale": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_tempest": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_reaper": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_zero": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_glitch": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_paradox": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_warden": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_titanus": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_bioform": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_inquisitor": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_collector": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_nightshade": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_amethyst": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_hollow": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_mirage": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_puppeteer": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_fang": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_lich": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_kairos": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_plague": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_harlequin": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_overlord": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_falsetto": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_lovelace": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_einar": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_nocturne": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_venom": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_obsidian": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_sinister": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_hex": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_silence": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_frostbite": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_dread": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_moth": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_hollowchild": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "v_rosethorn": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    },
+    "aya": {
+      "status": "PASS",
+      "reviewer": "Codex visual + structural audit",
+      "date": "2026-09-04"
+    }
+  }
+}

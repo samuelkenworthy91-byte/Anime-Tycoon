@@ -1,0 +1,187 @@
+﻿old_id,old_display_name,new_display_name,old_role,new_role,new_anime_type,new_visible_affinity_1,new_visible_affinity_2,new_hidden_affinity,id_preserved,notes
+kai,Kai,Kai Moriyama,protag,protag,SHONEN,sports,martial,cooking,yes,Display-name change; do not rename save keys or historical billing.
+hikari,Hikari,Hikari Amano,protag,protag,SHOJO,magical,romance,military,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+rei,Rei,Rei Han,protag,protag,SHONEN,mecha,space,military,yes,Display-name change; do not rename save keys or historical billing.
+sora,Sora,Sora Vale,protag,protag,SHONEN,isekai,fantasy,military,yes,Display-name change; do not rename save keys or historical billing.
+yui,Yui,Yui Tanaka,protag,protag,SHOJO,slice,cooking,survival,yes,Display-name change; do not rename save keys or historical billing.
+kage,Kage,Kage Mercer,protag,protag,SHONEN,horror,cyber,mystery,yes,Display-name change; do not rename save keys or historical billing.
+airi,Airi,Airi Watanabe,protag,protag,SHONEN,idol,romance,horror,yes,Display-name change; do not rename save keys or historical billing.
+shiro,Shiro,Shiro Desai,protag,protag,SHOJO,mystery,slice,pirate,yes,Display-name change; do not rename save keys or historical billing.
+mako,Mako,Mako Te Rangi,protag,protag,SHONEN,pirate,fantasy,mystery,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+rin,Rin,Rin Adebayo,protag,protag,SHONEN,sports,slice,pirate,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+niko,Niko,Niko Varga,protag,protag,SHONEN,mecha,cyber,magical,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+aya,Aya,Aya Hanamori,protag,villain,SHOJO,romance,mystery,martial,yes,"Role: Lead → Villain; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+taro,Taro,Taro Fujita,protag,secondary,SHOJO,cooking,fantasy,space,yes,"Role: Lead → Sidekick; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+mio,Mio,Mio Laurent,protag,protag,SHOJO,idol,romance,pirate,yes,Display-name change; do not rename save keys or historical billing.
+kenta,Kenta,Kenta Okafor,protag,protag,SHONEN,martial,comedy,mythology,yes,Display-name change; do not rename save keys or historical billing.
+saki,Saki,Saki Nguyen,protag,protag,SHOJO,slice,mystery,mythology,yes,Display-name change; do not rename save keys or historical billing.
+ryu,Ryu,Ryu Long,protag,protag,SHONEN,fantasy,martial,romance,yes,Display-name change; do not rename save keys or historical billing.
+nana,Nana,Nana Ortiz,protag,protag,SHOJO,cyber,idol,comedy,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+jin,Jin,Jin Park,protag,protag,SHONEN,mecha,survival,slice,yes,Display-name change; do not rename save keys or historical billing.
+emi,Emi,Emi Kowalska,protag,protag,SHOJO,magical,cooking,military,yes,Display-name change; do not rename save keys or historical billing.
+goro,Goro,Goro Nishida,protag,protag,SHONEN,sports,martial,magical,yes,Display-name change; do not rename save keys or historical billing.
+hana,Hana,Hana Al-Salim,protag,protag,SHOJO,mythology,romance,cyber,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+daichi,Daichi,Dawit Bekele,protag,protag,SHONEN,survival,military,supernatural,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+yuki,Yuki,Yuki Lind,protag,protag,SHONEN,nordic,survival,horror,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+mira,Mira,Mira Solano,protag,protag,SHOJO,space,idol,mythology,yes,Display-name change; do not rename save keys or historical billing.
+kaito,Kaito,Kaito Marlow,protag,protag,SHONEN,pirate,isekai,romance,yes,Display-name change; do not rename save keys or historical billing.
+riko,Riko,Riko Chen,protag,protag,SHONEN,mystery,mecha,idol,yes,Display-name change; do not rename save keys or historical billing.
+akira,Akira,Akira Sato,protag,protag,SHONEN,cyber,mystery,nordic,yes,Display-name change; do not rename save keys or historical billing.
+momo,Momo,Momo Alvarez,protag,protag,SHONEN,idol,comedy,survival,yes,Display-name change; do not rename save keys or historical billing.
+takumi,Takumi,Takumi Ito,protag,protag,SHOJO,romance,mecha,mystery,yes,Display-name change; do not rename save keys or historical billing.
+shiori,Shiori,Shiori Abe,protag,protag,SHOJO,horror,fantasy,comedy,yes,Display-name change; do not rename save keys or historical billing.
+haru,Haru,Haru Mensah,protag,protag,SHOJO,sports,romance,horror,yes,Display-name change; do not rename save keys or historical billing.
+yuzuki,Yuzuki,Yuzuki Amari,protag,secondary,SHOJO,supernatural,isekai,sports,yes,"Role: Lead → Sidekick; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+kota,Kota,Kota Soren,protag,protag,SHOJO,nordic,fantasy,mecha,yes,Display-name change; do not rename save keys or historical billing.
+fumi,Fumi,Fumi Arai,protag,secondary,SHOJO,slice,nordic,fantasy,yes,"Role: Lead → Sidekick; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+renji,Renji,Renji Kuroda,protag,protag,SHOJO,mystery,supernatural,nordic,yes,Display-name change; do not rename save keys or historical billing.
+sakura,Sakura,Sakura Fujimoto,protag,protag,SHONEN,martial,magical,space,yes,Display-name change; do not rename save keys or historical billing.
+jun,Jun,Jun Seo,protag,protag,SHOJO,isekai,comedy,nordic,yes,Display-name change; do not rename save keys or historical billing.
+kaede,Kaede,Kaede Lund,protag,protag,SHOJO,nordic,slice,martial,yes,Display-name change; do not rename save keys or historical billing.
+sota,Sota,Sota Rahman,protag,protag,SHOJO,cyber,slice,mythology,yes,Display-name change; do not rename save keys or historical billing.
+sen,Sen,Sen Arakawa,protag,villain,SHONEN,military,martial,romance,yes,"Role: Lead → Villain; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+zuri,Zuri,Zuri Kamau,protag,protag,SHONEN,mecha,cooking,horror,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+ash,Ash,Ash Rowan,protag,protag,SHOJO,pirate,survival,martial,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+kuro,Kuro,Kuro Reyes,protag,protag,SHONEN,cyber,military,martial,yes,Display-name change; do not rename save keys or historical billing.
+tsubasa,Tsubasa,Tsubasa Vega,protag,secondary,SHONEN,space,isekai,mecha,yes,"Role: Lead → Sidekick; stable ID retained, including its legacy prefix. Display-name change; do not rename save keys or historical billing."
+itsuki,Itsuki,Itsuki Mori,protag,protag,SHOJO,romance,supernatural,survival,yes,Display-name change; do not rename save keys or historical billing.
+suzume,Suzume,Suzume Inari,protag,protag,SHONEN,supernatural,mythology,sports,yes,Display-name change; do not rename save keys or historical billing.
+leo,Leo,Leo Carvalho,protag,protag,SHOJO,sports,military,idol,yes,Display-name change; do not rename save keys or historical billing.
+s_ren,Ren,Ren Kobayashi,secondary,secondary,SHONEN,sports,slice,space,yes,Display-name change; do not rename save keys or historical billing.
+s_mika,Mika,Mika Okoye,secondary,secondary,SHOJO,romance,slice,military,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_okada,Okada,Masaru Okada,secondary,secondary,SHONEN,martial,sports,romance,yes,Display-name change; do not rename save keys or historical billing.
+s_kiki,Kiki,Kiki Mensah,secondary,secondary,SHONEN,comedy,idol,survival,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_akane,Akane,Akane Sato,secondary,secondary,SHONEN,sports,idol,pirate,yes,Display-name change; do not rename save keys or historical billing.
+s_chiaki,Chiaki,Chiaki Moon,secondary,secondary,SHONEN,horror,supernatural,mystery,yes,Display-name change; do not rename save keys or historical billing.
+s_momoko,Momoko,Momoko Takeda,secondary,secondary,SHONEN,slice,sports,military,yes,Display-name change; do not rename save keys or historical billing.
+s_ichiro,Ichiro,Ichiro Santos,secondary,secondary,SHONEN,martial,comedy,mythology,yes,Display-name change; do not rename save keys or historical billing.
+s_anna,Anna,Anna Petrov,secondary,secondary,SHOJO,mythology,mystery,sports,yes,Display-name change; do not rename save keys or historical billing.
+s_takeshi,Takeshi,Takeshi Tan,secondary,secondary,SHONEN,military,sports,magical,yes,Display-name change; do not rename save keys or historical billing.
+s_lulu,Lulu,Lucien 'Lulu' Duval,secondary,secondary,SHOJO,idol,slice,military,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_haruto,Nyanko,Nyanko,secondary,pet,SHONEN,pirate,mystery,mythology,yes,"Role: Sidekick → Mascot; stable ID retained, including its legacy prefix. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_nozomi,Nozomi,Nozomi Hayashi,secondary,secondary,SHOJO,romance,slice,isekai,yes,Display-name change; do not rename save keys or historical billing.
+s_daiki,Daiki,Daiki Lim,secondary,secondary,SHONEN,cyber,mecha,cooking,yes,Display-name change; do not rename save keys or historical billing.
+s_sakurako,Sakurako,Sakurako Minami,secondary,secondary,SHOJO,idol,horror,romance,yes,Display-name change; do not rename save keys or historical billing.
+s_gen,Gen,Gen Zhao,secondary,secondary,SHONEN,mystery,military,idol,yes,Display-name change; do not rename save keys or historical billing.
+s_yuna,Yuna,Yuna Bautista,secondary,secondary,SHONEN,idol,sports,mythology,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_ken,Ken,Ken Mori,secondary,secondary,SHONEN,mecha,survival,fantasy,yes,Display-name change; do not rename save keys or historical billing.
+s_mimi,Mimi,Mimi Pham,secondary,secondary,SHOJO,magical,idol,cyber,yes,Display-name change; do not rename save keys or historical billing.
+s_riku,Riku,Riku Haddad,secondary,secondary,SHONEN,sports,martial,survival,yes,Display-name change; do not rename save keys or historical billing.
+s_aoi,Aoi,Aoi Bennett,secondary,secondary,SHOJO,survival,slice,pirate,yes,Display-name change; do not rename save keys or historical billing.
+s_shin,Pip,Pip,secondary,secondary,SHOJO,space,mystery,romance,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_chika,Chika,Chika,secondary,pet,SHOJO,cooking,fantasy,idol,yes,"Role: Sidekick → Mascot; stable ID retained, including its legacy prefix. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_ryo,Ryo,Ryo Flores,secondary,secondary,SHOJO,pirate,idol,supernatural,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_megu,Megu,Megumi Mori,secondary,secondary,SHOJO,slice,mystery,mecha,yes,Display-name change; do not rename save keys or historical billing.
+s_tora,Tora,Tora,secondary,secondary,SHONEN,fantasy,pirate,supernatural,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_hina,Hina,Hina Ali,secondary,secondary,SHOJO,fantasy,romance,survival,yes,Display-name change; do not rename save keys or historical billing.
+s_kazuki,Kazuki,Kazuki Tran,secondary,secondary,SHOJO,romance,martial,comedy,yes,Display-name change; do not rename save keys or historical billing.
+s_nanami,Nanami,Nanami Cho,secondary,secondary,SHOJO,mystery,comedy,space,yes,Display-name change; do not rename save keys or historical billing.
+s_eiji,Eiji,Eiji Nakamura,secondary,secondary,SHONEN,slice,martial,nordic,yes,Display-name change; do not rename save keys or historical billing.
+s_koko,Koko,Koko,secondary,pet,SHOJO,supernatural,idol,mystery,yes,"Role: Sidekick → Mascot; stable ID retained, including its legacy prefix. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_sosuke,Sosuke,Sosuke-9,secondary,secondary,SHOJO,mecha,slice,horror,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+s_boone,Boone,Boone Walker,secondary,secondary,SHONEN,mecha,cooking,supernatural,yes,Display-name change; do not rename save keys or historical billing.
+s_peko,Peko,Peko Yoshida,secondary,secondary,SHONEN,magical,comedy,mecha,yes,Display-name change; do not rename save keys or historical billing.
+s_reina,Reina,Reina Solberg,secondary,secondary,SHOJO,nordic,military,cooking,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_amber,Amber,Amber Qadir,secondary,secondary,SHONEN,isekai,pirate,mystery,yes,Display-name change; do not rename save keys or historical billing.
+s_kanna,Kanna,Kanna Sethi,secondary,secondary,SHONEN,military,romance,cyber,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_alfred,Alfred,Alfred Bellamy,secondary,secondary,SHOJO,romance,mystery,martial,yes,Display-name change; do not rename save keys or historical billing.
+s_tobi,Tobi,Tobi Akinwale,secondary,secondary,SHOJO,mystery,cyber,magical,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_maki,Maki,Maki Sorensen,secondary,secondary,SHONEN,survival,nordic,magical,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+p_mochi,Mochi,Mochi,pet,pet,SHOJO,slice,horror,romance,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_pudding,Pudding,Pudding,pet,pet,SHOJO,cooking,military,slice,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_koro,Koro,Koro,pet,pet,SHONEN,space,mecha,cooking,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_tama,Tama,Tama,pet,pet,SHOJO,fantasy,magical,mecha,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_peko,Peko,Peko Sprig,pet,pet,SHOJO,isekai,survival,magical,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_umi,Umi,Umi,pet,pet,SHONEN,slice,survival,space,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_baku,Baku,Baku,pet,pet,SHONEN,horror,fantasy,nordic,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_kuro,Kuro,Kuro Shade,pet,pet,SHONEN,cyber,supernatural,sports,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_momo2,Momo,Momo Peach,pet,pet,SHOJO,romance,fantasy,mystery,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_gon,Gon,Gon,pet,pet,SHONEN,survival,romance,fantasy,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_chibi,Chibi,Chibi,pet,pet,SHOJO,comedy,slice,military,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_nya,Nya,Nya,pet,pet,SHOJO,magical,supernatural,space,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_pochi,Pochi,Pochi,pet,pet,SHONEN,mecha,cyber,magical,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_ruri,Ruri,Ruri,pet,pet,SHONEN,idol,magical,military,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_toro,Toro,Toro,pet,pet,SHONEN,supernatural,comedy,military,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_piko,Piko,Piko,pet,pet,SHONEN,cyber,isekai,romance,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_mugi,Mugi,Mugi,pet,pet,SHONEN,survival,nordic,sports,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_sora,Sora,Sora Nimbus,pet,pet,SHOJO,magical,slice,pirate,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_hachi,Hachi,Hachi,pet,pet,SHONEN,sports,military,romance,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_fuu,Fuu,Fuu,pet,pet,SHONEN,mythology,pirate,cooking,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_kona,Kona,Kona,pet,pet,SHONEN,survival,horror,idol,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_maru,Maru,Maru,pet,pet,SHOJO,mystery,sports,fantasy,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_teto,Teto,Teto,pet,pet,SHONEN,sports,slice,mecha,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_kiki2,Kiki,Kiki Ember,pet,pet,SHONEN,fantasy,magical,cooking,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_nemu,Nemu,Nemu,pet,pet,SHOJO,romance,slice,survival,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_pomu,Pomu,Pomu,pet,pet,SHONEN,nordic,cooking,cyber,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_chacha,Chacha,Chacha,pet,pet,SHONEN,pirate,comedy,martial,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_rin2,Rin,Rin Pearl,pet,pet,SHOJO,mythology,cyber,magical,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_mocha,Mocha,Mocha,pet,pet,SHOJO,cooking,mystery,cyber,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_yuzu,Yuzu,Yuzu,pet,pet,SHOJO,slice,cooking,pirate,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_goma,Goma,Goma,pet,pet,SHOJO,romance,cooking,sports,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_puri,Puri,Puri,pet,pet,SHOJO,isekai,cooking,nordic,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_drakko,Drakko,Drakko,pet,pet,SHONEN,fantasy,martial,isekai,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_sakumi,Sakumi,Sakumi,pet,pet,SHOJO,romance,martial,supernatural,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_cogsworth,Cogsworth,Cogsworth,pet,pet,SHONEN,mecha,mystery,pirate,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_bloop,Bloop,Bloop,pet,pet,SHOJO,fantasy,magical,space,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_ponta,Ponta,Ponta,pet,pet,SHOJO,mecha,cooking,comedy,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_lumen,Lumen,Lumen,pet,pet,SHOJO,nordic,mythology,martial,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_nibi,Nibi,Nibi,pet,pet,SHONEN,horror,supernatural,magical,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_fuwa,Fuwa,Fuwa,pet,pet,SHOJO,nordic,comedy,space,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_kurogane,Kurogane,Daigo Kurogane,villain,villain,SHONEN,mecha,slice,military,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_nocturne,Nocturne,Nora Nocturne,villain,villain,SHOJO,mystery,slice,supernatural,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_baron,Baron Skull,Baron Ossian Vale,villain,villain,SHONEN,mythology,pirate,sports,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_venom,Madame Venom,Valerie Venn,villain,villain,SHOJO,romance,slice,survival,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_volt,General Volt,General Mateo Volt,villain,villain,SHONEN,mecha,romance,space,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_hollow,The Hollow King,The Hollow King,villain,villain,SHOJO,horror,supernatural,romance,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_reaper,Crimson Reaper,Rhea 'Reaper' Quinn,villain,villain,SHONEN,martial,sports,horror,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_mirage,Doctor Mirage,Dr Farid Mirage,villain,villain,SHOJO,cyber,mystery,magical,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_obsidian,Empress Obsidian,Odette Blackwell,villain,villain,SHOJO,idol,mecha,romance,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_tempest,Lord Tempest,Tessa Tempest,villain,villain,SHONEN,pirate,sports,supernatural,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_sinister,Sister Sinister,Sister Celia Senn,villain,villain,SHOJO,slice,mystery,mythology,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_puppeteer,The Puppeteer,Adrian Vale,villain,villain,SHOJO,idol,slice,military,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_fang,Count Fang,Count Lucan Varga,villain,villain,SHOJO,horror,romance,cooking,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_zero,Zero,Zero Venn,villain,villain,SHONEN,cyber,space,romance,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_glitch,Overlord Glitch,Director Glitch,villain,villain,SHONEN,cyber,mecha,slice,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_hex,Mistress Hex,Hester Hex,villain,villain,SHOJO,magical,fantasy,sports,yes,Display-name change; do not rename save keys or historical billing.
+v_carnage,King Carnage,Darius 'Carnage' Cole,villain,villain,SHONEN,sports,idol,martial,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_silence,The Silence,The Silence,villain,villain,SHOJO,horror,pirate,cooking,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_paradox,Professor Paradox,Professor Samira Paradox,villain,villain,SHONEN,space,mystery,cooking,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_frostbite,Lady Frostbite,Freya Frost,villain,villain,SHOJO,sports,romance,cyber,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_warden,The Warden,Warden Nandi Dube,villain,villain,SHONEN,survival,military,magical,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_magus,Chaos Magus,Orun Vey,villain,villain,SHONEN,magical,isekai,cooking,yes,Display-name change; do not rename save keys or historical billing.
+v_blackout,Blackout,Marek 'Blackout' Sanz,villain,villain,SHONEN,cyber,survival,mythology,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_collector,The Collector,Celeste Armand,villain,villain,SHONEN,mythology,cyber,fantasy,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_ash,Warlord Ash,Commander Ash Malik,villain,villain,SHONEN,military,horror,comedy,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_dread,Duchess Dread,Dorothea Reed,villain,villain,SHOJO,slice,military,pirate,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_lich,Lich of Laughter,Basil Lich,villain,villain,SHOJO,comedy,horror,isekai,yes,"Display-name change; do not rename save keys or historical billing. Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_scuttle,Captain Scuttlebutt,Captain Scuttlebutt,villain,villain,SHONEN,pirate,comedy,nordic,yes,
+v_moth,Mother Moth,Mother Moth,villain,villain,SHOJO,horror,mythology,cooking,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_inquisitor,The Grand Inquisitor,Dr Imani Sefu,villain,villain,SHONEN,mystery,martial,pirate,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_nightshade,Nightshade,Nadia Nightshade,villain,villain,SHONEN,survival,mystery,romance,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_titanus,Titanus Rex,Titanus Rex,villain,villain,SHONEN,horror,survival,isekai,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_amethyst,Empress Amethyst,Amethyst Rook,villain,villain,SHONEN,fantasy,magical,nordic,yes,Display-name change; do not rename save keys or historical billing.
+v_gravemark,Gravemark,Jarl Eirik Gravemark,villain,villain,SHONEN,nordic,military,cooking,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_kairos,CEO Kairos,Leon Kairos,villain,villain,SHOJO,cyber,romance,nordic,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_plague,The Green Doctor,Dr Emil Green,villain,villain,SHOJO,horror,mystery,idol,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_harlequin,Harlequin,Harlequin Bell,villain,villain,SHOJO,comedy,idol,survival,yes,Display-name change; do not rename save keys or historical billing.
+v_onikage,Onikage,Ren Onikage,villain,villain,SHONEN,martial,supernatural,mystery,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_hollowchild,The Pale Empress,The Pale Empress,villain,villain,SHOJO,space,fantasy,comedy,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_bioform,Bioform IX,Bioform IX,villain,villain,SHONEN,mecha,sports,idol,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+n_aoi,Aoi,Aoi Narang,protag,protag,SHOJO,isekai,fantasy,mythology,yes,Display-name change; do not rename save keys or historical billing.
+n_saku,Saku,Saku Diallo,protag,protag,SHOJO,isekai,martial,idol,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+n_ryoko,Ryoko,Astrid Voss,protag,protag,SHONEN,mecha,space,martial,yes,Display-name change; do not rename save keys or historical billing.
+n_chisato,Chisato,Chisato Kimura,protag,protag,SHOJO,sports,romance,space,yes,Display-name change; do not rename save keys or historical billing.
+n_reiwa,Reiwa,Reiwa Bell,protag,protag,SHOJO,idol,mystery,magical,yes,Display-name change; do not rename save keys or historical billing.
+n_mikoto,Mikoto,Mikoto Arata,protag,protag,SHONEN,magical,isekai,cooking,yes,Display-name change; do not rename save keys or historical billing.
+s_soleil,Soleil,Soleil Armand,secondary,secondary,SHOJO,isekai,sports,fantasy,yes,Display-name change; do not rename save keys or historical billing.
+s_ice,Ice,Isaak 'Ice' Novak,secondary,secondary,SHOJO,romance,idol,survival,yes,Display-name change; do not rename save keys or historical billing.
+s_bolt,Bolt,Bola 'Bolt' Adeyemi,secondary,secondary,SHONEN,sports,comedy,horror,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+s_ironmaid,Valkyrie,Vera 'Valkyrie' Nygaard,secondary,secondary,SHONEN,military,nordic,mecha,yes,Display-name change; do not rename save keys or historical billing.
+p_loader,Loader,Loader,pet,pet,SHONEN,military,survival,slice,yes,"Gender ledger: male; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_nitro,Nitro,Nitro,pet,pet,SHONEN,sports,comedy,mythology,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+p_stellar,Stellar,Stellar,pet,pet,SHOJO,space,magical,horror,yes,"Gender ledger: female; use the specified natural species/body presentation, not human gender stereotypes. The cell is not an Anime Type restriction."
+v_rosethorn,Rosethorn,Rosalie Thorn,villain,villain,SHOJO,romance,survival,idol,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_overlord,Overlord Zero,Osric Vale,villain,villain,SHOJO,isekai,fantasy,mecha,yes,Display-name change; do not rename save keys or historical billing.
+v_grandfinale,Grand Finale,Gabriel 'Grand Finale' Moreau,villain,villain,SHONEN,cooking,comedy,mecha,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_falsetto,Falsetto,Seo Min-jae 'Falsetto',villain,villain,SHOJO,idol,martial,romance,yes,Display-name change; do not rename save keys or historical billing. V2 visual concept replaces the old archetype/portrait brief; no new art exists yet.
+v_lovelace,Lovelace,Julian Lovelace,villain,villain,SHOJO,romance,comedy,space,yes,Display-name change; do not rename save keys or historical billing.
