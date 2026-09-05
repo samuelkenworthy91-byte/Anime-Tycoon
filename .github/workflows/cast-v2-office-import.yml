@@ -1,0 +1,42 @@
+name: Cast V2 Office careers franchise import
+
+on:
+  push:
+    branches:
+      - design/cast-v2-canonical
+    paths:
+      - .github/workflows/cast-v2-office-import.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/cast-v2-canonical
+          fetch-depth: 0
+
+      - name: Reconstruct and verify recovered Office runtime archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .transfer/ocf-* | base64 -d > /tmp/cv2-office-careers-franchise.tar.gz
+          echo "5dfb047355bc729b1d3909e766a9c932ac3db6de28803d9c352925044be13db7  /tmp/cv2-office-careers-franchise.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/cv2-office-careers-franchise.tar.gz
+          echo "a0e76c0320b7e03692caddee330c9fb1871a4f787653f83bdd26946d3864ba21  game_source/src/components/Office.tsx" | sha256sum -c -
+          echo "1c8a827c9fbaf9565851cb33a1b0dbd93c1c92aea52db045d2aa7c9db52c0824  game_source/src/engine/careers.ts" | sha256sum -c -
+          echo "3246de12ab2fe1dc11acbb1ca74085348c63b492a7214d1f081ed1ac5ba5d9cf  game_source/src/engine/franchise.ts" | sha256sum -c -
+
+      - name: Commit recovered Office runtime files and clean staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/components/Office.tsx game_source/src/engine/careers.ts game_source/src/engine/franchise.ts
+          git rm -r .transfer .github/workflows/cast-v2-office-import.yml
+          git commit -m "Cast V2 transfer: office, careers and franchise integration"
+          git push origin HEAD:design/cast-v2-canonical
