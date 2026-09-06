@@ -384,25 +384,37 @@ input[type="range"].ink-range::-moz-range-thumb {
   mix-blend-mode: overlay;
 }
 
-/* financial forecast is a true viewport modal: centred, readable and above
-   the clock controls until the player taps outside it. */
+/* The HUD uses backdrop-filter for its glass effect. That normally makes
+   position:fixed descendants use the HUD as their containing block, which is
+   why the forecast was being clipped into the bottom strip. Disable that
+   containing block only while the forecast is open so the overlay and panel
+   are truly viewport-fixed in both orientations. */
 .office-hud:has(.office-hud-forecast > .anim-pop) {
   z-index: 100 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible !important;
+  transform: none !important;
+  contain: none !important;
 }
 .office-hud-forecast > .fixed {
+  position: fixed !important;
+  inset: 0 !important;
   z-index: 105 !important;
-  background: rgba(6, 5, 14, 0.58);
+  background: rgba(6, 5, 14, 0.66);
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 .office-hud-forecast > .anim-pop {
   position: fixed !important;
   left: 50vw !important;
-  top: 38dvh !important;
+  top: 50dvh !important;
   z-index: 110 !important;
-  width: min(22rem, calc(100vw - 24px)) !important;
-  max-height: calc(76dvh - 24px);
+  width: min(32rem, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 32px) !important;
   margin: 0 !important;
-  overflow-y: auto;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
   animation: none !important;
   transform: translate(-50%, -50%) !important;
 }
@@ -412,12 +424,16 @@ input[type="range"].ink-range::-moz-range-thumb {
   html, body, #root { height: 100dvh; }
 }
 @media (max-width: 600px) and (orientation: portrait) {
-  .office-hud { min-height: 62px; padding: 4px 6px 31px !important; padding-right: 6px !important; gap: 4px !important; }
+  /* Two-row portrait HUD: studio/cash on top, then date · R&D · forecast.
+     Keeping all three secondary chips on their own row prevents R&D being
+     squeezed out by the cash and forecast controls. */
+  .office-hud { min-height: 68px; padding: 4px 6px 34px !important; padding-right: 6px !important; gap: 4px !important; }
   .office-hud-date { position: absolute; left: 6px; bottom: 4px; padding: 3px 7px !important; font-size: 9px !important; }
   .office-hud-stats { gap: 3px !important; }
-  .office-hud-forecast { display: block !important; position: absolute; right: 6px; bottom: 30px; z-index: 70; }
+  .office-hud-rd { position: absolute !important; left: 50%; bottom: 4px; z-index: 30; transform: translateX(-50%); padding: 3px 7px !important; font-size: 9px !important; }
+  .office-hud-forecast { display: block !important; position: absolute; right: 6px; bottom: 4px; z-index: 70; }
   .office-hud-forecast > button { min-height: 24px !important; padding: 3px 7px !important; font-size: 9px !important; }
-  .office-hud-cash, .office-hud-rd { padding: 3px 7px !important; font-size: 10px !important; }
+  .office-hud-cash { padding: 3px 7px !important; font-size: 10px !important; }
   .game-controls { top: 34px !important; right: 5px !important; gap: 2px !important; }
   .game-controls button { min-height: 25px !important; padding: 4px 6px !important; border-radius: 8px !important; font-size: 9px !important; }
 }
