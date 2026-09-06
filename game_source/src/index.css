@@ -384,6 +384,28 @@ input[type="range"].ink-range::-moz-range-thumb {
   mix-blend-mode: overlay;
 }
 
+/* financial forecast is a true viewport modal: centred, readable and above
+   the clock controls until the player taps outside it. */
+.office-hud:has(.office-hud-forecast > .anim-pop) {
+  z-index: 100 !important;
+}
+.office-hud-forecast > .fixed {
+  z-index: 105 !important;
+  background: rgba(6, 5, 14, 0.58);
+  backdrop-filter: blur(2px);
+}
+.office-hud-forecast > .anim-pop {
+  position: fixed !important;
+  left: 50vw !important;
+  top: 50dvh !important;
+  z-index: 110 !important;
+  width: min(22rem, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 32px);
+  margin: 0 !important;
+  overflow-y: auto;
+  animation: none !important;
+  transform: translate(-50%, -50%) !important;
+}
 
 /* ---------- phone portrait shell ---------- */
 @supports (height: 100dvh) {
@@ -393,7 +415,8 @@ input[type="range"].ink-range::-moz-range-thumb {
   .office-hud { min-height: 62px; padding: 4px 6px 31px !important; padding-right: 6px !important; gap: 4px !important; }
   .office-hud-date { position: absolute; left: 6px; bottom: 4px; padding: 3px 7px !important; font-size: 9px !important; }
   .office-hud-stats { gap: 3px !important; }
-  .office-hud-forecast { display: none !important; }
+  .office-hud-forecast { display: block !important; position: absolute; right: 6px; bottom: 4px; }
+  .office-hud-forecast > button { min-height: 24px !important; padding: 3px 7px !important; font-size: 9px !important; }
   .office-hud-cash, .office-hud-rd { padding: 3px 7px !important; font-size: 10px !important; }
   .game-controls { top: 34px !important; right: 5px !important; gap: 2px !important; }
   .game-controls button { min-height: 25px !important; padding: 4px 6px !important; border-radius: 8px !important; font-size: 9px !important; }
