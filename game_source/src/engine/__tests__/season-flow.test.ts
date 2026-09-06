@@ -86,7 +86,7 @@ const seasonDraftFor = (r: RunState, frKey: string): Draft => {
 
 describe("multi-season airing loop", () => {
   it("greenlights and finishes S2 while S1 is still on air", () => {
-    let r: RunState = { ...initialRun("Test Studio", "steady"), cash: 5_000_000 };
+    let r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 5_000_000 };
     let frKey: string, p1id: string;
     [r, frKey, p1id] = airSeasonOne(r);
 
@@ -125,7 +125,7 @@ describe("multi-season airing loop", () => {
   it("blocks a second production of the same next season", () => {
     /* office 1 = 2 concurrent productions, so the capacity guard can't mask
        the duplicate-season guard we're testing */
-    let r: RunState = { ...initialRun("Test Studio", "steady"), cash: 5_000_000, officeLevel: 1 };
+    let r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 5_000_000, officeLevel: 1 };
     let frKey: string;
     [r, frKey] = airSeasonOne(r);
 
@@ -142,7 +142,7 @@ describe("multi-season airing loop", () => {
   }, 30000);
 
   it("spends the quick-start pendingSequel the moment the season is greenlit", () => {
-    let r: RunState = { ...initialRun("Test Studio", "steady"), cash: 5_000_000 };
+    let r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 5_000_000 };
     let frKey: string;
     [r, frKey] = airSeasonOne(r);
 
@@ -153,7 +153,7 @@ describe("multi-season airing loop", () => {
   }, 30000);
 
   it("startBlockReason explains a greenlight the studio cannot afford", () => {
-    const r: RunState = { ...initialRun("Test Studio", "steady"), cash: 0 };
+    const r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 0 };
     const d = draft({});
     expect(startBlockReason(r, d)).toMatch(/not enough cash/i);
     expect(startProject(r, d)).toBeNull();
@@ -162,7 +162,7 @@ describe("multi-season airing loop", () => {
 
 describe("forecastWeek", () => {
   it("is a pure read and itemises exactly what tickWeek will move", () => {
-    let r: RunState = { ...initialRun("Test Studio", "steady"), cash: 5_000_000 };
+    let r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 5_000_000 };
     let frKey: string;
     [r, frKey] = airSeasonOne(r);
     /* S1 airing (income) + S2 in production (burn) + payroll week */
@@ -187,7 +187,7 @@ describe("forecastWeek", () => {
   }, 30000);
 
   it("non-payroll weeks carry no wages, and airing projects do not burn", () => {
-    let r: RunState = { ...initialRun("Test Studio", "steady"), cash: 5_000_000 };
+    let r: RunState = { ...initialRun("Test Studio", "steady"), mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"], cash: 5_000_000 };
     [r] = airSeasonOne(r);
     r = { ...r, week: 1 };
 

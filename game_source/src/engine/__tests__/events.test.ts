@@ -39,6 +39,7 @@ const worker = (id: string): Staff => ({
 
 const run = (): RunState => ({
   ...initialRun("Test Studio", "steady"),
+  mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
   cash: 500_000,
   officeLevel: 2,
   staff: [worker("a"), worker("b")],

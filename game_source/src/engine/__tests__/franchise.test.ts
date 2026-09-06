@@ -80,6 +80,7 @@ const mkFr = (over: Partial<Franchise> = {}): Franchise => ({
 
 const richRun = (over: Partial<RunState> = {}): RunState => ({
   ...initialRun("Test Studio", "steady"),
+  mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
   cash: 50_000_000,
   rd: 500,
   officeLevel: 4,

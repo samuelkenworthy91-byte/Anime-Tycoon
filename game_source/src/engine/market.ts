@@ -283,10 +283,16 @@ export interface Commission {
 
 let commissionSeq = 0;
 
+/** filterFormatsFor: a commissioner must not normally offer a format the
+ *  studio cannot legally/technically produce. `available` = the studio's
+ *  unlocked medium ids; if a partner's tastes only touch formats the studio
+ *  hasn't unlocked yet, the brief falls back to the unlocked pool (typically
+ *  Fan Web Series on a fresh save) instead of bypassing progression. */
 export function rollCommission(
   week: number,
   partners: Record<string, number>,
-  market: MarketState
+  market: MarketState,
+  available: MediumId[] = MEDIUM_IDS
 ): Commission {
   /* partners you have burned stop calling */
   const pool = PARTNERS.filter((p) => (partners[p.id] ?? 45) >= 25);
@@ -300,7 +306,9 @@ export function rollCommission(
     Math.floor(Math.random() * (hot.length && Math.random() < 0.55 ? hot.length : partner.likesGenres.length))
   ] ?? partner.likesGenres[0];
   const audience = partner.likesAudiences[Math.floor(Math.random() * partner.likesAudiences.length)];
-  const medium = partner.mediums[Math.floor(Math.random() * partner.mediums.length)];
+  const partnerMediums = partner.mediums.filter((m) => available.includes(m));
+  const mediumPool = partnerMediums.length ? partnerMediums : available;
+  const medium = mediumPool[Math.floor(Math.random() * mediumPool.length)];
   const preferredAnimeType = Math.random() < 0.5 ? (Math.random() < 0.5 ? "shonen" : "shojo") : undefined;
 
   const baseAdvance = medium === "movie" ? 420_000 : medium === "tv" ? 220_000 : 150_000;
@@ -463,15 +471,16 @@ export function rollMarketEvent(
 }
 
 /** the emergency-slot commission an accepted emergency event creates */
-export function emergencyCommission(week: number, partnerId: string, partners: Record<string, number>, market: MarketState): Commission {
-  const base = rollCommission(week, partners, market);
+export function emergencyCommission(week: number, partnerId: string, partners: Record<string, number>, market: MarketState, available: MediumId[] = MEDIUM_IDS): Commission {
+  const base = rollCommission(week, partners, market, available);
   const partner = partnerById(partnerId);
   const planWeeks = base.medium === "movie" ? 19 : base.medium === "tv" ? 15 : 12;
+  const emergencyMediums = partner.mediums.filter((m) => available.includes(m));
   return {
     ...base,
     id: `com${++commissionSeq}_${week}e`,
     partnerId,
-    medium: partner.mediums[0],
+    medium: emergencyMediums[0] ?? available[0] ?? base.medium,
     advance: Math.round((base.advance * 1.6) / 5_000) * 5_000,
     maxWeeks: planWeeks - 1, // one week LESS than a comfortable plan
     expiresWeek: week + 4,
@@ -481,8 +490,8 @@ export function emergencyCommission(week: number, partnerId: string, partners: R
 }
 
 /** the manga-adaptation commission an accepted adaptation event creates */
-export function adaptationCommission(week: number, partners: Record<string, number>, market: MarketState): Commission {
-  const base = rollCommission(week, partners, market);
+export function adaptationCommission(week: number, partners: Record<string, number>, market: MarketState, available: MediumId[] = MEDIUM_IDS): Commission {
+  const base = rollCommission(week, partners, market, available);
   return {
     ...base,
     id: `com${++commissionSeq}_${week}a`,

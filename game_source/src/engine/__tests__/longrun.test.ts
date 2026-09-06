@@ -5,7 +5,7 @@
  *  shows instead of stagnating.
  * ==================================================================== */
 import { describe, expect, it } from "vitest";
-import type { Draft } from "../data";
+import { FORMAT_ORDER, MEDIUMS, type Draft, type MediumId, type SlotId } from "../data";
 import { rollHire } from "../careers";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
 import {
@@ -15,8 +15,10 @@ import {
   projectCapacity,
   releaseProject,
   staffCapacity,
+  startContractAssignment,
   startProject,
   tickStudioWorkPulse,
+  unlockFormat,
   type RunState,
 } from "../state";
 
@@ -26,12 +28,20 @@ const WEEKS = YEARS * 48;
 const botDraft = (r: RunState, i: number): Draft => {
   const genres = r.genresUnlocked;
   const g = genres[i % genres.length];
+  /* the bot plays the real progression: only what the studio has unlocked */
+  const unlocked = r.mediumsUnlocked.length ? r.mediumsUnlocked : ["fanweb"];
+  const medium = unlocked[Math.floor(Math.random() * unlocked.length)] as MediumId;
   const budget = r.cash > 2_000_000 ? "blockbuster" : r.cash > 400_000 ? "standard" : "indie";
+  const slot: SlotId =
+    medium === "tv" || medium === "special"
+      ? (r.cash > 1_500_000 ? "prime" : r.cash > 300_000 ? "evening" : "midnight")
+      : (MEDIUMS[medium].slot ?? "stream");
   return {
     title: `Sim Show ${i}`,
-    medium: "tv",
+    medium,
     budget,
-    slot: r.cash > 1_500_000 ? "prime" : r.cash > 300_000 ? "evening" : "midnight", animeType:"shonen",
+    slot,
+    animeType: "shonen",
     genres: [g],
     audience: "teens",
     protag: "hero",
@@ -72,6 +82,17 @@ const botAssign = (r: RunState): RunState => {
   return { ...r, projects };
 };
 
+/** a sane studio takes on contract work when the cash is thin — it is the
+ *  game's own bridge between projects (assign idle staff, get paid on
+ *  delivery via tickStudioWorkPulse) */
+const botContract = (r: RunState): RunState => {
+  if (r.cash >= 60_000 || (r.contractJobs ?? []).length > 0 || !r.contracts.length) return r;
+  const contract = [...r.contracts].sort((a, b) => b.pay - a.pay)[0];
+  const free = r.staff.filter((s) => !projectOfStaff(r.projects, s.id) && !(r.contractJobs ?? []).some((j) => j.staffIds.includes(s.id)));
+  if (!free.length) return r;
+  return startContractAssignment(r, contract, [free[0].id]) ?? r;
+};
+
 const botHire = (r: RunState): RunState => {
   let staff = r.staff;
   let cash = r.cash;
@@ -92,7 +113,13 @@ const botHire = (r: RunState): RunState => {
 };
 
 function playCareer(seedLabel: string): RunState {
-  let r = initialRun(`SIM ${seedLabel}`, "steady");
+  /* the sim measures the 12-year economy, so the studio starts as an
+     established one that has already climbed the format ladder (the ladder
+     itself is covered by format-progression.test.ts) */
+  let r: RunState = {
+    ...initialRun(`SIM ${seedLabel}`, "steady"),
+    mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
+  };
   let greenlit = 0;
   for (let w = 0; w < WEEKS; w++) {
     /* play pending milestones */
@@ -117,9 +144,15 @@ function playCareer(seedLabel: string): RunState {
       r = next;
       greenlit++;
     }
+    /* climb the format ladder as the milestones allow (RD + shows + fans) */
+    for (const medium of FORMAT_ORDER) {
+      const unlocked = unlockFormat(r, medium);
+      if (unlocked) r = unlocked;
+    }
     /* keep teams staffed and staff hired */
     r = botAssign(r);
     r = botHire(r);
+    r = botContract(r);
     /* A real player sees ~40 work-check cycles in a seven-day week at 1x.
        Simulate those visible contributions explicitly before the calendar tick. */
     for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;

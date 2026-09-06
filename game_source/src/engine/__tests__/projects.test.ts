@@ -65,6 +65,7 @@ const worker = (id: string, over: Partial<Staff> = {}): Staff => ({
 
 const richRun = (over: Partial<RunState> = {}): RunState => ({
   ...initialRun("Test Studio", "steady"),
+  mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
   cash: 10_000_000,
   officeLevel: 2, // Sakuga Tower: 3 project slots
   staff: [worker("a"), worker("b"), worker("c")],
