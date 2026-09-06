@@ -17,6 +17,7 @@ import {
   buyFacility,
   facilityBlockReason,
   initialRun,
+  contributionEffectiveSkill,
   migrateRun,
   officeSlots,
   previewResult,
@@ -33,8 +34,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "indie",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -162,12 +163,13 @@ describe("facility bonuses", () => {
     expect(fx.pointMult.art).toBe(1);
     expect(fx.pointMult.sound).toBe(1);
 
-    const team = [worker("a", { story: 80 })];
-    const base = makeProject(draft(), 0); // concept stage focuses story
+    const team = [worker("a", { story: 80, stamina: 100 })];
+    const base = makeProject(draft(), 0);
     const p = { ...base, staffIds: ["a"] };
-    const plain = tickProjectsWeek([p], team, 1).projects[0];
-    const boosted = tickProjectsWeek([p], team, 1, fx).projects[0];
-    expect(boosted.points.story).toBeGreaterThan(plain.points.story);
+    const run = { ...richRun(), staff: team, projects: [p], facilities: {} };
+    const plain = contributionEffectiveSkill(run, team[0], "story");
+    const boosted = contributionEffectiveSkill({ ...run, facilities: { writers: 2 } }, team[0], "story");
+    expect(boosted).toBeGreaterThan(plain);
   });
 
   it("render farm speeds all projects — blockbusters double", () => {
@@ -186,13 +188,15 @@ describe("facility bonuses", () => {
     expect(teamSpeed(anim, [], fx)).toBeCloseTo(teamSpeed(anim, []) + 0.1);
   });
 
-  it("editing suite fixes more issues in post and guards sprints", () => {
-    const fx = facilityFX({ editing: 2 });
+  it("editing suite strengthens live note-clearing checks and guards sprints", () => {
     const base = makeProject(draft(), 0);
-    const p: Project = { ...base, stage: "post", issues: 8 };
-    const plain = tickProjectsWeek([p], [], 1).projects[0];
-    const suite = tickProjectsWeek([p], [], 1, fx).projects[0];
-    expect(suite.issues).toBe(plain.issues - 2);
+    const editor = worker("edit", { story: 70, art: 70, sound: 70, stamina: 100 });
+    const p: Project = { ...base, stage: "post", milestone: "edit", issues: 8, staffIds: [editor.id] };
+    const plainRun = { ...richRun(), staff: [editor], projects: [p], facilities: {} };
+    const suiteRun = { ...plainRun, facilities: { editing: 2 as const } };
+    expect(contributionEffectiveSkill(suiteRun, editor, "art", true)).toBeGreaterThan(
+      contributionEffectiveSkill(plainRun, editor, "art", true)
+    );
 
     // sprint issue guard
     let r = richRun();
@@ -330,10 +334,13 @@ describe("interaction with simultaneous projects", () => {
     r = assignToProject(r, r.projects[1].id, "b");
 
     const boosted = buyFacility(r, "writers")!;
-    const plainTick = tickProjectsWeek(r.projects, r.staff, 1);
-    const richTick = tickProjectsWeek(boosted.projects, boosted.staff, 1, facilityFX(boosted.facilities));
     for (let i = 0; i < 2; i++) {
-      expect(richTick.projects[i].points.story).toBeGreaterThan(plainTick.projects[i].points.story);
+      const id = r.projects[i].staffIds[0];
+      const plainStaff = r.staff.find((s) => s.id === id)!;
+      const boostedStaff = boosted.staff.find((s) => s.id === id)!;
+      expect(contributionEffectiveSkill(boosted, boostedStaff, "story")).toBeGreaterThan(
+        contributionEffectiveSkill(r, plainStaff, "story")
+      );
     }
   });
 });

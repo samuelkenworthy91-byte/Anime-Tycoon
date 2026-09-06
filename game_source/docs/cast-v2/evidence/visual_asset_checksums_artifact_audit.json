@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "rows": 216,
+  "columns": [
+    "asset_type",
+    "sheet",
+    "cell",
+    "cast_id",
+    "filename",
+    "sha256",
+    "width",
+    "height",
+    "format",
+    "qc_status"
+  ],
+  "artifact_inspect": "{\"kind\":\"table\",\"sheet\":\"Asset Checksums\",\"address\":\"A1:J217\",\"rows\":217,\"cols\":10,\"values\":[[\"asset_type\",\"sheet\",\"cell\",\"cast_id\",\"filename\",\"sha256\",\"width\",\"height\",\"format\",\"qc_status\"],[\"master_sheet\",\"LEAD_SHONEN_01\",\"\",\"\",\"lead_shonen_01.png\",\"985701c56294fd5a30cf819dc5b87b7bf60c5429e196beb91554befbd64c0ec8\",\"2048\",\"1024\",\"PNG\",\"PASS\"],[\"master_sheet\",\"LEAD_SHONEN_02\",\"\",\"\",\"lead_shonen_02.png\",\"768a8cc1b3c792a5b0ab81522fa81a61596825f3231859b8f8acfa8512d2c336\",\"2048\",\"1024\",\"PNG\",\"PASS\"],[\"master_sheet\",\"LEAD_SHONEN_03\",\"\",\"\",\"lead_shonen_03.png\",\"ecd780cc5f766b7cbdce3005fc1be16c91bd48cbc1e5ceba0237ec3a1c4bb15c\",\"2048\",\"1024\",\"PNG\",\"PASS\"]],\"valuesTruncated\":true,\"valuesPreviewRows\":4,\"valuesPreviewCols\":10,\"valuesPreviewAddress\":\"A1:J4\"}"
+}

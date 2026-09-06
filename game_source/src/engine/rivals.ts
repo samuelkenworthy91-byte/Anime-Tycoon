@@ -20,6 +20,7 @@ import {
   PUN_TITLES,
   RIVAL_STUDIOS,
   yearOfWeek,
+  type AnimeType,
   type BudgetId,
   type GenreId,
   type MediumId,
@@ -48,6 +49,7 @@ export interface RivalProduction {
   id: string;
   title: string;
   genres: GenreId[];
+  animeType: AnimeType;
   medium: MediumId;
   budget: BudgetId;
   /** release week on the industry calendar */
@@ -63,6 +65,7 @@ export interface RivalFranchise {
   key: string;
   baseTitle: string;
   genres: GenreId[];
+  animeType: AnimeType;
   season: number;
   popularity: number; // 0..100
   bestScore: number;
@@ -79,6 +82,7 @@ export interface RivalRelease {
   week: number;
   year: number;
   genres: GenreId[];
+  animeType: AnimeType;
   revenue: number;
   fans: number;
   kind: RivalEntryKind;
@@ -209,8 +213,8 @@ export const PERSONAS: Record<RivalPersonaId, PersonaDef> = {
     id: "blockbuster",
     label: "Blockbuster Action House",
     blurb: "Big robots, bigger budgets, endless sequels.",
-    preferred: ["shonen", "mecha", "sports", "military"],
-    specialist: ["shonen", "mecha"],
+    preferred: ["martial", "mecha", "sports", "military", "pirate"],
+    specialist: ["martial", "mecha"],
     baseTier: 4,
     baseSize: 3,
     variance: 7,
@@ -237,8 +241,8 @@ export const PERSONAS: Record<RivalPersonaId, PersonaDef> = {
     id: "experimental",
     label: "Experimental Atelier",
     blurb: "Weird, risky, occasionally genius.",
-    preferred: ["horror", "mystery", "noir", "supernatural"],
-    specialist: ["horror", "noir"],
+    preferred: ["horror", "mystery", "survival", "supernatural"],
+    specialist: ["horror", "survival"],
     baseTier: 3,
     baseSize: 2,
     variance: 10,
@@ -251,8 +255,8 @@ export const PERSONAS: Record<RivalPersonaId, PersonaDef> = {
     id: "prestige",
     label: "Prestige Drama Studio",
     blurb: "Awards-bait, one immaculate show at a time.",
-    preferred: ["slice", "noir", "romance", "mystery"],
-    specialist: ["noir", "mystery"],
+    preferred: ["slice", "nordic", "romance", "mystery", "mythology"],
+    specialist: ["nordic", "mystery"],
     baseTier: 4,
     baseSize: 1,
     variance: 2,
@@ -279,7 +283,7 @@ export const PERSONAS: Record<RivalPersonaId, PersonaDef> = {
     id: "idol",
     label: "Romance & Idol House",
     blurb: "Sparkles, songs and feelings — steady hits.",
-    preferred: ["romance", "shojo", "idol", "magical"],
+    preferred: ["romance", "slice", "idol", "magical"],
     specialist: ["idol", "romance"],
     baseTier: 3,
     baseSize: 2,
@@ -427,7 +431,8 @@ export function migrateRivalWorld(raw: unknown, week: number): RivalWorld {
       .map((rv, i) => ({
         id: `legacy_${week}_${i}`,
         title: String(rv.title ?? PUN_TITLES[i % PUN_TITLES.length]),
-        genres: (Array.isArray(rv.genre) ? rv.genre : rv.genre ? [rv.genre as GenreId] : ["shonen"]),
+        genres: (Array.isArray(rv.genre) ? rv.genre : rv.genre ? [rv.genre as GenreId] : ["sports"]),
+        animeType: "shonen" as AnimeType,
         medium: "tv" as MediumId,
         budget: "standard" as BudgetId,
         week: rv.week,
@@ -521,6 +526,7 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
     let title: string;
     let genres: GenreId[];
     let franchiseKey: string | null;
+    let animeType: AnimeType;
     if (fr) {
       const roll = Math.random();
       if (roll < 0.58) kind = "season";
@@ -529,13 +535,15 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
       else kind = "movie";
       title = makeTitle(fr, kind);
       genres = [...fr.genres];
+      animeType = fr.animeType;
       franchiseKey = fr.key;
     } else {
       kind = "original";
-      title = makeTitle({ key: "", baseTitle: "", genres: [], season: 0, popularity: 0, bestScore: 0, lastScore: 0, lastEntryWeek: 0, entries: 0 }, "original");
+      title = makeTitle({ key: "", baseTitle: "", genres: [], animeType: "shonen", season: 0, popularity: 0, bestScore: 0, lastScore: 0, lastEntryWeek: 0, entries: 0 }, "original");
       while (usedTitles.has(title) || studio.franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
       usedTitles.add(title);
       genres = pickGenres(studio);
+      animeType = studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : Math.random() < 0.5 ? "shonen" : "shojo";
       franchiseKey = null;
     }
     const medium: MediumId = Math.random() < 0.8 ? p.medium : pick(["tv", "ona", "movie"] as MediumId[]);
@@ -545,6 +553,7 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
       id: `rp${++rivalProdSeq}_${year}_${i}`,
       title,
       genres,
+      animeType,
       medium,
       budget,
       week: weeks[i],
@@ -709,6 +718,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
         id: `rp${++rivalProdSeq}_surp_${week}`,
         title,
         genres,
+        animeType: fr?.animeType ?? (studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : "shonen"),
         medium: PERSONAS[studio.persona].medium,
         budget: PERSONAS[studio.persona].budget,
         week: week + 4 + Math.floor(Math.random() * 8),
@@ -755,6 +765,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
         week,
         year: yearOfWeek(week),
         genres: [...prod.genres],
+        animeType: prod.animeType,
         revenue: rev,
         fans: f,
         kind: prod.kind,
@@ -790,6 +801,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
             key: prod.title,
             baseTitle: prod.title,
             genres: [...prod.genres],
+            animeType: prod.animeType,
             season: 1,
             popularity: clampPct((isSpin && parent ? parent.popularity * 0.8 : 18 + prod.score * 1.6) + (prod.score >= 32 ? 10 : 0)),
             bestScore: prod.score,

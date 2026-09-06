@@ -1,98 +1,73 @@
 import { describe, expect, it } from "vitest";
 import {
+  CAST_V2,
   GENRES,
+  PETS,
   PROTAGONISTS,
   SECONDARY,
-  PETS,
   VILLAINS,
-  CAST_WAVE_THREE,
+  type AnimeType,
   type CastMember,
+  type GenreId,
 } from "../data";
-
-/*
- * Cast coverage guarantees — the Create menu draws from the four role
- * arrays below, so these are asserted against exactly those arrays (not
- * just the CAST registry). docs/cast-coverage.md is the human-readable
- * snapshot; this suite is the permanent contract:
- *
- *   1. every roster member registered in CAST is actually selectable
- *      (wave-three was data-only before and couldn't be cast at all)
- *   2. every role x genre cell has at least TWO members — no genre shows
- *      an empty/thin picker, whatever the player picks
- *   3. every one of the 190 genre pairs has at least one member whose
- *      affinities cover BOTH genres (the dual-cover premium pick)
- *   4. every pair is fully castable — each of the four roles can field
- *      somebody whose affinities hit at least one of the two genres
- *      (the "mecha x shonen" case the player asked about)
- */
 
 const ROLES: [string, CastMember[]][] = [
   ["lead", PROTAGONISTS],
-  ["support", SECONDARY],
-  ["pet", PETS],
+  ["sidekick", SECONDARY],
+  ["mascot", PETS],
   ["villain", VILLAINS],
 ];
-const ALL = ROLES.flatMap(([, arr]) => arr);
+const TYPES: AnimeType[] = ["shonen", "shojo"];
+const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 
-describe("roster integrity", () => {
-  it("wave three is selectable (folded into the pick lists)", () => {
-    for (const m of CAST_WAVE_THREE) {
-      const pool = { protag: PROTAGONISTS, secondary: SECONDARY, pet: PETS, villain: VILLAINS }[m.role];
-      expect(pool, `${m.name} must appear in the ${m.role} array`).toContain(m);
-    }
+describe("Cast V2 canonical roster", () => {
+  it("contains exactly 192 unique selectable IDs in four equal roles", () => {
+    expect(CAST_V2).toHaveLength(192);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(192);
+    for (const [, members] of ROLES) expect(members).toHaveLength(48);
+    expect(ROLES.flatMap(([, members]) => members).map((member) => member.id).sort())
+      .toEqual(CAST_V2.map((member) => member.id).sort());
   });
 
-  it("no duplicate member ids across the role arrays", () => {
-    const ids = ALL.map((m) => m.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("every affinity inside every roster member is a real genre", () => {
-    const valid = new Set(GENRES.map((g) => g.id as string));
-    for (const m of ALL) {
-      for (const a of m.aff) {
-        expect(valid.has(a as string), `${m.id} has unknown genre aff '${a}'`).toBe(true);
+  it("balances every role at 24 Shonen / 24 Shojo and 12 / 12 gender", () => {
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        const cell = members.filter((member) => member.type === type);
+        expect(cell, `${role}/${type}`).toHaveLength(24);
+        expect(cell.filter((member) => member.gender === "male"), `${role}/${type}/male`).toHaveLength(12);
+        expect(cell.filter((member) => member.gender === "female"), `${role}/${type}/female`).toHaveLength(12);
       }
     }
   });
 
-  it("no member carries duplicate affinities", () => {
-    for (const m of ALL) {
-      expect(new Set(m.aff).size, m.id).toBe(m.aff.length);
+  it("gives every member two visible and one distinct hidden active affinity", () => {
+    const active = new Set(GENRES.map((genre) => genre.id));
+    for (const member of CAST_V2) {
+      expect(member.visibleAff, member.id).toHaveLength(2);
+      expect(new Set(affinities(member)).size, member.id).toBe(3);
+      for (const genre of affinities(member)) expect(active.has(genre), `${member.id}/${genre}`).toBe(true);
     }
   });
-});
 
-describe("single-genre coverage (menu availability)", () => {
-  for (const g of GENRES) {
-    it(`${g.id}: every role has at least 2 fitting members`, () => {
-      for (const [role, arr] of ROLES) {
-        const n = arr.filter((m) => m.aff.includes(g.id)).length;
-        expect(n, `${role}/${g.id}`).toBeGreaterThanOrEqual(2);
+  it("provides practical all-genre coverage in every role × Type group", () => {
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        const covered = new Set(members.filter((member) => member.type === type).flatMap(affinities));
+        for (const genre of GENRES) expect(covered.has(genre.id), `${role}/${type}/${genre.id}`).toBe(true);
       }
-    });
-  }
-});
-
-describe("genre-pair coverage (all 190 combos)", () => {
-  for (let i = 0; i < GENRES.length; i++) {
-    for (let j = i + 1; j < GENRES.length; j++) {
-      const [a, b] = [GENRES[i], GENRES[j]];
-      it(`${a.id} x ${b.id}: at least one dual-cover member, and fully castable`, () => {
-        const dual = ALL.filter((m) => m.aff.includes(a.id) && m.aff.includes(b.id));
-        expect(dual.length, `no member covers ${a.id}+${b.id}`).toBeGreaterThanOrEqual(1);
-        for (const [role, arr] of ROLES) {
-          expect(
-            arr.some((m) => m.aff.includes(a.id) || m.aff.includes(b.id)),
-            `a ${role} slot cannot be filled for ${a.id}/${b.id}`
-          ).toBe(true);
-        }
-      });
     }
-  }
+  });
 
-  it("spotlight: mecha x shonen has several picks like the player asked", () => {
-    const dual = ALL.filter((m) => m.aff.includes("mecha") && m.aff.includes("shonen"));
-    expect(dual.length).toBeGreaterThanOrEqual(3);
+  it("covers all 210 unordered genre pairs across complete affinity sets", () => {
+    let measured = 0;
+    for (let i = 0; i < GENRES.length; i += 1) {
+      for (let j = i + 1; j < GENRES.length; j += 1) {
+        measured += 1;
+        const a = GENRES[i].id;
+        const b = GENRES[j].id;
+        expect(CAST_V2.some((member) => affinities(member).includes(a) && affinities(member).includes(b)), `${a}|${b}`).toBe(true);
+      }
+    }
+    expect(measured).toBe(210);
   });
 });

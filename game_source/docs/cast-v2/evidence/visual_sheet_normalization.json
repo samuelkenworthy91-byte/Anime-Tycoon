@@ -1,0 +1,3053 @@
+{
+  "status": "PASS",
+  "sheets": [
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shojo_01.png",
+      "raw_sha256": "312e68e4a7bff6b5d421953d6c72450d6a463a153c5b109f0f5e6601f6fd34dd",
+      "raw_width": 1768,
+      "raw_height": 889,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shojo_01.png",
+      "normalized_sha256": "d2771c626b6f396930eab2aaa535a9728261c8e181d0f6211e8b1d1cbdcba998",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            438,
+            440
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            446,
+            4,
+            880,
+            440
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            888,
+            4,
+            1322,
+            440
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1330,
+            4,
+            1764,
+            440
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            438,
+            885
+          ],
+          "raw_size": [
+            434,
+            437
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            446,
+            448,
+            880,
+            885
+          ],
+          "raw_size": [
+            434,
+            437
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            888,
+            448,
+            1322,
+            885
+          ],
+          "raw_size": [
+            434,
+            437
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1330,
+            448,
+            1764,
+            885
+          ],
+          "raw_size": [
+            434,
+            437
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shojo_02.png",
+      "raw_sha256": "2661f55bec167e4449765338b4bbed3f2d715f22fec565cf7f4b3e491f6db1b5",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shojo_02.png",
+      "normalized_sha256": "ca766fb776b19c45ce5422b2dc6e46555aff7be2805ee6f4ab2230878133a567",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shojo_03.png",
+      "raw_sha256": "13a4d23862660f4cadfc9c9f4bb614b8a76b256aa58e14abdc20edae41c4b602",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shojo_03.png",
+      "normalized_sha256": "75fe75b721edd43ec82a0983d58e8a407d6ad74dbb92877c180a867f8cd2eab9",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shonen_01.png",
+      "raw_sha256": "6cdf8b41a1457721dc7cccebc8e6b9a11fa712c4ad99031d4790f7b5cbcab87e",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shonen_01.png",
+      "normalized_sha256": "985701c56294fd5a30cf819dc5b87b7bf60c5429e196beb91554befbd64c0ec8",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shonen_02.png",
+      "raw_sha256": "0a4dcd18696933ccd784364bfe0f2572b09dfa0622637fcc7212bb428553f384",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shonen_02.png",
+      "normalized_sha256": "768a8cc1b3c792a5b0ab81522fa81a61596825f3231859b8f8acfa8512d2c336",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/lead_shonen_03.png",
+      "raw_sha256": "4650e303b0c60c8d2fe15540893e01d2f1eb28798e2601b8fb1a4d5a889347ab",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/lead_shonen_03.png",
+      "normalized_sha256": "ecd780cc5f766b7cbdce3005fc1be16c91bd48cbc1e5ceba0237ec3a1c4bb15c",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shojo_01.png",
+      "raw_sha256": "6f340f4817069ac9f8422b16fd48262f621c1607c3de847aedb0442c57663111",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shojo_01.png",
+      "normalized_sha256": "1a55313852f338aad574a74547e8e7387c54529283d3dbb33536af23ac89f7e9",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shojo_02.png",
+      "raw_sha256": "0ee8f71535bbed30336a075d3d1d7140ce11f6f5309449bb784f4b5f2523f482",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shojo_02.png",
+      "normalized_sha256": "1c0d9a7934736cb6fec64346a19242a30da69a7c1dd19d21af921f544ca19a3d",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shojo_03.png",
+      "raw_sha256": "e6ae4e80dd8c96dde3ec7477e7561e9f61bf80f9efe53d5e61f9c089357aef64",
+      "raw_width": 1771,
+      "raw_height": 888,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shojo_03.png",
+      "normalized_sha256": "52a5b0ea14502a495e78032bbd825f9030c282319051380c9e002c6d215f6712",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            439,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            447,
+            4,
+            882,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            890,
+            4,
+            1324,
+            440
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1332,
+            4,
+            1767,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            439,
+            884
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            447,
+            448,
+            882,
+            884
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            890,
+            448,
+            1324,
+            884
+          ],
+          "raw_size": [
+            434,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1332,
+            448,
+            1767,
+            884
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shonen_01.png",
+      "raw_sha256": "280121859f04fdac7c8a1a78b026bc73e5ee86975bdb54f607ce2b39b706d338",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shonen_01.png",
+      "normalized_sha256": "a4d295800afac2185dce8c005a95aaee835c0e4159a203888c84c098aff33011",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shonen_02.png",
+      "raw_sha256": "300397707aaa3b023dc20feae53f9a1467b55b4bbea4373e3f7c79c03a9c4d77",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shonen_02.png",
+      "normalized_sha256": "9fad7a048b496736d338493bd58150e5365b3dcde971934d7b7d3b30890bd63f",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/mascot_shonen_03.png",
+      "raw_sha256": "4622806127decf7a157c0fe2db67e770fe2aea79580255a52927a7734610a5ea",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/mascot_shonen_03.png",
+      "normalized_sha256": "d49bbee2d5bd37f8d8d2cd2ec8790cb5b12c9946a945549db693e88f5ee63836",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shojo_01.png",
+      "raw_sha256": "a18b4e9031c4a9a5861a9653b0c4076b82c7db7df615c6adeae4aa5c09e0d606",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shojo_01.png",
+      "normalized_sha256": "1f16887df3ea409b10a1ab2848ce3ba9ec2ee8d5fa060c1b21834dff560c70da",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shojo_02.png",
+      "raw_sha256": "1ddf9968e5f2bf66f3c32427f935dd3cc9ce6da08a18d05e7018a067bfade1d9",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shojo_02.png",
+      "normalized_sha256": "b7e34b6ccef3deaad239b73d74d89bc8eb07494504dd6214ef896aa2d0305ee0",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shojo_03.png",
+      "raw_sha256": "0ec4b95b34a5c3fc1b329c8a5e8b07b21cb28179cc0d2670371bf903cdbdfdfe",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shojo_03.png",
+      "normalized_sha256": "e13c32a308ddb43dc875a879efd9efff47223250a5698737a49e428f5cf459ab",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shonen_01.png",
+      "raw_sha256": "2df28da5342e2cea8daedc5a0cecadd24237dcf28c12feeee84950cc46327592",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shonen_01.png",
+      "normalized_sha256": "d5fb1750a4e6890c95b9c6c9813398413b7b97e02f098dcdf3f9a71c95f1b919",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shonen_02.png",
+      "raw_sha256": "5b15869fa173bad107e7ae0b633e710b017d9e4d83388e3e9e87b0ff03ddba3f",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shonen_02.png",
+      "normalized_sha256": "c057ecf68f765da9e40a9dc4b807877151c114dfd62c3326f2fc757f0b6dd3c6",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/sidekick_shonen_03.png",
+      "raw_sha256": "4e3255c75da3dd5799564f8c63e4d9391b56217e71a022272f9f860cb8435dd8",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/sidekick_shonen_03.png",
+      "normalized_sha256": "c5fb40709a4f8b508bcba4ac0bd38f3819f4504efafd62117f8bfcc5ff3c3e93",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shojo_01.png",
+      "raw_sha256": "7c6fc6f7fcdd0ceb438467860b1c9dc0000861a3f8b9ca28b8f77d8b4b5efb65",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shojo_01.png",
+      "normalized_sha256": "76ea778c832bf3bf5cd11402438b914801a545c25a37cc949db1bbd638bf68dc",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shojo_02.png",
+      "raw_sha256": "cb2c4fda8fe35b83d8ebf0f0cf20aa6c2b2056ea0cd65cfb5d942ad10a673cb7",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shojo_02.png",
+      "normalized_sha256": "411ce35ab50e8fe6691ebbcf8f95640771a3c4ab6294a39a38bb262b48bee4df",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shojo_03.png",
+      "raw_sha256": "cb90cc434d487577d488e31fd7850772c4bd3812c4251dd39ca0a8d25066d5e3",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shojo_03.png",
+      "normalized_sha256": "8a166371dd02167fe85eaf07d003a145761ff02b14f1b8cb90c3e8084eb334e2",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shonen_01.png",
+      "raw_sha256": "a7887638939bf36ecda5bd8ca19a85b6fcfe96a88409e987cb60afe9dce10115",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shonen_01.png",
+      "normalized_sha256": "9fdc27009242a75abf96b0a977415475db4d4162c8412a58da9ba0a62714a0fa",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shonen_02.png",
+      "raw_sha256": "526641ea338dd7aa874e498b38c9cf20186c7012c48bbfcb4775d59c08e25f85",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shonen_02.png",
+      "normalized_sha256": "a804fb5414656dafece3070fe2ebf4e8f3eda1f01faf1dc01424688e41b4a161",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    },
+    {
+      "raw": "art_source/cast_v2/sheets/raw/villain_shonen_03.png",
+      "raw_sha256": "caf6fa69e126792ca71230b8cac37cb4a473e7fb08639c9499df54b4ca060cab",
+      "raw_width": 1774,
+      "raw_height": 887,
+      "normalized": "art_source/cast_v2/sheets/approved/villain_shonen_03.png",
+      "normalized_sha256": "e602ed91fd42540611bee6360291e081a0d4738c404ec532f978ad6c8973127e",
+      "normalized_width": 2048,
+      "normalized_height": 1024,
+      "cell_size": 512,
+      "gutter": 8,
+      "seam_inset": 4,
+      "cells": [
+        {
+          "row": 0,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            4,
+            440,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            4,
+            883,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            4,
+            1326,
+            440
+          ],
+          "raw_size": [
+            435,
+            436
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            4,
+            1770,
+            440
+          ],
+          "raw_size": [
+            436,
+            436
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "raw_bounds": [
+            4,
+            448,
+            440,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "raw_bounds": [
+            448,
+            448,
+            883,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "raw_bounds": [
+            891,
+            448,
+            1326,
+            883
+          ],
+          "raw_size": [
+            435,
+            435
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "raw_bounds": [
+            1334,
+            448,
+            1770,
+            883
+          ],
+          "raw_size": [
+            436,
+            435
+          ]
+        }
+      ]
+    }
+  ]
+}

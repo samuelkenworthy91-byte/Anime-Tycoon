@@ -173,10 +173,16 @@ export interface Project {
   /** weeks each production stage is planned to take */
   plan: Record<string, number>;
   createdWeek: number;
-  /** the broadcaster's target release week */
+  /** exact live-clock day the project was greenlit (legacy saves fall back to week × 7) */
+  createdDay?: number;
+  /** the broadcaster's target release week — retained for finance/calendar compatibility */
   deadlineWeek: number;
-  /** weeks past the deadline already suffered */
+  /** exact live-clock deadline */
+  deadlineDay?: number;
+  /** weeks past the deadline already suffered (release penalty compatibility) */
   lateWeeks: number;
+  /** exact number of live calendar days late */
+  lateDays?: number;
   /** ids of staff on this project (exclusive — one project per person) */
   staffIds: string[];
   points: Points;
@@ -223,6 +229,7 @@ export interface ProjectCommission {
   minQuality: number;
   bonus: number;
   deadlineWeek: number;
+  deadlineDay?: number;
 }
 
 export const TEAM_MAX = 6;
@@ -260,7 +267,7 @@ export const DEADLINE_SLACK = 4;
 /* -------------------------------------------------------- lifecycle */
 let projectSeq = 0;
 
-export function makeProject(draft: Draft, week: number): Project {
+export function makeProject(draft: Draft, week: number, day = week * 7): Project {
   const plan = stagePlan(draft);
   const totalPlan = PRODUCTION_STAGES.reduce((a, s) => a + plan[s], 0);
   const cost = draftCost(draft);
@@ -272,8 +279,11 @@ export function makeProject(draft: Draft, week: number): Project {
     progress: 0,
     plan,
     createdWeek: week,
+    createdDay: day,
     deadlineWeek: week + totalPlan + DEADLINE_SLACK,
+    deadlineDay: day + (totalPlan + DEADLINE_SLACK) * 7,
     lateWeeks: 0,
+    lateDays: 0,
     staffIds: [],
     points: { story: 0, art: 0, sound: 0 },
     liveQuality: { story: 0, art: 0, sound: 0 },
@@ -299,8 +309,10 @@ export const activeProjects = (projects: Project[]) =>
 export const isLate = (p: Project, week: number) =>
   p.stage !== "airing" && p.stage !== "done" && week > p.deadlineWeek;
 
-/** weeks left until the deadline (negative = already late) */
+/** weeks left until the deadline (legacy / high-level calendar view) */
 export const weeksToDeadline = (p: Project, week: number) => p.deadlineWeek - week;
+/** live production uses exact days; old saves derive the equivalent day from their week deadline. */
+export const daysToDeadline = (p: Project, day: number) => (p.deadlineDay ?? p.deadlineWeek * 7) - day;
 
 /* -------------------------------------------------- staff assignment */
 export const projectOfStaff = (projects: Project[], staffId: string): Project | null =>
@@ -344,8 +356,10 @@ export type StaffModFn = (s: Staff, p: Project, team: Staff[]) => StaffWorkMod;
 export interface StudioMod {
   speed: number;
   burnMult: number;
+  /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
+  issueChanceMult?: number;
 }
-export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1 };
+export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
 
 /** raw studio capacity. Capacity above the schedule ceiling becomes quality
  * and consistency rather than endlessly shortening the campaign. */
@@ -414,7 +428,7 @@ export function tickProjectsWeek(
 
   const next = projects.map((p0) => {
     if (p0.stage === "done") return p0;
-    const p = { ...p0, points: { ...p0.points }, liveQuality: { story: 0, art: 0, sound: 0, ...(p0.liveQuality ?? {}) } };
+    const p = { ...p0, points: { ...p0.points } };
     const team = staff.filter((s) => p.staffIds.includes(s.id));
 
     /* ----- airing: the payout schedule does the work; just finish up */
@@ -434,38 +448,21 @@ export function tickProjectsWeek(
     /* ----- work happens unless the team is waiting on a milestone */
     if (!p.milestone) {
       const plan = p.plan[p.stage] ?? 1;
-      const focus = STAGE_FOCUS[p.stage];
-      const qualityMult = teamQualityMultiplier(p, team, fx, mods, studio);
-      if (focus) {
-        let weeklyTarget = 0;
-        for (const s of team) {
-          const m = mods?.(s, p, team);
-          weeklyTarget += Math.round(staffPoint(s, focus) * 0.07 * (m ? m.out : staminaF(s)) * fx.pointMult[focus] * qualityMult);
-        }
-        /* Desk bubbles now bank real quality immediately. The weekly tick only
-           tops up whatever part of the established baseline was not already
-           earned live, so the same work is never counted twice. */
-        const live = p.liveQuality?.[focus] ?? 0;
-        p.points[focus] += Math.max(0, weeklyTarget - live);
-      }
-      p.liveQuality = { story: 0, art: 0, sound: 0 };
-      if (p.stage === "post") {
-        const surplusFix = Math.max(0, Math.floor((qualityMult - 1) * 8));
-        p.issues = Math.max(0, p.issues - Math.round(team.length * 0.6 + 0.4) - fx.issueFix - surplusFix);
-      }
+      /* Story / Art / Sound are deliberately NOT generated here. Quality now
+         comes only from visible Kairosoft-style desk bubbles, rushes and explicit
+         events. The weekly engine controls schedule, burn, deadlines and rework. */
       if (p.stage === "marketing") {
         p.hype = Math.min(100, p.hype + Math.round((3 + team.length * 2) * fx.hypeMult));
       }
       if (p.stage === "ready") {
-        /* deliberate delay: polish the master, but hype cools */
-        p.issues = Math.max(0, p.issues - Math.max(1, Math.round(team.length * 0.5)));
+        /* waiting never fixes editing notes for free; it only lets launch heat cool. */
         p.hype = Math.max(0, p.hype - 1);
       } else {
         const load = departmentLoad[p.id] ?? 1;
         p.progress += teamSpeed(p, team, fx, mods, studio) * load;
         /* sustained over-capacity creates rework instead of making a fifth simultaneous
            prestige show free. */
-        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post")) p.issues += 1;
+        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
@@ -491,7 +488,6 @@ export function tickProjectsWeek(
       cashDelta -= fee;
       p.spent += fee;
       p.hype = Math.max(0, p.hype - 2);
-      if (p.lateWeeks % 2 === 0) p.issues += 1;
       if (p.lateWeeks === 1)
         notices.push(`“${p.draft.title}” has missed its broadcast deadline — the network wants penalties (−£${fee.toLocaleString("en-GB")}/wk).`);
       else if (p.lateWeeks % 4 === 0)
@@ -502,6 +498,88 @@ export function tickProjectsWeek(
   });
 
   return { projects: next, cashDelta, notices };
+}
+
+export interface DayTickResult extends WeekTickResult {
+  attention: boolean;
+}
+
+/** Live-clock project schedule. Plans stay expressed in week-equivalents for save
+ * compatibility, but one in-game day banks exactly one seventh of normal schedule
+ * work and one seventh of production burn. Milestones can therefore arrive on any
+ * day rather than only at an arbitrary Sunday boundary. */
+export function tickProjectsDay(
+  projects: Project[],
+  staff: Staff[],
+  day: number,
+  fx: FacilityFX = NO_FX,
+  mods?: StaffModFn,
+  studio: StudioMod = NO_STUDIO,
+  departmentLoad: Record<string, number> = {}
+): DayTickResult {
+  let cashDelta = 0;
+  let attention = false;
+  const notices: string[] = [];
+
+  const next = projects.map((p0) => {
+    if (p0.stage === "done" || p0.stage === "airing") return p0;
+    const p = { ...p0, points: { ...p0.points } };
+    const team = staff.filter((s) => p.staffIds.includes(s.id));
+
+    const burn = Math.max(1, Math.round((p.weeklyBurn * studio.burnMult) / 7));
+    cashDelta -= burn;
+    p.spent += burn;
+
+    if (!p.milestone) {
+      const plan = p.plan[p.stage] ?? 1;
+      if (p.stage === "marketing") {
+        p.hype = Math.min(100, p.hype + ((3 + team.length * 2) * fx.hypeMult) / 7);
+      }
+      if (p.stage === "ready") {
+        p.hype = Math.max(0, p.hype - 1 / 7);
+      } else {
+        const load = departmentLoad[p.id] ?? 1;
+        p.progress += (teamSpeed(p, team, fx, mods, studio) * load) / 7;
+        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
+        if (p.progress >= plan) {
+          const gate = STAGE_GATE[p.stage];
+          if (gate && !p.milestonesDone.includes(gate)) {
+            p.progress = plan;
+            p.milestone = gate;
+            attention = true;
+            notices.push(`“${p.draft.title}”: ${MILESTONE_LABEL[gate]} is ready — the team needs you on the floor.`);
+          } else {
+            const nx = NEXT_STAGE[p.stage];
+            if (nx) {
+              p.stage = nx;
+              p.progress = 0;
+              if (nx === "ready") {
+                attention = true;
+                notices.push(`“${p.draft.title}” is ready for broadcast. Release it — or keep it back deliberately.`);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const dueDay = p.deadlineDay ?? p.deadlineWeek * 7;
+    if (day > dueDay) {
+      const lateDays = (p.lateDays ?? p.lateWeeks * 7) + 1;
+      p.lateDays = lateDays;
+      p.lateWeeks = Math.ceil(lateDays / 7);
+      const weeklyFee = 1_500 + Math.round(draftCost(p.draft) * 0.015);
+      const fee = Math.max(1, Math.round(weeklyFee / 7));
+      cashDelta -= fee;
+      p.spent += fee;
+      p.hype = Math.max(0, p.hype - 2 / 7);
+      if (lateDays === 1) notices.push(`“${p.draft.title}” misses its broadcast deadline — late fees now accrue every day.`);
+      else if (lateDays % 7 === 0) notices.push(`“${p.draft.title}” is ${lateDays} days late. Hype and cash are bleeding.`);
+    }
+    return p;
+  });
+
+  return { projects: next, cashDelta, notices, attention };
 }
 
 /** staff ids currently committed to an in-production project */
@@ -552,7 +630,8 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
       art: p.points.art + o.points.art,
       sound: p.points.sound + o.points.sound,
     },
-    issues: done === "edit" ? Math.max(0, p.issues + o.issues - (o.squashed ?? 0)) : p.issues + o.issues,
+    /* Final editing is a one-way quality pass: notes may be cleared, never manufactured. */
+    issues: done === "edit" ? Math.max(0, p.issues - (o.squashed ?? 0)) : p.issues + o.issues,
     spent: p.spent + o.spent,
     rdGained: p.rdGained + o.rdGained + (done === "edit" ? (o.squashed ?? 0) : 0),
   };
@@ -579,6 +658,7 @@ export interface ScoringContext {
   fans: number;
   /** dynasty-era audience expectations — raises the review bar */
   audienceBar?: number;
+  castAffinityDiscovered?: string[];
 }
 
 /** compute the review result for a project from its accumulated state */
@@ -615,6 +695,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     costs: p.spent,
     fanBase: ctx.fans,
     audienceBar: ctx.audienceBar,
+    castAffinityDiscovered: ctx.castAffinityDiscovered,
   });
 
   let out = res;

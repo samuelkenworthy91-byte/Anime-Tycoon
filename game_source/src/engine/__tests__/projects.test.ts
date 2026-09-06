@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Draft, Staff } from "../data";
 import {
   DEADLINE_SLACK,
@@ -34,8 +34,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "indie",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -221,7 +221,7 @@ describe("weekly progression", () => {
 
 /* ------------------------------------------------------------- deadlines */
 describe("deadlines", () => {
-  it("missing the deadline costs cash and hype and can add issues", () => {
+  it("missing the deadline costs cash and hype without adding issues", () => {
     let r = richRun();
     r = startProject(r, draft())!;
     const id = r.projects[0].id;
@@ -235,7 +235,7 @@ describe("deadlines", () => {
     expect(late.lateWeeks).toBe(2);
     expect(t1.cashDelta).toBeLessThan(-late.weeklyBurn); // burn + late fee
     expect(late.hype).toBeLessThan(20);
-    expect(late.issues).toBeGreaterThan(p0.issues);
+    expect(late.issues).toBe(p0.issues);
   });
 
   it("deadline includes planned weeks plus slack", () => {
@@ -247,6 +247,7 @@ describe("deadlines", () => {
   });
 
   it("late delivery docks release revenue", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
     let r = richRun();
     r = startProject(r, draft())!;
     const id = r.projects[0].id;

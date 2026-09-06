@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "errors": [],
+  "canonical_ids": 192,
+  "visual_profiles": 192,
+  "locked_field_deltas": 0,
+  "sheet_count": 24,
+  "assignments": 192,
+  "unique_assignment_ids": 192,
+  "characters_per_sheet": [
+    8
+  ],
+  "role_type_sheet_counts": {
+    "Lead|SHONEN": 3,
+    "Lead|SHOJO": 3,
+    "Sidekick|SHONEN": 3,
+    "Sidekick|SHOJO": 3,
+    "Mascot|SHONEN": 3,
+    "Mascot|SHOJO": 3,
+    "Villain|SHONEN": 3,
+    "Villain|SHOJO": 3
+  },
+  "unique_sheet_cells": 192,
+  "unique_crop_filenames": 192,
+  "face_eye_signature_collisions": 0,
+  "face_eye_hair_signature_collisions": 0,
+  "full_visual_signature_collisions": 0,
+  "generated_artwork_files": [],
+  "note": "Rendered-art QC ledger contains 192 PASS verdicts; asset-level validation is recorded separately."
+}

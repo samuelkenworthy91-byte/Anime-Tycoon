@@ -174,7 +174,7 @@ export default function Release({
                     studio={studio}
                     score={null}
                     hallOfFame={result.hallOfFame && verdictVisible}
-                    portrait={{ img: (awaitCast(draft.protag)).img, pos: (awaitCast(draft.protag)).pos, name: draft.protagName }}
+                    portrait={{ img: (awaitCast(draft.protag)).img, name: draft.protagName }}
                     className="shadow-[0_24px_80px_rgba(0,0,0,.6)]"
                   />
                 </div>

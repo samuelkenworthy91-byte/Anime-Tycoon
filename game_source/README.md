@@ -61,7 +61,7 @@ re-runs and word of mouth, like the Game Dev Tycoon sales chart.
 Four founding showrunners open a studio, each with a painted chibi model who
 walks your office floor and a matching head portrait:
 
-- **Genji Ashida** — Steady Hand: bubbles float longer, editing notes rarer.
+- **Genji Ashida** — Steady Hand: contribution checks are 25% more impactful, editing notes rarer.
 - **Akari Natsume** — Vision: dramatic arcs hit harder, no review below 3/10.
 - **Haruto Mori** — Golden Rolodex: contract jobs pay +40%, commission advances +30%.
 - **Sana Kobayashi** — Buzz Engine: shows open with +10 hype, marketing runs hot (+50% hype).

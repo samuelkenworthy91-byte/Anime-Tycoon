@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "parser": "@oai/artifact-tool Workbook.fromCSV",
+  "sheet": "Manifest",
+  "columns": 17,
+  "data_rows": 192,
+  "unique_ids": 192,
+  "unique_crop_filenames": 192,
+  "first_record": {
+    "sheet": "LEAD_SHONEN_01",
+    "cell": "A1",
+    "id": "kai",
+    "name": "Kai Moriyama",
+    "crop_filename": "lead_shonen_01__a1__kai.png"
+  },
+  "last_record": {
+    "sheet": "VILLAIN_SHOJO_03",
+    "cell": "B4",
+    "id": "aya",
+    "name": "Aya Hanamori",
+    "crop_filename": "villain_shojo_03__b4__aya.png"
+  },
+  "inspected_ranges": [
+    "Manifest!A1:Q5",
+    "Manifest!A189:Q193"
+  ],
+  "inspect_records_present": true
+}

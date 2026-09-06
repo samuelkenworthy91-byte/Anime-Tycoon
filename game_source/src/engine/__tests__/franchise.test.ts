@@ -40,8 +40,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "indie",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -103,7 +103,7 @@ describe("franchise creation", () => {
     const fr = out.run.franchises["Neon Drift"];
     expect(fr).toBeTruthy();
     expect(fr.baseTitle).toBe("Neon Drift");
-    expect(fr.genres).toEqual(["shonen"]);
+    expect(fr.genres).toEqual(["sports"]);
     expect(fr.entries).toHaveLength(1);
     expect(fr.entries[0].kind).toBe("original");
     expect(fr.entries[0].score).toBe(out.result.total);

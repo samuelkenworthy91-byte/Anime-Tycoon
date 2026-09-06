@@ -1,0 +1,142 @@
+[
+  {
+    "branch": "arena/01a05c9d-anime-tycoon",
+    "date": "2026-09-01T12:47:36Z",
+    "message": "Three save slots with Save/Load menus; repaint office and production floor in hand-painted FFT War of the Lions style",
+    "sha": "7ac7eecb15bbcbfbb5a4f1021c4140906ce5258d",
+    "tree": "ffbd37120139c2edbf84c5c334843181cc797ef3"
+  },
+  {
+    "branch": "arena/01a05d86-anime-tycoon",
+    "date": "2026-09-01T18:07:12Z",
+    "message": "Franchise overhaul: IPs with timelines, expectations, fatigue, cults, merch & crossovers",
+    "sha": "a332782b4b6dc4f8ade85e1fe0629f772de1c72b",
+    "tree": "cfefa24c50be3f0ce395fc7fd87e18d560040ea2"
+  },
+  {
+    "branch": "arena/01a05e36-anime-tycoon",
+    "date": "2026-09-02T05:29:59Z",
+    "message": "Worker-15/17 sprites + 8 more cast3 portraits (art batch 4)",
+    "sha": "ca345ae4abf29d80ae64ac1586dca92b3f361294",
+    "tree": "d456e6aa049026cd4484769a328f3937ed6b186f"
+  },
+  {
+    "branch": "arena/01a0608d-anime-tycoon",
+    "date": "2026-09-02T08:47:57Z",
+    "message": "Trigger APK playtest build after setup scroll and pun-title update",
+    "sha": "639af0b9ef008e19d50550270e2d9a7f88c21e3e",
+    "tree": "06a8f47b6bbe7e990ba4a77f727d719c2792c481"
+  },
+  {
+    "branch": "arena/01a0615b-anime-tycoon",
+    "date": "2026-09-02T15:32:22Z",
+    "message": "art: sheets 6-10 — completes the 60-portrait Wit/AoT rework",
+    "sha": "7dffc1d579c4d64cf7ba2b7b75b2a7eea8c9985f",
+    "tree": "997886d50effc678061ec072fb28766a7e0f1ffa"
+  },
+  {
+    "branch": "arena/01a05861-anime-tycoon",
+    "date": "2026-08-31T17:38:34Z",
+    "message": "Rename to Anime Runner + full Android launcher icon set",
+    "sha": "b27d39b5fdc674ae010d9ef56da0b813cedd6724",
+    "tree": "232412802fc6192a80986f39c44c571a1f1d84ab"
+  },
+  {
+    "branch": "arena/01a05928-anime-tycoon",
+    "date": "2026-09-01T09:45:58Z",
+    "message": "Inset the display on platforms that never report their safe area",
+    "sha": "615f3e7e03bd862f8fd3f4341de5b964be963c1a",
+    "tree": "98950f2c33cf0ea0acfd05f1236b0fa964b82025"
+  },
+  {
+    "branch": "arena/01a06577-anime-tycoon",
+    "date": "2026-09-03T04:22:12Z",
+    "message": "Replace all 186 cast portraits with individual WebP assets",
+    "sha": "62e7f25bfa7bb423ffcc924d87fd1fdac4f24d35",
+    "tree": "3ff7756286abed13ad05ff24dc2efd6f667710e5"
+  },
+  {
+    "branch": "feature/cardisoft-production-pass",
+    "date": "2026-09-03T18:55:13Z",
+    "message": "Create Kairosoft production pass staging marker",
+    "sha": "61d8acb12c6e8ba7041df501b4513be662c3233b",
+    "tree": "93005c49c337692f773fe98e69fb1de30f9fd5ec"
+  },
+  {
+    "branch": "feature/deeper-studio-loop",
+    "date": "2026-09-03T17:01:51Z",
+    "message": "Restore normal APK workflow triggers",
+    "sha": "bf2ebad4dbd9e78b950234df021eecd3883853d8",
+    "tree": "0b89f4807c62f4e85c3839aa90645d480ccf3e6f"
+  },
+  {
+    "branch": "feature/kairosoft-production-pass",
+    "date": "2026-09-04T10:21:52Z",
+    "message": "Fix live speed scaling and contract ETA; strengthen Steady Hand",
+    "sha": "63e072d310670b6cb19dbef77d2d13526f7d5317",
+    "tree": "c6a0c9c6330570e774f522d7082f362400df1de5"
+  },
+  {
+    "branch": "final-cast-portraits",
+    "date": "2026-09-03T03:25:34Z",
+    "message": "Add files via upload",
+    "sha": "e4b5afe2ff0a3bdf92f534e52f7d17e2dff95434",
+    "tree": "a596e8676564908d182a7ac0413a460dd7371d25"
+  },
+  {
+    "branch": "fix/portrait-framing-editing-loop",
+    "date": "2026-09-03T07:04:15Z",
+    "message": "Remove temporary production floor migration script",
+    "sha": "2d16e85e5eedbea34383186811d78fdf421ccbaf",
+    "tree": "ebc4750ee223471194c41f29b375107d734d5784"
+  },
+  {
+    "branch": "handoff/finalize-kairosoft-edit-balance",
+    "date": "2026-09-03T22:25:04Z",
+    "message": "Finalize validated editing balance patch",
+    "sha": "07b1d5a46b6b3ce0d3b6240f390bdd3719ea6262",
+    "tree": "48cb02c0348ea515d72a2c72aea7cfe2bd95ed88"
+  },
+  {
+    "branch": "handoff/retrigger-kairosoft-edit-balance",
+    "date": "2026-09-03T22:15:12Z",
+    "message": "Retrigger editing balance validation",
+    "sha": "4d696af0ef48f719f120f2e4fa6ce39280c41ca8",
+    "tree": "c4cc8d1a57e75932fc64dc0eac69163ae7e732ea"
+  },
+  {
+    "branch": "handoff/retrigger-kairosoft-edit-balance-2",
+    "date": "2026-09-03T22:18:32Z",
+    "message": "Retrigger hardened editing balance validation",
+    "sha": "01167ac08d4ad1eff745146324c067d51cff7712",
+    "tree": "50a0c7ae26a0542ecf9554634ea146e909a15864"
+  },
+  {
+    "branch": "handoff/trigger-kairosoft-edit-balance",
+    "date": "2026-09-03T22:13:17Z",
+    "message": "Trigger validated Kairosoft edit balance patch",
+    "sha": "5391c9c365199c2af283c849b30e47ba01ebc682",
+    "tree": "c6823cafe3464adebc35084e107c7841ca8502d0"
+  },
+  {
+    "branch": "main",
+    "date": "2026-09-03T18:00:17Z",
+    "message": "Merge approved deeper studio loop into main",
+    "sha": "f26f5be0495e8169359a81a87d69cfeefc0c68e0",
+    "tree": "0b89f4807c62f4e85c3839aa90645d480ccf3e6f"
+  },
+  {
+    "branch": "tmp-restore-pun-titles",
+    "date": "2026-09-03T04:22:12Z",
+    "message": "Replace all 186 cast portraits with individual WebP assets",
+    "sha": "62e7f25bfa7bb423ffcc924d87fd1fdac4f24d35",
+    "tree": "3ff7756286abed13ad05ff24dc2efd6f667710e5"
+  },
+  {
+    "branch": "tmp-restore-pun-titles-qa",
+    "date": "2026-09-03T05:03:32Z",
+    "message": "Restore expanded anime pun title pool",
+    "sha": "5555cb0114a2fed15721159abea60b3f57af2942",
+    "tree": "2a256aec58de295ff3437bbcdd7f4c92af4599ef"
+  }
+]

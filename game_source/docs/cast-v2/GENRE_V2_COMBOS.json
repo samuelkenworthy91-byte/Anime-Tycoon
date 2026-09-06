@@ -1,0 +1,1682 @@
+[
+  {
+    "genre_1": "mecha",
+    "genre_2": "isekai",
+    "key": "isekai|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "slice",
+    "key": "mecha|slice",
+    "first_release_multiplier": 0.8,
+    "learned_multiplier": 0.8,
+    "discovery_class": "risky"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "horror",
+    "key": "horror|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "romance",
+    "key": "mecha|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.24,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "sports",
+    "key": "mecha|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "cyber",
+    "key": "cyber|mecha",
+    "first_release_multiplier": 1.25,
+    "learned_multiplier": 1.25,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "fantasy",
+    "key": "fantasy|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "idol",
+    "key": "idol|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "mystery",
+    "key": "mecha|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "comedy",
+    "key": "comedy|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "cooking",
+    "key": "cooking|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "military",
+    "key": "mecha|military",
+    "first_release_multiplier": 1.22,
+    "learned_multiplier": 1.22,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "supernatural",
+    "key": "mecha|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "space",
+    "key": "mecha|space",
+    "first_release_multiplier": 1.24,
+    "learned_multiplier": 1.24,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "magical",
+    "key": "magical|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "survival",
+    "key": "mecha|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "pirate",
+    "key": "mecha|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.16,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "martial",
+    "key": "martial|mecha",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "mythology",
+    "key": "mecha|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mecha",
+    "genre_2": "nordic",
+    "key": "mecha|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "slice",
+    "key": "isekai|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "horror",
+    "key": "horror|isekai",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "romance",
+    "key": "isekai|romance",
+    "first_release_multiplier": 0.88,
+    "learned_multiplier": 0.88,
+    "discovery_class": "risky"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "sports",
+    "key": "isekai|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "cyber",
+    "key": "cyber|isekai",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "fantasy",
+    "key": "fantasy|isekai",
+    "first_release_multiplier": 1.25,
+    "learned_multiplier": 1.25,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "idol",
+    "key": "idol|isekai",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.22,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "mystery",
+    "key": "isekai|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "comedy",
+    "key": "comedy|isekai",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "cooking",
+    "key": "cooking|isekai",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "military",
+    "key": "isekai|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "supernatural",
+    "key": "isekai|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "space",
+    "key": "isekai|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "magical",
+    "key": "isekai|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "survival",
+    "key": "isekai|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "pirate",
+    "key": "isekai|pirate",
+    "first_release_multiplier": 1.18,
+    "learned_multiplier": 1.18,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "martial",
+    "key": "isekai|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "mythology",
+    "key": "isekai|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "isekai",
+    "genre_2": "nordic",
+    "key": "isekai|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "horror",
+    "key": "horror|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.3,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "romance",
+    "key": "romance|slice",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "sports",
+    "key": "slice|sports",
+    "first_release_multiplier": 1.1,
+    "learned_multiplier": 1.1,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "cyber",
+    "key": "cyber|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.22,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "fantasy",
+    "key": "fantasy|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "idol",
+    "key": "idol|slice",
+    "first_release_multiplier": 1.15,
+    "learned_multiplier": 1.15,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "mystery",
+    "key": "mystery|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "comedy",
+    "key": "comedy|slice",
+    "first_release_multiplier": 1.16,
+    "learned_multiplier": 1.16,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "cooking",
+    "key": "cooking|slice",
+    "first_release_multiplier": 1.18,
+    "learned_multiplier": 1.18,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "military",
+    "key": "military|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "supernatural",
+    "key": "slice|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "space",
+    "key": "slice|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.24,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "magical",
+    "key": "magical|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "survival",
+    "key": "slice|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.18,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "pirate",
+    "key": "pirate|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "martial",
+    "key": "martial|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "mythology",
+    "key": "mythology|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "slice",
+    "genre_2": "nordic",
+    "key": "nordic|slice",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "romance",
+    "key": "horror|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.16,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "sports",
+    "key": "horror|sports",
+    "first_release_multiplier": 0.8,
+    "learned_multiplier": 0.8,
+    "discovery_class": "risky"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "cyber",
+    "key": "cyber|horror",
+    "first_release_multiplier": 1.1,
+    "learned_multiplier": 1.1,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "fantasy",
+    "key": "fantasy|horror",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "idol",
+    "key": "horror|idol",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.28,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "mystery",
+    "key": "horror|mystery",
+    "first_release_multiplier": 1.25,
+    "learned_multiplier": 1.25,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "comedy",
+    "key": "comedy|horror",
+    "first_release_multiplier": 0.82,
+    "learned_multiplier": 0.82,
+    "discovery_class": "risky"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "cooking",
+    "key": "cooking|horror",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.26,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "military",
+    "key": "horror|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "supernatural",
+    "key": "horror|supernatural",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "space",
+    "key": "horror|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "magical",
+    "key": "horror|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "survival",
+    "key": "horror|survival",
+    "first_release_multiplier": 1.22,
+    "learned_multiplier": 1.22,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "pirate",
+    "key": "horror|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "martial",
+    "key": "horror|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "mythology",
+    "key": "horror|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "horror",
+    "genre_2": "nordic",
+    "key": "horror|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "sports",
+    "key": "romance|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "cyber",
+    "key": "cyber|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "fantasy",
+    "key": "fantasy|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "idol",
+    "key": "idol|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "mystery",
+    "key": "mystery|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.18,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "comedy",
+    "key": "comedy|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "cooking",
+    "key": "cooking|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "military",
+    "key": "military|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "supernatural",
+    "key": "romance|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "space",
+    "key": "romance|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "magical",
+    "key": "magical|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "survival",
+    "key": "romance|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "pirate",
+    "key": "pirate|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "martial",
+    "key": "martial|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "mythology",
+    "key": "mythology|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "romance",
+    "genre_2": "nordic",
+    "key": "nordic|romance",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "cyber",
+    "key": "cyber|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "fantasy",
+    "key": "fantasy|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "idol",
+    "key": "idol|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "mystery",
+    "key": "mystery|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.26,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "comedy",
+    "key": "comedy|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "cooking",
+    "key": "cooking|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "military",
+    "key": "military|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "supernatural",
+    "key": "sports|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "space",
+    "key": "space|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "magical",
+    "key": "magical|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "survival",
+    "key": "sports|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "pirate",
+    "key": "pirate|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "martial",
+    "key": "martial|sports",
+    "first_release_multiplier": 1.25,
+    "learned_multiplier": 1.25,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "mythology",
+    "key": "mythology|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "sports",
+    "genre_2": "nordic",
+    "key": "nordic|sports",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "fantasy",
+    "key": "cyber|fantasy",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.15,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "idol",
+    "key": "cyber|idol",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "mystery",
+    "key": "cyber|mystery",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "comedy",
+    "key": "comedy|cyber",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "cooking",
+    "key": "cooking|cyber",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "military",
+    "key": "cyber|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "supernatural",
+    "key": "cyber|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "space",
+    "key": "cyber|space",
+    "first_release_multiplier": 1.16,
+    "learned_multiplier": 1.16,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "magical",
+    "key": "cyber|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "survival",
+    "key": "cyber|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "pirate",
+    "key": "cyber|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "martial",
+    "key": "cyber|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "mythology",
+    "key": "cyber|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cyber",
+    "genre_2": "nordic",
+    "key": "cyber|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.14,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "idol",
+    "key": "fantasy|idol",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "mystery",
+    "key": "fantasy|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "comedy",
+    "key": "comedy|fantasy",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "cooking",
+    "key": "cooking|fantasy",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "military",
+    "key": "fantasy|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "supernatural",
+    "key": "fantasy|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "space",
+    "key": "fantasy|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "magical",
+    "key": "fantasy|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "survival",
+    "key": "fantasy|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "pirate",
+    "key": "fantasy|pirate",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "martial",
+    "key": "fantasy|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "mythology",
+    "key": "fantasy|mythology",
+    "first_release_multiplier": 1.22,
+    "learned_multiplier": 1.22,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "fantasy",
+    "genre_2": "nordic",
+    "key": "fantasy|nordic",
+    "first_release_multiplier": 1.15,
+    "learned_multiplier": 1.15,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "mystery",
+    "key": "idol|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "comedy",
+    "key": "comedy|idol",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "cooking",
+    "key": "cooking|idol",
+    "first_release_multiplier": 1.12,
+    "learned_multiplier": 1.12,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "military",
+    "key": "idol|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.18,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "supernatural",
+    "key": "idol|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "space",
+    "key": "idol|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "magical",
+    "key": "idol|magical",
+    "first_release_multiplier": 1.14,
+    "learned_multiplier": 1.14,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "survival",
+    "key": "idol|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "pirate",
+    "key": "idol|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "martial",
+    "key": "idol|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "mythology",
+    "key": "idol|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "idol",
+    "genre_2": "nordic",
+    "key": "idol|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "comedy",
+    "key": "comedy|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "cooking",
+    "key": "cooking|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "military",
+    "key": "military|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "supernatural",
+    "key": "mystery|supernatural",
+    "first_release_multiplier": 1.15,
+    "learned_multiplier": 1.15,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "space",
+    "key": "mystery|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "magical",
+    "key": "magical|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "survival",
+    "key": "mystery|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "pirate",
+    "key": "mystery|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "martial",
+    "key": "martial|mystery",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "mythology",
+    "key": "mystery|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mystery",
+    "genre_2": "nordic",
+    "key": "mystery|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "cooking",
+    "key": "comedy|cooking",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "military",
+    "key": "comedy|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "supernatural",
+    "key": "comedy|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "space",
+    "key": "comedy|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "magical",
+    "key": "comedy|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "survival",
+    "key": "comedy|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "pirate",
+    "key": "comedy|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "martial",
+    "key": "comedy|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "mythology",
+    "key": "comedy|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "comedy",
+    "genre_2": "nordic",
+    "key": "comedy|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "military",
+    "key": "cooking|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "supernatural",
+    "key": "cooking|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "space",
+    "key": "cooking|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.12,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "magical",
+    "key": "cooking|magical",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "survival",
+    "key": "cooking|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "pirate",
+    "key": "cooking|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "martial",
+    "key": "cooking|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "mythology",
+    "key": "cooking|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "cooking",
+    "genre_2": "nordic",
+    "key": "cooking|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "supernatural",
+    "key": "military|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "space",
+    "key": "military|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "magical",
+    "key": "magical|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.25,
+    "discovery_class": "experimental"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "survival",
+    "key": "military|survival",
+    "first_release_multiplier": 1.18,
+    "learned_multiplier": 1.18,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "pirate",
+    "key": "military|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "martial",
+    "key": "martial|military",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "mythology",
+    "key": "military|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "military",
+    "genre_2": "nordic",
+    "key": "military|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "space",
+    "key": "space|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "magical",
+    "key": "magical|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "survival",
+    "key": "supernatural|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "pirate",
+    "key": "pirate|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "martial",
+    "key": "martial|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "mythology",
+    "key": "mythology|supernatural",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  },
+  {
+    "genre_1": "supernatural",
+    "genre_2": "nordic",
+    "key": "nordic|supernatural",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "magical",
+    "key": "magical|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "survival",
+    "key": "space|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "pirate",
+    "key": "pirate|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "martial",
+    "key": "martial|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "mythology",
+    "key": "mythology|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "space",
+    "genre_2": "nordic",
+    "key": "nordic|space",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "magical",
+    "genre_2": "survival",
+    "key": "magical|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "magical",
+    "genre_2": "pirate",
+    "key": "magical|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "magical",
+    "genre_2": "martial",
+    "key": "magical|martial",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "magical",
+    "genre_2": "mythology",
+    "key": "magical|mythology",
+    "first_release_multiplier": 1.18,
+    "learned_multiplier": 1.18,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "magical",
+    "genre_2": "nordic",
+    "key": "magical|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "survival",
+    "genre_2": "pirate",
+    "key": "pirate|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "survival",
+    "genre_2": "martial",
+    "key": "martial|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "survival",
+    "genre_2": "mythology",
+    "key": "mythology|survival",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "survival",
+    "genre_2": "nordic",
+    "key": "nordic|survival",
+    "first_release_multiplier": 1.18,
+    "learned_multiplier": 1.18,
+    "discovery_class": "supportive"
+  },
+  {
+    "genre_1": "pirate",
+    "genre_2": "martial",
+    "key": "martial|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "pirate",
+    "genre_2": "mythology",
+    "key": "mythology|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "pirate",
+    "genre_2": "nordic",
+    "key": "nordic|pirate",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "martial",
+    "genre_2": "mythology",
+    "key": "martial|mythology",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "martial",
+    "genre_2": "nordic",
+    "key": "martial|nordic",
+    "first_release_multiplier": 1.0,
+    "learned_multiplier": 1.0,
+    "discovery_class": "neutral"
+  },
+  {
+    "genre_1": "mythology",
+    "genre_2": "nordic",
+    "key": "mythology|nordic",
+    "first_release_multiplier": 1.2,
+    "learned_multiplier": 1.2,
+    "discovery_class": "strong"
+  }
+]

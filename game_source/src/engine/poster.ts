@@ -19,7 +19,7 @@
  * the design of every poster is unit-testable.
  */
 
-import { GENRE, GENRES, MEDIUMS, SLOTS, type Draft, type GenreId, type Genre } from "./data";
+import { GENRE, GENRES, MEDIUMS, SLOTS, type AnimeType, type Draft, type GenreId, type Genre } from "./data";
 
 /* ------------------------------------------------------------- fonts ---- */
 
@@ -55,17 +55,14 @@ const CREEPSTER: Pick<PosterFont, "family"> = { family: '"Creepster", Impact, fa
 
 /** one font treatment per genre — this is the "different font per genre" rule */
 export const POSTER_FONTS: Record<GenreId, PosterFont> = {
-  shonen: { ...ANTON, upperCase: true, tracking: 0.02, skew: -2, glow: "#ff9a3d" },
   sports: { ...ANTON, upperCase: true, tracking: 0.03, italic: true, skew: -7 },
-  racing: { ...ANTON, upperCase: true, tracking: 0.01, italic: true, skew: -11 },
+  martial: { ...ANTON, upperCase: true, tracking: 0.01, italic: true, skew: -5 },
   military: { ...BLACKOPS, weight: 400, italic: false, upperCase: true, tracking: 0.05, skew: 0, scale: 0.96 },
   mecha: { ...CHAKRA, weight: 700, italic: false, upperCase: true, tracking: 0.07, skew: 0, scale: 1, glow: "#7af0ff" },
   cyber: { ...CHAKRA, weight: 600, italic: false, upperCase: true, tracking: 0.04, skew: 0, scale: 1, glow: "#22d3ee" },
   space: { ...CHAKRA, weight: 700, italic: false, upperCase: true, tracking: 0.12, skew: 0, scale: 0.94, glow: "#4cc9f0" },
   romance: { ...PLAYFAIR, weight: 700, italic: true, upperCase: false, tracking: 0.01, skew: 0, scale: 1.04 },
-  noir: { ...PLAYFAIR, weight: 800, italic: false, upperCase: true, tracking: 0.09, skew: 0, scale: 0.98 },
   mystery: { ...PLAYFAIR, weight: 600, italic: false, upperCase: false, tracking: 0.06, skew: 0, scale: 1 },
-  shojo: { ...COMFORTAA, weight: 700, italic: false, upperCase: false, tracking: 0.02, skew: 0, scale: 1, glow: "#ff9ecf" },
   idol: { ...COMFORTAA, weight: 700, italic: false, upperCase: true, tracking: 0.04, skew: 0, scale: 0.96, glow: "#f472b6" },
   magical: { ...COMFORTAA, weight: 700, italic: false, upperCase: false, tracking: 0.03, skew: -1, scale: 1, glow: "#f72585" },
   slice: { ...LILITA, weight: 400, italic: false, upperCase: false, tracking: 0.01, skew: 0, scale: 1.06 },
@@ -75,6 +72,10 @@ export const POSTER_FONTS: Record<GenreId, PosterFont> = {
   isekai: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.05, skew: 0, scale: 0.98, glow: "#a78bfa" },
   supernatural: { ...CINZEL, weight: 600, italic: false, upperCase: true, tracking: 0.07, skew: 0, scale: 0.98, glow: "#9d4edd" },
   horror: { ...CREEPSTER, weight: 400, italic: false, upperCase: true, tracking: 0.04, skew: 1, scale: 1.1, glow: "#86e03c" },
+  survival: { ...BLACKOPS, weight: 400, italic: false, upperCase: true, tracking: 0.025, skew: 0, scale: 0.98 },
+  pirate: { ...CINZEL, weight: 700, italic: true, upperCase: true, tracking: 0.035, skew: -2, scale: 1.02 },
+  mythology: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.08, skew: 0, scale: 0.98 },
+  nordic: { ...PLAYFAIR, weight: 800, italic: false, upperCase: true, tracking: 0.055, skew: 0, scale: 0.98 },
 };
 
 export const posterFontFor = (genre: GenreId): PosterFont => POSTER_FONTS[genre];
@@ -113,8 +114,6 @@ export type PosterDeco =
   | "neonBars"; /* cyberpunk neon slats */
 
 export const POSTER_DECOS: Record<GenreId, PosterDeco[]> = {
-  shonen: ["burst", "speedlines"],
-  shojo: ["petals", "sparkles"],
   slice: ["steam"],
   fantasy: ["runes"],
   romance: ["hearts", "petals"],
@@ -127,12 +126,15 @@ export const POSTER_DECOS: Record<GenreId, PosterDeco[]> = {
   cyber: ["neonBars", "hex"],
   comedy: ["burst"],
   cooking: ["steam", "stars"],
-  racing: ["checker", "speedlines"],
+  martial: ["burst", "speedlines"],
   military: ["reticle", "stars"],
   supernatural: ["runes", "fog"],
   space: ["orbit", "stars"],
-  noir: ["fog"],
   magical: ["sparkles", "glitter"],
+  survival: ["fog", "reticle"],
+  pirate: ["speedlines", "stars"],
+  mythology: ["runes", "stars"],
+  nordic: ["fog", "stars"],
 };
 
 /* ------------------------------------------------------------ layout ---- */
@@ -262,6 +264,7 @@ export const POSTER_GENRE_IDS = GENRES.map((g) => g.id);
 export interface HofEntryLite {
   title: string;
   genres: GenreId[];
+  animeType?: AnimeType;
   protag: string;
   score: number;
 }

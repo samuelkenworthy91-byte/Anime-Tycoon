@@ -8,6 +8,9 @@ export interface ContractAssignment {
   showrunner?: boolean;
   startWeek: number;
   dueWeek: number;
+  /** day-accurate deadline used by the live studio clock */
+  startDay?: number;
+  dueDay?: number;
   progress: number;
   /** progress already produced by live desk bubbles in the current week */
   liveProgressThisWeek?: number;
@@ -21,6 +24,8 @@ export interface TrainingJob {
   tier: number;
   startWeek: number;
   completesWeek: number;
+  startDay?: number;
+  completesDay?: number;
 }
 
 export interface ResearchJob {
@@ -29,7 +34,22 @@ export interface ResearchJob {
   name: string;
   startWeek: number;
   completesWeek: number;
+  startDay?: number;
+  completesDay?: number;
   rdCost: number;
+}
+
+/** Live-clock constants shared by playback, ETA maths and tests. */
+export const LIVE_DAY_MS = 10_000;
+export const LIVE_WORK_PULSE_BASE_MS = 1_750;
+export const LIVE_WORK_PULSES_PER_DAY = LIVE_DAY_MS / LIVE_WORK_PULSE_BASE_MS;
+export const SHOWRUNNER_CONTRACT_PULSE_CHANCE = 0.34;
+
+/** Playback speed changes real time only. Every speed therefore gets the same
+ * expected number of contribution checks per in-game day. */
+export function liveWorkPulseGapMs(speed: number): number {
+  if (speed <= 0) return LIVE_WORK_PULSE_BASE_MS;
+  return Math.max(80, Math.round(LIVE_WORK_PULSE_BASE_MS / speed));
 }
 
 export const trainingWeeks = (tier: number) => Math.max(2, 5 - Math.max(1, tier));
@@ -46,10 +66,20 @@ export function showrunnerContractSkill(showrunner: string, showsMade: number, t
   return Math.min(99, base + speciality);
 }
 
+/** Showrunners are senior contributors, not another junior desk roll.
+ * Every personal showrunner bubble gets +1 on top of the normal percentile output. */
+export function showrunnerBubbleOutput(effectiveSkill: number, roll = Math.random()): number {
+  const skill = Math.max(0, effectiveSkill);
+  const guaranteed = Math.floor(skill / 100);
+  const remainder = skill - guaranteed * 100;
+  return 1 + guaranteed + (roll * 100 < remainder ? 1 : 0);
+}
+
 export function contractWeeklyOutput(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
   const pipeline = research.includes("pipeline") ? 1.12 : 1;
   const base = 4;
-  const runner = showrunnerSkill > 0 ? showrunnerSkill * 0.16 : 0;
+  /* Legacy/headless cadence mirrors the live senior-bubble floor. */
+  const runner = showrunnerSkill > 0 ? 6 + showrunnerSkill * 0.16 : 0;
   return Math.max(
     1,
     Math.round((base + runner + crew.reduce((a, s) => a + staffPoint(s, contract.type) * (0.14 + s.stamina / 1000), 0)) * pipeline)
@@ -60,19 +90,16 @@ export function contractWeeklyOutput(contract: Contract, crew: Staff[], research
  * Actual delivery remains RNG-driven and can be faster or slower. */
 export function contractDailyOutputEstimate(contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0): number {
   const pipeline = research.includes("pipeline") ? 1.12 : 1;
-  const one = (skill: number) => {
-    const s = Math.max(1, Math.min(99, skill));
-    const chance = Math.min(0.97, 0.62 + s / 300);
-    const avgBubble = Math.min(6, 1 + s / 34 + 0.9);
-    return 5.7 * chance * avgBubble;
-  };
-  const staff = crew.reduce((a, s) => a + one(staffPoint(s, contract.type)), 0);
-  const runner = showrunnerSkill > 0 ? one(showrunnerSkill) : 0;
-  return Math.max(1, Math.round((staff + runner) * pipeline));
+  const staffPerPulse = crew.reduce((a, s) => a + (staffPoint(s, contract.type) * pipeline) / 100, 0);
+  const runnerEffective = showrunnerSkill * pipeline;
+  const runnerPerPulse = showrunnerSkill > 0
+    ? SHOWRUNNER_CONTRACT_PULSE_CHANCE * (1 + runnerEffective / 100)
+    : 0;
+  return Math.max(0.1, Math.round((staffPerPulse + runnerPerPulse) * LIVE_WORK_PULSES_PER_DAY * 10) / 10);
 }
 
 export const projectedContractTotal = (contract: Contract, crew: Staff[], research: string[] = [], showrunnerSkill = 0) =>
-  contractDailyOutputEstimate(contract, crew, research, showrunnerSkill) * contract.weeks * 7;
+  Math.round(contractDailyOutputEstimate(contract, crew, research, showrunnerSkill) * contract.weeks * 7);
 
 /** Better staff need less Research Data to reach the same boost confidence. */
 export function rushResearchCost(skill: number, chance: number): number {

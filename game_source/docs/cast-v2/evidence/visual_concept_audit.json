@@ -1,0 +1,110 @@
+{
+  "source_sha256": "f6f9ad196d818a76b3f9d67d2e7459e7ffa07d942f48b279729e9fe4397543d0",
+  "canonical_ids": 192,
+  "visual_profiles": 192,
+  "sheets": 24,
+  "characters_per_sheet": [
+    8
+  ],
+  "role_type_blocks": {
+    "Lead|SHONEN": 3,
+    "Lead|SHOJO": 3,
+    "Sidekick|SHONEN": 3,
+    "Sidekick|SHOJO": 3,
+    "Mascot|SHONEN": 3,
+    "Mascot|SHOJO": 3,
+    "Villain|SHONEN": 3,
+    "Villain|SHOJO": 3
+  },
+  "manifest_rows": 192,
+  "unique_manifest_ids": 192,
+  "unique_sheet_cells": 192,
+  "unique_crop_filenames": 192,
+  "face_eye_signature_collisions": 0,
+  "face_eye_hair_signature_collisions": 0,
+  "complete_signature_collisions": 0,
+  "school_uniform_concepts": 5,
+  "military_uniform_or_fatigue_concepts": 5,
+  "trench_coat_concepts": 0,
+  "japanese_or_mixed_japanese_basis": 83,
+  "non_human_or_nonstandard_species": 62,
+  "primary_palette_families": 98,
+  "hidden_affinity_collision_reviews": [
+    {
+      "id": "kage",
+      "risk": "Hidden Mystery vs visible notebook/raincoat",
+      "resolution": "Notebook stays shut and ordinary; raincoat is only weather protection; no investigation staging."
+    },
+    {
+      "id": "hikari",
+      "risk": "Hidden Military vs school uniform",
+      "resolution": "The garment remains an ordinary contemporary school uniform with no rank, insignia, command posture, or service tailoring."
+    },
+    {
+      "id": "tsubasa",
+      "risk": "Hidden Mecha vs visible Space flight gear",
+      "resolution": "Flight gear serves Space only; powered systems, mech silhouettes, machine interfaces, and pilot emblems are banned."
+    },
+    {
+      "id": "s_chiaki",
+      "risk": "Hidden Mystery vs pocket recorder",
+      "resolution": "Recorder serves the visible Supernatural premise as a plain audio device; no evidence-taking pose or clue layout."
+    },
+    {
+      "id": "s_ironmaid",
+      "risk": "Hidden Mecha vs visible Military harness",
+      "resolution": "Harness is conventional Military flight equipment; powered armour, mechanical wings, cockpit cues, and machine motifs are banned."
+    },
+    {
+      "id": "p_kiki2",
+      "risk": "Hidden Cooking vs warm throat wording",
+      "resolution": "Warm describes natural salamander colouring only; food, heat-source, utensil, apron, and kitchen cues remain banned."
+    },
+    {
+      "id": "p_tama",
+      "risk": "Hidden Mecha vs fantastical whale silhouette",
+      "resolution": "The canonical summary explicitly bans machinery; retain fully organic fins, skin, and movement."
+    },
+    {
+      "id": "p_bloop",
+      "risk": "Hidden Space vs translucent unusual species",
+      "resolution": "The canonical summary bans space motifs; use neutral refraction without stars, voids, planets, or cosmic lighting."
+    },
+    {
+      "id": "v_kurogane",
+      "risk": "Hidden Military vs authoritarian manager",
+      "resolution": "Authority stays institutional and civilian; the canonical summary bans military insignia and the prompt bans service styling."
+    },
+    {
+      "id": "v_volt",
+      "risk": "Hidden Space vs visible Mecha pilot glove",
+      "resolution": "Use an Earthbound test-fleet design with no pressure suit, stars, orbital insignia, or astronaut construction."
+    },
+    {
+      "id": "v_carnage",
+      "risk": "Hidden Martial Arts vs visible Sports tape",
+      "resolution": "Tape reads as sports support only; fighting guards, belts, dojo cues, and combat weapons are banned."
+    },
+    {
+      "id": "v_magus",
+      "risk": "Hidden Cooking vs teaching slate",
+      "resolution": "The slate remains a dry academic tool; no recipe, menu, ingredient, utensil, or food-service framing."
+    },
+    {
+      "id": "v_reaper",
+      "risk": "Hidden Horror vs locked display name",
+      "resolution": "Treat Reaper only as a sports nickname; show healthy complexion, clean kit, normal light, and zero death imagery."
+    },
+    {
+      "id": "v_collector",
+      "risk": "Hidden Fantasy vs catalogue/collector concept",
+      "resolution": "Catalogue records ordinary objects; the summary and prompt ban magical relics, runes, enchanted materials, and fantasy lighting."
+    },
+    {
+      "id": "v_falsetto",
+      "risk": "Hidden Romance vs polished Idol styling",
+      "resolution": "Idol polish remains public and professional; romantic jewellery, flirtation, blush, date styling, and heart/rose shapes are banned."
+    }
+  ],
+  "validation": "PASS"
+}

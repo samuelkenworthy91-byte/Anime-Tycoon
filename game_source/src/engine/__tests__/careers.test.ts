@@ -23,7 +23,7 @@ import {
   studioProduction,
   toLegend,
 } from "../careers";
-import { makeProject, tickProjectsWeek, teamSpeed, type Project, type StaffModFn } from "../projects";
+import { makeProject, teamSpeed, type Project, type StaffModFn } from "../projects";
 import {
   advanceWeeks,
   appointHead,
@@ -32,6 +32,7 @@ import {
   grantContractXp,
   headBlockReason,
   initialRun,
+  contributionEffectiveSkill,
   migrateRun,
   releaseProject,
   respondPoach,
@@ -47,8 +48,8 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Test Show",
   medium: "tv",
   budget: "indie",
-  slot: "midnight",
-  genres: ["shonen"],
+  slot: "midnight", animeType:"shonen",
+  genres: ["sports"],
   audience: "teens",
   protag: "hero",
   protagName: "Aki",
@@ -77,7 +78,7 @@ const worker = (id: string, over: Partial<Staff> = {}): Staff => ({
   morale: 70,
   traits: [],
   spec: "w_action",
-  favGenre: "shonen",
+  favGenre: "sports",
   joinedWeek: 0,
   shows: [],
   awardsWon: 0,
@@ -185,12 +186,12 @@ describe("traits", () => {
   });
 
   it("Genre Fanatic shines on the favourite genre only", () => {
-    const fan = worker("f", { traits: ["fanatic"], favGenre: "shonen" });
-    const on = personMod(fan, proj({ genres: ["shonen"] }), [], noBonds);
+    const fan = worker("f", { traits: ["fanatic"], favGenre: "sports" });
+    const on = personMod(fan, proj({ genres: ["sports"] }), [], noBonds);
     const off = personMod(fan, proj({ genres: ["slice"] }), [], noBonds);
     // both projects match the w_action spec? shonen does, slice doesn't — isolate by removing spec
     const fanNoSpec = { ...fan, spec: "w_mystery" };
-    const on2 = personMod(fanNoSpec, proj({ genres: ["shonen"] }), [], noBonds);
+    const on2 = personMod(fanNoSpec, proj({ genres: ["sports"] }), [], noBonds);
     const off2 = personMod(fanNoSpec, proj({ genres: ["slice"] }), [], noBonds);
     expect(on2.out).toBeCloseTo(off2.out * 1.3);
     expect(on.out).toBeGreaterThan(off.out);
@@ -219,7 +220,7 @@ describe("specialisations", () => {
 
   it("a matching genre gives +25% output", () => {
     const s = worker("s", { spec: "w_action" }); // shonen/sports/mecha
-    const on = personMod(s, proj({ genres: ["shonen"] }), [], noBonds);
+    const on = personMod(s, proj({ genres: ["sports"] }), [], noBonds);
     const off = personMod(s, proj({ genres: ["slice"] }), [], noBonds);
     expect(on.out).toBeCloseTo(off.out * 1.25);
   });
@@ -236,13 +237,14 @@ describe("specialisations", () => {
     expect(s2.out).toBeCloseTo(s1.out * 1.25);
   });
 
-  it("spec bonuses flow into weekly production", () => {
-    const s = worker("s", { spec: "w_action" });
-    const p = { ...proj({ genres: ["shonen"] }), staffIds: ["s"] };
-    const mods: StaffModFn = (st, pr, team) => personMod(st, pr, team, noBonds);
-    const withSpec = tickProjectsWeek([p], [s], 1, undefined, mods).projects[0];
-    const noSpec = tickProjectsWeek([p], [{ ...s, spec: "w_comedy" }], 1, undefined, mods).projects[0];
-    expect(withSpec.points.story).toBeGreaterThan(noSpec.points.story);
+  it("spec bonuses flow into live percentile production", () => {
+    const s = worker("s", { spec: "w_action", stamina: 100 });
+    const p = { ...proj({ genres: ["sports"] }), staffIds: ["s"] };
+    const run = { ...initialRun("Spec", "producer"), staff: [s], projects: [p] };
+    const withSpec = contributionEffectiveSkill(run, s, "story");
+    const off = { ...s, spec: "w_comedy" };
+    const noSpec = contributionEffectiveSkill({ ...run, staff: [off] }, off, "story");
+    expect(withSpec).toBeGreaterThan(noSpec);
   });
 });
 

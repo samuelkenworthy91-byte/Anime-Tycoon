@@ -14,10 +14,10 @@ import {
   staffPoint,
   type PointType,
 } from "../engine/data";
-import type { RunState } from "../engine/state";
+import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
 import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport } from "../engine/studioOps";
-import { MILESTONE_LABEL } from "../engine/projects";
+import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
@@ -27,11 +27,12 @@ const PHASES: Record<Exclude<MilestoneId, "edit">, { idx: 0 | 1 | 2; name: strin
   sound: { idx: 2, name: "RECORDING RUSH", icon: Music4, a: "Soundtrack", b: "Voice Cast", type: "sound" },
 };
 
-export default function Produce({ run, project, milestone, onDone, onBack }: {
+export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {
   run: RunState;
   project: Project;
   milestone: MilestoneId;
   paused: boolean;
+  workPulses?: DeskPulse[];
   onDone: (o: MilestoneOutcome) => void;
   onBack: () => void;
 }) {
@@ -78,7 +79,12 @@ export default function Produce({ run, project, milestone, onDone, onBack }: {
 
   if (isEdit) {
     const remaining = project.issues;
-    const late = run.week > project.deadlineWeek;
+    const liveDay = run.day ?? run.week * 7;
+    const deadlineDay = project.deadlineDay ?? project.deadlineWeek * 7;
+    const lateDays = Math.max(project.lateDays ?? 0, Math.max(0, liveDay - deadlineDay));
+    const late = lateDays > 0;
+    const dailyLateFee = Math.max(1, Math.round((1_500 + Math.round(draftCost(project.draft) * 0.015)) / 7));
+    const revenuePenalty = Math.min(30, Math.max(0, project.lateWeeks) * 3);
     return (
       <div className="relative flex h-full w-full flex-col overflow-hidden bg-ink gridlines">
         <div className="nice-scroll relative z-10 mx-auto w-full max-w-xl flex-1 overflow-y-auto p-4">
@@ -86,13 +92,20 @@ export default function Produce({ run, project, milestone, onDone, onBack }: {
             <Scissors size={24} className="mx-auto text-mint" />
             <div className="mt-2 text-[10px] font-bold tracking-[0.35em] text-mint">EDIT BAY · LIVE CALENDAR</div>
             <h2 className="font-display text-3xl font-extrabold">POLISH OR SHIP?</h2>
-            <p className="mt-1 text-xs text-paper/55">There is no edit-note timer. Let the calendar run and the team keeps clearing notes; every note removed earns +1 RD. Lock whenever you choose.</p>
+            <p className="mt-1 text-xs text-paper/55">Editing notes only move one way: down. Keep the calendar running to chase a cleaner master; every cleared note improves final quality and earns +1 RD. The trade-off is time and money.</p>
           </div>
 
           <div className={cn("mt-4 rounded-2xl border p-4 text-center", remaining === 0 ? "border-mint/60 bg-mint/10" : "border-gold/45 bg-gold/5")}>
             <div className="text-[9px] font-extrabold tracking-[0.3em] text-paper/45">EDITOR NOTES REMAINING</div>
             <div className={cn("mt-1 font-display text-6xl font-extrabold tabular-nums", remaining === 0 ? "text-mint" : "text-gold")}>{remaining}</div>
             <div className="mt-2 text-[10px] font-bold text-cyanx">✂ EVERY CLEARED NOTE = +1 RD</div>
+            <div className="mt-3 min-h-10 space-y-1">
+              {workPulses.filter((p) => p.source === "edit").slice(-3).map((p) => (
+                <div key={p.nonce} className="anim-pop mx-auto flex w-fit items-center gap-2 rounded-full border border-mint/50 bg-mint/10 px-3 py-1 text-[10px] font-extrabold text-mint">
+                  <span>{p.name.split(" ")[0]}</span><span>−{p.points} NOTE{p.points === 1 ? "" : "S"}</span><span className="text-viol">+{p.points} RD</span>
+                </div>
+              ))}
+            </div>
             <div className="mt-2 text-[9px] text-paper/45">Calendar: {dateLabel(run.week)} · use the time controls above to keep editing</div>
           </div>
 
@@ -103,7 +116,7 @@ export default function Produce({ run, project, milestone, onDone, onBack }: {
           ) : (
             <div className="anim-pop mt-3 rounded-xl border border-mint/50 bg-mint/10 p-3 text-center text-xs font-extrabold text-mint">MASTER CLEAN · ALL NOTES RESOLVED</div>
           )}
-          {late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · every extra week now costs cash, hype and can create further issues.</div>}
+          {late && <div className="mt-3 rounded-xl border border-neon/55 bg-neon/10 p-3 text-xs font-bold text-neon">LATE DELIVERY · {lateDays} day{lateDays === 1 ? "" : "s"} late · £{dailyLateFee.toLocaleString("en-GB")}/day late fee · current release payout −{revenuePenalty}%. Notes cannot increase, but burn, fees and hype loss keep running.</div>}
 
           <div className="mt-3 ink-card p-3">
             <div className="text-center text-[10px] font-extrabold tracking-[0.2em] text-cyanx">FINAL BILLING</div>
@@ -156,7 +169,7 @@ export default function Produce({ run, project, milestone, onDone, onBack }: {
       min = Math.round(min * 1.25);
       max = Math.round(max * 1.25);
     }
-    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1);
+    const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === "steady" ? 0.75 : 1);
     const ideaPool = [
       ...team.map((st) => ({ name: st.name, skill: Math.round(staffPoint(st, phase!.type)) })),
       { name: runner.name, skill: Math.min(99, 48 + run.showsMade * 2) },

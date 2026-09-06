@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { initialRun, tickEditDay, tickStudioDay } from "../state";
+import { initialRun, tickEditWorkPulse, tickStudioDay } from "../state";
 import { makeProject } from "../projects";
 import { rushOutcomeRange } from "../studioOps";
 import type { Draft } from "../data";
 
 const draft = (): Draft => ({
-  title: "Cut Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight",
-  genres: ["shonen"], audience: "teens", protag: "kai", protagName: "Kai",
+  title: "Cut Test", medium: "tv", budget: "standard", scope: "standard", slot: "midnight", animeType:"shonen",
+  genres: ["sports"], audience: "teens", protag: "kai", protagName: "Kai",
   secondary: "s_ren", pet: "none", villain: "v_oni", arcs: [], sliders: [50, 50, 50], season: 1,
 });
 
@@ -31,11 +31,11 @@ describe("rush spectacle and live editing tuning", () => {
 
   it("live editing clears notes and awards one RD for every note removed", () => {
     let r = initialRun("Edit Test", "steady");
-    const st = { ...r.candidates[0], stamina: 100 };
+    const st = { ...r.candidates[0], story: 99, art: 99, sound: 99, stamina: 100 };
     let project = makeProject(draft(), 0);
     project = { ...project, stage: "post", milestone: "edit", issues: 6, staffIds: [st.id] };
     r = { ...r, staff: [st], projects: [project], rd: 0 };
-    const out = tickEditDay(r, project.id).run;
+    const out = tickEditWorkPulse(r, project.id).run;
     const remaining = out.projects[0].issues;
     const cleared = 6 - remaining;
     expect(cleared).toBeGreaterThan(0);

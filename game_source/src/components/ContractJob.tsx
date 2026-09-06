@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Briefcase, Calendar, Check, ChevronLeft, Database, UserRound, Users } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, ROLE_LABEL, SHOWRUNNERS, formatGBP, staffPoint, type Contract } from "../engine/data";
-import { staffBusyReason, type RunState } from "../engine/state";
-import { projectedContractTotal, showrunnerContractSkill } from "../engine/studioOps";
+import { contractSelectionDailyOutputEstimate, staffBusyReason, type RunState } from "../engine/state";
+import { showrunnerContractSkill } from "../engine/studioOps";
 import { cn } from "../utils/cn";
 
 export default function ContractJob({ run, contract, onDone, onBack }: {
@@ -19,9 +19,11 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const runnerBusy = run.contractJobs.some((j) => j.showrunner);
   const runnerSkill = showrunnerContractSkill(run.showrunner, run.showsMade, contract.type);
-  const crew = useMemo(() => run.staff.filter((s) => selected.includes(s.id)), [run.staff, selected]);
   const seats = selected.length + (showrunnerSelected ? 1 : 0);
-  const projected = projectedContractTotal(contract, crew, run.research, showrunnerSelected ? runnerSkill : 0);
+  const dailyRate = seats > 0 ? contractSelectionDailyOutputEstimate(run, contract, selected, showrunnerSelected) : 0;
+  const dailyRateLabel = dailyRate >= 10 ? Math.round(dailyRate).toString() : dailyRate.toFixed(1);
+  const projected = Math.round(dailyRate * contract.weeks * 7);
+  const eta = seats > 0 ? Math.max(1, Math.ceil(contract.target / Math.max(0.1, dailyRate))) : 0;
   const likely = projected >= contract.target;
 
   const toggle = (id: string) => {
@@ -54,11 +56,11 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-panel3" style={{ color: POINT_COLOR[contract.type] }}><Briefcase size={21} /></span>
               <div className="min-w-0 flex-1">
                 <h2 className="font-display text-xl font-extrabold">Assign a contract team</h2>
-                <p className="mt-1 text-xs text-paper/65">This is background work, not an instant payout. Assign up to three people, return to the office, then watch the contract fill as weeks pass. Assigned staff cannot work on your shows until the job delivers or misses its deadline.</p>
+                <p className="mt-1 text-xs text-paper/65">This is background work, not an instant payout. Assign up to three people, return to the office, then watch the contract fill as days pass. Assigned staff cannot work on your shows until the job delivers or misses its deadline.</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <span className="ink-chip px-2 py-1 font-bold text-gold">{formatGBP(contract.pay)}</span>
                   <span className="ink-chip flex items-center gap-1 px-2 py-1 font-bold text-viol"><Database size={12} /> +{contract.rd} RD</span>
-                  <span className="ink-chip flex items-center gap-1 px-2 py-1 font-bold text-cyanx"><Calendar size={12} /> {contract.weeks} wk deadline</span>
+                  <span className="ink-chip flex items-center gap-1 px-2 py-1 font-bold text-cyanx"><Calendar size={12} /> {contract.weeks * 7} day deadline</span>
                 </div>
               </div>
             </div>
@@ -70,7 +72,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
               <button disabled={runnerBusy && !showrunnerSelected} onClick={toggleRunner} className={cn("btn-press flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left", showrunnerSelected ? "border-gold/70 bg-gold/10" : runnerBusy ? "border-line/40 bg-panel2/30 opacity-50" : "border-gold/35 bg-panel2/50 hover:border-gold/70")}>
                 <span className={cn("flex h-5 w-5 items-center justify-center rounded border", showrunnerSelected ? "border-gold bg-gold text-ink" : "border-line")}>{showrunnerSelected && <Check size={13} />}</span>
                 <UserRound size={17} className="text-gold" />
-                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{runner.name} · SHOWRUNNER</span><span className="text-[10px] text-paper/45">{runner.title} · {POINT_LABEL[contract.type]} {runnerSkill}{runnerBusy ? " · already on a contract" : ""}</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{runner.name} · SHOWRUNNER</span><span className="text-[10px] text-paper/45">{runner.title} · {POINT_LABEL[contract.type]} {runnerSkill}{run.showrunner === "steady" ? " · Steady Hand ×1.5 live" : ""}{runnerBusy ? " · already on a contract" : ""}</span></span>
                 <span className="font-display text-sm font-extrabold text-gold">{runnerSkill}</span>
               </button>
 
@@ -92,7 +94,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
 
           <div className={cn("rounded-xl border p-3", likely ? "border-mint/50 bg-mint/10" : "border-gold/50 bg-gold/10")}>
             <div className="flex items-center justify-between text-xs"><span className="font-bold">Projected output by deadline</span><span className={cn("font-display text-lg font-extrabold", likely ? "text-mint" : "text-gold")}>{projected}/{contract.target}</span></div>
-            <div className="mt-1 text-[10px] text-paper/55">Each in-game week, selected contributors turn their relevant skill + current energy into progress. Digital Pipeline improves output. Reach the target early and the job pays immediately; miss the deadline and you only recover a little learning RD.</div>
+            <div className="mt-1 text-[10px] text-paper/55">Live work rolls continuously. Current team estimate: ≈{dailyRateLabel}/day, around {eta || "—"} workdays on average. Speed controls only make game days pass faster; expected work per in-game day stays the same. Reach the target early and the job pays immediately.</div>
           </div>
 
           <div className="grid grid-cols-[auto_1fr] gap-2">

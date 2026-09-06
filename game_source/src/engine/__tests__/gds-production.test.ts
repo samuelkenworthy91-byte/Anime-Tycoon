@@ -3,7 +3,7 @@ import { initialRun, startContractAssignment, tickStudioDay, tickStudioWorkPulse
 import { makeProject } from "../projects";
 import type { Draft } from "../data";
 
-const draft = (): Draft => ({ title:"Desk Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", genres:["shonen"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
+const draft = (): Draft => ({ title:"Desk Test", medium:"tv", budget:"standard", scope:"standard", slot:"midnight", animeType: "shonen", genres:["sports"], audience:"teens", protag:"kai", protagName:"Kai", secondary:"s_ren", pet:"none", villain:"v_oni", arcs:[], sliders:[50,50,50], season:1 });
 
 describe("visible daily studio work", () => {
   it("drains energy while assigned and eventually sends an employee to recover", () => {
@@ -27,19 +27,19 @@ describe("visible daily studio work", () => {
     expect(r.staffResting[staff.id]).toBeUndefined();
   });
 
-  it("ordinary desk work emits a visible contribution bubble of the correct type", () => {
+  it("ordinary desk work emits a visible multi-discipline contribution bubble", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
     let r = initialRun("Test", "producer");
     const staff = { ...r.candidates[0], story:99, stamina:100 };
     const pr = { ...makeProject(draft(), 0), staffIds:[staff.id] };
     r = { ...r, staff:[staff], projects:[pr], candidates:r.candidates.slice(1) };
-    const before = r.projects[0].points.story;
-    const out = tickStudioDay(r);
+    const before = r.projects[0].points.story + r.projects[0].points.art + r.projects[0].points.sound;
+    const out = tickStudioWorkPulse(r);
     expect(out.pulses.length).toBeGreaterThan(0);
-    expect(out.pulses[0].type).toBe("story");
+    expect(["story", "art", "sound"]).toContain(out.pulses[0].type);
     expect(out.pulses[0].points).toBeGreaterThan(0);
-    expect(out.run.projects[0].points.story).toBeGreaterThan(before);
-    expect(out.run.projects[0].liveQuality?.story ?? 0).toBeGreaterThan(0);
+    const after = out.run.projects[0].points.story + out.run.projects[0].points.art + out.run.projects[0].points.sound;
+    expect(after).toBeGreaterThan(before);
     vi.restoreAllMocks();
   });
 

@@ -1,0 +1,3466 @@
+{
+  "sourceSha256": {
+    "CAST_V2_MASTER.json": "f6f9ad196d818a76b3f9d67d2e7459e7ffa07d942f48b279729e9fe4397543d0",
+    "CAST_V2_VISUAL_MANIFEST.csv": "ee7eb9241bcc26362ac352d4d409f24c2943aaa9381549be5ef3d73930e38ab2",
+    "GENRE_V2_DATA.json": "be90042cd483d4f6cc05fb5eedb67fbe23d9b935de84709252e50dd6918dcbbe",
+    "GENRE_V2_COMBOS.json": "9df9fefba3ee1097b46ce57a628613252f523b7599468afafabe71492482d2c0"
+  },
+  "cast": [
+    {
+      "id": "kai",
+      "name": "Kai Moriyama",
+      "archetype": "Underdog team captain",
+      "personality": "Keeps a notebook of every defeat; lends it to rivals who are struggling.",
+      "img": "cast/v2/lead_shonen_01__a1__kai.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "martial"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "rei",
+      "name": "Rei Han",
+      "archetype": "Test pilot on probation",
+      "personality": "Unflappable in emergencies but rehearses every apology before speaking.",
+      "img": "cast/v2/lead_shonen_01__a2__rei.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "space"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Korean-Japanese"
+    },
+    {
+      "id": "sora",
+      "name": "Sora Vale",
+      "archetype": "Reluctant second-world champion",
+      "personality": "Treats every quest as a promise and hates being called chosen.",
+      "img": "cast/v2/lead_shonen_01__a3__sora.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "isekai",
+        "fantasy"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese-British portal fantasy"
+    },
+    {
+      "id": "kage",
+      "name": "Kage Mercer",
+      "archetype": "Missing-person investigator",
+      "personality": "Patient with frightened witnesses; refuses to explain his own sleeplessness.",
+      "img": "cast/v2/lead_shonen_01__a4__kage.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "horror",
+        "cyber"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-Canadian"
+    },
+    {
+      "id": "kenta",
+      "name": "Kenta Okafor",
+      "archetype": "Joking dojo challenger",
+      "personality": "Defuses tension with terrible puns, then remembers exactly who laughed.",
+      "img": "cast/v2/lead_shonen_01__b1__kenta.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "comedy"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Nigerian"
+    },
+    {
+      "id": "ryu",
+      "name": "Ryu Long",
+      "archetype": "Dragon-school exile",
+      "personality": "Proud of his discipline but quick to defend another outsider.",
+      "img": "cast/v2/lead_shonen_01__b2__ryu.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "fantasy",
+        "martial"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Chinese-Japanese fantasy"
+    },
+    {
+      "id": "jin",
+      "name": "Jin Park",
+      "archetype": "Rescue vehicle ace",
+      "personality": "Chases impossible routes and quietly checks that every passenger arrived.",
+      "img": "cast/v2/lead_shonen_01__b3__jin.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "survival"
+      ],
+      "hiddenAff": "slice",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Korean"
+    },
+    {
+      "id": "goro",
+      "name": "Goro Nishida",
+      "archetype": "Veteran sumo hopeful",
+      "personality": "Laughs at his own nerves; takes a junior's disappointment seriously.",
+      "img": "cast/v2/lead_shonen_01__b4__goro.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "martial"
+      ],
+      "hiddenAff": "magical",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "daichi",
+      "name": "Dawit Bekele",
+      "archetype": "Civil engineer in a disaster zone",
+      "personality": "Blunt about unsafe plans and meticulous about sharing credit.",
+      "img": "cast/v2/lead_shonen_02__a1__daichi.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "military"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Ethiopian-inspired contemporary"
+    },
+    {
+      "id": "kaito",
+      "name": "Kaito Marlow",
+      "archetype": "Debt-ridden sky privateer",
+      "personality": "Borrows boldly but always returns for an abandoned crewmate.",
+      "img": "cast/v2/lead_shonen_02__a2__kaito.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "isekai"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Caribbean fantasy"
+    },
+    {
+      "id": "akira",
+      "name": "Akira Sato",
+      "archetype": "Neon district courier",
+      "personality": "Hates corporate slogans; remembers every shopkeeper's name.",
+      "img": "cast/v2/lead_shonen_02__a3__akira.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "mystery"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "kuro",
+      "name": "Kuro Reyes",
+      "archetype": "Corporate fugitive",
+      "personality": "Negotiates as if everything is a joke until another worker is threatened.",
+      "img": "cast/v2/lead_shonen_02__a4__kuro.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "military"
+      ],
+      "hiddenAff": "martial",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-Mexican"
+    },
+    {
+      "id": "rin",
+      "name": "Rin Adebayo",
+      "archetype": "Relay runner rebuilding a team",
+      "personality": "Impatient with excuses but stays late to pace the slowest teammate.",
+      "img": "cast/v2/lead_shonen_02__b1__rin.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "slice"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "British-Nigerian"
+    },
+    {
+      "id": "niko",
+      "name": "Niko Varga",
+      "archetype": "Improvising robot inventor",
+      "personality": "Celebrates a useful failure more loudly than a safe success.",
+      "img": "cast/v2/lead_shonen_02__b2__niko.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "cyber"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Hungarian"
+    },
+    {
+      "id": "mako",
+      "name": "Mako Te Rangi",
+      "archetype": "Reef defender",
+      "personality": "Patient with the sea and impatient with people who claim to own it.",
+      "img": "cast/v2/lead_shonen_02__b3__mako.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "fantasy"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Māori-inspired ocean fantasy"
+    },
+    {
+      "id": "zuri",
+      "name": "Zuri Kamau",
+      "archetype": "Community workshop founder",
+      "personality": "Insists everyone learn to repair their own invention, including her.",
+      "img": "cast/v2/lead_shonen_02__b4__zuri.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "cooking"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Kenyan"
+    },
+    {
+      "id": "sakura",
+      "name": "Sakura Fujimoto",
+      "archetype": "Courteous tournament swordswoman",
+      "personality": "Thanks opponents sincerely and challenges judges without raising her voice.",
+      "img": "cast/v2/lead_shonen_03__a1__sakura.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "magical"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "suzume",
+      "name": "Suzume Inari",
+      "archetype": "Shrine apprentice with a temper",
+      "personality": "Protective of neglected places; embarrassed by praise.",
+      "img": "cast/v2/lead_shonen_03__a2__suzume.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "supernatural",
+        "mythology"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese-inspired invented shrine town"
+    },
+    {
+      "id": "yuki",
+      "name": "Yuki Lind",
+      "archetype": "Winter search leader",
+      "personality": "Looks aloof because she listens before committing to a route.",
+      "img": "cast/v2/lead_shonen_03__a3__yuki.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "nordic",
+        "survival"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Swedish"
+    },
+    {
+      "id": "riko",
+      "name": "Riko Chen",
+      "archetype": "Clockwork mediator",
+      "personality": "Listens to a machine as patiently as to its frightened owner.",
+      "img": "cast/v2/lead_shonen_03__a4__riko.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mystery",
+        "mecha"
+      ],
+      "hiddenAff": "idol",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Chinese-Singaporean"
+    },
+    {
+      "id": "momo",
+      "name": "Momo Alvarez",
+      "archetype": "Explosive variety-show rookie",
+      "personality": "Turns mistakes into games; cannot bear leaving a colleague isolated.",
+      "img": "cast/v2/lead_shonen_03__b1__momo.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "idol",
+        "comedy"
+      ],
+      "hiddenAff": "survival",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese-Peruvian"
+    },
+    {
+      "id": "n_ryoko",
+      "name": "Astrid Voss",
+      "archetype": "Salvage pilot",
+      "personality": "Stubborn about rescuing obsolete machines and the people attached to them.",
+      "img": "cast/v2/lead_shonen_03__b2__n_ryoko.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "space"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Norwegian-inspired orbital colony"
+    },
+    {
+      "id": "n_mikoto",
+      "name": "Mikoto Arata",
+      "archetype": "Apprentice with one reliable spell",
+      "personality": "Competes fiercely but always shares what finally worked.",
+      "img": "cast/v2/lead_shonen_03__b3__n_mikoto.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "magical",
+        "isekai"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "airi",
+      "name": "Airi Watanabe",
+      "archetype": "Live-stream idol captain",
+      "personality": "Practises relentlessly and checks on nervous crew before going live.",
+      "img": "cast/v2/lead_shonen_03__b4__airi.webp",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "idol",
+        "romance"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "hikari",
+      "name": "Hikari Amano",
+      "archetype": "Wish-broker learning boundaries",
+      "personality": "Wants to help everyone and struggles to admit that kindness needs limits.",
+      "img": "cast/v2/lead_shojo_01__a1__hikari.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "romance"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "shiro",
+      "name": "Shiro Desai",
+      "archetype": "Quiet community archivist",
+      "personality": "Remembers other people's stories and keeps his own grief private.",
+      "img": "cast/v2/lead_shojo_01__a2__shiro.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "slice"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Indian-Japanese"
+    },
+    {
+      "id": "takumi",
+      "name": "Takumi Ito",
+      "archetype": "Ghostwriter of unsent letters",
+      "personality": "Can articulate anyone's feelings except his own.",
+      "img": "cast/v2/lead_shojo_01__a3__takumi.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "mecha"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "haru",
+      "name": "Haru Mensah",
+      "archetype": "Sprinter afraid of leaving home",
+      "personality": "Runs confidently but avoids discussing his scholarship offer.",
+      "img": "cast/v2/lead_shojo_01__a4__haru.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "sports",
+        "romance"
+      ],
+      "hiddenAff": "horror",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Ghanaian-Japanese"
+    },
+    {
+      "id": "kota",
+      "name": "Kota Soren",
+      "archetype": "Clan mediator",
+      "personality": "Loyal to a stubborn family but willing to question its oldest feud.",
+      "img": "cast/v2/lead_shojo_01__b1__kota.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "fantasy"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Danish saga fantasy"
+    },
+    {
+      "id": "renji",
+      "name": "Renji Kuroda",
+      "archetype": "Witness who broke his silence",
+      "personality": "Chooses words carefully and dislikes being mistaken for mysterious.",
+      "img": "cast/v2/lead_shojo_01__b2__renji.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "supernatural"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "jun",
+      "name": "Jun Seo",
+      "archetype": "Trickster caught by his own promise",
+      "personality": "Talks around his feelings until someone takes him literally.",
+      "img": "cast/v2/lead_shojo_01__b3__jun.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "comedy"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Korean-inspired portal fantasy"
+    },
+    {
+      "id": "sota",
+      "name": "Sota Rahman",
+      "archetype": "Programmer repairing a shared past",
+      "personality": "Methodical about code but willing to sit with problems that have no fix.",
+      "img": "cast/v2/lead_shojo_01__b4__sota.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "slice"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Bangladeshi-Japanese"
+    },
+    {
+      "id": "itsuki",
+      "name": "Itsuki Mori",
+      "archetype": "Novelist whose characters answer back",
+      "personality": "Courteous, melancholic and quietly delighted by absurdity.",
+      "img": "cast/v2/lead_shojo_02__a1__itsuki.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "supernatural"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "leo",
+      "name": "Leo Carvalho",
+      "archetype": "Street skater seeking a second chance",
+      "personality": "Charms a crowd but never knows how to apologise to one person.",
+      "img": "cast/v2/lead_shojo_02__a2__leo.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "sports",
+        "military"
+      ],
+      "hiddenAff": "idol",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Brazilian"
+    },
+    {
+      "id": "n_saku",
+      "name": "Saku Diallo",
+      "archetype": "Touring singer between worlds",
+      "personality": "Can make strangers feel at home while missing his own.",
+      "img": "cast/v2/lead_shojo_02__a3__n_saku.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "martial"
+      ],
+      "hiddenAff": "idol",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Senegalese-Japanese portal fantasy"
+    },
+    {
+      "id": "n_chisato",
+      "name": "Chisato Kimura",
+      "archetype": "Football prodigy facing a transfer",
+      "personality": "Reads a teammate's mood before the scoreboard and resents being marketed.",
+      "img": "cast/v2/lead_shojo_02__a4__n_chisato.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "sports",
+        "romance"
+      ],
+      "hiddenAff": "space",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "yui",
+      "name": "Yui Tanaka",
+      "archetype": "Neighbourhood café organiser",
+      "personality": "Warm but firm about people treating her kindness as unpaid labour.",
+      "img": "cast/v2/lead_shojo_02__b1__yui.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "cooking"
+      ],
+      "hiddenAff": "survival",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "mio",
+      "name": "Mio Laurent",
+      "archetype": "Dancer negotiating her own image",
+      "personality": "Expressive in rehearsal and guarded with interviewers.",
+      "img": "cast/v2/lead_shojo_02__b2__mio.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "romance"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-French"
+    },
+    {
+      "id": "saki",
+      "name": "Saki Nguyen",
+      "archetype": "Student newspaper editor",
+      "personality": "Asks gentle questions that people later realise were difficult.",
+      "img": "cast/v2/lead_shojo_02__b3__saki.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "mystery"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Vietnamese-Japanese"
+    },
+    {
+      "id": "nana",
+      "name": "Nana Ortiz",
+      "archetype": "Synth-pop songwriter",
+      "personality": "Uses jokes to test whether a room is safe enough for honesty.",
+      "img": "cast/v2/lead_shojo_02__b4__nana.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "idol"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Mexican-American"
+    },
+    {
+      "id": "emi",
+      "name": "Emi Kowalska",
+      "archetype": "Village witch learning to say no",
+      "personality": "Generous with tea, unexpectedly strict about careless promises.",
+      "img": "cast/v2/lead_shojo_03__a1__emi.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "cooking"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Polish-Japanese cottage fantasy"
+    },
+    {
+      "id": "hana",
+      "name": "Hana Al-Salim",
+      "archetype": "Gardener in a divine court",
+      "personality": "Soft-spoken until someone treats another person's life as decoration.",
+      "img": "cast/v2/lead_shojo_03__a2__hana.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "mythology",
+        "romance"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Arab-Japanese invented garden city"
+    },
+    {
+      "id": "mira",
+      "name": "Mira Solano",
+      "archetype": "Singer carrying a colony's memory",
+      "personality": "Listens closely and refuses to simplify a painful story for applause.",
+      "img": "cast/v2/lead_shojo_03__a3__mira.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "space",
+        "idol"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Chilean-inspired orbital diaspora"
+    },
+    {
+      "id": "shiori",
+      "name": "Shiori Abe",
+      "archetype": "Keeper of a fading forest rite",
+      "personality": "Tender toward frightened visitors and fiercely protective of private grief.",
+      "img": "cast/v2/lead_shojo_03__a4__shiori.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "fantasy"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "kaede",
+      "name": "Kaede Lund",
+      "archetype": "Poet returning to a fishing village",
+      "personality": "Observant, dryly funny and unwilling to romanticise a difficult childhood.",
+      "img": "cast/v2/lead_shojo_03__b1__kaede.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "slice"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-Swedish"
+    },
+    {
+      "id": "n_aoi",
+      "name": "Aoi Narang",
+      "archetype": "Summoned heiress rebuilding consent",
+      "personality": "Diplomatic but refuses titles that remove another person's choices.",
+      "img": "cast/v2/lead_shojo_03__b2__n_aoi.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "fantasy"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Indian-Japanese portal fantasy"
+    },
+    {
+      "id": "n_reiwa",
+      "name": "Reiwa Bell",
+      "archetype": "Nightclub singer with a contested past",
+      "personality": "Answers direct questions honestly but resists other people's preferred story.",
+      "img": "cast/v2/lead_shojo_03__b3__n_reiwa.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "mystery"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-British"
+    },
+    {
+      "id": "ash",
+      "name": "Ash Rowan",
+      "archetype": "Scout choosing between two homes",
+      "personality": "Reserved with strangers, playful with friends and suspicious of heroic labels.",
+      "img": "cast/v2/lead_shojo_03__b4__ash.webp",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "pirate",
+        "survival"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Irish-inspired coastal fantasy"
+    },
+    {
+      "id": "s_ren",
+      "name": "Ren Kobayashi",
+      "archetype": "Dependable reserve player",
+      "personality": "Practises the unglamorous jobs and gets embarrassed when anyone notices.",
+      "img": "cast/v2/sidekick_shonen_01__a1__s_ren.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "slice"
+      ],
+      "hiddenAff": "space",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_okada",
+      "name": "Masaru Okada",
+      "archetype": "Retired dojo instructor",
+      "personality": "Gruff about shortcuts, patient about fear and quietly proud of each student.",
+      "img": "cast/v2/sidekick_shonen_01__a2__s_okada.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "sports"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "60–69",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_ichiro",
+      "name": "Ichiro Santos",
+      "archetype": "Delinquent who fixes things",
+      "personality": "Blusters before offering practical help and hates being thanked publicly.",
+      "img": "cast/v2/sidekick_shonen_01__a3__s_ichiro.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "comedy"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese-Filipino"
+    },
+    {
+      "id": "s_takeshi",
+      "name": "Takeshi Tan",
+      "archetype": "Demanding logistics coach",
+      "personality": "Pushes hard but always carries spare water for someone who forgot.",
+      "img": "cast/v2/sidekick_shonen_01__a4__s_takeshi.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "sports"
+      ],
+      "hiddenAff": "magical",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Japanese-Malaysian"
+    },
+    {
+      "id": "s_daiki",
+      "name": "Daiki Lim",
+      "archetype": "Night-shift simulation expert",
+      "personality": "Competitive online, generous when teaching a newcomer in person.",
+      "img": "cast/v2/sidekick_shonen_01__b1__s_daiki.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "mecha"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Singaporean-Japanese"
+    },
+    {
+      "id": "s_gen",
+      "name": "Gen Zhao",
+      "archetype": "Apparently idle strategist",
+      "personality": "Asks one devastating question after appearing to sleep through the briefing.",
+      "img": "cast/v2/sidekick_shonen_01__b2__s_gen.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "mystery",
+        "military"
+      ],
+      "hiddenAff": "idol",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Chinese"
+    },
+    {
+      "id": "s_ken",
+      "name": "Ken Mori",
+      "archetype": "Rescue exosuit operator",
+      "personality": "Speaks briefly, checks every harness twice and never rushes a frightened person.",
+      "img": "cast/v2/sidekick_shonen_01__b3__s_ken.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "survival"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_riku",
+      "name": "Riku Haddad",
+      "archetype": "Rival who becomes a sparring partner",
+      "personality": "Loves a challenge and refuses a victory obtained by humiliating someone.",
+      "img": "cast/v2/sidekick_shonen_01__b4__s_riku.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "martial"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Lebanese-Japanese"
+    },
+    {
+      "id": "s_tora",
+      "name": "Tora",
+      "archetype": "Caravan protector",
+      "personality": "Proud of delicate craftsmanship and offended when asked only to lift things.",
+      "img": "cast/v2/sidekick_shonen_02__a1__s_tora.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "fantasy",
+        "pirate"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "male",
+      "species": "tigerfolk",
+      "ageBand": "adult",
+      "culturalBasis": "Invented tigerfolk caravan culture"
+    },
+    {
+      "id": "s_eiji",
+      "name": "Eiji Nakamura",
+      "archetype": "Protective older brother learning trust",
+      "personality": "Arrives early to help but must learn when to step aside.",
+      "img": "cast/v2/sidekick_shonen_02__a2__s_eiji.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "slice",
+        "martial"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_boone",
+      "name": "Boone Walker",
+      "archetype": "Workshop mentor",
+      "personality": "Explains the mistake before touching a tool; collects other people's bad jokes.",
+      "img": "cast/v2/sidekick_shonen_02__a3__s_boone.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "cooking"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "Black American"
+    },
+    {
+      "id": "tsubasa",
+      "name": "Tsubasa Vega",
+      "archetype": "Impulsive flight engineer",
+      "personality": "Solves a crisis quickly and files the report three days late.",
+      "img": "cast/v2/sidekick_shonen_02__a4__tsubasa.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "space",
+        "isekai"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Spanish orbital diaspora"
+    },
+    {
+      "id": "s_kiki",
+      "name": "Kiki Mensah",
+      "archetype": "Accidental stunt comic",
+      "personality": "Rushes to help, owns her mistakes and never blames the crew for a bad landing.",
+      "img": "cast/v2/sidekick_shonen_02__b1__s_kiki.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "comedy",
+        "idol"
+      ],
+      "hiddenAff": "survival",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Ghanaian-British"
+    },
+    {
+      "id": "s_akane",
+      "name": "Akane Sato",
+      "archetype": "Senior dance captain",
+      "personality": "Demanding about rehearsal and unexpectedly gentle after rejection.",
+      "img": "cast/v2/sidekick_shonen_02__b2__s_akane.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "idol"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_chiaki",
+      "name": "Chiaki Moon",
+      "archetype": "Transfer student investigating rumours",
+      "personality": "Asks oddly precise questions and protects anyone mocked for being afraid.",
+      "img": "cast/v2/sidekick_shonen_02__b3__s_chiaki.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "horror",
+        "supernatural"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Korean-Japanese"
+    },
+    {
+      "id": "s_momoko",
+      "name": "Momoko Takeda",
+      "archetype": "Volunteer event manager",
+      "personality": "Runs a formidable schedule but keeps spare time for other people's crises.",
+      "img": "cast/v2/sidekick_shonen_02__b4__s_momoko.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "slice",
+        "sports"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_yuna",
+      "name": "Yuna Bautista",
+      "archetype": "Cheer captain organising a comeback",
+      "personality": "Loud when others need courage and quiet when they need privacy.",
+      "img": "cast/v2/sidekick_shonen_03__a1__s_yuna.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "idol",
+        "sports"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Filipino-Japanese"
+    },
+    {
+      "id": "s_kanna",
+      "name": "Kanna Sethi",
+      "archetype": "Bodyguard who studies escape routes",
+      "personality": "Distrusts spectacle, values consent and always explains the safe exit.",
+      "img": "cast/v2/sidekick_shonen_03__a2__s_kanna.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "romance"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Indian-Japanese"
+    },
+    {
+      "id": "s_maki",
+      "name": "Maki Sorensen",
+      "archetype": "Offshore rescue ace",
+      "personality": "Competitive about drills and uncompromising about bringing everyone back.",
+      "img": "cast/v2/sidekick_shonen_03__a3__s_maki.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "nordic"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Danish"
+    },
+    {
+      "id": "s_bolt",
+      "name": "Bola 'Bolt' Adeyemi",
+      "archetype": "Last-lap rival",
+      "personality": "Talks a formidable race and is first to congratulate a personal best.",
+      "img": "cast/v2/sidekick_shonen_03__a4__s_bolt.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "comedy"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Nigerian-British"
+    },
+    {
+      "id": "s_ironmaid",
+      "name": "Vera 'Valkyrie' Nygaard",
+      "archetype": "Wing-suit sergeant",
+      "personality": "Insists on discipline because she remembers what careless bravado costs.",
+      "img": "cast/v2/sidekick_shonen_03__b1__s_ironmaid.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "nordic"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Norwegian-inspired near future"
+    },
+    {
+      "id": "s_amber",
+      "name": "Amber Qadir",
+      "archetype": "Traveller with unreliable directions",
+      "personality": "Enjoys detours but never abandons a novice who trusted her.",
+      "img": "cast/v2/sidekick_shonen_03__b2__s_amber.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "isekai",
+        "pirate"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Arab-British portal fantasy"
+    },
+    {
+      "id": "s_peko",
+      "name": "Peko Yoshida",
+      "archetype": "Festival organiser with impossible optimism",
+      "personality": "Finds one achievable next step when everyone else freezes.",
+      "img": "cast/v2/sidekick_shonen_03__b3__s_peko.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "magical",
+        "comedy"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_amina",
+      "name": "Amina El-Khatib",
+      "archetype": "Expedition archivist",
+      "personality": "Challenges heroic versions of events and insists support workers enter the record.",
+      "img": "cast/v2/sidekick_shonen_03__b4__s_amina.webp",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "mythology"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Sudanese-British invented expedition setting"
+    },
+    {
+      "id": "s_lulu",
+      "name": "Lucien 'Lulu' Duval",
+      "archetype": "Superfan becoming a wardrobe assistant",
+      "personality": "Enthusiastic about performers, increasingly brave about unfair contracts.",
+      "img": "cast/v2/sidekick_shojo_01__a1__s_lulu.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "slice"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "French-Caribbean"
+    },
+    {
+      "id": "s_shin",
+      "name": "Pip",
+      "archetype": "Visitor learning human subtext",
+      "personality": "Excellent at patterns and baffled by the things people politely leave unsaid.",
+      "img": "cast/v2/sidekick_shojo_01__a2__s_shin.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "space",
+        "mystery"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "small sapient alien",
+      "ageBand": "adult",
+      "culturalBasis": "Invented glass-moon civilisation"
+    },
+    {
+      "id": "s_sosuke",
+      "name": "Sosuke-9",
+      "archetype": "Butler negotiating autonomy",
+      "personality": "Courteous by habit, quietly stubborn about being asked rather than ordered.",
+      "img": "cast/v2/sidekick_shojo_01__a3__s_sosuke.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "mecha",
+        "slice"
+      ],
+      "hiddenAff": "horror",
+      "gender": "male",
+      "species": "sapient automaton",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented domestic-robot culture"
+    },
+    {
+      "id": "s_alfred",
+      "name": "Alfred Bellamy",
+      "archetype": "Household steward with boundaries",
+      "personality": "Dryly funny, scrupulous about confidences and loyal to people rather than titles.",
+      "img": "cast/v2/sidekick_shojo_01__a4__s_alfred.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "mystery"
+      ],
+      "hiddenAff": "martial",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "60–69",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "s_tobi",
+      "name": "Tobi Akinwale",
+      "archetype": "Rookie reporter earning trust",
+      "personality": "Curious to a fault, learns to ask before turning the camera on.",
+      "img": "cast/v2/sidekick_shojo_01__b1__s_tobi.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "cyber"
+      ],
+      "hiddenAff": "magical",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Nigerian-British"
+    },
+    {
+      "id": "taro",
+      "name": "Taro Fujita",
+      "archetype": "Guild cook and patient confidant",
+      "personality": "Feeds everyone first, then asks the question they were avoiding.",
+      "img": "cast/v2/sidekick_shojo_01__b2__taro.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "cooking",
+        "fantasy"
+      ],
+      "hiddenAff": "space",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_soleil",
+      "name": "Soleil Armand",
+      "archetype": "Knight adjusting to ordinary friendship",
+      "personality": "Formally courteous and endearingly unsure when duty does not provide an answer.",
+      "img": "cast/v2/sidekick_shojo_01__b3__s_soleil.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "sports"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "French-inspired portal court"
+    },
+    {
+      "id": "s_ice",
+      "name": "Isaak 'Ice' Novak",
+      "archetype": "Goth singer hiding a generous streak",
+      "personality": "Cultivates distance onstage and shares music with anyone sitting alone.",
+      "img": "cast/v2/sidekick_shojo_01__b4__s_ice.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "idol"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Czech"
+    },
+    {
+      "id": "s_ryo",
+      "name": "Ryo Flores",
+      "archetype": "Busker attached to a departing crew",
+      "personality": "Makes friends quickly and struggles to believe they will remember him.",
+      "img": "cast/v2/sidekick_shojo_02__a1__s_ryo.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "pirate",
+        "idol"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-Colombian"
+    },
+    {
+      "id": "s_kazuki",
+      "name": "Kazuki Tran",
+      "archetype": "Drama-club star afraid of being ordinary",
+      "personality": "Theatrical in company but surprisingly receptive to honest criticism.",
+      "img": "cast/v2/sidekick_shojo_02__a2__s_kazuki.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "martial"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Vietnamese-Japanese"
+    },
+    {
+      "id": "s_pranav",
+      "name": "Pranav Rao",
+      "archetype": "Museum conservator and home cook",
+      "personality": "Meticulous with objects, affectionate with people and reluctant to take credit.",
+      "img": "cast/v2/sidekick_shojo_02__a3__s_pranav.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "mythology",
+        "cooking"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Indian"
+    },
+    {
+      "id": "fumi",
+      "name": "Fumi Arai",
+      "archetype": "Quiet storyboard artist",
+      "personality": "Draws while others speak and notices when someone is excluded.",
+      "img": "cast/v2/sidekick_shojo_02__a4__fumi.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "nordic"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_mika",
+      "name": "Mika Okoye",
+      "archetype": "Blunt best friend learning tact",
+      "personality": "Witty and protective, gradually learns that help need not sound like a verdict.",
+      "img": "cast/v2/sidekick_shojo_02__b1__s_mika.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "slice"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Nigerian-Japanese"
+    },
+    {
+      "id": "s_anna",
+      "name": "Anna Petrov",
+      "archetype": "Archivist of contradictory legends",
+      "personality": "Loves footnotes but will put the book down when a person needs listening to.",
+      "img": "cast/v2/sidekick_shojo_02__b2__s_anna.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "mythology",
+        "mystery"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Bulgarian"
+    },
+    {
+      "id": "s_nozomi",
+      "name": "Nozomi Hayashi",
+      "archetype": "Childhood friend pursuing her own future",
+      "personality": "Supportive without agreeing to wait forever; laughs easily once she decides.",
+      "img": "cast/v2/sidekick_shojo_02__b3__s_nozomi.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "slice"
+      ],
+      "hiddenAff": "isekai",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_sakurako",
+      "name": "Sakurako Minami",
+      "archetype": "Elegant rival turned rehearsal partner",
+      "personality": "Competitive and painfully aware of every small kindness she owes.",
+      "img": "cast/v2/sidekick_shojo_02__b4__s_sakurako.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "horror"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_mimi",
+      "name": "Mimi Pham",
+      "archetype": "Costume designer discovering her voice",
+      "personality": "Playful with colour, precise about fit and increasingly direct about credit.",
+      "img": "cast/v2/sidekick_shojo_03__a1__s_mimi.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "idol"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Vietnamese"
+    },
+    {
+      "id": "s_aoi",
+      "name": "Aoi Bennett",
+      "archetype": "Weather presenter on a difficult assignment",
+      "personality": "Reassuring on camera and honest when a forecast is uncertain.",
+      "img": "cast/v2/sidekick_shojo_03__a2__s_aoi.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "survival",
+        "slice"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-British"
+    },
+    {
+      "id": "s_megu",
+      "name": "Megumi Mori",
+      "archetype": "Class representative under pressure",
+      "personality": "Fair, serious and learning to admit that she cannot do everything.",
+      "img": "cast/v2/sidekick_shojo_03__a3__s_megu.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "mystery"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "s_hina",
+      "name": "Hina Ali",
+      "archetype": "Timid artist travelling with a troupe",
+      "personality": "Expressive through observation, slow to trust and loyal once heard.",
+      "img": "cast/v2/sidekick_shojo_03__a4__s_hina.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "romance"
+      ],
+      "hiddenAff": "survival",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Pakistani-Japanese"
+    },
+    {
+      "id": "s_nanami",
+      "name": "Nanami Cho",
+      "archetype": "Gossip writer questioning her trade",
+      "personality": "Quick with a rumour and increasingly troubled by what publication costs.",
+      "img": "cast/v2/sidekick_shojo_03__b1__s_nanami.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "comedy"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Korean-Japanese"
+    },
+    {
+      "id": "s_reina",
+      "name": "Reina Solberg",
+      "archetype": "Council clerk caught between clans",
+      "personality": "Keeps impeccable records and refuses to pretend procedure is always justice.",
+      "img": "cast/v2/sidekick_shojo_03__b2__s_reina.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "military"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Norwegian-Japanese"
+    },
+    {
+      "id": "yuzuki",
+      "name": "Yuzuki Amari",
+      "archetype": "Guide for the homesick",
+      "personality": "Gentle about grief but firm that no one should follow blindly.",
+      "img": "cast/v2/sidekick_shojo_03__b3__yuzuki.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "supernatural",
+        "isekai"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese-inspired lantern-town fantasy"
+    },
+    {
+      "id": "s_linh",
+      "name": "Linh Trần",
+      "archetype": "Ship medic mediating a divided crew",
+      "personality": "Practical, candid and unwilling to let rank decide whose pain matters.",
+      "img": "cast/v2/sidekick_shojo_03__b4__s_linh.webp",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "pirate",
+        "military"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Vietnamese-inspired maritime future"
+    },
+    {
+      "id": "p_koro",
+      "name": "Koro",
+      "archetype": "Pocket navigation companion",
+      "personality": "Collects loose fasteners and stubbornly returns to the same safe pocket.",
+      "img": "cast/v2/mascot_shonen_01__a1__p_koro.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "space",
+        "mecha"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "hamster",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented orbital habitat"
+    },
+    {
+      "id": "p_baku",
+      "name": "Baku",
+      "archetype": "Guardian of exhausted sleepers",
+      "personality": "Suspicious of noise, affectionate with insomniacs and brave when someone cannot rest.",
+      "img": "cast/v2/mascot_shonen_01__a2__p_baku.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "horror",
+        "fantasy"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "tapir-like dream eater",
+      "ageBand": "ageless",
+      "culturalBasis": "Japanese-inspired dream folklore"
+    },
+    {
+      "id": "p_gon",
+      "name": "Gon",
+      "archetype": "Excitable expedition follower",
+      "personality": "Charges into harmless puddles and waits faithfully at dangerous crossings.",
+      "img": "cast/v2/mascot_shonen_01__a3__p_gon.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "romance"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "male",
+      "species": "small dinosaur",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented lost-island ecosystem"
+    },
+    {
+      "id": "p_pochi",
+      "name": "Pochi",
+      "archetype": "Helpful workshop puppy",
+      "personality": "Repeats useful routines until asked to stop and seeks praise through completed tasks.",
+      "img": "cast/v2/mascot_shonen_01__a4__p_pochi.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "cyber"
+      ],
+      "hiddenAff": "magical",
+      "gender": "male",
+      "species": "robot dog",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Japanese near-future robotics"
+    },
+    {
+      "id": "p_toro",
+      "name": "Toro",
+      "archetype": "Kettle-shaped camp nuisance",
+      "personality": "Trades stolen trinkets back for attention and follows the least pompous traveller.",
+      "img": "cast/v2/mascot_shonen_01__b1__p_toro.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "supernatural",
+        "comedy"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "tanuki spirit",
+      "ageBand": "adult animal",
+      "culturalBasis": "Japanese-inspired fictional folklore"
+    },
+    {
+      "id": "p_mugi",
+      "name": "Mugi",
+      "archetype": "Persistent foraging cub",
+      "personality": "Brave about bad weather, shy about new voices and easily offended by empty baskets.",
+      "img": "cast/v2/mascot_shonen_01__b2__p_mugi.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "nordic"
+      ],
+      "hiddenAff": "sports",
+      "gender": "male",
+      "species": "brown bear",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented northern forest"
+    },
+    {
+      "id": "p_hachi",
+      "name": "Hachi",
+      "archetype": "Tiny formation leader",
+      "personality": "Circles stragglers until the group catches up and returns to favourite flowers.",
+      "img": "cast/v2/mascot_shonen_01__b3__p_hachi.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "military"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "bumblebee",
+      "ageBand": "adult insect",
+      "culturalBasis": "Japanese community garden"
+    },
+    {
+      "id": "p_kiki2",
+      "name": "Kiki Ember",
+      "archetype": "Warm-blooded trail companion",
+      "personality": "Curious about cold objects and careful around smaller animals.",
+      "img": "cast/v2/mascot_shonen_01__b4__p_kiki2.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "fantasy",
+        "magical"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "fire salamander",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented volcanic wetland"
+    },
+    {
+      "id": "p_chacha",
+      "name": "Chacha",
+      "archetype": "Mischievous deck lookout",
+      "personality": "Steals attention but returns a frightened crewmate's belongings first.",
+      "img": "cast/v2/mascot_shonen_02__a1__p_chacha.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "comedy"
+      ],
+      "hiddenAff": "martial",
+      "gender": "male",
+      "species": "capuchin monkey",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented tropical port"
+    },
+    {
+      "id": "p_drakko",
+      "name": "Drakko",
+      "archetype": "Sock-hoarding hatchling",
+      "personality": "Guards tiny treasures ferociously and shares them only when someone is sad.",
+      "img": "cast/v2/mascot_shonen_02__a2__p_drakko.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "fantasy",
+        "martial"
+      ],
+      "hiddenAff": "isekai",
+      "gender": "male",
+      "species": "dragon",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented caravan fantasy"
+    },
+    {
+      "id": "p_loader",
+      "name": "Loader",
+      "archetype": "Supply-search terrier",
+      "personality": "Indefatigable about retrieving dropped equipment, deeply proud of a finished job.",
+      "img": "cast/v2/mascot_shonen_02__a3__p_loader.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "survival"
+      ],
+      "hiddenAff": "slice",
+      "gender": "male",
+      "species": "dog",
+      "ageBand": "adult animal",
+      "culturalBasis": "British-inspired rescue service"
+    },
+    {
+      "id": "s_haruto",
+      "name": "Nyanko",
+      "archetype": "Streetwise harbour guide",
+      "personality": "Accepts food from everyone but trusts the people who wait for permission.",
+      "img": "cast/v2/mascot_shonen_02__a4__s_haruto.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "mystery"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "male",
+      "species": "cat",
+      "ageBand": "adult animal",
+      "culturalBasis": "Japanese harbour district"
+    },
+    {
+      "id": "p_umi",
+      "name": "Umi",
+      "archetype": "Unhurried recovery companion",
+      "personality": "Investigates slowly and returns to a familiar hand after every disturbance.",
+      "img": "cast/v2/mascot_shonen_02__b1__p_umi.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "slice",
+        "survival"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "axolotl",
+      "ageBand": "adult animal",
+      "culturalBasis": "Mexican-Japanese aquarium setting"
+    },
+    {
+      "id": "p_kuro",
+      "name": "Kuro Shade",
+      "archetype": "Elusive signal-follower",
+      "personality": "Hides from noise, chooses one person to shadow and dislikes being chased.",
+      "img": "cast/v2/mascot_shonen_02__b2__p_kuro.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "supernatural"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "shadow fox",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented urban spirit ecology"
+    },
+    {
+      "id": "p_ruri",
+      "name": "Ruri",
+      "archetype": "Resonant rehearsal companion",
+      "personality": "Repeats the phrase that calms a room rather than the loudest song.",
+      "img": "cast/v2/mascot_shonen_02__b3__p_ruri.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "idol",
+        "magical"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "crystal songbird",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented crystalline highlands"
+    },
+    {
+      "id": "p_piko",
+      "name": "Piko",
+      "archetype": "Adaptive puzzle helper",
+      "personality": "Copies useful shapes and loses interest in flashy but pointless ones.",
+      "img": "cast/v2/mascot_shonen_02__b4__p_piko.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "isekai"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "digital slime",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented game-world ecosystem"
+    },
+    {
+      "id": "p_fuu",
+      "name": "Fuu",
+      "archetype": "Wayfinding companion",
+      "personality": "Circles a hesitant traveller until they decide and then follows faithfully.",
+      "img": "cast/v2/mascot_shonen_03__a1__p_fuu.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "mythology",
+        "pirate"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "wind spirit",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented Mediterranean wind folklore"
+    },
+    {
+      "id": "p_kona",
+      "name": "Kona",
+      "archetype": "Timid snow-guide cub",
+      "personality": "Fears unfamiliar voices but walks into a storm for a familiar friend.",
+      "img": "cast/v2/mascot_shonen_03__a2__p_kona.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "horror"
+      ],
+      "hiddenAff": "idol",
+      "gender": "female",
+      "species": "yeti",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented mountain folklore"
+    },
+    {
+      "id": "p_teto",
+      "name": "Teto",
+      "archetype": "Patient timing companion",
+      "personality": "Waits through noise and jumps only at a familiar tap.",
+      "img": "cast/v2/mascot_shonen_03__a3__p_teto.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "slice"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "female",
+      "species": "frog",
+      "ageBand": "adult animal",
+      "culturalBasis": "Thai-inspired riverside town"
+    },
+    {
+      "id": "p_pomu",
+      "name": "Pomu",
+      "archetype": "Overprepared orchard scout",
+      "personality": "Stores too much, remembers where it all is and shares only after a careful inspection.",
+      "img": "cast/v2/mascot_shonen_03__a4__p_pomu.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "nordic",
+        "cooking"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "squirrel",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented Nordic orchard valley"
+    },
+    {
+      "id": "p_cogsworth",
+      "name": "Cogsworth",
+      "archetype": "Punctual observation machine",
+      "personality": "Records tiny deviations and communicates disapproval with a deliberate pause.",
+      "img": "cast/v2/mascot_shonen_03__b1__p_cogsworth.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "mystery"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "clockwork owl",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "British-inspired clockwork city"
+    },
+    {
+      "id": "p_nibi",
+      "name": "Nibi",
+      "archetype": "Contrary boundary keeper",
+      "personality": "Distrusts easy answers and escorts lost visitors home while pretending not to care.",
+      "img": "cast/v2/mascot_shonen_03__b2__p_nibi.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "horror",
+        "supernatural"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "two-tailed cat spirit",
+      "ageBand": "ageless",
+      "culturalBasis": "Japanese-inspired invented spirit town"
+    },
+    {
+      "id": "p_nitro",
+      "name": "Nitro",
+      "archetype": "Tool-stealing pit companion",
+      "personality": "Lives for the next task, returns stolen washers and falls asleep mid-celebration.",
+      "img": "cast/v2/mascot_shonen_03__b3__p_nitro.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "comedy"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "ferret",
+      "ageBand": "adult animal",
+      "culturalBasis": "Italian-inspired sports workshop"
+    },
+    {
+      "id": "p_silt",
+      "name": "Silt",
+      "archetype": "Patient route-finder",
+      "personality": "Tests unstable ground, curls up when crowded and follows gentle handling.",
+      "img": "cast/v2/mascot_shonen_03__b4__p_silt.webp",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "pirate"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "pangolin",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented West African-inspired river expedition"
+    },
+    {
+      "id": "p_mochi",
+      "name": "Mochi",
+      "archetype": "Companion who chooses the quietest lap",
+      "personality": "Affectionate on its own schedule and reliably present after an argument.",
+      "img": "cast/v2/mascot_shojo_01__a1__p_mochi.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "horror"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "cat",
+      "ageBand": "adult animal",
+      "culturalBasis": "Japanese urban home"
+    },
+    {
+      "id": "p_tama",
+      "name": "Tama",
+      "archetype": "Homesick sky calf",
+      "personality": "Answers familiar humming and becomes restless when separated from its group.",
+      "img": "cast/v2/mascot_shojo_01__a2__p_tama.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "magical"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "floating whale",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented floating-island ecology"
+    },
+    {
+      "id": "p_chibi",
+      "name": "Chibi",
+      "archetype": "Solemn social observer",
+      "personality": "Stands politely in the wrong queue and becomes loyal to its accidental group.",
+      "img": "cast/v2/mascot_shojo_01__a3__p_chibi.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "comedy",
+        "slice"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "penguin",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented southern coastal sanctuary"
+    },
+    {
+      "id": "p_maru",
+      "name": "Maru",
+      "archetype": "Wakeful library companion",
+      "personality": "Appears judgmental but follows the reader who stays after closing.",
+      "img": "cast/v2/mascot_shojo_01__a4__p_maru.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "sports"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "male",
+      "species": "owl",
+      "ageBand": "adult animal",
+      "culturalBasis": "British-Japanese storybook town"
+    },
+    {
+      "id": "p_sora",
+      "name": "Sora Nimbus",
+      "archetype": "Drifting reassurance companion",
+      "personality": "Settles beside the most anxious person and dislikes hurried departures.",
+      "img": "cast/v2/mascot_shojo_01__b1__p_sora.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "slice"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "male",
+      "species": "cloud sheep",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented pastoral sky country"
+    },
+    {
+      "id": "p_nemu",
+      "name": "Nemu",
+      "archetype": "Unhurried emotional anchor",
+      "personality": "Holds familiar branches and people with equal care and resists commotion.",
+      "img": "cast/v2/mascot_shojo_01__b2__p_nemu.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "slice"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "sloth",
+      "ageBand": "adult animal",
+      "culturalBasis": "Costa Rican-inspired forest sanctuary"
+    },
+    {
+      "id": "p_mocha",
+      "name": "Mocha",
+      "archetype": "Curious café companion",
+      "personality": "Sniffs every new parcel and hides near trusted staff during the rush.",
+      "img": "cast/v2/mascot_shojo_01__b3__p_mocha.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "cooking",
+        "mystery"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "male",
+      "species": "ferret",
+      "ageBand": "adult animal",
+      "culturalBasis": "French-Vietnamese café district"
+    },
+    {
+      "id": "p_goma",
+      "name": "Goma",
+      "archetype": "Gentle doorway greeter",
+      "personality": "Approaches lonely visitors first and waits calmly through tense conversations.",
+      "img": "cast/v2/mascot_shojo_01__b4__p_goma.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "cooking"
+      ],
+      "hiddenAff": "sports",
+      "gender": "male",
+      "species": "dog",
+      "ageBand": "adult animal",
+      "culturalBasis": "Japanese neighbourhood bakery"
+    },
+    {
+      "id": "p_puri",
+      "name": "Puri",
+      "archetype": "Shy heat-sharing hatchling",
+      "personality": "Toasts treats too carefully and hides behind whoever gives gentle instructions.",
+      "img": "cast/v2/mascot_shojo_02__a1__p_puri.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "cooking"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "cream dragon",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented portal market"
+    },
+    {
+      "id": "p_ponta",
+      "name": "Ponta",
+      "archetype": "Grumbling communal companion",
+      "personality": "Sighs at everyone, remembers everyone and misses them when they leave.",
+      "img": "cast/v2/mascot_shojo_02__a2__p_ponta.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "mecha",
+        "cooking"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "male",
+      "species": "red panda",
+      "ageBand": "adult animal",
+      "culturalBasis": "Himalayan-inspired invented forest town"
+    },
+    {
+      "id": "s_koko",
+      "name": "Koko",
+      "archetype": "Unreadable household oracle",
+      "personality": "Gives attention sparingly and follows a distressed person without demanding contact.",
+      "img": "cast/v2/mascot_shojo_02__a3__s_koko.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "supernatural",
+        "idol"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "male",
+      "species": "cat familiar",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Japanese-inspired invented spirit harbour"
+    },
+    {
+      "id": "p_brine",
+      "name": "Brine",
+      "archetype": "Colour-speaking social companion",
+      "personality": "Matches a trusted visitor's pace and signals discomfort before retreating.",
+      "img": "cast/v2/mascot_shojo_02__a4__p_brine.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "pirate",
+        "space"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "male",
+      "species": "cuttlefish",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented island research community"
+    },
+    {
+      "id": "p_pudding",
+      "name": "Pudding",
+      "archetype": "Affectionate wobbling greeter",
+      "personality": "Becomes still when someone needs calm and bounces only when invited.",
+      "img": "cast/v2/mascot_shojo_02__b1__p_pudding.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "cooking",
+        "military"
+      ],
+      "hiddenAff": "slice",
+      "gender": "female",
+      "species": "gelatinous dog",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented soft-creature café world"
+    },
+    {
+      "id": "p_peko",
+      "name": "Peko Sprig",
+      "archetype": "Tiny companion for a first journey",
+      "personality": "Peeks from a safe pocket and gradually ventures farther on each visit.",
+      "img": "cast/v2/mascot_shojo_02__b2__p_peko.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "survival"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "leaf chick",
+      "ageBand": "juvenile",
+      "culturalBasis": "Japanese-inspired orchard fantasy"
+    },
+    {
+      "id": "p_momo2",
+      "name": "Momo Peach",
+      "archetype": "Tender reunion companion",
+      "personality": "Remembers familiar footsteps and waits at a gate long after everyone else leaves.",
+      "img": "cast/v2/mascot_shojo_02__b3__p_momo2.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "fantasy"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "female",
+      "species": "rabbit",
+      "ageBand": "adult animal",
+      "culturalBasis": "Chinese-Japanese garden fantasy"
+    },
+    {
+      "id": "p_nya",
+      "name": "Nya",
+      "archetype": "Opinionated apprentice supervisor",
+      "personality": "Accepts no fuss, interrupts overwork and sleeps beside unfinished tasks.",
+      "img": "cast/v2/mascot_shojo_02__b4__p_nya.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "supernatural"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "cat familiar",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented European-Japanese witch village"
+    },
+    {
+      "id": "p_rin2",
+      "name": "Rin Pearl",
+      "archetype": "Wish-pool companion",
+      "personality": "Approaches patient people and refuses loud demands.",
+      "img": "cast/v2/mascot_shojo_03__a1__p_rin2.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "mythology",
+        "cyber"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "floating koi spirit",
+      "ageBand": "ageless",
+      "culturalBasis": "Chinese-inspired invented river folklore"
+    },
+    {
+      "id": "p_yuzu",
+      "name": "Yuzu",
+      "archetype": "Restless kitchen companion",
+      "personality": "Interrupts sulking with small demands and steals only empty wrappers.",
+      "img": "cast/v2/mascot_shojo_03__a2__p_yuzu.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "cooking"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "cat",
+      "ageBand": "adult animal",
+      "culturalBasis": "Japanese seaside household"
+    },
+    {
+      "id": "p_sakumi",
+      "name": "Sakumi",
+      "archetype": "Seasonal reunion companion",
+      "personality": "Returns to familiar doorsteps and grows quiet when routines change.",
+      "img": "cast/v2/mascot_shojo_03__a3__p_sakumi.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "martial"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "female",
+      "species": "petal-shedding ferret",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented blossom-forest community"
+    },
+    {
+      "id": "p_bloop",
+      "name": "Bloop",
+      "archetype": "Responsive light companion",
+      "personality": "Brightens near familiar motion and withdraws from sudden crowds.",
+      "img": "cast/v2/mascot_shojo_03__a4__p_bloop.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "magical"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "prism jellyfish",
+      "ageBand": "adult organism",
+      "culturalBasis": "Invented bioluminescent reef"
+    },
+    {
+      "id": "p_lumen",
+      "name": "Lumen",
+      "archetype": "Shy witness to family promises",
+      "personality": "Approaches people who keep still and returns to places associated with trust.",
+      "img": "cast/v2/mascot_shojo_03__b1__p_lumen.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "mythology"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "crystal fawn",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented Nordic woodland folklore"
+    },
+    {
+      "id": "p_fuwa",
+      "name": "Fuwa",
+      "archetype": "Mood-following flock companion",
+      "personality": "Naps through arguments but nudges the person left alone afterwards.",
+      "img": "cast/v2/mascot_shojo_03__b2__p_fuwa.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "comedy"
+      ],
+      "hiddenAff": "space",
+      "gender": "female",
+      "species": "cloud sheep",
+      "ageBand": "adult animal-equivalent",
+      "culturalBasis": "Invented highland pasture"
+    },
+    {
+      "id": "p_stellar",
+      "name": "Stellar",
+      "archetype": "Curious companion of exiles",
+      "personality": "Chases moving light and always circles back to the same shoulder.",
+      "img": "cast/v2/mascot_shojo_03__b3__p_stellar.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "space",
+        "magical"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "cosmic cat",
+      "ageBand": "juvenile",
+      "culturalBasis": "Invented comet nursery"
+    },
+    {
+      "id": "s_chika",
+      "name": "Chika",
+      "archetype": "Baker's companion learning independence",
+      "personality": "Offers food when words fail and insists that gifts do not create a debt.",
+      "img": "cast/v2/mascot_shojo_03__b4__s_chika.webp",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "cooking",
+        "fantasy"
+      ],
+      "hiddenAff": "idol",
+      "gender": "female",
+      "species": "small sapient dragon",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented pastry-market fantasy"
+    },
+    {
+      "id": "v_kurogane",
+      "name": "Daigo Kurogane",
+      "archetype": "Authoritarian mechanised commander",
+      "personality": "Believes a clear chain of command excuses refusing to listen.",
+      "img": "cast/v2/villain_shonen_01__a1__v_kurogane.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "slice"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "v_volt",
+      "name": "General Mateo Volt",
+      "archetype": "Test-fleet commander",
+      "personality": "Rewards results and treats every objection as a delay he can afford to ignore.",
+      "img": "cast/v2/villain_shonen_01__a2__v_volt.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "romance"
+      ],
+      "hiddenAff": "space",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Spanish-inspired orbital federation"
+    },
+    {
+      "id": "v_carnage",
+      "name": "Darius 'Carnage' Cole",
+      "archetype": "Reigning tournament champion",
+      "personality": "Generous when secure, brutally dismissive when a newcomer threatens his record.",
+      "img": "cast/v2/villain_shonen_01__a3__v_carnage.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "sports",
+        "idol"
+      ],
+      "hiddenAff": "martial",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Black British"
+    },
+    {
+      "id": "v_ash",
+      "name": "Commander Ash Malik",
+      "archetype": "Hard-line evacuation officer",
+      "personality": "Counts resources accurately but undervalues people who cannot move quickly.",
+      "img": "cast/v2/villain_shonen_01__a4__v_ash.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "horror"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Pakistani-British"
+    },
+    {
+      "id": "v_scuttle",
+      "name": "Captain Scuttlebutt",
+      "archetype": "Rumour-trading pirate captain",
+      "personality": "Charming, observant and incapable of leaving a story unembellished.",
+      "img": "cast/v2/villain_shonen_01__b1__v_scuttle.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "comedy"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Invented Caribbean-inspired maritime world"
+    },
+    {
+      "id": "v_gravemark",
+      "name": "Jarl Eirik Gravemark",
+      "archetype": "Clan elder defending an unequal peace",
+      "personality": "Remembers every debt and mistakes endurance for moral authority.",
+      "img": "cast/v2/villain_shonen_01__b2__v_gravemark.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "nordic",
+        "military"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "Norwegian-inspired grounded saga"
+    },
+    {
+      "id": "v_onikage",
+      "name": "Ren Onikage",
+      "archetype": "Dojo heir bound to a harmful oath",
+      "personality": "Disciplined, proud and afraid that questioning his teacher would erase his life.",
+      "img": "cast/v2/villain_shonen_01__b3__v_onikage.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "supernatural"
+      ],
+      "hiddenAff": "mystery",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Japanese-inspired fictional martial school"
+    },
+    {
+      "id": "v_baron",
+      "name": "Baron Ossian Vale",
+      "archetype": "Collector of heroic titles",
+      "personality": "Proudly formal and unable to understand why a title without deeds means little.",
+      "img": "cast/v2/villain_shonen_01__b4__v_baron.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mythology",
+        "pirate"
+      ],
+      "hiddenAff": "sports",
+      "gender": "male",
+      "species": "animated skeleton",
+      "ageBand": "adult",
+      "culturalBasis": "Invented European-inspired mythic coast"
+    },
+    {
+      "id": "v_magus",
+      "name": "Orun Vey",
+      "archetype": "Gatekeeper of a summoned world",
+      "personality": "Brilliant, impatient and convinced newcomers should earn kindness through usefulness.",
+      "img": "cast/v2/villain_shonen_02__a1__v_magus.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "magical",
+        "isekai"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "humanlike fantasy person",
+      "ageBand": "40–49-equivalent",
+      "culturalBasis": "Invented non-earth spell culture"
+    },
+    {
+      "id": "v_blackout",
+      "name": "Marek 'Blackout' Sanz",
+      "archetype": "Infrastructure monopolist",
+      "personality": "Calmly calls each imposed hardship a necessary efficiency.",
+      "img": "cast/v2/villain_shonen_02__a2__v_blackout.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "survival"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Spanish-Polish near future"
+    },
+    {
+      "id": "sen",
+      "name": "Sen Arakawa",
+      "archetype": "Scarred veteran opposing a reckless mission",
+      "personality": "Respects courage but assumes that fear makes him the only realist.",
+      "img": "cast/v2/villain_shonen_02__a3__sen.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "martial"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Japanese"
+    },
+    {
+      "id": "v_grandfinale",
+      "name": "Gabriel 'Grand Finale' Moreau",
+      "archetype": "Theatrical culinary judge",
+      "personality": "Can recognise excellence but struggles when it arrives without prestigious training.",
+      "img": "cast/v2/villain_shonen_02__a4__v_grandfinale.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "cooking",
+        "comedy"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "French-Martinican"
+    },
+    {
+      "id": "v_tempest",
+      "name": "Tessa Tempest",
+      "archetype": "Champion offshore skipper",
+      "personality": "Thrives on competition and treats crew loyalty as something she has already earned.",
+      "img": "cast/v2/villain_shonen_02__b1__v_tempest.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "pirate",
+        "sports"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "v_reaper",
+      "name": "Rhea 'Reaper' Quinn",
+      "archetype": "Relentless elimination-round champion",
+      "personality": "Disciplined, unsentimental and furious when victory is mistaken for luck.",
+      "img": "cast/v2/villain_shonen_02__b2__v_reaper.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "martial",
+        "sports"
+      ],
+      "hiddenAff": "horror",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Irish"
+    },
+    {
+      "id": "v_zero",
+      "name": "Zero Venn",
+      "archetype": "Identity broker with no public history",
+      "personality": "Polite, private and convinced every identity is a negotiable resource.",
+      "img": "cast/v2/villain_shonen_02__b3__v_zero.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "space"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "sapient synthetic person",
+      "ageBand": "30–39-equivalent",
+      "culturalBasis": "Invented orbital diaspora"
+    },
+    {
+      "id": "v_glitch",
+      "name": "Director Glitch",
+      "archetype": "Overprotective civic administrator",
+      "personality": "Consistent, literal and incapable of admitting that a tidy system can be cruel.",
+      "img": "cast/v2/villain_shonen_02__b4__v_glitch.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "cyber",
+        "mecha"
+      ],
+      "hiddenAff": "slice",
+      "gender": "female",
+      "species": "sapient machine",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented municipal AI culture"
+    },
+    {
+      "id": "v_paradox",
+      "name": "Professor Samira Paradox",
+      "archetype": "Prestige-obsessed chronology researcher",
+      "personality": "Enjoys brilliant questions until a junior asks one she cannot answer.",
+      "img": "cast/v2/villain_shonen_03__a1__v_paradox.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "space",
+        "mystery"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Arab-French invented research federation"
+    },
+    {
+      "id": "v_warden",
+      "name": "Warden Nandi Dube",
+      "archetype": "Camp leader rationing hope",
+      "personality": "Practical and protective until dissent feels like a threat to everyone.",
+      "img": "cast/v2/villain_shonen_03__a2__v_warden.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "military"
+      ],
+      "hiddenAff": "magical",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Zimbabwean-inspired expedition setting"
+    },
+    {
+      "id": "v_titanus",
+      "name": "Titanus Rex",
+      "archetype": "Territorial nesting creature",
+      "personality": "Returns to familiar routes and escalates only when its nesting space is invaded.",
+      "img": "cast/v2/villain_shonen_03__a3__v_titanus.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "horror",
+        "survival"
+      ],
+      "hiddenAff": "isekai",
+      "gender": "female",
+      "species": "colossal reptile",
+      "ageBand": "adult animal",
+      "culturalBasis": "Invented island ecology"
+    },
+    {
+      "id": "v_bioform",
+      "name": "Bioform IX",
+      "archetype": "Manufactured champion seeking authorship",
+      "personality": "Competitive, observant and angry at being treated as equipment.",
+      "img": "cast/v2/villain_shonen_03__a4__v_bioform.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "sports"
+      ],
+      "hiddenAff": "idol",
+      "gender": "female",
+      "species": "sapient bioengineered person",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented synthetic-athlete programme"
+    },
+    {
+      "id": "v_inquisitor",
+      "name": "Dr Imani Sefu",
+      "archetype": "Unforgiving examination chair",
+      "personality": "Believes severe scrutiny protects standards and overlooks its unequal cost.",
+      "img": "cast/v2/villain_shonen_03__b1__v_inquisitor.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mystery",
+        "martial"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Tanzanian-British"
+    },
+    {
+      "id": "v_collector",
+      "name": "Celeste Armand",
+      "archetype": "Museum patron claiming living traditions",
+      "personality": "Polite, acquisitive and convinced that preservation grants ownership.",
+      "img": "cast/v2/villain_shonen_03__b2__v_collector.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mythology",
+        "cyber"
+      ],
+      "hiddenAff": "fantasy",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "French"
+    },
+    {
+      "id": "v_nightshade",
+      "name": "Nadia Nightshade",
+      "archetype": "Botanical expedition rival",
+      "personality": "Patient with plants, dismissive of colleagues and dangerously certain of her expertise.",
+      "img": "cast/v2/villain_shonen_03__b3__v_nightshade.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "survival",
+        "mystery"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "British-Indian"
+    },
+    {
+      "id": "v_amethyst",
+      "name": "Amethyst Rook",
+      "archetype": "Court regent defending inherited privilege",
+      "personality": "Magnificently composed and deeply threatened by ordinary competence.",
+      "img": "cast/v2/villain_shonen_03__b4__v_amethyst.webp",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "fantasy",
+        "magical"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "female",
+      "species": "humanlike fantasy person",
+      "ageBand": "40–49",
+      "culturalBasis": "Invented multicoloured court"
+    },
+    {
+      "id": "v_hollow",
+      "name": "The Hollow King",
+      "archetype": "Lonely ruler of an empty audience",
+      "personality": "Courteous, possessive and terrified that being forgotten means ceasing to exist.",
+      "img": "cast/v2/villain_shojo_01__a1__v_hollow.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "supernatural"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human-shaped spirit",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented abandoned theatre folklore"
+    },
+    {
+      "id": "v_mirage",
+      "name": "Dr Farid Mirage",
+      "archetype": "Charismatic memory specialist",
+      "personality": "Listens beautifully but subtly replaces a patient's account with his own.",
+      "img": "cast/v2/villain_shojo_01__a2__v_mirage.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "mystery"
+      ],
+      "hiddenAff": "magical",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Iranian-French"
+    },
+    {
+      "id": "v_puppeteer",
+      "name": "Adrian Vale",
+      "archetype": "Manipulative talent manager",
+      "personality": "Remembers every insecurity and calls dependence a family bond.",
+      "img": "cast/v2/villain_shojo_01__a3__v_puppeteer.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "slice"
+      ],
+      "hiddenAff": "military",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "v_fang",
+      "name": "Count Lucan Varga",
+      "archetype": "Courteous host unable to accept refusal",
+      "personality": "Attentive, lonely and convinced his generosity deserves permanence.",
+      "img": "cast/v2/villain_shojo_01__a4__v_fang.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "romance"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "male",
+      "species": "vampire",
+      "ageBand": "adult",
+      "culturalBasis": "Romanian-inspired gothic fantasy"
+    },
+    {
+      "id": "v_lich",
+      "name": "Basil Lich",
+      "archetype": "Washed-up comic guarding his slot",
+      "personality": "Quick-witted, insecure and unexpectedly moved by another performer improving.",
+      "img": "cast/v2/villain_shojo_01__b1__v_lich.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "comedy",
+        "horror"
+      ],
+      "hiddenAff": "isekai",
+      "gender": "male",
+      "species": "animated skeleton",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented humorous afterlife"
+    },
+    {
+      "id": "v_kairos",
+      "name": "Leon Kairos",
+      "archetype": "Charming technology sponsor",
+      "personality": "Makes every concession sound generous while securing the stronger obligation.",
+      "img": "cast/v2/villain_shojo_01__b2__v_kairos.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "romance"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Greek"
+    },
+    {
+      "id": "v_plague",
+      "name": "Dr Emil Green",
+      "archetype": "Respected clinic director suppressing failure",
+      "personality": "Reassuring by reflex and unable to acknowledge damage to his reputation.",
+      "img": "cast/v2/villain_shojo_01__b3__v_plague.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "mystery"
+      ],
+      "hiddenAff": "idol",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "German"
+    },
+    {
+      "id": "v_harlequin",
+      "name": "Harlequin Bell",
+      "archetype": "Improv star who always needs the last laugh",
+      "personality": "Perceptive, funny and careless about who becomes the punchline.",
+      "img": "cast/v2/villain_shojo_01__b4__v_harlequin.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "comedy",
+        "idol"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "British-Caribbean"
+    },
+    {
+      "id": "v_overlord",
+      "name": "Osric Vale",
+      "archetype": "Summoned administrator claiming the crown",
+      "personality": "Organised, persuasive and convinced good intentions excuse permanent control.",
+      "img": "cast/v2/villain_shojo_02__a1__v_overlord.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "fantasy"
+      ],
+      "hiddenAff": "mecha",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "Invented portal monarchy"
+    },
+    {
+      "id": "v_falsetto",
+      "name": "Seo Min-jae 'Falsetto'",
+      "archetype": "Rival centre fearing replacement",
+      "personality": "Disciplined, glamorous and exquisitely sensitive to unequal attention.",
+      "img": "cast/v2/villain_shojo_02__a2__v_falsetto.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "martial"
+      ],
+      "hiddenAff": "romance",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Korean"
+    },
+    {
+      "id": "v_lovelace",
+      "name": "Julian Lovelace",
+      "archetype": "Serial charmer dodging accountability",
+      "personality": "Funny, attentive and expert at making a boundary sound unkind.",
+      "img": "cast/v2/villain_shojo_02__a3__v_lovelace.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "comedy"
+      ],
+      "hiddenAff": "space",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "v_einar",
+      "name": "Einar Dahl",
+      "archetype": "Prestigious restaurateur guarding a family legacy",
+      "personality": "Hospitable to guests, exacting with relatives and afraid inherited respect can vanish.",
+      "img": "cast/v2/villain_shojo_02__a4__v_einar.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "nordic",
+        "cooking"
+      ],
+      "hiddenAff": "idol",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Norwegian"
+    },
+    {
+      "id": "v_nocturne",
+      "name": "Nora Nocturne",
+      "archetype": "Intimidating gallery director",
+      "personality": "Knows how to make praise sound like a warning and insists taste is neutral.",
+      "img": "cast/v2/villain_shojo_02__b1__v_nocturne.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "mystery",
+        "slice"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30–39",
+      "culturalBasis": "French-Algerian"
+    },
+    {
+      "id": "v_venom",
+      "name": "Valerie Venn",
+      "archetype": "Immaculate popular school rival",
+      "personality": "Socially brilliant, subtly condescending and convinced exclusion is simply good taste.",
+      "img": "cast/v2/villain_shojo_02__b2__v_venom.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "slice"
+      ],
+      "hiddenAff": "survival",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "British-Chinese"
+    },
+    {
+      "id": "v_obsidian",
+      "name": "Odette Blackwell",
+      "archetype": "Fashion-house director guarding her image",
+      "personality": "Creative, polished and increasingly cruel about anything that recalls her own early failures.",
+      "img": "cast/v2/villain_shojo_02__b3__v_obsidian.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "idol",
+        "mecha"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "v_sinister",
+      "name": "Sister Celia Senn",
+      "archetype": "Overbearing school administrator",
+      "personality": "Calls every intrusion care and mistakes privacy for ingratitude.",
+      "img": "cast/v2/villain_shojo_02__b4__v_sinister.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "mystery"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "Invented European-inspired school setting"
+    },
+    {
+      "id": "v_hex",
+      "name": "Hester Hex",
+      "archetype": "Tutor who rations approval",
+      "personality": "Patient when admired and devastatingly precise when a pupil questions her.",
+      "img": "cast/v2/villain_shojo_03__a1__v_hex.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "magical",
+        "fantasy"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40–49",
+      "culturalBasis": "Invented British-inspired magical academy"
+    },
+    {
+      "id": "v_silence",
+      "name": "The Silence",
+      "archetype": "Unacknowledged witness",
+      "personality": "Repeats the gesture nobody wished to notice and refuses an easy explanation.",
+      "img": "cast/v2/villain_shojo_03__a2__v_silence.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "pirate"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "human-shaped echo",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented coastal ghost tradition"
+    },
+    {
+      "id": "v_frostbite",
+      "name": "Freya Frost",
+      "archetype": "Reigning ice-dance champion",
+      "personality": "Impeccably courteous and brutally protective of her place at the top.",
+      "img": "cast/v2/villain_shojo_03__a3__v_frostbite.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "sports",
+        "romance"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Danish"
+    },
+    {
+      "id": "v_dread",
+      "name": "Dorothea Reed",
+      "archetype": "Exacting residential manager",
+      "personality": "Polite, inflexible and convinced that exceptions invite personal disrespect.",
+      "img": "cast/v2/villain_shojo_03__a4__v_dread.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "slice",
+        "military"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "50–59",
+      "culturalBasis": "British"
+    },
+    {
+      "id": "v_moth",
+      "name": "Mother Moth",
+      "archetype": "Comfort that will not let go",
+      "personality": "Tender toward grief and possessive once someone accepts her shelter.",
+      "img": "cast/v2/villain_shojo_03__b1__v_moth.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "mythology"
+      ],
+      "hiddenAff": "cooking",
+      "gender": "female",
+      "species": "mothlike spirit",
+      "ageBand": "ageless",
+      "culturalBasis": "Invented nocturnal folklore"
+    },
+    {
+      "id": "v_hollowchild",
+      "name": "The Pale Empress",
+      "archetype": "Sovereign afraid of being irrelevant",
+      "personality": "Asks softly and reacts to refusal as if it were incomprehensible.",
+      "img": "cast/v2/villain_shojo_03__b2__v_hollowchild.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "space",
+        "fantasy"
+      ],
+      "hiddenAff": "comedy",
+      "gender": "female",
+      "species": "sapient lunar being",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented moon-court diaspora"
+    },
+    {
+      "id": "v_rosethorn",
+      "name": "Rosalie Thorn",
+      "archetype": "Beautiful club president protecting rank",
+      "personality": "Immaculate, socially observant and quietly resentful of unearned popularity.",
+      "img": "cast/v2/villain_shojo_03__b3__v_rosethorn.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "survival"
+      ],
+      "hiddenAff": "idol",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "17–19",
+      "culturalBasis": "British-French"
+    },
+    {
+      "id": "aya",
+      "name": "Aya Hanamori",
+      "archetype": "Courteous romantic rival with sharp boundaries",
+      "personality": "Sweet in company and very direct when she believes someone has taken her place.",
+      "img": "cast/v2/villain_shojo_03__b4__aya.webp",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "romance",
+        "mystery"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20–29",
+      "culturalBasis": "Japanese"
+    }
+  ]
+}

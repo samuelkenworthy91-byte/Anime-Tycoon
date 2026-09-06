@@ -84,7 +84,8 @@ describe("rivals progress between years", () => {
     const prod = {
       id: "test_hit",
       title: "Dragon Bowl Z",
-      genres: ["shonen" as const],
+      genres: ["sports" as const],
+      animeType: "shonen" as const,
       medium: "tv" as const,
       budget: "blockbuster" as const,
       week: 10,
@@ -105,7 +106,7 @@ describe("rivals progress between years", () => {
     expect(st.releasesCount).toBe(1);
     expect(st.franchises.some((f) => f.key === "Dragon Bowl Z")).toBe(true);
     /* the premiere floods its genre on the market */
-    expect(t.releaseRecords.some((r) => r.genre === "shonen" && r.weight === 2)).toBe(true);
+    expect(t.releaseRecords.some((r) => r.genre === "sports" && r.weight === 2)).toBe(true);
     expect(st.revenue).toBeGreaterThan(0);
     expect(st.fans).toBeGreaterThan(0);
   });
@@ -181,8 +182,8 @@ describe("market interaction", () => {
   it("rival premieres flood saturation with weight by budget", () => {
     const world = initRivalWorld(0);
     const s0 = world.studios[0];
-    const big = { id: "big", title: "Big", genres: ["mecha" as const], medium: "tv" as const, budget: "blockbuster" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 30 };
-    const small = { id: "small", title: "Small", genres: ["mecha" as const], medium: "tv" as const, budget: "indie" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 18 };
+    const big = { id: "big", title: "Big", genres: ["mecha" as const], animeType:"shonen" as const, medium: "tv" as const, budget: "blockbuster" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 30 };
+    const small = { id: "small", title: "Small", genres: ["mecha" as const], animeType:"shonen" as const, medium: "tv" as const, budget: "indie" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 18 };
     const t = tickRivalWeek({ ...world, studios: [{ ...s0, productions: [big, small] }, ...world.studios.slice(1)] }, 5, { playerAiringGenres: new Set() });
     const mecha = t.releaseRecords.filter((r) => r.genre === "mecha");
     expect(mecha.reduce((a, r) => a + r.weight, 0)).toBe(3); // blockbuster 2 + indie 1
@@ -192,9 +193,9 @@ describe("market interaction", () => {
     vi.spyOn(Math, "random").mockReturnValue(0); // always trigger
     const world = initRivalWorld(0);
     const s0 = world.studios[0];
-    const prod = { id: "smash", title: "Smash", genres: ["shonen" as const], medium: "tv" as const, budget: "blockbuster" as const, week: 8, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 36 };
+    const prod = { id: "smash", title: "Smash", genres: ["sports" as const], animeType:"shonen" as const, medium: "tv" as const, budget: "blockbuster" as const, week: 8, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 36 };
     const t = tickRivalWeek({ ...world, studios: [{ ...s0, productions: [prod] }, ...world.studios.slice(1)] }, 8, { playerAiringGenres: new Set() });
-    expect(t.trendShifts.some((s) => s.genre === "shonen" && s.delta > 0)).toBe(true);
+    expect(t.trendShifts.some((s) => s.genre === "sports" && s.delta > 0)).toBe(true);
   });
 });
 
@@ -205,7 +206,7 @@ describe("rival franchises", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
     const world = initRivalWorld(0);
     const s0 = world.studios[0];
-    const hit = { id: "h", title: "Neon Saga", genres: ["cyber" as const], medium: "tv" as const, budget: "standard" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 31 };
+    const hit = { id: "h", title: "Neon Saga", genres: ["cyber" as const], animeType:"shonen" as const, medium: "tv" as const, budget: "standard" as const, week: 5, year: 1, franchiseKey: null as string | null, kind: "original" as const, score: 31 };
     const t = tickRivalWorldOnce(world, s0, [hit], 5);
     const st = t.world.studios[0];
     expect(st.franchises.some((f) => f.key === "Neon Saga")).toBe(true);
@@ -219,8 +220,8 @@ describe("rival franchises", () => {
   it("a sequel grows the parent franchise's season count", () => {
     const world = initRivalWorld(0);
     const s0 = world.studios[0];
-    const seq = { id: "s2", title: "IP 2", genres: ["shonen" as const], medium: "tv" as const, budget: "standard" as const, week: 6, year: 1, franchiseKey: "IP", kind: "season" as const, score: 28 };
-    const s1 = { ...s0, productions: [seq], franchises: [{ key: "IP", baseTitle: "IP", genres: ["shonen" as const], season: 1, popularity: 70, bestScore: 30, lastScore: 30, lastEntryWeek: 1, entries: 1 }] };
+    const seq = { id: "s2", title: "IP 2", genres: ["sports" as const], animeType:"shonen" as const, medium: "tv" as const, budget: "standard" as const, week: 6, year: 1, franchiseKey: "IP", kind: "season" as const, score: 28 };
+    const s1 = { ...s0, productions: [seq], franchises: [{ key: "IP", baseTitle: "IP", genres: ["sports" as const], animeType:"shonen" as const, season: 1, popularity: 70, bestScore: 30, lastScore: 30, lastEntryWeek: 1, entries: 1 }] };
     const t = tickRivalWeek({ ...world, studios: [s1, ...world.studios.slice(1)] }, 6, { playerAiringGenres: new Set() });
     const fr = t.world.studios[0].franchises.find((f) => f.key === "IP")!;
     expect(fr.season).toBe(2);
@@ -351,8 +352,8 @@ describe("long simulations", () => {
       momentum: -25,
       slumpYears: 2,
       releases: [
-        { title: "Dud", studioId: s.id, studio: s.name, score: 8, week: 1, year: 1, genres: ["comedy" as const], revenue: 10, fans: 10, kind: "original" as const, hallOfFame: false },
-        { title: "Dud 2", studioId: s.id, studio: s.name, score: 9, week: 2, year: 1, genres: ["comedy" as const], revenue: 10, fans: 10, kind: "original" as const, hallOfFame: false },
+        { title: "Dud", studioId: s.id, studio: s.name, score: 8, week: 1, year: 1, genres: ["comedy" as const], animeType:"shonen" as const, revenue: 10, fans: 10, kind: "original" as const, hallOfFame: false },
+        { title: "Dud 2", studioId: s.id, studio: s.name, score: 9, week: 2, year: 1, genres: ["comedy" as const], animeType:"shonen" as const, revenue: 10, fans: 10, kind: "original" as const, hallOfFame: false },
       ],
       _i: i,
     }));

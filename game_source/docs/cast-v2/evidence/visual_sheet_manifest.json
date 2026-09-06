@@ -1,0 +1,962 @@
+[
+  {
+    "sheet_number": 1,
+    "sheet": "LEAD_SHONEN_01",
+    "role": "Lead",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "kai",
+        "name": "Kai Moriyama"
+      },
+      "A2": {
+        "id": "rei",
+        "name": "Rei Han"
+      },
+      "A3": {
+        "id": "sora",
+        "name": "Sora Vale"
+      },
+      "A4": {
+        "id": "kage",
+        "name": "Kage Mercer"
+      },
+      "B1": {
+        "id": "kenta",
+        "name": "Kenta Okafor"
+      },
+      "B2": {
+        "id": "ryu",
+        "name": "Ryu Long"
+      },
+      "B3": {
+        "id": "jin",
+        "name": "Jin Park"
+      },
+      "B4": {
+        "id": "goro",
+        "name": "Goro Nishida"
+      }
+    }
+  },
+  {
+    "sheet_number": 2,
+    "sheet": "LEAD_SHONEN_02",
+    "role": "Lead",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "daichi",
+        "name": "Dawit Bekele"
+      },
+      "A2": {
+        "id": "kaito",
+        "name": "Kaito Marlow"
+      },
+      "A3": {
+        "id": "akira",
+        "name": "Akira Sato"
+      },
+      "A4": {
+        "id": "kuro",
+        "name": "Kuro Reyes"
+      },
+      "B1": {
+        "id": "rin",
+        "name": "Rin Adebayo"
+      },
+      "B2": {
+        "id": "niko",
+        "name": "Niko Varga"
+      },
+      "B3": {
+        "id": "mako",
+        "name": "Mako Te Rangi"
+      },
+      "B4": {
+        "id": "zuri",
+        "name": "Zuri Kamau"
+      }
+    }
+  },
+  {
+    "sheet_number": 3,
+    "sheet": "LEAD_SHONEN_03",
+    "role": "Lead",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "sakura",
+        "name": "Sakura Fujimoto"
+      },
+      "A2": {
+        "id": "suzume",
+        "name": "Suzume Inari"
+      },
+      "A3": {
+        "id": "yuki",
+        "name": "Yuki Lind"
+      },
+      "A4": {
+        "id": "riko",
+        "name": "Riko Chen"
+      },
+      "B1": {
+        "id": "momo",
+        "name": "Momo Alvarez"
+      },
+      "B2": {
+        "id": "n_ryoko",
+        "name": "Astrid Voss"
+      },
+      "B3": {
+        "id": "n_mikoto",
+        "name": "Mikoto Arata"
+      },
+      "B4": {
+        "id": "airi",
+        "name": "Airi Watanabe"
+      }
+    }
+  },
+  {
+    "sheet_number": 4,
+    "sheet": "LEAD_SHOJO_01",
+    "role": "Lead",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "hikari",
+        "name": "Hikari Amano"
+      },
+      "A2": {
+        "id": "shiro",
+        "name": "Shiro Desai"
+      },
+      "A3": {
+        "id": "takumi",
+        "name": "Takumi Ito"
+      },
+      "A4": {
+        "id": "haru",
+        "name": "Haru Mensah"
+      },
+      "B1": {
+        "id": "kota",
+        "name": "Kota Soren"
+      },
+      "B2": {
+        "id": "renji",
+        "name": "Renji Kuroda"
+      },
+      "B3": {
+        "id": "jun",
+        "name": "Jun Seo"
+      },
+      "B4": {
+        "id": "sota",
+        "name": "Sota Rahman"
+      }
+    }
+  },
+  {
+    "sheet_number": 5,
+    "sheet": "LEAD_SHOJO_02",
+    "role": "Lead",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "itsuki",
+        "name": "Itsuki Mori"
+      },
+      "A2": {
+        "id": "leo",
+        "name": "Leo Carvalho"
+      },
+      "A3": {
+        "id": "n_saku",
+        "name": "Saku Diallo"
+      },
+      "A4": {
+        "id": "n_chisato",
+        "name": "Chisato Kimura"
+      },
+      "B1": {
+        "id": "yui",
+        "name": "Yui Tanaka"
+      },
+      "B2": {
+        "id": "mio",
+        "name": "Mio Laurent"
+      },
+      "B3": {
+        "id": "saki",
+        "name": "Saki Nguyen"
+      },
+      "B4": {
+        "id": "nana",
+        "name": "Nana Ortiz"
+      }
+    }
+  },
+  {
+    "sheet_number": 6,
+    "sheet": "LEAD_SHOJO_03",
+    "role": "Lead",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "emi",
+        "name": "Emi Kowalska"
+      },
+      "A2": {
+        "id": "hana",
+        "name": "Hana Al-Salim"
+      },
+      "A3": {
+        "id": "mira",
+        "name": "Mira Solano"
+      },
+      "A4": {
+        "id": "shiori",
+        "name": "Shiori Abe"
+      },
+      "B1": {
+        "id": "kaede",
+        "name": "Kaede Lund"
+      },
+      "B2": {
+        "id": "n_aoi",
+        "name": "Aoi Narang"
+      },
+      "B3": {
+        "id": "n_reiwa",
+        "name": "Reiwa Bell"
+      },
+      "B4": {
+        "id": "ash",
+        "name": "Ash Rowan"
+      }
+    }
+  },
+  {
+    "sheet_number": 7,
+    "sheet": "SIDEKICK_SHONEN_01",
+    "role": "Sidekick",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "s_ren",
+        "name": "Ren Kobayashi"
+      },
+      "A2": {
+        "id": "s_okada",
+        "name": "Masaru Okada"
+      },
+      "A3": {
+        "id": "s_ichiro",
+        "name": "Ichiro Santos"
+      },
+      "A4": {
+        "id": "s_takeshi",
+        "name": "Takeshi Tan"
+      },
+      "B1": {
+        "id": "s_daiki",
+        "name": "Daiki Lim"
+      },
+      "B2": {
+        "id": "s_gen",
+        "name": "Gen Zhao"
+      },
+      "B3": {
+        "id": "s_ken",
+        "name": "Ken Mori"
+      },
+      "B4": {
+        "id": "s_riku",
+        "name": "Riku Haddad"
+      }
+    }
+  },
+  {
+    "sheet_number": 8,
+    "sheet": "SIDEKICK_SHONEN_02",
+    "role": "Sidekick",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "s_tora",
+        "name": "Tora"
+      },
+      "A2": {
+        "id": "s_eiji",
+        "name": "Eiji Nakamura"
+      },
+      "A3": {
+        "id": "s_boone",
+        "name": "Boone Walker"
+      },
+      "A4": {
+        "id": "tsubasa",
+        "name": "Tsubasa Vega"
+      },
+      "B1": {
+        "id": "s_kiki",
+        "name": "Kiki Mensah"
+      },
+      "B2": {
+        "id": "s_akane",
+        "name": "Akane Sato"
+      },
+      "B3": {
+        "id": "s_chiaki",
+        "name": "Chiaki Moon"
+      },
+      "B4": {
+        "id": "s_momoko",
+        "name": "Momoko Takeda"
+      }
+    }
+  },
+  {
+    "sheet_number": 9,
+    "sheet": "SIDEKICK_SHONEN_03",
+    "role": "Sidekick",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "s_yuna",
+        "name": "Yuna Bautista"
+      },
+      "A2": {
+        "id": "s_kanna",
+        "name": "Kanna Sethi"
+      },
+      "A3": {
+        "id": "s_maki",
+        "name": "Maki Sorensen"
+      },
+      "A4": {
+        "id": "s_bolt",
+        "name": "Bola 'Bolt' Adeyemi"
+      },
+      "B1": {
+        "id": "s_ironmaid",
+        "name": "Vera 'Valkyrie' Nygaard"
+      },
+      "B2": {
+        "id": "s_amber",
+        "name": "Amber Qadir"
+      },
+      "B3": {
+        "id": "s_peko",
+        "name": "Peko Yoshida"
+      },
+      "B4": {
+        "id": "s_amina",
+        "name": "Amina El-Khatib"
+      }
+    }
+  },
+  {
+    "sheet_number": 10,
+    "sheet": "SIDEKICK_SHOJO_01",
+    "role": "Sidekick",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "s_lulu",
+        "name": "Lucien 'Lulu' Duval"
+      },
+      "A2": {
+        "id": "s_shin",
+        "name": "Pip"
+      },
+      "A3": {
+        "id": "s_sosuke",
+        "name": "Sosuke-9"
+      },
+      "A4": {
+        "id": "s_alfred",
+        "name": "Alfred Bellamy"
+      },
+      "B1": {
+        "id": "s_tobi",
+        "name": "Tobi Akinwale"
+      },
+      "B2": {
+        "id": "taro",
+        "name": "Taro Fujita"
+      },
+      "B3": {
+        "id": "s_soleil",
+        "name": "Soleil Armand"
+      },
+      "B4": {
+        "id": "s_ice",
+        "name": "Isaak 'Ice' Novak"
+      }
+    }
+  },
+  {
+    "sheet_number": 11,
+    "sheet": "SIDEKICK_SHOJO_02",
+    "role": "Sidekick",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "s_ryo",
+        "name": "Ryo Flores"
+      },
+      "A2": {
+        "id": "s_kazuki",
+        "name": "Kazuki Tran"
+      },
+      "A3": {
+        "id": "s_pranav",
+        "name": "Pranav Rao"
+      },
+      "A4": {
+        "id": "fumi",
+        "name": "Fumi Arai"
+      },
+      "B1": {
+        "id": "s_mika",
+        "name": "Mika Okoye"
+      },
+      "B2": {
+        "id": "s_anna",
+        "name": "Anna Petrov"
+      },
+      "B3": {
+        "id": "s_nozomi",
+        "name": "Nozomi Hayashi"
+      },
+      "B4": {
+        "id": "s_sakurako",
+        "name": "Sakurako Minami"
+      }
+    }
+  },
+  {
+    "sheet_number": 12,
+    "sheet": "SIDEKICK_SHOJO_03",
+    "role": "Sidekick",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "s_mimi",
+        "name": "Mimi Pham"
+      },
+      "A2": {
+        "id": "s_aoi",
+        "name": "Aoi Bennett"
+      },
+      "A3": {
+        "id": "s_megu",
+        "name": "Megumi Mori"
+      },
+      "A4": {
+        "id": "s_hina",
+        "name": "Hina Ali"
+      },
+      "B1": {
+        "id": "s_nanami",
+        "name": "Nanami Cho"
+      },
+      "B2": {
+        "id": "s_reina",
+        "name": "Reina Solberg"
+      },
+      "B3": {
+        "id": "yuzuki",
+        "name": "Yuzuki Amari"
+      },
+      "B4": {
+        "id": "s_linh",
+        "name": "Linh Trần"
+      }
+    }
+  },
+  {
+    "sheet_number": 13,
+    "sheet": "MASCOT_SHONEN_01",
+    "role": "Mascot",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "p_koro",
+        "name": "Koro"
+      },
+      "A2": {
+        "id": "p_baku",
+        "name": "Baku"
+      },
+      "A3": {
+        "id": "p_gon",
+        "name": "Gon"
+      },
+      "A4": {
+        "id": "p_pochi",
+        "name": "Pochi"
+      },
+      "B1": {
+        "id": "p_toro",
+        "name": "Toro"
+      },
+      "B2": {
+        "id": "p_mugi",
+        "name": "Mugi"
+      },
+      "B3": {
+        "id": "p_hachi",
+        "name": "Hachi"
+      },
+      "B4": {
+        "id": "p_kiki2",
+        "name": "Kiki Ember"
+      }
+    }
+  },
+  {
+    "sheet_number": 14,
+    "sheet": "MASCOT_SHONEN_02",
+    "role": "Mascot",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "p_chacha",
+        "name": "Chacha"
+      },
+      "A2": {
+        "id": "p_drakko",
+        "name": "Drakko"
+      },
+      "A3": {
+        "id": "p_loader",
+        "name": "Loader"
+      },
+      "A4": {
+        "id": "s_haruto",
+        "name": "Nyanko"
+      },
+      "B1": {
+        "id": "p_umi",
+        "name": "Umi"
+      },
+      "B2": {
+        "id": "p_kuro",
+        "name": "Kuro Shade"
+      },
+      "B3": {
+        "id": "p_ruri",
+        "name": "Ruri"
+      },
+      "B4": {
+        "id": "p_piko",
+        "name": "Piko"
+      }
+    }
+  },
+  {
+    "sheet_number": 15,
+    "sheet": "MASCOT_SHONEN_03",
+    "role": "Mascot",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "p_fuu",
+        "name": "Fuu"
+      },
+      "A2": {
+        "id": "p_kona",
+        "name": "Kona"
+      },
+      "A3": {
+        "id": "p_teto",
+        "name": "Teto"
+      },
+      "A4": {
+        "id": "p_pomu",
+        "name": "Pomu"
+      },
+      "B1": {
+        "id": "p_cogsworth",
+        "name": "Cogsworth"
+      },
+      "B2": {
+        "id": "p_nibi",
+        "name": "Nibi"
+      },
+      "B3": {
+        "id": "p_nitro",
+        "name": "Nitro"
+      },
+      "B4": {
+        "id": "p_silt",
+        "name": "Silt"
+      }
+    }
+  },
+  {
+    "sheet_number": 16,
+    "sheet": "MASCOT_SHOJO_01",
+    "role": "Mascot",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "p_mochi",
+        "name": "Mochi"
+      },
+      "A2": {
+        "id": "p_tama",
+        "name": "Tama"
+      },
+      "A3": {
+        "id": "p_chibi",
+        "name": "Chibi"
+      },
+      "A4": {
+        "id": "p_maru",
+        "name": "Maru"
+      },
+      "B1": {
+        "id": "p_sora",
+        "name": "Sora Nimbus"
+      },
+      "B2": {
+        "id": "p_nemu",
+        "name": "Nemu"
+      },
+      "B3": {
+        "id": "p_mocha",
+        "name": "Mocha"
+      },
+      "B4": {
+        "id": "p_goma",
+        "name": "Goma"
+      }
+    }
+  },
+  {
+    "sheet_number": 17,
+    "sheet": "MASCOT_SHOJO_02",
+    "role": "Mascot",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "p_puri",
+        "name": "Puri"
+      },
+      "A2": {
+        "id": "p_ponta",
+        "name": "Ponta"
+      },
+      "A3": {
+        "id": "s_koko",
+        "name": "Koko"
+      },
+      "A4": {
+        "id": "p_brine",
+        "name": "Brine"
+      },
+      "B1": {
+        "id": "p_pudding",
+        "name": "Pudding"
+      },
+      "B2": {
+        "id": "p_peko",
+        "name": "Peko Sprig"
+      },
+      "B3": {
+        "id": "p_momo2",
+        "name": "Momo Peach"
+      },
+      "B4": {
+        "id": "p_nya",
+        "name": "Nya"
+      }
+    }
+  },
+  {
+    "sheet_number": 18,
+    "sheet": "MASCOT_SHOJO_03",
+    "role": "Mascot",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "p_rin2",
+        "name": "Rin Pearl"
+      },
+      "A2": {
+        "id": "p_yuzu",
+        "name": "Yuzu"
+      },
+      "A3": {
+        "id": "p_sakumi",
+        "name": "Sakumi"
+      },
+      "A4": {
+        "id": "p_bloop",
+        "name": "Bloop"
+      },
+      "B1": {
+        "id": "p_lumen",
+        "name": "Lumen"
+      },
+      "B2": {
+        "id": "p_fuwa",
+        "name": "Fuwa"
+      },
+      "B3": {
+        "id": "p_stellar",
+        "name": "Stellar"
+      },
+      "B4": {
+        "id": "s_chika",
+        "name": "Chika"
+      }
+    }
+  },
+  {
+    "sheet_number": 19,
+    "sheet": "VILLAIN_SHONEN_01",
+    "role": "Villain",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "v_kurogane",
+        "name": "Daigo Kurogane"
+      },
+      "A2": {
+        "id": "v_volt",
+        "name": "General Mateo Volt"
+      },
+      "A3": {
+        "id": "v_carnage",
+        "name": "Darius 'Carnage' Cole"
+      },
+      "A4": {
+        "id": "v_ash",
+        "name": "Commander Ash Malik"
+      },
+      "B1": {
+        "id": "v_scuttle",
+        "name": "Captain Scuttlebutt"
+      },
+      "B2": {
+        "id": "v_gravemark",
+        "name": "Jarl Eirik Gravemark"
+      },
+      "B3": {
+        "id": "v_onikage",
+        "name": "Ren Onikage"
+      },
+      "B4": {
+        "id": "v_baron",
+        "name": "Baron Ossian Vale"
+      }
+    }
+  },
+  {
+    "sheet_number": 20,
+    "sheet": "VILLAIN_SHONEN_02",
+    "role": "Villain",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "v_magus",
+        "name": "Orun Vey"
+      },
+      "A2": {
+        "id": "v_blackout",
+        "name": "Marek 'Blackout' Sanz"
+      },
+      "A3": {
+        "id": "sen",
+        "name": "Sen Arakawa"
+      },
+      "A4": {
+        "id": "v_grandfinale",
+        "name": "Gabriel 'Grand Finale' Moreau"
+      },
+      "B1": {
+        "id": "v_tempest",
+        "name": "Tessa Tempest"
+      },
+      "B2": {
+        "id": "v_reaper",
+        "name": "Rhea 'Reaper' Quinn"
+      },
+      "B3": {
+        "id": "v_zero",
+        "name": "Zero Venn"
+      },
+      "B4": {
+        "id": "v_glitch",
+        "name": "Director Glitch"
+      }
+    }
+  },
+  {
+    "sheet_number": 21,
+    "sheet": "VILLAIN_SHONEN_03",
+    "role": "Villain",
+    "anime_type": "SHONEN",
+    "cells": {
+      "A1": {
+        "id": "v_paradox",
+        "name": "Professor Samira Paradox"
+      },
+      "A2": {
+        "id": "v_warden",
+        "name": "Warden Nandi Dube"
+      },
+      "A3": {
+        "id": "v_titanus",
+        "name": "Titanus Rex"
+      },
+      "A4": {
+        "id": "v_bioform",
+        "name": "Bioform IX"
+      },
+      "B1": {
+        "id": "v_inquisitor",
+        "name": "Dr Imani Sefu"
+      },
+      "B2": {
+        "id": "v_collector",
+        "name": "Celeste Armand"
+      },
+      "B3": {
+        "id": "v_nightshade",
+        "name": "Nadia Nightshade"
+      },
+      "B4": {
+        "id": "v_amethyst",
+        "name": "Amethyst Rook"
+      }
+    }
+  },
+  {
+    "sheet_number": 22,
+    "sheet": "VILLAIN_SHOJO_01",
+    "role": "Villain",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "v_hollow",
+        "name": "The Hollow King"
+      },
+      "A2": {
+        "id": "v_mirage",
+        "name": "Dr Farid Mirage"
+      },
+      "A3": {
+        "id": "v_puppeteer",
+        "name": "Adrian Vale"
+      },
+      "A4": {
+        "id": "v_fang",
+        "name": "Count Lucan Varga"
+      },
+      "B1": {
+        "id": "v_lich",
+        "name": "Basil Lich"
+      },
+      "B2": {
+        "id": "v_kairos",
+        "name": "Leon Kairos"
+      },
+      "B3": {
+        "id": "v_plague",
+        "name": "Dr Emil Green"
+      },
+      "B4": {
+        "id": "v_harlequin",
+        "name": "Harlequin Bell"
+      }
+    }
+  },
+  {
+    "sheet_number": 23,
+    "sheet": "VILLAIN_SHOJO_02",
+    "role": "Villain",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "v_overlord",
+        "name": "Osric Vale"
+      },
+      "A2": {
+        "id": "v_falsetto",
+        "name": "Seo Min-jae 'Falsetto'"
+      },
+      "A3": {
+        "id": "v_lovelace",
+        "name": "Julian Lovelace"
+      },
+      "A4": {
+        "id": "v_einar",
+        "name": "Einar Dahl"
+      },
+      "B1": {
+        "id": "v_nocturne",
+        "name": "Nora Nocturne"
+      },
+      "B2": {
+        "id": "v_venom",
+        "name": "Valerie Venn"
+      },
+      "B3": {
+        "id": "v_obsidian",
+        "name": "Odette Blackwell"
+      },
+      "B4": {
+        "id": "v_sinister",
+        "name": "Sister Celia Senn"
+      }
+    }
+  },
+  {
+    "sheet_number": 24,
+    "sheet": "VILLAIN_SHOJO_03",
+    "role": "Villain",
+    "anime_type": "SHOJO",
+    "cells": {
+      "A1": {
+        "id": "v_hex",
+        "name": "Hester Hex"
+      },
+      "A2": {
+        "id": "v_silence",
+        "name": "The Silence"
+      },
+      "A3": {
+        "id": "v_frostbite",
+        "name": "Freya Frost"
+      },
+      "A4": {
+        "id": "v_dread",
+        "name": "Dorothea Reed"
+      },
+      "B1": {
+        "id": "v_moth",
+        "name": "Mother Moth"
+      },
+      "B2": {
+        "id": "v_hollowchild",
+        "name": "The Pale Empress"
+      },
+      "B3": {
+        "id": "v_rosethorn",
+        "name": "Rosalie Thorn"
+      },
+      "B4": {
+        "id": "aya",
+        "name": "Aya Hanamori"
+      }
+    }
+  }
+]

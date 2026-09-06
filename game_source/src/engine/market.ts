@@ -1,6 +1,7 @@
 import {
   GENRES,
   type AudienceId,
+  type AnimeType,
   type Draft,
   type GenreId,
   type MediumId,
@@ -158,7 +159,7 @@ export const PARTNERS: Partner[] = [
     style: "Major TV network",
     color: "#3be1ff",
     blurb: "Prime-time money, prime-time expectations.",
-    likesGenres: ["shonen", "sports", "mecha", "comedy", "racing"],
+    likesGenres: ["sports", "mecha", "comedy", "martial", "pirate"],
     likesAudiences: ["teens", "family"],
     mediums: ["tv"],
     size: 1.35,
@@ -172,7 +173,7 @@ export const PARTNERS: Partner[] = [
     style: "Prestige late-night",
     color: "#a78bfa",
     blurb: "Small audience, immaculate taste.",
-    likesGenres: ["noir", "mystery", "horror", "supernatural", "cyber"],
+    likesGenres: ["survival", "mystery", "horror", "supernatural", "cyber"],
     likesAudiences: ["adults"],
     mediums: ["tv", "ona"],
     size: 0.8,
@@ -214,7 +215,7 @@ export const PARTNERS: Partner[] = [
     style: "Niche anime service",
     color: "#5ef0c0",
     blurb: "Three hundred thousand subscribers who watch everything twice.",
-    likesGenres: ["mecha", "idol", "isekai", "slice", "magical", "noir"],
+    likesGenres: ["mecha", "idol", "isekai", "slice", "magical", "mystery"],
     likesAudiences: ["adults", "teens"],
     mediums: ["ona"],
     size: 0.65,
@@ -260,6 +261,8 @@ export interface Commission {
   genre: GenreId;
   audience: AudienceId;
   medium: MediumId;
+  /** a disclosed creative preference, not a binding acceptance condition */
+  preferredAnimeType?: AnimeType;
   /** cash paid the moment production starts */
   advance: number;
   /** the partner's cut of release revenue, 0..1 */
@@ -298,6 +301,7 @@ export function rollCommission(
   ] ?? partner.likesGenres[0];
   const audience = partner.likesAudiences[Math.floor(Math.random() * partner.likesAudiences.length)];
   const medium = partner.mediums[Math.floor(Math.random() * partner.mediums.length)];
+  const preferredAnimeType = Math.random() < 0.5 ? (Math.random() < 0.5 ? "shonen" : "shojo") : undefined;
 
   const baseAdvance = medium === "movie" ? 420_000 : medium === "tv" ? 220_000 : 150_000;
   const advance =
@@ -313,13 +317,14 @@ export function rollCommission(
     genre,
     audience,
     medium,
+    preferredAnimeType,
     advance,
     share,
     minQuality,
     bonus: Math.round((advance * 0.25) / 5_000) * 5_000,
     maxWeeks,
     expiresWeek: week + 10,
-    restriction: `Must star the ${audience} audience · ${medium.toUpperCase()} only · ${GENRES.find((g) => g.id === genre)?.label ?? genre} required`,
+    restriction: `Must star the ${audience} audience · ${medium.toUpperCase()} only · ${GENRES.find((g) => g.id === genre)?.label ?? genre} required${preferredAnimeType ? ` · ${preferredAnimeType.toUpperCase()} preferred` : ""}`,
   };
 }
 
