@@ -4,6 +4,7 @@ import {
   ARC_COMBOS,
   ARC_RESEARCH_COMBOS,
   ARC_RESEARCH_GENRE_KEYS,
+  MEDIUMS,
   OFFICES,
   PRODUCTION_SCOPES,
   RESEARCH,
@@ -22,6 +23,7 @@ import {
   type AnimeType,
   type Draft,
   type GenreId,
+  type MediumId,
   type PointType,
   type Arc,
   type Staff,
@@ -38,6 +40,7 @@ import {
   migrateUnlockedGenres,
 } from "./castV2Migration";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
+import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import {
   bumpRivalry,
   computeRankings,
@@ -283,8 +286,11 @@ export interface RunState {
   arcKnowledge: Record<string, number>;
   /** arc×genre relationships learned by shipping that exact pairing or by research */
   arcGenreKnowledge: Record<string, number>;
-  /** best raw quality ever shipped — reviews compare against this */
+  /** best raw quality ever shipped — the historical RECORD. Reviews are
+   *  absolute-quality based; this is kept for stats, records and display. */
   studioTop: number;
+  /** slow rolling expectation (EMA of past quality) — mild review nudge only */
+  reviewExpectation: number;
   franchises: Record<string, Franchise>;
   pendingSequel: string | null;
   contracts: Contract[];
@@ -371,6 +377,38 @@ export const arcLockReason = (a: Arc, r: RunState): string | null => {
   }
 };
 
+/** why a professional format is still locked (null = available to research).
+ *  Milestones are real progression conditions, not just an RD price tag. */
+export function formatLockReason(r: RunState, medium: MediumId): string | null {
+  const def = MEDIUMS[medium];
+  if (r.mediumsUnlocked.includes(medium)) return null;
+  const u = def.unlock;
+  if (!u) return null;
+  const parts: string[] = [];
+  if (u.shows && r.showsMade < u.shows) parts.push(`${r.showsMade}/${u.shows} shows aired`);
+  if (u.fans && r.fans < u.fans)
+    parts.push(`${Math.round(r.fans).toLocaleString("en-GB")}/${u.fans.toLocaleString("en-GB")} fans`);
+  if (u.office && r.officeLevel < u.office) parts.push(`office Lv${u.office + 1} (${OFFICES[u.office].name})`);
+  if (u.hits && r.hits < u.hits) parts.push(`${r.hits}/${u.hits} hit shows`);
+  if (u.franchise && Object.keys(r.franchises ?? {}).length === 0) parts.push("owning a franchise");
+  return parts.length ? `Requires ${parts.join(" · ")}` : null;
+}
+
+/** unlock a professional format: pays RD, requires every milestone to be met */
+export function unlockFormat(r: RunState, medium: MediumId): RunState | null {
+  const def = MEDIUMS[medium];
+  const u = def.unlock;
+  if (!u || r.mediumsUnlocked.includes(medium)) return null;
+  if (formatLockReason(r, medium)) return null;
+  if (r.rd < u.rd) return null;
+  return {
+    ...r,
+    rd: r.rd - u.rd,
+    mediumsUnlocked: [...r.mediumsUnlocked, medium],
+    notices: [...r.notices, `Production format unlocked: ${def.label}!`],
+  };
+}
+
 /** twelve-year career — after this the studio enters Dynasty Mode */
 export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
@@ -395,7 +433,9 @@ export function initialRun(studio: string, showrunner: string): RunState {
     candidates: [rollHire(0), rollHire(0), rollHire(0)],
     research: [],
     genresUnlocked: ["slice", "fantasy"],
-    mediumsUnlocked: ["tv", "ona"],
+    /* every career starts as a tiny fan creator on an open video platform —
+       no TV licence, no streaming deal, no theatrical release */
+    mediumsUnlocked: ["fanweb"],
     comboLevels: {},
     legacyComboLevels: {},
     genreKnowledge: {},
@@ -406,6 +446,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     arcKnowledge: {},
     arcGenreKnowledge: {},
     studioTop: 0,
+    reviewExpectation: REVIEW_EXPECTATION_SEED,
     franchises: {},
     pendingSequel: null,
     contracts: [rollContract(0), rollContract(0), rollContract(0)].map((c) => contractForShowrunner(showrunner, c)),
@@ -521,6 +562,14 @@ export function migrateRun(raw: unknown): RunState {
     arcKnowledge: r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {},
     arcGenreKnowledge: migrateArcGenreKnowledge(r.arcGenreKnowledge),
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
+    /* additive migration: an old save simply starts with the neutral
+       expectation; only the studio's own past releases move it forward */
+    reviewExpectation: typeof r.reviewExpectation === "number" ? r.reviewExpectation : REVIEW_EXPECTATION_SEED,
+    /* every save can always make fan productions; professional formats stay
+       gated as before and the new ladder is researched normally */
+    mediumsUnlocked: Array.isArray(r.mediumsUnlocked)
+      ? [...new Set([...r.mediumsUnlocked, "fanweb"])]
+      : ["fanweb"],
     rivalWorld: migrateRivalWorld((r as { rivalWorld?: unknown }).rivalWorld ?? (r as { rivals?: unknown }).rivals ?? [], r.week ?? 0),
     franchises: Object.fromEntries(
       Object.entries(r.franchises ?? {}).map(([k, v]) => [k, migrateFranchise(k, v, r.week ?? 0)])
@@ -2059,6 +2108,7 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     castCombos: r.castCombos,
     arcCombos: r.arcCombos,
     studioTop: r.studioTop,
+    reviewExpectation: r.reviewExpectation,
     franchises: r.franchises,
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r),
@@ -2327,6 +2377,9 @@ export function releaseProject(
       return acc2;
     }, { ...(r.arcGenreKnowledge ?? {}) } as Record<string, number>),
     studioTop: Math.max(r.studioTop, result.quality),
+    /* slow EMA expectation — NOT a maximum. One exceptional release cannot
+       poison future reviews, and a deliberate flop cannot soften the bar. */
+    reviewExpectation: nextReviewExpectation(r.reviewExpectation, result.quality),
     franchises,
     pendingSequel:
       result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,

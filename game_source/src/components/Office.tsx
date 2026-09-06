@@ -3,8 +3,12 @@ import {
   AlertTriangle,
   BarChart3,
   Clapperboard,
+  Disc3,
+  Globe,
   Hammer,
   KanbanSquare,
+  Smartphone,
+  Tv,
   Users,
   Banknote,
   Flame,
@@ -34,6 +38,8 @@ import {
   arcComboRating,
   CAST_CHEMS,
   castById,
+  DISTRIBUTION_LABEL,
+  FORMAT_ORDER,
   GENRES,
   NEWS,
   OFFICES,
@@ -54,6 +60,7 @@ import {
   assignToProject,
   buyFacility,
   forecastWeek,
+  formatLockReason,
   office,
   projectCapacity,
   relocateOffice,
@@ -61,6 +68,7 @@ import {
   startBlockReason,
   startResearchProject,
   startTestAudience,
+  unlockFormat,
   AUDIENCE_TEST_DAYS,
   AUDIENCE_TEST_RD,
   AUDIENCE_TEST_MAX_FINDINGS,
@@ -151,16 +159,6 @@ export default function Office({
       rd: r.rd - rd,
       genresUnlocked: [...r.genresUnlocked, g],
       notices: [...r.notices, `New genre licensed: ${GENRES.find((x) => x.id === g)?.label}!`],
-    }));
-  };
-  const unlockMovie = () => {
-    if (run.rd < MEDIUMS.movie.rd) return;
-    sfx.fanfare();
-    setRun((r) => ({
-      ...r,
-      rd: r.rd - MEDIUMS.movie.rd,
-      mediumsUnlocked: [...r.mediumsUnlocked, "movie"],
-      notices: [...r.notices, "Theatrical distribution deal signed!"],
     }));
   };
   const relocate = () => {
@@ -679,26 +677,48 @@ export default function Office({
                 </button>
               );
             })}
-            {!run.mediumsUnlocked.includes("movie") ? (
-              <button
-                disabled={run.rd < MEDIUMS.movie.rd}
-                onClick={unlockMovie}
-                className={cn(
-                  "btn-press flex items-center gap-1.5 rounded-xl border p-2 text-left",
-                  run.rd >= MEDIUMS.movie.rd ? "border-gold/60 bg-gold/10" : "border-line/50 opacity-45"
-                )}
-              >
-                <Clapperboard size={14} className="text-gold" />
-                <span className="text-xs font-bold">Films</span>
-                <span className="ml-auto text-[10px] font-bold text-viol">{MEDIUMS.movie.rd}</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-1.5 rounded-xl border border-mint/50 bg-mint/5 p-2">
-                <Clapperboard size={14} className="text-gold" />
-                <span className="text-xs font-bold">Films</span>
-                <span className="ml-auto text-[10px] font-bold text-mint">✓</span>
-              </div>
-            )}
+          </div>
+
+          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">PRODUCTION FORMATS</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {FORMAT_ORDER.map((m) => {
+              const def = MEDIUMS[m];
+              const owned = run.mediumsUnlocked.includes(m);
+              const milestoneBlock = formatLockReason(run, m);
+              const rdReady = run.rd >= def.rd;
+              const unlockable = !owned && !milestoneBlock && rdReady;
+              const Icon = m === "tv" || m === "special" ? Tv : m === "movie" ? Clapperboard : m === "fanweb" ? Smartphone : m === "ova" ? Disc3 : Globe;
+              return (
+                <button
+                  key={m}
+                  disabled={!unlockable}
+                  onClick={() => {
+                    const next = unlockFormat(run, m);
+                    if (next) {
+                      sfx.fanfare();
+                      setRun(() => next);
+                    }
+                  }}
+                  className={cn(
+                    "btn-press flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left",
+                    owned ? "border-mint/50 bg-mint/5" : unlockable ? "border-gold/60 bg-gold/10 hover:border-gold" : "border-line/50 opacity-60"
+                  )}
+                >
+                  <div className="flex w-full items-center gap-1.5">
+                    <Icon size={14} className={m === "movie" ? "text-gold" : m === "fanweb" ? "text-mint" : "text-cyanx"} />
+                    <span className="text-xs font-bold">{def.label}</span>
+                    <span className="ml-auto text-[10px] font-bold text-viol">{owned ? "✓" : `${def.rd} RD`}</span>
+                  </div>
+                  <span className="text-[10px] text-paper/55">{def.desc}</span>
+                  <span className="text-[9px] font-bold text-mint">{DISTRIBUTION_LABEL[def.distribution]}</span>
+                  {!owned && (
+                    <span className={cn("text-[9px] font-bold", milestoneBlock ? "text-gold" : "text-paper/45")}>
+                      {milestoneBlock ? `LOCKED · ${milestoneBlock}` : rdReady ? "READY TO UNLOCK" : "Not enough RD"}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </Modal>
       )}

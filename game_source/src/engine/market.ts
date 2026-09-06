@@ -35,7 +35,7 @@ export const SIDE_HEAT_MULT = [0.92, 1.0, 1.08]; // audiences & mediums, −1/0/
 
 const GENRE_IDS = GENRES.map((g) => g.id);
 const AUDIENCE_IDS: AudienceId[] = ["kids", "teens", "adults", "family"];
-const MEDIUM_IDS: MediumId[] = ["tv", "ona", "movie"];
+const MEDIUM_IDS: MediumId[] = ["fanweb", "ona", "tv", "ova", "special", "movie"];
 
 const clampHeat = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(v)));
 

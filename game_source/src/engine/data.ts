@@ -49,10 +49,13 @@ export type GenreId =
 
 export type AnimeType = "shonen" | "shojo";
 
-export type MediumId = "tv" | "movie" | "ona";
+/** Supported format ladder. Production Scope (short/standard/extended/
+ *  prestige) is a separate dimension — there are no mini-series, double-cour
+ *  or prestige-series formats. */
+export type MediumId = "fanweb" | "ona" | "tv" | "ova" | "special" | "movie";
 export type BudgetId = "indie" | "standard" | "blockbuster";
 export type ScopeId = "short" | "standard" | "extended" | "prestige";
-export type SlotId = "midnight" | "evening" | "prime" | "stream";
+export type SlotId = "midnight" | "evening" | "prime" | "web" | "stream" | "homevideo" | "theatrical";
 export type AudienceId = "kids" | "teens" | "adults" | "family";
 export type StaffRole = "writer" | "animator" | "composer";
 export type PointType = "story" | "art" | "sound";
@@ -258,11 +261,104 @@ export const comboLabel = (genres: GenreId[], discovered = true) => {
 export const comboLevelBonus = (lv: number) => 1 + Math.min(5, lv) * 0.035;
 
 /* ---------------------------------------------------------------- economy */
-export const MEDIUMS: Record<MediumId, { label: string; desc: string; costMult: number; reach: number; weeks: number; rd: number }> = {
-  tv: { label: "TV Series", desc: "12 episodes. The classic grind.", costMult: 1, reach: 1, weeks: 0, rd: 0 },
-  ona: { label: "ONA Shorts", desc: "Cheap net mini-series for the fans.", costMult: 0.62, reach: 0.78, weeks: -3, rd: 0 },
-  movie: { label: "Theatrical Film", desc: "Big screen, big risk, big reward.", costMult: 1.7, reach: 1.5, weeks: 4, rd: 40 },
+/** milestone/progression gate for a professional format. All thresholds are
+ *  isolated constants — adjust after APK playtesting, do not scatter them. */
+export interface FormatRequirement {
+  /** RD cost to research the format */
+  rd: number;
+  /** shows already aired */
+  shows?: number;
+  /** studio fan base */
+  fans?: number;
+  /** office level (0 = Bedroom Studio) */
+  office?: number;
+  /** hit shows shipped */
+  hits?: number;
+  /** owned franchise */
+  franchise?: boolean;
+}
+
+export type DistributionKind = "broadcast" | "streaming" | "web" | "homevideo" | "theatrical";
+
+export interface MediumInfo {
+  label: string;
+  desc: string;
+  costMult: number;
+  reach: number;
+  weeks: number;
+  /** RD to unlock via R&D (0 = available from the start) */
+  rd: number;
+  /** how the finished show reaches people — drives the Create gate and
+   *  the finance forecast labels. broadcast = slot picker; everything
+   *  else auto-maps to its distribution slot (no broadcast slot choice). */
+  distribution: DistributionKind;
+  /** auto distribution slot for non-broadcast formats */
+  slot?: SlotId;
+  /** scope choices this format allows (fan web stays deliberately small) */
+  scopes: ScopeId[];
+  /** progression gate (see FormatRequirement) */
+  unlock?: FormatRequirement;
+  /** commercial ceiling: fan web can be a cult classic, never a nationwide
+   *  mainstream phenomenon. Quality/reviews are NOT capped — distribution is. */
+  commercialCeiling?: string;
+}
+
+export const DISTRIBUTION_LABEL: Record<DistributionKind, string> = {
+  broadcast: "Broadcast",
+  streaming: "Streaming / ONA",
+  web: "Open Video Platform",
+  homevideo: "Direct / Home Video",
+  theatrical: "Theatrical",
 };
+
+/** the format ladder's starting order for the R&D menu and Create screen */
+export const FORMAT_ORDER: MediumId[] = ["fanweb", "ona", "tv", "ova", "special", "movie"];
+
+export const MEDIUMS: Record<MediumId, MediumInfo> = {
+  fanweb: {
+    label: "Fan Web Series", desc: "Tiny fan production on an open video platform.", costMult: 0.45, reach: 0.55, weeks: -6, rd: 0,
+    distribution: "web", slot: "web", scopes: ["short", "standard"],
+    commercialCeiling: "CULT CLASSIC — no national mainstream distribution from a fan platform.",
+  },
+  ona: {
+    label: "Streaming / ONA", desc: "Day-one episode drops on a streaming platform.", costMult: 0.62, reach: 0.78, weeks: -3, rd: 14,
+    distribution: "streaming", slot: "stream", scopes: ["short", "standard", "extended", "prestige"],
+    unlock: { rd: 14, shows: 2 },
+  },
+  tv: {
+    label: "TV Series", desc: "12 episodes. The classic grind.", costMult: 1, reach: 1, weeks: 0, rd: 24,
+    distribution: "broadcast", scopes: ["short", "standard", "extended", "prestige"],
+    unlock: { rd: 24, shows: 3, fans: 1_500, office: 1 },
+  },
+  ova: {
+    label: "OVA / Home Video", desc: "A direct-to-fans release on disc and digital.", costMult: 0.8, reach: 0.9, weeks: -2, rd: 18,
+    distribution: "homevideo", slot: "homevideo", scopes: ["short", "standard", "extended", "prestige"],
+    unlock: { rd: 18, shows: 4 },
+  },
+  special: {
+    label: "TV Special", desc: "One event night of prime-time scheduling.", costMult: 1.05, reach: 1.25, weeks: 1, rd: 30,
+    distribution: "broadcast", scopes: ["short", "standard", "extended", "prestige"],
+    unlock: { rd: 30, hits: 1, office: 1 },
+  },
+  movie: {
+    label: "Theatrical Film", desc: "Big screen, big risk, big reward.", costMult: 1.7, reach: 1.5, weeks: 4, rd: 40,
+    distribution: "theatrical", slot: "theatrical", scopes: ["short", "standard", "extended", "prestige"],
+    unlock: { rd: 40, shows: 5, fans: 15_000, office: 1 },
+  },
+};
+
+/** which slot a format uses — broadcast formats keep the picker, everything
+ *  else is locked to its distribution slot (no broadcast-slot choice). */
+export const slotForMedium = (medium: MediumId, fallback: SlotId): SlotId => {
+  const def = MEDIUMS[medium];
+  if (def.distribution === "broadcast")
+    return fallback === "midnight" || fallback === "evening" || fallback === "prime" ? fallback : "midnight";
+  return def.slot ?? "stream";
+};
+
+/** formats can restrict available production scopes (Fan Web: Short/Standard only) */
+export const mediumAllowsScope = (medium: MediumId, scope: ScopeId) =>
+  MEDIUMS[medium].scopes.includes(scope);
 
 export interface ProductionScope {
   label: string;
@@ -286,10 +382,15 @@ export const PRODUCTION_SCOPES: Record<ScopeId, ProductionScope> = {
 };
 
 export const scopeLabel = (scope: ScopeId, medium: MediumId) => {
-  if (scope === "short") return medium === "movie" ? "Short Feature" : medium === "ona" ? "Short Run" : "Short Cour";
-  if (scope === "standard") return medium === "movie" ? "Standard Feature" : medium === "ona" ? "Streaming Season" : "Standard Cour";
-  if (scope === "extended") return medium === "movie" ? "Major Feature" : medium === "ona" ? "Full Streaming Season" : "Double Cour";
-  return medium === "movie" ? "Event Film" : medium === "ona" ? "Prestige Streaming Event" : "Prestige Series";
+  const byMedium: Record<MediumId, Record<ScopeId, string>> = {
+    tv: { short: "Short Cour", standard: "Standard Cour", extended: "Double Cour", prestige: "Prestige Series" },
+    ona: { short: "Short Run", standard: "Streaming Season", extended: "Full Streaming Season", prestige: "Prestige Streaming Event" },
+    fanweb: { short: "Short Filk", standard: "Fan Series", extended: "Extended Fan Series", prestige: "Prestige Fan Event" },
+    ova: { short: "Short OVA", standard: "Standard OVA", extended: "Extended OVA", prestige: "Event OVA" },
+    special: { short: "Short Special", standard: "TV Special", extended: "Extended Special", prestige: "Grand Special" },
+    movie: { short: "Short Feature", standard: "Standard Feature", extended: "Major Feature", prestige: "Event Film" },
+  };
+  return byMedium[medium][scope];
 };
 
 export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: number; desc: string; heat: number }> = {
@@ -301,8 +402,13 @@ export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: num
 export const SLOTS: Record<SlotId, { label: string; cost: number; reach: number; best: GenreId[]; desc: string }> = {
   midnight: { label: "Midnight Otaku Slot", cost: 6_000, reach: 0.78, best: ["horror", "mystery", "cyber", "slice", "supernatural", "survival"], desc: "Cheap airtime for devoted weirdos." },
   evening: { label: "Evening Family Slot", cost: 40_000, reach: 1.15, best: ["romance", "slice", "fantasy", "comedy", "cooking", "magical", "mythology"], desc: "Dinner-table viewing." },
-  stream: { label: "Global Streaming", cost: 60_000, reach: 1.35, best: ["isekai", "fantasy", "cyber", "horror", "space", "supernatural"], desc: "Day-one simulcast worldwide." },
   prime: { label: "Prime-Time Saturday", cost: 110_000, reach: 1.62, best: ["sports", "mecha", "idol", "military", "martial", "pirate"], desc: "The whole nation watches." },
+  /* non-broadcast distribution slots: no slot picker, no genre fit — the
+     distribution simply reaches its audience */
+  web: { label: "Open Video Platform", cost: 0, reach: 0.55, best: [], desc: "Fictional open-video site for fan creators." },
+  stream: { label: "Global Streaming", cost: 60_000, reach: 1.35, best: [], desc: "Day-one simulcast worldwide." },
+  homevideo: { label: "Direct Home Video", cost: 8_000, reach: 0.9, best: [], desc: "Disc and digital direct release." },
+  theatrical: { label: "Theatrical", cost: 45_000, reach: 1.75, best: [], desc: "Every screen in the country." },
 };
 
 export const AUDIENCES: Record<AudienceId, { label: string; mult: number; fit: Partial<Record<GenreId, number>>; desc: string }> = {

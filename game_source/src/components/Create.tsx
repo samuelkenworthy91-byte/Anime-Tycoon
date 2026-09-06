@@ -37,6 +37,8 @@ import {
   arcGenreKey,
   AUDIENCES,
   BUDGETS,
+  DISTRIBUTION_LABEL,
+  FORMAT_ORDER,
   GENRES,
   MEDIUMS,
   PETS,
@@ -49,8 +51,10 @@ import {
   comboLabel,
   comboLevelBonus,
   formatGBP,
+  mediumAllowsScope,
   randomTitle,
   scopeLabel,
+  slotForMedium,
   type AudienceId,
   type AnimeType,
   type BudgetId,
@@ -61,7 +65,7 @@ import {
   type ScopeId,
   type SlotId,
 } from "../engine/data";
-import { arcLockReason, startBlockReason } from "../engine/state";
+import { arcLockReason, formatLockReason, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -104,12 +108,14 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
   /* remember the settings from your last show — same format, budget,
      slot and audience, so a new show doesn't start from scratch */
   const last = run.lastDraft;
+  const startMedium: MediumId =
+    last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "fanweb";
   const base: Draft = {
     title: randomTitle(),
-    medium: last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "tv",
+    medium: startMedium,
     budget: last?.budget ?? "standard",
-    scope: last?.scope ?? "standard",
-    slot: last?.slot ?? "midnight",
+    scope: mediumAllowsScope(startMedium, last?.scope ?? "standard") ? (last?.scope ?? "standard") : "standard",
+    slot: slotForMedium(startMedium, last?.slot ?? "midnight"),
     animeType: fr && plan?.kind !== "crossover" ? fr.animeType : last?.animeType ?? "shonen",
     genres: [],
     audience: last?.audience ?? "teens",
@@ -130,6 +136,10 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     ...base,
     title: continuationTitle(fr, plan, run),
     medium: def?.medium && run.mediumsUnlocked.includes(def.medium) ? def.medium : base.medium,
+    slot: slotForMedium(
+      def?.medium && run.mediumsUnlocked.includes(def.medium) ? def.medium : base.medium,
+      base.slot,
+    ),
     genres: fr.genres.length ? fr.genres.slice(0, 2) : base.genres,
     audience: fr.audience,
     protag: protagChar?.id ?? base.protag,
@@ -211,7 +221,14 @@ export default function Create({
   const [d, setD] = useState<Draft>(() => {
     const base = freshDraft(run, plan);
     return commission
-      ? { ...base, animeType: commission.preferredAnimeType ?? base.animeType, medium: commission.medium, audience: commission.audience, genres: [commission.genre] }
+      ? {
+          ...base,
+          animeType: commission.preferredAnimeType ?? base.animeType,
+          medium: commission.medium,
+          slot: slotForMedium(commission.medium, base.slot),
+          audience: commission.audience,
+          genres: [commission.genre],
+        }
       : base;
   });
   const partner = commission ? partnerById(commission.partnerId) : null;
@@ -413,17 +430,34 @@ export default function Create({
                 </div>
               </Section>
               <Section title="FORMAT">
-                <div className="grid grid-cols-3 gap-2">
-                  {(Object.keys(MEDIUMS) as MediumId[]).map((m) => {
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+                  {FORMAT_ORDER.map((m) => {
+                    const owned = run.mediumsUnlocked.includes(m);
+                    const lockReason = formatLockReason(run, m);
                     const locked =
-                      !run.mediumsUnlocked.includes(m) ||
+                      !owned ||
                       (!!commission && m !== commission.medium) ||
-                      (!!planDef?.medium && run.mediumsUnlocked.includes(planDef.medium) && m !== planDef.medium);
+                      (!!planDef?.medium && owned && m !== planDef.medium);
+                    const reason = !owned
+                      ? lockReason
+                        ? `Locked — ${lockReason} · ${MEDIUMS[m].rd} RD`
+                        : `Research to unlock (${MEDIUMS[m].rd} RD)`
+                      : locked
+                        ? "Unavailable for this brief"
+                        : MEDIUMS[m].desc;
                     return (
-                      <Pick key={m} active={d.medium === m} disabled={locked} onClick={() => set({ medium: m })}>
-                        {m === "tv" ? <Tv size={18} /> : m === "movie" ? <Clapperboard size={18} /> : <Smartphone size={18} />}
-                        <div className="font-display text-sm font-extrabold">{MEDIUMS[m].label}</div>
-                        <div className="text-[10px] text-paper/50">{locked ? `Research to unlock (${MEDIUMS[m].rd} RD)` : MEDIUMS[m].desc}</div>
+                      <Pick
+                        key={m}
+                        active={d.medium === m}
+                        disabled={locked}
+                        onClick={() => set({ medium: m, slot: slotForMedium(m, d.slot) })}
+                      >
+                        {m === "tv" || m === "special" ? <Tv size={18} /> : m === "movie" ? <Clapperboard size={18} /> : m === "fanweb" ? <Smartphone size={18} /> : <Globe size={18} />}
+                        <div className="font-display text-sm font-extrabold leading-tight">{MEDIUMS[m].label}</div>
+                        <div className="text-[10px] text-paper/50">{reason}</div>
+                        {MEDIUMS[m].distribution !== "broadcast" && (
+                          <div className="text-[9px] font-bold text-mint">DISTRIBUTION: {DISTRIBUTION_LABEL[MEDIUMS[m].distribution]}</div>
+                        )}
                       </Pick>
                     );
                   })}
@@ -445,29 +479,47 @@ export default function Create({
                 <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
                   {(Object.keys(PRODUCTION_SCOPES) as ScopeId[]).map((scope) => {
                     const def = PRODUCTION_SCOPES[scope];
-                    const locked = run.officeLevel < def.minOffice || run.staff.length < def.minStaff;
+                    const formatBlocked = !mediumAllowsScope(d.medium, scope);
+                    const locked = formatBlocked || run.officeLevel < def.minOffice || run.staff.length < def.minStaff;
                     return (
                       <Pick key={scope} active={(d.scope ?? "standard") === scope} disabled={locked} onClick={() => set({ scope, arcs: d.arcs.slice(0, def.arcLimit) })}>
                         <div className="font-display text-sm font-extrabold">{scopeLabel(scope, d.medium)}</div>
                         <div className="text-[10px] font-bold text-gold">×{def.costMult.toFixed(2)} cost · ×{def.weeksMult.toFixed(2)} time · {def.arcLimit} arcs</div>
-                        <div className="text-[10px] text-paper/50">{locked ? `Needs office Lv${def.minOffice + 1} and ${def.minStaff} staff` : def.desc}</div>
+                        <div className="text-[10px] text-paper/50">{formatBlocked ? `${MEDIUMS[d.medium].label}: Short/Standard only` : locked ? `Needs office Lv${def.minOffice + 1} and ${def.minStaff} staff` : def.desc}</div>
                       </Pick>
                     );
                   })}
                 </div>
               </Section>
-              <Section title="BROADCAST SLOT">
-                <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                  {(Object.keys(SLOTS) as SlotId[]).map((s) => (
-                    <Pick key={s} active={d.slot === s} onClick={() => set({ slot: s })}>
-                      {s === "midnight" ? <Moon size={16} className="text-viol" /> : s === "evening" ? <Sunset size={16} className="text-neon2" /> : s === "prime" ? <Crown size={16} className="text-gold" /> : <Globe size={16} className="text-cyanx" />}
-                      <div className="font-display text-xs font-extrabold leading-tight">{SLOTS[s].label}</div>
-                      <div className="text-[10px] font-bold text-gold">{formatGBP(SLOTS[s].cost)}</div>
-                      <div className="text-[10px] text-paper/50">{SLOTS[s].desc}</div>
-                    </Pick>
-                  ))}
-                </div>
-              </Section>
+              {MEDIUMS[d.medium].distribution === "broadcast" ? (
+                <Section title="BROADCAST SLOT">
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["midnight", "evening", "prime"] as SlotId[]).map((s) => (
+                      <Pick key={s} active={d.slot === s} onClick={() => set({ slot: s })}>
+                        {s === "midnight" ? <Moon size={16} className="text-viol" /> : s === "evening" ? <Sunset size={16} className="text-neon2" /> : <Crown size={16} className="text-gold" />}
+                        <div className="font-display text-xs font-extrabold leading-tight">{SLOTS[s].label}</div>
+                        <div className="text-[10px] font-bold text-gold">{formatGBP(SLOTS[s].cost)}</div>
+                        <div className="text-[10px] text-paper/50">{SLOTS[s].desc}</div>
+                      </Pick>
+                    ))}
+                  </div>
+                </Section>
+              ) : (
+                <Section title="DISTRIBUTION">
+                  <div className="flex items-center gap-2 rounded-xl border border-mint/35 bg-mint/5 p-3">
+                    <Globe size={18} className="shrink-0 text-mint" />
+                    <div className="min-w-0">
+                      <div className="font-display text-xs font-extrabold">{DISTRIBUTION_LABEL[MEDIUMS[d.medium].distribution]}</div>
+                      <div className="text-[10px] text-paper/60">
+                        {SLOTS[d.slot]?.label ?? MEDIUMS[d.medium].desc} · {formatGBP(SLOTS[d.slot]?.cost ?? 0)}
+                      </div>
+                      {MEDIUMS[d.medium].commercialCeiling && (
+                        <div className="mt-1 text-[9px] font-bold text-gold">{MEDIUMS[d.medium].commercialCeiling}</div>
+                      )}
+                    </div>
+                  </div>
+                </Section>
+              )}
             </div>
           )}
 
@@ -834,11 +886,11 @@ export default function Create({
                   <Row k="Pet / Mascot" v={PETS.find((x) => x.id === d.pet)?.name ?? ""} />
                   <Row k="Villain" v={VILLAINS.find((x) => x.id === d.villain)?.name ?? ""} />
                   <Row k="Arcs" v={`${d.arcs.length} planned`} />
-                  <Row k="Slot" v={SLOTS[d.slot].label} />
+                  <Row k={MEDIUMS[d.medium].distribution === "broadcast" ? "Broadcast slot" : "Distribution"} v={SLOTS[d.slot].label} />
                   <Row k="Schedule" v={`${weeks} weeks in production`} />
                   <div className="my-2 border-t border-line/60" />
                   <Row k="Production" v={formatGBP(Math.round(BUDGETS[d.budget].cost * MEDIUMS[d.medium].costMult))} money />
-                  <Row k="Broadcast slot" v={formatGBP(SLOTS[d.slot].cost)} money />
+                  <Row k={MEDIUMS[d.medium].distribution === "broadcast" ? "Broadcast slot" : "Distribution"} v={formatGBP(SLOTS[d.slot].cost)} money />
                   <Row k="Arcs total" v={formatGBP(d.arcs.reduce((a, id) => a + (ARCS.find((x) => x.id === id)?.cost ?? 0), 0))} money />
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
