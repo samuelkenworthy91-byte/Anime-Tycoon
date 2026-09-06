@@ -303,12 +303,23 @@ export default function OfficeScene({
   const bodiesRef = useRef<Body[]>([]);
   bodiesRef.current = bodies;
 
-  /* rebuild anchors whenever the cast size or the room changes */
+  /* rebuild anchors whenever the cast size or the room changes. In portrait
+     the showrunner is deliberately pinned near the centre of the visible
+     floor so the boss can never be cropped away by the wide office art. */
   useEffect(() => {
     const spots = anchors(layoutZone, Math.max(cast.length, Math.min(maxStaff + 1, 13)), stage.portrait);
+    if (stage.portrait && spots.length > 0) {
+      spots[0] = {
+        x: (layoutZone.x0 + layoutZone.x1) / 2,
+        y: layoutZone.y0 + (layoutZone.y1 - layoutZone.y0) * 0.16,
+      };
+    }
     setBodies((prev) =>
       cast.map((_, i) => {
         const home = spots[i] ?? spots[spots.length - 1] ?? { x: 50, y: 80 };
+        if (stage.portrait && i === 0) {
+          return { home, pos: { ...home }, target: { ...home }, dur: 0, flip: false };
+        }
         const old = prev[i];
         return old
           ? { ...old, home }
@@ -327,14 +338,17 @@ export default function OfficeScene({
     }));
   }, [cast.map((c) => !!c.working).join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* every so often somebody wanders off and comes back */
+  /* every so often somebody wanders off and comes back. The portrait boss
+     stays put so the selected showrunner is always visible on a phone. */
   useEffect(() => {
     if (!bodies.length) return;
     const tick = window.setInterval(() => {
       const list = bodiesRef.current;
       if (!list.length) return;
       const resters = list.map((_, i) => i).filter((i) => !!cast[i]?.resting);
-      const movable = resters.length ? resters : list.map((_, i) => i).filter((i) => !cast[i]?.working);
+      const movable = resters.length
+        ? resters
+        : list.map((_, i) => i).filter((i) => !cast[i]?.working && !(stage.portrait && i === 0));
       if (!movable.length) return;
       if (!resters.length && Math.random() < 0.45) return;
       const picked = new Set<number>();
@@ -363,7 +377,7 @@ export default function OfficeScene({
       );
     }, 1150);
     return () => window.clearInterval(tick);
-  }, [bodies.length, layoutZone, cast]);
+  }, [bodies.length, layoutZone, cast, stage.portrait]);
 
   /* --------------------------------------------------------------- light */
   /* 0 = dawn, .5 = midday, 1 = night — warms up at noon, goes indigo at night */
@@ -412,7 +426,7 @@ export default function OfficeScene({
               key={`${c.name}-${i}`}
               src={c.boss ? (c.sprite ?? BOSS_SPRITE) : SPRITES[(c.look ?? (i - 1)) % SPRITES.length]}
               body={b}
-              scale={SPRITE_H[lvl] * 100 * (stage.portrait ? 0.82 : 1)}
+              scale={SPRITE_H[lvl] * 100 * (stage.portrait ? (c.boss ? 0.95 : 0.82) : 1)}
               label={c.boss ? `${c.name} · showrunner` : c.name}
               color={c.color}
               tired={c.tired}
