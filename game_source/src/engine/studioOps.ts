@@ -113,6 +113,12 @@ export const rushStreamPoint = (skill: number, roll: number) =>
 
 export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(99, skill) * 0.13));
 
+/** Which side of a direction slider the studio's knowledge points at.
+ *  Derived from the SAME blended direction `ideal` used by scoring and by
+ *  the exact high-knowledge estimate:  ideal >= 50 -> side A, < 50 -> side B. */
+export const studioKnowledgeEmphasis = (ideal: number, a: string, b: string): string =>
+  ideal >= 50 ? a : b;
+
 /** Stronger rush specialists now have a substantially higher floor AND ceiling. */
 export function rushOutcomeRange(skill: number): { min: number; max: number } {
   const s = Math.max(1, Math.min(99, Math.round(skill)));

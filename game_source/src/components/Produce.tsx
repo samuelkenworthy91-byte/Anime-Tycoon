@@ -17,7 +17,7 @@ import {
 } from "../engine/data";
 import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
-import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport } from "../engine/studioOps";
+import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, studioKnowledgeEmphasis } from "../engine/studioOps";
 import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
@@ -245,10 +245,9 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
               const ideal = defs.length
                 ? Math.round(defs.reduce((a, g) => a + g!.ideal[phase!.idx], 0) / defs.length)
                 : 50;
-              const ratio = defs.length
-                ? defs.reduce((a, g) => a + g!.ratio[phase!.idx], 0) / defs.length
-                : 1;
-              const emphasis = ratio >= 1 ? phase!.a : phase!.b;
+              /* the same blended ideal drives the early hint, the working
+                 read and the exact estimate — no second knowledge calculation */
+              const emphasis = studioKnowledgeEmphasis(ideal, phase!.a, phase!.b);
               return (
                 <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 px-3 py-2">
                   <div className="text-[9px] font-extrabold tracking-[0.2em] text-cyanx">STUDIO KNOWLEDGE</div>
