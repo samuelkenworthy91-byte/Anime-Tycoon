@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CANONICAL_GENRE_IDS,
   CAST_V2,
   GENRES,
   PETS,
@@ -50,24 +51,36 @@ describe("Cast V2 canonical roster", () => {
   });
 
   it("provides practical all-genre coverage in every role × Type group", () => {
+    /* coverage is guaranteed against the CANONICAL 21 genres — the 192 cast
+       affinities are Cast V2 canonical data and are NOT being re-balanced for
+       the provisional Samurai/Shinobi ids in this pass */
     for (const [role, members] of ROLES) {
       for (const type of TYPES) {
         const covered = new Set(members.filter((member) => member.type === type).flatMap(affinities));
-        for (const genre of GENRES) expect(covered.has(genre.id), `${role}/${type}/${genre.id}`).toBe(true);
+        for (const genre of CANONICAL_GENRE_IDS) expect(covered.has(genre), `${role}/${type}/${genre}`).toBe(true);
       }
     }
   });
 
-  it("covers all 210 unordered genre pairs across complete affinity sets", () => {
+  it("covers all 210 unordered canonical genre pairs across complete affinity sets", () => {
     let measured = 0;
-    for (let i = 0; i < GENRES.length; i += 1) {
-      for (let j = i + 1; j < GENRES.length; j += 1) {
+    for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
+      for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
         measured += 1;
-        const a = GENRES[i].id;
-        const b = GENRES[j].id;
+        const a = CANONICAL_GENRE_IDS[i];
+        const b = CANONICAL_GENRE_IDS[j];
         expect(CAST_V2.some((member) => affinities(member).includes(a) && affinities(member).includes(b)), `${a}|${b}`).toBe(true);
       }
     }
     expect(measured).toBe(210);
+  });
+
+  it("leaves the provisional Samurai/Shinobi ids out of Cast V2 coverage (Work will re-balance)", () => {
+    /* the cast manifest has no Samurai/Shinobi affinities — this pass does not
+       invent Cast V3 assignments or touch the existing 192 affinity sets */
+    for (const id of ["samurai", "shinobi"] as GenreId[]) {
+      expect(CAST_V2.every((member) => !affinities(member).includes(id))).toBe(true);
+      expect(CANONICAL_GENRE_IDS).not.toContain(id);
+    }
   });
 });

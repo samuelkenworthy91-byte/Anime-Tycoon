@@ -76,6 +76,9 @@ export const POSTER_FONTS: Record<GenreId, PosterFont> = {
   pirate: { ...CINZEL, weight: 700, italic: true, upperCase: true, tracking: 0.035, skew: -2, scale: 1.02 },
   mythology: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.08, skew: 0, scale: 0.98 },
   nordic: { ...PLAYFAIR, weight: 800, italic: false, upperCase: true, tracking: 0.055, skew: 0, scale: 0.98 },
+  /* PROVISIONAL Scaffolding — replace with Work's canonical treatments */
+  samurai: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.05, skew: 0, scale: 1, glow: "#f4a261" },
+  shinobi: { ...PLAYFAIR, weight: 700, italic: false, upperCase: true, tracking: 0.06, skew: 1, scale: 0.98 },
 };
 
 export const posterFontFor = (genre: GenreId): PosterFont => POSTER_FONTS[genre];
@@ -135,6 +138,9 @@ export const POSTER_DECOS: Record<GenreId, PosterDeco[]> = {
   pirate: ["speedlines", "stars"],
   mythology: ["runes", "stars"],
   nordic: ["fog", "stars"],
+  /* PROVISIONAL Scaffolding — replace with Work's canonical treatments */
+  samurai: ["speedlines", "burst"],
+  shinobi: ["fog", "speedlines"],
 };
 
 /* ------------------------------------------------------------ layout ---- */

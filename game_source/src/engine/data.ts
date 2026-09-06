@@ -19,6 +19,8 @@ import {
   Hand,
   Landmark,
   MountainSnow,
+  Swords,
+  Moon,
   type LucideIcon,
 } from "lucide-react";
 import genreV2Runtime from "./generated/genreV2.json";
@@ -45,7 +47,12 @@ export type GenreId =
   | "pirate"
   | "martial"
   | "mythology"
-  | "nordic";
+  | "nordic"
+  /* PROVISIONAL — Samurai & Shinobi scaffolding. Work supplies the final
+     canonical tuning; these ids keep the runtime safe at 23 active genres
+     until the canonical 23-genre/253-pair manifest lands. */
+  | "samurai"
+  | "shinobi";
 
 export type AnimeType = "shonen" | "shojo";
 
@@ -202,24 +209,78 @@ const GENRE_COLORS: Record<GenreId, string> = {
   sports: "#fbbf24", cyber: "#22d3ee", fantasy: "#c084fc", idol: "#f472b6", mystery: "#94a3b8",
   comedy: "#ffb347", cooking: "#e76f51", military: "#6a994e", supernatural: "#9d4edd", space: "#4cc9f0",
   magical: "#f72585", survival: "#84a98c", pirate: "#2a9d8f", martial: "#e63946", mythology: "#d4a373", nordic: "#8ecae6",
+  /* PROVISIONAL scaffolding colours (do not tune with the canonical set) */
+  samurai: "#f4a261", shinobi: "#5f6caf",
 };
 const GENRE_ICONS: Record<GenreId, LucideIcon> = {
   mecha: Bot, isekai: Sparkles, slice: Coffee, horror: Ghost, romance: Heart, sports: Trophy, cyber: Cpu,
   fantasy: Sword, idol: Mic2, mystery: Eye, comedy: Laugh, cooking: ChefHat, military: Crosshair,
   supernatural: Wand2, space: Rocket, magical: Sparkles, survival: Tent, pirate: Ship, martial: Hand,
   mythology: Landmark, nordic: MountainSnow,
+  /* PROVISIONAL scaffolding icons */
+  samurai: Swords, shinobi: Moon,
 };
 
-export const GENRES: Genre[] = genreV2Runtime.genres.map((g) => ({
-  id: g.id as GenreId,
-  label: g.label,
-  color: GENRE_COLORS[g.id as GenreId],
-  icon: GENRE_ICONS[g.id as GenreId],
-  desc: g.description,
-  ideal: g.ideal as [number, number, number],
-  ratio: g.ratio as [number, number, number],
-  rd: g.rd,
-}));
+/* ------------------------------------------------------------------ PROVISIONAL GENRES
+ * Samurai & Shinobi scaffolding. The canonical genre manifest (genreV2.json)
+ * ships 21 genres / 210 pairs today; Work will supply the final 23-genre /
+ * 253-pair data. Until then these two entries are merged into GENRES so the
+ * game can accept the IDs everywhere (drafts, market, staff, arcs, posters).
+ *
+ * When the canonical manifest lands, DELETE PROVISIONAL_GENRES and let the
+ * runtime loader below build every genre from genreV2.json — it already
+ * tolerates any number of entries and 253-pair combo manifests. */
+const PROVISIONAL_GENRES: Omit<Genre, "id">[] = [
+  {
+    label: "Samurai",
+    color: GENRE_COLORS.samurai,
+    icon: GENRE_ICONS.samurai,
+    desc: "PROVISIONAL — swords, honour, wandering ronin, clans and duels.",
+    ideal: [68, 74, 50],
+    ratio: [0.28, 0.5, 0.22],
+    rd: 26,
+  },
+  {
+    label: "Shinobi",
+    color: GENRE_COLORS.shinobi,
+    icon: GENRE_ICONS.shinobi,
+    desc: "PROVISIONAL — shadow operatives, infiltration, espionage and deception.",
+    ideal: [62, 70, 56],
+    ratio: [0.32, 0.42, 0.26],
+    rd: 30,
+  },
+];
+const PROVISIONAL_GENRE_IDS: GenreId[] = ["samurai", "shinobi"];
+
+/* Tolerant runtime loader: accepts any manifest the generator/Work produces
+ * (21/210 today, 23/253 canonical later) without a type-system rewrite.
+ * Unknown genre ids fall back to a neutral colour/icon instead of crashing;
+ * combo records are keyed by string so a 253-pair manifest loads as-is. */
+const GENRE_FALLBACK_COLOR = "#9ca3af";
+
+export const GENRES: Genre[] = [
+  ...genreV2Runtime.genres.map((g) => ({
+    id: g.id as GenreId,
+    label: g.label,
+    color: GENRE_COLORS[g.id as GenreId] ?? GENRE_FALLBACK_COLOR,
+    icon: GENRE_ICONS[g.id as GenreId] ?? Sparkles,
+    desc: g.description,
+    ideal: g.ideal as [number, number, number],
+    ratio: g.ratio as [number, number, number],
+    rd: g.rd,
+  })),
+  /* provisional scaffolding: only merged when the manifest doesn't already
+     provide the id, so a future canonical 23-genre file wins cleanly */
+  ...PROVISIONAL_GENRE_IDS.map((id, i) =>
+    genreV2Runtime.genres.some((g) => g.id === id) ? null : { id, ...PROVISIONAL_GENRES[i] }
+  ).filter((g): g is Genre => g !== null),
+];
+
+/** the 21 canonical genre ids exactly as shipped in the generated manifest
+ *  (Cast V2's 192 affinities and the 210-pair matrix are defined against
+ *  these; the two provisional ids are NOT in this set until Work lands the
+ *  canonical 23-genre / 253-pair data with matching cast coverage). */
+export const CANONICAL_GENRE_IDS: GenreId[] = genreV2Runtime.genres.map((g) => g.id as GenreId);
 
 export const GENRE = (id: GenreId) => GENRES.find((g) => g.id === id)!;
 
@@ -413,9 +474,9 @@ export const BUDGETS: Record<BudgetId, { label: string; cost: number; scope: num
 };
 
 export const SLOTS: Record<SlotId, { label: string; cost: number; reach: number; best: GenreId[]; desc: string }> = {
-  midnight: { label: "Midnight Otaku Slot", cost: 6_000, reach: 0.78, best: ["horror", "mystery", "cyber", "slice", "supernatural", "survival"], desc: "Cheap airtime for devoted weirdos." },
+  midnight: { label: "Midnight Otaku Slot", cost: 6_000, reach: 0.78, best: ["horror", "mystery", "cyber", "slice", "supernatural", "survival", "shinobi" /* PROVISIONAL */], desc: "Cheap airtime for devoted weirdos." },
   evening: { label: "Evening Family Slot", cost: 40_000, reach: 1.15, best: ["romance", "slice", "fantasy", "comedy", "cooking", "magical", "mythology"], desc: "Dinner-table viewing." },
-  prime: { label: "Prime-Time Saturday", cost: 110_000, reach: 1.62, best: ["sports", "mecha", "idol", "military", "martial", "pirate"], desc: "The whole nation watches." },
+  prime: { label: "Prime-Time Saturday", cost: 110_000, reach: 1.62, best: ["sports", "mecha", "idol", "military", "martial", "pirate", "samurai" /* PROVISIONAL */], desc: "The whole nation watches." },
   /* non-broadcast distribution slots: no slot picker, no genre fit — the
      distribution simply reaches its audience */
   web: { label: "Open Video Platform", cost: 0, reach: 0.55, best: [], desc: "Fictional open-video site for fan creators." },
@@ -425,10 +486,10 @@ export const SLOTS: Record<SlotId, { label: string; cost: number; reach: number;
 };
 
 export const AUDIENCES: Record<AudienceId, { label: string; mult: number; fit: Partial<Record<GenreId, number>>; desc: string }> = {
-  kids: { label: "Saturday Kids", mult: 1.0, fit: { sports: 1.15, idol: 1.1, mecha: 1.05, horror: 0.7, cyber: 0.8, mystery: 0.9, romance: 0.9, comedy: 1.15, cooking: 1.1, magical: 1.1, supernatural: 0.85, military: 0.95, space: 1.0, pirate: 1.1, martial: 1.1, mythology: 1.05, survival: 0.8, nordic: 0.9 }, desc: "Toys sell themselves." },
-  teens: { label: "Teen Fever", mult: 1.05, fit: { isekai: 1.15, horror: 1.05, mecha: 1.0, romance: 1.0, idol: 1.05, slice: 0.95, comedy: 1.05, supernatural: 1.1, space: 1.05, military: 1.05, cooking: 0.95, magical: 0.95, sports: 1.15, martial: 1.12, pirate: 1.08, survival: 1.05, mythology: 1.02 }, desc: "Loud, loyal, extremely online." },
-  adults: { label: "Seinen Adults", mult: 1.0, fit: { cyber: 1.2, mystery: 1.15, horror: 1.1, slice: 1.05, romance: 1.0, isekai: 0.95, military: 1.1, space: 1.05, comedy: 1.0, supernatural: 1.0, cooking: 1.0, magical: 0.85, survival: 1.12, nordic: 1.12, mythology: 1.08, pirate: 1.0, martial: 1.0 }, desc: "Discerning tastes, deep wallets." },
-  family: { label: "All Ages", mult: 1.12, fit: { idol: 1.15, sports: 1.1, fantasy: 1.05, slice: 1.05, horror: 0.85, cyber: 0.9, comedy: 1.15, cooking: 1.15, magical: 1.1, space: 0.95, military: 0.85, supernatural: 0.9, pirate: 1.05, mythology: 1.05, martial: 1.0, survival: 0.9, nordic: 0.95 }, desc: "Hard to please everyone." },
+  kids: { label: "Saturday Kids", mult: 1.0, fit: { sports: 1.15, idol: 1.1, mecha: 1.05, horror: 0.7, cyber: 0.8, mystery: 0.9, romance: 0.9, comedy: 1.15, cooking: 1.1, magical: 1.1, supernatural: 0.85, military: 0.95, space: 1.0, pirate: 1.1, martial: 1.1, mythology: 1.05, survival: 0.8, nordic: 0.9, samurai: 1.1 /* PROVISIONAL */, shinobi: 0.95 /* PROVISIONAL */ }, desc: "Toys sell themselves." },
+  teens: { label: "Teen Fever", mult: 1.05, fit: { isekai: 1.15, horror: 1.05, mecha: 1.0, romance: 1.0, idol: 1.05, slice: 0.95, comedy: 1.05, supernatural: 1.1, space: 1.05, military: 1.05, cooking: 0.95, magical: 0.95, sports: 1.15, martial: 1.12, pirate: 1.08, survival: 1.05, mythology: 1.02, samurai: 1.08 /* PROVISIONAL */, shinobi: 1.12 /* PROVISIONAL */ }, desc: "Loud, loyal, extremely online." },
+  adults: { label: "Seinen Adults", mult: 1.0, fit: { cyber: 1.2, mystery: 1.15, horror: 1.1, slice: 1.05, romance: 1.0, isekai: 0.95, military: 1.1, space: 1.05, comedy: 1.0, supernatural: 1.0, cooking: 1.0, magical: 0.85, survival: 1.12, nordic: 1.12, mythology: 1.08, pirate: 1.0, martial: 1.0, samurai: 1.06 /* PROVISIONAL */, shinobi: 1.1 /* PROVISIONAL */ }, desc: "Discerning tastes, deep wallets." },
+  family: { label: "All Ages", mult: 1.12, fit: { idol: 1.15, sports: 1.1, fantasy: 1.05, slice: 1.05, horror: 0.85, cyber: 0.9, comedy: 1.15, cooking: 1.15, magical: 1.1, space: 0.95, military: 0.85, supernatural: 0.9, pirate: 1.05, mythology: 1.05, martial: 1.0, survival: 0.9, nordic: 0.95, samurai: 1.05 /* PROVISIONAL */, shinobi: 1.0 /* PROVISIONAL */ }, desc: "Hard to please everyone." },
 };
 
 /* ---------------------------------------------------------------- offices */

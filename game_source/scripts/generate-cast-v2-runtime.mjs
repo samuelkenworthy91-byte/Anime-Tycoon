@@ -65,7 +65,19 @@ if (cast.length !== 192 || new Set(cast.map((m) => m.id)).size !== 192) throw ne
 for (const member of cast) {
   if (new Set([...member.visibleAff, member.hiddenAff]).size !== 3) throw new Error(`Affinity invariant failed for ${member.id}`);
 }
-if (genre.length !== 21 || combos.length !== 210) throw new Error("Genre V2 invariant failed");
+/* Genre manifest is forward-compatible: the canonical data is 21 genres /
+ * 210 pairs today; Work's canonical update is 23 genres / 253 pairs. The
+ * generated/runtime loader accepts either, so only structural invariants
+ * are enforced here — every genre id is unique, every combo references
+ * known genre ids with a string key, and the pair count is complete
+ * (n*(n-1)/2 pairs). No count is hard-coded to 21/210. */
+const genreIdSet = new Set(genre.map((g) => g.id));
+if (genreIdSet.size !== genre.length) throw new Error("Genre V2 id uniqueness failed");
+for (const c of combos) {
+  if (!genreIdSet.has(c.genre_1) || !genreIdSet.has(c.genre_2)) throw new Error(`Combo references unknown genre: ${JSON.stringify(c)}`);
+  if (!c.key || typeof c.key !== "string") throw new Error(`Combo missing key: ${JSON.stringify(c)}`);
+}
+if (combos.length !== (genreIdSet.size * (genreIdSet.size - 1)) / 2) throw new Error(`Genre combo count incomplete: expected ${(genreIdSet.size * (genreIdSet.size - 1)) / 2}, got ${combos.length}`);
 
 const sourceSha256 = Object.fromEntries([rosterPath, manifestPath, genrePath, comboPath].map((path) => [
   path.slice(docs.length + 1),
