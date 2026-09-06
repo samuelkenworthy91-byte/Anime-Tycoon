@@ -1,6 +1,7 @@
-import runtime from "./generated/castV2.json";
+import runtime from "./generated/castV3.json";
 import type { AnimeType, CastMember, CastRole, GenreId } from "./data";
 
+/** Compatibility export name retained for existing consumers and saved-ID lookup. */
 export const CAST_V2 = runtime.cast as CastMember[];
 const BY_ID = new Map(CAST_V2.map((member) => [member.id, member]));
 

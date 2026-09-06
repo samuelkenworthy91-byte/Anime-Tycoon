@@ -190,6 +190,7 @@ export default function Office({
           color: POINT_COLOR[ROLE_POINT[s.role]],
           tired: !!run.staffResting?.[s.id] || s.stamina < 28,
           look: workerLookIndex(s),
+          workstation: s.role === "animator" ? "animation" : s.role === "composer" ? "audio" : "standard",
           working: !run.staffResting?.[s.id] && s.stamina > 0 && (projActive.some((pr) => pr.staffIds.includes(s.id)) || run.contractJobs.some((j) => j.staffIds.includes(s.id))),
           energy: s.stamina,
           resting: !!run.staffResting?.[s.id],

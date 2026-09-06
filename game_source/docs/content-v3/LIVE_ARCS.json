@@ -1,0 +1,926 @@
+[
+  {
+    "id": "hook",
+    "name": "Cold Open Hook",
+    "cost": 8000,
+    "q": 4,
+    "f": 0.04,
+    "desc": "Start with a bang. Critics rewatch it."
+  },
+  {
+    "id": "lore",
+    "name": "Worldbuilding Dive",
+    "cost": 15000,
+    "q": 3,
+    "f": 0.03,
+    "syn": [
+      "fantasy",
+      "cyber",
+      "mystery"
+    ],
+    "synQ": 3,
+    "desc": "Lore so deep the wiki needs editors."
+  },
+  {
+    "id": "montage",
+    "name": "Training Montage",
+    "cost": 10000,
+    "q": 2,
+    "f": 0.03,
+    "syn": [
+      "martial",
+      "sports"
+    ],
+    "synQ": 3,
+    "desc": "Push-ups! Friendship! Power levels!"
+  },
+  {
+    "id": "tournament",
+    "name": "Tournament Arc",
+    "cost": 26000,
+    "q": 1,
+    "f": 0.14,
+    "syn": [
+      "martial",
+      "sports"
+    ],
+    "synQ": 4,
+    "desc": "Bracket of dreams. Merch prints money."
+  },
+  {
+    "id": "beach",
+    "name": "Beach Episode",
+    "cost": 6000,
+    "q": -1,
+    "f": 0.09,
+    "syn": [
+      "romance",
+      "slice"
+    ],
+    "synQ": 3,
+    "desc": "Pure fanservice. Critics sigh. Fans scream."
+  },
+  {
+    "id": "festival",
+    "name": "Festival Episode",
+    "cost": 11000,
+    "q": 2,
+    "f": 0.05,
+    "syn": [
+      "romance",
+      "slice",
+      "romance"
+    ],
+    "synQ": 3,
+    "desc": "Yukata, fireworks, almost-confessions."
+  },
+  {
+    "id": "launch",
+    "name": "Mecha Launch",
+    "cost": 24000,
+    "q": 1,
+    "f": 0.05,
+    "syn": [
+      "mecha",
+      "cyber"
+    ],
+    "synQ": 5,
+    "desc": "90 uninterrupted seconds of launch sequence."
+  },
+  {
+    "id": "live",
+    "name": "Idol Live",
+    "cost": 21000,
+    "q": 1,
+    "f": 0.1,
+    "syn": [
+      "idol"
+    ],
+    "synQ": 5,
+    "synF": 0.03,
+    "desc": "A full episode concert. Glowsticks sold separately."
+  },
+  {
+    "id": "case",
+    "name": "Phantom Case",
+    "cost": 12000,
+    "q": 3,
+    "f": 0.04,
+    "syn": [
+      "mystery",
+      "horror"
+    ],
+    "synQ": 4,
+    "desc": "A locked-room mystery. In space. Maybe."
+  },
+  {
+    "id": "twist",
+    "name": "Tragic Twist",
+    "cost": 14000,
+    "q": 5,
+    "f": 0,
+    "syn": [
+      "horror",
+      "mystery",
+      "romance"
+    ],
+    "synQ": 3,
+    "desc": "Nobody saw it coming. Nobody recovered."
+  },
+  {
+    "id": "filler",
+    "name": "Filler Saga",
+    "cost": -12000,
+    "q": -4,
+    "f": 0.02,
+    "desc": "Cheap padding. The manga isn't ready."
+  },
+  {
+    "id": "timeskip",
+    "name": "Timeskip Reboot",
+    "cost": 14000,
+    "q": 2,
+    "f": 0.05,
+    "syn": [
+      "martial",
+      "isekai"
+    ],
+    "synQ": 2,
+    "desc": "Three years pass. Everyone's buffer now."
+  },
+  {
+    "id": "crossover",
+    "name": "Crossover Special",
+    "cost": 28000,
+    "q": 0,
+    "f": 0.12,
+    "franchiseOnly": true,
+    "desc": "Your past casts collide in one hour of chaos."
+  },
+  {
+    "id": "finale",
+    "name": "Finale Climax",
+    "cost": 22000,
+    "q": 4,
+    "f": 0.08,
+    "desc": "Everything pays off. Better nail the landing."
+  },
+  {
+    "id": "origin",
+    "name": "Villain Origin",
+    "cost": 18000,
+    "q": 5,
+    "f": 0.04,
+    "syn": [
+      "horror",
+      "mystery",
+      "martial"
+    ],
+    "synQ": 3,
+    "cast": "villain",
+    "castQ": 3,
+    "desc": "The villain's tragic past. Critics weep."
+  },
+  {
+    "id": "redemption",
+    "name": "Villain Redemption",
+    "cost": 22000,
+    "q": 4,
+    "f": 0.08,
+    "syn": [
+      "martial",
+      "romance",
+      "romance"
+    ],
+    "synQ": 3,
+    "cast": "villain",
+    "castQ": 2,
+    "desc": "The big bad switches sides. Merch explodes."
+  },
+  {
+    "id": "mascot",
+    "name": "Mascot Episode",
+    "cost": 14000,
+    "q": 0,
+    "f": 0.12,
+    "cast": "pet",
+    "castQ": 4,
+    "desc": "The mascot carries a whole episode. Toys sell out."
+  },
+  {
+    "id": "musical",
+    "name": "Full Musical Episode",
+    "cost": 24000,
+    "q": 2,
+    "f": 0.08,
+    "syn": [
+      "idol"
+    ],
+    "synQ": 4,
+    "desc": "Everyone sings. Even the narrator."
+  },
+  {
+    "id": "confession",
+    "name": "Confession Episode",
+    "cost": 18000,
+    "q": 4,
+    "f": 0.06,
+    "syn": [
+      "romance",
+      "romance"
+    ],
+    "synQ": 3,
+    "desc": "It finally happens. Fans pass out."
+  },
+  {
+    "id": "cliffhanger",
+    "name": "Mid-Season Cliffhanger",
+    "cost": 16000,
+    "q": 3,
+    "f": 0.07,
+    "syn": [
+      "mystery",
+      "horror"
+    ],
+    "synQ": 3,
+    "desc": "The season ends on a scream."
+  },
+  {
+    "id": "sakuga",
+    "name": "Sakuga Showcase",
+    "cost": 26000,
+    "q": 2,
+    "f": 0.05,
+    "syn": [
+      "mecha",
+      "cyber",
+      "martial"
+    ],
+    "synQ": 4,
+    "desc": "Nine minutes of animation so clean it hurts."
+  },
+  {
+    "id": "collab",
+    "name": "Merch Collab",
+    "cost": 20000,
+    "q": 0,
+    "f": 0.1,
+    "syn": [
+      "idol",
+      "slice"
+    ],
+    "synQ": 2,
+    "desc": "The crossover toy drop. Bots crash the site."
+  },
+  {
+    "id": "ova",
+    "name": "OVA Special",
+    "cost": 30000,
+    "q": 2,
+    "f": 0.1,
+    "franchiseOnly": true,
+    "desc": "A bonus disc for the true believers."
+  },
+  {
+    "id": "war",
+    "name": "All-Out War",
+    "cost": 42000,
+    "q": 6,
+    "f": 0.1,
+    "syn": [
+      "martial",
+      "mecha",
+      "fantasy"
+    ],
+    "synQ": 4,
+    "desc": "The entire cast fights at once. Budget dies."
+  },
+  {
+    "id": "movienight",
+    "name": "Movie Night Special",
+    "cost": 12000,
+    "q": 1,
+    "f": 0.04,
+    "desc": "A low-stakes breather the fans rewatch.",
+    "unlock": {
+      "kind": "shows",
+      "n": 2
+    }
+  },
+  {
+    "id": "heist",
+    "name": "Heist Caper",
+    "cost": 19000,
+    "q": 2,
+    "f": 0.06,
+    "syn": [
+      "mystery",
+      "comedy"
+    ],
+    "synQ": 3,
+    "desc": "One last score. This time it's personal.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "comedy"
+    }
+  },
+  {
+    "id": "cookingbattle",
+    "name": "Cooking Battle",
+    "cost": 16000,
+    "q": 1,
+    "f": 0.09,
+    "syn": [
+      "cooking"
+    ],
+    "synQ": 4,
+    "synF": 0.02,
+    "desc": "Judges weep. Merch sells out.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "cooking"
+    }
+  },
+  {
+    "id": "grandprix",
+    "name": "Grand Prix",
+    "cost": 25000,
+    "q": 2,
+    "f": 0.09,
+    "syn": [
+      "sports",
+      "sports"
+    ],
+    "synQ": 4,
+    "desc": "Tyre strategy, friendship, and the finish line.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "sports"
+    }
+  },
+  {
+    "id": "bootcamp",
+    "name": "Boot Camp",
+    "cost": 17000,
+    "q": 2,
+    "f": 0.04,
+    "syn": [
+      "military",
+      "martial"
+    ],
+    "synQ": 3,
+    "desc": "They'll break you. Then they'll build you.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "military"
+    }
+  },
+  {
+    "id": "ghosthunt",
+    "name": "Ghost Hunt",
+    "cost": 15000,
+    "q": 3,
+    "f": 0.05,
+    "syn": [
+      "supernatural",
+      "horror"
+    ],
+    "synQ": 4,
+    "desc": "The cameras catch something. Nobody rewatches.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "supernatural"
+    }
+  },
+  {
+    "id": "orbital",
+    "name": "Orbital Rescue",
+    "cost": 23000,
+    "q": 2,
+    "f": 0.06,
+    "syn": [
+      "space",
+      "mecha"
+    ],
+    "synQ": 4,
+    "desc": "Six minutes of fuel left. Hold the line.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "space"
+    }
+  },
+  {
+    "id": "raincity",
+    "name": "Rain City Chase",
+    "cost": 20000,
+    "q": 3,
+    "f": 0.03,
+    "syn": [
+      "mystery",
+      "mystery"
+    ],
+    "synQ": 4,
+    "desc": "Every shadow is a suspect.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "mystery"
+    }
+  },
+  {
+    "id": "transformation",
+    "name": "Transformation Test",
+    "cost": 18000,
+    "q": 2,
+    "f": 0.05,
+    "syn": [
+      "magical",
+      "romance"
+    ],
+    "synQ": 4,
+    "desc": "The new form fails at the worst moment.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "magical"
+    }
+  },
+  {
+    "id": "directorscut",
+    "name": "Director's Cut",
+    "cost": 21000,
+    "q": 3,
+    "f": 0.02,
+    "syn": [
+      "cyber",
+      "mystery"
+    ],
+    "synQ": 3,
+    "desc": "Forty minutes nobody asked for. Critics adore it.",
+    "unlock": {
+      "kind": "rd",
+      "cost": 18
+    }
+  },
+  {
+    "id": "fanservice",
+    "name": "Fan Service Deluxe",
+    "cost": 9000,
+    "q": -2,
+    "f": 0.12,
+    "desc": "Cheap. Shameless. Financially unwise to skip.",
+    "unlock": {
+      "kind": "rd",
+      "cost": 10
+    }
+  },
+  {
+    "id": "mega",
+    "name": "Mega Crossover",
+    "cost": 30000,
+    "q": 2,
+    "f": 0.14,
+    "franchiseOnly": true,
+    "desc": "Every franchise you own, one timeline.",
+    "unlock": {
+      "kind": "franchise"
+    }
+  },
+  {
+    "id": "awardpush",
+    "name": "Award Season Push",
+    "cost": 26000,
+    "q": 4,
+    "f": 0.03,
+    "desc": "Screeners, galas, and one very tired director.",
+    "unlock": {
+      "kind": "score",
+      "n": 30
+    }
+  },
+  {
+    "id": "guildwar",
+    "name": "Guild War",
+    "cost": 34000,
+    "q": 5,
+    "f": 0.07,
+    "syn": [
+      "fantasy",
+      "martial"
+    ],
+    "synQ": 4,
+    "desc": "Factions, betrayals, and a siege that spans two episodes.",
+    "unlock": {
+      "kind": "hits",
+      "n": 3
+    }
+  },
+  {
+    "id": "expansion",
+    "name": "Studio Expansion Arc",
+    "cost": 24000,
+    "q": 3,
+    "f": 0.05,
+    "desc": "The meta-narrative: your own studio, animated.",
+    "unlock": {
+      "kind": "staff",
+      "n": 6
+    }
+  },
+  {
+    "id": "idolfest",
+    "name": "Idol Festival",
+    "cost": 22000,
+    "q": 2,
+    "f": 0.1,
+    "syn": [
+      "idol"
+    ],
+    "synQ": 4,
+    "desc": "Three nights. One stage. Zero dry eyes.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "idol"
+    }
+  },
+  {
+    "id": "narr_slowburn",
+    "name": "Slow-Burn Introduction",
+    "cost": 9000,
+    "q": 4,
+    "f": 0.01,
+    "syn": [
+      "slice",
+      "romance",
+      "mystery"
+    ],
+    "synQ": 3,
+    "anti": [
+      "sports",
+      "martial"
+    ],
+    "antiQ": -2,
+    "desc": "Let the cast breathe before the plot starts squeezing."
+  },
+  {
+    "id": "narr_flashforward",
+    "name": "Flash-Forward Teaser",
+    "cost": 13000,
+    "q": 3,
+    "f": 0.04,
+    "syn": [
+      "mystery",
+      "cyber",
+      "mystery"
+    ],
+    "synQ": 3,
+    "anti": [
+      "slice"
+    ],
+    "antiQ": -1,
+    "desc": "Show the destination first and dare viewers to work out the road.",
+    "unlock": {
+      "kind": "shows",
+      "n": 2
+    }
+  },
+  {
+    "id": "narr_mediasres",
+    "name": "In Medias Res",
+    "cost": 15000,
+    "q": 4,
+    "f": 0.03,
+    "syn": [
+      "martial",
+      "military",
+      "sports"
+    ],
+    "synQ": 3,
+    "anti": [
+      "slice",
+      "cooking"
+    ],
+    "antiQ": -2,
+    "desc": "Open halfway through the disaster and explain later.",
+    "unlock": {
+      "kind": "score",
+      "n": 22
+    }
+  },
+  {
+    "id": "narr_rivalintro",
+    "name": "Rival Introduction",
+    "cost": 12000,
+    "q": 3,
+    "f": 0.05,
+    "syn": [
+      "martial",
+      "sports",
+      "sports"
+    ],
+    "synQ": 4,
+    "cast": "secondary",
+    "castQ": 2,
+    "desc": "A perfect foil arrives and immediately steals the frame."
+  },
+  {
+    "id": "narr_mentor",
+    "name": "Mentor Arc",
+    "cost": 14000,
+    "q": 4,
+    "f": 0.03,
+    "syn": [
+      "martial",
+      "fantasy",
+      "military"
+    ],
+    "synQ": 3,
+    "cast": "secondary",
+    "castQ": 2,
+    "desc": "Wisdom, bad habits, and one lesson that matters later."
+  },
+  {
+    "id": "narr_foundfamily",
+    "name": "Found Family",
+    "cost": 13000,
+    "q": 4,
+    "f": 0.05,
+    "syn": [
+      "slice",
+      "fantasy",
+      "romance"
+    ],
+    "synQ": 3,
+    "anti": [
+      "mystery"
+    ],
+    "antiQ": -1,
+    "desc": "The team slowly becomes the home they were missing.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "slice"
+    }
+  },
+  {
+    "id": "narr_journey",
+    "name": "Journey Arc",
+    "cost": 16000,
+    "q": 3,
+    "f": 0.05,
+    "syn": [
+      "fantasy",
+      "isekai",
+      "space"
+    ],
+    "synQ": 4,
+    "desc": "New places, new problems, increasingly questionable maps."
+  },
+  {
+    "id": "narr_politics",
+    "name": "Political Intrigue",
+    "cost": 19000,
+    "q": 5,
+    "f": 0.01,
+    "syn": [
+      "military",
+      "mystery",
+      "fantasy"
+    ],
+    "synQ": 4,
+    "anti": [
+      "idol",
+      "cooking"
+    ],
+    "antiQ": -2,
+    "desc": "Factions smile politely while sharpening knives.",
+    "unlock": {
+      "kind": "rd",
+      "cost": 16
+    }
+  },
+  {
+    "id": "narr_explore",
+    "name": "Exploration Expedition",
+    "cost": 15000,
+    "q": 3,
+    "f": 0.04,
+    "syn": [
+      "space",
+      "fantasy",
+      "isekai"
+    ],
+    "synQ": 3,
+    "desc": "Put something impossible beyond the next horizon."
+  },
+  {
+    "id": "narr_siege",
+    "name": "Siege Arc",
+    "cost": 31000,
+    "q": 6,
+    "f": 0.06,
+    "syn": [
+      "military",
+      "fantasy",
+      "mecha"
+    ],
+    "synQ": 4,
+    "anti": [
+      "slice",
+      "romance"
+    ],
+    "antiQ": -3,
+    "desc": "One location, no escape, every department working overtime.",
+    "unlock": {
+      "kind": "hits",
+      "n": 2
+    }
+  },
+  {
+    "id": "narr_survival",
+    "name": "Survival Game",
+    "cost": 22000,
+    "q": 3,
+    "f": 0.08,
+    "syn": [
+      "horror",
+      "mystery",
+      "martial"
+    ],
+    "synQ": 4,
+    "anti": [
+      "romance",
+      "cooking"
+    ],
+    "antiQ": -2,
+    "desc": "Rules are announced. Half the cast immediately breaks them.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "horror"
+    }
+  },
+  {
+    "id": "narr_rescue",
+    "name": "Rescue Mission",
+    "cost": 18000,
+    "q": 3,
+    "f": 0.06,
+    "syn": [
+      "martial",
+      "military",
+      "space"
+    ],
+    "synQ": 3,
+    "desc": "Someone is missing; everyone else gets one shot."
+  },
+  {
+    "id": "narr_revenge",
+    "name": "Revenge Arc",
+    "cost": 19000,
+    "q": 4,
+    "f": 0.04,
+    "syn": [
+      "mystery",
+      "martial",
+      "horror"
+    ],
+    "synQ": 3,
+    "anti": [
+      "idol",
+      "cooking"
+    ],
+    "antiQ": -2,
+    "desc": "A clean objective gradually becomes a terrible idea.",
+    "unlock": {
+      "kind": "shows",
+      "n": 3
+    }
+  },
+  {
+    "id": "narr_betrayal",
+    "name": "Betrayal",
+    "cost": 17000,
+    "q": 5,
+    "f": 0.02,
+    "syn": [
+      "mystery",
+      "military",
+      "mystery"
+    ],
+    "synQ": 3,
+    "desc": "The trusted ally was taking notes for somebody else.",
+    "unlock": {
+      "kind": "hits",
+      "n": 1
+    }
+  },
+  {
+    "id": "narr_secretid",
+    "name": "Secret Identity",
+    "cost": 14000,
+    "q": 4,
+    "f": 0.04,
+    "syn": [
+      "mystery",
+      "magical",
+      "supernatural"
+    ],
+    "synQ": 4,
+    "desc": "Two lives, one increasingly impossible calendar.",
+    "unlock": {
+      "kind": "genre",
+      "genre": "mystery"
+    }
+  },
+  {
+    "id": "narr_falsewin",
+    "name": "False Victory",
+    "cost": 20000,
+    "q": 5,
+    "f": 0.03,
+    "syn": [
+      "martial",
+      "horror",
+      "military"
+    ],
+    "synQ": 3,
+    "desc": "They won. Which is exactly why something feels wrong.",
+    "unlock": {
+      "kind": "score",
+      "n": 26
+    }
+  },
+  {
+    "id": "narr_villainreveal",
+    "name": "Villain Reveal",
+    "cost": 18000,
+    "q": 5,
+    "f": 0.05,
+    "syn": [
+      "mystery",
+      "horror",
+      "mystery"
+    ],
+    "synQ": 4,
+    "cast": "villain",
+    "castQ": 3,
+    "desc": "The camera finally turns toward the person behind it all."
+  },
+  {
+    "id": "narr_quiet",
+    "name": "Quiet Character Episode",
+    "cost": 8000,
+    "q": 4,
+    "f": 0.02,
+    "syn": [
+      "slice",
+      "romance",
+      "romance"
+    ],
+    "synQ": 4,
+    "anti": [
+      "sports",
+      "military"
+    ],
+    "antiQ": -2,
+    "desc": "No explosions. One conversation. Somehow the episode everyone quotes."
+  },
+  {
+    "id": "narr_pov",
+    "name": "POV Switch",
+    "cost": 16000,
+    "q": 5,
+    "f": 0.01,
+    "syn": [
+      "mystery",
+      "mystery",
+      "horror"
+    ],
+    "synQ": 3,
+    "desc": "Retell the conflict through the eyes of somebody the audience mistrusted.",
+    "unlock": {
+      "kind": "rd",
+      "cost": 22
+    }
+  },
+  {
+    "id": "narr_sacrifice",
+    "name": "Heroic Sacrifice",
+    "cost": 24000,
+    "q": 6,
+    "f": 0.03,
+    "syn": [
+      "martial",
+      "fantasy",
+      "military"
+    ],
+    "synQ": 4,
+    "anti": [
+      "comedy",
+      "cooking"
+    ],
+    "antiQ": -3,
+    "desc": "One character pays the bill for everybody else's tomorrow.",
+    "unlock": {
+      "kind": "score",
+      "n": 30
+    }
+  }
+]

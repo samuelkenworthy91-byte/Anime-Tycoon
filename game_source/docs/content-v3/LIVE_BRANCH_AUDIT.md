@@ -1,0 +1,9 @@
+# Live branch audit
+
+Repository: samuelkenworthy91-byte/Anime-Tycoon. Authoritative live Arena branch: arena/01a0759f-anime-tycoon. Verified starting commit: 2701f638f614eccce0e58a48f705918570b1f78c. All source and style findings refer to this commit, not main or a historical Cast V2 branch. Live recursive tree was obtained; reused local art bytes were accepted only when their Git blob SHA matched that live tree. Updated relevant engine and scene sources were read from the pinned commit. No repository writes, commits, merges or deployments were performed.
+
+The live cast contains 192 entries, 48 per role. The live generated genre payload has 21 canonical entries and 210 pairs, while engine scaffolding supports Samurai and Shinobi separately from Martial Arts. This handoff supplies the future 23-entry, 253-pair content. Six formats and the Bedroom Studio / Fan Web Series / Open Video Platform career are consumed unchanged. The arc source contains 60 arcs and 31 combos. Worker hire appearance selection contains 15 looks; worker file 6 is reserved for the vision showrunner.
+
+The exact graph audit showed minimum additions of 46 Lead, 48 Sidekick, 48 Mascot and 51 Villain. Thus the original +48 Villain block cannot close coverage: it is three Villains below its minimum. The unconstrained total minimum is 193. Keeping equal roles and an even Shonen/Shojo split requires 52 additions per role, +208 total. The user authorised continuation with revised calculations. Final roster: 400, 100 per role, each role 50 Shonen / 50 Shojo. The live 192 remain unchanged except the proposed additive epithet field.
+
+The user-mentioned screenshot was not attached in this session. The style audit uses the verified live asset files and runtime source; screenshot comparison and APK testing remain pending. Evidence contains the pinned cast, exact-solver source and witnesses. Historical stop results are superseded by the validated +208 handoff.

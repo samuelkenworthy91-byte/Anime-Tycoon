@@ -1,0 +1,7 @@
+# Arc audit and expansion
+
+Pinned live source has 60 arcs and 31 combos. Existing Samurai and Shinobi have no explicit syn/anti arc support. Several source arrays repeat romance, mystery or sports; report this as redundant data, do not silently modify existing arcs. Generic arcs still remain available under their live gates.
+
+Add 24 arcs and 18 combos (15 positive, 3 negative). Final inventories are 84 arcs and 49 combos. Genre coverage CSV records positive/negative support before and after; all 23 genres have both after expansion. New early beats are affordable 9–15k and include genre-unlocked Samurai/Shinobi introductions; mid beats use existing shows/genre/RD/score gates; late consequences use hit or franchise gates. These are availability recommendations through current fields, not a new era system. Three new arcs are franchise-only: Home Without a Mask, The Last Retainer and The Empty Throne. They support continuing identity, old promises and successor conflicts.
+
+All four cast roles have explicit hooks, including meaningful mascot courier/witness/rescue beats. Existing cast/castQ fields apply the established affinity match; no new role-scoring rules. 17 combos are ordered and one unordered. Costs, quality and fan adjustments stay within live content ranges, with negative combos exposing causal mistakes. ARC_V3_RUNTIME.json contains only additions. No existing arc IDs, quality formulas, reviews or progression gates changed. APK balance still needs ChatGPT/Arena playtesting after import.

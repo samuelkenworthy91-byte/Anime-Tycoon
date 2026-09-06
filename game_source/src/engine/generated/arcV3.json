@@ -1,0 +1,787 @@
+{
+  "add_arcs": [
+    {
+      "id": "v3_swornoath",
+      "name": "The Sworn Oath",
+      "cost": 9000,
+      "q": 3,
+      "f": 0.02,
+      "desc": "A promise protects someone today and creates a debt for tomorrow.",
+      "syn": [
+        "samurai",
+        "military"
+      ],
+      "synQ": 3,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "samurai"
+      }
+    },
+    {
+      "id": "v3_crossroadsduel",
+      "name": "Duel at the Crossing",
+      "cost": 17000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "Two blades meet; the companion decides what winning should cost.",
+      "syn": [
+        "samurai",
+        "martial"
+      ],
+      "synQ": 3,
+      "anti": [
+        "slice",
+        "cooking"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_clanhearing",
+      "name": "The Clan Hearing",
+      "cost": 19000,
+      "q": 4,
+      "f": 0.02,
+      "desc": "A public accusation turns family duty into a question of evidence.",
+      "syn": [
+        "samurai",
+        "mystery",
+        "romance"
+      ],
+      "synQ": 3,
+      "anti": [
+        "sports"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "rd",
+        "cost": 16
+      }
+    },
+    {
+      "id": "v3_brokenstandard",
+      "name": "The Broken Standard",
+      "cost": 29000,
+      "q": 5,
+      "f": 0.05,
+      "desc": "The banner falls; the leader chooses people over inherited orders.",
+      "syn": [
+        "samurai",
+        "military",
+        "nordic"
+      ],
+      "synQ": 3,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "hits",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_deadletter",
+      "name": "The Dead Letter",
+      "cost": 9000,
+      "q": 3,
+      "f": 0.02,
+      "desc": "A small companion brings a message its intended recipient never received.",
+      "syn": [
+        "shinobi",
+        "mystery"
+      ],
+      "synQ": 3,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "shinobi"
+      }
+    },
+    {
+      "id": "v3_silententry",
+      "name": "The Silent Entry",
+      "cost": 17000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "A route, a timing window and a partner who must be trusted.",
+      "syn": [
+        "shinobi",
+        "cyber"
+      ],
+      "synQ": 3,
+      "anti": [
+        "sports",
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_doubleagent",
+      "name": "The Double Agent",
+      "cost": 21000,
+      "q": 4,
+      "f": 0.04,
+      "desc": "The enemy offers reliable information for an unacceptable price.",
+      "syn": [
+        "shinobi",
+        "mystery",
+        "military"
+      ],
+      "synQ": 3,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "rd",
+        "cost": 18
+      }
+    },
+    {
+      "id": "v3_burnednetwork",
+      "name": "The Burned Network",
+      "cost": 30000,
+      "q": 5,
+      "f": 0.04,
+      "desc": "Every safe house is exposed; saving the network means losing its secrets.",
+      "syn": [
+        "shinobi",
+        "survival",
+        "cyber"
+      ],
+      "synQ": 3,
+      "anti": [
+        "cooking"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "hits",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_retainersday",
+      "name": "A Retainer’s Day Off",
+      "cost": 10000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "The person beneath the uniform tries to have one ordinary afternoon.",
+      "syn": [
+        "samurai",
+        "slice",
+        "comedy"
+      ],
+      "synQ": 3,
+      "anti": [
+        "horror"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "samurai"
+      }
+    },
+    {
+      "id": "v3_roofcourier",
+      "name": "The Rooftop Courier",
+      "cost": 12000,
+      "q": 2,
+      "f": 0.06,
+      "desc": "The smallest team member carries the only copy across a closing city.",
+      "syn": [
+        "shinobi",
+        "pirate",
+        "survival"
+      ],
+      "synQ": 3,
+      "anti": [
+        "romance"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "shinobi"
+      }
+    },
+    {
+      "id": "v3_duelwithoutblades",
+      "name": "A Duel Without Blades",
+      "cost": 16000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "An enemy must answer a question that strength cannot settle.",
+      "syn": [
+        "samurai",
+        "romance",
+        "mystery"
+      ],
+      "synQ": 3,
+      "anti": [
+        "mecha"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    },
+    {
+      "id": "v3_unmaskedhome",
+      "name": "Home Without a Mask",
+      "cost": 22000,
+      "q": 4,
+      "f": 0.05,
+      "desc": "A former operative returns to someone who knew only the cover story.",
+      "syn": [
+        "shinobi",
+        "romance",
+        "slice"
+      ],
+      "synQ": 3,
+      "anti": [
+        "military"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "franchise"
+      },
+      "franchiseOnly": true
+    },
+    {
+      "id": "v3_lastretainer",
+      "name": "The Last Retainer",
+      "cost": 23000,
+      "q": 4,
+      "f": 0.05,
+      "desc": "An old companion keeps a promise after the clan that demanded it is gone.",
+      "syn": [
+        "samurai",
+        "nordic",
+        "survival"
+      ],
+      "synQ": 3,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "franchise"
+      },
+      "franchiseOnly": true
+    },
+    {
+      "id": "v3_winterharbour",
+      "name": "Winter Harbour",
+      "cost": 14000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "A storm closes the port; a small guide finds the last safe crossing.",
+      "syn": [
+        "nordic",
+        "survival",
+        "pirate"
+      ],
+      "synQ": 3,
+      "anti": [
+        "magical"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "nordic"
+      }
+    },
+    {
+      "id": "v3_borrowedworld",
+      "name": "A Borrowed World",
+      "cost": 17000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "The visitor learns which local custom keeps everyone alive.",
+      "syn": [
+        "isekai",
+        "fantasy",
+        "mythology"
+      ],
+      "synQ": 3,
+      "anti": [
+        "cyber"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_sharedtable",
+      "name": "The Shared Table",
+      "cost": 11000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "A meal creates enough trust for a difficult truth.",
+      "syn": [
+        "cooking",
+        "slice",
+        "romance"
+      ],
+      "synQ": 3,
+      "anti": [
+        "military",
+        "horror"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2
+    },
+    {
+      "id": "v3_lastbroadcast",
+      "name": "The Last Broadcast",
+      "cost": 21000,
+      "q": 4,
+      "f": 0.04,
+      "desc": "A voice crosses an impossible distance and reaches someone who had stopped listening.",
+      "syn": [
+        "space",
+        "idol",
+        "supernatural"
+      ],
+      "synQ": 3,
+      "anti": [
+        "martial",
+        "samurai"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    },
+    {
+      "id": "v3_brokenrecord",
+      "name": "The Broken Record",
+      "cost": 18000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "A perfect result hides the rule that made honest victory impossible.",
+      "syn": [
+        "sports",
+        "mecha",
+        "cyber"
+      ],
+      "synQ": 3,
+      "anti": [
+        "mythology",
+        "fantasy"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "score",
+        "n": 22
+      }
+    },
+    {
+      "id": "v3_inheritedmask",
+      "name": "The Inherited Mask",
+      "cost": 18000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "A familiar role passes to someone who refuses its old ending.",
+      "syn": [
+        "magical",
+        "mythology",
+        "supernatural"
+      ],
+      "synQ": 3,
+      "anti": [
+        "nordic"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_roomthatwaits",
+      "name": "The Room That Waits",
+      "cost": 15000,
+      "q": 4,
+      "f": 0.02,
+      "desc": "The companion refuses to cross a threshold everyone else calls harmless.",
+      "syn": [
+        "horror",
+        "mystery"
+      ],
+      "synQ": 3,
+      "anti": [
+        "comedy",
+        "idol",
+        "pirate"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "horror"
+      }
+    },
+    {
+      "id": "v3_schoolwithoutmaster",
+      "name": "A School Without Masters",
+      "cost": 18000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "The students must decide which lessons deserve to survive the teacher.",
+      "syn": [
+        "martial",
+        "sports"
+      ],
+      "synQ": 3,
+      "anti": [
+        "space",
+        "isekai"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "martial"
+      }
+    },
+    {
+      "id": "v3_emptythrone",
+      "name": "The Empty Throne",
+      "cost": 24000,
+      "q": 4,
+      "f": 0.04,
+      "desc": "The old ruler is gone; their rival has inherited a problem instead of a prize.",
+      "syn": [
+        "fantasy",
+        "isekai",
+        "samurai"
+      ],
+      "synQ": 3,
+      "anti": [
+        "cooking",
+        "shinobi"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "franchise"
+      },
+      "franchiseOnly": true
+    },
+    {
+      "id": "v3_falsefestival",
+      "name": "The False Festival",
+      "cost": 17000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "A public celebration hides a private operation; the mascot notices the wrong rehearsal.",
+      "syn": [
+        "comedy",
+        "idol",
+        "shinobi"
+      ],
+      "synQ": 3,
+      "anti": [
+        "survival",
+        "supernatural"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "v3_chartedescape",
+      "name": "The Charted Escape",
+      "cost": 21000,
+      "q": 4,
+      "f": 0.04,
+      "desc": "The map is accurate, but following it would abandon someone.",
+      "syn": [
+        "pirate",
+        "space",
+        "survival"
+      ],
+      "synQ": 3,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    }
+  ],
+  "add_combos": [
+    {
+      "id": "v3_oathcost",
+      "name": "The Cost of an Oath",
+      "arcs": [
+        "v3_swornoath",
+        "v3_clanhearing",
+        "v3_brokenstandard"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_crossingpayoff",
+      "name": "A Blade Put Down",
+      "arcs": [
+        "v3_crossroadsduel",
+        "v3_duelwithoutblades",
+        "finale"
+      ],
+      "q": 3,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "v3_couriertruth",
+      "name": "What the Message Cost",
+      "arcs": [
+        "v3_deadletter",
+        "v3_silententry",
+        "v3_doubleagent"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_networkhome",
+      "name": "A Name Worth Keeping",
+      "arcs": [
+        "v3_doubleagent",
+        "v3_burnednetwork",
+        "v3_unmaskedhome"
+      ],
+      "q": 4,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "v3_smallroute",
+      "name": "The Smallest Way Through",
+      "arcs": [
+        "v3_roofcourier",
+        "narr_rescue"
+      ],
+      "q": 2,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_retainerlegacy",
+      "name": "Duty After the Banner",
+      "arcs": [
+        "v3_swornoath",
+        "v3_lastretainer"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_snowpassage",
+      "name": "No Harbour Left Behind",
+      "arcs": [
+        "v3_winterharbour",
+        "v3_chartedescape"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_borrowedcustom",
+      "name": "Learn Before You Rule",
+      "arcs": [
+        "v3_borrowedworld",
+        "v3_emptythrone",
+        "finale"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_tabletruth",
+      "name": "A Place at the Table",
+      "arcs": [
+        "v3_sharedtable",
+        "confession"
+      ],
+      "q": 2,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "v3_lastvoice",
+      "name": "The Voice Comes Home",
+      "arcs": [
+        "v3_lastbroadcast",
+        "narr_quiet"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_recordschool",
+      "name": "The Rules We Keep",
+      "arcs": [
+        "v3_brokenrecord",
+        "v3_schoolwithoutmaster",
+        "finale"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_masklegacy",
+      "name": "A Different Ending",
+      "arcs": [
+        "v3_inheritedmask",
+        "redemption"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_thresholdcase",
+      "name": "Trust the Small Witness",
+      "arcs": [
+        "v3_roomthatwaits",
+        "case",
+        "narr_villainreveal"
+      ],
+      "q": 4,
+      "f": 0.01,
+      "ordered": true
+    },
+    {
+      "id": "v3_festivalcover",
+      "name": "The Perfect Distraction",
+      "arcs": [
+        "v3_falsefestival",
+        "v3_silententry"
+      ],
+      "q": 2,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "v3_offduty",
+      "name": "People Behind the Uniform",
+      "arcs": [
+        "v3_retainersday",
+        "v3_sharedtable"
+      ],
+      "q": 2,
+      "f": 0.02,
+      "ordered": false
+    },
+    {
+      "id": "v3_lateoath",
+      "name": "An Oath After Abandonment",
+      "arcs": [
+        "v3_brokenstandard",
+        "v3_swornoath"
+      ],
+      "q": -2,
+      "f": -0.01,
+      "ordered": true
+    },
+    {
+      "id": "v3_latecover",
+      "name": "Cover After Exposure",
+      "arcs": [
+        "v3_burnednetwork",
+        "v3_silententry"
+      ],
+      "q": -3,
+      "f": -0.01,
+      "ordered": true
+    },
+    {
+      "id": "v3_emptycomfort",
+      "name": "Comfort Before Consequences",
+      "arcs": [
+        "v3_burnednetwork",
+        "beach"
+      ],
+      "q": -2,
+      "f": -0.01,
+      "ordered": true
+    }
+  ]
+}

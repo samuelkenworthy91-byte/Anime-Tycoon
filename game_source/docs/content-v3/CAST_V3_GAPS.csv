@@ -1,0 +1,552 @@
+role,genre_a,genre_b,new_covering_ids,status
+protag,comedy,cooking,"[""cv3_lead_001"", ""cv3_lead_002""]",SOLVED
+protag,comedy,magical,"[""cv3_lead_003""]",SOLVED
+protag,comedy,mecha,"[""cv3_lead_004""]",SOLVED
+protag,comedy,military,"[""cv3_lead_005""]",SOLVED
+protag,comedy,mystery,"[""cv3_lead_005""]",SOLVED
+protag,comedy,pirate,"[""cv3_lead_001""]",SOLVED
+protag,comedy,romance,"[""cv3_lead_006""]",SOLVED
+protag,comedy,samurai,"[""cv3_lead_007""]",SOLVED
+protag,comedy,shinobi,"[""cv3_lead_003""]",SOLVED
+protag,comedy,slice,"[""cv3_lead_006""]",SOLVED
+protag,comedy,space,"[""cv3_lead_002""]",SOLVED
+protag,comedy,sports,"[""cv3_lead_004""]",SOLVED
+protag,comedy,supernatural,"[""cv3_lead_007""]",SOLVED
+protag,cooking,cyber,"[""cv3_lead_008""]",SOLVED
+protag,cooking,fantasy,"[""cv3_lead_009""]",SOLVED
+protag,cooking,idol,"[""cv3_lead_009""]",SOLVED
+protag,cooking,mystery,"[""cv3_lead_010""]",SOLVED
+protag,cooking,mythology,"[""cv3_lead_011""]",SOLVED
+protag,cooking,nordic,"[""cv3_lead_012""]",SOLVED
+protag,cooking,pirate,"[""cv3_lead_001""]",SOLVED
+protag,cooking,romance,"[""cv3_lead_012""]",SOLVED
+protag,cooking,samurai,"[""cv3_lead_011""]",SOLVED
+protag,cooking,shinobi,"[""cv3_lead_010"", ""cv3_lead_050""]",SOLVED
+protag,cooking,space,"[""cv3_lead_002""]",SOLVED
+protag,cooking,supernatural,"[""cv3_lead_008""]",SOLVED
+protag,cyber,fantasy,"[""cv3_lead_013""]",SOLVED
+protag,cyber,isekai,"[""cv3_lead_014""]",SOLVED
+protag,cyber,pirate,"[""cv3_lead_015""]",SOLVED
+protag,cyber,samurai,"[""cv3_lead_015""]",SOLVED
+protag,cyber,shinobi,"[""cv3_lead_016""]",SOLVED
+protag,cyber,space,"[""cv3_lead_016""]",SOLVED
+protag,cyber,sports,"[""cv3_lead_013""]",SOLVED
+protag,cyber,supernatural,"[""cv3_lead_008""]",SOLVED
+protag,cyber,survival,"[""cv3_lead_014""]",SOLVED
+protag,fantasy,idol,"[""cv3_lead_009"", ""cv3_lead_017""]",SOLVED
+protag,fantasy,magical,"[""cv3_lead_018""]",SOLVED
+protag,fantasy,samurai,"[""cv3_lead_019""]",SOLVED
+protag,fantasy,shinobi,"[""cv3_lead_020""]",SOLVED
+protag,fantasy,slice,"[""cv3_lead_018""]",SOLVED
+protag,fantasy,space,"[""cv3_lead_019""]",SOLVED
+protag,fantasy,sports,"[""cv3_lead_013""]",SOLVED
+protag,fantasy,supernatural,"[""cv3_lead_017""]",SOLVED
+protag,fantasy,survival,"[""cv3_lead_020""]",SOLVED
+protag,horror,isekai,"[""cv3_lead_021""]",SOLVED
+protag,horror,magical,"[""cv3_lead_022"", ""cv3_lead_023""]",SOLVED
+protag,horror,martial,"[""cv3_lead_024""]",SOLVED
+protag,horror,military,"[""cv3_lead_024""]",SOLVED
+protag,horror,mythology,"[""cv3_lead_025""]",SOLVED
+protag,horror,pirate,"[""cv3_lead_025""]",SOLVED
+protag,horror,samurai,"[""cv3_lead_022""]",SOLVED
+protag,horror,shinobi,"[""cv3_lead_021""]",SOLVED
+protag,horror,slice,"[""cv3_lead_026""]",SOLVED
+protag,horror,space,"[""cv3_lead_026""]",SOLVED
+protag,horror,supernatural,"[""cv3_lead_023""]",SOLVED
+protag,idol,nordic,"[""cv3_lead_027""]",SOLVED
+protag,idol,samurai,"[""cv3_lead_027""]",SOLVED
+protag,idol,shinobi,"[""cv3_lead_028"", ""cv3_lead_052""]",SOLVED
+protag,idol,slice,"[""cv3_lead_028""]",SOLVED
+protag,idol,supernatural,"[""cv3_lead_017""]",SOLVED
+protag,isekai,mecha,"[""cv3_lead_029""]",SOLVED
+protag,isekai,mystery,"[""cv3_lead_030""]",SOLVED
+protag,isekai,samurai,"[""cv3_lead_029""]",SOLVED
+protag,isekai,shinobi,"[""cv3_lead_021""]",SOLVED
+protag,isekai,slice,"[""cv3_lead_031""]",SOLVED
+protag,isekai,space,"[""cv3_lead_032""]",SOLVED
+protag,isekai,sports,"[""cv3_lead_030""]",SOLVED
+protag,isekai,supernatural,"[""cv3_lead_031"", ""cv3_lead_032""]",SOLVED
+protag,isekai,survival,"[""cv3_lead_014""]",SOLVED
+protag,magical,mythology,"[""cv3_lead_033""]",SOLVED
+protag,magical,nordic,"[""cv3_lead_034""]",SOLVED
+protag,magical,pirate,"[""cv3_lead_034""]",SOLVED
+protag,magical,samurai,"[""cv3_lead_022""]",SOLVED
+protag,magical,shinobi,"[""cv3_lead_003""]",SOLVED
+protag,magical,slice,"[""cv3_lead_018""]",SOLVED
+protag,magical,supernatural,"[""cv3_lead_023""]",SOLVED
+protag,magical,survival,"[""cv3_lead_033""]",SOLVED
+protag,martial,mystery,"[""cv3_lead_035""]",SOLVED
+protag,martial,samurai,"[""cv3_lead_035"", ""cv3_lead_047""]",SOLVED
+protag,martial,shinobi,"[""cv3_lead_036"", ""cv3_lead_047""]",SOLVED
+protag,martial,supernatural,"[""cv3_lead_036""]",SOLVED
+protag,mecha,mythology,"[""cv3_lead_037""]",SOLVED
+protag,mecha,pirate,"[""cv3_lead_038""]",SOLVED
+protag,mecha,samurai,"[""cv3_lead_029"", ""cv3_lead_048""]",SOLVED
+protag,mecha,shinobi,"[""cv3_lead_037"", ""cv3_lead_048""]",SOLVED
+protag,mecha,sports,"[""cv3_lead_004""]",SOLVED
+protag,mecha,supernatural,"[""cv3_lead_038""]",SOLVED
+protag,military,mystery,"[""cv3_lead_005""]",SOLVED
+protag,military,mythology,"[""cv3_lead_039""]",SOLVED
+protag,military,nordic,"[""cv3_lead_039""]",SOLVED
+protag,military,pirate,"[""cv3_lead_040""]",SOLVED
+protag,military,samurai,"[""cv3_lead_041""]",SOLVED
+protag,military,shinobi,"[""cv3_lead_040""]",SOLVED
+protag,military,slice,"[""cv3_lead_041""]",SOLVED
+protag,mystery,samurai,"[""cv3_lead_035""]",SOLVED
+protag,mystery,shinobi,"[""cv3_lead_010""]",SOLVED
+protag,mystery,space,"[""cv3_lead_042""]",SOLVED
+protag,mystery,sports,"[""cv3_lead_030""]",SOLVED
+protag,mystery,survival,"[""cv3_lead_042""]",SOLVED
+protag,mythology,nordic,"[""cv3_lead_039""]",SOLVED
+protag,mythology,pirate,"[""cv3_lead_025""]",SOLVED
+protag,mythology,samurai,"[""cv3_lead_011""]",SOLVED
+protag,mythology,shinobi,"[""cv3_lead_037""]",SOLVED
+protag,mythology,survival,"[""cv3_lead_033""]",SOLVED
+protag,nordic,pirate,"[""cv3_lead_034"", ""cv3_lead_043""]",SOLVED
+protag,nordic,romance,"[""cv3_lead_012""]",SOLVED
+protag,nordic,samurai,"[""cv3_lead_027"", ""cv3_lead_051""]",SOLVED
+protag,nordic,shinobi,"[""cv3_lead_044""]",SOLVED
+protag,nordic,space,"[""cv3_lead_043""]",SOLVED
+protag,nordic,sports,"[""cv3_lead_044""]",SOLVED
+protag,pirate,samurai,"[""cv3_lead_015""]",SOLVED
+protag,pirate,shinobi,"[""cv3_lead_040""]",SOLVED
+protag,pirate,space,"[""cv3_lead_043""]",SOLVED
+protag,pirate,supernatural,"[""cv3_lead_038""]",SOLVED
+protag,romance,samurai,"[""cv3_lead_045"", ""cv3_lead_049""]",SOLVED
+protag,romance,shinobi,"[""cv3_lead_045""]",SOLVED
+protag,romance,slice,"[""cv3_lead_006"", ""cv3_lead_049""]",SOLVED
+protag,samurai,shinobi,"[""cv3_lead_045"", ""cv3_lead_047"", ""cv3_lead_048""]",SOLVED
+protag,samurai,slice,"[""cv3_lead_041"", ""cv3_lead_049""]",SOLVED
+protag,samurai,space,"[""cv3_lead_019""]",SOLVED
+protag,samurai,sports,"[""cv3_lead_046""]",SOLVED
+protag,samurai,supernatural,"[""cv3_lead_007""]",SOLVED
+protag,samurai,survival,"[""cv3_lead_046"", ""cv3_lead_051""]",SOLVED
+protag,shinobi,slice,"[""cv3_lead_028"", ""cv3_lead_050""]",SOLVED
+protag,shinobi,space,"[""cv3_lead_016""]",SOLVED
+protag,shinobi,sports,"[""cv3_lead_044"", ""cv3_lead_052""]",SOLVED
+protag,shinobi,supernatural,"[""cv3_lead_036""]",SOLVED
+protag,shinobi,survival,"[""cv3_lead_020""]",SOLVED
+protag,slice,space,"[""cv3_lead_026""]",SOLVED
+protag,slice,supernatural,"[""cv3_lead_031""]",SOLVED
+protag,space,supernatural,"[""cv3_lead_032""]",SOLVED
+protag,space,survival,"[""cv3_lead_042""]",SOLVED
+protag,sports,survival,"[""cv3_lead_046""]",SOLVED
+secondary,comedy,cooking,"[""cv3_sidekick_001""]",SOLVED
+secondary,comedy,cyber,"[""cv3_sidekick_002""]",SOLVED
+secondary,comedy,fantasy,"[""cv3_sidekick_003""]",SOLVED
+secondary,comedy,isekai,"[""cv3_sidekick_002""]",SOLVED
+secondary,comedy,military,"[""cv3_sidekick_003""]",SOLVED
+secondary,comedy,nordic,"[""cv3_sidekick_004""]",SOLVED
+secondary,comedy,pirate,"[""cv3_sidekick_005""]",SOLVED
+secondary,comedy,samurai,"[""cv3_sidekick_006""]",SOLVED
+secondary,comedy,shinobi,"[""cv3_sidekick_005""]",SOLVED
+secondary,comedy,slice,"[""cv3_sidekick_001""]",SOLVED
+secondary,comedy,supernatural,"[""cv3_sidekick_006""]",SOLVED
+secondary,cooking,horror,"[""cv3_sidekick_007""]",SOLVED
+secondary,cooking,idol,"[""cv3_sidekick_008""]",SOLVED
+secondary,cooking,isekai,"[""cv3_sidekick_007""]",SOLVED
+secondary,cooking,magical,"[""cv3_sidekick_009""]",SOLVED
+secondary,cooking,martial,"[""cv3_sidekick_010""]",SOLVED
+secondary,cooking,mystery,"[""cv3_sidekick_011""]",SOLVED
+secondary,cooking,pirate,"[""cv3_sidekick_010""]",SOLVED
+secondary,cooking,romance,"[""cv3_sidekick_009""]",SOLVED
+secondary,cooking,samurai,"[""cv3_sidekick_012""]",SOLVED
+secondary,cooking,shinobi,"[""cv3_sidekick_008"", ""cv3_sidekick_052""]",SOLVED
+secondary,cooking,slice,"[""cv3_sidekick_001""]",SOLVED
+secondary,cooking,sports,"[""cv3_sidekick_012""]",SOLVED
+secondary,cooking,survival,"[""cv3_sidekick_011"", ""cv3_sidekick_052""]",SOLVED
+secondary,cyber,fantasy,"[""cv3_sidekick_013""]",SOLVED
+secondary,cyber,horror,"[""cv3_sidekick_014""]",SOLVED
+secondary,cyber,isekai,"[""cv3_sidekick_002""]",SOLVED
+secondary,cyber,martial,"[""cv3_sidekick_015""]",SOLVED
+secondary,cyber,mythology,"[""cv3_sidekick_014""]",SOLVED
+secondary,cyber,nordic,"[""cv3_sidekick_016""]",SOLVED
+secondary,cyber,pirate,"[""cv3_sidekick_017""]",SOLVED
+secondary,cyber,samurai,"[""cv3_sidekick_018""]",SOLVED
+secondary,cyber,shinobi,"[""cv3_sidekick_015""]",SOLVED
+secondary,cyber,slice,"[""cv3_sidekick_018""]",SOLVED
+secondary,cyber,space,"[""cv3_sidekick_017""]",SOLVED
+secondary,cyber,sports,"[""cv3_sidekick_016""]",SOLVED
+secondary,cyber,supernatural,"[""cv3_sidekick_019""]",SOLVED
+secondary,cyber,survival,"[""cv3_sidekick_019""]",SOLVED
+secondary,fantasy,horror,"[""cv3_sidekick_020""]",SOLVED
+secondary,fantasy,idol,"[""cv3_sidekick_013""]",SOLVED
+secondary,fantasy,magical,"[""cv3_sidekick_020""]",SOLVED
+secondary,fantasy,martial,"[""cv3_sidekick_021""]",SOLVED
+secondary,fantasy,military,"[""cv3_sidekick_003""]",SOLVED
+secondary,fantasy,mystery,"[""cv3_sidekick_022""]",SOLVED
+secondary,fantasy,mythology,"[""cv3_sidekick_023""]",SOLVED
+secondary,fantasy,samurai,"[""cv3_sidekick_021""]",SOLVED
+secondary,fantasy,shinobi,"[""cv3_sidekick_022""]",SOLVED
+secondary,horror,isekai,"[""cv3_sidekick_007""]",SOLVED
+secondary,horror,magical,"[""cv3_sidekick_020""]",SOLVED
+secondary,horror,martial,"[""cv3_sidekick_024""]",SOLVED
+secondary,horror,military,"[""cv3_sidekick_025""]",SOLVED
+secondary,horror,mythology,"[""cv3_sidekick_014""]",SOLVED
+secondary,horror,nordic,"[""cv3_sidekick_026""]",SOLVED
+secondary,horror,pirate,"[""cv3_sidekick_026""]",SOLVED
+secondary,horror,samurai,"[""cv3_sidekick_027""]",SOLVED
+secondary,horror,shinobi,"[""cv3_sidekick_025""]",SOLVED
+secondary,horror,space,"[""cv3_sidekick_024""]",SOLVED
+secondary,horror,survival,"[""cv3_sidekick_027""]",SOLVED
+secondary,idol,isekai,"[""cv3_sidekick_028""]",SOLVED
+secondary,idol,martial,"[""cv3_sidekick_028""]",SOLVED
+secondary,idol,mecha,"[""cv3_sidekick_029""]",SOLVED
+secondary,idol,nordic,"[""cv3_sidekick_030""]",SOLVED
+secondary,idol,samurai,"[""cv3_sidekick_029""]",SOLVED
+secondary,idol,shinobi,"[""cv3_sidekick_008""]",SOLVED
+secondary,idol,space,"[""cv3_sidekick_030""]",SOLVED
+secondary,isekai,magical,"[""cv3_sidekick_031""]",SOLVED
+secondary,isekai,martial,"[""cv3_sidekick_028""]",SOLVED
+secondary,isekai,military,"[""cv3_sidekick_032""]",SOLVED
+secondary,isekai,mythology,"[""cv3_sidekick_033""]",SOLVED
+secondary,isekai,nordic,"[""cv3_sidekick_034""]",SOLVED
+secondary,isekai,samurai,"[""cv3_sidekick_032""]",SOLVED
+secondary,isekai,shinobi,"[""cv3_sidekick_031""]",SOLVED
+secondary,isekai,survival,"[""cv3_sidekick_033""]",SOLVED
+secondary,magical,martial,"[""cv3_sidekick_035""]",SOLVED
+secondary,magical,mythology,"[""cv3_sidekick_036""]",SOLVED
+secondary,magical,romance,"[""cv3_sidekick_009""]",SOLVED
+secondary,magical,samurai,"[""cv3_sidekick_037""]",SOLVED
+secondary,magical,shinobi,"[""cv3_sidekick_031""]",SOLVED
+secondary,magical,slice,"[""cv3_sidekick_036""]",SOLVED
+secondary,magical,space,"[""cv3_sidekick_037""]",SOLVED
+secondary,magical,supernatural,"[""cv3_sidekick_035""]",SOLVED
+secondary,martial,mecha,"[""cv3_sidekick_038""]",SOLVED
+secondary,martial,military,"[""cv3_sidekick_038""]",SOLVED
+secondary,martial,pirate,"[""cv3_sidekick_010""]",SOLVED
+secondary,martial,samurai,"[""cv3_sidekick_021"", ""cv3_sidekick_049""]",SOLVED
+secondary,martial,shinobi,"[""cv3_sidekick_015"", ""cv3_sidekick_049""]",SOLVED
+secondary,martial,space,"[""cv3_sidekick_024""]",SOLVED
+secondary,martial,supernatural,"[""cv3_sidekick_035""]",SOLVED
+secondary,mecha,pirate,"[""cv3_sidekick_039""]",SOLVED
+secondary,mecha,romance,"[""cv3_sidekick_039""]",SOLVED
+secondary,mecha,samurai,"[""cv3_sidekick_029"", ""cv3_sidekick_050""]",SOLVED
+secondary,mecha,shinobi,"[""cv3_sidekick_040"", ""cv3_sidekick_050""]",SOLVED
+secondary,mecha,sports,"[""cv3_sidekick_040""]",SOLVED
+secondary,military,samurai,"[""cv3_sidekick_032""]",SOLVED
+secondary,military,shinobi,"[""cv3_sidekick_025""]",SOLVED
+secondary,military,space,"[""cv3_sidekick_041""]",SOLVED
+secondary,military,supernatural,"[""cv3_sidekick_041""]",SOLVED
+secondary,mystery,nordic,"[""cv3_sidekick_042""]",SOLVED
+secondary,mystery,samurai,"[""cv3_sidekick_042""]",SOLVED
+secondary,mystery,shinobi,"[""cv3_sidekick_022""]",SOLVED
+secondary,mystery,survival,"[""cv3_sidekick_011""]",SOLVED
+secondary,mythology,nordic,"[""cv3_sidekick_043""]",SOLVED
+secondary,mythology,pirate,"[""cv3_sidekick_044""]",SOLVED
+secondary,mythology,romance,"[""cv3_sidekick_045""]",SOLVED
+secondary,mythology,samurai,"[""cv3_sidekick_044""]",SOLVED
+secondary,mythology,shinobi,"[""cv3_sidekick_043""]",SOLVED
+secondary,mythology,slice,"[""cv3_sidekick_036""]",SOLVED
+secondary,mythology,space,"[""cv3_sidekick_023""]",SOLVED
+secondary,mythology,supernatural,"[""cv3_sidekick_045""]",SOLVED
+secondary,nordic,pirate,"[""cv3_sidekick_026""]",SOLVED
+secondary,nordic,romance,"[""cv3_sidekick_004""]",SOLVED
+secondary,nordic,samurai,"[""cv3_sidekick_042""]",SOLVED
+secondary,nordic,shinobi,"[""cv3_sidekick_043""]",SOLVED
+secondary,nordic,space,"[""cv3_sidekick_030""]",SOLVED
+secondary,nordic,sports,"[""cv3_sidekick_016""]",SOLVED
+secondary,nordic,supernatural,"[""cv3_sidekick_034""]",SOLVED
+secondary,pirate,romance,"[""cv3_sidekick_039""]",SOLVED
+secondary,pirate,samurai,"[""cv3_sidekick_044""]",SOLVED
+secondary,pirate,shinobi,"[""cv3_sidekick_005""]",SOLVED
+secondary,pirate,space,"[""cv3_sidekick_017""]",SOLVED
+secondary,romance,samurai,"[""cv3_sidekick_046"", ""cv3_sidekick_051""]",SOLVED
+secondary,romance,shinobi,"[""cv3_sidekick_046""]",SOLVED
+secondary,romance,supernatural,"[""cv3_sidekick_045""]",SOLVED
+secondary,samurai,shinobi,"[""cv3_sidekick_046"", ""cv3_sidekick_049"", ""cv3_sidekick_050""]",SOLVED
+secondary,samurai,slice,"[""cv3_sidekick_018"", ""cv3_sidekick_051""]",SOLVED
+secondary,samurai,space,"[""cv3_sidekick_037""]",SOLVED
+secondary,samurai,sports,"[""cv3_sidekick_012""]",SOLVED
+secondary,samurai,supernatural,"[""cv3_sidekick_006""]",SOLVED
+secondary,samurai,survival,"[""cv3_sidekick_027""]",SOLVED
+secondary,shinobi,slice,"[""cv3_sidekick_047""]",SOLVED
+secondary,shinobi,space,"[""cv3_sidekick_048""]",SOLVED
+secondary,shinobi,sports,"[""cv3_sidekick_040""]",SOLVED
+secondary,shinobi,supernatural,"[""cv3_sidekick_047""]",SOLVED
+secondary,shinobi,survival,"[""cv3_sidekick_048"", ""cv3_sidekick_052""]",SOLVED
+secondary,slice,supernatural,"[""cv3_sidekick_047""]",SOLVED
+secondary,space,supernatural,"[""cv3_sidekick_041""]",SOLVED
+secondary,space,survival,"[""cv3_sidekick_048""]",SOLVED
+secondary,supernatural,survival,"[""cv3_sidekick_019""]",SOLVED
+pet,comedy,cyber,"[""cv3_mascot_001""]",SOLVED
+pet,comedy,fantasy,"[""cv3_mascot_002""]",SOLVED
+pet,comedy,horror,"[""cv3_mascot_003""]",SOLVED
+pet,comedy,idol,"[""cv3_mascot_001""]",SOLVED
+pet,comedy,isekai,"[""cv3_mascot_003"", ""cv3_mascot_004""]",SOLVED
+pet,comedy,magical,"[""cv3_mascot_005""]",SOLVED
+pet,comedy,mystery,"[""cv3_mascot_006""]",SOLVED
+pet,comedy,romance,"[""cv3_mascot_005""]",SOLVED
+pet,comedy,samurai,"[""cv3_mascot_004""]",SOLVED
+pet,comedy,shinobi,"[""cv3_mascot_002""]",SOLVED
+pet,comedy,survival,"[""cv3_mascot_006""]",SOLVED
+pet,cooking,horror,"[""cv3_mascot_007""]",SOLVED
+pet,cooking,martial,"[""cv3_mascot_007""]",SOLVED
+pet,cooking,samurai,"[""cv3_mascot_008""]",SOLVED
+pet,cooking,shinobi,"[""cv3_mascot_008"", ""cv3_mascot_052""]",SOLVED
+pet,cooking,supernatural,"[""cv3_mascot_009""]",SOLVED
+pet,cooking,survival,"[""cv3_mascot_009"", ""cv3_mascot_052""]",SOLVED
+pet,cyber,fantasy,"[""cv3_mascot_010""]",SOLVED
+pet,cyber,horror,"[""cv3_mascot_011""]",SOLVED
+pet,cyber,idol,"[""cv3_mascot_001""]",SOLVED
+pet,cyber,martial,"[""cv3_mascot_012""]",SOLVED
+pet,cyber,military,"[""cv3_mascot_010""]",SOLVED
+pet,cyber,samurai,"[""cv3_mascot_011""]",SOLVED
+pet,cyber,shinobi,"[""cv3_mascot_013""]",SOLVED
+pet,cyber,slice,"[""cv3_mascot_013""]",SOLVED
+pet,cyber,survival,"[""cv3_mascot_012""]",SOLVED
+pet,fantasy,military,"[""cv3_mascot_010""]",SOLVED
+pet,fantasy,mythology,"[""cv3_mascot_014""]",SOLVED
+pet,fantasy,pirate,"[""cv3_mascot_015""]",SOLVED
+pet,fantasy,samurai,"[""cv3_mascot_016""]",SOLVED
+pet,fantasy,shinobi,"[""cv3_mascot_002""]",SOLVED
+pet,fantasy,slice,"[""cv3_mascot_014""]",SOLVED
+pet,fantasy,supernatural,"[""cv3_mascot_015"", ""cv3_mascot_016""]",SOLVED
+pet,horror,isekai,"[""cv3_mascot_003""]",SOLVED
+pet,horror,martial,"[""cv3_mascot_007""]",SOLVED
+pet,horror,mecha,"[""cv3_mascot_017""]",SOLVED
+pet,horror,military,"[""cv3_mascot_018""]",SOLVED
+pet,horror,mystery,"[""cv3_mascot_019""]",SOLVED
+pet,horror,mythology,"[""cv3_mascot_017""]",SOLVED
+pet,horror,pirate,"[""cv3_mascot_018"", ""cv3_mascot_020""]",SOLVED
+pet,horror,samurai,"[""cv3_mascot_011""]",SOLVED
+pet,horror,shinobi,"[""cv3_mascot_019""]",SOLVED
+pet,horror,sports,"[""cv3_mascot_020""]",SOLVED
+pet,idol,isekai,"[""cv3_mascot_021""]",SOLVED
+pet,idol,martial,"[""cv3_mascot_022""]",SOLVED
+pet,idol,mecha,"[""cv3_mascot_022""]",SOLVED
+pet,idol,mythology,"[""cv3_mascot_023""]",SOLVED
+pet,idol,nordic,"[""cv3_mascot_024""]",SOLVED
+pet,idol,pirate,"[""cv3_mascot_021""]",SOLVED
+pet,idol,romance,"[""cv3_mascot_024""]",SOLVED
+pet,idol,samurai,"[""cv3_mascot_025""]",SOLVED
+pet,idol,shinobi,"[""cv3_mascot_026""]",SOLVED
+pet,idol,slice,"[""cv3_mascot_023""]",SOLVED
+pet,idol,space,"[""cv3_mascot_026""]",SOLVED
+pet,idol,sports,"[""cv3_mascot_025""]",SOLVED
+pet,isekai,mecha,"[""cv3_mascot_027""]",SOLVED
+pet,isekai,military,"[""cv3_mascot_028""]",SOLVED
+pet,isekai,mystery,"[""cv3_mascot_029""]",SOLVED
+pet,isekai,mythology,"[""cv3_mascot_028""]",SOLVED
+pet,isekai,pirate,"[""cv3_mascot_021""]",SOLVED
+pet,isekai,samurai,"[""cv3_mascot_004""]",SOLVED
+pet,isekai,shinobi,"[""cv3_mascot_030""]",SOLVED
+pet,isekai,slice,"[""cv3_mascot_029""]",SOLVED
+pet,isekai,space,"[""cv3_mascot_031""]",SOLVED
+pet,isekai,sports,"[""cv3_mascot_030"", ""cv3_mascot_031""]",SOLVED
+pet,isekai,supernatural,"[""cv3_mascot_027""]",SOLVED
+pet,magical,martial,"[""cv3_mascot_032""]",SOLVED
+pet,magical,mystery,"[""cv3_mascot_033""]",SOLVED
+pet,magical,nordic,"[""cv3_mascot_034""]",SOLVED
+pet,magical,romance,"[""cv3_mascot_005""]",SOLVED
+pet,magical,samurai,"[""cv3_mascot_033""]",SOLVED
+pet,magical,shinobi,"[""cv3_mascot_034""]",SOLVED
+pet,magical,sports,"[""cv3_mascot_032""]",SOLVED
+pet,martial,mecha,"[""cv3_mascot_022""]",SOLVED
+pet,martial,military,"[""cv3_mascot_035""]",SOLVED
+pet,martial,mystery,"[""cv3_mascot_036""]",SOLVED
+pet,martial,samurai,"[""cv3_mascot_037"", ""cv3_mascot_049""]",SOLVED
+pet,martial,shinobi,"[""cv3_mascot_035"", ""cv3_mascot_049""]",SOLVED
+pet,martial,slice,"[""cv3_mascot_037""]",SOLVED
+pet,martial,space,"[""cv3_mascot_036""]",SOLVED
+pet,martial,sports,"[""cv3_mascot_032""]",SOLVED
+pet,martial,survival,"[""cv3_mascot_012""]",SOLVED
+pet,mecha,military,"[""cv3_mascot_038""]",SOLVED
+pet,mecha,mythology,"[""cv3_mascot_017""]",SOLVED
+pet,mecha,nordic,"[""cv3_mascot_038""]",SOLVED
+pet,mecha,romance,"[""cv3_mascot_039""]",SOLVED
+pet,mecha,samurai,"[""cv3_mascot_039"", ""cv3_mascot_050""]",SOLVED
+pet,mecha,shinobi,"[""cv3_mascot_040"", ""cv3_mascot_050""]",SOLVED
+pet,mecha,supernatural,"[""cv3_mascot_027""]",SOLVED
+pet,mecha,survival,"[""cv3_mascot_040""]",SOLVED
+pet,military,mystery,"[""cv3_mascot_041""]",SOLVED
+pet,military,mythology,"[""cv3_mascot_028""]",SOLVED
+pet,military,nordic,"[""cv3_mascot_038"", ""cv3_mascot_041""]",SOLVED
+pet,military,pirate,"[""cv3_mascot_018""]",SOLVED
+pet,military,samurai,"[""cv3_mascot_042""]",SOLVED
+pet,military,shinobi,"[""cv3_mascot_035""]",SOLVED
+pet,military,space,"[""cv3_mascot_042""]",SOLVED
+pet,mystery,nordic,"[""cv3_mascot_041""]",SOLVED
+pet,mystery,samurai,"[""cv3_mascot_033""]",SOLVED
+pet,mystery,shinobi,"[""cv3_mascot_019""]",SOLVED
+pet,mystery,slice,"[""cv3_mascot_029""]",SOLVED
+pet,mystery,space,"[""cv3_mascot_036""]",SOLVED
+pet,mystery,survival,"[""cv3_mascot_006""]",SOLVED
+pet,mythology,romance,"[""cv3_mascot_043""]",SOLVED
+pet,mythology,samurai,"[""cv3_mascot_044""]",SOLVED
+pet,mythology,shinobi,"[""cv3_mascot_045""]",SOLVED
+pet,mythology,slice,"[""cv3_mascot_014"", ""cv3_mascot_023""]",SOLVED
+pet,mythology,space,"[""cv3_mascot_043""]",SOLVED
+pet,mythology,supernatural,"[""cv3_mascot_045""]",SOLVED
+pet,mythology,survival,"[""cv3_mascot_044""]",SOLVED
+pet,nordic,pirate,"[""cv3_mascot_046""]",SOLVED
+pet,nordic,romance,"[""cv3_mascot_024""]",SOLVED
+pet,nordic,samurai,"[""cv3_mascot_046""]",SOLVED
+pet,nordic,shinobi,"[""cv3_mascot_034""]",SOLVED
+pet,nordic,slice,"[""cv3_mascot_047""]",SOLVED
+pet,nordic,supernatural,"[""cv3_mascot_047""]",SOLVED
+pet,pirate,romance,"[""cv3_mascot_048""]",SOLVED
+pet,pirate,samurai,"[""cv3_mascot_046""]",SOLVED
+pet,pirate,shinobi,"[""cv3_mascot_048""]",SOLVED
+pet,pirate,sports,"[""cv3_mascot_020""]",SOLVED
+pet,pirate,supernatural,"[""cv3_mascot_015""]",SOLVED
+pet,romance,samurai,"[""cv3_mascot_039"", ""cv3_mascot_051""]",SOLVED
+pet,romance,shinobi,"[""cv3_mascot_048""]",SOLVED
+pet,romance,space,"[""cv3_mascot_043""]",SOLVED
+pet,samurai,shinobi,"[""cv3_mascot_008"", ""cv3_mascot_049"", ""cv3_mascot_050""]",SOLVED
+pet,samurai,slice,"[""cv3_mascot_037"", ""cv3_mascot_051""]",SOLVED
+pet,samurai,space,"[""cv3_mascot_042""]",SOLVED
+pet,samurai,sports,"[""cv3_mascot_025""]",SOLVED
+pet,samurai,supernatural,"[""cv3_mascot_016""]",SOLVED
+pet,samurai,survival,"[""cv3_mascot_044""]",SOLVED
+pet,shinobi,slice,"[""cv3_mascot_013""]",SOLVED
+pet,shinobi,space,"[""cv3_mascot_026""]",SOLVED
+pet,shinobi,sports,"[""cv3_mascot_030""]",SOLVED
+pet,shinobi,supernatural,"[""cv3_mascot_045""]",SOLVED
+pet,shinobi,survival,"[""cv3_mascot_040"", ""cv3_mascot_052""]",SOLVED
+pet,slice,supernatural,"[""cv3_mascot_047""]",SOLVED
+pet,space,sports,"[""cv3_mascot_031""]",SOLVED
+pet,supernatural,survival,"[""cv3_mascot_009""]",SOLVED
+villain,comedy,cyber,"[""cv3_villain_001""]",SOLVED
+villain,comedy,magical,"[""cv3_villain_002""]",SOLVED
+villain,comedy,martial,"[""cv3_villain_003""]",SOLVED
+villain,comedy,mystery,"[""cv3_villain_004""]",SOLVED
+villain,comedy,mythology,"[""cv3_villain_005""]",SOLVED
+villain,comedy,samurai,"[""cv3_villain_001""]",SOLVED
+villain,comedy,shinobi,"[""cv3_villain_003""]",SOLVED
+villain,comedy,slice,"[""cv3_villain_002""]",SOLVED
+villain,comedy,sports,"[""cv3_villain_004""]",SOLVED
+villain,comedy,supernatural,"[""cv3_villain_005""]",SOLVED
+villain,cooking,cyber,"[""cv3_villain_006""]",SOLVED
+villain,cooking,fantasy,"[""cv3_villain_007"", ""cv3_villain_008""]",SOLVED
+villain,cooking,martial,"[""cv3_villain_007""]",SOLVED
+villain,cooking,samurai,"[""cv3_villain_010""]",SOLVED
+villain,cooking,shinobi,"[""cv3_villain_011""]",SOLVED
+villain,cooking,slice,"[""cv3_villain_010""]",SOLVED
+villain,cooking,sports,"[""cv3_villain_009""]",SOLVED
+villain,cooking,supernatural,"[""cv3_villain_006"", ""cv3_villain_008""]",SOLVED
+villain,cooking,survival,"[""cv3_villain_011""]",SOLVED
+villain,cyber,horror,"[""cv3_villain_012""]",SOLVED
+villain,cyber,idol,"[""cv3_villain_013""]",SOLVED
+villain,cyber,isekai,"[""cv3_villain_014""]",SOLVED
+villain,cyber,martial,"[""cv3_villain_015""]",SOLVED
+villain,cyber,military,"[""cv3_villain_014""]",SOLVED
+villain,cyber,pirate,"[""cv3_villain_013""]",SOLVED
+villain,cyber,samurai,"[""cv3_villain_001""]",SOLVED
+villain,cyber,shinobi,"[""cv3_villain_012""]",SOLVED
+villain,cyber,supernatural,"[""cv3_villain_006""]",SOLVED
+villain,fantasy,horror,"[""cv3_villain_016""]",SOLVED
+villain,fantasy,idol,"[""cv3_villain_017""]",SOLVED
+villain,fantasy,martial,"[""cv3_villain_007""]",SOLVED
+villain,fantasy,military,"[""cv3_villain_018""]",SOLVED
+villain,fantasy,mystery,"[""cv3_villain_018""]",SOLVED
+villain,fantasy,pirate,"[""cv3_villain_019""]",SOLVED
+villain,fantasy,romance,"[""cv3_villain_020""]",SOLVED
+villain,fantasy,samurai,"[""cv3_villain_020""]",SOLVED
+villain,fantasy,shinobi,"[""cv3_villain_017""]",SOLVED
+villain,fantasy,slice,"[""cv3_villain_016""]",SOLVED
+villain,fantasy,supernatural,"[""cv3_villain_008""]",SOLVED
+villain,fantasy,survival,"[""cv3_villain_019""]",SOLVED
+villain,horror,magical,"[""cv3_villain_021""]",SOLVED
+villain,horror,mecha,"[""cv3_villain_021""]",SOLVED
+villain,horror,nordic,"[""cv3_villain_022""]",SOLVED
+villain,horror,samurai,"[""cv3_villain_023""]",SOLVED
+villain,horror,shinobi,"[""cv3_villain_012""]",SOLVED
+villain,horror,slice,"[""cv3_villain_016""]",SOLVED
+villain,horror,space,"[""cv3_villain_022""]",SOLVED
+villain,idol,isekai,"[""cv3_villain_024""]",SOLVED
+villain,idol,magical,"[""cv3_villain_025""]",SOLVED
+villain,idol,mythology,"[""cv3_villain_025""]",SOLVED
+villain,idol,pirate,"[""cv3_villain_013""]",SOLVED
+villain,idol,samurai,"[""cv3_villain_026""]",SOLVED
+villain,idol,shinobi,"[""cv3_villain_017""]",SOLVED
+villain,idol,space,"[""cv3_villain_026""]",SOLVED
+villain,idol,supernatural,"[""cv3_villain_024""]",SOLVED
+villain,isekai,martial,"[""cv3_villain_027""]",SOLVED
+villain,isekai,military,"[""cv3_villain_014""]",SOLVED
+villain,isekai,mystery,"[""cv3_villain_028""]",SOLVED
+villain,isekai,mythology,"[""cv3_villain_029"", ""cv3_villain_030""]",SOLVED
+villain,isekai,nordic,"[""cv3_villain_028""]",SOLVED
+villain,isekai,pirate,"[""cv3_villain_031""]",SOLVED
+villain,isekai,romance,"[""cv3_villain_029""]",SOLVED
+villain,isekai,samurai,"[""cv3_villain_030""]",SOLVED
+villain,isekai,shinobi,"[""cv3_villain_032""]",SOLVED
+villain,isekai,slice,"[""cv3_villain_027""]",SOLVED
+villain,isekai,space,"[""cv3_villain_031""]",SOLVED
+villain,isekai,sports,"[""cv3_villain_032""]",SOLVED
+villain,isekai,supernatural,"[""cv3_villain_024""]",SOLVED
+villain,magical,martial,"[""cv3_villain_033""]",SOLVED
+villain,magical,mecha,"[""cv3_villain_021""]",SOLVED
+villain,magical,mythology,"[""cv3_villain_025""]",SOLVED
+villain,magical,pirate,"[""cv3_villain_034"", ""cv3_villain_035""]",SOLVED
+villain,magical,romance,"[""cv3_villain_034""]",SOLVED
+villain,magical,samurai,"[""cv3_villain_033""]",SOLVED
+villain,magical,shinobi,"[""cv3_villain_035""]",SOLVED
+villain,magical,slice,"[""cv3_villain_002""]",SOLVED
+villain,magical,space,"[""cv3_villain_036""]",SOLVED
+villain,magical,supernatural,"[""cv3_villain_036""]",SOLVED
+villain,martial,mecha,"[""cv3_villain_037""]",SOLVED
+villain,martial,mythology,"[""cv3_villain_037""]",SOLVED
+villain,martial,nordic,"[""cv3_villain_038""]",SOLVED
+villain,martial,samurai,"[""cv3_villain_033"", ""cv3_villain_052""]",SOLVED
+villain,martial,shinobi,"[""cv3_villain_003"", ""cv3_villain_052""]",SOLVED
+villain,martial,slice,"[""cv3_villain_027""]",SOLVED
+villain,martial,space,"[""cv3_villain_015""]",SOLVED
+villain,martial,survival,"[""cv3_villain_038""]",SOLVED
+villain,mecha,mystery,"[""cv3_villain_039""]",SOLVED
+villain,mecha,mythology,"[""cv3_villain_037""]",SOLVED
+villain,mecha,nordic,"[""cv3_villain_039""]",SOLVED
+villain,mecha,pirate,"[""cv3_villain_040""]",SOLVED
+villain,mecha,samurai,"[""cv3_villain_040""]",SOLVED
+villain,mecha,shinobi,"[""cv3_villain_041""]",SOLVED
+villain,mecha,supernatural,"[""cv3_villain_042""]",SOLVED
+villain,mecha,survival,"[""cv3_villain_042""]",SOLVED
+villain,military,mystery,"[""cv3_villain_018""]",SOLVED
+villain,military,mythology,"[""cv3_villain_043""]",SOLVED
+villain,military,samurai,"[""cv3_villain_044""]",SOLVED
+villain,military,shinobi,"[""cv3_villain_045""]",SOLVED
+villain,military,space,"[""cv3_villain_043""]",SOLVED
+villain,military,sports,"[""cv3_villain_044""]",SOLVED
+villain,military,supernatural,"[""cv3_villain_045""]",SOLVED
+villain,mystery,nordic,"[""cv3_villain_028"", ""cv3_villain_039""]",SOLVED
+villain,mystery,samurai,"[""cv3_villain_046""]",SOLVED
+villain,mystery,shinobi,"[""cv3_villain_046""]",SOLVED
+villain,mystery,sports,"[""cv3_villain_004"", ""cv3_villain_009""]",SOLVED
+villain,mythology,nordic,"[""cv3_villain_047""]",SOLVED
+villain,mythology,romance,"[""cv3_villain_029""]",SOLVED
+villain,mythology,samurai,"[""cv3_villain_030""]",SOLVED
+villain,mythology,shinobi,"[""cv3_villain_047""]",SOLVED
+villain,mythology,space,"[""cv3_villain_043""]",SOLVED
+villain,mythology,supernatural,"[""cv3_villain_005""]",SOLVED
+villain,nordic,samurai,"[""cv3_villain_048""]",SOLVED
+villain,nordic,shinobi,"[""cv3_villain_047""]",SOLVED
+villain,nordic,slice,"[""cv3_villain_049""]",SOLVED
+villain,nordic,space,"[""cv3_villain_022""]",SOLVED
+villain,nordic,sports,"[""cv3_villain_049""]",SOLVED
+villain,nordic,supernatural,"[""cv3_villain_048""]",SOLVED
+villain,nordic,survival,"[""cv3_villain_038""]",SOLVED
+villain,pirate,romance,"[""cv3_villain_034""]",SOLVED
+villain,pirate,samurai,"[""cv3_villain_040""]",SOLVED
+villain,pirate,shinobi,"[""cv3_villain_035""]",SOLVED
+villain,pirate,space,"[""cv3_villain_031""]",SOLVED
+villain,pirate,survival,"[""cv3_villain_019""]",SOLVED
+villain,romance,samurai,"[""cv3_villain_020""]",SOLVED
+villain,romance,shinobi,"[""cv3_villain_041""]",SOLVED
+villain,samurai,shinobi,"[""cv3_villain_046"", ""cv3_villain_052""]",SOLVED
+villain,samurai,slice,"[""cv3_villain_010""]",SOLVED
+villain,samurai,space,"[""cv3_villain_026""]",SOLVED
+villain,samurai,sports,"[""cv3_villain_044""]",SOLVED
+villain,samurai,supernatural,"[""cv3_villain_048""]",SOLVED
+villain,samurai,survival,"[""cv3_villain_023""]",SOLVED
+villain,shinobi,slice,"[""cv3_villain_050""]",SOLVED
+villain,shinobi,space,"[""cv3_villain_050""]",SOLVED
+villain,shinobi,sports,"[""cv3_villain_032""]",SOLVED
+villain,shinobi,supernatural,"[""cv3_villain_045""]",SOLVED
+villain,shinobi,survival,"[""cv3_villain_011""]",SOLVED
+villain,slice,space,"[""cv3_villain_050""]",SOLVED
+villain,slice,sports,"[""cv3_villain_049""]",SOLVED
+villain,space,sports,"[""cv3_villain_051""]",SOLVED
+villain,space,supernatural,"[""cv3_villain_036""]",SOLVED
+villain,space,survival,"[""cv3_villain_051""]",SOLVED
+villain,sports,survival,"[""cv3_villain_051""]",SOLVED
+villain,supernatural,survival,"[""cv3_villain_042""]",SOLVED

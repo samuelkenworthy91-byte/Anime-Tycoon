@@ -23,7 +23,9 @@ import {
   Moon,
   type LucideIcon,
 } from "lucide-react";
-import genreV2Runtime from "./generated/genreV2.json";
+import genreV2Runtime from "./generated/genreV3.json";
+
+import arcV3Runtime from "./generated/arcV3.json";
 
 /* ------------------------------------------------------------------ types */
 export type GenreId =
@@ -125,6 +127,7 @@ export interface CastMember {
   id: string;
   name: string;
   archetype: string;
+  epithet?: string;
   /** image path; if `pos` is set the file is a 2x2 portrait sheet */
   img: string;
   personality: string;
@@ -276,10 +279,7 @@ export const GENRES: Genre[] = [
   ).filter((g): g is Genre => g !== null),
 ];
 
-/** the 21 canonical genre ids exactly as shipped in the generated manifest
- *  (Cast V2's 192 affinities and the 210-pair matrix are defined against
- *  these; the two provisional ids are NOT in this set until Work lands the
- *  canonical 23-genre / 253-pair data with matching cast coverage). */
+/** The 23 canonical ids supplied by the integrated V3 manifest. */
 export const CANONICAL_GENRE_IDS: GenreId[] = genreV2Runtime.genres.map((g) => g.id as GenreId);
 
 export const GENRE = (id: GenreId) => GENRES.find((g) => g.id === id)!;
@@ -662,6 +662,7 @@ export const ARCS: Arc[] = [
   { id: "narr_quiet", name: "Quiet Character Episode", cost: 8_000, q: 4, f: 0.02, syn: ["slice", "romance", "romance"], synQ: 4, anti: ["sports", "military"], antiQ: -2, desc: "No explosions. One conversation. Somehow the episode everyone quotes." },
   { id: "narr_pov", name: "POV Switch", cost: 16_000, q: 5, f: 0.01, syn: ["mystery", "mystery", "horror"], synQ: 3, desc: "Retell the conflict through the eyes of somebody the audience mistrusted.", unlock: { kind: "rd", cost: 22 } },
   { id: "narr_sacrifice", name: "Heroic Sacrifice", cost: 24_000, q: 6, f: 0.03, syn: ["martial", "fantasy", "military"], synQ: 4, anti: ["comedy", "cooking"], antiQ: -3, desc: "One character pays the bill for everybody else's tomorrow.", unlock: { kind: "score", n: 30 } },
+  ...arcV3Runtime.add_arcs as Arc[],
 ];
 
 /* ------------------------------------------- hidden arc synergies (shipped to discover) */
@@ -709,6 +710,7 @@ export const ARC_COMBOS: ArcCombo[] = [
   /* deliberately bad structures teach the player that order can hurt too */
   { id: "backwards_training", name: "Training After the Test", arcs: ["tournament", "montage"], q: -3, f: -0.01, ordered: true },
   { id: "spoiled_mystery", name: "Mystery Spoiled Early", arcs: ["narr_villainreveal", "case"], q: -3, f: -0.01, ordered: true },
+  ...arcV3Runtime.add_combos as ArcCombo[],
 ];
 
 const containsInOrder = (haystack: string[], needles: string[]) => {
@@ -800,7 +802,7 @@ export interface WorkerLook {
 /* Looks must only reference art that actually shipped in public/img — a
    missing file renders as a broken image in menus (6 is the showrunner's
    dedicated model, reserved; art batch 2 added workers 14-16). */
-export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((n) => ({
+export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((n) => ({
   sprite: `img/sprite-worker-${n}.png`,
   portrait: `img/portrait-worker-${n}.png`,
 }));

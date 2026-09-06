@@ -1,0 +1,47 @@
+path_relative_to_public,entity,kind,classification,width,height,reason
+img/sprite-worker-1.png,worker-look-1,sprite,KEEP,262,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-1.png,worker-look-1,portrait,KEEP,211,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-2.png,worker-look-2,sprite,KEEP,306,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-2.png,worker-look-2,portrait,KEEP,224,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-3.png,worker-look-3,sprite,KEEP,330,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-3.png,worker-look-3,portrait,KEEP,224,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-4.png,worker-look-4,sprite,KEEP,233,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-4.png,worker-look-4,portrait,KEEP,183,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-5.png,worker-look-5,sprite,KEEP,296,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-5.png,worker-look-5,portrait,KEEP,224,223,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-6.png,vision,sprite,KEEP,324,640,Reserved for vision showrunner; exclude from hire pool.
+img/portrait-worker-6.png,vision,portrait,KEEP,224,224,Reserved for vision showrunner; exclude from hire pool.
+img/sprite-worker-7.png,worker-look-7,sprite,KEEP,227,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-7.png,worker-look-7,portrait,KEEP,168,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-8.png,worker-look-8,sprite,KEEP,343,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-8.png,worker-look-8,portrait,KEEP,224,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-9.png,worker-look-9,sprite,KEEP,296,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-9.png,worker-look-9,portrait,KEEP,224,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-10.png,worker-look-10,sprite,KEEP,255,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-10.png,worker-look-10,portrait,KEEP,194,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-11.png,worker-look-11,sprite,KEEP,272,640,Primary warm painted worker style; preserve matching identity.
+img/portrait-worker-11.png,worker-look-11,portrait,KEEP,222,224,Primary warm painted worker style; preserve matching identity.
+img/sprite-worker-12.png,worker-look-12,sprite,KEEP,262,605,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/portrait-worker-12.png,worker-look-12,portrait,KEEP,224,224,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/sprite-worker-13.png,worker-look-13,sprite,KEEP,262,531,"More realistic senior facial rendering; acceptable age variation, secondary anchor only."
+img/portrait-worker-13.png,worker-look-13,portrait,KEEP,223,224,"More realistic senior facial rendering; acceptable age variation, secondary anchor only."
+img/sprite-worker-14.png,worker-look-14,sprite,KEEP,333,660,"More realistic senior facial rendering; acceptable age variation, secondary anchor only."
+img/portrait-worker-14.png,worker-look-14,portrait,KEEP,188,224,"More realistic senior facial rendering; acceptable age variation, secondary anchor only."
+img/sprite-worker-15.png,worker-look-15,sprite,KEEP,411,660,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/portrait-worker-15.png,worker-look-15,portrait,KEEP,179,224,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/sprite-worker-16.png,worker-look-16,sprite,KEEP,262,519,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/portrait-worker-16.png,worker-look-16,portrait,KEEP,153,224,Later group: larger brighter eyes; acceptable but secondary anchor only.
+img/sprite-showrunner-steady.png,steady,sprite,KEEP,262,507,Strong senior worker-style anchor.
+img/portrait-showrunner-steady.png,steady,portrait,KEEP,155,224,Strong senior worker-style anchor.
+img/sprite-showrunner-producer.png,producer,sprite,REPLACE RECOMMENDED,262,698,STYLE MISMATCH: elongated body and mature realistic face; replace pair.
+img/portrait-showrunner-producer.png,producer,portrait,REPLACE RECOMMENDED,220,224,STYLE MISMATCH: elongated body and mature realistic face; replace pair.
+img/sprite-showrunner-marketer.png,marketer,sprite,KEEP,262,550,"Weak match: busy costume, brighter eyes; retain, secondary anchor only."
+img/portrait-showrunner-marketer.png,marketer,portrait,KEEP,224,224,"Weak match: busy costume, brighter eyes; retain, secondary anchor only."
+img/staff-1.jpg,legacy-card,card,KEEP,1254,1254,Legacy/menu fallback illustration; not an office style anchor.
+img/staff-2.jpg,legacy-card,card,KEEP,1254,1254,Legacy/menu fallback illustration; not an office style anchor.
+img/staff-3.jpg,legacy-card,card,KEEP,1254,1254,Legacy/menu fallback illustration; not an office style anchor.
+img/staff-4.jpg,legacy-card,card,KEEP,1254,1254,Legacy/menu fallback illustration; not an office style anchor.
+img/showrunner-a.jpg,legacy-card,card,KEEP,1408,768,Legacy/menu fallback illustration; not an office style anchor.
+img/showrunner-b.jpg,legacy-card,card,KEEP,1408,768,Legacy/menu fallback illustration; not an office style anchor.
+img/showrunner-c.jpg,legacy-card,card,KEEP,1376,768,Legacy/menu fallback illustration; not an office style anchor.
+img/showrunner-d.jpg,legacy-card,card,KEEP,768,1376,Legacy/menu fallback illustration; not an office style anchor.

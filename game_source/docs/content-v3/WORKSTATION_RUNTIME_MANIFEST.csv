@@ -1,0 +1,4 @@
+id,filename,width,height,alpha,target_repo_path,anchor,baseline_px,source_crop_box,qc
+workstation_standard,workstation-standard.png,768,512,True,game_source/public/img/workstations/workstation-standard.png,bottom-centre,482,"[0, 0, 1024, 505]",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+workstation_animation,workstation-animation.png,768,512,True,game_source/public/img/workstations/workstation-animation.png,bottom-centre,482,"[0, 505, 1024, 990]",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+workstation_audio,workstation-audio.png,768,512,True,game_source/public/img/workstations/workstation-audio.png,bottom-centre,482,"[0, 990, 1024, 1536]",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING

@@ -1,0 +1,347 @@
+[
+  {
+    "id": "rivalry",
+    "name": "Rivalry Saga",
+    "arcs": [
+      "tournament",
+      "origin"
+    ],
+    "q": 2,
+    "f": 0.02
+  },
+  {
+    "id": "heart",
+    "name": "Heartfelt Trilogy",
+    "arcs": [
+      "beach",
+      "festival",
+      "confession"
+    ],
+    "q": 3,
+    "f": 0.01
+  },
+  {
+    "id": "suspense",
+    "name": "Suspense Engine",
+    "arcs": [
+      "case",
+      "twist",
+      "cliffhanger"
+    ],
+    "q": 3,
+    "f": 0
+  },
+  {
+    "id": "spectacle",
+    "name": "Sakuga Spectacle",
+    "arcs": [
+      "launch",
+      "sakuga",
+      "war"
+    ],
+    "q": 3,
+    "f": 0.01
+  },
+  {
+    "id": "music",
+    "name": "Song & Dance",
+    "arcs": [
+      "live",
+      "musical"
+    ],
+    "q": 2,
+    "f": 0.015
+  },
+  {
+    "id": "gold",
+    "name": "Franchise Gold",
+    "arcs": [
+      "crossover",
+      "ova",
+      "finale"
+    ],
+    "q": 2,
+    "f": 0.03
+  },
+  {
+    "id": "blitz",
+    "name": "Merch Blitz",
+    "arcs": [
+      "mascot",
+      "collab"
+    ],
+    "q": 1,
+    "f": 0.02
+  },
+  {
+    "id": "road",
+    "name": "Redemption Road",
+    "arcs": [
+      "origin",
+      "redemption",
+      "finale"
+    ],
+    "q": 2,
+    "f": 0
+  },
+  {
+    "id": "gag",
+    "name": "Gag Reel",
+    "arcs": [
+      "filler",
+      "beach"
+    ],
+    "q": -1,
+    "f": 0.03
+  },
+  {
+    "id": "deep",
+    "name": "Deep Lore",
+    "arcs": [
+      "lore",
+      "twist"
+    ],
+    "q": 2,
+    "f": 0
+  },
+  {
+    "id": "speed",
+    "name": "Need for Speed",
+    "arcs": [
+      "grandprix",
+      "montage"
+    ],
+    "q": 2,
+    "f": 0.01
+  },
+  {
+    "id": "haunted",
+    "name": "Haunted Case Files",
+    "arcs": [
+      "ghosthunt",
+      "case"
+    ],
+    "q": 2,
+    "f": 0.01
+  },
+  {
+    "id": "feast",
+    "name": "Feast & Merch",
+    "arcs": [
+      "cookingbattle",
+      "collab"
+    ],
+    "q": 2,
+    "f": 0.02
+  },
+  {
+    "id": "orbit",
+    "name": "Orbital Launch",
+    "arcs": [
+      "orbital",
+      "launch"
+    ],
+    "q": 2,
+    "f": 0.01
+  },
+  {
+    "id": "crime",
+    "name": "Crime & Rain",
+    "arcs": [
+      "raincity",
+      "case",
+      "twist"
+    ],
+    "q": 2,
+    "f": 0.01
+  },
+  {
+    "id": "magicgirl",
+    "name": "Magical Rising",
+    "arcs": [
+      "transformation",
+      "live",
+      "confession"
+    ],
+    "q": 2,
+    "f": 0.01
+  },
+  {
+    "id": "earned_victory",
+    "name": "Earned Victory",
+    "arcs": [
+      "montage",
+      "tournament",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.03,
+    "ordered": true
+  },
+  {
+    "id": "rival_payoff",
+    "name": "Rivalry Payoff",
+    "arcs": [
+      "narr_rivalintro",
+      "tournament",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.04,
+    "ordered": true
+  },
+  {
+    "id": "mentor_legacy",
+    "name": "Mentor's Legacy",
+    "arcs": [
+      "narr_mentor",
+      "narr_sacrifice",
+      "finale"
+    ],
+    "q": 5,
+    "f": 0.02,
+    "ordered": true
+  },
+  {
+    "id": "mystery_reveal",
+    "name": "The Long Reveal",
+    "arcs": [
+      "hook",
+      "case",
+      "narr_villainreveal",
+      "twist"
+    ],
+    "q": 5,
+    "f": 0.02,
+    "ordered": true
+  },
+  {
+    "id": "false_betrayal",
+    "name": "Victory Was a Lie",
+    "arcs": [
+      "narr_falsewin",
+      "narr_betrayal",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.03,
+    "ordered": true
+  },
+  {
+    "id": "journey_family",
+    "name": "Road Becomes Home",
+    "arcs": [
+      "narr_journey",
+      "narr_foundfamily",
+      "finale"
+    ],
+    "q": 3,
+    "f": 0.04,
+    "ordered": true
+  },
+  {
+    "id": "political_siege",
+    "name": "War by Other Means",
+    "arcs": [
+      "narr_politics",
+      "narr_siege",
+      "war"
+    ],
+    "q": 5,
+    "f": 0.01,
+    "ordered": true
+  },
+  {
+    "id": "identity_confession",
+    "name": "Mask Comes Off",
+    "arcs": [
+      "narr_secretid",
+      "confession"
+    ],
+    "q": 3,
+    "f": 0.03,
+    "ordered": true
+  },
+  {
+    "id": "survival_rescue",
+    "name": "No One Left Behind",
+    "arcs": [
+      "narr_survival",
+      "narr_rescue",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.03,
+    "ordered": true
+  },
+  {
+    "id": "revenge_redemption",
+    "name": "Break the Cycle",
+    "arcs": [
+      "narr_revenge",
+      "redemption",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.02,
+    "ordered": true
+  },
+  {
+    "id": "slowburn_payoff",
+    "name": "Slow Fuse",
+    "arcs": [
+      "narr_slowburn",
+      "twist",
+      "finale"
+    ],
+    "q": 4,
+    "f": 0.02,
+    "ordered": true
+  },
+  {
+    "id": "pov_mystery",
+    "name": "Other Side of the Case",
+    "arcs": [
+      "narr_pov",
+      "case",
+      "twist"
+    ],
+    "q": 4,
+    "f": 0.01,
+    "ordered": true
+  },
+  {
+    "id": "flashforward_loop",
+    "name": "Promise Kept",
+    "arcs": [
+      "narr_flashforward",
+      "origin",
+      "finale"
+    ],
+    "q": 3,
+    "f": 0.02,
+    "ordered": true
+  },
+  {
+    "id": "backwards_training",
+    "name": "Training After the Test",
+    "arcs": [
+      "tournament",
+      "montage"
+    ],
+    "q": -3,
+    "f": -0.01,
+    "ordered": true
+  },
+  {
+    "id": "spoiled_mystery",
+    "name": "Mystery Spoiled Early",
+    "arcs": [
+      "narr_villainreveal",
+      "case"
+    ],
+    "q": -3,
+    "f": -0.01,
+    "ordered": true
+  }
+]

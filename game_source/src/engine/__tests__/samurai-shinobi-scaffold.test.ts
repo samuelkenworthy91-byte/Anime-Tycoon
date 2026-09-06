@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import manifest from "../generated/genreV3.json";
 import {
   AUDIENCES,
   CANONICAL_GENRE_IDS,
@@ -14,17 +15,17 @@ import { initMarket } from "../market";
 import { migrateActiveGenre, migrateGenreRecord } from "../castV2Migration";
 import { migrateRun as migrateRunState } from "../state";
 import { ensureCareer, rollHire } from "../careers";
-import { arcGenreFit, ARCS } from "../data";
+import { ARCS } from "../data";
 
 const SCAFFOLD_IDS: GenreId[] = ["samurai", "shinobi"];
 
-describe("Samurai + Shinobi runtime scaffolding", () => {
-  it("exposes 23 active genre ids: canonical 21 + the two scaffold ids", () => {
+describe("Samurai + Shinobi canonical content", () => {
+  it("exposes 23 active genre ids: canonical 23 including Samurai and Shinobi", () => {
     expect(GENRES).toHaveLength(23);
     expect(SCAFFOLD_IDS.every((id) => GENRES.some((g) => g.id === id))).toBe(true);
     /* original 21 unchanged and in order */
-    expect(CANONICAL_GENRE_IDS).toHaveLength(21);
-    expect(GENRES.map((g) => g.id).slice(0, 21)).toEqual(CANONICAL_GENRE_IDS);
+    expect(CANONICAL_GENRE_IDS).toHaveLength(23);
+    expect(GENRES.map((g) => g.id)).toEqual(CANONICAL_GENRE_IDS);
   });
 
   it("gives the scaffold ids a complete runtime entry (label/icon/desc/ideal/ratio/rd)", () => {
@@ -38,7 +39,7 @@ describe("Samurai + Shinobi runtime scaffolding", () => {
       expect(g.ideal.every((v) => v >= 0 && v <= 100)).toBe(true);
       expect(g.ratio.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 5);
       expect(g.rd).toBeGreaterThan(0);
-      expect(g.desc.toUpperCase()).toContain("PROVISIONAL");
+      expect(g.desc.toUpperCase()).not.toContain("PROVISIONAL");
     }
   });
 
@@ -66,13 +67,10 @@ describe("Samurai + Shinobi runtime scaffolding", () => {
     expect(forced.favGenre).toBe("samurai");
   });
 
-  it("arc typing treats scaffold ids as NEUTRAL (no crash, no fake synergy)", () => {
+  it("supports positive and negative arcs for both new genres", () => {
     for (const id of SCAFFOLD_IDS) {
-      for (const arc of ARCS) {
-        const fit = arcGenreFit(arc, id);
-        expect(fit.label).toBe("NEUTRAL");
-        expect(fit.score).toBe(0);
-      }
+      expect(ARCS.some(a => a.syn?.includes(id))).toBe(true);
+      expect(ARCS.some(a => a.anti?.includes(id))).toBe(true);
     }
   });
 
@@ -87,26 +85,13 @@ describe("Samurai + Shinobi runtime scaffolding", () => {
     }
   });
 
-  it("combo lookups stay neutral: no 253-pair matrix was created", () => {
-    for (const id of SCAFFOLD_IDS) {
-      const pair = comboKey([id, "slice"]);
-      /* pairs absent from the manifest read as neutral 1.0 — the scaffold
-         must not invent synergy data */
-      expect(COMBO[pair] ?? 1).toBe(1);
-      expect(comboMult([id, "slice"])).toBe(1);
+  it("loads every canonical pair and its authored multiplier", () => {
+    expect(manifest.combos).toHaveLength(253);
+    for (const pair of manifest.combos) {
+      expect(comboMult([pair.genre_1, pair.genre_2] as GenreId[])).toBe(pair.learned_multiplier);
     }
-    /* the loader is string-keyed, so a future 253-pair manifest lands with
-       no type-system rewrite: construct one synthetically and read it back */
-    const future = new Map<string, number>(Object.entries(COMBO));
-    for (let i = 0; i < GENRES.length; i += 1) {
-      for (let j = i + 1; j < GENRES.length; j += 1) {
-        future.set(comboKey([GENRES[i].id, GENRES[j].id]), 1.05);
-      }
-    }
-    expect(future.get(comboKey(["samurai", "slice"]))).toBe(1.05);
-    expect(future.get(comboKey(["samurai", "shinobi"]))).toBe(1.05);
-    /* 23 genres → 23×22/2 = 253 pairs, exactly what Work's manifest will carry */
-    expect(future.size).toBe(253);
+    expect(COMBO[comboKey(["samurai", "military"])]).toBe(1.22);
+    expect(COMBO[comboKey(["shinobi", "mystery"])]).toBe(1.22);
   });
 
   it("migration accepts the scaffold ids as active genres and defaults old saves safely", () => {

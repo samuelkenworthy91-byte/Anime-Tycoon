@@ -15,7 +15,8 @@
     "cast-v2:generate": "node scripts/generate-cast-v2-runtime.mjs",
     "cast-v2:validate": "cd docs/cast-v2 && node tools/validate_cast_v2.mjs && node tools/validate_visual_bible.mjs",
     "cast-v2:validate-assets": "node scripts/validate-cast-v2-assets.mjs",
-    "cast-v2:balance": "vitest run scripts/cast-v2-balance.test.ts --reporter=verbose"
+    "cast-v2:balance": "vitest run scripts/cast-v2-balance.test.ts --reporter=verbose",
+    "content-v3:generate": "node scripts/generate-content-v3-runtime.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

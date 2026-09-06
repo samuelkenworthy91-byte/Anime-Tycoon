@@ -11,6 +11,7 @@ export interface OfficeStaff {
   /** the showrunner's own painted office sprite */
   sprite?: string;
   working?: boolean;
+  workstation?: "standard" | "animation" | "audio";
   energy?: number;
   resting?: boolean;
   pulse?: { actorId: string; name: string; type: string; points: number; nonce: number; kind?: "research" | "note" };
@@ -97,6 +98,7 @@ function Character({
   color,
   tired,
   working,
+  workstation = "standard",
   energy,
   resting,
   pulse,
@@ -110,6 +112,7 @@ function Character({
   color: string;
   tired?: boolean;
   working?: boolean;
+  workstation?: "standard" | "animation" | "audio";
   energy?: number;
   resting?: boolean;
   pulse?: { points: number; type: string; nonce: number; kind?: "research" | "note" };
@@ -187,19 +190,13 @@ function Character({
       </span>
 
       {working && (
-        <>
-          {/* compact production desk: monitor, stand and drawing tablet — no faux laptop/SVG */}
-          <span className="pointer-events-none absolute bottom-[1%] left-1/2 z-20 block h-[10%] w-[94%] -translate-x-1/2 rounded-[3px] border border-[#8a6248]/70 bg-[#674630] shadow-[0_5px_12px_rgba(0,0,0,.45)]" />
-          <span className="pointer-events-none absolute bottom-[10%] left-[51%] z-10 block h-[20%] w-[49%] -translate-x-1/2 rounded-[3px] border border-paper/20 bg-[#17182a] shadow-[0_0_10px_rgba(59,225,255,.16)]">
-            <span className="absolute inset-[10%] overflow-hidden rounded-[2px] bg-[#252844]">
-              <span className="absolute left-[8%] right-[8%] top-[18%] h-[8%] rounded bg-cyanx/65" />
-              <span className="absolute left-[8%] right-[25%] top-[40%] h-[7%] rounded bg-neon/55" />
-              <span className="absolute bottom-[18%] left-[8%] right-[12%] h-[6%] rounded bg-gold/45" />
-            </span>
-          </span>
-          <span className="pointer-events-none absolute bottom-[7%] left-1/2 z-20 block h-[5%] w-[5%] -translate-x-1/2 bg-paper/25" />
-          <span className="pointer-events-none absolute bottom-[3%] left-[48%] z-30 block h-[4%] w-[34%] -translate-x-1/2 -skew-x-6 rounded-[2px] border border-paper/10 bg-[#222235]" />
-        </>
+        <img
+          src={`img/workstations/workstation-${workstation}.png`}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="pointer-events-none absolute bottom-[1%] left-1/2 z-20 w-[110%] max-w-none -translate-x-1/2 select-none drop-shadow-md"
+        />
       )}
       {energy !== undefined && (
         <span className="pointer-events-none absolute -top-[5%] left-1/2 z-40 block w-[74%] -translate-x-1/2">
@@ -420,6 +417,7 @@ export default function OfficeScene({
               color={c.color}
               tired={c.tired}
               working={c.working}
+              workstation={c.workstation}
               energy={c.energy}
               resting={c.resting}
               pulse={c.pulse}

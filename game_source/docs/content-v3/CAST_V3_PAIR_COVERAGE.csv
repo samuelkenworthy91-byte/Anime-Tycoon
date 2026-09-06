@@ -1,0 +1,1013 @@
+role,genre_a,genre_b,existing_ids,new_ids,total,status
+protag,comedy,cooking,[],"[""cv3_lead_001"", ""cv3_lead_002""]",2,COVERED
+protag,comedy,cyber,"[""nana""]",[],1,COVERED
+protag,comedy,fantasy,"[""shiori""]",[],1,COVERED
+protag,comedy,horror,"[""shiori""]",[],1,COVERED
+protag,comedy,idol,"[""momo"", ""nana""]",[],2,COVERED
+protag,comedy,isekai,"[""jun""]",[],1,COVERED
+protag,comedy,magical,[],"[""cv3_lead_003""]",1,COVERED
+protag,comedy,martial,"[""kenta""]",[],1,COVERED
+protag,comedy,mecha,[],"[""cv3_lead_004""]",1,COVERED
+protag,comedy,military,[],"[""cv3_lead_005""]",1,COVERED
+protag,comedy,mystery,[],"[""cv3_lead_005""]",1,COVERED
+protag,comedy,mythology,"[""kenta""]",[],1,COVERED
+protag,comedy,nordic,"[""jun""]",[],1,COVERED
+protag,comedy,pirate,[],"[""cv3_lead_001""]",1,COVERED
+protag,comedy,romance,[],"[""cv3_lead_006""]",1,COVERED
+protag,comedy,samurai,[],"[""cv3_lead_007""]",1,COVERED
+protag,comedy,shinobi,[],"[""cv3_lead_003""]",1,COVERED
+protag,comedy,slice,[],"[""cv3_lead_006""]",1,COVERED
+protag,comedy,space,[],"[""cv3_lead_002""]",1,COVERED
+protag,comedy,sports,[],"[""cv3_lead_004""]",1,COVERED
+protag,comedy,supernatural,[],"[""cv3_lead_007""]",1,COVERED
+protag,comedy,survival,"[""momo""]",[],1,COVERED
+protag,cooking,cyber,[],"[""cv3_lead_008""]",1,COVERED
+protag,cooking,fantasy,[],"[""cv3_lead_009""]",1,COVERED
+protag,cooking,horror,"[""zuri""]",[],1,COVERED
+protag,cooking,idol,[],"[""cv3_lead_009""]",1,COVERED
+protag,cooking,isekai,"[""n_mikoto""]",[],1,COVERED
+protag,cooking,magical,"[""n_mikoto"", ""emi""]",[],2,COVERED
+protag,cooking,martial,"[""kai""]",[],1,COVERED
+protag,cooking,mecha,"[""zuri""]",[],1,COVERED
+protag,cooking,military,"[""emi""]",[],1,COVERED
+protag,cooking,mystery,[],"[""cv3_lead_010""]",1,COVERED
+protag,cooking,mythology,[],"[""cv3_lead_011""]",1,COVERED
+protag,cooking,nordic,[],"[""cv3_lead_012""]",1,COVERED
+protag,cooking,pirate,[],"[""cv3_lead_001""]",1,COVERED
+protag,cooking,romance,[],"[""cv3_lead_012""]",1,COVERED
+protag,cooking,samurai,[],"[""cv3_lead_011""]",1,COVERED
+protag,cooking,shinobi,[],"[""cv3_lead_010"", ""cv3_lead_050""]",2,COVERED
+protag,cooking,slice,"[""yui""]","[""cv3_lead_050""]",2,COVERED
+protag,cooking,space,[],"[""cv3_lead_002""]",1,COVERED
+protag,cooking,sports,"[""kai""]",[],1,COVERED
+protag,cooking,supernatural,[],"[""cv3_lead_008""]",1,COVERED
+protag,cooking,survival,"[""yui""]",[],1,COVERED
+protag,cyber,fantasy,[],"[""cv3_lead_013""]",1,COVERED
+protag,cyber,horror,"[""kage""]",[],1,COVERED
+protag,cyber,idol,"[""nana""]",[],1,COVERED
+protag,cyber,isekai,[],"[""cv3_lead_014""]",1,COVERED
+protag,cyber,magical,"[""niko""]",[],1,COVERED
+protag,cyber,martial,"[""kuro""]",[],1,COVERED
+protag,cyber,mecha,"[""niko""]",[],1,COVERED
+protag,cyber,military,"[""kuro""]",[],1,COVERED
+protag,cyber,mystery,"[""kage"", ""akira""]",[],2,COVERED
+protag,cyber,mythology,"[""sota"", ""hana""]",[],2,COVERED
+protag,cyber,nordic,"[""akira""]",[],1,COVERED
+protag,cyber,pirate,[],"[""cv3_lead_015""]",1,COVERED
+protag,cyber,romance,"[""hana""]",[],1,COVERED
+protag,cyber,samurai,[],"[""cv3_lead_015""]",1,COVERED
+protag,cyber,shinobi,[],"[""cv3_lead_016""]",1,COVERED
+protag,cyber,slice,"[""sota""]",[],1,COVERED
+protag,cyber,space,[],"[""cv3_lead_016""]",1,COVERED
+protag,cyber,sports,[],"[""cv3_lead_013""]",1,COVERED
+protag,cyber,supernatural,[],"[""cv3_lead_008""]",1,COVERED
+protag,cyber,survival,[],"[""cv3_lead_014""]",1,COVERED
+protag,fantasy,horror,"[""shiori""]",[],1,COVERED
+protag,fantasy,idol,[],"[""cv3_lead_009"", ""cv3_lead_017""]",2,COVERED
+protag,fantasy,isekai,"[""sora"", ""n_aoi""]",[],2,COVERED
+protag,fantasy,magical,[],"[""cv3_lead_018""]",1,COVERED
+protag,fantasy,martial,"[""ryu""]",[],1,COVERED
+protag,fantasy,mecha,"[""kota""]",[],1,COVERED
+protag,fantasy,military,"[""sora""]",[],1,COVERED
+protag,fantasy,mystery,"[""mako""]",[],1,COVERED
+protag,fantasy,mythology,"[""n_aoi""]",[],1,COVERED
+protag,fantasy,nordic,"[""kota""]",[],1,COVERED
+protag,fantasy,pirate,"[""mako""]",[],1,COVERED
+protag,fantasy,romance,"[""ryu""]",[],1,COVERED
+protag,fantasy,samurai,[],"[""cv3_lead_019""]",1,COVERED
+protag,fantasy,shinobi,[],"[""cv3_lead_020""]",1,COVERED
+protag,fantasy,slice,[],"[""cv3_lead_018""]",1,COVERED
+protag,fantasy,space,[],"[""cv3_lead_019""]",1,COVERED
+protag,fantasy,sports,[],"[""cv3_lead_013""]",1,COVERED
+protag,fantasy,supernatural,[],"[""cv3_lead_017""]",1,COVERED
+protag,fantasy,survival,[],"[""cv3_lead_020""]",1,COVERED
+protag,horror,idol,"[""airi""]",[],1,COVERED
+protag,horror,isekai,[],"[""cv3_lead_021""]",1,COVERED
+protag,horror,magical,[],"[""cv3_lead_022"", ""cv3_lead_023""]",2,COVERED
+protag,horror,martial,[],"[""cv3_lead_024""]",1,COVERED
+protag,horror,mecha,"[""zuri""]",[],1,COVERED
+protag,horror,military,[],"[""cv3_lead_024""]",1,COVERED
+protag,horror,mystery,"[""kage""]",[],1,COVERED
+protag,horror,mythology,[],"[""cv3_lead_025""]",1,COVERED
+protag,horror,nordic,"[""yuki""]",[],1,COVERED
+protag,horror,pirate,[],"[""cv3_lead_025""]",1,COVERED
+protag,horror,romance,"[""airi"", ""haru""]",[],2,COVERED
+protag,horror,samurai,[],"[""cv3_lead_022""]",1,COVERED
+protag,horror,shinobi,[],"[""cv3_lead_021""]",1,COVERED
+protag,horror,slice,[],"[""cv3_lead_026""]",1,COVERED
+protag,horror,space,[],"[""cv3_lead_026""]",1,COVERED
+protag,horror,sports,"[""haru""]",[],1,COVERED
+protag,horror,supernatural,[],"[""cv3_lead_023""]",1,COVERED
+protag,horror,survival,"[""yuki""]",[],1,COVERED
+protag,idol,isekai,"[""n_saku""]",[],1,COVERED
+protag,idol,magical,"[""n_reiwa""]",[],1,COVERED
+protag,idol,martial,"[""n_saku""]",[],1,COVERED
+protag,idol,mecha,"[""riko""]",[],1,COVERED
+protag,idol,military,"[""leo""]",[],1,COVERED
+protag,idol,mystery,"[""riko"", ""n_reiwa""]",[],2,COVERED
+protag,idol,mythology,"[""mira""]",[],1,COVERED
+protag,idol,nordic,[],"[""cv3_lead_027""]",1,COVERED
+protag,idol,pirate,"[""mio""]",[],1,COVERED
+protag,idol,romance,"[""airi"", ""mio""]",[],2,COVERED
+protag,idol,samurai,[],"[""cv3_lead_027""]",1,COVERED
+protag,idol,shinobi,[],"[""cv3_lead_028"", ""cv3_lead_052""]",2,COVERED
+protag,idol,slice,[],"[""cv3_lead_028""]",1,COVERED
+protag,idol,space,"[""mira""]",[],1,COVERED
+protag,idol,sports,"[""leo""]","[""cv3_lead_052""]",2,COVERED
+protag,idol,supernatural,[],"[""cv3_lead_017""]",1,COVERED
+protag,idol,survival,"[""momo""]",[],1,COVERED
+protag,isekai,magical,"[""n_mikoto""]",[],1,COVERED
+protag,isekai,martial,"[""n_saku""]",[],1,COVERED
+protag,isekai,mecha,[],"[""cv3_lead_029""]",1,COVERED
+protag,isekai,military,"[""sora""]",[],1,COVERED
+protag,isekai,mystery,[],"[""cv3_lead_030""]",1,COVERED
+protag,isekai,mythology,"[""n_aoi""]",[],1,COVERED
+protag,isekai,nordic,"[""jun""]",[],1,COVERED
+protag,isekai,pirate,"[""kaito""]",[],1,COVERED
+protag,isekai,romance,"[""kaito""]",[],1,COVERED
+protag,isekai,samurai,[],"[""cv3_lead_029""]",1,COVERED
+protag,isekai,shinobi,[],"[""cv3_lead_021""]",1,COVERED
+protag,isekai,slice,[],"[""cv3_lead_031""]",1,COVERED
+protag,isekai,space,[],"[""cv3_lead_032""]",1,COVERED
+protag,isekai,sports,[],"[""cv3_lead_030""]",1,COVERED
+protag,isekai,supernatural,[],"[""cv3_lead_031"", ""cv3_lead_032""]",2,COVERED
+protag,isekai,survival,[],"[""cv3_lead_014""]",1,COVERED
+protag,magical,martial,"[""goro"", ""sakura""]",[],2,COVERED
+protag,magical,mecha,"[""niko""]",[],1,COVERED
+protag,magical,military,"[""hikari"", ""emi""]",[],2,COVERED
+protag,magical,mystery,"[""n_reiwa""]",[],1,COVERED
+protag,magical,mythology,[],"[""cv3_lead_033""]",1,COVERED
+protag,magical,nordic,[],"[""cv3_lead_034""]",1,COVERED
+protag,magical,pirate,[],"[""cv3_lead_034""]",1,COVERED
+protag,magical,romance,"[""hikari""]",[],1,COVERED
+protag,magical,samurai,[],"[""cv3_lead_022""]",1,COVERED
+protag,magical,shinobi,[],"[""cv3_lead_003""]",1,COVERED
+protag,magical,slice,[],"[""cv3_lead_018""]",1,COVERED
+protag,magical,space,"[""sakura""]",[],1,COVERED
+protag,magical,sports,"[""goro""]",[],1,COVERED
+protag,magical,supernatural,[],"[""cv3_lead_023""]",1,COVERED
+protag,magical,survival,[],"[""cv3_lead_033""]",1,COVERED
+protag,martial,mecha,"[""n_ryoko""]",[],1,COVERED
+protag,martial,military,"[""kuro""]","[""cv3_lead_024""]",2,COVERED
+protag,martial,mystery,[],"[""cv3_lead_035""]",1,COVERED
+protag,martial,mythology,"[""kenta""]",[],1,COVERED
+protag,martial,nordic,"[""kaede""]",[],1,COVERED
+protag,martial,pirate,"[""ash""]",[],1,COVERED
+protag,martial,romance,"[""ryu""]",[],1,COVERED
+protag,martial,samurai,[],"[""cv3_lead_035"", ""cv3_lead_047""]",2,COVERED
+protag,martial,shinobi,[],"[""cv3_lead_036"", ""cv3_lead_047""]",2,COVERED
+protag,martial,slice,"[""kaede""]",[],1,COVERED
+protag,martial,space,"[""sakura"", ""n_ryoko""]",[],2,COVERED
+protag,martial,sports,"[""kai"", ""goro""]",[],2,COVERED
+protag,martial,supernatural,[],"[""cv3_lead_036""]",1,COVERED
+protag,martial,survival,"[""ash""]",[],1,COVERED
+protag,mecha,military,"[""rei""]",[],1,COVERED
+protag,mecha,mystery,"[""riko"", ""takumi""]",[],2,COVERED
+protag,mecha,mythology,[],"[""cv3_lead_037""]",1,COVERED
+protag,mecha,nordic,"[""kota""]",[],1,COVERED
+protag,mecha,pirate,[],"[""cv3_lead_038""]",1,COVERED
+protag,mecha,romance,"[""takumi""]",[],1,COVERED
+protag,mecha,samurai,[],"[""cv3_lead_029"", ""cv3_lead_048""]",2,COVERED
+protag,mecha,shinobi,[],"[""cv3_lead_037"", ""cv3_lead_048""]",2,COVERED
+protag,mecha,slice,"[""jin""]",[],1,COVERED
+protag,mecha,space,"[""rei"", ""n_ryoko""]",[],2,COVERED
+protag,mecha,sports,[],"[""cv3_lead_004""]",1,COVERED
+protag,mecha,supernatural,[],"[""cv3_lead_038""]",1,COVERED
+protag,mecha,survival,"[""jin""]",[],1,COVERED
+protag,military,mystery,[],"[""cv3_lead_005""]",1,COVERED
+protag,military,mythology,[],"[""cv3_lead_039""]",1,COVERED
+protag,military,nordic,[],"[""cv3_lead_039""]",1,COVERED
+protag,military,pirate,[],"[""cv3_lead_040""]",1,COVERED
+protag,military,romance,"[""hikari""]",[],1,COVERED
+protag,military,samurai,[],"[""cv3_lead_041""]",1,COVERED
+protag,military,shinobi,[],"[""cv3_lead_040""]",1,COVERED
+protag,military,slice,[],"[""cv3_lead_041""]",1,COVERED
+protag,military,space,"[""rei""]",[],1,COVERED
+protag,military,sports,"[""leo""]",[],1,COVERED
+protag,military,supernatural,"[""daichi""]",[],1,COVERED
+protag,military,survival,"[""daichi""]",[],1,COVERED
+protag,mystery,mythology,"[""saki""]",[],1,COVERED
+protag,mystery,nordic,"[""akira"", ""renji""]",[],2,COVERED
+protag,mystery,pirate,"[""mako"", ""shiro""]",[],2,COVERED
+protag,mystery,romance,"[""takumi""]",[],1,COVERED
+protag,mystery,samurai,[],"[""cv3_lead_035""]",1,COVERED
+protag,mystery,shinobi,[],"[""cv3_lead_010""]",1,COVERED
+protag,mystery,slice,"[""shiro"", ""saki""]",[],2,COVERED
+protag,mystery,space,[],"[""cv3_lead_042""]",1,COVERED
+protag,mystery,sports,[],"[""cv3_lead_030""]",1,COVERED
+protag,mystery,supernatural,"[""renji""]",[],1,COVERED
+protag,mystery,survival,[],"[""cv3_lead_042""]",1,COVERED
+protag,mythology,nordic,[],"[""cv3_lead_039""]",1,COVERED
+protag,mythology,pirate,[],"[""cv3_lead_025""]",1,COVERED
+protag,mythology,romance,"[""hana""]",[],1,COVERED
+protag,mythology,samurai,[],"[""cv3_lead_011""]",1,COVERED
+protag,mythology,shinobi,[],"[""cv3_lead_037""]",1,COVERED
+protag,mythology,slice,"[""sota"", ""saki""]",[],2,COVERED
+protag,mythology,space,"[""mira""]",[],1,COVERED
+protag,mythology,sports,"[""suzume""]",[],1,COVERED
+protag,mythology,supernatural,"[""suzume""]",[],1,COVERED
+protag,mythology,survival,[],"[""cv3_lead_033""]",1,COVERED
+protag,nordic,pirate,[],"[""cv3_lead_034"", ""cv3_lead_043""]",2,COVERED
+protag,nordic,romance,[],"[""cv3_lead_012""]",1,COVERED
+protag,nordic,samurai,[],"[""cv3_lead_027"", ""cv3_lead_051""]",2,COVERED
+protag,nordic,shinobi,[],"[""cv3_lead_044""]",1,COVERED
+protag,nordic,slice,"[""kaede""]",[],1,COVERED
+protag,nordic,space,[],"[""cv3_lead_043""]",1,COVERED
+protag,nordic,sports,[],"[""cv3_lead_044""]",1,COVERED
+protag,nordic,supernatural,"[""renji""]",[],1,COVERED
+protag,nordic,survival,"[""yuki""]","[""cv3_lead_051""]",2,COVERED
+protag,pirate,romance,"[""kaito"", ""mio""]",[],2,COVERED
+protag,pirate,samurai,[],"[""cv3_lead_015""]",1,COVERED
+protag,pirate,shinobi,[],"[""cv3_lead_040""]",1,COVERED
+protag,pirate,slice,"[""rin"", ""shiro""]",[],2,COVERED
+protag,pirate,space,[],"[""cv3_lead_043""]",1,COVERED
+protag,pirate,sports,"[""rin""]",[],1,COVERED
+protag,pirate,supernatural,[],"[""cv3_lead_038""]",1,COVERED
+protag,pirate,survival,"[""ash""]",[],1,COVERED
+protag,romance,samurai,[],"[""cv3_lead_045"", ""cv3_lead_049""]",2,COVERED
+protag,romance,shinobi,[],"[""cv3_lead_045""]",1,COVERED
+protag,romance,slice,[],"[""cv3_lead_006"", ""cv3_lead_049""]",2,COVERED
+protag,romance,space,"[""n_chisato""]",[],1,COVERED
+protag,romance,sports,"[""haru"", ""n_chisato""]",[],2,COVERED
+protag,romance,supernatural,"[""itsuki""]",[],1,COVERED
+protag,romance,survival,"[""itsuki""]",[],1,COVERED
+protag,samurai,shinobi,[],"[""cv3_lead_045"", ""cv3_lead_047"", ""cv3_lead_048""]",3,COVERED
+protag,samurai,slice,[],"[""cv3_lead_041"", ""cv3_lead_049""]",2,COVERED
+protag,samurai,space,[],"[""cv3_lead_019""]",1,COVERED
+protag,samurai,sports,[],"[""cv3_lead_046""]",1,COVERED
+protag,samurai,supernatural,[],"[""cv3_lead_007""]",1,COVERED
+protag,samurai,survival,[],"[""cv3_lead_046"", ""cv3_lead_051""]",2,COVERED
+protag,shinobi,slice,[],"[""cv3_lead_028"", ""cv3_lead_050""]",2,COVERED
+protag,shinobi,space,[],"[""cv3_lead_016""]",1,COVERED
+protag,shinobi,sports,[],"[""cv3_lead_044"", ""cv3_lead_052""]",2,COVERED
+protag,shinobi,supernatural,[],"[""cv3_lead_036""]",1,COVERED
+protag,shinobi,survival,[],"[""cv3_lead_020""]",1,COVERED
+protag,slice,space,[],"[""cv3_lead_026""]",1,COVERED
+protag,slice,sports,"[""rin""]",[],1,COVERED
+protag,slice,supernatural,[],"[""cv3_lead_031""]",1,COVERED
+protag,slice,survival,"[""jin"", ""yui""]",[],2,COVERED
+protag,space,sports,"[""n_chisato""]",[],1,COVERED
+protag,space,supernatural,[],"[""cv3_lead_032""]",1,COVERED
+protag,space,survival,[],"[""cv3_lead_042""]",1,COVERED
+protag,sports,supernatural,"[""suzume""]",[],1,COVERED
+protag,sports,survival,[],"[""cv3_lead_046""]",1,COVERED
+protag,supernatural,survival,"[""daichi"", ""itsuki""]",[],2,COVERED
+secondary,comedy,cooking,[],"[""cv3_sidekick_001""]",1,COVERED
+secondary,comedy,cyber,[],"[""cv3_sidekick_002""]",1,COVERED
+secondary,comedy,fantasy,[],"[""cv3_sidekick_003""]",1,COVERED
+secondary,comedy,horror,"[""s_bolt""]",[],1,COVERED
+secondary,comedy,idol,"[""s_kiki""]",[],1,COVERED
+secondary,comedy,isekai,[],"[""cv3_sidekick_002""]",1,COVERED
+secondary,comedy,magical,"[""s_peko""]",[],1,COVERED
+secondary,comedy,martial,"[""s_ichiro"", ""s_kazuki""]",[],2,COVERED
+secondary,comedy,mecha,"[""s_peko""]",[],1,COVERED
+secondary,comedy,military,[],"[""cv3_sidekick_003""]",1,COVERED
+secondary,comedy,mystery,"[""s_nanami""]",[],1,COVERED
+secondary,comedy,mythology,"[""s_ichiro""]",[],1,COVERED
+secondary,comedy,nordic,[],"[""cv3_sidekick_004""]",1,COVERED
+secondary,comedy,pirate,[],"[""cv3_sidekick_005""]",1,COVERED
+secondary,comedy,romance,"[""s_kazuki""]","[""cv3_sidekick_004""]",2,COVERED
+secondary,comedy,samurai,[],"[""cv3_sidekick_006""]",1,COVERED
+secondary,comedy,shinobi,[],"[""cv3_sidekick_005""]",1,COVERED
+secondary,comedy,slice,[],"[""cv3_sidekick_001""]",1,COVERED
+secondary,comedy,space,"[""s_nanami""]",[],1,COVERED
+secondary,comedy,sports,"[""s_bolt""]",[],1,COVERED
+secondary,comedy,supernatural,[],"[""cv3_sidekick_006""]",1,COVERED
+secondary,comedy,survival,"[""s_kiki""]",[],1,COVERED
+secondary,cooking,cyber,"[""s_daiki""]",[],1,COVERED
+secondary,cooking,fantasy,"[""taro""]",[],1,COVERED
+secondary,cooking,horror,[],"[""cv3_sidekick_007""]",1,COVERED
+secondary,cooking,idol,[],"[""cv3_sidekick_008""]",1,COVERED
+secondary,cooking,isekai,[],"[""cv3_sidekick_007""]",1,COVERED
+secondary,cooking,magical,[],"[""cv3_sidekick_009""]",1,COVERED
+secondary,cooking,martial,[],"[""cv3_sidekick_010""]",1,COVERED
+secondary,cooking,mecha,"[""s_daiki"", ""s_boone"", ""s_pranav""]",[],3,COVERED
+secondary,cooking,military,"[""s_reina""]",[],1,COVERED
+secondary,cooking,mystery,[],"[""cv3_sidekick_011""]",1,COVERED
+secondary,cooking,mythology,"[""s_pranav""]",[],1,COVERED
+secondary,cooking,nordic,"[""s_reina""]",[],1,COVERED
+secondary,cooking,pirate,[],"[""cv3_sidekick_010""]",1,COVERED
+secondary,cooking,romance,[],"[""cv3_sidekick_009""]",1,COVERED
+secondary,cooking,samurai,[],"[""cv3_sidekick_012""]",1,COVERED
+secondary,cooking,shinobi,[],"[""cv3_sidekick_008"", ""cv3_sidekick_052""]",2,COVERED
+secondary,cooking,slice,[],"[""cv3_sidekick_001""]",1,COVERED
+secondary,cooking,space,"[""taro""]",[],1,COVERED
+secondary,cooking,sports,[],"[""cv3_sidekick_012""]",1,COVERED
+secondary,cooking,supernatural,"[""s_boone""]",[],1,COVERED
+secondary,cooking,survival,[],"[""cv3_sidekick_011"", ""cv3_sidekick_052""]",2,COVERED
+secondary,cyber,fantasy,[],"[""cv3_sidekick_013""]",1,COVERED
+secondary,cyber,horror,[],"[""cv3_sidekick_014""]",1,COVERED
+secondary,cyber,idol,"[""s_mimi""]","[""cv3_sidekick_013""]",2,COVERED
+secondary,cyber,isekai,[],"[""cv3_sidekick_002""]",1,COVERED
+secondary,cyber,magical,"[""s_tobi"", ""s_mimi""]",[],2,COVERED
+secondary,cyber,martial,[],"[""cv3_sidekick_015""]",1,COVERED
+secondary,cyber,mecha,"[""s_daiki""]",[],1,COVERED
+secondary,cyber,military,"[""s_kanna""]",[],1,COVERED
+secondary,cyber,mystery,"[""s_tobi""]",[],1,COVERED
+secondary,cyber,mythology,[],"[""cv3_sidekick_014""]",1,COVERED
+secondary,cyber,nordic,[],"[""cv3_sidekick_016""]",1,COVERED
+secondary,cyber,pirate,[],"[""cv3_sidekick_017""]",1,COVERED
+secondary,cyber,romance,"[""s_kanna""]",[],1,COVERED
+secondary,cyber,samurai,[],"[""cv3_sidekick_018""]",1,COVERED
+secondary,cyber,shinobi,[],"[""cv3_sidekick_015""]",1,COVERED
+secondary,cyber,slice,[],"[""cv3_sidekick_018""]",1,COVERED
+secondary,cyber,space,[],"[""cv3_sidekick_017""]",1,COVERED
+secondary,cyber,sports,[],"[""cv3_sidekick_016""]",1,COVERED
+secondary,cyber,supernatural,[],"[""cv3_sidekick_019""]",1,COVERED
+secondary,cyber,survival,[],"[""cv3_sidekick_019""]",1,COVERED
+secondary,fantasy,horror,[],"[""cv3_sidekick_020""]",1,COVERED
+secondary,fantasy,idol,[],"[""cv3_sidekick_013""]",1,COVERED
+secondary,fantasy,isekai,"[""s_soleil""]",[],1,COVERED
+secondary,fantasy,magical,[],"[""cv3_sidekick_020""]",1,COVERED
+secondary,fantasy,martial,[],"[""cv3_sidekick_021""]",1,COVERED
+secondary,fantasy,mecha,"[""s_ken""]",[],1,COVERED
+secondary,fantasy,military,[],"[""cv3_sidekick_003""]",1,COVERED
+secondary,fantasy,mystery,[],"[""cv3_sidekick_022""]",1,COVERED
+secondary,fantasy,mythology,[],"[""cv3_sidekick_023""]",1,COVERED
+secondary,fantasy,nordic,"[""fumi""]",[],1,COVERED
+secondary,fantasy,pirate,"[""s_tora""]",[],1,COVERED
+secondary,fantasy,romance,"[""s_hina""]",[],1,COVERED
+secondary,fantasy,samurai,[],"[""cv3_sidekick_021""]",1,COVERED
+secondary,fantasy,shinobi,[],"[""cv3_sidekick_022""]",1,COVERED
+secondary,fantasy,slice,"[""fumi""]",[],1,COVERED
+secondary,fantasy,space,"[""taro""]","[""cv3_sidekick_023""]",2,COVERED
+secondary,fantasy,sports,"[""s_soleil""]",[],1,COVERED
+secondary,fantasy,supernatural,"[""s_tora""]",[],1,COVERED
+secondary,fantasy,survival,"[""s_ken"", ""s_hina""]",[],2,COVERED
+secondary,horror,idol,"[""s_sakurako""]",[],1,COVERED
+secondary,horror,isekai,[],"[""cv3_sidekick_007""]",1,COVERED
+secondary,horror,magical,[],"[""cv3_sidekick_020""]",1,COVERED
+secondary,horror,martial,[],"[""cv3_sidekick_024""]",1,COVERED
+secondary,horror,mecha,"[""s_sosuke""]",[],1,COVERED
+secondary,horror,military,[],"[""cv3_sidekick_025""]",1,COVERED
+secondary,horror,mystery,"[""s_chiaki""]",[],1,COVERED
+secondary,horror,mythology,[],"[""cv3_sidekick_014""]",1,COVERED
+secondary,horror,nordic,[],"[""cv3_sidekick_026""]",1,COVERED
+secondary,horror,pirate,[],"[""cv3_sidekick_026""]",1,COVERED
+secondary,horror,romance,"[""s_sakurako""]",[],1,COVERED
+secondary,horror,samurai,[],"[""cv3_sidekick_027""]",1,COVERED
+secondary,horror,shinobi,[],"[""cv3_sidekick_025""]",1,COVERED
+secondary,horror,slice,"[""s_sosuke""]",[],1,COVERED
+secondary,horror,space,[],"[""cv3_sidekick_024""]",1,COVERED
+secondary,horror,sports,"[""s_bolt""]",[],1,COVERED
+secondary,horror,supernatural,"[""s_chiaki""]",[],1,COVERED
+secondary,horror,survival,[],"[""cv3_sidekick_027""]",1,COVERED
+secondary,idol,isekai,[],"[""cv3_sidekick_028""]",1,COVERED
+secondary,idol,magical,"[""s_mimi""]",[],1,COVERED
+secondary,idol,martial,[],"[""cv3_sidekick_028""]",1,COVERED
+secondary,idol,mecha,[],"[""cv3_sidekick_029""]",1,COVERED
+secondary,idol,military,"[""s_gen"", ""s_lulu""]",[],2,COVERED
+secondary,idol,mystery,"[""s_gen""]",[],1,COVERED
+secondary,idol,mythology,"[""s_yuna""]",[],1,COVERED
+secondary,idol,nordic,[],"[""cv3_sidekick_030""]",1,COVERED
+secondary,idol,pirate,"[""s_akane"", ""s_ryo""]",[],2,COVERED
+secondary,idol,romance,"[""s_ice"", ""s_sakurako""]",[],2,COVERED
+secondary,idol,samurai,[],"[""cv3_sidekick_029""]",1,COVERED
+secondary,idol,shinobi,[],"[""cv3_sidekick_008""]",1,COVERED
+secondary,idol,slice,"[""s_lulu""]",[],1,COVERED
+secondary,idol,space,[],"[""cv3_sidekick_030""]",1,COVERED
+secondary,idol,sports,"[""s_akane"", ""s_yuna""]",[],2,COVERED
+secondary,idol,supernatural,"[""s_ryo""]",[],1,COVERED
+secondary,idol,survival,"[""s_kiki"", ""s_ice""]",[],2,COVERED
+secondary,isekai,magical,[],"[""cv3_sidekick_031""]",1,COVERED
+secondary,isekai,martial,[],"[""cv3_sidekick_028""]",1,COVERED
+secondary,isekai,mecha,"[""tsubasa""]",[],1,COVERED
+secondary,isekai,military,[],"[""cv3_sidekick_032""]",1,COVERED
+secondary,isekai,mystery,"[""s_amber""]",[],1,COVERED
+secondary,isekai,mythology,[],"[""cv3_sidekick_033""]",1,COVERED
+secondary,isekai,nordic,[],"[""cv3_sidekick_034""]",1,COVERED
+secondary,isekai,pirate,"[""s_amber""]",[],1,COVERED
+secondary,isekai,romance,"[""s_nozomi""]",[],1,COVERED
+secondary,isekai,samurai,[],"[""cv3_sidekick_032""]",1,COVERED
+secondary,isekai,shinobi,[],"[""cv3_sidekick_031""]",1,COVERED
+secondary,isekai,slice,"[""s_nozomi""]",[],1,COVERED
+secondary,isekai,space,"[""tsubasa""]",[],1,COVERED
+secondary,isekai,sports,"[""s_soleil"", ""yuzuki""]",[],2,COVERED
+secondary,isekai,supernatural,"[""yuzuki""]","[""cv3_sidekick_034""]",2,COVERED
+secondary,isekai,survival,[],"[""cv3_sidekick_033""]",1,COVERED
+secondary,magical,martial,[],"[""cv3_sidekick_035""]",1,COVERED
+secondary,magical,mecha,"[""s_peko""]",[],1,COVERED
+secondary,magical,military,"[""s_takeshi"", ""s_linh""]",[],2,COVERED
+secondary,magical,mystery,"[""s_tobi""]",[],1,COVERED
+secondary,magical,mythology,[],"[""cv3_sidekick_036""]",1,COVERED
+secondary,magical,nordic,"[""s_maki""]",[],1,COVERED
+secondary,magical,pirate,"[""s_linh""]",[],1,COVERED
+secondary,magical,romance,[],"[""cv3_sidekick_009""]",1,COVERED
+secondary,magical,samurai,[],"[""cv3_sidekick_037""]",1,COVERED
+secondary,magical,shinobi,[],"[""cv3_sidekick_031""]",1,COVERED
+secondary,magical,slice,[],"[""cv3_sidekick_036""]",1,COVERED
+secondary,magical,space,[],"[""cv3_sidekick_037""]",1,COVERED
+secondary,magical,sports,"[""s_takeshi""]",[],1,COVERED
+secondary,magical,supernatural,[],"[""cv3_sidekick_035""]",1,COVERED
+secondary,magical,survival,"[""s_maki""]",[],1,COVERED
+secondary,martial,mecha,[],"[""cv3_sidekick_038""]",1,COVERED
+secondary,martial,military,[],"[""cv3_sidekick_038""]",1,COVERED
+secondary,martial,mystery,"[""s_alfred""]",[],1,COVERED
+secondary,martial,mythology,"[""s_ichiro""]",[],1,COVERED
+secondary,martial,nordic,"[""s_eiji""]",[],1,COVERED
+secondary,martial,pirate,[],"[""cv3_sidekick_010""]",1,COVERED
+secondary,martial,romance,"[""s_okada"", ""s_alfred"", ""s_kazuki""]",[],3,COVERED
+secondary,martial,samurai,[],"[""cv3_sidekick_021"", ""cv3_sidekick_049""]",2,COVERED
+secondary,martial,shinobi,[],"[""cv3_sidekick_015"", ""cv3_sidekick_049""]",2,COVERED
+secondary,martial,slice,"[""s_eiji""]",[],1,COVERED
+secondary,martial,space,[],"[""cv3_sidekick_024""]",1,COVERED
+secondary,martial,sports,"[""s_okada"", ""s_riku""]",[],2,COVERED
+secondary,martial,supernatural,[],"[""cv3_sidekick_035""]",1,COVERED
+secondary,martial,survival,"[""s_riku""]",[],1,COVERED
+secondary,mecha,military,"[""s_ironmaid""]","[""cv3_sidekick_038""]",2,COVERED
+secondary,mecha,mystery,"[""s_megu""]",[],1,COVERED
+secondary,mecha,mythology,"[""s_pranav""]",[],1,COVERED
+secondary,mecha,nordic,"[""s_ironmaid""]",[],1,COVERED
+secondary,mecha,pirate,[],"[""cv3_sidekick_039""]",1,COVERED
+secondary,mecha,romance,[],"[""cv3_sidekick_039""]",1,COVERED
+secondary,mecha,samurai,[],"[""cv3_sidekick_029"", ""cv3_sidekick_050""]",2,COVERED
+secondary,mecha,shinobi,[],"[""cv3_sidekick_040"", ""cv3_sidekick_050""]",2,COVERED
+secondary,mecha,slice,"[""s_sosuke"", ""s_megu""]",[],2,COVERED
+secondary,mecha,space,"[""tsubasa""]",[],1,COVERED
+secondary,mecha,sports,[],"[""cv3_sidekick_040""]",1,COVERED
+secondary,mecha,supernatural,"[""s_boone""]",[],1,COVERED
+secondary,mecha,survival,"[""s_ken""]",[],1,COVERED
+secondary,military,mystery,"[""s_gen""]",[],1,COVERED
+secondary,military,mythology,"[""s_amina""]",[],1,COVERED
+secondary,military,nordic,"[""s_ironmaid"", ""s_reina""]",[],2,COVERED
+secondary,military,pirate,"[""s_linh""]",[],1,COVERED
+secondary,military,romance,"[""s_kanna"", ""s_mika""]",[],2,COVERED
+secondary,military,samurai,[],"[""cv3_sidekick_032""]",1,COVERED
+secondary,military,shinobi,[],"[""cv3_sidekick_025""]",1,COVERED
+secondary,military,slice,"[""s_momoko"", ""s_lulu"", ""s_mika""]",[],3,COVERED
+secondary,military,space,[],"[""cv3_sidekick_041""]",1,COVERED
+secondary,military,sports,"[""s_takeshi"", ""s_momoko""]",[],2,COVERED
+secondary,military,supernatural,[],"[""cv3_sidekick_041""]",1,COVERED
+secondary,military,survival,"[""s_amina""]",[],1,COVERED
+secondary,mystery,mythology,"[""s_anna""]",[],1,COVERED
+secondary,mystery,nordic,[],"[""cv3_sidekick_042""]",1,COVERED
+secondary,mystery,pirate,"[""s_amber""]",[],1,COVERED
+secondary,mystery,romance,"[""s_shin"", ""s_alfred""]",[],2,COVERED
+secondary,mystery,samurai,[],"[""cv3_sidekick_042""]",1,COVERED
+secondary,mystery,shinobi,[],"[""cv3_sidekick_022""]",1,COVERED
+secondary,mystery,slice,"[""s_megu""]",[],1,COVERED
+secondary,mystery,space,"[""s_shin"", ""s_nanami""]",[],2,COVERED
+secondary,mystery,sports,"[""s_anna""]",[],1,COVERED
+secondary,mystery,supernatural,"[""s_chiaki""]",[],1,COVERED
+secondary,mystery,survival,[],"[""cv3_sidekick_011""]",1,COVERED
+secondary,mythology,nordic,[],"[""cv3_sidekick_043""]",1,COVERED
+secondary,mythology,pirate,[],"[""cv3_sidekick_044""]",1,COVERED
+secondary,mythology,romance,[],"[""cv3_sidekick_045""]",1,COVERED
+secondary,mythology,samurai,[],"[""cv3_sidekick_044""]",1,COVERED
+secondary,mythology,shinobi,[],"[""cv3_sidekick_043""]",1,COVERED
+secondary,mythology,slice,[],"[""cv3_sidekick_036""]",1,COVERED
+secondary,mythology,space,[],"[""cv3_sidekick_023""]",1,COVERED
+secondary,mythology,sports,"[""s_yuna"", ""s_anna""]",[],2,COVERED
+secondary,mythology,supernatural,[],"[""cv3_sidekick_045""]",1,COVERED
+secondary,mythology,survival,"[""s_amina""]","[""cv3_sidekick_033""]",2,COVERED
+secondary,nordic,pirate,[],"[""cv3_sidekick_026""]",1,COVERED
+secondary,nordic,romance,[],"[""cv3_sidekick_004""]",1,COVERED
+secondary,nordic,samurai,[],"[""cv3_sidekick_042""]",1,COVERED
+secondary,nordic,shinobi,[],"[""cv3_sidekick_043""]",1,COVERED
+secondary,nordic,slice,"[""s_eiji"", ""fumi""]",[],2,COVERED
+secondary,nordic,space,[],"[""cv3_sidekick_030""]",1,COVERED
+secondary,nordic,sports,[],"[""cv3_sidekick_016""]",1,COVERED
+secondary,nordic,supernatural,[],"[""cv3_sidekick_034""]",1,COVERED
+secondary,nordic,survival,"[""s_maki""]",[],1,COVERED
+secondary,pirate,romance,[],"[""cv3_sidekick_039""]",1,COVERED
+secondary,pirate,samurai,[],"[""cv3_sidekick_044""]",1,COVERED
+secondary,pirate,shinobi,[],"[""cv3_sidekick_005""]",1,COVERED
+secondary,pirate,slice,"[""s_aoi""]",[],1,COVERED
+secondary,pirate,space,[],"[""cv3_sidekick_017""]",1,COVERED
+secondary,pirate,sports,"[""s_akane""]",[],1,COVERED
+secondary,pirate,supernatural,"[""s_tora"", ""s_ryo""]",[],2,COVERED
+secondary,pirate,survival,"[""s_aoi""]",[],1,COVERED
+secondary,romance,samurai,[],"[""cv3_sidekick_046"", ""cv3_sidekick_051""]",2,COVERED
+secondary,romance,shinobi,[],"[""cv3_sidekick_046""]",1,COVERED
+secondary,romance,slice,"[""s_mika"", ""s_nozomi""]","[""cv3_sidekick_051""]",3,COVERED
+secondary,romance,space,"[""s_shin""]",[],1,COVERED
+secondary,romance,sports,"[""s_okada""]",[],1,COVERED
+secondary,romance,supernatural,[],"[""cv3_sidekick_045""]",1,COVERED
+secondary,romance,survival,"[""s_ice"", ""s_hina""]",[],2,COVERED
+secondary,samurai,shinobi,[],"[""cv3_sidekick_046"", ""cv3_sidekick_049"", ""cv3_sidekick_050""]",3,COVERED
+secondary,samurai,slice,[],"[""cv3_sidekick_018"", ""cv3_sidekick_051""]",2,COVERED
+secondary,samurai,space,[],"[""cv3_sidekick_037""]",1,COVERED
+secondary,samurai,sports,[],"[""cv3_sidekick_012""]",1,COVERED
+secondary,samurai,supernatural,[],"[""cv3_sidekick_006""]",1,COVERED
+secondary,samurai,survival,[],"[""cv3_sidekick_027""]",1,COVERED
+secondary,shinobi,slice,[],"[""cv3_sidekick_047""]",1,COVERED
+secondary,shinobi,space,[],"[""cv3_sidekick_048""]",1,COVERED
+secondary,shinobi,sports,[],"[""cv3_sidekick_040""]",1,COVERED
+secondary,shinobi,supernatural,[],"[""cv3_sidekick_047""]",1,COVERED
+secondary,shinobi,survival,[],"[""cv3_sidekick_048"", ""cv3_sidekick_052""]",2,COVERED
+secondary,slice,space,"[""s_ren""]",[],1,COVERED
+secondary,slice,sports,"[""s_ren"", ""s_momoko""]",[],2,COVERED
+secondary,slice,supernatural,[],"[""cv3_sidekick_047""]",1,COVERED
+secondary,slice,survival,"[""s_aoi""]",[],1,COVERED
+secondary,space,sports,"[""s_ren""]",[],1,COVERED
+secondary,space,supernatural,[],"[""cv3_sidekick_041""]",1,COVERED
+secondary,space,survival,[],"[""cv3_sidekick_048""]",1,COVERED
+secondary,sports,supernatural,"[""yuzuki""]",[],1,COVERED
+secondary,sports,survival,"[""s_riku""]",[],1,COVERED
+secondary,supernatural,survival,[],"[""cv3_sidekick_019""]",1,COVERED
+pet,comedy,cooking,"[""p_ponta""]",[],1,COVERED
+pet,comedy,cyber,[],"[""cv3_mascot_001""]",1,COVERED
+pet,comedy,fantasy,[],"[""cv3_mascot_002""]",1,COVERED
+pet,comedy,horror,[],"[""cv3_mascot_003""]",1,COVERED
+pet,comedy,idol,[],"[""cv3_mascot_001""]",1,COVERED
+pet,comedy,isekai,[],"[""cv3_mascot_003"", ""cv3_mascot_004""]",2,COVERED
+pet,comedy,magical,[],"[""cv3_mascot_005""]",1,COVERED
+pet,comedy,martial,"[""p_chacha""]",[],1,COVERED
+pet,comedy,mecha,"[""p_ponta""]",[],1,COVERED
+pet,comedy,military,"[""p_toro"", ""p_chibi""]",[],2,COVERED
+pet,comedy,mystery,[],"[""cv3_mascot_006""]",1,COVERED
+pet,comedy,mythology,"[""p_nitro""]",[],1,COVERED
+pet,comedy,nordic,"[""p_fuwa""]",[],1,COVERED
+pet,comedy,pirate,"[""p_chacha""]",[],1,COVERED
+pet,comedy,romance,[],"[""cv3_mascot_005""]",1,COVERED
+pet,comedy,samurai,[],"[""cv3_mascot_004""]",1,COVERED
+pet,comedy,shinobi,[],"[""cv3_mascot_002""]",1,COVERED
+pet,comedy,slice,"[""p_chibi""]",[],1,COVERED
+pet,comedy,space,"[""p_fuwa""]",[],1,COVERED
+pet,comedy,sports,"[""p_nitro""]",[],1,COVERED
+pet,comedy,supernatural,"[""p_toro""]",[],1,COVERED
+pet,comedy,survival,[],"[""cv3_mascot_006""]",1,COVERED
+pet,cooking,cyber,"[""p_pomu"", ""p_mocha""]",[],2,COVERED
+pet,cooking,fantasy,"[""p_kiki2"", ""s_chika""]",[],2,COVERED
+pet,cooking,horror,[],"[""cv3_mascot_007""]",1,COVERED
+pet,cooking,idol,"[""s_chika""]",[],1,COVERED
+pet,cooking,isekai,"[""p_puri""]",[],1,COVERED
+pet,cooking,magical,"[""p_kiki2""]",[],1,COVERED
+pet,cooking,martial,[],"[""cv3_mascot_007""]",1,COVERED
+pet,cooking,mecha,"[""p_koro"", ""p_ponta""]",[],2,COVERED
+pet,cooking,military,"[""p_pudding""]",[],1,COVERED
+pet,cooking,mystery,"[""p_mocha""]",[],1,COVERED
+pet,cooking,mythology,"[""p_fuu""]",[],1,COVERED
+pet,cooking,nordic,"[""p_pomu"", ""p_puri""]",[],2,COVERED
+pet,cooking,pirate,"[""p_fuu"", ""p_yuzu""]",[],2,COVERED
+pet,cooking,romance,"[""p_goma""]",[],1,COVERED
+pet,cooking,samurai,[],"[""cv3_mascot_008""]",1,COVERED
+pet,cooking,shinobi,[],"[""cv3_mascot_008"", ""cv3_mascot_052""]",2,COVERED
+pet,cooking,slice,"[""p_pudding"", ""p_yuzu""]",[],2,COVERED
+pet,cooking,space,"[""p_koro""]",[],1,COVERED
+pet,cooking,sports,"[""p_goma""]",[],1,COVERED
+pet,cooking,supernatural,[],"[""cv3_mascot_009""]",1,COVERED
+pet,cooking,survival,[],"[""cv3_mascot_009"", ""cv3_mascot_052""]",2,COVERED
+pet,cyber,fantasy,[],"[""cv3_mascot_010""]",1,COVERED
+pet,cyber,horror,[],"[""cv3_mascot_011""]",1,COVERED
+pet,cyber,idol,[],"[""cv3_mascot_001""]",1,COVERED
+pet,cyber,isekai,"[""p_piko""]",[],1,COVERED
+pet,cyber,magical,"[""p_pochi"", ""p_rin2""]",[],2,COVERED
+pet,cyber,martial,[],"[""cv3_mascot_012""]",1,COVERED
+pet,cyber,mecha,"[""p_pochi""]",[],1,COVERED
+pet,cyber,military,[],"[""cv3_mascot_010""]",1,COVERED
+pet,cyber,mystery,"[""p_mocha""]",[],1,COVERED
+pet,cyber,mythology,"[""p_rin2""]",[],1,COVERED
+pet,cyber,nordic,"[""p_pomu""]",[],1,COVERED
+pet,cyber,pirate,"[""p_brine""]",[],1,COVERED
+pet,cyber,romance,"[""p_piko""]",[],1,COVERED
+pet,cyber,samurai,[],"[""cv3_mascot_011""]",1,COVERED
+pet,cyber,shinobi,[],"[""cv3_mascot_013""]",1,COVERED
+pet,cyber,slice,[],"[""cv3_mascot_013""]",1,COVERED
+pet,cyber,space,"[""p_brine""]",[],1,COVERED
+pet,cyber,sports,"[""p_kuro""]",[],1,COVERED
+pet,cyber,supernatural,"[""p_kuro""]",[],1,COVERED
+pet,cyber,survival,[],"[""cv3_mascot_012""]",1,COVERED
+pet,fantasy,horror,"[""p_baku""]",[],1,COVERED
+pet,fantasy,idol,"[""s_chika""]",[],1,COVERED
+pet,fantasy,isekai,"[""p_drakko""]",[],1,COVERED
+pet,fantasy,magical,"[""p_kiki2"", ""p_tama"", ""p_bloop""]",[],3,COVERED
+pet,fantasy,martial,"[""p_drakko""]",[],1,COVERED
+pet,fantasy,mecha,"[""p_tama""]",[],1,COVERED
+pet,fantasy,military,[],"[""cv3_mascot_010""]",1,COVERED
+pet,fantasy,mystery,"[""p_maru"", ""p_momo2""]",[],2,COVERED
+pet,fantasy,mythology,[],"[""cv3_mascot_014""]",1,COVERED
+pet,fantasy,nordic,"[""p_baku""]",[],1,COVERED
+pet,fantasy,pirate,[],"[""cv3_mascot_015""]",1,COVERED
+pet,fantasy,romance,"[""p_gon"", ""p_momo2""]",[],2,COVERED
+pet,fantasy,samurai,[],"[""cv3_mascot_016""]",1,COVERED
+pet,fantasy,shinobi,[],"[""cv3_mascot_002""]",1,COVERED
+pet,fantasy,slice,[],"[""cv3_mascot_014""]",1,COVERED
+pet,fantasy,space,"[""p_bloop""]",[],1,COVERED
+pet,fantasy,sports,"[""p_maru""]",[],1,COVERED
+pet,fantasy,supernatural,[],"[""cv3_mascot_015"", ""cv3_mascot_016""]",2,COVERED
+pet,fantasy,survival,"[""p_gon""]",[],1,COVERED
+pet,horror,idol,"[""p_kona""]",[],1,COVERED
+pet,horror,isekai,[],"[""cv3_mascot_003""]",1,COVERED
+pet,horror,magical,"[""p_nibi"", ""p_stellar""]",[],2,COVERED
+pet,horror,martial,[],"[""cv3_mascot_007""]",1,COVERED
+pet,horror,mecha,[],"[""cv3_mascot_017""]",1,COVERED
+pet,horror,military,[],"[""cv3_mascot_018""]",1,COVERED
+pet,horror,mystery,[],"[""cv3_mascot_019""]",1,COVERED
+pet,horror,mythology,[],"[""cv3_mascot_017""]",1,COVERED
+pet,horror,nordic,"[""p_baku""]",[],1,COVERED
+pet,horror,pirate,[],"[""cv3_mascot_018"", ""cv3_mascot_020""]",2,COVERED
+pet,horror,romance,"[""p_mochi""]",[],1,COVERED
+pet,horror,samurai,[],"[""cv3_mascot_011""]",1,COVERED
+pet,horror,shinobi,[],"[""cv3_mascot_019""]",1,COVERED
+pet,horror,slice,"[""p_mochi""]",[],1,COVERED
+pet,horror,space,"[""p_stellar""]",[],1,COVERED
+pet,horror,sports,[],"[""cv3_mascot_020""]",1,COVERED
+pet,horror,supernatural,"[""p_nibi""]",[],1,COVERED
+pet,horror,survival,"[""p_kona""]",[],1,COVERED
+pet,idol,isekai,[],"[""cv3_mascot_021""]",1,COVERED
+pet,idol,magical,"[""p_ruri""]",[],1,COVERED
+pet,idol,martial,[],"[""cv3_mascot_022""]",1,COVERED
+pet,idol,mecha,[],"[""cv3_mascot_022""]",1,COVERED
+pet,idol,military,"[""p_ruri""]",[],1,COVERED
+pet,idol,mystery,"[""s_koko""]",[],1,COVERED
+pet,idol,mythology,[],"[""cv3_mascot_023""]",1,COVERED
+pet,idol,nordic,[],"[""cv3_mascot_024""]",1,COVERED
+pet,idol,pirate,[],"[""cv3_mascot_021""]",1,COVERED
+pet,idol,romance,[],"[""cv3_mascot_024""]",1,COVERED
+pet,idol,samurai,[],"[""cv3_mascot_025""]",1,COVERED
+pet,idol,shinobi,[],"[""cv3_mascot_026""]",1,COVERED
+pet,idol,slice,[],"[""cv3_mascot_023""]",1,COVERED
+pet,idol,space,[],"[""cv3_mascot_026""]",1,COVERED
+pet,idol,sports,[],"[""cv3_mascot_025""]",1,COVERED
+pet,idol,supernatural,"[""s_koko""]",[],1,COVERED
+pet,idol,survival,"[""p_kona""]",[],1,COVERED
+pet,isekai,magical,"[""p_peko""]",[],1,COVERED
+pet,isekai,martial,"[""p_drakko""]",[],1,COVERED
+pet,isekai,mecha,[],"[""cv3_mascot_027""]",1,COVERED
+pet,isekai,military,[],"[""cv3_mascot_028""]",1,COVERED
+pet,isekai,mystery,[],"[""cv3_mascot_029""]",1,COVERED
+pet,isekai,mythology,[],"[""cv3_mascot_028""]",1,COVERED
+pet,isekai,nordic,"[""p_puri""]",[],1,COVERED
+pet,isekai,pirate,[],"[""cv3_mascot_021""]",1,COVERED
+pet,isekai,romance,"[""p_piko""]",[],1,COVERED
+pet,isekai,samurai,[],"[""cv3_mascot_004""]",1,COVERED
+pet,isekai,shinobi,[],"[""cv3_mascot_030""]",1,COVERED
+pet,isekai,slice,[],"[""cv3_mascot_029""]",1,COVERED
+pet,isekai,space,[],"[""cv3_mascot_031""]",1,COVERED
+pet,isekai,sports,[],"[""cv3_mascot_030"", ""cv3_mascot_031""]",2,COVERED
+pet,isekai,supernatural,[],"[""cv3_mascot_027""]",1,COVERED
+pet,isekai,survival,"[""p_peko""]",[],1,COVERED
+pet,magical,martial,[],"[""cv3_mascot_032""]",1,COVERED
+pet,magical,mecha,"[""p_pochi"", ""p_tama""]",[],2,COVERED
+pet,magical,military,"[""p_ruri""]",[],1,COVERED
+pet,magical,mystery,[],"[""cv3_mascot_033""]",1,COVERED
+pet,magical,mythology,"[""p_rin2""]",[],1,COVERED
+pet,magical,nordic,[],"[""cv3_mascot_034""]",1,COVERED
+pet,magical,pirate,"[""p_silt"", ""p_sora""]",[],2,COVERED
+pet,magical,romance,[],"[""cv3_mascot_005""]",1,COVERED
+pet,magical,samurai,[],"[""cv3_mascot_033""]",1,COVERED
+pet,magical,shinobi,[],"[""cv3_mascot_034""]",1,COVERED
+pet,magical,slice,"[""p_sora""]",[],1,COVERED
+pet,magical,space,"[""p_nya"", ""p_bloop"", ""p_stellar""]",[],3,COVERED
+pet,magical,sports,[],"[""cv3_mascot_032""]",1,COVERED
+pet,magical,supernatural,"[""p_nibi"", ""p_nya""]",[],2,COVERED
+pet,magical,survival,"[""p_silt"", ""p_peko""]",[],2,COVERED
+pet,martial,mecha,[],"[""cv3_mascot_022""]",1,COVERED
+pet,martial,military,[],"[""cv3_mascot_035""]",1,COVERED
+pet,martial,mystery,[],"[""cv3_mascot_036""]",1,COVERED
+pet,martial,mythology,"[""p_lumen""]",[],1,COVERED
+pet,martial,nordic,"[""p_lumen""]",[],1,COVERED
+pet,martial,pirate,"[""p_chacha""]",[],1,COVERED
+pet,martial,romance,"[""p_sakumi""]",[],1,COVERED
+pet,martial,samurai,[],"[""cv3_mascot_037"", ""cv3_mascot_049""]",2,COVERED
+pet,martial,shinobi,[],"[""cv3_mascot_035"", ""cv3_mascot_049""]",2,COVERED
+pet,martial,slice,[],"[""cv3_mascot_037""]",1,COVERED
+pet,martial,space,[],"[""cv3_mascot_036""]",1,COVERED
+pet,martial,sports,[],"[""cv3_mascot_032""]",1,COVERED
+pet,martial,supernatural,"[""p_sakumi""]",[],1,COVERED
+pet,martial,survival,[],"[""cv3_mascot_012""]",1,COVERED
+pet,mecha,military,[],"[""cv3_mascot_038""]",1,COVERED
+pet,mecha,mystery,"[""p_cogsworth""]",[],1,COVERED
+pet,mecha,mythology,[],"[""cv3_mascot_017""]",1,COVERED
+pet,mecha,nordic,[],"[""cv3_mascot_038""]",1,COVERED
+pet,mecha,pirate,"[""p_cogsworth""]",[],1,COVERED
+pet,mecha,romance,[],"[""cv3_mascot_039""]",1,COVERED
+pet,mecha,samurai,[],"[""cv3_mascot_039"", ""cv3_mascot_050""]",2,COVERED
+pet,mecha,shinobi,[],"[""cv3_mascot_040"", ""cv3_mascot_050""]",2,COVERED
+pet,mecha,slice,"[""p_teto""]",[],1,COVERED
+pet,mecha,space,"[""p_koro""]",[],1,COVERED
+pet,mecha,sports,"[""p_teto""]",[],1,COVERED
+pet,mecha,supernatural,[],"[""cv3_mascot_027""]",1,COVERED
+pet,mecha,survival,[],"[""cv3_mascot_040""]",1,COVERED
+pet,military,mystery,[],"[""cv3_mascot_041""]",1,COVERED
+pet,military,mythology,[],"[""cv3_mascot_028""]",1,COVERED
+pet,military,nordic,[],"[""cv3_mascot_038"", ""cv3_mascot_041""]",2,COVERED
+pet,military,pirate,[],"[""cv3_mascot_018""]",1,COVERED
+pet,military,romance,"[""p_hachi""]",[],1,COVERED
+pet,military,samurai,[],"[""cv3_mascot_042""]",1,COVERED
+pet,military,shinobi,[],"[""cv3_mascot_035""]",1,COVERED
+pet,military,slice,"[""p_loader"", ""p_chibi"", ""p_pudding""]",[],3,COVERED
+pet,military,space,[],"[""cv3_mascot_042""]",1,COVERED
+pet,military,sports,"[""p_hachi""]",[],1,COVERED
+pet,military,supernatural,"[""p_toro""]",[],1,COVERED
+pet,military,survival,"[""p_loader""]",[],1,COVERED
+pet,mystery,mythology,"[""s_haruto""]",[],1,COVERED
+pet,mystery,nordic,[],"[""cv3_mascot_041""]",1,COVERED
+pet,mystery,pirate,"[""s_haruto"", ""p_cogsworth""]",[],2,COVERED
+pet,mystery,romance,"[""p_momo2""]",[],1,COVERED
+pet,mystery,samurai,[],"[""cv3_mascot_033""]",1,COVERED
+pet,mystery,shinobi,[],"[""cv3_mascot_019""]",1,COVERED
+pet,mystery,slice,[],"[""cv3_mascot_029""]",1,COVERED
+pet,mystery,space,[],"[""cv3_mascot_036""]",1,COVERED
+pet,mystery,sports,"[""p_maru""]",[],1,COVERED
+pet,mystery,supernatural,"[""s_koko""]",[],1,COVERED
+pet,mystery,survival,[],"[""cv3_mascot_006""]",1,COVERED
+pet,mythology,nordic,"[""p_lumen""]",[],1,COVERED
+pet,mythology,pirate,"[""s_haruto"", ""p_fuu""]",[],2,COVERED
+pet,mythology,romance,[],"[""cv3_mascot_043""]",1,COVERED
+pet,mythology,samurai,[],"[""cv3_mascot_044""]",1,COVERED
+pet,mythology,shinobi,[],"[""cv3_mascot_045""]",1,COVERED
+pet,mythology,slice,[],"[""cv3_mascot_014"", ""cv3_mascot_023""]",2,COVERED
+pet,mythology,space,[],"[""cv3_mascot_043""]",1,COVERED
+pet,mythology,sports,"[""p_nitro""]",[],1,COVERED
+pet,mythology,supernatural,[],"[""cv3_mascot_045""]",1,COVERED
+pet,mythology,survival,[],"[""cv3_mascot_044""]",1,COVERED
+pet,nordic,pirate,[],"[""cv3_mascot_046""]",1,COVERED
+pet,nordic,romance,[],"[""cv3_mascot_024""]",1,COVERED
+pet,nordic,samurai,[],"[""cv3_mascot_046""]",1,COVERED
+pet,nordic,shinobi,[],"[""cv3_mascot_034""]",1,COVERED
+pet,nordic,slice,[],"[""cv3_mascot_047""]",1,COVERED
+pet,nordic,space,"[""p_fuwa""]",[],1,COVERED
+pet,nordic,sports,"[""p_mugi""]",[],1,COVERED
+pet,nordic,supernatural,[],"[""cv3_mascot_047""]",1,COVERED
+pet,nordic,survival,"[""p_mugi""]",[],1,COVERED
+pet,pirate,romance,[],"[""cv3_mascot_048""]",1,COVERED
+pet,pirate,samurai,[],"[""cv3_mascot_046""]",1,COVERED
+pet,pirate,shinobi,[],"[""cv3_mascot_048""]",1,COVERED
+pet,pirate,slice,"[""p_sora"", ""p_yuzu""]",[],2,COVERED
+pet,pirate,space,"[""p_brine""]",[],1,COVERED
+pet,pirate,sports,[],"[""cv3_mascot_020""]",1,COVERED
+pet,pirate,supernatural,[],"[""cv3_mascot_015""]",1,COVERED
+pet,pirate,survival,"[""p_silt""]",[],1,COVERED
+pet,romance,samurai,[],"[""cv3_mascot_039"", ""cv3_mascot_051""]",2,COVERED
+pet,romance,shinobi,[],"[""cv3_mascot_048""]",1,COVERED
+pet,romance,slice,"[""p_mochi"", ""p_nemu""]","[""cv3_mascot_051""]",3,COVERED
+pet,romance,space,[],"[""cv3_mascot_043""]",1,COVERED
+pet,romance,sports,"[""p_hachi"", ""p_goma""]",[],2,COVERED
+pet,romance,supernatural,"[""p_sakumi""]",[],1,COVERED
+pet,romance,survival,"[""p_gon"", ""p_nemu""]",[],2,COVERED
+pet,samurai,shinobi,[],"[""cv3_mascot_008"", ""cv3_mascot_049"", ""cv3_mascot_050""]",3,COVERED
+pet,samurai,slice,[],"[""cv3_mascot_037"", ""cv3_mascot_051""]",2,COVERED
+pet,samurai,space,[],"[""cv3_mascot_042""]",1,COVERED
+pet,samurai,sports,[],"[""cv3_mascot_025""]",1,COVERED
+pet,samurai,supernatural,[],"[""cv3_mascot_016""]",1,COVERED
+pet,samurai,survival,[],"[""cv3_mascot_044""]",1,COVERED
+pet,shinobi,slice,[],"[""cv3_mascot_013""]",1,COVERED
+pet,shinobi,space,[],"[""cv3_mascot_026""]",1,COVERED
+pet,shinobi,sports,[],"[""cv3_mascot_030""]",1,COVERED
+pet,shinobi,supernatural,[],"[""cv3_mascot_045""]",1,COVERED
+pet,shinobi,survival,[],"[""cv3_mascot_040"", ""cv3_mascot_052""]",2,COVERED
+pet,slice,space,"[""p_umi""]",[],1,COVERED
+pet,slice,sports,"[""p_teto""]",[],1,COVERED
+pet,slice,supernatural,[],"[""cv3_mascot_047""]",1,COVERED
+pet,slice,survival,"[""p_loader"", ""p_umi"", ""p_nemu""]",[],3,COVERED
+pet,space,sports,[],"[""cv3_mascot_031""]",1,COVERED
+pet,space,supernatural,"[""p_nya""]",[],1,COVERED
+pet,space,survival,"[""p_umi""]",[],1,COVERED
+pet,sports,supernatural,"[""p_kuro""]",[],1,COVERED
+pet,sports,survival,"[""p_mugi""]",[],1,COVERED
+pet,supernatural,survival,[],"[""cv3_mascot_009""]",1,COVERED
+villain,comedy,cooking,"[""v_grandfinale""]",[],1,COVERED
+villain,comedy,cyber,[],"[""cv3_villain_001""]",1,COVERED
+villain,comedy,fantasy,"[""v_hollowchild""]",[],1,COVERED
+villain,comedy,horror,"[""v_ash"", ""v_lich""]",[],2,COVERED
+villain,comedy,idol,"[""v_harlequin""]",[],1,COVERED
+villain,comedy,isekai,"[""v_lich""]",[],1,COVERED
+villain,comedy,magical,[],"[""cv3_villain_002""]",1,COVERED
+villain,comedy,martial,[],"[""cv3_villain_003""]",1,COVERED
+villain,comedy,mecha,"[""v_grandfinale""]",[],1,COVERED
+villain,comedy,military,"[""v_ash""]",[],1,COVERED
+villain,comedy,mystery,[],"[""cv3_villain_004""]",1,COVERED
+villain,comedy,mythology,[],"[""cv3_villain_005""]",1,COVERED
+villain,comedy,nordic,"[""v_scuttle""]",[],1,COVERED
+villain,comedy,pirate,"[""v_scuttle""]",[],1,COVERED
+villain,comedy,romance,"[""v_lovelace""]",[],1,COVERED
+villain,comedy,samurai,[],"[""cv3_villain_001""]",1,COVERED
+villain,comedy,shinobi,[],"[""cv3_villain_003""]",1,COVERED
+villain,comedy,slice,[],"[""cv3_villain_002""]",1,COVERED
+villain,comedy,space,"[""v_lovelace"", ""v_hollowchild""]",[],2,COVERED
+villain,comedy,sports,[],"[""cv3_villain_004""]",1,COVERED
+villain,comedy,supernatural,[],"[""cv3_villain_005""]",1,COVERED
+villain,comedy,survival,"[""v_harlequin""]",[],1,COVERED
+villain,cooking,cyber,[],"[""cv3_villain_006""]",1,COVERED
+villain,cooking,fantasy,[],"[""cv3_villain_007"", ""cv3_villain_008""]",2,COVERED
+villain,cooking,horror,"[""v_fang"", ""v_silence"", ""v_moth""]",[],3,COVERED
+villain,cooking,idol,"[""v_einar""]",[],1,COVERED
+villain,cooking,isekai,"[""v_magus""]",[],1,COVERED
+villain,cooking,magical,"[""v_magus""]",[],1,COVERED
+villain,cooking,martial,[],"[""cv3_villain_007""]",1,COVERED
+villain,cooking,mecha,"[""v_grandfinale""]",[],1,COVERED
+villain,cooking,military,"[""v_gravemark""]",[],1,COVERED
+villain,cooking,mystery,"[""v_paradox""]","[""cv3_villain_009""]",2,COVERED
+villain,cooking,mythology,"[""v_moth""]",[],1,COVERED
+villain,cooking,nordic,"[""v_gravemark"", ""v_einar""]",[],2,COVERED
+villain,cooking,pirate,"[""v_silence""]",[],1,COVERED
+villain,cooking,romance,"[""v_fang""]",[],1,COVERED
+villain,cooking,samurai,[],"[""cv3_villain_010""]",1,COVERED
+villain,cooking,shinobi,[],"[""cv3_villain_011""]",1,COVERED
+villain,cooking,slice,[],"[""cv3_villain_010""]",1,COVERED
+villain,cooking,space,"[""v_paradox""]",[],1,COVERED
+villain,cooking,sports,[],"[""cv3_villain_009""]",1,COVERED
+villain,cooking,supernatural,[],"[""cv3_villain_006"", ""cv3_villain_008""]",2,COVERED
+villain,cooking,survival,[],"[""cv3_villain_011""]",1,COVERED
+villain,cyber,fantasy,"[""v_collector""]",[],1,COVERED
+villain,cyber,horror,[],"[""cv3_villain_012""]",1,COVERED
+villain,cyber,idol,[],"[""cv3_villain_013""]",1,COVERED
+villain,cyber,isekai,[],"[""cv3_villain_014""]",1,COVERED
+villain,cyber,magical,"[""v_mirage""]",[],1,COVERED
+villain,cyber,martial,[],"[""cv3_villain_015""]",1,COVERED
+villain,cyber,mecha,"[""v_glitch""]",[],1,COVERED
+villain,cyber,military,[],"[""cv3_villain_014""]",1,COVERED
+villain,cyber,mystery,"[""v_mirage""]",[],1,COVERED
+villain,cyber,mythology,"[""v_blackout"", ""v_collector""]",[],2,COVERED
+villain,cyber,nordic,"[""v_kairos""]",[],1,COVERED
+villain,cyber,pirate,[],"[""cv3_villain_013""]",1,COVERED
+villain,cyber,romance,"[""v_zero"", ""v_kairos"", ""v_frostbite""]",[],3,COVERED
+villain,cyber,samurai,[],"[""cv3_villain_001""]",1,COVERED
+villain,cyber,shinobi,[],"[""cv3_villain_012""]",1,COVERED
+villain,cyber,slice,"[""v_glitch""]",[],1,COVERED
+villain,cyber,space,"[""v_zero""]","[""cv3_villain_015""]",2,COVERED
+villain,cyber,sports,"[""v_frostbite""]",[],1,COVERED
+villain,cyber,supernatural,[],"[""cv3_villain_006""]",1,COVERED
+villain,cyber,survival,"[""v_blackout""]",[],1,COVERED
+villain,fantasy,horror,[],"[""cv3_villain_016""]",1,COVERED
+villain,fantasy,idol,[],"[""cv3_villain_017""]",1,COVERED
+villain,fantasy,isekai,"[""v_overlord""]",[],1,COVERED
+villain,fantasy,magical,"[""v_amethyst"", ""v_hex""]",[],2,COVERED
+villain,fantasy,martial,[],"[""cv3_villain_007""]",1,COVERED
+villain,fantasy,mecha,"[""v_overlord""]",[],1,COVERED
+villain,fantasy,military,[],"[""cv3_villain_018""]",1,COVERED
+villain,fantasy,mystery,[],"[""cv3_villain_018""]",1,COVERED
+villain,fantasy,mythology,"[""v_collector""]",[],1,COVERED
+villain,fantasy,nordic,"[""v_amethyst""]",[],1,COVERED
+villain,fantasy,pirate,[],"[""cv3_villain_019""]",1,COVERED
+villain,fantasy,romance,[],"[""cv3_villain_020""]",1,COVERED
+villain,fantasy,samurai,[],"[""cv3_villain_020""]",1,COVERED
+villain,fantasy,shinobi,[],"[""cv3_villain_017""]",1,COVERED
+villain,fantasy,slice,[],"[""cv3_villain_016""]",1,COVERED
+villain,fantasy,space,"[""v_hollowchild""]",[],1,COVERED
+villain,fantasy,sports,"[""v_hex""]",[],1,COVERED
+villain,fantasy,supernatural,[],"[""cv3_villain_008""]",1,COVERED
+villain,fantasy,survival,[],"[""cv3_villain_019""]",1,COVERED
+villain,horror,idol,"[""v_plague""]",[],1,COVERED
+villain,horror,isekai,"[""v_titanus"", ""v_lich""]",[],2,COVERED
+villain,horror,magical,[],"[""cv3_villain_021""]",1,COVERED
+villain,horror,martial,"[""v_reaper""]",[],1,COVERED
+villain,horror,mecha,[],"[""cv3_villain_021""]",1,COVERED
+villain,horror,military,"[""v_ash""]",[],1,COVERED
+villain,horror,mystery,"[""v_plague""]",[],1,COVERED
+villain,horror,mythology,"[""v_moth""]",[],1,COVERED
+villain,horror,nordic,[],"[""cv3_villain_022""]",1,COVERED
+villain,horror,pirate,"[""v_silence""]",[],1,COVERED
+villain,horror,romance,"[""v_hollow"", ""v_fang""]",[],2,COVERED
+villain,horror,samurai,[],"[""cv3_villain_023""]",1,COVERED
+villain,horror,shinobi,[],"[""cv3_villain_012""]",1,COVERED
+villain,horror,slice,[],"[""cv3_villain_016""]",1,COVERED
+villain,horror,space,[],"[""cv3_villain_022""]",1,COVERED
+villain,horror,sports,"[""v_reaper""]",[],1,COVERED
+villain,horror,supernatural,"[""v_hollow""]",[],1,COVERED
+villain,horror,survival,"[""v_titanus""]","[""cv3_villain_023""]",2,COVERED
+villain,idol,isekai,[],"[""cv3_villain_024""]",1,COVERED
+villain,idol,magical,[],"[""cv3_villain_025""]",1,COVERED
+villain,idol,martial,"[""v_carnage"", ""v_falsetto""]",[],2,COVERED
+villain,idol,mecha,"[""v_bioform"", ""v_obsidian""]",[],2,COVERED
+villain,idol,military,"[""v_puppeteer""]",[],1,COVERED
+villain,idol,mystery,"[""v_plague""]",[],1,COVERED
+villain,idol,mythology,[],"[""cv3_villain_025""]",1,COVERED
+villain,idol,nordic,"[""v_einar""]",[],1,COVERED
+villain,idol,pirate,[],"[""cv3_villain_013""]",1,COVERED
+villain,idol,romance,"[""v_falsetto"", ""v_obsidian"", ""v_rosethorn""]",[],3,COVERED
+villain,idol,samurai,[],"[""cv3_villain_026""]",1,COVERED
+villain,idol,shinobi,[],"[""cv3_villain_017""]",1,COVERED
+villain,idol,slice,"[""v_puppeteer""]",[],1,COVERED
+villain,idol,space,[],"[""cv3_villain_026""]",1,COVERED
+villain,idol,sports,"[""v_carnage"", ""v_bioform""]",[],2,COVERED
+villain,idol,supernatural,[],"[""cv3_villain_024""]",1,COVERED
+villain,idol,survival,"[""v_harlequin"", ""v_rosethorn""]",[],2,COVERED
+villain,isekai,magical,"[""v_magus""]",[],1,COVERED
+villain,isekai,martial,[],"[""cv3_villain_027""]",1,COVERED
+villain,isekai,mecha,"[""v_overlord""]",[],1,COVERED
+villain,isekai,military,[],"[""cv3_villain_014""]",1,COVERED
+villain,isekai,mystery,[],"[""cv3_villain_028""]",1,COVERED
+villain,isekai,mythology,[],"[""cv3_villain_029"", ""cv3_villain_030""]",2,COVERED
+villain,isekai,nordic,[],"[""cv3_villain_028""]",1,COVERED
+villain,isekai,pirate,[],"[""cv3_villain_031""]",1,COVERED
+villain,isekai,romance,[],"[""cv3_villain_029""]",1,COVERED
+villain,isekai,samurai,[],"[""cv3_villain_030""]",1,COVERED
+villain,isekai,shinobi,[],"[""cv3_villain_032""]",1,COVERED
+villain,isekai,slice,[],"[""cv3_villain_027""]",1,COVERED
+villain,isekai,space,[],"[""cv3_villain_031""]",1,COVERED
+villain,isekai,sports,[],"[""cv3_villain_032""]",1,COVERED
+villain,isekai,supernatural,[],"[""cv3_villain_024""]",1,COVERED
+villain,isekai,survival,"[""v_titanus""]",[],1,COVERED
+villain,magical,martial,[],"[""cv3_villain_033""]",1,COVERED
+villain,magical,mecha,[],"[""cv3_villain_021""]",1,COVERED
+villain,magical,military,"[""v_warden""]",[],1,COVERED
+villain,magical,mystery,"[""v_mirage""]",[],1,COVERED
+villain,magical,mythology,[],"[""cv3_villain_025""]",1,COVERED
+villain,magical,nordic,"[""v_amethyst""]",[],1,COVERED
+villain,magical,pirate,[],"[""cv3_villain_034"", ""cv3_villain_035""]",2,COVERED
+villain,magical,romance,[],"[""cv3_villain_034""]",1,COVERED
+villain,magical,samurai,[],"[""cv3_villain_033""]",1,COVERED
+villain,magical,shinobi,[],"[""cv3_villain_035""]",1,COVERED
+villain,magical,slice,[],"[""cv3_villain_002""]",1,COVERED
+villain,magical,space,[],"[""cv3_villain_036""]",1,COVERED
+villain,magical,sports,"[""v_hex""]",[],1,COVERED
+villain,magical,supernatural,[],"[""cv3_villain_036""]",1,COVERED
+villain,magical,survival,"[""v_warden""]",[],1,COVERED
+villain,martial,mecha,[],"[""cv3_villain_037""]",1,COVERED
+villain,martial,military,"[""sen""]",[],1,COVERED
+villain,martial,mystery,"[""v_onikage"", ""v_inquisitor"", ""aya""]",[],3,COVERED
+villain,martial,mythology,[],"[""cv3_villain_037""]",1,COVERED
+villain,martial,nordic,[],"[""cv3_villain_038""]",1,COVERED
+villain,martial,pirate,"[""v_inquisitor""]",[],1,COVERED
+villain,martial,romance,"[""sen"", ""v_falsetto"", ""aya""]",[],3,COVERED
+villain,martial,samurai,[],"[""cv3_villain_033"", ""cv3_villain_052""]",2,COVERED
+villain,martial,shinobi,[],"[""cv3_villain_003"", ""cv3_villain_052""]",2,COVERED
+villain,martial,slice,[],"[""cv3_villain_027""]",1,COVERED
+villain,martial,space,[],"[""cv3_villain_015""]",1,COVERED
+villain,martial,sports,"[""v_carnage"", ""v_reaper""]",[],2,COVERED
+villain,martial,supernatural,"[""v_onikage""]",[],1,COVERED
+villain,martial,survival,[],"[""cv3_villain_038""]",1,COVERED
+villain,mecha,military,"[""v_kurogane""]",[],1,COVERED
+villain,mecha,mystery,[],"[""cv3_villain_039""]",1,COVERED
+villain,mecha,mythology,[],"[""cv3_villain_037""]",1,COVERED
+villain,mecha,nordic,[],"[""cv3_villain_039""]",1,COVERED
+villain,mecha,pirate,[],"[""cv3_villain_040""]",1,COVERED
+villain,mecha,romance,"[""v_volt"", ""v_obsidian""]","[""cv3_villain_041""]",3,COVERED
+villain,mecha,samurai,[],"[""cv3_villain_040""]",1,COVERED
+villain,mecha,shinobi,[],"[""cv3_villain_041""]",1,COVERED
+villain,mecha,slice,"[""v_kurogane"", ""v_glitch""]",[],2,COVERED
+villain,mecha,space,"[""v_volt""]",[],1,COVERED
+villain,mecha,sports,"[""v_bioform""]",[],1,COVERED
+villain,mecha,supernatural,[],"[""cv3_villain_042""]",1,COVERED
+villain,mecha,survival,[],"[""cv3_villain_042""]",1,COVERED
+villain,military,mystery,[],"[""cv3_villain_018""]",1,COVERED
+villain,military,mythology,[],"[""cv3_villain_043""]",1,COVERED
+villain,military,nordic,"[""v_gravemark""]",[],1,COVERED
+villain,military,pirate,"[""v_dread""]",[],1,COVERED
+villain,military,romance,"[""sen""]",[],1,COVERED
+villain,military,samurai,[],"[""cv3_villain_044""]",1,COVERED
+villain,military,shinobi,[],"[""cv3_villain_045""]",1,COVERED
+villain,military,slice,"[""v_kurogane"", ""v_puppeteer"", ""v_dread""]",[],3,COVERED
+villain,military,space,[],"[""cv3_villain_043""]",1,COVERED
+villain,military,sports,[],"[""cv3_villain_044""]",1,COVERED
+villain,military,supernatural,[],"[""cv3_villain_045""]",1,COVERED
+villain,military,survival,"[""v_warden""]",[],1,COVERED
+villain,mystery,mythology,"[""v_sinister""]",[],1,COVERED
+villain,mystery,nordic,[],"[""cv3_villain_028"", ""cv3_villain_039""]",2,COVERED
+villain,mystery,pirate,"[""v_inquisitor""]",[],1,COVERED
+villain,mystery,romance,"[""v_nightshade"", ""aya""]",[],2,COVERED
+villain,mystery,samurai,[],"[""cv3_villain_046""]",1,COVERED
+villain,mystery,shinobi,[],"[""cv3_villain_046""]",1,COVERED
+villain,mystery,slice,"[""v_nocturne"", ""v_sinister""]",[],2,COVERED
+villain,mystery,space,"[""v_paradox""]",[],1,COVERED
+villain,mystery,sports,[],"[""cv3_villain_004"", ""cv3_villain_009""]",2,COVERED
+villain,mystery,supernatural,"[""v_onikage"", ""v_nocturne""]",[],2,COVERED
+villain,mystery,survival,"[""v_nightshade""]",[],1,COVERED
+villain,mythology,nordic,[],"[""cv3_villain_047""]",1,COVERED
+villain,mythology,pirate,"[""v_baron""]",[],1,COVERED
+villain,mythology,romance,[],"[""cv3_villain_029""]",1,COVERED
+villain,mythology,samurai,[],"[""cv3_villain_030""]",1,COVERED
+villain,mythology,shinobi,[],"[""cv3_villain_047""]",1,COVERED
+villain,mythology,slice,"[""v_sinister""]",[],1,COVERED
+villain,mythology,space,[],"[""cv3_villain_043""]",1,COVERED
+villain,mythology,sports,"[""v_baron""]",[],1,COVERED
+villain,mythology,supernatural,[],"[""cv3_villain_005""]",1,COVERED
+villain,mythology,survival,"[""v_blackout""]",[],1,COVERED
+villain,nordic,pirate,"[""v_scuttle""]",[],1,COVERED
+villain,nordic,romance,"[""v_kairos""]",[],1,COVERED
+villain,nordic,samurai,[],"[""cv3_villain_048""]",1,COVERED
+villain,nordic,shinobi,[],"[""cv3_villain_047""]",1,COVERED
+villain,nordic,slice,[],"[""cv3_villain_049""]",1,COVERED
+villain,nordic,space,[],"[""cv3_villain_022""]",1,COVERED
+villain,nordic,sports,[],"[""cv3_villain_049""]",1,COVERED
+villain,nordic,supernatural,[],"[""cv3_villain_048""]",1,COVERED
+villain,nordic,survival,[],"[""cv3_villain_038""]",1,COVERED
+villain,pirate,romance,[],"[""cv3_villain_034""]",1,COVERED
+villain,pirate,samurai,[],"[""cv3_villain_040""]",1,COVERED
+villain,pirate,shinobi,[],"[""cv3_villain_035""]",1,COVERED
+villain,pirate,slice,"[""v_dread""]",[],1,COVERED
+villain,pirate,space,[],"[""cv3_villain_031""]",1,COVERED
+villain,pirate,sports,"[""v_baron"", ""v_tempest""]",[],2,COVERED
+villain,pirate,supernatural,"[""v_tempest""]",[],1,COVERED
+villain,pirate,survival,[],"[""cv3_villain_019""]",1,COVERED
+villain,romance,samurai,[],"[""cv3_villain_020""]",1,COVERED
+villain,romance,shinobi,[],"[""cv3_villain_041""]",1,COVERED
+villain,romance,slice,"[""v_venom""]",[],1,COVERED
+villain,romance,space,"[""v_volt"", ""v_zero"", ""v_lovelace""]",[],3,COVERED
+villain,romance,sports,"[""v_frostbite""]",[],1,COVERED
+villain,romance,supernatural,"[""v_hollow""]",[],1,COVERED
+villain,romance,survival,"[""v_nightshade"", ""v_venom"", ""v_rosethorn""]",[],3,COVERED
+villain,samurai,shinobi,[],"[""cv3_villain_046"", ""cv3_villain_052""]",2,COVERED
+villain,samurai,slice,[],"[""cv3_villain_010""]",1,COVERED
+villain,samurai,space,[],"[""cv3_villain_026""]",1,COVERED
+villain,samurai,sports,[],"[""cv3_villain_044""]",1,COVERED
+villain,samurai,supernatural,[],"[""cv3_villain_048""]",1,COVERED
+villain,samurai,survival,[],"[""cv3_villain_023""]",1,COVERED
+villain,shinobi,slice,[],"[""cv3_villain_050""]",1,COVERED
+villain,shinobi,space,[],"[""cv3_villain_050""]",1,COVERED
+villain,shinobi,sports,[],"[""cv3_villain_032""]",1,COVERED
+villain,shinobi,supernatural,[],"[""cv3_villain_045""]",1,COVERED
+villain,shinobi,survival,[],"[""cv3_villain_011""]",1,COVERED
+villain,slice,space,[],"[""cv3_villain_050""]",1,COVERED
+villain,slice,sports,[],"[""cv3_villain_049""]",1,COVERED
+villain,slice,supernatural,"[""v_nocturne""]",[],1,COVERED
+villain,slice,survival,"[""v_venom""]",[],1,COVERED
+villain,space,sports,[],"[""cv3_villain_051""]",1,COVERED
+villain,space,supernatural,[],"[""cv3_villain_036""]",1,COVERED
+villain,space,survival,[],"[""cv3_villain_051""]",1,COVERED
+villain,sports,supernatural,"[""v_tempest""]",[],1,COVERED
+villain,sports,survival,[],"[""cv3_villain_051""]",1,COVERED
+villain,supernatural,survival,[],"[""cv3_villain_042""]",1,COVERED

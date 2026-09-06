@@ -1,0 +1,19 @@
+id,name,arcs,q,f,ordered
+v3_oathcost,The Cost of an Oath,"[""v3_swornoath"", ""v3_clanhearing"", ""v3_brokenstandard""]",4,0.02,True
+v3_crossingpayoff,A Blade Put Down,"[""v3_crossroadsduel"", ""v3_duelwithoutblades"", ""finale""]",3,0.03,True
+v3_couriertruth,What the Message Cost,"[""v3_deadletter"", ""v3_silententry"", ""v3_doubleagent""]",4,0.02,True
+v3_networkhome,A Name Worth Keeping,"[""v3_doubleagent"", ""v3_burnednetwork"", ""v3_unmaskedhome""]",4,0.03,True
+v3_smallroute,The Smallest Way Through,"[""v3_roofcourier"", ""narr_rescue""]",2,0.02,True
+v3_retainerlegacy,Duty After the Banner,"[""v3_swornoath"", ""v3_lastretainer""]",3,0.02,True
+v3_snowpassage,No Harbour Left Behind,"[""v3_winterharbour"", ""v3_chartedescape""]",3,0.02,True
+v3_borrowedcustom,Learn Before You Rule,"[""v3_borrowedworld"", ""v3_emptythrone"", ""finale""]",4,0.02,True
+v3_tabletruth,A Place at the Table,"[""v3_sharedtable"", ""confession""]",2,0.03,True
+v3_lastvoice,The Voice Comes Home,"[""v3_lastbroadcast"", ""narr_quiet""]",3,0.02,True
+v3_recordschool,The Rules We Keep,"[""v3_brokenrecord"", ""v3_schoolwithoutmaster"", ""finale""]",4,0.02,True
+v3_masklegacy,A Different Ending,"[""v3_inheritedmask"", ""redemption""]",3,0.02,True
+v3_thresholdcase,Trust the Small Witness,"[""v3_roomthatwaits"", ""case"", ""narr_villainreveal""]",4,0.01,True
+v3_festivalcover,The Perfect Distraction,"[""v3_falsefestival"", ""v3_silententry""]",2,0.02,True
+v3_offduty,People Behind the Uniform,"[""v3_retainersday"", ""v3_sharedtable""]",2,0.02,False
+v3_lateoath,An Oath After Abandonment,"[""v3_brokenstandard"", ""v3_swornoath""]",-2,-0.01,True
+v3_latecover,Cover After Exposure,"[""v3_burnednetwork"", ""v3_silententry""]",-3,-0.01,True
+v3_emptycomfort,Comfort Before Consequences,"[""v3_burnednetwork"", ""beach""]",-2,-0.01,True

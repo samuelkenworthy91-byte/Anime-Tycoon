@@ -1,0 +1,172 @@
+{
+  "schema_version": 3,
+  "source_head": "2701f638f614eccce0e58a48f705918570b1f78c",
+  "genres": [
+    {
+      "id": "samurai",
+      "label": "Samurai",
+      "description": "Swordsmanship, ronin and retainers caught between personal conviction, honour and feudal duty.",
+      "flavour_identity": "One duel can settle a promise; one promise can unmake a clan.",
+      "ideal": [
+        68,
+        74,
+        50
+      ],
+      "slider_axes": [
+        "Plot / Characters",
+        "Sakuga / Consistency",
+        "Soundtrack / Voice Cast"
+      ],
+      "slider_unit": "0\u2013100 percent allocated to first named aspect",
+      "ratio": [
+        0.28,
+        0.5,
+        0.22
+      ],
+      "ratio_axes": [
+        "Story",
+        "Art",
+        "Sound"
+      ],
+      "rd": 26,
+      "tier": "MID",
+      "recommended_rd_cost": 26,
+      "audience_fit": {
+        "kids": 1.1,
+        "teens": 1.08,
+        "adults": 1.06,
+        "family": 1.05
+      },
+      "slot_tendencies": {
+        "preferred_broadcast": "prime",
+        "other_broadcast": "evening",
+        "distribution": [
+          "stream",
+          "homevideo",
+          "theatrical",
+          "web"
+        ],
+        "note": "Preferences only; preserve all live format gates and economics."
+      },
+      "market_tendencies": {
+        "appeal": "prestige duels and returning clan drama",
+        "initial_heat": "Use existing neutral market initialisation; no extra multiplier.",
+        "cycle": "Follow existing market updates; no permanent trend bonus."
+      },
+      "positive_pairings": [
+        "martial",
+        "military",
+        "nordic",
+        "romance",
+        "mystery",
+        "shinobi"
+      ],
+      "negative_pairings": [
+        "idol",
+        "space"
+      ],
+      "staff_implications": {
+        "favourite": "Existing dynamic GENRES selection already supports this id.",
+        "specialisation_append_proposal": [
+          "w_action",
+          "w_drama",
+          "a_sakuga",
+          "c_battle"
+        ],
+        "note": "Data recommendations only: preserve output, morale, speed and training formulas."
+      },
+      "arc_relationships": [
+        "v3_swornoath",
+        "v3_crossroadsduel",
+        "v3_clanhearing",
+        "v3_brokenstandard"
+      ],
+      "visual_language": "Sword and sheath, haori/hakama, practical retainer armour, timber halls, gatehouses, restrained clan colours; modern crossover equivalents must retain the sword/duty identity.",
+      "differentiation_from_martial": "Martial Arts centres hand-to-hand schools, training and tournament spirit. Samurai centres sword duty, duels and political obligations; neither substitutes for the other.",
+      "status": "CANONICAL_CONTENT_PROPOSAL_FOR_ARENA_IMPORT"
+    },
+    {
+      "id": "shinobi",
+      "label": "Shinobi",
+      "description": "Stealth, infiltration, espionage and hidden techniques amid rival factions and covert operations.",
+      "flavour_identity": "The mission ends when the truth reaches the right hands, not when the loudest fighter wins.",
+      "ideal": [
+        62,
+        70,
+        56
+      ],
+      "slider_axes": [
+        "Plot / Characters",
+        "Sakuga / Consistency",
+        "Soundtrack / Voice Cast"
+      ],
+      "slider_unit": "0\u2013100 percent allocated to first named aspect",
+      "ratio": [
+        0.32,
+        0.42,
+        0.26
+      ],
+      "ratio_axes": [
+        "Story",
+        "Art",
+        "Sound"
+      ],
+      "rd": 30,
+      "tier": "MID",
+      "recommended_rd_cost": 30,
+      "audience_fit": {
+        "kids": 0.95,
+        "teens": 1.12,
+        "adults": 1.1,
+        "family": 1.0
+      },
+      "slot_tendencies": {
+        "preferred_broadcast": "midnight",
+        "other_broadcast": "evening",
+        "distribution": [
+          "stream",
+          "homevideo",
+          "theatrical",
+          "web"
+        ],
+        "note": "Preferences only; preserve all live format gates and economics."
+      },
+      "market_tendencies": {
+        "appeal": "serial mysteries, faction reveals and mission hooks",
+        "initial_heat": "Use existing neutral market initialisation; no extra multiplier.",
+        "cycle": "Follow existing market updates; no permanent trend bonus."
+      },
+      "positive_pairings": [
+        "mystery",
+        "cyber",
+        "military",
+        "martial",
+        "samurai",
+        "supernatural"
+      ],
+      "negative_pairings": [
+        "idol",
+        "cooking"
+      ],
+      "staff_implications": {
+        "favourite": "Existing dynamic GENRES selection already supports this id.",
+        "specialisation_append_proposal": [
+          "w_mystery",
+          "w_action",
+          "a_sakuga",
+          "c_horror"
+        ],
+        "note": "Data recommendations only: preserve output, morale, speed and training formulas."
+      },
+      "arc_relationships": [
+        "v3_deadletter",
+        "v3_silententry",
+        "v3_doubleagent",
+        "v3_burnednetwork"
+      ],
+      "visual_language": "Practical layered field clothing, cord and tool pouch, rooftops, hidden routes, seals with no lettering and guarded archives. No borrowed franchise headbands. Techniques may be fantastic only when a visible partner genre supports that.",
+      "differentiation_from_martial": "Martial Arts rewards visible discipline and contest; Shinobi rewards information, covert routes and deception. Samurai concerns sworn feudal duty and sword duels, not covert identity.",
+      "status": "CANONICAL_CONTENT_PROPOSAL_FOR_ARENA_IMPORT"
+    }
+  ]
+}

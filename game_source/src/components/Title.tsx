@@ -303,7 +303,7 @@ export default function Title({
                 <img src={p.img} alt={p.name} className="h-11 w-11 rounded-lg object-cover" />
                 <div>
                   <div className="font-display text-xs font-extrabold">{p.name}</div>
-                  <div className="text-[10px] text-paper/50">{p.archetype}</div>
+                  <div className="text-[10px] text-paper/50">{(p.epithet ?? p.archetype)}</div>
                 </div>
               </div>
             ))}

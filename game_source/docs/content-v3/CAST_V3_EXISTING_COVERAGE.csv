@@ -1,0 +1,1013 @@
+role,genre_a,genre_b,count,ids
+protag,comedy,cooking,0,[]
+protag,comedy,cyber,1,"[""nana""]"
+protag,comedy,fantasy,1,"[""shiori""]"
+protag,comedy,horror,1,"[""shiori""]"
+protag,comedy,idol,2,"[""momo"", ""nana""]"
+protag,comedy,isekai,1,"[""jun""]"
+protag,comedy,magical,0,[]
+protag,comedy,martial,1,"[""kenta""]"
+protag,comedy,mecha,0,[]
+protag,comedy,military,0,[]
+protag,comedy,mystery,0,[]
+protag,comedy,mythology,1,"[""kenta""]"
+protag,comedy,nordic,1,"[""jun""]"
+protag,comedy,pirate,0,[]
+protag,comedy,romance,0,[]
+protag,comedy,samurai,0,[]
+protag,comedy,shinobi,0,[]
+protag,comedy,slice,0,[]
+protag,comedy,space,0,[]
+protag,comedy,sports,0,[]
+protag,comedy,supernatural,0,[]
+protag,comedy,survival,1,"[""momo""]"
+protag,cooking,cyber,0,[]
+protag,cooking,fantasy,0,[]
+protag,cooking,horror,1,"[""zuri""]"
+protag,cooking,idol,0,[]
+protag,cooking,isekai,1,"[""n_mikoto""]"
+protag,cooking,magical,2,"[""n_mikoto"", ""emi""]"
+protag,cooking,martial,1,"[""kai""]"
+protag,cooking,mecha,1,"[""zuri""]"
+protag,cooking,military,1,"[""emi""]"
+protag,cooking,mystery,0,[]
+protag,cooking,mythology,0,[]
+protag,cooking,nordic,0,[]
+protag,cooking,pirate,0,[]
+protag,cooking,romance,0,[]
+protag,cooking,samurai,0,[]
+protag,cooking,shinobi,0,[]
+protag,cooking,slice,1,"[""yui""]"
+protag,cooking,space,0,[]
+protag,cooking,sports,1,"[""kai""]"
+protag,cooking,supernatural,0,[]
+protag,cooking,survival,1,"[""yui""]"
+protag,cyber,fantasy,0,[]
+protag,cyber,horror,1,"[""kage""]"
+protag,cyber,idol,1,"[""nana""]"
+protag,cyber,isekai,0,[]
+protag,cyber,magical,1,"[""niko""]"
+protag,cyber,martial,1,"[""kuro""]"
+protag,cyber,mecha,1,"[""niko""]"
+protag,cyber,military,1,"[""kuro""]"
+protag,cyber,mystery,2,"[""kage"", ""akira""]"
+protag,cyber,mythology,2,"[""sota"", ""hana""]"
+protag,cyber,nordic,1,"[""akira""]"
+protag,cyber,pirate,0,[]
+protag,cyber,romance,1,"[""hana""]"
+protag,cyber,samurai,0,[]
+protag,cyber,shinobi,0,[]
+protag,cyber,slice,1,"[""sota""]"
+protag,cyber,space,0,[]
+protag,cyber,sports,0,[]
+protag,cyber,supernatural,0,[]
+protag,cyber,survival,0,[]
+protag,fantasy,horror,1,"[""shiori""]"
+protag,fantasy,idol,0,[]
+protag,fantasy,isekai,2,"[""sora"", ""n_aoi""]"
+protag,fantasy,magical,0,[]
+protag,fantasy,martial,1,"[""ryu""]"
+protag,fantasy,mecha,1,"[""kota""]"
+protag,fantasy,military,1,"[""sora""]"
+protag,fantasy,mystery,1,"[""mako""]"
+protag,fantasy,mythology,1,"[""n_aoi""]"
+protag,fantasy,nordic,1,"[""kota""]"
+protag,fantasy,pirate,1,"[""mako""]"
+protag,fantasy,romance,1,"[""ryu""]"
+protag,fantasy,samurai,0,[]
+protag,fantasy,shinobi,0,[]
+protag,fantasy,slice,0,[]
+protag,fantasy,space,0,[]
+protag,fantasy,sports,0,[]
+protag,fantasy,supernatural,0,[]
+protag,fantasy,survival,0,[]
+protag,horror,idol,1,"[""airi""]"
+protag,horror,isekai,0,[]
+protag,horror,magical,0,[]
+protag,horror,martial,0,[]
+protag,horror,mecha,1,"[""zuri""]"
+protag,horror,military,0,[]
+protag,horror,mystery,1,"[""kage""]"
+protag,horror,mythology,0,[]
+protag,horror,nordic,1,"[""yuki""]"
+protag,horror,pirate,0,[]
+protag,horror,romance,2,"[""airi"", ""haru""]"
+protag,horror,samurai,0,[]
+protag,horror,shinobi,0,[]
+protag,horror,slice,0,[]
+protag,horror,space,0,[]
+protag,horror,sports,1,"[""haru""]"
+protag,horror,supernatural,0,[]
+protag,horror,survival,1,"[""yuki""]"
+protag,idol,isekai,1,"[""n_saku""]"
+protag,idol,magical,1,"[""n_reiwa""]"
+protag,idol,martial,1,"[""n_saku""]"
+protag,idol,mecha,1,"[""riko""]"
+protag,idol,military,1,"[""leo""]"
+protag,idol,mystery,2,"[""riko"", ""n_reiwa""]"
+protag,idol,mythology,1,"[""mira""]"
+protag,idol,nordic,0,[]
+protag,idol,pirate,1,"[""mio""]"
+protag,idol,romance,2,"[""airi"", ""mio""]"
+protag,idol,samurai,0,[]
+protag,idol,shinobi,0,[]
+protag,idol,slice,0,[]
+protag,idol,space,1,"[""mira""]"
+protag,idol,sports,1,"[""leo""]"
+protag,idol,supernatural,0,[]
+protag,idol,survival,1,"[""momo""]"
+protag,isekai,magical,1,"[""n_mikoto""]"
+protag,isekai,martial,1,"[""n_saku""]"
+protag,isekai,mecha,0,[]
+protag,isekai,military,1,"[""sora""]"
+protag,isekai,mystery,0,[]
+protag,isekai,mythology,1,"[""n_aoi""]"
+protag,isekai,nordic,1,"[""jun""]"
+protag,isekai,pirate,1,"[""kaito""]"
+protag,isekai,romance,1,"[""kaito""]"
+protag,isekai,samurai,0,[]
+protag,isekai,shinobi,0,[]
+protag,isekai,slice,0,[]
+protag,isekai,space,0,[]
+protag,isekai,sports,0,[]
+protag,isekai,supernatural,0,[]
+protag,isekai,survival,0,[]
+protag,magical,martial,2,"[""goro"", ""sakura""]"
+protag,magical,mecha,1,"[""niko""]"
+protag,magical,military,2,"[""hikari"", ""emi""]"
+protag,magical,mystery,1,"[""n_reiwa""]"
+protag,magical,mythology,0,[]
+protag,magical,nordic,0,[]
+protag,magical,pirate,0,[]
+protag,magical,romance,1,"[""hikari""]"
+protag,magical,samurai,0,[]
+protag,magical,shinobi,0,[]
+protag,magical,slice,0,[]
+protag,magical,space,1,"[""sakura""]"
+protag,magical,sports,1,"[""goro""]"
+protag,magical,supernatural,0,[]
+protag,magical,survival,0,[]
+protag,martial,mecha,1,"[""n_ryoko""]"
+protag,martial,military,1,"[""kuro""]"
+protag,martial,mystery,0,[]
+protag,martial,mythology,1,"[""kenta""]"
+protag,martial,nordic,1,"[""kaede""]"
+protag,martial,pirate,1,"[""ash""]"
+protag,martial,romance,1,"[""ryu""]"
+protag,martial,samurai,0,[]
+protag,martial,shinobi,0,[]
+protag,martial,slice,1,"[""kaede""]"
+protag,martial,space,2,"[""sakura"", ""n_ryoko""]"
+protag,martial,sports,2,"[""kai"", ""goro""]"
+protag,martial,supernatural,0,[]
+protag,martial,survival,1,"[""ash""]"
+protag,mecha,military,1,"[""rei""]"
+protag,mecha,mystery,2,"[""riko"", ""takumi""]"
+protag,mecha,mythology,0,[]
+protag,mecha,nordic,1,"[""kota""]"
+protag,mecha,pirate,0,[]
+protag,mecha,romance,1,"[""takumi""]"
+protag,mecha,samurai,0,[]
+protag,mecha,shinobi,0,[]
+protag,mecha,slice,1,"[""jin""]"
+protag,mecha,space,2,"[""rei"", ""n_ryoko""]"
+protag,mecha,sports,0,[]
+protag,mecha,supernatural,0,[]
+protag,mecha,survival,1,"[""jin""]"
+protag,military,mystery,0,[]
+protag,military,mythology,0,[]
+protag,military,nordic,0,[]
+protag,military,pirate,0,[]
+protag,military,romance,1,"[""hikari""]"
+protag,military,samurai,0,[]
+protag,military,shinobi,0,[]
+protag,military,slice,0,[]
+protag,military,space,1,"[""rei""]"
+protag,military,sports,1,"[""leo""]"
+protag,military,supernatural,1,"[""daichi""]"
+protag,military,survival,1,"[""daichi""]"
+protag,mystery,mythology,1,"[""saki""]"
+protag,mystery,nordic,2,"[""akira"", ""renji""]"
+protag,mystery,pirate,2,"[""mako"", ""shiro""]"
+protag,mystery,romance,1,"[""takumi""]"
+protag,mystery,samurai,0,[]
+protag,mystery,shinobi,0,[]
+protag,mystery,slice,2,"[""shiro"", ""saki""]"
+protag,mystery,space,0,[]
+protag,mystery,sports,0,[]
+protag,mystery,supernatural,1,"[""renji""]"
+protag,mystery,survival,0,[]
+protag,mythology,nordic,0,[]
+protag,mythology,pirate,0,[]
+protag,mythology,romance,1,"[""hana""]"
+protag,mythology,samurai,0,[]
+protag,mythology,shinobi,0,[]
+protag,mythology,slice,2,"[""sota"", ""saki""]"
+protag,mythology,space,1,"[""mira""]"
+protag,mythology,sports,1,"[""suzume""]"
+protag,mythology,supernatural,1,"[""suzume""]"
+protag,mythology,survival,0,[]
+protag,nordic,pirate,0,[]
+protag,nordic,romance,0,[]
+protag,nordic,samurai,0,[]
+protag,nordic,shinobi,0,[]
+protag,nordic,slice,1,"[""kaede""]"
+protag,nordic,space,0,[]
+protag,nordic,sports,0,[]
+protag,nordic,supernatural,1,"[""renji""]"
+protag,nordic,survival,1,"[""yuki""]"
+protag,pirate,romance,2,"[""kaito"", ""mio""]"
+protag,pirate,samurai,0,[]
+protag,pirate,shinobi,0,[]
+protag,pirate,slice,2,"[""rin"", ""shiro""]"
+protag,pirate,space,0,[]
+protag,pirate,sports,1,"[""rin""]"
+protag,pirate,supernatural,0,[]
+protag,pirate,survival,1,"[""ash""]"
+protag,romance,samurai,0,[]
+protag,romance,shinobi,0,[]
+protag,romance,slice,0,[]
+protag,romance,space,1,"[""n_chisato""]"
+protag,romance,sports,2,"[""haru"", ""n_chisato""]"
+protag,romance,supernatural,1,"[""itsuki""]"
+protag,romance,survival,1,"[""itsuki""]"
+protag,samurai,shinobi,0,[]
+protag,samurai,slice,0,[]
+protag,samurai,space,0,[]
+protag,samurai,sports,0,[]
+protag,samurai,supernatural,0,[]
+protag,samurai,survival,0,[]
+protag,shinobi,slice,0,[]
+protag,shinobi,space,0,[]
+protag,shinobi,sports,0,[]
+protag,shinobi,supernatural,0,[]
+protag,shinobi,survival,0,[]
+protag,slice,space,0,[]
+protag,slice,sports,1,"[""rin""]"
+protag,slice,supernatural,0,[]
+protag,slice,survival,2,"[""jin"", ""yui""]"
+protag,space,sports,1,"[""n_chisato""]"
+protag,space,supernatural,0,[]
+protag,space,survival,0,[]
+protag,sports,supernatural,1,"[""suzume""]"
+protag,sports,survival,0,[]
+protag,supernatural,survival,2,"[""daichi"", ""itsuki""]"
+secondary,comedy,cooking,0,[]
+secondary,comedy,cyber,0,[]
+secondary,comedy,fantasy,0,[]
+secondary,comedy,horror,1,"[""s_bolt""]"
+secondary,comedy,idol,1,"[""s_kiki""]"
+secondary,comedy,isekai,0,[]
+secondary,comedy,magical,1,"[""s_peko""]"
+secondary,comedy,martial,2,"[""s_ichiro"", ""s_kazuki""]"
+secondary,comedy,mecha,1,"[""s_peko""]"
+secondary,comedy,military,0,[]
+secondary,comedy,mystery,1,"[""s_nanami""]"
+secondary,comedy,mythology,1,"[""s_ichiro""]"
+secondary,comedy,nordic,0,[]
+secondary,comedy,pirate,0,[]
+secondary,comedy,romance,1,"[""s_kazuki""]"
+secondary,comedy,samurai,0,[]
+secondary,comedy,shinobi,0,[]
+secondary,comedy,slice,0,[]
+secondary,comedy,space,1,"[""s_nanami""]"
+secondary,comedy,sports,1,"[""s_bolt""]"
+secondary,comedy,supernatural,0,[]
+secondary,comedy,survival,1,"[""s_kiki""]"
+secondary,cooking,cyber,1,"[""s_daiki""]"
+secondary,cooking,fantasy,1,"[""taro""]"
+secondary,cooking,horror,0,[]
+secondary,cooking,idol,0,[]
+secondary,cooking,isekai,0,[]
+secondary,cooking,magical,0,[]
+secondary,cooking,martial,0,[]
+secondary,cooking,mecha,3,"[""s_daiki"", ""s_boone"", ""s_pranav""]"
+secondary,cooking,military,1,"[""s_reina""]"
+secondary,cooking,mystery,0,[]
+secondary,cooking,mythology,1,"[""s_pranav""]"
+secondary,cooking,nordic,1,"[""s_reina""]"
+secondary,cooking,pirate,0,[]
+secondary,cooking,romance,0,[]
+secondary,cooking,samurai,0,[]
+secondary,cooking,shinobi,0,[]
+secondary,cooking,slice,0,[]
+secondary,cooking,space,1,"[""taro""]"
+secondary,cooking,sports,0,[]
+secondary,cooking,supernatural,1,"[""s_boone""]"
+secondary,cooking,survival,0,[]
+secondary,cyber,fantasy,0,[]
+secondary,cyber,horror,0,[]
+secondary,cyber,idol,1,"[""s_mimi""]"
+secondary,cyber,isekai,0,[]
+secondary,cyber,magical,2,"[""s_tobi"", ""s_mimi""]"
+secondary,cyber,martial,0,[]
+secondary,cyber,mecha,1,"[""s_daiki""]"
+secondary,cyber,military,1,"[""s_kanna""]"
+secondary,cyber,mystery,1,"[""s_tobi""]"
+secondary,cyber,mythology,0,[]
+secondary,cyber,nordic,0,[]
+secondary,cyber,pirate,0,[]
+secondary,cyber,romance,1,"[""s_kanna""]"
+secondary,cyber,samurai,0,[]
+secondary,cyber,shinobi,0,[]
+secondary,cyber,slice,0,[]
+secondary,cyber,space,0,[]
+secondary,cyber,sports,0,[]
+secondary,cyber,supernatural,0,[]
+secondary,cyber,survival,0,[]
+secondary,fantasy,horror,0,[]
+secondary,fantasy,idol,0,[]
+secondary,fantasy,isekai,1,"[""s_soleil""]"
+secondary,fantasy,magical,0,[]
+secondary,fantasy,martial,0,[]
+secondary,fantasy,mecha,1,"[""s_ken""]"
+secondary,fantasy,military,0,[]
+secondary,fantasy,mystery,0,[]
+secondary,fantasy,mythology,0,[]
+secondary,fantasy,nordic,1,"[""fumi""]"
+secondary,fantasy,pirate,1,"[""s_tora""]"
+secondary,fantasy,romance,1,"[""s_hina""]"
+secondary,fantasy,samurai,0,[]
+secondary,fantasy,shinobi,0,[]
+secondary,fantasy,slice,1,"[""fumi""]"
+secondary,fantasy,space,1,"[""taro""]"
+secondary,fantasy,sports,1,"[""s_soleil""]"
+secondary,fantasy,supernatural,1,"[""s_tora""]"
+secondary,fantasy,survival,2,"[""s_ken"", ""s_hina""]"
+secondary,horror,idol,1,"[""s_sakurako""]"
+secondary,horror,isekai,0,[]
+secondary,horror,magical,0,[]
+secondary,horror,martial,0,[]
+secondary,horror,mecha,1,"[""s_sosuke""]"
+secondary,horror,military,0,[]
+secondary,horror,mystery,1,"[""s_chiaki""]"
+secondary,horror,mythology,0,[]
+secondary,horror,nordic,0,[]
+secondary,horror,pirate,0,[]
+secondary,horror,romance,1,"[""s_sakurako""]"
+secondary,horror,samurai,0,[]
+secondary,horror,shinobi,0,[]
+secondary,horror,slice,1,"[""s_sosuke""]"
+secondary,horror,space,0,[]
+secondary,horror,sports,1,"[""s_bolt""]"
+secondary,horror,supernatural,1,"[""s_chiaki""]"
+secondary,horror,survival,0,[]
+secondary,idol,isekai,0,[]
+secondary,idol,magical,1,"[""s_mimi""]"
+secondary,idol,martial,0,[]
+secondary,idol,mecha,0,[]
+secondary,idol,military,2,"[""s_gen"", ""s_lulu""]"
+secondary,idol,mystery,1,"[""s_gen""]"
+secondary,idol,mythology,1,"[""s_yuna""]"
+secondary,idol,nordic,0,[]
+secondary,idol,pirate,2,"[""s_akane"", ""s_ryo""]"
+secondary,idol,romance,2,"[""s_ice"", ""s_sakurako""]"
+secondary,idol,samurai,0,[]
+secondary,idol,shinobi,0,[]
+secondary,idol,slice,1,"[""s_lulu""]"
+secondary,idol,space,0,[]
+secondary,idol,sports,2,"[""s_akane"", ""s_yuna""]"
+secondary,idol,supernatural,1,"[""s_ryo""]"
+secondary,idol,survival,2,"[""s_kiki"", ""s_ice""]"
+secondary,isekai,magical,0,[]
+secondary,isekai,martial,0,[]
+secondary,isekai,mecha,1,"[""tsubasa""]"
+secondary,isekai,military,0,[]
+secondary,isekai,mystery,1,"[""s_amber""]"
+secondary,isekai,mythology,0,[]
+secondary,isekai,nordic,0,[]
+secondary,isekai,pirate,1,"[""s_amber""]"
+secondary,isekai,romance,1,"[""s_nozomi""]"
+secondary,isekai,samurai,0,[]
+secondary,isekai,shinobi,0,[]
+secondary,isekai,slice,1,"[""s_nozomi""]"
+secondary,isekai,space,1,"[""tsubasa""]"
+secondary,isekai,sports,2,"[""s_soleil"", ""yuzuki""]"
+secondary,isekai,supernatural,1,"[""yuzuki""]"
+secondary,isekai,survival,0,[]
+secondary,magical,martial,0,[]
+secondary,magical,mecha,1,"[""s_peko""]"
+secondary,magical,military,2,"[""s_takeshi"", ""s_linh""]"
+secondary,magical,mystery,1,"[""s_tobi""]"
+secondary,magical,mythology,0,[]
+secondary,magical,nordic,1,"[""s_maki""]"
+secondary,magical,pirate,1,"[""s_linh""]"
+secondary,magical,romance,0,[]
+secondary,magical,samurai,0,[]
+secondary,magical,shinobi,0,[]
+secondary,magical,slice,0,[]
+secondary,magical,space,0,[]
+secondary,magical,sports,1,"[""s_takeshi""]"
+secondary,magical,supernatural,0,[]
+secondary,magical,survival,1,"[""s_maki""]"
+secondary,martial,mecha,0,[]
+secondary,martial,military,0,[]
+secondary,martial,mystery,1,"[""s_alfred""]"
+secondary,martial,mythology,1,"[""s_ichiro""]"
+secondary,martial,nordic,1,"[""s_eiji""]"
+secondary,martial,pirate,0,[]
+secondary,martial,romance,3,"[""s_okada"", ""s_alfred"", ""s_kazuki""]"
+secondary,martial,samurai,0,[]
+secondary,martial,shinobi,0,[]
+secondary,martial,slice,1,"[""s_eiji""]"
+secondary,martial,space,0,[]
+secondary,martial,sports,2,"[""s_okada"", ""s_riku""]"
+secondary,martial,supernatural,0,[]
+secondary,martial,survival,1,"[""s_riku""]"
+secondary,mecha,military,1,"[""s_ironmaid""]"
+secondary,mecha,mystery,1,"[""s_megu""]"
+secondary,mecha,mythology,1,"[""s_pranav""]"
+secondary,mecha,nordic,1,"[""s_ironmaid""]"
+secondary,mecha,pirate,0,[]
+secondary,mecha,romance,0,[]
+secondary,mecha,samurai,0,[]
+secondary,mecha,shinobi,0,[]
+secondary,mecha,slice,2,"[""s_sosuke"", ""s_megu""]"
+secondary,mecha,space,1,"[""tsubasa""]"
+secondary,mecha,sports,0,[]
+secondary,mecha,supernatural,1,"[""s_boone""]"
+secondary,mecha,survival,1,"[""s_ken""]"
+secondary,military,mystery,1,"[""s_gen""]"
+secondary,military,mythology,1,"[""s_amina""]"
+secondary,military,nordic,2,"[""s_ironmaid"", ""s_reina""]"
+secondary,military,pirate,1,"[""s_linh""]"
+secondary,military,romance,2,"[""s_kanna"", ""s_mika""]"
+secondary,military,samurai,0,[]
+secondary,military,shinobi,0,[]
+secondary,military,slice,3,"[""s_momoko"", ""s_lulu"", ""s_mika""]"
+secondary,military,space,0,[]
+secondary,military,sports,2,"[""s_takeshi"", ""s_momoko""]"
+secondary,military,supernatural,0,[]
+secondary,military,survival,1,"[""s_amina""]"
+secondary,mystery,mythology,1,"[""s_anna""]"
+secondary,mystery,nordic,0,[]
+secondary,mystery,pirate,1,"[""s_amber""]"
+secondary,mystery,romance,2,"[""s_shin"", ""s_alfred""]"
+secondary,mystery,samurai,0,[]
+secondary,mystery,shinobi,0,[]
+secondary,mystery,slice,1,"[""s_megu""]"
+secondary,mystery,space,2,"[""s_shin"", ""s_nanami""]"
+secondary,mystery,sports,1,"[""s_anna""]"
+secondary,mystery,supernatural,1,"[""s_chiaki""]"
+secondary,mystery,survival,0,[]
+secondary,mythology,nordic,0,[]
+secondary,mythology,pirate,0,[]
+secondary,mythology,romance,0,[]
+secondary,mythology,samurai,0,[]
+secondary,mythology,shinobi,0,[]
+secondary,mythology,slice,0,[]
+secondary,mythology,space,0,[]
+secondary,mythology,sports,2,"[""s_yuna"", ""s_anna""]"
+secondary,mythology,supernatural,0,[]
+secondary,mythology,survival,1,"[""s_amina""]"
+secondary,nordic,pirate,0,[]
+secondary,nordic,romance,0,[]
+secondary,nordic,samurai,0,[]
+secondary,nordic,shinobi,0,[]
+secondary,nordic,slice,2,"[""s_eiji"", ""fumi""]"
+secondary,nordic,space,0,[]
+secondary,nordic,sports,0,[]
+secondary,nordic,supernatural,0,[]
+secondary,nordic,survival,1,"[""s_maki""]"
+secondary,pirate,romance,0,[]
+secondary,pirate,samurai,0,[]
+secondary,pirate,shinobi,0,[]
+secondary,pirate,slice,1,"[""s_aoi""]"
+secondary,pirate,space,0,[]
+secondary,pirate,sports,1,"[""s_akane""]"
+secondary,pirate,supernatural,2,"[""s_tora"", ""s_ryo""]"
+secondary,pirate,survival,1,"[""s_aoi""]"
+secondary,romance,samurai,0,[]
+secondary,romance,shinobi,0,[]
+secondary,romance,slice,2,"[""s_mika"", ""s_nozomi""]"
+secondary,romance,space,1,"[""s_shin""]"
+secondary,romance,sports,1,"[""s_okada""]"
+secondary,romance,supernatural,0,[]
+secondary,romance,survival,2,"[""s_ice"", ""s_hina""]"
+secondary,samurai,shinobi,0,[]
+secondary,samurai,slice,0,[]
+secondary,samurai,space,0,[]
+secondary,samurai,sports,0,[]
+secondary,samurai,supernatural,0,[]
+secondary,samurai,survival,0,[]
+secondary,shinobi,slice,0,[]
+secondary,shinobi,space,0,[]
+secondary,shinobi,sports,0,[]
+secondary,shinobi,supernatural,0,[]
+secondary,shinobi,survival,0,[]
+secondary,slice,space,1,"[""s_ren""]"
+secondary,slice,sports,2,"[""s_ren"", ""s_momoko""]"
+secondary,slice,supernatural,0,[]
+secondary,slice,survival,1,"[""s_aoi""]"
+secondary,space,sports,1,"[""s_ren""]"
+secondary,space,supernatural,0,[]
+secondary,space,survival,0,[]
+secondary,sports,supernatural,1,"[""yuzuki""]"
+secondary,sports,survival,1,"[""s_riku""]"
+secondary,supernatural,survival,0,[]
+pet,comedy,cooking,1,"[""p_ponta""]"
+pet,comedy,cyber,0,[]
+pet,comedy,fantasy,0,[]
+pet,comedy,horror,0,[]
+pet,comedy,idol,0,[]
+pet,comedy,isekai,0,[]
+pet,comedy,magical,0,[]
+pet,comedy,martial,1,"[""p_chacha""]"
+pet,comedy,mecha,1,"[""p_ponta""]"
+pet,comedy,military,2,"[""p_toro"", ""p_chibi""]"
+pet,comedy,mystery,0,[]
+pet,comedy,mythology,1,"[""p_nitro""]"
+pet,comedy,nordic,1,"[""p_fuwa""]"
+pet,comedy,pirate,1,"[""p_chacha""]"
+pet,comedy,romance,0,[]
+pet,comedy,samurai,0,[]
+pet,comedy,shinobi,0,[]
+pet,comedy,slice,1,"[""p_chibi""]"
+pet,comedy,space,1,"[""p_fuwa""]"
+pet,comedy,sports,1,"[""p_nitro""]"
+pet,comedy,supernatural,1,"[""p_toro""]"
+pet,comedy,survival,0,[]
+pet,cooking,cyber,2,"[""p_pomu"", ""p_mocha""]"
+pet,cooking,fantasy,2,"[""p_kiki2"", ""s_chika""]"
+pet,cooking,horror,0,[]
+pet,cooking,idol,1,"[""s_chika""]"
+pet,cooking,isekai,1,"[""p_puri""]"
+pet,cooking,magical,1,"[""p_kiki2""]"
+pet,cooking,martial,0,[]
+pet,cooking,mecha,2,"[""p_koro"", ""p_ponta""]"
+pet,cooking,military,1,"[""p_pudding""]"
+pet,cooking,mystery,1,"[""p_mocha""]"
+pet,cooking,mythology,1,"[""p_fuu""]"
+pet,cooking,nordic,2,"[""p_pomu"", ""p_puri""]"
+pet,cooking,pirate,2,"[""p_fuu"", ""p_yuzu""]"
+pet,cooking,romance,1,"[""p_goma""]"
+pet,cooking,samurai,0,[]
+pet,cooking,shinobi,0,[]
+pet,cooking,slice,2,"[""p_pudding"", ""p_yuzu""]"
+pet,cooking,space,1,"[""p_koro""]"
+pet,cooking,sports,1,"[""p_goma""]"
+pet,cooking,supernatural,0,[]
+pet,cooking,survival,0,[]
+pet,cyber,fantasy,0,[]
+pet,cyber,horror,0,[]
+pet,cyber,idol,0,[]
+pet,cyber,isekai,1,"[""p_piko""]"
+pet,cyber,magical,2,"[""p_pochi"", ""p_rin2""]"
+pet,cyber,martial,0,[]
+pet,cyber,mecha,1,"[""p_pochi""]"
+pet,cyber,military,0,[]
+pet,cyber,mystery,1,"[""p_mocha""]"
+pet,cyber,mythology,1,"[""p_rin2""]"
+pet,cyber,nordic,1,"[""p_pomu""]"
+pet,cyber,pirate,1,"[""p_brine""]"
+pet,cyber,romance,1,"[""p_piko""]"
+pet,cyber,samurai,0,[]
+pet,cyber,shinobi,0,[]
+pet,cyber,slice,0,[]
+pet,cyber,space,1,"[""p_brine""]"
+pet,cyber,sports,1,"[""p_kuro""]"
+pet,cyber,supernatural,1,"[""p_kuro""]"
+pet,cyber,survival,0,[]
+pet,fantasy,horror,1,"[""p_baku""]"
+pet,fantasy,idol,1,"[""s_chika""]"
+pet,fantasy,isekai,1,"[""p_drakko""]"
+pet,fantasy,magical,3,"[""p_kiki2"", ""p_tama"", ""p_bloop""]"
+pet,fantasy,martial,1,"[""p_drakko""]"
+pet,fantasy,mecha,1,"[""p_tama""]"
+pet,fantasy,military,0,[]
+pet,fantasy,mystery,2,"[""p_maru"", ""p_momo2""]"
+pet,fantasy,mythology,0,[]
+pet,fantasy,nordic,1,"[""p_baku""]"
+pet,fantasy,pirate,0,[]
+pet,fantasy,romance,2,"[""p_gon"", ""p_momo2""]"
+pet,fantasy,samurai,0,[]
+pet,fantasy,shinobi,0,[]
+pet,fantasy,slice,0,[]
+pet,fantasy,space,1,"[""p_bloop""]"
+pet,fantasy,sports,1,"[""p_maru""]"
+pet,fantasy,supernatural,0,[]
+pet,fantasy,survival,1,"[""p_gon""]"
+pet,horror,idol,1,"[""p_kona""]"
+pet,horror,isekai,0,[]
+pet,horror,magical,2,"[""p_nibi"", ""p_stellar""]"
+pet,horror,martial,0,[]
+pet,horror,mecha,0,[]
+pet,horror,military,0,[]
+pet,horror,mystery,0,[]
+pet,horror,mythology,0,[]
+pet,horror,nordic,1,"[""p_baku""]"
+pet,horror,pirate,0,[]
+pet,horror,romance,1,"[""p_mochi""]"
+pet,horror,samurai,0,[]
+pet,horror,shinobi,0,[]
+pet,horror,slice,1,"[""p_mochi""]"
+pet,horror,space,1,"[""p_stellar""]"
+pet,horror,sports,0,[]
+pet,horror,supernatural,1,"[""p_nibi""]"
+pet,horror,survival,1,"[""p_kona""]"
+pet,idol,isekai,0,[]
+pet,idol,magical,1,"[""p_ruri""]"
+pet,idol,martial,0,[]
+pet,idol,mecha,0,[]
+pet,idol,military,1,"[""p_ruri""]"
+pet,idol,mystery,1,"[""s_koko""]"
+pet,idol,mythology,0,[]
+pet,idol,nordic,0,[]
+pet,idol,pirate,0,[]
+pet,idol,romance,0,[]
+pet,idol,samurai,0,[]
+pet,idol,shinobi,0,[]
+pet,idol,slice,0,[]
+pet,idol,space,0,[]
+pet,idol,sports,0,[]
+pet,idol,supernatural,1,"[""s_koko""]"
+pet,idol,survival,1,"[""p_kona""]"
+pet,isekai,magical,1,"[""p_peko""]"
+pet,isekai,martial,1,"[""p_drakko""]"
+pet,isekai,mecha,0,[]
+pet,isekai,military,0,[]
+pet,isekai,mystery,0,[]
+pet,isekai,mythology,0,[]
+pet,isekai,nordic,1,"[""p_puri""]"
+pet,isekai,pirate,0,[]
+pet,isekai,romance,1,"[""p_piko""]"
+pet,isekai,samurai,0,[]
+pet,isekai,shinobi,0,[]
+pet,isekai,slice,0,[]
+pet,isekai,space,0,[]
+pet,isekai,sports,0,[]
+pet,isekai,supernatural,0,[]
+pet,isekai,survival,1,"[""p_peko""]"
+pet,magical,martial,0,[]
+pet,magical,mecha,2,"[""p_pochi"", ""p_tama""]"
+pet,magical,military,1,"[""p_ruri""]"
+pet,magical,mystery,0,[]
+pet,magical,mythology,1,"[""p_rin2""]"
+pet,magical,nordic,0,[]
+pet,magical,pirate,2,"[""p_silt"", ""p_sora""]"
+pet,magical,romance,0,[]
+pet,magical,samurai,0,[]
+pet,magical,shinobi,0,[]
+pet,magical,slice,1,"[""p_sora""]"
+pet,magical,space,3,"[""p_nya"", ""p_bloop"", ""p_stellar""]"
+pet,magical,sports,0,[]
+pet,magical,supernatural,2,"[""p_nibi"", ""p_nya""]"
+pet,magical,survival,2,"[""p_silt"", ""p_peko""]"
+pet,martial,mecha,0,[]
+pet,martial,military,0,[]
+pet,martial,mystery,0,[]
+pet,martial,mythology,1,"[""p_lumen""]"
+pet,martial,nordic,1,"[""p_lumen""]"
+pet,martial,pirate,1,"[""p_chacha""]"
+pet,martial,romance,1,"[""p_sakumi""]"
+pet,martial,samurai,0,[]
+pet,martial,shinobi,0,[]
+pet,martial,slice,0,[]
+pet,martial,space,0,[]
+pet,martial,sports,0,[]
+pet,martial,supernatural,1,"[""p_sakumi""]"
+pet,martial,survival,0,[]
+pet,mecha,military,0,[]
+pet,mecha,mystery,1,"[""p_cogsworth""]"
+pet,mecha,mythology,0,[]
+pet,mecha,nordic,0,[]
+pet,mecha,pirate,1,"[""p_cogsworth""]"
+pet,mecha,romance,0,[]
+pet,mecha,samurai,0,[]
+pet,mecha,shinobi,0,[]
+pet,mecha,slice,1,"[""p_teto""]"
+pet,mecha,space,1,"[""p_koro""]"
+pet,mecha,sports,1,"[""p_teto""]"
+pet,mecha,supernatural,0,[]
+pet,mecha,survival,0,[]
+pet,military,mystery,0,[]
+pet,military,mythology,0,[]
+pet,military,nordic,0,[]
+pet,military,pirate,0,[]
+pet,military,romance,1,"[""p_hachi""]"
+pet,military,samurai,0,[]
+pet,military,shinobi,0,[]
+pet,military,slice,3,"[""p_loader"", ""p_chibi"", ""p_pudding""]"
+pet,military,space,0,[]
+pet,military,sports,1,"[""p_hachi""]"
+pet,military,supernatural,1,"[""p_toro""]"
+pet,military,survival,1,"[""p_loader""]"
+pet,mystery,mythology,1,"[""s_haruto""]"
+pet,mystery,nordic,0,[]
+pet,mystery,pirate,2,"[""s_haruto"", ""p_cogsworth""]"
+pet,mystery,romance,1,"[""p_momo2""]"
+pet,mystery,samurai,0,[]
+pet,mystery,shinobi,0,[]
+pet,mystery,slice,0,[]
+pet,mystery,space,0,[]
+pet,mystery,sports,1,"[""p_maru""]"
+pet,mystery,supernatural,1,"[""s_koko""]"
+pet,mystery,survival,0,[]
+pet,mythology,nordic,1,"[""p_lumen""]"
+pet,mythology,pirate,2,"[""s_haruto"", ""p_fuu""]"
+pet,mythology,romance,0,[]
+pet,mythology,samurai,0,[]
+pet,mythology,shinobi,0,[]
+pet,mythology,slice,0,[]
+pet,mythology,space,0,[]
+pet,mythology,sports,1,"[""p_nitro""]"
+pet,mythology,supernatural,0,[]
+pet,mythology,survival,0,[]
+pet,nordic,pirate,0,[]
+pet,nordic,romance,0,[]
+pet,nordic,samurai,0,[]
+pet,nordic,shinobi,0,[]
+pet,nordic,slice,0,[]
+pet,nordic,space,1,"[""p_fuwa""]"
+pet,nordic,sports,1,"[""p_mugi""]"
+pet,nordic,supernatural,0,[]
+pet,nordic,survival,1,"[""p_mugi""]"
+pet,pirate,romance,0,[]
+pet,pirate,samurai,0,[]
+pet,pirate,shinobi,0,[]
+pet,pirate,slice,2,"[""p_sora"", ""p_yuzu""]"
+pet,pirate,space,1,"[""p_brine""]"
+pet,pirate,sports,0,[]
+pet,pirate,supernatural,0,[]
+pet,pirate,survival,1,"[""p_silt""]"
+pet,romance,samurai,0,[]
+pet,romance,shinobi,0,[]
+pet,romance,slice,2,"[""p_mochi"", ""p_nemu""]"
+pet,romance,space,0,[]
+pet,romance,sports,2,"[""p_hachi"", ""p_goma""]"
+pet,romance,supernatural,1,"[""p_sakumi""]"
+pet,romance,survival,2,"[""p_gon"", ""p_nemu""]"
+pet,samurai,shinobi,0,[]
+pet,samurai,slice,0,[]
+pet,samurai,space,0,[]
+pet,samurai,sports,0,[]
+pet,samurai,supernatural,0,[]
+pet,samurai,survival,0,[]
+pet,shinobi,slice,0,[]
+pet,shinobi,space,0,[]
+pet,shinobi,sports,0,[]
+pet,shinobi,supernatural,0,[]
+pet,shinobi,survival,0,[]
+pet,slice,space,1,"[""p_umi""]"
+pet,slice,sports,1,"[""p_teto""]"
+pet,slice,supernatural,0,[]
+pet,slice,survival,3,"[""p_loader"", ""p_umi"", ""p_nemu""]"
+pet,space,sports,0,[]
+pet,space,supernatural,1,"[""p_nya""]"
+pet,space,survival,1,"[""p_umi""]"
+pet,sports,supernatural,1,"[""p_kuro""]"
+pet,sports,survival,1,"[""p_mugi""]"
+pet,supernatural,survival,0,[]
+villain,comedy,cooking,1,"[""v_grandfinale""]"
+villain,comedy,cyber,0,[]
+villain,comedy,fantasy,1,"[""v_hollowchild""]"
+villain,comedy,horror,2,"[""v_ash"", ""v_lich""]"
+villain,comedy,idol,1,"[""v_harlequin""]"
+villain,comedy,isekai,1,"[""v_lich""]"
+villain,comedy,magical,0,[]
+villain,comedy,martial,0,[]
+villain,comedy,mecha,1,"[""v_grandfinale""]"
+villain,comedy,military,1,"[""v_ash""]"
+villain,comedy,mystery,0,[]
+villain,comedy,mythology,0,[]
+villain,comedy,nordic,1,"[""v_scuttle""]"
+villain,comedy,pirate,1,"[""v_scuttle""]"
+villain,comedy,romance,1,"[""v_lovelace""]"
+villain,comedy,samurai,0,[]
+villain,comedy,shinobi,0,[]
+villain,comedy,slice,0,[]
+villain,comedy,space,2,"[""v_lovelace"", ""v_hollowchild""]"
+villain,comedy,sports,0,[]
+villain,comedy,supernatural,0,[]
+villain,comedy,survival,1,"[""v_harlequin""]"
+villain,cooking,cyber,0,[]
+villain,cooking,fantasy,0,[]
+villain,cooking,horror,3,"[""v_fang"", ""v_silence"", ""v_moth""]"
+villain,cooking,idol,1,"[""v_einar""]"
+villain,cooking,isekai,1,"[""v_magus""]"
+villain,cooking,magical,1,"[""v_magus""]"
+villain,cooking,martial,0,[]
+villain,cooking,mecha,1,"[""v_grandfinale""]"
+villain,cooking,military,1,"[""v_gravemark""]"
+villain,cooking,mystery,1,"[""v_paradox""]"
+villain,cooking,mythology,1,"[""v_moth""]"
+villain,cooking,nordic,2,"[""v_gravemark"", ""v_einar""]"
+villain,cooking,pirate,1,"[""v_silence""]"
+villain,cooking,romance,1,"[""v_fang""]"
+villain,cooking,samurai,0,[]
+villain,cooking,shinobi,0,[]
+villain,cooking,slice,0,[]
+villain,cooking,space,1,"[""v_paradox""]"
+villain,cooking,sports,0,[]
+villain,cooking,supernatural,0,[]
+villain,cooking,survival,0,[]
+villain,cyber,fantasy,1,"[""v_collector""]"
+villain,cyber,horror,0,[]
+villain,cyber,idol,0,[]
+villain,cyber,isekai,0,[]
+villain,cyber,magical,1,"[""v_mirage""]"
+villain,cyber,martial,0,[]
+villain,cyber,mecha,1,"[""v_glitch""]"
+villain,cyber,military,0,[]
+villain,cyber,mystery,1,"[""v_mirage""]"
+villain,cyber,mythology,2,"[""v_blackout"", ""v_collector""]"
+villain,cyber,nordic,1,"[""v_kairos""]"
+villain,cyber,pirate,0,[]
+villain,cyber,romance,3,"[""v_zero"", ""v_kairos"", ""v_frostbite""]"
+villain,cyber,samurai,0,[]
+villain,cyber,shinobi,0,[]
+villain,cyber,slice,1,"[""v_glitch""]"
+villain,cyber,space,1,"[""v_zero""]"
+villain,cyber,sports,1,"[""v_frostbite""]"
+villain,cyber,supernatural,0,[]
+villain,cyber,survival,1,"[""v_blackout""]"
+villain,fantasy,horror,0,[]
+villain,fantasy,idol,0,[]
+villain,fantasy,isekai,1,"[""v_overlord""]"
+villain,fantasy,magical,2,"[""v_amethyst"", ""v_hex""]"
+villain,fantasy,martial,0,[]
+villain,fantasy,mecha,1,"[""v_overlord""]"
+villain,fantasy,military,0,[]
+villain,fantasy,mystery,0,[]
+villain,fantasy,mythology,1,"[""v_collector""]"
+villain,fantasy,nordic,1,"[""v_amethyst""]"
+villain,fantasy,pirate,0,[]
+villain,fantasy,romance,0,[]
+villain,fantasy,samurai,0,[]
+villain,fantasy,shinobi,0,[]
+villain,fantasy,slice,0,[]
+villain,fantasy,space,1,"[""v_hollowchild""]"
+villain,fantasy,sports,1,"[""v_hex""]"
+villain,fantasy,supernatural,0,[]
+villain,fantasy,survival,0,[]
+villain,horror,idol,1,"[""v_plague""]"
+villain,horror,isekai,2,"[""v_titanus"", ""v_lich""]"
+villain,horror,magical,0,[]
+villain,horror,martial,1,"[""v_reaper""]"
+villain,horror,mecha,0,[]
+villain,horror,military,1,"[""v_ash""]"
+villain,horror,mystery,1,"[""v_plague""]"
+villain,horror,mythology,1,"[""v_moth""]"
+villain,horror,nordic,0,[]
+villain,horror,pirate,1,"[""v_silence""]"
+villain,horror,romance,2,"[""v_hollow"", ""v_fang""]"
+villain,horror,samurai,0,[]
+villain,horror,shinobi,0,[]
+villain,horror,slice,0,[]
+villain,horror,space,0,[]
+villain,horror,sports,1,"[""v_reaper""]"
+villain,horror,supernatural,1,"[""v_hollow""]"
+villain,horror,survival,1,"[""v_titanus""]"
+villain,idol,isekai,0,[]
+villain,idol,magical,0,[]
+villain,idol,martial,2,"[""v_carnage"", ""v_falsetto""]"
+villain,idol,mecha,2,"[""v_bioform"", ""v_obsidian""]"
+villain,idol,military,1,"[""v_puppeteer""]"
+villain,idol,mystery,1,"[""v_plague""]"
+villain,idol,mythology,0,[]
+villain,idol,nordic,1,"[""v_einar""]"
+villain,idol,pirate,0,[]
+villain,idol,romance,3,"[""v_falsetto"", ""v_obsidian"", ""v_rosethorn""]"
+villain,idol,samurai,0,[]
+villain,idol,shinobi,0,[]
+villain,idol,slice,1,"[""v_puppeteer""]"
+villain,idol,space,0,[]
+villain,idol,sports,2,"[""v_carnage"", ""v_bioform""]"
+villain,idol,supernatural,0,[]
+villain,idol,survival,2,"[""v_harlequin"", ""v_rosethorn""]"
+villain,isekai,magical,1,"[""v_magus""]"
+villain,isekai,martial,0,[]
+villain,isekai,mecha,1,"[""v_overlord""]"
+villain,isekai,military,0,[]
+villain,isekai,mystery,0,[]
+villain,isekai,mythology,0,[]
+villain,isekai,nordic,0,[]
+villain,isekai,pirate,0,[]
+villain,isekai,romance,0,[]
+villain,isekai,samurai,0,[]
+villain,isekai,shinobi,0,[]
+villain,isekai,slice,0,[]
+villain,isekai,space,0,[]
+villain,isekai,sports,0,[]
+villain,isekai,supernatural,0,[]
+villain,isekai,survival,1,"[""v_titanus""]"
+villain,magical,martial,0,[]
+villain,magical,mecha,0,[]
+villain,magical,military,1,"[""v_warden""]"
+villain,magical,mystery,1,"[""v_mirage""]"
+villain,magical,mythology,0,[]
+villain,magical,nordic,1,"[""v_amethyst""]"
+villain,magical,pirate,0,[]
+villain,magical,romance,0,[]
+villain,magical,samurai,0,[]
+villain,magical,shinobi,0,[]
+villain,magical,slice,0,[]
+villain,magical,space,0,[]
+villain,magical,sports,1,"[""v_hex""]"
+villain,magical,supernatural,0,[]
+villain,magical,survival,1,"[""v_warden""]"
+villain,martial,mecha,0,[]
+villain,martial,military,1,"[""sen""]"
+villain,martial,mystery,3,"[""v_onikage"", ""v_inquisitor"", ""aya""]"
+villain,martial,mythology,0,[]
+villain,martial,nordic,0,[]
+villain,martial,pirate,1,"[""v_inquisitor""]"
+villain,martial,romance,3,"[""sen"", ""v_falsetto"", ""aya""]"
+villain,martial,samurai,0,[]
+villain,martial,shinobi,0,[]
+villain,martial,slice,0,[]
+villain,martial,space,0,[]
+villain,martial,sports,2,"[""v_carnage"", ""v_reaper""]"
+villain,martial,supernatural,1,"[""v_onikage""]"
+villain,martial,survival,0,[]
+villain,mecha,military,1,"[""v_kurogane""]"
+villain,mecha,mystery,0,[]
+villain,mecha,mythology,0,[]
+villain,mecha,nordic,0,[]
+villain,mecha,pirate,0,[]
+villain,mecha,romance,2,"[""v_volt"", ""v_obsidian""]"
+villain,mecha,samurai,0,[]
+villain,mecha,shinobi,0,[]
+villain,mecha,slice,2,"[""v_kurogane"", ""v_glitch""]"
+villain,mecha,space,1,"[""v_volt""]"
+villain,mecha,sports,1,"[""v_bioform""]"
+villain,mecha,supernatural,0,[]
+villain,mecha,survival,0,[]
+villain,military,mystery,0,[]
+villain,military,mythology,0,[]
+villain,military,nordic,1,"[""v_gravemark""]"
+villain,military,pirate,1,"[""v_dread""]"
+villain,military,romance,1,"[""sen""]"
+villain,military,samurai,0,[]
+villain,military,shinobi,0,[]
+villain,military,slice,3,"[""v_kurogane"", ""v_puppeteer"", ""v_dread""]"
+villain,military,space,0,[]
+villain,military,sports,0,[]
+villain,military,supernatural,0,[]
+villain,military,survival,1,"[""v_warden""]"
+villain,mystery,mythology,1,"[""v_sinister""]"
+villain,mystery,nordic,0,[]
+villain,mystery,pirate,1,"[""v_inquisitor""]"
+villain,mystery,romance,2,"[""v_nightshade"", ""aya""]"
+villain,mystery,samurai,0,[]
+villain,mystery,shinobi,0,[]
+villain,mystery,slice,2,"[""v_nocturne"", ""v_sinister""]"
+villain,mystery,space,1,"[""v_paradox""]"
+villain,mystery,sports,0,[]
+villain,mystery,supernatural,2,"[""v_onikage"", ""v_nocturne""]"
+villain,mystery,survival,1,"[""v_nightshade""]"
+villain,mythology,nordic,0,[]
+villain,mythology,pirate,1,"[""v_baron""]"
+villain,mythology,romance,0,[]
+villain,mythology,samurai,0,[]
+villain,mythology,shinobi,0,[]
+villain,mythology,slice,1,"[""v_sinister""]"
+villain,mythology,space,0,[]
+villain,mythology,sports,1,"[""v_baron""]"
+villain,mythology,supernatural,0,[]
+villain,mythology,survival,1,"[""v_blackout""]"
+villain,nordic,pirate,1,"[""v_scuttle""]"
+villain,nordic,romance,1,"[""v_kairos""]"
+villain,nordic,samurai,0,[]
+villain,nordic,shinobi,0,[]
+villain,nordic,slice,0,[]
+villain,nordic,space,0,[]
+villain,nordic,sports,0,[]
+villain,nordic,supernatural,0,[]
+villain,nordic,survival,0,[]
+villain,pirate,romance,0,[]
+villain,pirate,samurai,0,[]
+villain,pirate,shinobi,0,[]
+villain,pirate,slice,1,"[""v_dread""]"
+villain,pirate,space,0,[]
+villain,pirate,sports,2,"[""v_baron"", ""v_tempest""]"
+villain,pirate,supernatural,1,"[""v_tempest""]"
+villain,pirate,survival,0,[]
+villain,romance,samurai,0,[]
+villain,romance,shinobi,0,[]
+villain,romance,slice,1,"[""v_venom""]"
+villain,romance,space,3,"[""v_volt"", ""v_zero"", ""v_lovelace""]"
+villain,romance,sports,1,"[""v_frostbite""]"
+villain,romance,supernatural,1,"[""v_hollow""]"
+villain,romance,survival,3,"[""v_nightshade"", ""v_venom"", ""v_rosethorn""]"
+villain,samurai,shinobi,0,[]
+villain,samurai,slice,0,[]
+villain,samurai,space,0,[]
+villain,samurai,sports,0,[]
+villain,samurai,supernatural,0,[]
+villain,samurai,survival,0,[]
+villain,shinobi,slice,0,[]
+villain,shinobi,space,0,[]
+villain,shinobi,sports,0,[]
+villain,shinobi,supernatural,0,[]
+villain,shinobi,survival,0,[]
+villain,slice,space,0,[]
+villain,slice,sports,0,[]
+villain,slice,supernatural,1,"[""v_nocturne""]"
+villain,slice,survival,1,"[""v_venom""]"
+villain,space,sports,0,[]
+villain,space,supernatural,0,[]
+villain,space,survival,0,[]
+villain,sports,supernatural,1,"[""v_tempest""]"
+villain,sports,survival,0,[]
+villain,supernatural,survival,0,[]

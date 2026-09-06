@@ -1,0 +1,17 @@
+id,kind,filename,width,height,pair_id,look_index,target_repo_path,source_crop_box,status
+worker_17,sprite,sprite-worker-17.png,448,640,worker_17,15,game_source/public/img/sprite-worker-17.png,"(0, 0, 384, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_17,portrait,portrait-worker-17.png,224,224,worker_17,15,game_source/public/img/portrait-worker-17.png,"(0, 0, 384, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_18,sprite,sprite-worker-18.png,448,640,worker_18,16,game_source/public/img/sprite-worker-18.png,"(384, 0, 768, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_18,portrait,portrait-worker-18.png,224,224,worker_18,16,game_source/public/img/portrait-worker-18.png,"(384, 0, 768, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_19,sprite,sprite-worker-19.png,448,640,worker_19,17,game_source/public/img/sprite-worker-19.png,"(768, 0, 1152, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_19,portrait,portrait-worker-19.png,224,224,worker_19,17,game_source/public/img/portrait-worker-19.png,"(768, 0, 1152, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_20,sprite,sprite-worker-20.png,448,640,worker_20,18,game_source/public/img/sprite-worker-20.png,"(1152, 0, 1536, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_20,portrait,portrait-worker-20.png,224,224,worker_20,18,game_source/public/img/portrait-worker-20.png,"(1152, 0, 1536, 536)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_21,sprite,sprite-worker-21.png,448,640,worker_21,19,game_source/public/img/sprite-worker-21.png,"(0, 536, 384, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_21,portrait,portrait-worker-21.png,224,224,worker_21,19,game_source/public/img/portrait-worker-21.png,"(0, 536, 384, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_22,sprite,sprite-worker-22.png,448,640,worker_22,20,game_source/public/img/sprite-worker-22.png,"(384, 536, 768, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_22,portrait,portrait-worker-22.png,224,224,worker_22,20,game_source/public/img/portrait-worker-22.png,"(384, 536, 768, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_23,sprite,sprite-worker-23.png,448,640,worker_23,21,game_source/public/img/sprite-worker-23.png,"(768, 536, 1152, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_23,portrait,portrait-worker-23.png,224,224,worker_23,21,game_source/public/img/portrait-worker-23.png,"(768, 536, 1152, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+producer,sprite,sprite-showrunner-producer.png,448,640,producer,,game_source/public/img/sprite-showrunner-producer.png,"(1152, 536, 1536, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+producer,portrait,portrait-showrunner-producer.png,224,224,producer,,game_source/public/img/portrait-showrunner-producer.png,"(1152, 536, 1536, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING

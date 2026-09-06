@@ -72,6 +72,15 @@ import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
 
+import { mixedCastOrder } from "../engine/castDisplayOrder";
+
+const MIXED_CAST = {
+  protag: mixedCastOrder(PROTAGONISTS),
+  secondary: mixedCastOrder(SECONDARY),
+  pet: mixedCastOrder(PETS),
+  villain: mixedCastOrder(VILLAINS),
+};
+
 const STEPS = ["CONCEPT", "TYPE", "GENRES", "AUDIENCE", "CAST", "STORY ARCS", "GREENLIGHT"];
 /** CAST is broken into one screen per role, in this order. */
 const CAST_ORDER = ["protag", "secondary", "pet", "villain"] as const;
@@ -185,7 +194,7 @@ function CastPick({
       <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-2">
         <div className="font-display text-sm font-extrabold leading-tight">{m.name}</div>
-        <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {m.archetype}</div>
+        <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {(m.epithet ?? m.archetype)}</div>
       </div>
       {on && (
         <div className="absolute left-1.5 top-1.5 rounded-full bg-neon p-1 text-white">
@@ -351,10 +360,10 @@ export default function Create({
   }, [d.arcs, d.genres, run.arcKnowledge, run.arcGenreKnowledge, run.arcCombos]);
 
   const castRows: { role: "protag" | "secondary" | "pet" | "villain"; title: string; hint: string; icon: React.ReactNode; list: CastMember[] }[] = [
-    { role: "protag", title: "LEAD ROLE", hint: "The face of the show — everything is built around them.", icon: <Users size={14} />, list: PROTAGONISTS },
-    { role: "secondary", title: "SIDEKICK", hint: "The trusty best friend / mentor / rival.", icon: <Users size={14} />, list: SECONDARY },
-    { role: "pet", title: "PET / MASCOT", hint: "Merch sales depend on them.", icon: <PawPrint size={14} />, list: PETS },
-    { role: "villain", title: "VILLAIN", hint: "Every hero needs a foil.", icon: <Skull size={14} />, list: VILLAINS },
+    { role: "protag", title: "LEAD ROLE", hint: "The face of the show — everything is built around them.", icon: <Users size={14} />, list: MIXED_CAST.protag },
+    { role: "secondary", title: "SIDEKICK", hint: "The trusty best friend / mentor / rival.", icon: <Users size={14} />, list: MIXED_CAST.secondary },
+    { role: "pet", title: "PET / MASCOT", hint: "Merch sales depend on them.", icon: <PawPrint size={14} />, list: MIXED_CAST.pet },
+    { role: "villain", title: "VILLAIN", hint: "Every hero needs a foil.", icon: <Skull size={14} />, list: MIXED_CAST.villain },
   ];
   const CAST_SCREENS = castRows.length;
   const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
@@ -655,7 +664,7 @@ export default function Create({
                 />
                 <div className="min-w-0 flex-1">
                   <div className="font-display text-base font-extrabold leading-tight">{castPicked.name}</div>
-                  <div className="text-[11px] font-bold text-cyanx">{castPicked.archetype}</div>
+                  <div className="text-[11px] font-bold text-cyanx">{(castPicked.epithet ?? castPicked.archetype)}</div>
                   <div className="truncate text-[10px] italic text-paper/50">“{castPicked.personality}”</div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {castPicked.visibleAff.map((a) => {
@@ -882,7 +891,7 @@ export default function Create({
                   <Row k="Anime Type" v={ANIME_TYPE_LABEL[d.animeType]} />
                   <Row k="Genre" v={d.genres.map((g) => GENRES.find((x) => x.id === g)!.label).join(" × ")} />
                   <Row k="Audience" v={AUDIENCES[d.audience].label} />
-                  <Row k="Lead" v={`${d.protagName} (${protag.archetype})`} />
+                  <Row k="Lead" v={`${d.protagName} (${(protag.epithet ?? protag.archetype)})`} />
                   <Row k="Supporting" v={SECONDARY.find((x) => x.id === d.secondary)?.name ?? ""} />
                   <Row k="Pet / Mascot" v={PETS.find((x) => x.id === d.pet)?.name ?? ""} />
                   <Row k="Villain" v={VILLAINS.find((x) => x.id === d.villain)?.name ?? ""} />
