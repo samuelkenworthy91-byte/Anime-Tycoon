@@ -21,7 +21,7 @@ import {
   type ScopeId,
 } from "../src/engine/data";
 import { computeResult, seededRng } from "../src/engine/scoring";
-import { expectedProductionPoints } from "../src/engine/production";
+import { expectedProductionPoints, nextReviewExpectation, productionPointScore } from "../src/engine/production";
 
 /* ======================================================================
  * DETERMINISTIC SCORING BALANCE MATRIX
@@ -430,5 +430,86 @@ describe("scoring balance acceptance", () => {
   it("fan web gets no review cap — a fantastic fan series can review 9+/10", () => {
     const fan = (matrix.formats as Record<string, Record<string, { ninePlus: number; mean: number }>>).fanweb;
     expect(fan.exceptional.mean).toBeGreaterThanOrEqual(8.3);
+  });
+
+  it("scope advantage is real but never automatic — strong prestige is NOT an almost-guaranteed Hall of Fame", () => {
+    const scopes = matrix.scopes as Record<string, Record<string, { mean: number; hof: number; tenRate: number }>>;
+    /* the audit's hard requirement: merely *choosing* a bigger scope at the
+       same relative effort must not hand out HoF */
+    expect(scopes.extended.strong.hof).toBeLessThan(0.45);
+    expect(scopes.prestige.strong.hof).toBeLessThan(0.5);
+    /* desired directional bands: strong stays in the 7.6–8.2 range */
+    expect(scopes.extended.strong.mean).toBeGreaterThanOrEqual(7.6);
+    expect(scopes.extended.strong.mean).toBeLessThanOrEqual(8.1);
+    expect(scopes.prestige.strong.mean).toBeGreaterThanOrEqual(7.7);
+    expect(scopes.prestige.strong.mean).toBeLessThanOrEqual(8.2);
+  });
+
+  it("genuinely exceptional prestige still clears a higher bar than standard", () => {
+    const scopes = matrix.scopes as Record<string, Record<string, { mean: number; hof: number; tenRate: number }>>;
+    const std = scopes.standard.exceptional;
+    const pres = scopes.prestige.exceptional;
+    expect(pres.mean).toBeGreaterThanOrEqual(8.8);
+    expect(pres.mean).toBeLessThanOrEqual(9.3);
+    /* exceptional work in a big scope is notably better than the same work
+       at standard — the ceiling exists, it is just earned */
+    expect(pres.mean).toBeGreaterThan(std.mean + 0.15);
+    /* …but 10s are still not automatic, and the top of the scale stays rare */
+    expect(pres.tenRate).toBeGreaterThan(0);
+    expect(pres.tenRate).toBeLessThan(0.75);
+  });
+
+  it("the ambition gate: at effort 1.0 a bigger scope earns no ceiling bonus; at 1.5× it fully unlocks", () => {
+    for (const scope of ["standard", "extended", "prestige"] as ScopeId[]) {
+      const expected = expectedProductionPoints({ scope, medium: "tv" });
+      const atExpectation = productionPointScore(expected, { scope, medium: "tv" });
+      const maxed = productionPointScore(expected * 1.5, { scope, medium: "tv" });
+      /* meeting the larger expected workload exactly is worth the same as
+         meeting standard's — the pay-off starts above expectation */
+      if (scope !== "standard") expect(atExpectation).toBeLessThanOrEqual(productionPointScore(expectedProductionPoints({ scope: "standard", medium: "tv" }), { scope: "standard", medium: "tv" }) + 0.01);
+      /* genuine over-delivery scales with the scope's ceiling */
+      if (scope !== "standard") expect(maxed).toBeGreaterThan(productionPointScore(expectedProductionPoints({ scope: "standard", medium: "tv" }) * 1.5, { scope: "standard", medium: "tv" }));
+    }
+  });
+});
+
+/* ============================== expectation exploit ==================
+ * The review expectation EMA is asymmetric: strong releases raise the bar
+ * normally; bad releases can barely lower it. Deliberate flops must never
+ * be a useful review strategy. */
+describe("review expectation exploit", () => {
+  it("one flop does not lower the expectation by several points", () => {
+    /* 38 expectation + quality 14 used to slide ~4.8 points (alpha 0.2).
+       With the asymmetric EMA it moves well under 1 point. */
+    const next = nextReviewExpectation(38, 14);
+    expect(next).toBeGreaterThan(37.5);
+    expect(38 - next).toBeLessThan(1);
+  });
+
+  it("five deliberate flops do not materially boost a subsequent exceptional release", () => {
+    let exp = 38;
+    for (let i = 0; i < 5; i += 1) exp = nextReviewExpectation(exp, 14);
+    /* a stack of deliberate garbage barely moves the bar */
+    expect(38 - exp).toBeLessThan(2.5);
+    /* and that shift is far below the ±0.75 reviewer-point nudge band */
+    const adjAfter = (32 - exp) * 0.055;
+    const adjClean = (32 - 38) * 0.055;
+    expect(Math.abs(adjAfter - adjClean)).toBeLessThan(0.15);
+  });
+
+  it("good releases still raise the expectation normally", () => {
+    const exp = nextReviewExpectation(32, 40);
+    /* upward move keeps the normal alpha (0.2): 32 → 33.6 */
+    expect(exp).toBeCloseTo(33.6, 5);
+  });
+
+  it("long stretches of genuinely weaker output soften the bar very slowly", () => {
+    let exp = 38;
+    for (let i = 0; i < 60; i += 1) exp = nextReviewExpectation(exp, 26);
+    /* 60 mediocre releases eventually pull the studio's own bar down —
+       slowly, not after one or two stinkers (still above the mediocre
+       quality floor of 26 after 1.25 in-game years of weak output) */
+    expect(exp).toBeLessThan(34);
+    expect(exp).toBeGreaterThan(27);
   });
 });
