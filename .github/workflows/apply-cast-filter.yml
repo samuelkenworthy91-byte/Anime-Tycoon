@@ -1,0 +1,125 @@
+name: Apply Cast Genre Filter
+
+on:
+  push:
+    branches:
+      - tmp/cast-filter-patch
+    paths:
+      - .github/cast-filter-trigger
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout patch branch
+        uses: actions/checkout@v4
+        with:
+          ref: tmp/cast-filter-patch
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply cast genre filter patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          create = Path('game_source/src/components/Create.tsx')
+          text = create.read_text()
+
+          def replace_once(old: str, new: str, label: str):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, found {count}')
+              text = text.replace(old, new, 1)
+
+          replace_once(
+              '  Lock,\n} from "lucide-react";',
+              '  Lock,\n  Filter,\n} from "lucide-react";',
+              'Filter icon import',
+          )
+          replace_once(
+              'import { mixedCastOrder } from "../engine/castDisplayOrder";',
+              'import { filterCastByVisibleGenre, mixedCastOrder } from "../engine/castDisplayOrder";',
+              'cast display helper import',
+          )
+          replace_once(
+              '  const [castStep, setCastStep] = useState(0);\n',
+              '  const [castStep, setCastStep] = useState(0);\n  const [castFilterOpen, setCastFilterOpen] = useState(false);\n  const [castGenreFilter, setCastGenreFilter] = useState<GenreId | null>(null);\n',
+              'cast filter state',
+          )
+          replace_once(
+              '  const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];\n\n  return (',
+              '  const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];\n  const filteredCastList = filterCastByVisibleGenre(castRow.list, castGenreFilter);\n  const filterGenre = castGenreFilter ? GENRES.find((g) => g.id === castGenreFilter) : null;\n\n  return (',
+              'filtered cast derivation',
+          )
+          replace_once(
+              '                    const pool = castRow.list;\n',
+              '                    const pool = filteredCastList.length ? filteredCastList : castRow.list;\n',
+              'random pick filter pool',
+          )
+          replace_once(
+              '                {castRow.list.map((m) => (\n',
+              '                {filteredCastList.map((m) => (\n',
+              'cast grid filtered list',
+          )
+
+          marker = '              {/* chosen-so-far strip — sticky so the current pick stays visible\n'
+          if text.count(marker) != 1:
+              raise SystemExit(f'filter UI insertion marker: expected 1 match, found {text.count(marker)}')
+          filter_ui = '''              {/* genre filter — visible affinities only, so hidden affinities never leak */}\n              <div className="rounded-xl border border-line bg-panel2/70 p-2.5">\n                <div className="flex flex-wrap items-center gap-2">\n                  <button\n                    onClick={() => { sfx.click(); setCastFilterOpen((open) => !open); }}\n                    className={cn(\n                      "btn-press flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-extrabold tracking-wider",\n                      castGenreFilter ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line bg-panel3 text-paper/70"\n                    )}\n                  >\n                    <Filter size={13} />\n                    {castGenreFilter ? `FILTER: ${filterGenre?.label ?? castGenreFilter}` : "FILTER BY GENRE"}\n                    <span className="rounded bg-abyss/60 px-1.5 py-0.5 text-[9px] text-paper/55">{filteredCastList.length}/{castRow.list.length}</span>\n                  </button>\n                  {castGenreFilter && (\n                    <button\n                      onClick={() => { sfx.click(); setCastGenreFilter(null); }}\n                      className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1.5 text-[9px] font-bold text-paper/55"\n                    >\n                      <X size={11} /> CLEAR\n                    </button>\n                  )}\n                  {d.genres.map((genre) => {\n                    const g = GENRES.find((x) => x.id === genre);\n                    return (\n                      <button\n                        key={genre}\n                        onClick={() => { sfx.click(); setCastGenreFilter(genre); setCastFilterOpen(false); }}\n                        className={cn(\n                          "btn-press rounded-lg border px-2 py-1.5 text-[9px] font-bold",\n                          castGenreFilter === genre ? "border-mint bg-mint/10 text-mint" : "border-line text-paper/50"\n                        )}\n                      >\n                        SHOW: {g?.label ?? genre}\n                      </button>\n                    );\n                  })}\n                </div>\n                {castFilterOpen && (\n                  <div className="mt-2 border-t border-line/60 pt-2">\n                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/40">VISIBLE AFFINITY FILTER</div>\n                    <div className="mt-1.5 flex flex-wrap gap-1.5">\n                      <button\n                        onClick={() => { sfx.click(); setCastGenreFilter(null); setCastFilterOpen(false); }}\n                        className={cn(\n                          "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",\n                          castGenreFilter === null ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/50"\n                        )}\n                      >\n                        ALL\n                      </button>\n                      {GENRES.map((g) => (\n                        <button\n                          key={g.id}\n                          onClick={() => { sfx.click(); setCastGenreFilter(g.id); setCastFilterOpen(false); }}\n                          className={cn(\n                            "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",\n                            castGenreFilter === g.id ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line text-paper/50"\n                          )}\n                        >\n                          {g.label}\n                        </button>\n                      ))}\n                    </div>\n                    <div className="mt-2 text-[9px] italic text-paper/35">Visible affinities only — hidden affinities never affect filter results.</div>\n                  </div>\n                )}\n              </div>\n\n'''
+          text = text.replace(marker, filter_ui + marker, 1)
+
+          create.write_text(text)
+
+          helper = Path('game_source/src/engine/castDisplayOrder.ts')
+          h = helper.read_text()
+          if 'filterCastByVisibleGenre' in h:
+              raise SystemExit('filterCastByVisibleGenre already exists unexpectedly')
+          h = h.replace(
+              'import type { CastMember } from "./data";',
+              'import type { CastMember, GenreId } from "./data";',
+              1,
+          )
+          h += '''\n/** Browse-time filter. Only public visible affinities are considered. */\nexport function filterCastByVisibleGenre(\n  members: readonly CastMember[],\n  genre: GenreId | null,\n): CastMember[] {\n  if (!genre) return [...members];\n  return members.filter((member) => member.visibleAff.includes(genre));\n}\n'''
+          helper.write_text(h)
+
+          test = Path('game_source/src/engine/__tests__/cast-display-filter.test.ts')
+          test.write_text('''import { describe, expect, it } from "vitest";\nimport { GENRES, PROTAGONISTS } from "../data";\nimport { filterCastByVisibleGenre } from "../castDisplayOrder";\n\ndescribe("cast visible-genre filter", () => {\n  it("keeps the mixed source order when no filter is active", () => {\n    const result = filterCastByVisibleGenre(PROTAGONISTS, null);\n    expect(result.map((m) => m.id)).toEqual(PROTAGONISTS.map((m) => m.id));\n    expect(result).not.toBe(PROTAGONISTS);\n  });\n\n  it("returns only cast with the requested visible affinity", () => {\n    for (const genre of GENRES.map((g) => g.id)) {\n      const result = filterCastByVisibleGenre(PROTAGONISTS, genre);\n      expect(result.length).toBeGreaterThan(0);\n      expect(result.every((m) => m.visibleAff.includes(genre))).toBe(true);\n    }\n  });\n\n  it("never uses hidden affinities to satisfy the filter", () => {\n    for (const genre of GENRES.map((g) => g.id)) {\n      const hiddenOnly = PROTAGONISTS.find((m) => m.hiddenAff === genre && !m.visibleAff.includes(genre));\n      if (!hiddenOnly) continue;\n      const result = filterCastByVisibleGenre(PROTAGONISTS, genre);\n      expect(result.some((m) => m.id === hiddenOnly.id)).toBe(false);\n    }\n  });\n});\n''')
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Type-check
+        working-directory: game_source
+        run: npx tsc --noEmit
+
+      - name: Build web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Verify diff
+        run: git diff --check
+
+      - name: Commit tested patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/components/Create.tsx game_source/src/engine/castDisplayOrder.ts game_source/src/engine/__tests__/cast-display-filter.test.ts
+          git commit -m "Add visible-genre filter to cast selection"
+          git push origin HEAD:tmp/cast-filter-patch
