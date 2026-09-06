@@ -66,63 +66,39 @@
   }
 }
 
-/* ---------- body-level forecast mirror ----------
-   This node is appended directly to document.body by main.tsx, so it is not
-   affected by the HUD's backdrop-filter/transform containing block in Android
-   WebView. */
+/* ---------- true body-level forecast surface ----------
+   main.tsx creates this directly under document.body and gives it measured
+   viewport dimensions with inline !important declarations. It contains only
+   the forecast CONTENT, never the old HUD panel's width/translate classes. */
 .forecast-screen {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  box-sizing: border-box !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  margin: 0 !important;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + 18px)
-    16px
-    calc(env(safe-area-inset-bottom, 0px) + 18px) !important;
-  overflow-y: auto !important;
-  background: #100d1c !important;
-  color: inherit !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-.forecast-screen-card {
-  position: static !important;
-  inset: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
   display: block !important;
-  box-sizing: border-box !important;
-  width: 100% !important;
-  max-width: 44rem !important;
-  max-height: none !important;
-  margin: 0 auto !important;
-  transform: none !important;
-  animation: none !important;
-  visibility: visible !important;
-  pointer-events: none !important;
+  color: var(--color-paper) !important;
+  font-family: var(--font-body) !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
-.forecast-screen-card > div:first-child {
-  font-size: 15px !important;
+.forecast-screen > div:first-child {
+  margin-bottom: 18px !important;
+  font-size: 16px !important;
   line-height: 1.35 !important;
+  letter-spacing: .04em !important;
 }
 
-.forecast-screen-card .space-y-0\.5 {
+.forecast-screen > .space-y-0\.5 {
   font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.forecast-screen > .space-y-0\.5 > div {
+  min-height: 24px;
+  align-items: center;
 }
 
 .forecast-screen-close {
   width: 100%;
-  max-width: 44rem;
-  margin: auto auto 0;
-  padding-top: 28px;
+  margin: 36px 0 0;
+  padding: 18px 0 8px;
   text-align: center;
   font-size: 10px;
   font-weight: 800;
