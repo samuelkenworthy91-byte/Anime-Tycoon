@@ -13,7 +13,7 @@ export interface OfficeStaff {
   working?: boolean;
   energy?: number;
   resting?: boolean;
-  pulse?: { actorId: string; name: string; type: string; points: number; nonce: number };
+  pulse?: { actorId: string; name: string; type: string; points: number; nonce: number; kind?: "research" | "note" };
 }
 
 /* ------------------------------------------------------------------ art
@@ -112,7 +112,7 @@ function Character({
   working?: boolean;
   energy?: number;
   resting?: boolean;
-  pulse?: { points: number; type: string; nonce: number };
+  pulse?: { points: number; type: string; nonce: number; kind?: "research" | "note" };
   onClick?: () => void;
   bobDelay: number;
 }) {
@@ -208,8 +208,10 @@ function Character({
         </span>
       )}
       {pulse && (
-        <span key={pulse.nonce} className="pointer-events-none absolute -top-[20%] left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-gold/50 bg-abyss/95 px-2 py-1 font-display text-[10px] font-extrabold text-gold shadow-xl anim-floaty">
-          +{pulse.points} {pulse.type.toUpperCase()}
+        <span key={pulse.nonce} className={`pointer-events-none absolute -top-[20%] left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-full border bg-abyss/95 px-2 py-1 font-display text-[10px] font-extrabold shadow-xl anim-floaty ${
+          pulse.kind === "research" ? "border-viol/60 text-viol" : pulse.kind === "note" ? "border-neon/60 text-neon" : "border-gold/50 text-gold"
+        }`}>
+          {pulse.kind === "research" ? `+${pulse.points} RD · RESEARCH` : pulse.kind === "note" ? `+${pulse.points} NOTE · EDITOR NOTE` : `+${pulse.points} ${pulse.type.toUpperCase()}`}
         </span>
       )}
 

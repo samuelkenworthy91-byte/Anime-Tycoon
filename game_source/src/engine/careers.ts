@@ -152,7 +152,7 @@ export const TRAIT_DEFS: TraitDef[] = [
   { id: "fanatic", name: "Genre Fanatic", desc: "+30% output on favourite genre · +1 morale/wk on it, −1 off it", good: true },
   { id: "adapt", name: "Adaptation Expert", desc: "+20% output on season 2+ projects", good: true },
   { id: "movie", name: "Movie Specialist", desc: "+25% output on movie projects", good: true },
-  { id: "veteran", name: "Franchise Veteran", desc: "+15% output on franchise projects", good: true },
+  { id: "veteran", name: "Franchise Veteran", desc: "+15% output on franchise & season 2+ projects", good: true },
 ];
 
 export const traitDef = (id: string): TraitDef | null => TRAIT_DEFS.find((t) => t.id === id) ?? null;
@@ -420,6 +420,29 @@ export const WEEKLY_XP = 3; // for assigned staff
 export const TRAIN_COOLDOWN = 6; // weeks between courses per person
 export const trainCost = (tier: number) => ({ cash: 4_000 + 2_000 * tier, rd: 2 * tier });
 export const trainXp = (tier: number) => 50 * tier;
+
+/* -------------------------------------------------- intensive development
+ * Spend RD to advance an employee to EXACTLY the XP threshold of their next
+ * career level. All stat growth flows through gainXp() — canonical +2 main /
+ * +1 off per level — nothing is bumped manually. No cooldown (that is Timed
+ * Training's job); the cost escalates with level so it stays a deliberate,
+ * expensive choice. */
+export const INTENSIVE_RD_BASE = 15;
+export const INTENSIVE_RD_PER_LEVEL = 10;
+export const intensiveRdCost = (level: number) => INTENSIVE_RD_BASE + level * INTENSIVE_RD_PER_LEVEL;
+
+/** exactly the XP needed to cross into the next level, or null at max */
+export function intensiveTargetXp(s: Staff): number | null {
+  const xp = s.xp ?? XP_LEVELS[Math.max(0, Math.min(MAX_LEVEL, s.level) - 1)];
+  if (s.level >= MAX_LEVEL || xp >= XP_LEVELS[s.level]) return null;
+  return XP_LEVELS[s.level] - xp;
+}
+
+/** the canonical stat growth gainXp applies to this person per level */
+export function intensiveGainFor(s: Staff): { story: number; art: number; sound: number } {
+  const main = ROLE_POINT[s.role];
+  return { story: main === "story" ? 2 : 1, art: main === "art" ? 2 : 1, sound: main === "sound" ? 2 : 1 };
+}
 
 /* ------------------------------------------------------------ retirement */
 export const RETIRE_MIN_LEVEL = 10;

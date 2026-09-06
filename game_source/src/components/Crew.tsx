@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Award,
+  Brain,
+  Check,
   ChevronDown,
   ChevronUp,
   Crown,
@@ -13,10 +15,12 @@ import {
   PenTool,
   Trash2,
   UserRound,
+  X,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
+  GENRES,
   POINT_COLOR,
   ROLE_LABEL,
   ROLE_POINT,
@@ -35,6 +39,8 @@ import {
   XP_LEVELS,
   MAX_LEVEL,
   bondBetween,
+  intensiveGainFor,
+  intensiveRdCost,
   levelProgress,
   levelTitle,
   marketSalary,
@@ -51,6 +57,7 @@ import {
 import {
   appointHead,
   headBlockReason,
+  intensiveDevelop,
   respondPoach,
   respondSalary,
   trainBlockReason,
@@ -78,17 +85,114 @@ const BOND_COLOR: Record<BondKind, string> = {
 const roleIcon = (role: Staff["role"]) =>
   role === "writer" ? <PenTool size={13} /> : role === "animator" ? <Monitor size={13} /> : <Music size={13} />;
 
+/* ------------------------------------------------- ability explanation
+ * Traits & specialisations are tappable (they can't rely on hover on a
+ * phone). The sheet shows the canonical description plus the exact
+ * mechanical effect; Genre Fanatic reveals the candidate's ACTUAL
+ * favourite genre. */
+type AbilityInfo = { title: string; body: string };
+const specAbility = (s: Staff): AbilityInfo | null => {
+  const spec = specDef(s.spec);
+  return spec ? { title: `★ ${spec.name}`, body: specLabel(spec) } : null;
+};
+const traitAbilities = (s: Staff): AbilityInfo[] =>
+  (s.traits ?? []).map((tid) => {
+    const t = traitDef(tid)!;
+    let body = t.desc;
+    if (tid === "fanatic") {
+      const fav = s.favGenre ? GENRES.find((g) => g.id === s.favGenre)?.label ?? s.favGenre : "unspecified";
+      body += ` — this candidate's favourite genre: ${fav}.`;
+    }
+    return { title: t.name, body };
+  });
+
+/* ------------------------------------------- intensive development reveal
+ * A short sequential reveal: old level -> new level, new career title, then
+ * the canonical stat gains. SKIP (top-right) jumps instantly to the last
+ * line. Everything comes from gainXp() — no manual stat bumps. */
+function IntensiveReveal({
+  before,
+  after,
+  onClose,
+}: {
+  before: Staff;
+  after: Staff;
+  onClose: () => void;
+}) {
+  const gain = intensiveGainFor(before);
+  const lines = [
+    <>Lv {before.level} → Lv {after.level}</>,
+    <>{levelTitle(after.level)}</>,
+    <>Story +{gain.story}</>,
+    <>Art +{gain.art}</>,
+    <>Sound +{gain.sound}</>,
+  ];
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const t = window.setTimeout(() => setStep((s) => Math.min(lines.length, s + 1)), 700);
+    return () => window.clearTimeout(t);
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div className="fixed inset-0 z-[97] flex items-center justify-center bg-abyss/85 p-4 backdrop-blur-md">
+      <button
+        onClick={() => setStep(lines.length)}
+        className="btn-press absolute right-4 top-4 rounded-lg border border-line bg-panel px-3 py-1.5 text-[10px] font-extrabold tracking-widest text-paper/70"
+      >
+        SKIP ⏭
+      </button>
+      <div className="anim-pop ink-card w-full max-w-sm p-5 text-center">
+        <Brain size={22} className="mx-auto text-viol" />
+        <div className="mt-2 text-[10px] font-extrabold tracking-[0.3em] text-viol">INTENSIVE DEVELOPMENT</div>
+        <div className="mt-1 text-sm font-bold text-paper/60">{before.name}</div>
+        <div className="mt-4 min-h-32 space-y-1.5">
+          {lines.slice(0, step).map((line, i) => (
+            <div
+              key={i}
+              className={`anim-pop flex items-center justify-center gap-2 font-display text-lg font-extrabold ${i === 0 ? "text-gold" : i === 2 || i === 3 || i === 4 ? "text-mint" : "text-paper"}`}
+            >
+              <Check size={13} className="text-mint" />
+              {line}
+            </div>
+          ))}
+          {step < lines.length && <div className="pt-2 text-[9px] tracking-widest text-paper/35">REVEALING…</div>}
+        </div>
+        <Btn big variant="primary" className="mt-4 w-full" onClick={onClose}>CONTINUE</Btn>
+      </div>
+    </div>
+  );
+}
+
+function AbilitySheet({ info, onClose }: { info: AbilityInfo | null; onClose: () => void }) {
+  if (!info) return null;
+  return (
+    <div className="fixed inset-0 z-[96] flex items-end justify-center bg-abyss/70 p-3 backdrop-blur-sm" onClick={onClose}>
+      <div className="anim-pop w-full max-w-md rounded-2xl border border-line bg-panel p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] font-extrabold tracking-[0.25em] text-viol">ABILITY</div>
+          <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={16} /></button>
+        </div>
+        <div className="mt-1 font-display text-lg font-extrabold">{info.title}</div>
+        <p className="mt-1 text-xs leading-relaxed text-paper/60">{info.body}</p>
+        <p className="mt-2 text-[9px] text-paper/40">Exact values — no hidden mechanics.</p>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------- staff card */
 function StaffCard({
   s,
   run,
   setRun,
+  onIntense,
 }: {
   s: Staff;
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
+  onIntense: (before: Staff, after: Staff) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const proj = projectOfStaff(run.projects, s.id);
   const morale = moraleOf(s);
   const xp = s.xp ?? 0;
@@ -183,20 +287,25 @@ function StaffCard({
       {/* spec + traits (always visible — this is who they are) */}
       <div className="mt-1.5 flex flex-wrap gap-1">
         {spec && (
-          <span className="ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol" title={specLabel(spec)}>
+          <button onClick={() => { sfx.click(); setSheet(specAbility(s)); }} className="btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol">
             ★ {spec.name}
-          </span>
+          </button>
         )}
         {(s.traits ?? []).map((tid) => {
           const t = traitDef(tid);
           if (!t) return null;
           return (
-            <span key={tid} className={cn("ink-chip px-1.5 py-0.5 text-[8px] font-bold", t.good ? "text-mint" : "text-neon2")} title={t.desc}>
+            <button
+              key={tid}
+              onClick={() => { sfx.click(); const hit = traitAbilities(s).find((a) => a.title === t.name); if (hit) setSheet(hit); }}
+              className={cn("btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold", t.good ? "text-mint" : "text-neon2")}
+            >
               {t.name}
-            </span>
+            </button>
           );
         })}
       </div>
+      <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
 
       {open && (
         <div className="mt-2 space-y-2 border-t border-line/60 pt-2">
@@ -268,6 +377,40 @@ function StaffCard({
               {trainBlock && <div className="mt-0.5 text-[8px] text-neon">{trainBlock}</div>}
             </div>
           )}
+
+          {/* intensive development — one exact level, canonical stat growth */}
+          {(() => {
+            const rdCost = intensiveRdCost(s.level);
+            const atMax = s.level >= MAX_LEVEL;
+            return (
+              <div className="rounded-xl border border-viol/40 bg-viol/5 p-2">
+                <div className="flex items-center gap-1 text-[8px] font-bold tracking-[0.2em] text-viol">
+                  <Brain size={10} /> INTENSIVE DEVELOPMENT · {rdCost} RD → exactly Lv{s.level + 1} {levelTitle(s.level + 1)}
+                </div>
+                <div className="mt-1 text-[8px] text-paper/45">
+                  {atMax
+                    ? "Already at the top of the career ladder."
+                    : "Escalating RD cost · +2 main / +1 off stats via the normal XP path. Timed Training stays separate."}
+                </div>
+                <Btn
+                  variant="ghost"
+                  className="mt-1.5 w-full !py-1 text-[9px]"
+                  disabled={atMax || run.rd < rdCost}
+                  onClick={() => {
+                    if (atMax || run.rd < rdCost) return;
+                    const nx = intensiveDevelop(run, s.id);
+                    if (!nx) return;
+                    const after = nx.staff.find((x) => x.id === s.id)!;
+                    sfx.fanfare();
+                    setRun(() => nx);
+                    onIntense(s, after);
+                  }}
+                >
+                  {atMax ? "MAX LEVEL" : run.rd < rdCost ? `NEEDS ${rdCost} RD (${run.rd})` : `DEVELOP — ${rdCost} RD`}
+                </Btn>
+              </div>
+            );
+          })()}
 
           <div className="flex justify-end">
             <button onClick={fire} className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[10px] text-neon/80 hover:bg-neon/10">
@@ -348,6 +491,8 @@ export default function CrewPanel({
   setRun: (fn: (r: RunState) => RunState) => void;
   maxStaff: number;
 }) {
+  const [sheet, setSheet] = useState<AbilityInfo | null>(null);
+  const [intense, setIntense] = useState<null | { before: Staff; after: Staff }>(null);
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= maxStaff) return;
     sfx.coin();
@@ -441,7 +586,7 @@ export default function CrewPanel({
           {run.staff.length === 0 && <div className="text-sm text-paper/40">Nobody here but you.</div>}
           <div className="space-y-2">
             {run.staff.map((s) => (
-              <StaffCard key={s.id} s={s} run={run} setRun={setRun} />
+              <StaffCard key={s.id} s={s} run={run} setRun={setRun} onIntense={(before, after) => setIntense({ before, after })} />
             ))}
           </div>
 
@@ -498,16 +643,20 @@ export default function CrewPanel({
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {cSpec && (
-                      <span className="ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol" title={specLabel(cSpec)}>
+                      <button onClick={() => { sfx.click(); setSheet(specAbility(c)); }} className="btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol">
                         ★ {cSpec.name}
-                      </span>
+                      </button>
                     )}
                     {(c.traits ?? []).map((tid) => {
                       const t = traitDef(tid);
                       return t ? (
-                        <span key={tid} className={cn("ink-chip px-1.5 py-0.5 text-[8px] font-bold", t.good ? "text-mint" : "text-neon2")} title={t.desc}>
+                        <button
+                          key={tid}
+                          onClick={() => { sfx.click(); const hit = traitAbilities(c).find((a) => a.title === t.name); if (hit) setSheet(hit); }}
+                          className={cn("btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold", t.good ? "text-mint" : "text-neon2")}
+                        >
                           {t.name}
-                        </span>
+                        </button>
                       ) : null;
                     })}
                   </div>
@@ -522,6 +671,8 @@ export default function CrewPanel({
           </div>
         </div>
       </div>
+      <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
+      {intense && <IntensiveReveal before={intense.before} after={intense.after} onClose={() => setIntense(null)} />}
     </div>
   );
 }

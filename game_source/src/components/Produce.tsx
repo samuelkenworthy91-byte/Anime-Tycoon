@@ -3,6 +3,7 @@ import { Building2, ChevronLeft, MonitorPlay, Music4, PenTool, Scissors } from "
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
+  GENRES,
   POINT_COLOR,
   POINT_LABEL,
   SHOWRUNNERS,
@@ -234,6 +235,37 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
             <div className="mt-4 flex justify-between text-[10px] font-bold"><span className="text-neon2">{phase!.a}</span><span className="text-cyanx">{phase!.b}</span></div>
             <input type="range" min={0} max={100} value={slider} onChange={(e) => setSlider(+e.target.value)} className="ink-range relative z-10" style={{ "--p": `${slider}%` } as React.CSSProperties} />
             <div className="mt-1 flex justify-between text-[10px] text-paper/50"><span>{slider}%</span><span>{100-slider}%</span></div>
+            {/* contextual studio knowledge — same dossier ideal values, same
+                averaging as scoring, never reveals an unknown genre */}
+            {(() => {
+              const genres = project.draft.genres;
+              const defs = genres.map((id) => GENRES.find((g) => g.id === id)).filter((g) => !!g);
+              const known = defs.map((g) => run.genreKnowledge?.[g!.id] ?? 0);
+              const k = known.length ? Math.min(...known) : 0;
+              const ideal = defs.length
+                ? Math.round(defs.reduce((a, g) => a + g!.ideal[phase!.idx], 0) / defs.length)
+                : 50;
+              const ratio = defs.length
+                ? defs.reduce((a, g) => a + g!.ratio[phase!.idx], 0) / defs.length
+                : 1;
+              const emphasis = ratio >= 1 ? phase!.a : phase!.b;
+              return (
+                <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 px-3 py-2">
+                  <div className="text-[9px] font-extrabold tracking-[0.2em] text-cyanx">STUDIO KNOWLEDGE</div>
+                  {k <= 0 ? (
+                    <div className="mt-0.5 text-[10px] text-paper/55">No data on {defs.map((g) => g!.label).join("/") || "this genre"} yet — ship it or run a test audience to learn what works.</div>
+                  ) : k <= 2 ? (
+                    <div className="mt-0.5 text-[10px] text-paper/55">Early read: {emphasis} appears more important for {phase!.name.toLowerCase()}.</div>
+                  ) : k <= 5 ? (
+                    <div className="mt-0.5 text-[10px] text-paper/55">Working read: the blend leans toward <b className="text-paper/85">{emphasis}</b> — more releases narrow the slider target.</div>
+                  ) : (
+                    <div className="mt-0.5 text-[10px] font-bold text-mint">
+                      Studio estimate: <span className="text-neon2">{phase!.a}</span> around {Math.round(ideal / 5) * 5}% · {phase!.b} around {100 - Math.round(ideal / 5) * 5}%
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           <div className="mt-4 flex gap-2"><Btn variant="ghost" onClick={onBack}><ChevronLeft size={16}/> LATER</Btn><Btn big variant="primary" className="flex-1" onClick={() => setMode("assign")}>ASSIGN RUSH LEAD</Btn></div>
         </div>

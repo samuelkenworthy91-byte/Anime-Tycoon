@@ -316,31 +316,42 @@ export default function Office({
                     NEXT WEEK'S FORECAST — {dateLabel(fc.week)}
                   </div>
                   <div className="space-y-0.5 text-[11px]">
+                    {/* money in — the actual labelled payouts due */}
+                    <div className="text-[9px] font-extrabold tracking-[0.2em] text-mint">MONEY IN</div>
+                    {fc.payoutsDue.length > 0 ? (
+                      fc.payoutsDue.map((p, i) => (
+                        <div key={i} className="flex justify-between">
+                          <span className="min-w-0 truncate text-paper/60">{p.label}</span>
+                          <span className="font-bold text-mint">+{formatGBPShort(p.amount)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-paper/35">No payouts scheduled</div>
+                    )}
+                    <div className="pt-1 text-[9px] font-extrabold tracking-[0.2em] text-neon">MONEY OUT</div>
+                    {fc.costsDue.length > 0 ? (
+                      fc.costsDue.map((c, i) => (
+                        <div key={i} className="flex justify-between">
+                          <span className="text-paper/60">{c.label}</span>
+                          <span className="font-bold text-neon">−{formatGBPShort(c.amount)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-paper/35">No costs due</div>
+                    )}
+                    <div className="my-1 border-t border-line/60" />
                     <div className="flex justify-between">
-                      <span className="text-paper/60">Broadcast revenue</span>
+                      <span className="font-bold text-paper/80">Total money in</span>
                       <span className={cn("font-bold", fc.income > 0 ? "text-mint" : "text-paper/35")}>
                         {fc.income > 0 ? `+${formatGBPShort(fc.income)}` : "—"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-paper/60">Production burn</span>
-                      <span className={cn("font-bold", fc.burn > 0 ? "text-gold" : "text-paper/35")}>
-                        {fc.burn > 0 ? `−${formatGBPShort(fc.burn)}` : "—"}
+                      <span className="font-bold text-paper/80">Total money out</span>
+                      <span className={cn("font-bold", fc.burn + fc.lateFees + fc.payday > 0 ? "text-neon" : "text-paper/35")}>
+                        {fc.burn + fc.lateFees + fc.payday > 0 ? `−${formatGBPShort(fc.burn + fc.lateFees + fc.payday)}` : "—"}
                       </span>
                     </div>
-                    {fc.lateFees > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-paper/60">Deadline penalties</span>
-                        <span className="font-bold text-neon">−{formatGBPShort(fc.lateFees)}</span>
-                      </div>
-                    )}
-                    {fc.payday > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-paper/60">Payday — wages + rent</span>
-                        <span className="font-bold text-neon">−{formatGBPShort(fc.payday)}</span>
-                      </div>
-                    )}
-                    <div className="my-1 border-t border-line/60" />
                     <div className="flex justify-between">
                       <span className="font-bold text-paper/80">Net next week</span>
                       <span className={cn("font-display font-extrabold", fc.net >= 0 ? "text-mint" : "text-neon")}>

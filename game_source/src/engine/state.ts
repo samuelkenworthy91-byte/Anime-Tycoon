@@ -76,6 +76,8 @@ import {
   ensureCareer,
   gainXp,
   hasTrait,
+  intensiveRdCost,
+  intensiveTargetXp,
   levelTitle,
   marketSalary,
   moraleDelta,
@@ -616,12 +618,16 @@ export interface WeekForecast {
   week: number;
   /** broadcast payouts due that week */
   income: number;
+  /** labelled money-in lines (each scheduled payout, e.g. `"Title" broadcast`) */
+  payoutsDue: { label: string; amount: number }[];
   /** weekly production burn for everything still in the pipeline */
   burn: number;
   /** broadcaster penalties for projects already past their deadline */
   lateFees: number;
   /** wages + rent + facilities bill (lands every 4th week, 0 otherwise) */
   payday: number;
+  /** money-out lines: wages, rent, facilities, project burn, penalties */
+  costsDue: { label: string; amount: number }[];
   /** income − burn − lateFees − payday */
   net: number;
   /** cash + net — negative means the studio bounces that week */
@@ -629,15 +635,29 @@ export interface WeekForecast {
 }
 export function forecastWeek(r: RunState): WeekForecast {
   const w = r.week + 1;
-  const income = r.payouts.reduce((a, p) => (p.week === w ? a + p.amount : a), 0);
+  const payoutsDue = r.payouts
+    .filter((p) => p.week === w && p.amount !== 0)
+    .map((p) => ({ label: p.label, amount: p.amount }));
+  const income = payoutsDue.reduce((a, p) => a + p.amount, 0);
   const burnMult = studioProduction(r.heads ?? {}, r.staff).burnMult;
   const burn = activeProjects(r.projects).reduce((a, p) => a + Math.round(p.weeklyBurn * burnMult), 0);
   const lateFees = activeProjects(r.projects)
     .filter((p) => w > p.deadlineWeek)
     .reduce((a, p) => a + 1_500 + Math.round(draftCost(p.draft) * 0.015), 0);
   const payday = w % 4 === 0 ? weeklyOutgoings(r) * 4 : 0;
+  const costsDue: { label: string; amount: number }[] = [];
+  if (burn > 0) costsDue.push({ label: "Project production", amount: burn });
+  if (lateFees > 0) costsDue.push({ label: "Deadline penalties", amount: lateFees });
+  if (payday > 0) {
+    const wages = r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * 4;
+    const rent = office(r).rent * 4;
+    const upkeep = facilityUpkeep(r.facilities) * 4;
+    if (wages > 0) costsDue.push({ label: "Wages", amount: Math.round(wages) });
+    if (rent > 0) costsDue.push({ label: "Rent", amount: Math.round(rent) });
+    if (upkeep > 0) costsDue.push({ label: "Facilities", amount: Math.round(upkeep) });
+  }
   const net = income - burn - lateFees - payday;
-  return { week: w, income, burn, lateFees, payday, net, cashAfter: r.cash + net };
+  return { week: w, income, payoutsDue, burn, lateFees, payday, costsDue, net, cashAfter: r.cash + net };
 }
 
 /* ------------------------------------------------------------------ year end */
@@ -1460,9 +1480,24 @@ export interface DeskPulse {
   source?: "project" | "contract" | "edit";
   projectId?: string;
   jobId?: string;
+  /** rare project-wide outcomes surfaced through the same bubble system:
+   *  research = +1 RD, note = +1 editing issue (see tickStudioWorkPulse) */
+  kind?: "research" | "note";
 }
 
 const POINT_TYPES: PointType[] = ["story", "art", "sound"];
+
+/* -------------------------------------------------- rare project pulses
+ * The live work-check bubbles are authoritative, so rare project outcomes
+ * ride the SAME system — one bubble, one effect, no second timer.
+ *  - RESEARCH DISCOVERY (~2% per work cycle): +1 RD, instantly applied
+ *  - EDITOR NOTE (~5%): +1 editing issue on the active production
+ * Both apply ONLY to normal active production (never contracts, never the
+ * edit bay — notes can only go down there). Existing issue-reduction
+ * (Steady Hand showrunner) narrows the note chance. Constants are isolated
+ * for APK/audit tuning. */
+export const PROJECT_RESEARCH_PULSE_CHANCE = 0.02;
+export const PROJECT_NOTE_PULSE_CHANCE = 0.05;
 
 export const AUDIENCE_TEST_DAYS = 2;
 export const AUDIENCE_TEST_RD = 4;
@@ -1750,7 +1785,7 @@ export function contractSelectionDailyOutputEstimate(
 /** One visible production-check cycle. At most two hired staff are sampled per
  *  cycle so a full office stays readable; skill determines whether their check
  *  fires and whether 100+/200+ effective skill creates multi-point bubbles. */
-export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
+export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.random): DeskPulse[] {
   if (r.audienceTest) return [];
   const pulses: DeskPulse[] = [];
   const eligible = r.staff.filter((st) => {
@@ -1790,11 +1825,24 @@ export function rollStudioWorkPulses(r: RunState): DeskPulse[] {
       if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "project", projectId: active.id });
     }
   }
+
+  /* ---- rare project-wide outcomes on the active production ---- */
+  const production = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
+  if (production) {
+    const face = r.staff.find((st) => production.staffIds.includes(st.id));
+    const actorId = face?.id ?? "showrunner";
+    const name = face?.name ?? `${r.studio} showrunner`;
+    if (roll() < PROJECT_RESEARCH_PULSE_CHANCE) {
+      pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "research" });
+    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * (r.showrunner === "steady" ? 0.75 : 1)) {
+      pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "note" });
+    }
+  }
   return pulses;
 }
 
-export function tickStudioWorkPulse(r: RunState): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
-  const pulses = rollStudioWorkPulses(r);
+export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.random): { run: RunState; pulses: DeskPulse[]; attention: boolean } {
+  const pulses = rollStudioWorkPulses(r, roll);
   if (!pulses.length) return { run: r, pulses, attention: false };
   let projects = r.projects.map((p) => ({ ...p, points: { ...p.points } }));
   let contractJobs = (r.contractJobs ?? []).map((j) => ({ ...j, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 }));
@@ -1803,7 +1851,11 @@ export function tickStudioWorkPulse(r: RunState): { run: RunState; pulses: DeskP
   let staff = r.staff;
   const notices = [...r.notices];
   for (const pulse of pulses) {
-    if (pulse.source === "project" && pulse.projectId) {
+    if (pulse.kind === "research") {
+      rd += pulse.points;
+    } else if (pulse.kind === "note") {
+      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
+    } else if (pulse.source === "project" && pulse.projectId) {
       projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } }));
     } else if (pulse.source === "contract" && pulse.jobId) {
       contractJobs = contractJobs.map((j) => j.id === pulse.jobId ? ({ ...j, progress: Math.min(j.contract.target, j.progress + pulse.points), liveProgressThisWeek: (j.liveProgressThisWeek ?? 0) + pulse.points }) : j);
@@ -2547,6 +2599,25 @@ export function trainBlockReason(r: RunState, staffId: string): string | null {
 }
 
 /** training now occupies the employee for calendar time; the reward lands on completion. */
+/** intensive development: spend escalating RD to advance one career level.
+ *  All growth is canonical (gainXp: +2 main / +1 off per level). Timed
+ *  Training stays a separate system. */
+export function intensiveDevelop(r: RunState, staffId: string): RunState | null {
+  const s = r.staff.find((x) => x.id === staffId);
+  if (!s) return null;
+  const amount = intensiveTargetXp(s);
+  if (amount === null) return null; // max level
+  const cost = intensiveRdCost(s.level);
+  if (r.rd < cost) return null;
+  const { staff } = gainXp(s, amount);
+  return {
+    ...r,
+    rd: r.rd - cost,
+    staff: r.staff.map((x) => (x.id === staffId ? staff : x)),
+    notices: [...r.notices, `🧠 INTENSIVE DEVELOPMENT: ${s.name} reaches ${levelTitle(staff.level)} — ${staff.level} (${staff.xp} XP).`],
+  };
+}
+
 export function trainStaff(r: RunState, staffId: string, focus: PointType): RunState | null {
   if (trainBlockReason(r, staffId)) return null;
   const tier = r.facilities.training ?? 0;

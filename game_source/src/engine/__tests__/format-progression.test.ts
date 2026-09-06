@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { initialRun, migrateRun, startBlockReason, startProject, unlockFormat } from "../state";
 import { adaptationCommission, emergencyCommission, initMarket, rollCommission } from "../market";
 import { formatLockReason } from "../state";
-import type { Commission, MediumId } from "../data";
+import type { MediumId } from "../data";
+import type { Commission } from "../market";
 
 /** a minimal valid draft in the requested medium */
 function draft(medium: MediumId, genres: ("slice" | "fantasy")[] = ["slice", "fantasy"]) {
@@ -30,7 +31,6 @@ function fakeCommission(medium: MediumId, genre: "slice" | "fantasy" = "slice"):
   return {
     id: `com-probe-${medium}`,
     partnerId: "streamline",
-    partnerName: "Streamline",
     genre,
     audience: "teens",
     medium,

@@ -644,8 +644,9 @@ export default function Create({
                 ))}
               </div>
 
-              {/* chosen-so-far strip */}
-              <div className="ink-card flex items-center gap-3 p-2.5">
+              {/* chosen-so-far strip — sticky so the current pick stays visible
+                  while the cast grid scrolls (single panel, no second pane) */}
+              <div className="ink-card sticky top-0 z-30 flex items-center gap-3 p-2.5">
                 <Portrait
                   img={castPicked.img}
                   name={castPicked.name}
