@@ -1,119 +1,18 @@
 /* Final phone-layout corrections before main promotion.
    Loaded after index.css so these rules deliberately override the earlier
-   portrait HUD/forecast experiments without disturbing desktop styling. */
+   portrait HUD layout without disturbing desktop styling. */
 
-/* Mobile forecast: do not try to make a HUD descendant escape the HUD.
-   Android WebView repeatedly resolved that child against the HUD box, which
-   produced the half-width card seen on-device. Instead, while the forecast is
-   open, promote the HUD itself to cover the whole game viewport and use it as
-   the forecast surface. The forecast is read-only, so the panel ignores pointer
-   events and a tap anywhere falls through to the existing backdrop click-to-close. */
-@media (max-width: 600px), (max-height: 600px) {
-  .office-hud:has(.office-hud-forecast > .anim-pop) {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 2000 !important;
-    display: block !important;
-    min-height: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    overflow: visible !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) > :not(.office-hud-stats) {
-    display: none !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) > .office-hud-stats {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 1 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-stats > :not(.office-hud-forecast) {
-    display: none !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-forecast {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 2 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-forecast > button {
-    display: none !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-forecast > .fixed {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 1 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(6, 5, 14, 0.88) !important;
-    backdrop-filter: blur(5px) !important;
-    -webkit-backdrop-filter: blur(5px) !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-forecast > .anim-pop {
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 2 !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 24px 20px 28px !important;
-    overflow-y: auto !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: var(--color-panel) !important;
-    box-shadow: none !important;
-    animation: none !important;
-    transform: none !important;
-    pointer-events: none !important;
-  }
-
-  .office-hud:has(.office-hud-forecast > .anim-pop) .office-hud-forecast > .anim-pop::after {
-    content: "TAP ANYWHERE TO CLOSE";
-    display: block;
-    margin-top: 18px;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .16em;
-    color: rgba(242, 236, 223, .45);
-  }
-}
-
-/* ---------- phone portrait shell ---------- */
 @media (max-width: 600px) and (orientation: portrait) {
-  /* Two-row portrait HUD: studio/cash on top, date · R&D · forecast below. */
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) {
+  /* Three compact secondary chips share the bottom HUD row:
+     date on the left, R&D in the middle, forecast on the right. */
+  .office-hud {
     min-height: 70px !important;
     padding: 4px 6px 36px !important;
     padding-right: 6px !important;
     gap: 4px !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-date {
+  .office-hud-date {
     position: absolute !important;
     left: 6px !important;
     bottom: 5px !important;
@@ -121,11 +20,11 @@
     font-size: 9px !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-stats {
+  .office-hud-stats {
     gap: 3px !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-rd {
+  .office-hud-rd {
     display: flex !important;
     position: absolute !important;
     left: 50% !important;
@@ -139,7 +38,7 @@
     transform: translateX(-50%) !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-rd::before {
+  .office-hud-rd::before {
     content: "R&D";
     margin-right: 3px;
     font-size: 8px;
@@ -147,7 +46,7 @@
     letter-spacing: .04em;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-forecast {
+  .office-hud-forecast {
     display: block !important;
     position: absolute !important;
     right: 6px !important;
@@ -155,14 +54,50 @@
     z-index: 73 !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-forecast > button {
+  .office-hud-forecast > button {
     min-height: 24px !important;
     padding: 3px 7px !important;
     font-size: 9px !important;
   }
 
-  .office-hud:not(:has(.office-hud-forecast > .anim-pop)) .office-hud-cash {
+  .office-hud-cash {
     padding: 3px 7px !important;
     font-size: 10px !important;
   }
+}
+
+/* Forecast overlay is rendered at document.body level. It is therefore
+   completely independent of the office HUD's transforms, blur and clipping. */
+.forecast-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100dvh;
+  overflow-y: auto;
+  background: #100d1c;
+  color: inherit;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 18px)
+    18px
+    calc(env(safe-area-inset-bottom, 0px) + 18px);
+}
+
+.forecast-screen-inner {
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.forecast-screen-close {
+  margin-top: auto;
+  padding-top: 28px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  opacity: .45;
 }
