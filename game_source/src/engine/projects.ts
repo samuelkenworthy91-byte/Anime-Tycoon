@@ -653,10 +653,13 @@ export interface ScoringContext {
   comboLevels: Record<string, number>;
   castCombos: string[];
   arcCombos: string[];
+  /** best raw quality ever shipped — historical RECORD only */
   studioTop: number;
+  /** slow rolling expectation (EMA of past quality) — mild review nudge */
+  reviewExpectation?: number;
   franchises: Record<string, { season: number }>;
   fans: number;
-  /** dynasty-era audience expectations — raises the review bar */
+  /** dynasty-era audience expectations — mildly raises the review bar */
   audienceBar?: number;
   castAffinityDiscovered?: string[];
 }
@@ -691,6 +694,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     castCombos: ctx.castCombos,
     arcCombos: ctx.arcCombos,
     studioTop: ctx.studioTop,
+    reviewExpectation: ctx.reviewExpectation,
     franchiseMult,
     costs: p.spent,
     fanBase: ctx.fans,

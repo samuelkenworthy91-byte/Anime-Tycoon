@@ -22,6 +22,11 @@ import {
   type Draft,
   type PointType,
 } from "./data";
+import {
+  BUDGET_QUALITY_FACTOR,
+  productionPointScore,
+  reviewExpectationAdjustment,
+} from "./production";
 
 export interface Points {
   story: number;
@@ -57,7 +62,8 @@ export interface ShowResult {
   chemDiscovered: string[];
   /** a secret genre combo was discovered by shipping this show */
   secretDiscovered: boolean;
-  /** raw quality (0..40) — feeds the studio's all-time best */
+  /** raw quality (0..~42) — feeds the studio's all-time best and the
+   *  slow rolling review expectation, NOT the review denominator */
   quality: number;
   /** arc synergies newly discovered by shipping this season */
   arcCombosDiscovered: string[];
@@ -80,6 +86,49 @@ export const tierOf = (total: number): TierKey =>
   total >= 32 ? "masterpiece" : total >= 27 ? "hit" : total >= 21 ? "solid" : total >= 15 ? "mixed" : "flop";
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+/* ------------------------------------------------ quality calibration
+ * Kairosoft-first absolute quality. A production's decisions (points,
+ * ratio, sliders, cast, arcs, notes) land on a bounded quality scale that
+ * maps directly to reviewer scores:
+ *
+ *   quality 16 → ~4/10     quality 32 → ~8/10
+ *   quality 20 → ~5/10     quality 36 → ~9/10
+ *   quality 24 → ~6/10     quality 40+ → potential 10/10
+ *   quality 28 → ~7/10
+ *
+ * Above 36 the curve soft-caps (40 → ~9.2): a 10 needs genuinely elite
+ * quality plus a favourable critic roll, and a perfect 40/40 is truly
+ * exceptional instead of routine for any high-point production.
+ *
+ * These are directional starting constants, exercised by the seeded
+ * balance matrix (scripts/scoring-balance.test.ts) and tuned by audit +
+ * playtesting. They are NOT magic numbers. */
+export const RAW_QUALITY_BASE = 10;
+export const RAW_QUALITY_FLOOR = 14;
+export const RAW_QUALITY_CEILING = 40;
+/** saturating point conversion (see production.ts) scaled into quality */
+export const POINT_QUALITY_SCALE = 0.55;
+/** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
+export const TOP_QUALITY_SLOPE = 0.12;
+/** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
+ *  early career meaningful while staying far flatter than the old curve */
+export const CRAFT_LIFT = 2.6;
+export const CRAFT_LIFT_DIVISOR = 160;
+export const SLIDER_QUALITY_SCALE = 0.35;
+export const ARC_QUALITY_SCALE = 0.22;
+/** bounded negative floor: poor/anti-synergistic arcs can genuinely hurt,
+ *  experimentation stays viable (never an abyss) */
+export const ARC_QUALITY_FLOOR = -12;
+export const ISSUE_QUALITY_COST = 0.6;
+export const SLOT_QUALITY_POINTS = 0.8;
+/** combo/refinement multipliers are real but bounded — decisions matter
+ *  without letting one discovered multiplier drown everything else */
+export const COMBO_QUALITY_WEIGHT = 0.5;
+export const CHEM_QUALITY_WEIGHT = 0.6;
+/** per-critic variance. Wide enough that four simultaneous 10s are rare
+ *  even for an elite master, tight enough that 9s are repeatable. */
+export const REVIEW_NOISE_RANGE = 0.5;
 
 export const CAST_BASE_QUALITY = 0.5;
 export const VISIBLE_CAST_QUALITY = 0.6;
@@ -107,6 +156,16 @@ export function castContribution(member: CastMember, role: CastRole, draft: Pick
   return { tier, typeModifier, baseQuality, affinityQuality, salesBonus, totalQuality: baseQuality + affinityQuality };
 }
 
+/** deterministic LCG used by the seeded balance harness; normal gameplay
+ *  keeps Math.random (the optional rng is test-only) */
+export function seededRng(seed: number): () => number {
+  let value = seed >>> 0;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 0x100000000;
+  };
+}
+
 export function computeResult(opts: {
   draft: Draft;
   points: Points;
@@ -124,15 +183,20 @@ export function computeResult(opts: {
   castCombos: string[];
   /** arc synergy ids already discovered this run */
   arcCombos: string[];
-  /** best raw quality the studio has ever shipped (reviews are relative to it) */
+  /** best raw quality the studio has ever shipped — kept as a RECORD only.
+   *  Reviews are absolute-quality based and no longer divided by it. */
   studioTop: number;
+  /** slow rolling studio expectation (EMA of past quality) — mild effect only */
+  reviewExpectation?: number;
   franchiseMult: number;
   costs: number;
   fanBase: number;
-  /** dynasty-era audience expectations — raises the review bar */
+  /** dynasty-era audience expectations — mildly raises the review bar */
   audienceBar?: number;
   /** knowledge affects explanation only; never affinity mechanics */
   castAffinityDiscovered?: string[];
+  /** deterministic reviewer RNG (tests); default Math.random */
+  rng?: () => number;
 }): ShowResult {
   const {
     draft,
@@ -148,13 +212,15 @@ export function computeResult(opts: {
     comboDiscovered,
     castCombos,
     arcCombos,
-    studioTop,
+    reviewExpectation,
     franchiseMult,
     costs,
     fanBase,
     audienceBar,
     castAffinityDiscovered = [],
+    rng,
   } = opts;
+  const roll = rng ?? Math.random;
 
   const totalPts = points.story + points.art + points.sound;
 
@@ -163,7 +229,7 @@ export function computeResult(opts: {
     ? [points.story / totalPts, points.art / totalPts, points.sound / totalPts]
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
-  const ratioMatch = clamp(1.18 - drift * 0.95, 0.55, 1.18);
+  const ratioMatch = clamp(1.05 - drift * 0.85, 0.5, 1.05);
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -241,14 +307,25 @@ export function computeResult(opts: {
   const arcCombosDiscovered = arcCombosHit.filter((c) => !arcCombos.includes(c.id)).map((c) => c.id);
 
   const slot = SLOTS[draft.slot];
-  const slotFit = slot.best.some((g) => draft.genres.includes(g)) ? 2 : 0;
-  const scope = BUDGETS[draft.budget].scope;
+  const slotFit = slot.best.some((g) => draft.genres.includes(g)) ? 1 : 0;
 
-  /* ---- raw quality on a 0..40 curve: rookie teams land ~29, legends ~40 */
-  const pointScore = Math.pow(totalPts / 170, 1.35) * 12 * scope;
-  let raw = 4 + pointScore * ratioMatch + sliderPart * 0.5 + casting + Math.max(0, arcQ) * 0.35 + slotFit * 0.8;
-  raw *= comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel);
-  raw -= issues * 0.9;
+  /* ---- raw quality on a diminishing-return curve. Production points
+     matter strongly but asymptote; every decision below has real weight. */
+  const pointScore = productionPointScore(totalPts, draft);
+  const budgetFactor = BUDGET_QUALITY_FACTOR[draft.budget];
+  const arcQuality = clamp(arcQ, ARC_QUALITY_FLOOR, 50) * ARC_QUALITY_SCALE;
+  const craft = CRAFT_LIFT * Math.log(1 + totalPts / CRAFT_LIFT_DIVISOR);
+  let raw = RAW_QUALITY_BASE
+    + (pointScore * POINT_QUALITY_SCALE + craft) * ratioMatch * budgetFactor
+    + sliderPart * SLIDER_QUALITY_SCALE
+    + casting
+    + arcQuality
+    + slotFit * SLOT_QUALITY_POINTS;
+  const comboFactor =
+    1 + (comboMult(draft.genres, comboDiscovered) - 1) * COMBO_QUALITY_WEIGHT
+    + (comboLevelBonus(comboLevel) - 1) * COMBO_QUALITY_WEIGHT;
+  raw *= comboFactor;
+  raw -= issues * ISSUE_QUALITY_COST;
 
   /* ---- hidden cast chemistry (discovered by experimenting) */
   const matchingChems = castChemFor(draft);
@@ -256,30 +333,32 @@ export function computeResult(opts: {
   const chemDiscovered = matchingChems.filter((c) => !castCombos.includes(c.id)).map((c) => c.id);
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
 
-  /* unclamped: elite studios can push past 40; reviews compare against your best */
-  const quality = clamp(raw * chemMult, 4, 60);
+  const chemFactor = 1 + (chemMult - 1) * CHEM_QUALITY_WEIGHT;
+  const quality = clamp(raw * chemFactor, RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
 
-  /* ---- four critics, each out of 10, relative to your studio's all-time best.
-     Game Dev Tycoon-style: reviews compare this show against your own high score,
-     so a great first show lands ~7s and every new best raises the bar. */
+  /* ---- four critics, each out of 10.
+     Absolute quality provides most of the score; the studio's all-time
+     best is a record only. A slow EMA expectation nudges reviewers a
+     little (≤ ±0.75) so unchanged mastery slowly feels less special
+     without ever poisoning future releases. */
   const floor = showrunner === "vision" ? 3 : 1;
-  /* GDT review algorithm: first show aims at a preset bar; afterwards the bar
-     ratchets to ~10% above your all-time best, so every new best raises it */
-  const target = Math.max(56, (studioTop > 0 ? 10 + studioTop * 1.1 : 56) + (audienceBar ?? 0));
-  const u = clamp(quality / target, 0, 1);
+  const expectationAdj = reviewExpectationAdjustment(reviewExpectation);
+  const audienceAdj = -Math.max(0, audienceBar ?? 0) * 0.07;
+  /* absolute-quality mapping with a soft cap above quality 36
+     (36 → ~9.0, 40 → ~9.5). A 10 requires elite quality AND critic
+     agreement — elite work lands 9s regularly, 10s occasionally. */
+  const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
+    + expectationAdj + audienceAdj;
   const reviews: Review[] = REVIEWERS.map((r) => {
-    let s = 10 * u;
-    if (r.bias === "story") s += (perPhase[0] - 2) * 0.25 + (mix[0] - genreRatio[0]) * 2.5 + (Math.random() - 0.5) * 0.8;
-    if (r.bias === "hype") s += (hype / 100) * 1.0 + (Math.random() - 0.4) * 1.4;
-    if (r.bias === "harsh") s += -0.5 - issues * 0.12 + Math.random() * 0.5;
-    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 2.5 - issues * 0.18 + (Math.random() - 0.5) * 0.8;
+    let s = base;
+    if (r.bias === "story") s += (perPhase[0] - 2) * 0.25 + (mix[0] - genreRatio[0]) * 2.5 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    if (r.bias === "hype") s += (hype / 100) * 0.55 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    if (r.bias === "harsh") s += -0.5 - issues * 0.12 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 2.5 - issues * 0.18 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     s = Math.round(clamp(s, floor, 10));
-    /* reviewers never hand out perfect 10s (GDT second pass) */
-    if (s >= 10) s = 9;
-    else if (s === 9 && Math.random() < 0.35) s = 8;
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
-    return { outlet: r.name, focus: r.focus, score: s, quote: pool[Math.floor(Math.random() * pool.length)] };
+    return { outlet: r.name, focus: r.focus, score: s, quote: pool[Math.floor(roll() * pool.length)] };
   });
 
   const total = reviews.reduce((a, r) => a + r.score, 0);
@@ -294,13 +373,18 @@ export function computeResult(opts: {
     : 1;
   const merch = research.includes("merch2") ? 1.3 : research.includes("merch") ? 1.18 : 1;
   const local = research.includes("local") ? 1.12 : 1;
+  const budgetScope = BUDGETS[draft.budget].scope;
+  /* reviews use an absolute-quality scale now (a good show is ~5.5–7.5/10,
+     not 8–10 like the old curve), so the review→sales curve is softened
+     from ^2.1 to ^1.2: a decent show keeps pre-overhaul revenue, is not
+     auto-rich, and excellence still pays ~1.8× more. */
   const appeal =
-    Math.pow(total / 40, 2.1) *
+    Math.pow(total / 40, 1.2) *
     slot.reach *
     medium.reach *
     aud.mult *
     audFit *
-    scope *
+    budgetScope *
     (1 + arcsF * 1.5) *
     (1 + hype / 90) *
     franchiseMult *
@@ -312,9 +396,6 @@ export function computeResult(opts: {
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
      shape ramps with t^a and decays exponentially, normalised so the peak
      week lands exactly at `peak` units. */
-  /* 44k base keeps the 12-week bell's total area ≈ the old 8-week spike,
-     so the same show earns about the same lifetime revenue — only the
-     week-to-week shape (build → peak → tail) matches Game Dev Tycoon. */
   const peak = 44_000 * appeal * castSalesMultiplier;
   const rampA = 2.2; // how steeply the show climbs
   const tailB = 2.05; // how long the tail lasts
@@ -325,7 +406,7 @@ export function computeResult(opts: {
   }
   const shapeMax = Math.max(...rawShape);
   const sales = rawShape.map((s) =>
-    Math.max(0, Math.round(peak * (s / shapeMax) * (0.9 + Math.random() * 0.2)))
+    Math.max(0, Math.round(peak * (s / shapeMax) * (0.9 + roll() * 0.2)))
   );
   const units = sales.reduce((a, b) => a + b, 0);
   const revenue = Math.round(units * 2.6);
@@ -335,17 +416,17 @@ export function computeResult(opts: {
   const rd = Math.max(2, Math.round(total * 0.55 + issues * 0.4));
 
   const breakdown = [
-    { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)}` },
+    { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
     { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
-    { label: "Direction sliders", pts: `+${(sliderPart * 0.5).toFixed(1)}` },
+    { label: "Direction sliders", pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)}` },
     { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
-    { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${(Math.max(0, arcQ) * 0.35).toFixed(1)}` },
-    { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? "+2.0" : "+0.0" },
-    { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${(comboMult(draft.genres, comboDiscovered) * comboLevelBonus(comboLevel)).toFixed(2)}` },
-    { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * 0.9).toFixed(1)}` },
+    { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
+    { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
+    { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)}` },
+    { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
   ];
-  if (chemMult !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemMult.toFixed(2)}` });
+  if (chemFactor !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemFactor.toFixed(2)}` });
   if (arcCombosHit.length > 0)
     breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ} Q` });
   const affNotes: string[] = [];

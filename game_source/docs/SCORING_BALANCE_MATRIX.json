@@ -1,0 +1,815 @@
+{
+  "meta": {
+    "rolls": 1000,
+    "genrePair": "romance × military",
+    "notes": "Seeded LCG per roll. Directional calibration — judgement comes after ChatGPT audit + APK playtesting."
+  },
+  "scopes": {
+    "short": {
+      "poor": {
+        "mean": 3.397,
+        "p10": 3.25,
+        "p50": 3.5,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 4.787,
+        "p10": 4.5,
+        "p50": 4.75,
+        "p90": 5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.47,
+        "p10": 6.25,
+        "p50": 6.5,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.279,
+        "p10": 7,
+        "p50": 7.25,
+        "p90": 7.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.354,
+        "p10": 8,
+        "p50": 8.25,
+        "p90": 8.75,
+        "hof": 0.99,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.36010101010101
+      }
+    },
+    "standard": {
+      "poor": {
+        "mean": 3.602,
+        "p10": 3.5,
+        "p50": 3.75,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.148,
+        "p10": 4.75,
+        "p50": 5.25,
+        "p90": 5.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.666,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.649,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.751,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.13,
+        "tenRate": 0.038,
+        "perfect40": 0,
+        "hofAvg": 8.75125
+      }
+    },
+    "extended": {
+      "poor": {
+        "mean": 3.726,
+        "p10": 3.5,
+        "p50": 3.75,
+        "p90": 4,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.409,
+        "p10": 5.25,
+        "p50": 5.5,
+        "p90": 5.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.88,
+        "p10": 6.75,
+        "p50": 6.75,
+        "p90": 7,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.882,
+        "p10": 7.75,
+        "p50": 7.75,
+        "p90": 8,
+        "hof": 0.448,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.043526785714286
+      },
+      "exceptional": {
+        "mean": 8.981,
+        "p10": 8.75,
+        "p50": 9,
+        "p90": 9.25,
+        "hof": 1,
+        "ninePlus": 0.684,
+        "tenRate": 0.452,
+        "perfect40": 0,
+        "hofAvg": 8.981
+      }
+    },
+    "prestige": {
+      "poor": {
+        "mean": 3.851,
+        "p10": 3.75,
+        "p50": 3.75,
+        "p90": 4,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.583,
+        "p10": 5.5,
+        "p50": 5.5,
+        "p90": 5.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 7.166,
+        "p10": 6.75,
+        "p50": 7.25,
+        "p90": 7.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 8.091,
+        "p10": 7.75,
+        "p50": 8,
+        "p90": 8.25,
+        "hof": 0.85,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.151176470588235
+      },
+      "exceptional": {
+        "mean": 9.098,
+        "p10": 8.75,
+        "p50": 9,
+        "p90": 9.25,
+        "hof": 1,
+        "ninePlus": 0.861,
+        "tenRate": 0.656,
+        "perfect40": 0,
+        "hofAvg": 9.09775
+      }
+    }
+  },
+  "formats": {
+    "fanweb": {
+      "poor": {
+        "mean": 3.471,
+        "p10": 3.25,
+        "p50": 3.5,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 4.897,
+        "p10": 4.5,
+        "p50": 5,
+        "p90": 5.25,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.549,
+        "p10": 6.25,
+        "p50": 6.5,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.423,
+        "p10": 7,
+        "p50": 7.5,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.538,
+        "p10": 8.25,
+        "p50": 8.5,
+        "p90": 8.75,
+        "hof": 0.996,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.540913654618475
+      }
+    },
+    "ona": {
+      "poor": {
+        "mean": 3.533,
+        "p10": 3.25,
+        "p50": 3.5,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.047,
+        "p10": 4.75,
+        "p50": 5,
+        "p90": 5.25,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.598,
+        "p10": 6.5,
+        "p50": 6.5,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.538,
+        "p10": 7.25,
+        "p50": 7.5,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.665,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 8.75,
+        "hof": 1,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.6645
+      }
+    },
+    "tv": {
+      "poor": {
+        "mean": 3.602,
+        "p10": 3.5,
+        "p50": 3.75,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.148,
+        "p10": 4.75,
+        "p50": 5.25,
+        "p90": 5.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.666,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.649,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.751,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.13,
+        "tenRate": 0.038,
+        "perfect40": 0,
+        "hofAvg": 8.75125
+      }
+    },
+    "ova": {
+      "poor": {
+        "mean": 3.557,
+        "p10": 3.25,
+        "p50": 3.5,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.079,
+        "p10": 4.75,
+        "p50": 5,
+        "p90": 5.25,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.622,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.577,
+        "p10": 7.25,
+        "p50": 7.5,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.693,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 8.75,
+        "hof": 1,
+        "ninePlus": 0.01,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.6925
+      }
+    },
+    "special": {
+      "poor": {
+        "mean": 3.619,
+        "p10": 3.5,
+        "p50": 3.75,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.189,
+        "p10": 5,
+        "p50": 5.25,
+        "p90": 5.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.696,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.672,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 7.75,
+        "hof": 0.02,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8
+      },
+      "exceptional": {
+        "mean": 8.772,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.185,
+        "tenRate": 0.062,
+        "perfect40": 0,
+        "hofAvg": 8.77225
+      }
+    },
+    "movie": {
+      "poor": {
+        "mean": 3.654,
+        "p10": 3.5,
+        "p50": 3.75,
+        "p90": 3.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "mediocre": {
+        "mean": 5.244,
+        "p10": 5,
+        "p50": 5.25,
+        "p90": 5.5,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "competent": {
+        "mean": 6.756,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 7,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.737,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 8,
+        "hof": 0.118,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8
+      },
+      "exceptional": {
+        "mean": 8.832,
+        "p10": 8.75,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.336,
+        "tenRate": 0.138,
+        "perfect40": 0,
+        "hofAvg": 8.832
+      }
+    }
+  },
+  "careers": {
+    "first production": {
+      "competent": {
+        "mean": 6.797,
+        "p10": 6.75,
+        "p50": 6.75,
+        "p90": 7,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.796,
+        "p10": 7.75,
+        "p50": 7.75,
+        "p90": 8,
+        "hof": 0.24,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.001041666666667
+      },
+      "exceptional": {
+        "mean": 8.865,
+        "p10": 8.75,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.408,
+        "tenRate": 0.207,
+        "perfect40": 0,
+        "hofAvg": 8.8645
+      }
+    },
+    "early studio": {
+      "competent": {
+        "mean": 6.742,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 7,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.726,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 7.75,
+        "hof": 0.096,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8
+      },
+      "exceptional": {
+        "mean": 8.823,
+        "p10": 8.75,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.317,
+        "tenRate": 0.12,
+        "perfect40": 0,
+        "hofAvg": 8.8225
+      }
+    },
+    "midgame": {
+      "competent": {
+        "mean": 6.666,
+        "p10": 6.5,
+        "p50": 6.75,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.649,
+        "p10": 7.5,
+        "p50": 7.75,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.751,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 9,
+        "hof": 1,
+        "ninePlus": 0.13,
+        "tenRate": 0.038,
+        "perfect40": 0,
+        "hofAvg": 8.75125
+      }
+    },
+    "late game": {
+      "competent": {
+        "mean": 6.59,
+        "p10": 6.25,
+        "p50": 6.5,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.543,
+        "p10": 7.25,
+        "p50": 7.5,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.675,
+        "p10": 8.5,
+        "p50": 8.75,
+        "p90": 8.75,
+        "hof": 1,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.67525
+      }
+    },
+    "elite endgame": {
+      "competent": {
+        "mean": 6.549,
+        "p10": 6.25,
+        "p50": 6.5,
+        "p90": 6.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "strong": {
+        "mean": 7.447,
+        "p10": 7.25,
+        "p50": 7.5,
+        "p90": 7.75,
+        "hof": 0,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 0
+      },
+      "exceptional": {
+        "mean": 8.579,
+        "p10": 8.25,
+        "p50": 8.5,
+        "p90": 8.75,
+        "hof": 0.999,
+        "ninePlus": 0,
+        "tenRate": 0,
+        "perfect40": 0,
+        "hofAvg": 8.57957957957958
+      }
+    }
+  },
+  "pointCheck": {
+    "150": {
+      "mean": 5.976,
+      "p10": 5.75,
+      "p90": 6.25,
+      "hof": 0
+    },
+    "250": {
+      "mean": 6.552,
+      "p10": 6.25,
+      "p90": 6.75,
+      "hof": 0
+    },
+    "350": {
+      "mean": 6.849,
+      "p10": 6.75,
+      "p90": 7,
+      "hof": 0
+    },
+    "450": {
+      "mean": 7.112,
+      "p10": 6.75,
+      "p90": 7.5,
+      "hof": 0
+    },
+    "600": {
+      "mean": 7.601,
+      "p10": 7.5,
+      "p90": 7.75,
+      "hof": 0
+    },
+    "800": {
+      "mean": 7.862,
+      "p10": 7.75,
+      "p90": 8,
+      "hof": 0.406
+    },
+    "1000": {
+      "mean": 8.055,
+      "p10": 7.75,
+      "p90": 8.25,
+      "hof": 0.81
+    },
+    "1200": {
+      "mean": 8.316,
+      "p10": 8,
+      "p90": 8.5,
+      "hof": 0.982
+    }
+  },
+  "elite": {
+    "mean": 8.755,
+    "p50": 8.75,
+    "tenRate": 0.083,
+    "perfect40": 0,
+    "ninePlus": 0.147
+  }
+}
