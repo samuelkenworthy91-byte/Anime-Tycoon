@@ -263,7 +263,7 @@ export default function Title({
                     >
                       <div className="flex items-center gap-3 p-3">
                         <img
-                          src={s.img}
+                          src={s.portrait}
                           alt={s.name}
                           className="h-20 w-20 rounded-xl border border-line object-cover"
                         />
