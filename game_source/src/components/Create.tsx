@@ -23,6 +23,7 @@ import {
   PawPrint,
   Skull,
   Lock,
+  Filter,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -72,7 +73,7 @@ import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
 
-import { mixedCastOrder } from "../engine/castDisplayOrder";
+import { filterCastByVisibleGenre, mixedCastOrder } from "../engine/castDisplayOrder";
 
 const MIXED_CAST = {
   protag: mixedCastOrder(PROTAGONISTS),
@@ -227,6 +228,8 @@ export default function Create({
   const [step, setStep] = useState(0);
   /** which cast role is being picked — CAST is split into one screen per role */
   const [castStep, setCastStep] = useState(0);
+  const [castFilterOpen, setCastFilterOpen] = useState(false);
+  const [castGenreFilter, setCastGenreFilter] = useState<GenreId | null>(null);
   const [d, setD] = useState<Draft>(() => {
     const base = freshDraft(run, plan);
     return commission
@@ -368,6 +371,8 @@ export default function Create({
   const CAST_SCREENS = castRows.length;
   const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
   const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];
+  const filteredCastList = filterCastByVisibleGenre(castRow.list, castGenreFilter);
+  const filterGenre = castGenreFilter ? GENRES.find((g) => g.id === castGenreFilter) : null;
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-ink">
@@ -653,6 +658,75 @@ export default function Create({
                 ))}
               </div>
 
+              {/* genre filter — visible affinities only, so hidden affinities never leak */}
+              <div className="rounded-xl border border-line bg-panel2/70 p-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => { sfx.click(); setCastFilterOpen((open) => !open); }}
+                    className={cn(
+                      "btn-press flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-extrabold tracking-wider",
+                      castGenreFilter ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line bg-panel3 text-paper/70"
+                    )}
+                  >
+                    <Filter size={13} />
+                    {castGenreFilter ? `FILTER: ${filterGenre?.label ?? castGenreFilter}` : "FILTER BY GENRE"}
+                    <span className="rounded bg-abyss/60 px-1.5 py-0.5 text-[9px] text-paper/55">{filteredCastList.length}/{castRow.list.length}</span>
+                  </button>
+                  {castGenreFilter && (
+                    <button
+                      onClick={() => { sfx.click(); setCastGenreFilter(null); }}
+                      className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1.5 text-[9px] font-bold text-paper/55"
+                    >
+                      <X size={11} /> CLEAR
+                    </button>
+                  )}
+                  {d.genres.map((genre) => {
+                    const g = GENRES.find((x) => x.id === genre);
+                    return (
+                      <button
+                        key={genre}
+                        onClick={() => { sfx.click(); setCastGenreFilter(genre); setCastFilterOpen(false); }}
+                        className={cn(
+                          "btn-press rounded-lg border px-2 py-1.5 text-[9px] font-bold",
+                          castGenreFilter === genre ? "border-mint bg-mint/10 text-mint" : "border-line text-paper/50"
+                        )}
+                      >
+                        SHOW: {g?.label ?? genre}
+                      </button>
+                    );
+                  })}
+                </div>
+                {castFilterOpen && (
+                  <div className="mt-2 border-t border-line/60 pt-2">
+                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/40">VISIBLE AFFINITY FILTER</div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => { sfx.click(); setCastGenreFilter(null); setCastFilterOpen(false); }}
+                        className={cn(
+                          "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",
+                          castGenreFilter === null ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/50"
+                        )}
+                      >
+                        ALL
+                      </button>
+                      {GENRES.map((g) => (
+                        <button
+                          key={g.id}
+                          onClick={() => { sfx.click(); setCastGenreFilter(g.id); setCastFilterOpen(false); }}
+                          className={cn(
+                            "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",
+                            castGenreFilter === g.id ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line text-paper/50"
+                          )}
+                        >
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-[9px] italic text-paper/35">Visible affinities only — hidden affinities never affect filter results.</div>
+                  </div>
+                )}
+              </div>
+
               {/* chosen-so-far strip — sticky so the current pick stays visible
                   while the cast grid scrolls (single panel, no second pane) */}
               <div className="ink-card sticky top-0 z-30 flex items-center gap-3 p-2.5">
@@ -701,7 +775,7 @@ export default function Create({
                   variant="ghost"
                   onClick={() => {
                     sfx.click();
-                    const pool = castRow.list;
+                    const pool = filteredCastList.length ? filteredCastList : castRow.list;
                     const pick = pool[Math.floor(Math.random() * pool.length)];
                     if (castRow.role === "protag") set({ protag: pick.id, protagName: pick.name });
                     else set({ [castRow.role]: pick.id } as Partial<Draft>);
@@ -714,7 +788,7 @@ export default function Create({
 
               {/* the grid for this role only */}
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-5">
-                {castRow.list.map((m) => (
+                {filteredCastList.map((m) => (
                   <CastPick
                     key={m.id}
                     m={m}
