@@ -20,6 +20,7 @@ import {
   type CastRole,
   type CastMember,
   type Draft,
+  type MediumId,
   type PointType,
 } from "./data";
 import {
@@ -52,7 +53,10 @@ export interface ShowResult {
   fans: number;
   costs: number;
   rd: number;
-  sales: number[]; // weekly units
+  sales: number[]; // weekly units (for fan web: weekly VIEWS — see WEB_ECONOMY)
+  /** commercial-impact classification — separate from review tier.
+   *  A Fan Web show is capped at CULT CLASSIC regardless of reviews. */
+  commercial: { id: CommercialTierId; label: string; index: number };
   breakdown: { label: string; pts: string }[];
   comboLevel: number;
   newCombo: boolean;
@@ -72,6 +76,70 @@ export interface ShowResult {
 }
 
 export type TierKey = "masterpiece" | "hit" | "solid" | "mixed" | "flop";
+
+/* --------------------------------------------- commercial impact
+ * Reviews = artistic quality. Commercial impact = distribution/reach.
+ * They are deliberately SEPARATE: a Fan Web show can review 10/10 and
+ * still be stuck at CULT CLASSIC because it only reaches an open video
+ * platform. A professional medium can climb all the way to a cultural
+ * phenomenon. */
+export type CommercialTierId = "obscure" | "niche" | "breakout" | "cult" | "mainstream" | "phenomenon";
+
+export const COMMERCIAL_TIERS: { id: CommercialTierId; label: string; minRevenue: number }[] = [
+  { id: "obscure", label: "OBSCURE", minRevenue: 0 },
+  { id: "niche", label: "NICHE FOLLOWING", minRevenue: 20_000 },
+  { id: "breakout", label: "BREAKOUT HIT", minRevenue: 60_000 },
+  { id: "cult", label: "CULT CLASSIC", minRevenue: 100_000 },
+  { id: "mainstream", label: "MAINSTREAM HIT", minRevenue: 450_000 },
+  { id: "phenomenon", label: "CULTURAL PHENOMENON", minRevenue: 1_500_000 },
+];
+
+/** highest commercial tier a medium can reach. Fan Web is capped at
+ *  CULT CLASSIC by the platform itself — never by review quality. */
+export const COMMERCIAL_MAX_INDEX: Record<MediumId, number> = {
+  fanweb: 3,
+  ona: 5,
+  tv: 5,
+  ova: 5,
+  special: 5,
+  movie: 5,
+};
+
+export function commercialTierOf(medium: MediumId, revenue: number): { id: CommercialTierId; label: string; index: number } {
+  let index = 0;
+  for (let i = COMMERCIAL_TIERS.length - 1; i >= 0; i -= 1) {
+    if (revenue >= COMMERCIAL_TIERS[i].minRevenue) { index = i; break; }
+  }
+  index = Math.min(index, COMMERCIAL_MAX_INDEX[medium] ?? 5);
+  const tier = COMMERCIAL_TIERS[index];
+  return {
+    id: tier.id,
+    label: medium === "fanweb" && tier.id === "breakout" ? "BREAKOUT WEB HIT" : tier.label,
+    index,
+  };
+}
+
+/* ------------------------------------------------ web (fan) economy
+ * Fan Web Series runs a deliberately different commercial model: it is
+ * an ad/view platform, not a broadcaster — low money per view, a slow
+ * climb, a very long tail, strong fan conversion and an almost-free
+ * distribution deal. It generates fans, knowledge and proof of concept,
+ * never millions. All knobs are isolated here for APK tuning.
+ * `sales[]` stays the weekly audience array internally; the UI labels it
+ * VIEWS for a fan work. */
+export const WEB_ECONOMY = {
+  /** peak weekly views for a perfect fan series (vs 44,000 broadcast units) */
+  peak: 30_000,
+  /** ad revenue per view (vs £2.6 per broadcast unit) */
+  revenuePerView: 0.55,
+  /** fan conversion per view — the platform's whole draw */
+  fanPerView: 0.16,
+  /** slower climb than broadcast (2.2) and a much longer tail (2.05) */
+  rampA: 1.35,
+  tailB: 3.4,
+  /** the platform takes almost nothing */
+  platformFee: 0.02,
+};
 
 export const TIERS: Record<TierKey, { label: string; color: string }> = {
   masterpiece: { label: "HALL OF FAME", color: "#ffd166" },
@@ -395,10 +463,12 @@ export function computeResult(opts: {
   /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
      shape ramps with t^a and decays exponentially, normalised so the peak
-     week lands exactly at `peak` units. */
-  const peak = 44_000 * appeal * castSalesMultiplier;
-  const rampA = 2.2; // how steeply the show climbs
-  const tailB = 2.05; // how long the tail lasts
+     week lands exactly at `peak` units. A fan (web) work uses the same
+     shape but a slower climb, a much longer tail and a much lower peak. */
+  const web = draft.medium === "fanweb" ? WEB_ECONOMY : null;
+  const peak = (web ? web.peak : 44_000) * appeal * castSalesMultiplier;
+  const rampA = web ? web.rampA : 2.2; // how steeply the show climbs
+  const tailB = web ? web.tailB : 2.05; // how long the tail lasts
   const rawShape: number[] = [];
   for (let i = 0; i < AIR_WEEKS; i++) {
     const t = i + 1;
@@ -409,11 +479,14 @@ export function computeResult(opts: {
     Math.max(0, Math.round(peak * (s / shapeMax) * (0.9 + roll() * 0.2)))
   );
   const units = sales.reduce((a, b) => a + b, 0);
-  const revenue = Math.round(units * 2.6);
+  const revenue = web
+    ? Math.round(units * web.revenuePerView * (1 - web.platformFee))
+    : Math.round(units * 2.6);
 
   const tierFan = { masterpiece: 1.5, hit: 1.2, solid: 1, mixed: 0.62, flop: 0.3 }[tier];
-  const fans = Math.round(units * 0.09 * tierFan);
+  const fans = Math.round(units * (web ? web.fanPerView : 0.09) * tierFan);
   const rd = Math.max(2, Math.round(total * 0.55 + issues * 0.4));
+  const commercial = commercialTierOf(draft.medium, revenue);
 
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
@@ -425,6 +498,7 @@ export function computeResult(opts: {
     { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)}` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
+    { label: "Commercial impact", pts: commercial.label },
   ];
   if (chemFactor !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemFactor.toFixed(2)}` });
   if (arcCombosHit.length > 0)
@@ -455,6 +529,7 @@ export function computeResult(opts: {
     costs,
     rd,
     sales,
+    commercial,
     breakdown,
     comboLevel,
     newCombo,

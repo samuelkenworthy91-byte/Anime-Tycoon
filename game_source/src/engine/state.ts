@@ -14,6 +14,7 @@ import {
   arcGenreFit,
   comboKey,
   dateLabel,
+  payoutLabelFor,
   PUN_TITLES,
   RIVAL_STUDIOS,
   ROLE_POINT,
@@ -1033,7 +1034,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* commissioners refresh their briefs */
     commissions = commissions.filter((c) => w <= c.expiresWeek);
     if (w % 10 === 0) {
-      while (commissions.length < 3) commissions.push(commissionForShowrunner(r.showrunner, rollCommission(w, partners, market)));
+      while (commissions.length < 3)
+        commissions.push(commissionForShowrunner(r.showrunner, rollCommission(w, partners, market, r.mediumsUnlocked as MediumId[])));
       notices.push("New commission briefs are on the table — check the market.");
     }
 
@@ -1263,6 +1265,11 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
     if (d.animeType !== "shonen" && d.animeType !== "shojo") return "Choose an Anime Type";
     if (d.genres.length < 1 || d.genres.length > 2 || d.genres.some((genre) => !isActiveGenre(genre)))
       return "Choose one or two active genres";
+    /* state-level format gate: a commission can never start through a
+       format the studio has not unlocked, no matter where the brief came
+       from (UI filtering alone is not a safety net) */
+    const mediumBlock = formatLockReason(r, d.medium);
+    if (mediumBlock) return mediumBlock;
     const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
     if (r.officeLevel < scope.minOffice) return `${scope.label} requires ${OFFICES[scope.minOffice].name} or larger`;
     if (r.staff.length < scope.minStaff) return `${scope.label} needs at least ${scope.minStaff} staff on the books`;
@@ -1290,7 +1297,9 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
     lands immediately, but their deadline and revenue share bind the show. */
 export function startProject(r: RunState, d: Draft, commission?: Commission): RunState | null {
   if (commission) {
-    /* the brief is binding */
+    /* the brief is binding — and the format must be genuinely unlocked
+       (defence in depth; never trust UI/commission generation alone) */
+    if (!r.mediumsUnlocked.includes(d.medium)) return null;
     if (!d.genres.includes(commission.genre)) return null;
     if (d.audience !== commission.audience) return null;
     if (d.medium !== commission.medium) return null;
@@ -2336,7 +2345,7 @@ export function releaseProject(
   chunks[AIR_WEEKS - 1].fans += result.fans - accF;
   chunks.forEach((c, i) => {
     if (c.amount > 0 || c.fans > 0)
-      payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: `“${draft.title}” broadcast` });
+      payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: payoutLabelFor(draft.medium, draft.title) });
   });
 
   const released: Project = { ...p, stage: "airing", result, airedWeek: start };
@@ -2718,7 +2727,7 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
   }
   switch (ev.kind) {
     case "emergency": {
-      const c = commissionForShowrunner(r.showrunner, emergencyCommission(r.week, ev.partnerId ?? "ntv8", r.partners ?? {}, r.market ?? initMarket()));
+      const c = commissionForShowrunner(r.showrunner, emergencyCommission(r.week, ev.partnerId ?? "ntv8", r.partners ?? {}, r.market ?? initMarket(), r.mediumsUnlocked as MediumId[]));
       return {
         ...r,
         marketEvents: rest,
@@ -2727,7 +2736,7 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
       };
     }
     case "adaptation": {
-      const c = commissionForShowrunner(r.showrunner, adaptationCommission(r.week, r.partners ?? {}, r.market ?? initMarket()));
+      const c = commissionForShowrunner(r.showrunner, adaptationCommission(r.week, r.partners ?? {}, r.market ?? initMarket(), r.mediumsUnlocked as MediumId[]));
       return {
         ...r,
         marketEvents: rest,

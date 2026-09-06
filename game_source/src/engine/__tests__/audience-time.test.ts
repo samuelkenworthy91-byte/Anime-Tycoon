@@ -46,7 +46,7 @@ describe("repeatable test audience", () => {
       ...r,
       staff:[staff()],
       lastDraft:draft(),
-      lastResult:{ reviews:[], total:24, tier:"solid", hallOfFame:false, points:{story:20,art:20,sound:20}, issues:2, revenue:1000, fans:100, costs:1000, rd:0, sales:[1], breakdown:[], comboLevel:1, newCombo:false, chemMult:1, chemDiscovered:[], secretDiscovered:false, quality:22, arcCombosDiscovered:[] },
+      lastResult:{ reviews:[], total:24, tier:"solid", hallOfFame:false, points:{story:20,art:20,sound:20}, issues:2, revenue:1000, fans:100, costs:1000, rd:0, sales:[1], commercial:{id:"niche",label:"NICHE FOLLOWING",index:1}, breakdown:[], comboLevel:1, newCombo:false, chemMult:1, chemDiscovered:[], secretDiscovered:false, quality:22, arcCombosDiscovered:[] },
       showsMade:1,
     };
   };

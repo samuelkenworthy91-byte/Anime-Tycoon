@@ -311,6 +311,19 @@ export const DISTRIBUTION_LABEL: Record<DistributionKind, string> = {
   theatrical: "Theatrical",
 };
 
+/** player-facing label for the money a finished show earns each week,
+ *  per medium. Single source of truth — the finance forecast and release
+ *  payouts both read this instead of scattering switch statements. */
+export const PAYOUT_LABEL: Record<MediumId, string> = {
+  fanweb: "Open Video ads",
+  ona: "streaming licence",
+  tv: "broadcast",
+  ova: "home-video sales",
+  special: "special broadcast",
+  movie: "box office",
+};
+export const payoutLabelFor = (medium: MediumId, title: string) => `“${title}” ${PAYOUT_LABEL[medium]}`;
+
 /** the format ladder's starting order for the R&D menu and Create screen */
 export const FORMAT_ORDER: MediumId[] = ["fanweb", "ona", "tv", "ova", "special", "movie"];
 
@@ -385,7 +398,7 @@ export const scopeLabel = (scope: ScopeId, medium: MediumId) => {
   const byMedium: Record<MediumId, Record<ScopeId, string>> = {
     tv: { short: "Short Cour", standard: "Standard Cour", extended: "Double Cour", prestige: "Prestige Series" },
     ona: { short: "Short Run", standard: "Streaming Season", extended: "Full Streaming Season", prestige: "Prestige Streaming Event" },
-    fanweb: { short: "Short Filk", standard: "Fan Series", extended: "Extended Fan Series", prestige: "Prestige Fan Event" },
+    fanweb: { short: "Web Short", standard: "Fan Series", extended: "Extended Fan Series", prestige: "Prestige Fan Event" },
     ova: { short: "Short OVA", standard: "Standard OVA", extended: "Extended OVA", prestige: "Event OVA" },
     special: { short: "Short Special", standard: "TV Special", extended: "Extended Special", prestige: "Grand Special" },
     movie: { short: "Short Feature", standard: "Standard Feature", extended: "Major Feature", prestige: "Event Film" },
