@@ -1,4 +1,4 @@
-import type { CastMember } from "./data";
+import type { CastMember, GenreId } from "./data";
 
 /** Stable presentation only. Hidden affinities never influence browsing order. */
 export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
@@ -37,4 +37,13 @@ export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
     for (const genre of next.visibleAff) used.set(genre, (used.get(genre) ?? 0) + 1);
   }
   return result;
+}
+
+/** Browse-time filter. Only public visible affinities are considered. */
+export function filterCastByVisibleGenre(
+  members: readonly CastMember[],
+  genre: GenreId | null,
+): CastMember[] {
+  if (!genre) return [...members];
+  return members.filter((member) => member.visibleAff.includes(genre));
 }
