@@ -1,0 +1,106 @@
+/* Final phone-layout corrections before main promotion.
+   Loaded after index.css so these rules deliberately override the earlier
+   portrait HUD/forecast experiments without disturbing desktop styling. */
+
+/* The HUD uses backdrop-filter, which makes fixed descendants behave like
+   HUD-contained elements in Android WebView. Disable that containing block
+   while the forecast is open so the overlay/panel are truly viewport-fixed. */
+.office-hud:has(.office-hud-forecast > .anim-pop) {
+  z-index: 1000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.office-hud-forecast > .fixed {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1005 !important;
+  background: rgba(6, 5, 14, 0.72) !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.office-hud-forecast > .anim-pop {
+  position: fixed !important;
+  left: 50vw !important;
+  top: 72px !important;
+  z-index: 1010 !important;
+  width: min(22rem, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 96px) !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  animation: none !important;
+  transform: translateX(-50%) !important;
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  /* Three compact secondary chips share the bottom HUD row:
+     date on the left, R&D in the middle, forecast on the right. */
+  .office-hud {
+    min-height: 66px !important;
+    padding: 4px 6px 34px !important;
+    padding-right: 6px !important;
+    gap: 4px !important;
+  }
+
+  .office-hud-date {
+    position: absolute !important;
+    left: 6px !important;
+    bottom: 4px !important;
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+  }
+
+  .office-hud-stats {
+    gap: 3px !important;
+  }
+
+  .office-hud-rd {
+    display: flex !important;
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 4px !important;
+    z-index: 72 !important;
+    min-height: 24px !important;
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .office-hud-forecast {
+    display: block !important;
+    position: absolute !important;
+    right: 6px !important;
+    bottom: 4px !important;
+    z-index: 73 !important;
+  }
+
+  .office-hud-forecast > button {
+    min-height: 24px !important;
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+  }
+
+  .office-hud-cash {
+    padding: 3px 7px !important;
+    font-size: 10px !important;
+  }
+
+  /* Put the full forecast near the top of the usable phone viewport and let
+     only the panel itself scroll if a particularly busy week has many rows. */
+  .office-hud-forecast > .anim-pop {
+    top: 92px !important;
+    width: min(22rem, calc(100vw - 20px)) !important;
+    max-height: calc(100dvh - 116px) !important;
+  }
+}
+
+/* Landscape phones have very little vertical space, so anchor the forecast
+   close to the top rather than vertically centring it. */
+@media (max-height: 600px) and (orientation: landscape) {
+  .office-hud-forecast > .anim-pop {
+    top: 52px !important;
+    max-height: calc(100dvh - 68px) !important;
+  }
+}
