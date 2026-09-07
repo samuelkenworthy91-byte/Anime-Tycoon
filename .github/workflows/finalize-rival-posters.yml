@@ -6,8 +6,6 @@ on:
       - work/final-awards-rival-posters
     paths:
       - game_source/art_src/rival/external/rival_poster_atlas_20.zip
-      - game_source/scripts/finalize-rival-posters.mjs
-      - .github/workflows/finalize-rival-posters.yml
 
 permissions:
   contents: write
@@ -49,6 +47,10 @@ jobs:
         working-directory: game_source
         run: npm run build
 
+      - name: Cast coverage audit
+        working-directory: game_source
+        run: npm run cast:coverage
+
       - name: Commit generated integration result
         run: |
           git config user.name "github-actions[bot]"
@@ -58,8 +60,7 @@ jobs:
             game_source/public/rival-posters/atlas \
             game_source/src/engine/generated/rivalPosterManifest.json \
             game_source/docs/rival-poster-import-map.csv \
-            game_source/src/components/Create.tsx \
-            game_source/dist
+            game_source/src/components/Create.tsx
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
             exit 0
