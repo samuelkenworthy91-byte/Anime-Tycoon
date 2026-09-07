@@ -1,0 +1,68 @@
+name: Finalize Rival Poster Import
+
+on:
+  push:
+    branches:
+      - work/final-awards-rival-posters
+    paths:
+      - game_source/art_src/rival/external/rival_poster_atlas_20.zip
+      - game_source/scripts/finalize-rival-posters.mjs
+      - .github/workflows/finalize-rival-posters.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Unpack 20 poster atlases
+        run: |
+          mkdir -p game_source/public/rival-posters/sheets
+          unzip -o game_source/art_src/rival/external/rival_poster_atlas_20.zip -d game_source/public/rival-posters/sheets
+
+      - name: Generate 160 stable poster crops and final manifest
+        working-directory: game_source
+        run: node scripts/finalize-rival-posters.mjs
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test -- --reporter=dot
+
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit generated integration result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            game_source/public/rival-posters/sheets \
+            game_source/public/rival-posters/atlas \
+            game_source/src/engine/generated/rivalPosterManifest.json \
+            game_source/docs/rival-poster-import-map.csv \
+            game_source/src/components/Create.tsx \
+            game_source/dist
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "Finalize 160 rival poster atlas import [generated]"
+          git push origin HEAD:work/final-awards-rival-posters
