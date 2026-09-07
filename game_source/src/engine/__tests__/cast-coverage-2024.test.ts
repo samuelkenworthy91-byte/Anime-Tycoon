@@ -9,85 +9,71 @@ import {
 } from "../castCoverage";
 
 /* ------------------------------------------------------------------ *
- *  Part G: cast coverage validator — 253 visible genre pairs × 8 roles
- *  = 2,024 cells, reported exactly. Two truths are asserted:
- *   1. the enumeration math is exact (253 pairs, 8 groups, 2,024 cells)
- *   2. the gameplay invariant (type-mixed role coverage, what the live
- *      cast picker actually needs) stays complete — 4 × 253 = 1,012
- *  Strict per-type same-member cells are REPORTED (never fabricated);
- *  they have a hard combinatorial ceiling (50 members × C(3,2) = 150
- *  pair slots per group) so they cannot all be covered, by design.
+ *  Cast V3 closure is deliberately TWO complementary guarantees:
+ *
+ *   - 253 pairs × 4 roles = 1,012 role cells (anime types mixed)
+ *   - 253 pairs × 2 anime types = 506 type cells (roles mixed)
+ *
+ *  Total canonical acceptance grid = 1,518 cells. This matches the
+ *  432-character closure now on main and avoids pretending that every
+ *  54-member role×type intersection could cover 253 same-member pairs.
  * ------------------------------------------------------------------ */
 
-describe("cast coverage — 253 pairs × 8 roles = 2,024 cells", () => {
-  const { required, covered, crewCovered, cells, pairs, groups } = computeCoverage();
+describe("Cast V3 canonical pair closure", () => {
+  const result = computeCoverage();
 
-  it("enumerates exactly 253 visible genre pairs from the 23 canonical genres", () => {
+  it("enumerates exactly 253 unordered pairs from 23 canonical genres", () => {
     expect(GENRES).toHaveLength(23);
-    expect(pairs).toBe(23 * 22 / 2);
-    expect(pairs).toBe(253);
-    const seen = new Set(genrePairs().map(([a, b]) => [a, b].sort().join("|")));
-    expect(seen.size).toBe(253);
-    /* all pair members are visible (canonical) genres on live cast */
-    const live = new Set(CAST_V2.flatMap((m) => m.visibleAff));
-    for (const [a, b] of genrePairs()) {
-      expect(live.has(a)).toBe(true);
-      expect(live.has(b)).toBe(true);
-    }
+    expect(result.pairs).toBe(253);
+    expect(genrePairs()).toHaveLength(253);
+    expect(new Set(genrePairs().map(([a, b]) => [a, b].sort().join("|"))).size).toBe(253);
   });
 
-  it("enumerates exactly 8 role groups (4 roles × 2 anime types)", () => {
-    expect(groups).toHaveLength(8);
+  it("uses the four runtime roles and two anime types", () => {
     expect(CAST_COVERAGE_ROLES).toEqual(["protag", "secondary", "pet", "villain"]);
     expect(CAST_COVERAGE_TYPES).toEqual(["shonen", "shojo"]);
+    expect(result.groups).toHaveLength(6);
   });
 
-  it("REQUIRED is exactly 2,024 cells — no more, no fewer", () => {
-    expect(required).toBe(2024);
-    expect(cells).toHaveLength(2024);
+  it("audits exactly 1,518 canonical cells", () => {
+    expect(result.roleRequired).toBe(4 * 253);
+    expect(result.typeRequired).toBe(2 * 253);
+    expect(result.required).toBe(1518);
+    expect(result.cells).toHaveLength(1518);
   });
 
-  it("every cell is explicitly adjudicated: coverage + crew-union + witness, no fabrication", () => {
-    for (const c of cells) {
-      expect(typeof c.covered).toBe("boolean");
-      expect(typeof c.crewUnion).toBe("boolean");
-      if (c.covered) {
-        expect(c.witness).toBeTruthy();
-        /* the witness truly carries both genres and belongs to the group */
-        const m = CAST_V2.find((x) => x.id === c.witness)!;
-        const aff = [...m.visibleAff, m.hiddenAff];
-        expect(aff).toContain(c.pair[0]);
-        expect(aff).toContain(c.pair[1]);
-        expect(m.type).toBe(c.animeType);
-      }
+  it("covers every pair in each of the four cast roles — 1,012/1,012", () => {
+    expect(result.roleCovered).toBe(result.roleRequired);
+    expect(result.roleCovered).toBe(1012);
+  });
+
+  it("covers every pair globally within Shonen and within Shojo — 506/506", () => {
+    expect(result.typeCovered).toBe(result.typeRequired);
+    expect(result.typeCovered).toBe(506);
+  });
+
+  it("has a real same-member witness for every accepted cell", () => {
+    expect(result.covered).toBe(result.required);
+    for (const cell of result.cells) {
+      expect(cell.covered, `${cell.dimension}:${cell.group}/${cell.pair.join("|")}`).toBe(true);
+      expect(cell.witness).toBeTruthy();
+      const member = CAST_V2.find((m) => m.id === cell.witness);
+      expect(member).toBeTruthy();
+      const aff = [...member!.visibleAff, member!.hiddenAff];
+      expect(aff).toContain(cell.pair[0]);
+      expect(aff).toContain(cell.pair[1]);
+      if (cell.dimension === "role") expect(member!.role).toBe(cell.group);
+      else expect(member!.type).toBe(cell.group);
     }
   });
 
-  it("the gameplay invariant holds: role-level (type-mixed) coverage is complete — 1,012/1,012", () => {
-    const perRole = new Set<string>();
-    for (const c of cells) {
-      if (c.covered) perRole.add(`${c.role}|${c.pair[0]}|${c.pair[1]}`);
-    }
-    /* 4 roles × 253 pairs — every role can fill every paired prompt */
-    expect(perRole.size).toBe(4 * 253);
-  });
-
-  it("crew-union floor is complete: both genres coexist in every group — 2,024/2,024", () => {
-    expect(crewCovered).toBe(2024);
-  });
-
-  it("strict per-type coverage is honestly reported (and respects the combinatorial ceiling)", () => {
-    /* each 50-member group offers ≤ 150 same-member pair slots (3 affinities
-       per member → C(3,2) = 3 pairs × 50) — 253 strict cells per group are
-       impossible; the report must sit at or under that ceiling */
-    const summary = groupSummary(cells);
-    expect(summary.size).toBe(8);
+  it("reports every canonical group as 253/253 with no missing pairs", () => {
+    const summary = groupSummary(result.cells);
+    expect(summary.size).toBe(6);
     for (const [group, row] of summary) {
       expect(row.required, group).toBe(253);
-      expect(row.covered, group).toBeLessThanOrEqual(150);
-      expect(row.missing.length + row.covered).toBe(253);
+      expect(row.covered, group).toBe(253);
+      expect(row.missing, group).toEqual([]);
     }
-    expect(covered).toBeGreaterThan(0);
-    expect(covered).toBeLessThanOrEqual(150 * 8);
   });
 });
