@@ -11,6 +11,7 @@ import {
   CAREER_WEEKS,
   AIR_WEEKS,
   castById,
+  CAST_V2,
   arcGenreFit,
   comboKey,
   dateLabel,
@@ -193,8 +194,16 @@ import {
   type TrainingJob,
 } from "./studioOps";
 import { rollStudioEvent, type StudioEvent } from "./events";
+import {
+  buildCeremony,
+  playerCraftFor,
+  rivalNominee,
+  type AwardCeremony,
+  type AwardNominee,
+} from "./awards";
 
 export type { Franchise, EntryKind } from "./franchise";
+export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
 
 export interface HofEntry {
   title: string;
@@ -212,26 +221,6 @@ export interface Payout {
   amount: number;
   fans: number;
   label: string;
-}
-
-export interface AwardNominee {
-  title: string;
-  studio: string;
-  score: number;
-  player: boolean;
-}
-
-export interface AwardCategory {
-  name: string;
-  blurb: string;
-  nominees: AwardNominee[];
-  winner: AwardNominee;
-}
-
-export interface AwardCeremony {
-  year: number;
-  categories: AwardCategory[];
-  playerAwards: number;
 }
 
 export interface AudienceInsight {
@@ -528,6 +517,28 @@ export function migrateRun(raw: unknown): RunState {
       rush: null,
       liveQuality: { ...(pr.liveQuality ?? { story: 0, art: 0, sound: 0 }) },
     })) : [],
+    /* older saves may carry bare-bones award slate entries — backfill the
+       fields the seven-category ceremony judges on (defensive; fresh saves
+       write the full record at release time) */
+    yearShows: Array.isArray(r.yearShows)
+      ? r.yearShows.map((n0) => {
+          const n = n0 as Partial<AwardNominee> & { title: string; studio: string; score: number };
+          return {
+            title: n.title,
+            studio: n.studio,
+            player: !!n.player,
+            animeType: n.animeType ?? "shonen",
+            genres: n.genres ?? [],
+            score: n.score,
+            story: typeof n.story === "number" ? n.story : n.score,
+            art: typeof n.art === "number" ? n.art : n.score,
+            sound: typeof n.sound === "number" ? n.sound : n.score,
+            audience: typeof n.audience === "number" ? n.audience : n.score * 400,
+            posterId: n.posterId ?? null,
+            protag: n.protag ?? null,
+          };
+        })
+      : [],
     facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
     bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
@@ -661,50 +672,14 @@ export function forecastWeek(r: RunState): WeekForecast {
 }
 
 /* ------------------------------------------------------------------ year end */
-function runCeremony(year: number, yearShows: AwardNominee[], rivalWorld: RivalWorld): AwardCeremony {
-  const all: AwardNominee[] = [
+/** judge a full awards year: the player's real releases plus every rival
+ *  studio's televised slate, across the seven headline categories. */
+export function runCeremony(year: number, yearShows: AwardNominee[], rivalWorld: RivalWorld): AwardCeremony {
+  const slate: AwardNominee[] = [
     ...yearShows,
-    ...yearRivalReleases(rivalWorld, year).map((r) => ({ title: r.title, studio: r.studio, score: r.score, player: false })),
+    ...yearRivalReleases(rivalWorld, year).map(rivalNominee),
   ];
-  const byScore = [...all].sort((a, b) => b.score - a.score);
-
-  const categories: AwardCategory[] = [];
-  const best = byScore[0];
-  if (best) {
-    categories.push({
-      name: "Anime of the Year",
-      blurb: "The show that defined the year.",
-      nominees: byScore.slice(0, Math.min(5, byScore.length)),
-      winner: best,
-    });
-  }
-  const rest = byScore.filter((n) => n !== best);
-  if (rest.length) {
-    categories.push({
-      name: "Critics' Choice",
-      blurb: "The panel's personal favourite.",
-      nominees: rest.slice(0, Math.min(4, rest.length)),
-      winner: rest[0],
-    });
-  }
-  const people = all.length
-    ? all[Math.floor(Math.random() * all.length)]
-    : null;
-  if (people && categories.length < 3) {
-    const pool = [...all].sort((a, b) => b.score - a.score).slice(0, Math.min(4, all.length));
-    categories.push({
-      name: "People's Choice",
-      blurb: "Voted by one million screaming fans.",
-      nominees: pool,
-      winner: people,
-    });
-  }
-
-  return {
-    year,
-    categories,
-    playerAwards: categories.filter((c) => c.winner.player).length,
-  };
+  return buildCeremony(year, slate);
 }
 
 /** the player's stats in the shape the ranking table shares with rivals */
@@ -755,6 +730,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let arcCombos = [...(r.arcCombos ?? [])];
   let arcKnowledge = { ...(r.arcKnowledge ?? {}) };
   let arcGenreKnowledge = { ...(r.arcGenreKnowledge ?? {}) };
+  let castAffinityDiscovered = [...(r.castAffinityDiscovered ?? [])];
   let contractJobs = [...(r.contractJobs ?? [])];
   let trainingJobs = [...(r.trainingJobs ?? [])];
   let researchJobs = [...(r.researchJobs ?? [])];
@@ -887,20 +863,18 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const keep: ResearchJob[] = [];
       for (const job of researchJobs) {
         if (w < job.completesWeek) { keep.push(job); continue; }
-        if (!research.includes(job.researchId)) research.push(job.researchId);
-        if (job.researchId === "narrative_analytics") {
-          arcCombos = [...new Set([...arcCombos, ...ARC_RESEARCH_COMBOS])];
-          for (const id of ARC_RESEARCH_COMBOS) {
-            const combo = ARC_COMBOS.find((c) => c.id === id);
-            for (const arcId of combo?.arcs ?? []) arcKnowledge[arcId] = Math.max(1, arcKnowledge[arcId] ?? 0);
-          }
-          notices.push("📚 Narrative Analytics adds several proven structures to the Studio Bible.");
-        }
-        if (job.researchId === "genre_studies") {
-          for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
-          notices.push("📚 Genre Studies reveals a starter set of arc-to-genre relationships.");
-        }
-        notices.push(`🔬 Research complete: ${job.name}!`);
+        const out = applyResearchCompletion(
+          { research, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices },
+          job.researchId,
+          job.name
+        );
+        research = out.research;
+        arcCombos = out.arcCombos;
+        arcKnowledge = out.arcKnowledge;
+        arcGenreKnowledge = out.arcGenreKnowledge;
+        castAffinityDiscovered = out.castAffinityDiscovered;
+        notices.length = 0;
+        notices.push(...out.notices);
       }
       researchJobs = keep;
     }
@@ -1120,17 +1094,20 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const ceremony = runCeremony(year, yearShows, rivalWorld);
       awardsCeremony = ceremony;
       awards += ceremony.playerAwards;
+      /* tiered category prizes — applied exactly once, in aggregate.
+         (the old flat £25,000 / +1,500-per-award payout is retired) */
       if (ceremony.playerAwards > 0) {
-        const prize = 25_000 * ceremony.playerAwards;
-        const fanPrize = 1_500 * ceremony.playerAwards;
-        cash += prize;
-        fans += fanPrize;
-        notices.push(`🏆 ${r.studio} takes ${ceremony.playerAwards} award${ceremony.playerAwards > 1 ? "s" : ""} at the London Anime Awards (+£${prize.toLocaleString("en-GB")})!`);
+        cash += ceremony.playerCash;
+        fans += ceremony.playerFans;
+        notices.push(
+          `🏆 ${r.studio} takes ${ceremony.playerAwards} award${ceremony.playerAwards > 1 ? "s" : ""} at the London Anime Awards (+£${ceremony.playerCash.toLocaleString("en-GB")}, +${ceremony.playerFans.toLocaleString("en-GB")} fans)!`
+        );
       } else {
         notices.push(`The London Anime Awards: ${r.studio} goes home empty-handed.`);
       }
-      if (ceremony.categories[0]) {
-        const w2 = ceremony.categories[0].winner;
+      const aoty = ceremony.categories.find((c) => c.id === "aoty");
+      if (aoty) {
+        const w2 = aoty.winner;
         notices.push(`Anime of the Year: “${w2.title}” (${w2.studio}, ${w2.score}/40).`);
         /* every winner banks an award — rival studios included */
         for (const cat of ceremony.categories) {
@@ -1144,9 +1121,9 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           const studio = rivalWorld.studios.find((s) => s.name === w2.studio);
           if (studio) rivalWorld = bumpRivalry(rivalWorld, studio.id, 5);
           notices.push(`The rivalry with ${w2.studio} deepens — they took Anime of the Year.`);
-        } else if (ceremony.categories[0].nominees.some((n) => !n.player)) {
+        } else if (aoty.nominees.some((n) => !n.player)) {
           /* your win over a rival stings them too */
-          const closestRival = ceremony.categories[0].nominees
+          const closestRival = aoty.nominees
             .filter((n) => !n.player)
             .sort((a, b) => b.score - a.score)[0];
           const studio = rivalWorld.studios.find((s) => s.name === closestRival.studio);
@@ -1241,6 +1218,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     arcCombos,
     arcKnowledge,
     arcGenreKnowledge,
+    castAffinityDiscovered,
     contractJobs,
     trainingJobs,
     researchJobs,
@@ -1571,27 +1549,75 @@ export function startTestAudience(r: RunState): RunState | null {
   };
 }
 
-function finishResearchJob(r: RunState, job: ResearchJob): RunState {
-  let research = [...r.research];
-  let arcCombos = [...r.arcCombos];
-  const arcKnowledge = { ...r.arcKnowledge };
-  const arcGenreKnowledge = { ...r.arcGenreKnowledge };
-  const notices = [...r.notices];
-  if (!research.includes(job.researchId)) research.push(job.researchId);
-  if (job.researchId === "narrative_analytics") {
-    arcCombos = [...new Set([...arcCombos, ...ARC_RESEARCH_COMBOS])];
+/** the shared carrier every research-completion path reads/writes */
+interface ResearchCarrier {
+  research: string[];
+  arcCombos: string[];
+  arcKnowledge: Record<string, number>;
+  arcGenreKnowledge: Record<string, number>;
+  castAffinityDiscovered: string[];
+  notices: string[];
+}
+
+/** apply one completed research project to a state-shaped carrier.
+ *  Repeatable projects (Talent Analysis) never enter run.research — they
+ *  instead reveal exactly one undiscovered cast hidden affinity. */
+export function applyResearchCompletion<T extends ResearchCarrier>(
+  carrier: T,
+  researchId: string,
+  name: string,
+  rand: () => number = Math.random
+): T {
+  const research = carrier.research.includes(researchId)
+    ? carrier.research
+    : researchId === TALENT_ANALYSIS_ID
+      ? carrier.research
+      : [...carrier.research, researchId];
+  let arcCombos = carrier.arcCombos;
+  let arcKnowledge = carrier.arcKnowledge;
+  let arcGenreKnowledge = carrier.arcGenreKnowledge;
+  let castAffinityDiscovered = carrier.castAffinityDiscovered;
+  const notices = [...carrier.notices];
+
+  if (researchId === "narrative_analytics") {
+    arcCombos = [...new Set([...carrier.arcCombos, ...ARC_RESEARCH_COMBOS])];
+    arcKnowledge = { ...carrier.arcKnowledge };
     for (const id of ARC_RESEARCH_COMBOS) {
       const combo = ARC_COMBOS.find((c) => c.id === id);
       for (const arcId of combo?.arcs ?? []) arcKnowledge[arcId] = Math.max(1, arcKnowledge[arcId] ?? 0);
     }
     notices.push("📚 Narrative Analytics adds several proven structures to the Studio Bible.");
   }
-  if (job.researchId === "genre_studies") {
+  if (researchId === "genre_studies") {
+    arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
     for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
     notices.push("📚 Genre Studies reveals a starter set of arc-to-genre relationships.");
   }
-  notices.push(`🔬 Research complete: ${job.name}!`);
-  return { ...r, research, arcCombos, arcKnowledge, arcGenreKnowledge, notices };
+  if (researchId === TALENT_ANALYSIS_ID) {
+    /* collect every valid, non-legacy cast id the studio has NOT yet
+       discovered — never re-target, never waste a completed programme */
+    const pool = undiscoveredProfileIds(carrier);
+    if (pool.length) {
+      const pickId = pool[Math.floor(rand() * pool.length)];
+      castAffinityDiscovered = [...carrier.castAffinityDiscovered, pickId];
+      const member = castById(pickId);
+      const genre = GENRES.find((g) => g.id === member.hiddenAff)?.label ?? member.hiddenAff;
+      notices.push(
+        `🔬 Research complete: ${name}!`,
+        `🧠 TALENT ANALYSIS COMPLETE — ${member.name}. HIDDEN AFFINITY DISCOVERED: ${genre} ✦`
+      );
+    } else {
+      notices.push(`🔬 Research complete: ${name}! ALL CAST PROFILED — the programme winds down.`);
+    }
+    return { ...carrier, research, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
+  }
+
+  notices.push(`🔬 Research complete: ${name}!`);
+  return { ...carrier, research, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
+}
+
+function finishResearchJob(r: RunState, job: ResearchJob): RunState {
+  return applyResearchCompletion(r, job.researchId, job.name);
 }
 
 function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; studioLocked: boolean } {
@@ -2469,7 +2495,23 @@ export function releaseProject(
         return g.staff;
       });
     })(),
-    yearShows: [...r.yearShows, { title: draft.title, studio: r.studio, score: result.total, player: true }],
+    /* the awards slate keeps REAL production data: critic total, discipline
+       point mix (→ craft strengths), audience, genres — never invented values */
+    yearShows: [
+      ...r.yearShows,
+      {
+        title: draft.title,
+        studio: r.studio,
+        player: true,
+        animeType: draft.animeType,
+        genres: [...draft.genres],
+        score: result.total,
+        ...playerCraftFor(result.total, result.points),
+        audience: result.fans,
+        posterId: null,
+        protag: draft.protag,
+      },
+    ],
     lastResult: result,
     lastDraft: draft,
     notices,
@@ -2636,8 +2678,38 @@ export function trainStaff(r: RunState, staffId: string, focus: PointType): RunS
   };
 }
 
+/* --------------------------------------------- repeatable talent analysis */
+export const TALENT_ANALYSIS_ID = "talent_analysis";
+export const TALENT_ANALYSIS_RD = 85;
+
+/** every genuinely profileable cast member — valid, non-legacy, selectable */
+export const profileableCastIds = (): string[] =>
+  CAST_V2.filter((m) => !m.legacyPlaceholder).map((m) => m.id);
+
+/** ids whose hidden affinity is still unknown to this studio */
+export const undiscoveredProfileIds = (r: Pick<RunState, "castAffinityDiscovered">): string[] =>
+  profileableCastIds().filter((id) => !(r.castAffinityDiscovered ?? []).includes(id));
+
+export const allCastProfiled = (r: Pick<RunState, "castAffinityDiscovered">): boolean =>
+  undiscoveredProfileIds(r).length === 0;
+
+/** why a research project can't be started (null = allowed). Repeatable
+ *  projects skip the "already researched" rule; talent analysis needs an
+ *  undiscovered subject so a completed project can never be wasted. */
+export function researchBlockReason(r: RunState, id: string): string | null {
+  const def = RESEARCH.find((x) => x.id === id);
+  if (!def) return "Unknown research";
+  if ((r.researchJobs ?? []).some((j) => j.researchId === id)) return "Already in research";
+  if (!def.repeatable && r.research.includes(id)) return "Already researched";
+  if (def.requires && !r.research.includes(def.requires))
+    return `Requires ${RESEARCH.find((x) => x.id === def.requires)?.name ?? def.requires} first`;
+  if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";
+  if (r.rd < def.rd) return `Needs ${def.rd} research data (you have ${r.rd})`;
+  return null;
+}
+
 export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {
-  if (r.research.includes(id) || (r.researchJobs ?? []).some((j) => j.researchId === id)) return null;
+  if (researchBlockReason(r, id)) return null;
   if (r.rd < rdCost) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
@@ -2911,12 +2983,14 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
 
 /* ============================ franchising ops ============================ */
 
-/** launch a merchandise line for an IP: pay now, royalties arrive weekly */
+/** launch a merchandise line for an IP: pay now, royalties arrive weekly.
+ *  Every product requires Merch Division + its own dedicated research —
+ *  the existing cost / popularity / pedigree / cooldown gates are unchanged. */
 export function launchMerch(r: RunState, franchiseKey: string, productId: string): RunState | null {
   const fr = r.franchises[franchiseKey];
   const product = merchProductById(productId);
   if (!fr || !product) return null;
-  if (merchBlock(fr, product, r.week, r.cash)) return null;
+  if (merchBlock(fr, product, r.week, r.cash, r.research ?? [])) return null;
   const total = merchReturn(fr, product);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];

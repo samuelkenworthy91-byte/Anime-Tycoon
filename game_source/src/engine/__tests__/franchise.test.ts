@@ -324,9 +324,11 @@ describe("merchandising", () => {
     expect(merchProductById("collectors")!.minScore).toBeGreaterThan(0);
   });
 
+  const ALL_MERCH_RESEARCH = ["merch", "merch_plush", "merch_soundtrack", "merch_figures", "merch_apparel", "merch_collectors", "merch2"];
+
   it("launching a line costs cash now and schedules royalties", () => {
     const fr = mkFr({ popularity: 70, lifetimeFans: 300_000 });
-    const r = richRun({ franchises: { IP: fr } });
+    const r = richRun({ franchises: { IP: fr }, research: [...ALL_MERCH_RESEARCH] });
     const out = launchMerch(r, "IP", "figures")!;
     const product = merchProductById("figures")!;
     expect(out.cash).toBe(r.cash - product.cost);
@@ -338,7 +340,7 @@ describe("merchandising", () => {
 
   it("the same line cannot be spammed before its cooldown", () => {
     const fr = mkFr({ popularity: 70 });
-    let r = richRun({ franchises: { IP: fr } });
+    let r = richRun({ franchises: { IP: fr }, research: [...ALL_MERCH_RESEARCH] });
     r = launchMerch(r, "IP", "plush")!;
     expect(launchMerch(r, "IP", "plush")).toBeNull();
     expect(launchMerch(r, "IP", "ost")).toBeTruthy(); // other lines unaffected
@@ -346,9 +348,9 @@ describe("merchandising", () => {
 
   it("cold or unproven IPs cannot carry premium products", () => {
     const cold = mkFr({ popularity: 10, bestScore: 20 });
-    expect(merchBlock(cold, merchProductById("mobile")!, 10, 10_000_000)).toBeTruthy();
-    expect(merchBlock(cold, merchProductById("collectors")!, 10, 10_000_000)).toBeTruthy();
-    expect(merchBlock(cold, merchProductById("ost")!, 10, 10_000_000)).toBeNull();
+    expect(merchBlock(cold, merchProductById("mobile")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeTruthy();
+    expect(merchBlock(cold, merchProductById("collectors")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeTruthy();
+    expect(merchBlock(cold, merchProductById("ost")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeNull();
   });
 });
 

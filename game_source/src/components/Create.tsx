@@ -261,6 +261,45 @@ export default function Create({
   const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
   const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));
 
+  /* — KNOWLEDGE QUICK PICKS (only what the studio itself has discovered) — */
+  /** genre pairings this studio has already PROVEN (combo knowledge > 0),
+   *  both genres licensed — quick-pick chips on the genre step. Nothing
+   *  here reads the hidden combo table, so unknown formulas never leak. */
+  const knownPairings = useMemo(
+    () =>
+      Object.entries(run.comboLevels)
+        .filter(([key, lv]) => lv > 0 && key.split("|").every((g) => run.genresUnlocked.includes(g as never)))
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([key, lv]) => ({ key, genres: key.split("|") as GenreId[], lv })),
+    [run.comboLevels, run.genresUnlocked]
+  );
+
+  /** arcs whose fit against EVERY picked genre the studio already knows
+   *  (arcGenreKnowledge row revealed). Sorted strong→neutral; KNOWN RISK
+   *  arcs surface as an advisory, never a recommendation. */
+  const recommendedArcs = useMemo(() => {
+    if (!d.genres.length) return [];
+    const out: { arc: (typeof ARCS)[number]; chips: { genre: string; fit: { label: string; cls: string; score: number } }[]; rank: 0 | 1 | 2 | 3 }[] = [];
+    for (const a of ARCS) {
+      if (d.arcs.includes(a.id) || arcLockReason(a, run)) continue;
+      const chips = d.genres.map((genre) => {
+        const known = (run.arcGenreKnowledge[arcGenreKey(a.id, genre)] ?? 0) > 0;
+        if (!known) return null;
+        const g = GENRES.find((x) => x.id === genre)!;
+        return { genre: g.label, fit: arcGenreFit(a, genre) };
+      });
+      if (chips.some((c) => c === null)) continue; /* an unknown fit row stays private */
+      const clean = chips as { genre: string; fit: { label: string; cls: string; score: number } }[];
+      const worst = Math.min(...clean.map((c) => c.fit.score));
+      const rank = (worst >= 4 ? 3 : worst >= 1 ? 2 : worst >= 0 ? 1 : 0) as 0 | 1 | 2 | 3;
+      out.push({ arc: a, chips: clean, rank });
+    }
+    const recs = out.filter((r) => r.rank > 0).sort((a, b) => b.rank - a.rank).slice(0, 4);
+    const risks = out.filter((r) => r.rank === 0).slice(0, 2);
+    return [...recs, ...risks];
+  }, [d.genres, d.arcs, run, run.arcGenreKnowledge]);
+
   const stepValid =
     [
       d.title.trim().length > 0,
@@ -593,7 +632,37 @@ export default function Create({
                   </span>
                 )}
               </div>
-                          </div>
+              {/* KNOWN FITS — quick picks from the studio's own proven pairings */}
+              {!commission && !plan && knownPairings.length > 0 && (
+                <div className="rounded-xl border border-mint/30 bg-mint/5 p-2.5" title="Quick picks from pairings your studio has already shipped and learned.">
+                  <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/45">
+                    KNOWN FITS ✦ — PROVEN BY YOUR STUDIO
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {knownPairings.map(({ key, genres, lv }) => {
+                      const active = comboKey(d.genres) === key;
+                      const tip = `Proven pairing — combo knowledge Lv${lv}. Tap to ${active ? "drop the second genre" : "use this pairing"}.`;
+                      return (
+                        <button
+                          key={key}
+                          title={tip}
+                          onClick={() => set({ genres: active ? [genres[0]] : [...genres] })}
+                          className={cn(
+                            "btn-press flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-extrabold",
+                            active
+                              ? "border-mint bg-mint/15 text-mint"
+                              : "border-line bg-panel2/80 text-paper/80 hover:border-mint/50"
+                          )}
+                        >
+                          {genres.map((g) => GENRES.find((x) => x.id === g)!.label).join(" + ")}
+                          <span className="rounded bg-panel3 px-1 text-[8px] font-extrabold text-gold">Lv{lv}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {step === 3 && (
@@ -868,6 +937,33 @@ export default function Create({
                     ) : (
                       <div className="mt-1 text-[10px] italic text-viol">No proven structure here yet — release it, or research narrative analytics.</div>
                     )}
+                  </div>
+                )}
+                {/* RECOMMENDED — quick picks from discovered arc↔genre fits only */}
+                {d.genres.length > 0 && recommendedArcs.length > 0 && (
+                  <div className="rounded-xl border border-cyanx/30 bg-cyanx/5 p-2.5" title="Recommended from arc-to-genre fits your studio has revealed. Unknown fits never appear here.">
+                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/45">
+                      RECOMMENDED FOR {d.genres.map((g) => GENRES.find((x) => x.id === g)!.label).join(" + ").toUpperCase()}
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {recommendedArcs.map(({ arc, chips, rank }) => {
+                        const label = rank === 3 ? "STRONG" : rank === 2 ? "GOOD" : rank === 1 ? "NEUTRAL" : "KNOWN RISK";
+                        const cls = rank === 3 ? "text-gold" : rank === 2 ? "text-mint" : rank === 1 ? "text-paper/70" : "text-neon";
+                        const border = rank === 3 ? "border-gold/60 hover:border-gold" : rank === 2 ? "border-mint/40 hover:border-mint" : rank === 1 ? "border-line hover:border-paper/50" : "border-neon/50 hover:border-neon/80";
+                        const tip = chips.map((c) => `${c.genre}: ${c.fit.label}`).join(" · ");
+                        return (
+                          <button
+                            key={arc.id}
+                            title={tip + (rank === 0 ? " — revealed as risky; you can still take the gamble" : "")}
+                            onClick={() => toggleArc(arc.id)}
+                            className={cn("btn-press flex items-center gap-1.5 rounded-lg border bg-panel2/80 px-2 py-1 text-[10px] font-extrabold text-paper/85", border)}
+                          >
+                            <span className={cn("text-[8px] tracking-[0.14em]", cls)}>{label}</span>
+                            {arc.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

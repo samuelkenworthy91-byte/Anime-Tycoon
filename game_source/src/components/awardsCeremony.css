@@ -1,0 +1,102 @@
+/*
+ * Awards ceremony — full-screen theatrical overlay.
+ * Transform/opacity animations only (composited, mobile-GPU friendly).
+ */
+
+@keyframes aw-curtain-left-in   { from { transform: translateX(-104%); } to { transform: translateX(0); } }
+@keyframes aw-curtain-right-in  { from { transform: translateX(104%); }  to { transform: translateX(0); } }
+@keyframes aw-curtain-left-out  { from { transform: translateX(0); }     to { transform: translateX(-104%); } }
+@keyframes aw-curtain-right-out { from { transform: translateX(0); }     to { transform: translateX(104%); } }
+
+@keyframes aw-marquee-glow {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.015); }
+}
+
+@keyframes aw-poster-in {
+  0%   { opacity: 0; transform: translateY(46px) rotate(-4deg) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(-6px) rotate(1deg) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes aw-winner-zoom {
+  0%   { transform: scale(1) rotate(0); }
+  30%  { transform: scale(1.32) rotate(1.5deg); }
+  55%  { transform: scale(1.18) rotate(-0.6deg); }
+  75%  { transform: scale(1.24) rotate(0.3deg); }
+  100% { transform: scale(1.22) rotate(0); }
+}
+
+@keyframes aw-loser-dim {
+  to { opacity: 0.22; transform: scale(0.92); filter: grayscale(0.9) brightness(0.5); }
+}
+
+@keyframes aw-flash {
+  0% { opacity: 0; } 18% { opacity: 0.95; } 100% { opacity: 0; }
+}
+
+@keyframes aw-ring {
+  0%   { opacity: 0.9; transform: scale(0.2); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+
+@keyframes aw-envelope-in {
+  0%   { opacity: 0; transform: translateY(60px) scale(0.7) rotateX(30deg); }
+  60%  { opacity: 1; transform: translateY(-8px) scale(1.05) rotateX(-6deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+}
+
+@keyframes aw-envelope-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+@keyframes aw-spotlight-sweep {
+  0%   { transform: translateX(-30vw) rotate(14deg); opacity: 0; }
+  20%  { opacity: 0.85; }
+  80%  { opacity: 0.85; }
+  100% { transform: translateX(30vw) rotate(-14deg); opacity: 0; }
+}
+
+@keyframes aw-confetti {
+  0%   { transform: translate3d(0, -8vh, 0) rotate(0deg); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(var(--aw-drift, 4vw), 108vh, 0) rotate(var(--aw-spin, 640deg)); opacity: 0; }
+}
+
+@keyframes aw-title-reveal {
+  0%   { opacity: 0; letter-spacing: 0.6em; transform: scale(1.15); }
+  100% { opacity: 1; letter-spacing: 0.18em; transform: scale(1); }
+}
+
+@keyframes aw-fade-in        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes aw-rise           { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes aw-ray-spin       { from { transform: rotate(0turn); } to { transform: rotate(1turn); } }
+
+.aw-curtain { position: absolute; top: -3%; bottom: -3%; width: 57%; will-change: transform; z-index: 30; }
+.aw-curtain.closed-l { left: 0;  animation: aw-curtain-left-in  1.4s cubic-bezier(.22,.75,.28,1) both; }
+.aw-curtain.closed-r { right: 0; animation: aw-curtain-right-in 1.4s cubic-bezier(.22,.75,.28,1) both; }
+.aw-curtain.open-l   { left: 0;  animation: aw-curtain-left-out  1.9s cubic-bezier(.6,.05,.2,1) both; }
+.aw-curtain.open-r   { right: 0; animation: aw-curtain-right-out 1.9s cubic-bezier(.6,.05,.2,1) both; }
+
+.aw-marquee      { animation: aw-marquee-glow 3.2s ease-in-out infinite; }
+.aw-poster-in    { animation: aw-poster-in 0.72s cubic-bezier(.2,.9,.25,1.18) both; }
+.aw-winner-zoom  { animation: aw-winner-zoom 0.9s cubic-bezier(.3,.8,.3,1) forwards; box-shadow: 0 0 42px rgba(255,214,106,.85), 0 0 120px rgba(255,170,40,.5) !important; }
+.aw-loser-dim    { animation: aw-loser-dim 1.1s ease forwards; }
+.aw-flash        { animation: aw-flash 0.95s ease-out forwards; }
+.aw-ring         { animation: aw-ring 1.6s ease-out forwards; }
+.aw-envelope-in  { animation: aw-envelope-in 0.9s cubic-bezier(.2,.9,.3,1.2) both; }
+.aw-envelope-pulse { animation: aw-envelope-pulse 1.1s ease-in-out infinite; }
+.aw-spotlight    { animation: aw-spotlight-sweep 2.6s ease-in-out infinite; }
+.aw-title-reveal { animation: aw-title-reveal 1.4s cubic-bezier(.2,.8,.2,1) both; }
+.aw-fade-in      { animation: aw-fade-in 0.8s ease both; }
+.aw-rise         { animation: aw-rise 0.7s cubic-bezier(.2,.9,.25,1) both; }
+.aw-rays         { animation: aw-ray-spin 26s linear infinite; }
+.aw-confetti-piece { animation: aw-confetti linear forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aw-curtain.open-l, .aw-curtain.open-r, .aw-curtain.closed-l, .aw-curtain.closed-r,
+  .aw-poster-in, .aw-winner-zoom, .aw-envelope-in, .aw-rise, .aw-title-reveal { animation-duration: 0.01s !important; }
+  .aw-confetti-piece { display: none; }
+  .aw-rays, .aw-envelope-pulse, .aw-marquee, .aw-spotlight { animation: none; }
+}

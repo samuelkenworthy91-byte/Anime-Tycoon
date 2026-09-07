@@ -1,0 +1,2500 @@
+{
+  "schema": 1,
+  "capacity": {
+    "perStudio": 24,
+    "studios": 6,
+    "total": 168
+  },
+  "generated": 6,
+  "pending": 162,
+  "posters": [
+    {
+      "id": "toei_titanrise",
+      "img": "rival-posters/toei_titanrise.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": "iron-titans"
+    },
+    {
+      "id": "toei_titanwreck",
+      "img": "rival-posters/toei_titanwreck.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "military"
+      ],
+      "family": "iron-titans"
+    },
+    {
+      "id": "toei_titannova",
+      "img": "rival-posters/toei_titannova.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "space"
+      ],
+      "family": "iron-titans"
+    },
+    {
+      "id": "toei_ironfist",
+      "img": "rival-posters/toei_ironfist.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "martial"
+      ],
+      "family": null
+    },
+    {
+      "id": "toei_grandpitch",
+      "img": "rival-posters/toei_grandpitch.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null
+    },
+    {
+      "id": "toei_steelstorm",
+      "img": "rival-posters/toei_steelstorm.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": "steel-front"
+    },
+    {
+      "id": "toei_steelash",
+      "img": "rival-posters/toei_steelash.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military",
+        "survival"
+      ],
+      "family": "steel-front",
+      "pending": true
+    },
+    {
+      "id": "toei_stormcorsair",
+      "img": "rival-posters/toei_stormcorsair.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "pirate"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_orbitfall",
+      "img": "rival-posters/toei_orbitfall.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_apexduel",
+      "img": "rival-posters/toei_apexduel.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "martial",
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_warhorn",
+      "img": "rival-posters/toei_warhorn.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military",
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_voltagirl",
+      "img": "rival-posters/toei_voltagirl.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_neonsaber",
+      "img": "rival-posters/toei_neonsaber.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_kaijunight",
+      "img": "rival-posters/toei_kaijunight.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_grandchef",
+      "img": "rival-posters/toei_grandchef.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_blaststage",
+      "img": "rival-posters/toei_blaststage.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_siege",
+      "img": "rival-posters/toei_siege.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military",
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_roninblade",
+      "img": "rival-posters/toei_roninblade.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": "ashen-ronin",
+      "pending": true
+    },
+    {
+      "id": "toei_ronindusk",
+      "img": "rival-posters/toei_ronindusk.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": "ashen-ronin",
+      "pending": true
+    },
+    {
+      "id": "toei_shadowstrike",
+      "img": "rival-posters/toei_shadowstrike.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_lastbastion",
+      "img": "rival-posters/toei_lastbastion.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "survival",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_mythforge",
+      "img": "rival-posters/toei_mythforge.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_stormcourt",
+      "img": "rival-posters/toei_stormcourt.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_galaxyrun",
+      "img": "rival-posters/toei_galaxyrun.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "pirate"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_orbknights",
+      "img": "rival-posters/sunrise_orbknights.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "space"
+      ],
+      "family": "orbital-knights",
+      "pending": true
+    },
+    {
+      "id": "sunrise_orbknights2",
+      "img": "rival-posters/sunrise_orbknights2.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "space"
+      ],
+      "family": "orbital-knights",
+      "pending": true
+    },
+    {
+      "id": "sunrise_orbknights3",
+      "img": "rival-posters/sunrise_orbknights3.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": "orbital-knights",
+      "pending": true
+    },
+    {
+      "id": "sunrise_chrome1",
+      "img": "rival-posters/sunrise_chrome1.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": "chrome-initiative",
+      "pending": true
+    },
+    {
+      "id": "sunrise_chrome2",
+      "img": "rival-posters/sunrise_chrome2.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": "chrome-initiative",
+      "pending": true
+    },
+    {
+      "id": "sunrise_fineworks",
+      "img": "rival-posters/sunrise_fineworks.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_zerog",
+      "img": "rival-posters/sunrise_zerog.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_dronecompany",
+      "img": "rival-posters/sunrise_dronecompany.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_circuitheart",
+      "img": "rival-posters/sunrise_circuitheart.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_jetstream",
+      "img": "rival-posters/sunrise_jetstream.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_icebound",
+      "img": "rival-posters/sunrise_icebound.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "mystery"
+      ],
+      "family": "icebound-protocol",
+      "pending": true
+    },
+    {
+      "id": "sunrise_icebound2",
+      "img": "rival-posters/sunrise_icebound2.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": "icebound-protocol",
+      "pending": true
+    },
+    {
+      "id": "sunrise_exoframe",
+      "img": "rival-posters/sunrise_exoframe.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_datalumen",
+      "img": "rival-posters/sunrise_datalumen.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_terraform",
+      "img": "rival-posters/sunrise_terraform.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "survival"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_gearsaint",
+      "img": "rival-posters/sunrise_gearsaint.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_signalidol",
+      "img": "rival-posters/sunrise_signalidol.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_nanoswarm",
+      "img": "rival-posters/sunrise_nanoswarm.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cyber",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_clockworkcafe",
+      "img": "rival-posters/sunrise_clockworkcafe.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_arclight",
+      "img": "rival-posters/sunrise_arclight.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_deepfield",
+      "img": "rival-posters/sunrise_deepfield.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sentinel",
+      "img": "rival-posters/sunrise_sentinel.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_photonblade",
+      "img": "rival-posters/sunrise_photonblade.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "samurai",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_nightops",
+      "img": "rival-posters/sunrise_nightops.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_hollowtide",
+      "img": "rival-posters/bones_hollowtide.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": "the-hollow-tide",
+      "pending": true
+    },
+    {
+      "id": "bones_hollowtide2",
+      "img": "rival-posters/bones_hollowtide2.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror",
+        "supernatural"
+      ],
+      "family": "the-hollow-tide",
+      "pending": true
+    },
+    {
+      "id": "bones_hollowtide3",
+      "img": "rival-posters/bones_hollowtide3.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "survival",
+        "horror"
+      ],
+      "family": "the-hollow-tide",
+      "pending": true
+    },
+    {
+      "id": "bones_papermoon",
+      "img": "rival-posters/bones_papermoon.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "mystery"
+      ],
+      "family": "paper-moon",
+      "pending": true
+    },
+    {
+      "id": "bones_papermoon2",
+      "img": "rival-posters/bones_papermoon2.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": "paper-moon",
+      "pending": true
+    },
+    {
+      "id": "bones_marrow",
+      "img": "rival-posters/bones_marrow.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_staticdream",
+      "img": "rival-posters/bones_staticdream.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "supernatural",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_funhouse",
+      "img": "rival-posters/bones_funhouse.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_limbos",
+      "img": "rival-posters/bones_limbos.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "isekai"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_teeth",
+      "img": "rival-posters/bones_teeth.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "survival"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_mothlight",
+      "img": "rival-posters/bones_mothlight.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_redroom",
+      "img": "rival-posters/bones_redroom.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_waxworks",
+      "img": "rival-posters/bones_waxworks.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_oddsaint",
+      "img": "rival-posters/bones_oddsaint.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "supernatural",
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_fevergreen",
+      "img": "rival-posters/bones_fevergreen.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_hungers",
+      "img": "rival-posters/bones_hungers.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cooking",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_mirrorsalt",
+      "img": "rival-posters/bones_mirrorsalt.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_crowsong",
+      "img": "rival-posters/bones_crowsong.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mythology",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_nullpoint",
+      "img": "rival-posters/bones_nullpoint.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_pilgrim",
+      "img": "rival-posters/bones_pilgrim.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "nordic",
+        "survival"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_inverted",
+      "img": "rival-posters/bones_inverted.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_madronin",
+      "img": "rival-posters/bones_madronin.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "samurai",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_paleoperative",
+      "img": "rival-posters/bones_paleoperative.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_throng",
+      "img": "rival-posters/bones_throng.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_winters",
+      "img": "rival-posters/kyo_winters.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "slice"
+      ],
+      "family": "winters-light",
+      "pending": true
+    },
+    {
+      "id": "kyo_winters2",
+      "img": "rival-posters/kyo_winters2.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "mystery"
+      ],
+      "family": "winters-light",
+      "pending": true
+    },
+    {
+      "id": "kyo_mapleave",
+      "img": "rival-posters/kyo_mapleave.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": "maple-avenue",
+      "pending": true
+    },
+    {
+      "id": "kyo_mapleave2",
+      "img": "rival-posters/kyo_mapleave2.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": "maple-avenue",
+      "pending": true
+    },
+    {
+      "id": "kyo_quietsea",
+      "img": "rival-posters/kyo_quietsea.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_lastletter",
+      "img": "rival-posters/kyo_lastletter.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_embershield",
+      "img": "rival-posters/kyo_embershield.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_valkyriefall",
+      "img": "rival-posters/kyo_valkyriefall.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_snowcourt",
+      "img": "rival-posters/kyo_snowcourt.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_afterrain",
+      "img": "rival-posters/kyo_afterrain.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_thedetective",
+      "img": "rival-posters/kyo_thedetective.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_calligrapher",
+      "img": "rival-posters/kyo_calligrapher.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai",
+        "slice"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_foxshrine",
+      "img": "rival-posters/kyo_foxshrine.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "mythology",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_greymarket",
+      "img": "rival-posters/kyo_greymarket.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_pianoline",
+      "img": "rival-posters/kyo_pianoline.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_orchard",
+      "img": "rival-posters/kyo_orchard.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "slice"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_longwinter",
+      "img": "rival-posters/kyo_longwinter.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival",
+        "nordic"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_glassangel",
+      "img": "rival-posters/kyo_glassangel.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_shoreline",
+      "img": "rival-posters/kyo_shoreline.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_oniabacus",
+      "img": "rival-posters/kyo_oniabacus.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_gildedcage",
+      "img": "rival-posters/kyo_gildedcage.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "horror"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_shadowless",
+      "img": "rival-posters/kyo_shadowless.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_starfarer",
+      "img": "rival-posters/kyo_starfarer.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_shogi",
+      "img": "rival-posters/kyo_shogi.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_goblin1",
+      "img": "rival-posters/madcap_goblin1.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai",
+        "comedy"
+      ],
+      "family": "goblin-delivery",
+      "pending": true
+    },
+    {
+      "id": "madcap_goblin2",
+      "img": "rival-posters/madcap_goblin2.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": "goblin-delivery",
+      "pending": true
+    },
+    {
+      "id": "madcap_cafe1",
+      "img": "rival-posters/madcap_cafe1.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "slice"
+      ],
+      "family": "cafe-parade",
+      "pending": true
+    },
+    {
+      "id": "madcap_cafe2",
+      "img": "rival-posters/madcap_cafe2.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": "cafe-parade",
+      "pending": true
+    },
+    {
+      "id": "madcap_overdrive",
+      "img": "rival-posters/madcap_overdrive.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_roommates",
+      "img": "rival-posters/madcap_roommates.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_otherworld",
+      "img": "rival-posters/madcap_otherworld.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_bento",
+      "img": "rival-posters/madcap_bento.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_classrep",
+      "img": "rival-posters/madcap_classrep.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_magicaloops",
+      "img": "rival-posters/madcap_magicaloops.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_petshop",
+      "img": "rival-posters/madcap_petshop.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "magical"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_easyquest",
+      "img": "rival-posters/madcap_easyquest.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "fantasy",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_dungeonmart",
+      "img": "rival-posters/madcap_dungeonmart.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "fantasy",
+        "isekai"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_pirateprank",
+      "img": "rival-posters/madcap_pirateprank.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "pirate",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_mechahelper",
+      "img": "rival-posters/madcap_mechahelper.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sportsgag",
+      "img": "rival-posters/madcap_sportsgag.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_ghostroomie",
+      "img": "rival-posters/madcap_ghostroomie.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_idolfail",
+      "img": "rival-posters/madcap_idolfail.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_romcom",
+      "img": "rival-posters/madcap_romcom.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_ninjanap",
+      "img": "rival-posters/madcap_ninjanap.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_vikingolympic",
+      "img": "rival-posters/madcap_vikingolympic.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mythology",
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_spacecamp",
+      "img": "rival-posters/madcap_spacecamp.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_hauntedbaker",
+      "img": "rival-posters/madcap_hauntedbaker.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_survivalgag",
+      "img": "rival-posters/madcap_survivalgag.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "survival",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_star1",
+      "img": "rival-posters/ttl_star1.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": "starlight-cascade",
+      "pending": true
+    },
+    {
+      "id": "ttl_star2",
+      "img": "rival-posters/ttl_star2.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": "starlight-cascade",
+      "pending": true
+    },
+    {
+      "id": "ttl_star3",
+      "img": "rival-posters/ttl_star3.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "romance"
+      ],
+      "family": "starlight-cascade",
+      "pending": true
+    },
+    {
+      "id": "ttl_velvet1",
+      "img": "rival-posters/ttl_velvet1.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "romance"
+      ],
+      "family": "velvet-stage",
+      "pending": true
+    },
+    {
+      "id": "ttl_velvet2",
+      "img": "rival-posters/ttl_velvet2.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": "velvet-stage",
+      "pending": true
+    },
+    {
+      "id": "ttl_prismduet",
+      "img": "rival-posters/ttl_prismduet.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_moonwaltz",
+      "img": "rival-posters/ttl_moonwaltz.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "magical"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_encore",
+      "img": "rival-posters/ttl_encore.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "slice"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_heartantenna",
+      "img": "rival-posters/ttl_heartantenna.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_backstage",
+      "img": "rival-posters/ttl_backstage.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_neonsymphony",
+      "img": "rival-posters/ttl_neonsymphony.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_roseduel",
+      "img": "rival-posters/ttl_roseduel.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_fantasia",
+      "img": "rival-posters/ttl_fantasia.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_laceparade",
+      "img": "rival-posters/ttl_laceparade.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_swansong",
+      "img": "rival-posters/ttl_swansong.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_candystage",
+      "img": "rival-posters/ttl_candystage.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_debutante",
+      "img": "rival-posters/ttl_debutante.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_stardustrevue",
+      "img": "rival-posters/ttl_stardustrevue.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_violinprince",
+      "img": "rival-posters/ttl_violinprince.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_gildedmelody",
+      "img": "rival-posters/ttl_gildedmelody.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sweetdiva",
+      "img": "rival-posters/ttl_sweetdiva.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_seaserenade",
+      "img": "rival-posters/ttl_seaserenade.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_clockball",
+      "img": "rival-posters/ttl_clockball.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_kwaiimech",
+      "img": "rival-posters/ttl_kwaiimech.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "mecha",
+        "magical"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparesun",
+      "img": "rival-posters/toei_sparesun.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "sports",
+        "martial"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparetide",
+      "img": "rival-posters/toei_sparetide.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "pirate",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparezero",
+      "img": "rival-posters/toei_sparezero.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparekaiju",
+      "img": "rival-posters/toei_sparekaiju.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "supernatural",
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparesolar",
+      "img": "rival-posters/sunrise_sparesolar.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_spareforge",
+      "img": "rival-posters/sunrise_spareforge.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparecrypto",
+      "img": "rival-posters/sunrise_sparecrypto.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparetundra",
+      "img": "rival-posters/sunrise_sparetundra.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_spareobe",
+      "img": "rival-posters/bones_spareobe.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_sparehive",
+      "img": "rival-posters/bones_sparehive.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror",
+        "survival"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_sparevale",
+      "img": "rival-posters/bones_sparevale.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "isekai"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_spareclinic",
+      "img": "rival-posters/bones_spareclinic.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_spareharvest",
+      "img": "rival-posters/kyo_spareharvest.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "cooking"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_sparezephyr",
+      "img": "rival-posters/kyo_sparezephyr.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_spareempire",
+      "img": "rival-posters/kyo_spareempire.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_sparerail",
+      "img": "rival-posters/kyo_sparerail.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparebuffet",
+      "img": "rival-posters/madcap_sparebuffet.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparewap",
+      "img": "rival-posters/madcap_sparewap.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparepowerup",
+      "img": "rival-posters/madcap_sparepowerup.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparenightout",
+      "img": "rival-posters/madcap_sparenightout.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparestarfall",
+      "img": "rival-posters/ttl_sparestarfall.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparepetal",
+      "img": "rival-posters/ttl_sparepetal.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_spareprismwalk",
+      "img": "rival-posters/ttl_spareprismwalk.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparearia",
+      "img": "rival-posters/ttl_sparearia.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "nordic"
+      ],
+      "family": null,
+      "pending": true
+    }
+  ]
+}

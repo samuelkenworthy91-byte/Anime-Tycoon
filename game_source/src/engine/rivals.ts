@@ -28,6 +28,8 @@ import {
   type StaffRole,
 } from "./data";
 import { ensureCareer } from "./careers";
+import { rivalCraftFor } from "./awards";
+import { pickRivalPoster, rivalPosterById } from "./rivalPosters";
 import type { ReleaseRecord } from "./market";
 
 /* ------------------------------------------------------------------ types */
@@ -59,6 +61,12 @@ export interface RivalProduction {
   kind: RivalEntryKind;
   /** review score /40 — computed at greenlight, revealed at premiere */
   score: number;
+  /** bounded persona-influenced craft strengths (writing/animation/score),
+   *  locked at greenlight — judged at the awards ceremony */
+  craft: { story: number; art: number; sound: number };
+  /** permanent key-art identity from the rival poster pool; locked at
+   *  greenlight so a release always shows the same poster */
+  posterId: string | null;
 }
 
 export interface RivalFranchise {
@@ -72,6 +80,9 @@ export interface RivalFranchise {
   lastScore: number;
   lastEntryWeek: number;
   entries: number;
+  /** current key art of this franchise (first entry's poster) — seasons
+   *  prefer different artwork from the same visual family */
+  posterId?: string | null;
 }
 
 export interface RivalRelease {
@@ -87,6 +98,11 @@ export interface RivalRelease {
   fans: number;
   kind: RivalEntryKind;
   hallOfFame: boolean;
+  /** craft strengths and key art, carried from the production */
+  craft: { story: number; art: number; sound: number };
+  posterId: string | null;
+  /** the IP line this entry belongs to (for franchise visual families) */
+  franchiseKey: string | null;
 }
 
 /** a notable person at a rival studio the player can eventually poach back */
@@ -137,6 +153,9 @@ export interface RivalStudio {
   /** rivalry heat with the PLAYER, 0..100 */
   rivalry: number;
   talent: RivalTalent[];
+  /** poster ids this studio used most recently (newest last, capped) —
+   *  drives no-repeat selection so slates never visibly repeat art */
+  posterRecent?: string[];
 }
 
 export interface RivalWorld {
@@ -342,6 +361,59 @@ function rng(seed: number): () => number {
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
+/* --------------------------------------------------- key art assignment */
+
+/** how many recent poster ids each studio remembers (no visible repeats) */
+export const POSTER_RECENT_CAP = 10;
+
+/** lock a poster identity onto a production; never re-rolled afterwards */
+function assignPoster(
+  studio: RivalStudio,
+  show: { genres: GenreId[]; animeType: AnimeType; franchiseKey: string | null }
+): { posterId: string | null; posterRecent: string[] } {
+  const fr = show.franchiseKey ? studio.franchises.find((f) => f.key === show.franchiseKey) : null;
+  const familyId = fr?.posterId ?? null;
+  const family = familyId ? (rivalPosterById(familyId)?.family ?? null) : null;
+  const chosen = pickRivalPoster({
+    studio: studio.name,
+    animeType: show.animeType,
+    genres: show.genres,
+    recent: studio.posterRecent ?? [],
+    family,
+    rand: Math.random,
+  });
+  if (!chosen) return { posterId: null, posterRecent: studio.posterRecent ?? [] };
+  return {
+    posterId: chosen.id,
+    posterRecent: [...(studio.posterRecent ?? []), chosen.id].slice(-POSTER_RECENT_CAP),
+  };
+}
+
+/** craft strengths for a greenlit show — persona-shaped, deterministic */
+const craftForProduction = (studio: RivalStudio, prod: { id: string; score: number }) =>
+  rivalCraftFor(studio.persona, prod.score, prod.id);
+
+/** fill craft / poster on a production loaded from a save that predates them */
+function normalizeProduction(studio: RivalStudio, prod: RivalProduction): RivalProduction {
+  if (prod.craft && typeof prod.craft.story === "number" && "posterId" in prod) return prod;
+  const minimal = { id: prod.id, score: prod.score };
+  return {
+    ...prod,
+    craft: prod.craft && typeof prod.craft.story === "number" ? prod.craft : craftForProduction(studio, minimal),
+    posterId: typeof prod.posterId === "string" || prod.posterId === null ? prod.posterId : assignPoster(studio, prod).posterId,
+  };
+}
+
+function normalizeRelease(studio: RivalStudio, rel: RivalRelease): RivalRelease {
+  if (rel.craft && typeof rel.craft.story === "number" && "posterId" in rel) return rel;
+  return {
+    ...rel,
+    craft: rel.craft && typeof rel.craft.story === "number" ? rel.craft : rivalCraftFor(studio.persona, rel.score, `rel_${rel.title}_${rel.week}`),
+    posterId: typeof rel.posterId === "string" || rel.posterId === null ? rel.posterId : null,
+    franchiseKey: rel.franchiseKey ?? null,
+  };
+}
+
 /* ------------------------------------------------------------ talent */
 
 const TALENT_FIRST = ["Rin", "Kaito", "Aya", "Haruto", "Nao", "Sora", "Miku", "Ren", "Yume", "Daichi", "Kaede", "Sho"];
@@ -403,7 +475,12 @@ export function ensureStudio(raw: unknown, name: string, index: number, yearStar
     talent: Array.isArray(partial.talent) && partial.talent.length
       ? partial.talent
       : [0, 1].map((i) => genTalent({ id: name, name, persona, tier } as RivalStudio, i, yearStartWeek)),
+    posterRecent: Array.isArray(partial.posterRecent) ? partial.posterRecent.slice(-POSTER_RECENT_CAP) : [],
   };
+  /* old saves / legacy paths can carry productions without craft + key art;
+     backfill them once so every show is fully award- and poster-ready */
+  studio.productions = studio.productions.map((prod) => normalizeProduction(studio, prod));
+  studio.releases = studio.releases.map((rel) => normalizeRelease(studio, rel));
   return studio;
 }
 
@@ -428,22 +505,30 @@ export function migrateRivalWorld(raw: unknown, week: number): RivalWorld {
     /* preserve anything still upcoming from the old slate */
     const upcoming = raw
       .filter((rv) => typeof rv?.week === "number" && rv.week > week)
-      .map((rv, i) => ({
-        id: `legacy_${week}_${i}`,
-        title: String(rv.title ?? PUN_TITLES[i % PUN_TITLES.length]),
-        genres: (Array.isArray(rv.genre) ? rv.genre : rv.genre ? [rv.genre as GenreId] : ["sports"]),
-        animeType: "shonen" as AnimeType,
-        medium: "tv" as MediumId,
-        budget: "standard" as BudgetId,
-        week: rv.week,
-        year: yearOfWeek(rv.week),
-        franchiseKey: null,
-        kind: "original" as RivalEntryKind,
-        score: clamp(Math.round(rv.score ?? 20), 4, 39),
-      }));
+      .map((rv, i) => {
+        const id = `legacy_${week}_${i}`;
+        const score = clamp(Math.round(rv.score ?? 20), 4, 39);
+        return {
+          id,
+          title: String(rv.title ?? PUN_TITLES[i % PUN_TITLES.length]),
+          genres: (Array.isArray(rv.genre) ? rv.genre : rv.genre ? [rv.genre as GenreId] : ["sports"]),
+          animeType: "shonen" as AnimeType,
+          medium: "tv" as MediumId,
+          budget: "standard" as BudgetId,
+          week: rv.week,
+          year: yearOfWeek(rv.week),
+          franchiseKey: null,
+          kind: "original" as RivalEntryKind,
+          score,
+          craft: null as unknown as RivalProduction["craft"],
+          posterId: null as string | null,
+        };
+      });
     if (upcoming.length) {
       world.studios = world.studios.map((s) => {
-        const mine = upcoming.filter((u) => (rvOf(raw, u.week) as { studio?: string })?.studio === s.name);
+        const mine = upcoming
+          .filter((u) => (rvOf(raw, u.week) as { studio?: string })?.studio === s.name)
+          .map((prod) => normalizeProduction(s, prod));
         return mine.length ? { ...s, productions: [...s.productions, ...mine] } : s;
       });
     }
@@ -500,8 +585,14 @@ function makeTitle(fr: RivalFranchise, kind: RivalEntryKind): string {
 /* ------------------------------------------------------ yearly planning */
 
 /** decide what one studio greenlights this year */
-function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number, boost = 0): RivalProduction[] {
-  if (studio.status === "collapsed") return [];
+function planStudioYear(
+  studio: RivalStudio,
+  year: number,
+  yearStartWeek: number,
+  boost = 0
+): { productions: RivalProduction[]; posterRecent: string[]; franchises: RivalFranchise[] } {
+  const empty = { productions: [], posterRecent: studio.posterRecent ?? [], franchises: studio.franchises };
+  if (studio.status === "collapsed") return empty;
   const p = PERSONAS[studio.persona];
   let count = clamp(Math.round(studio.size + p.volumeBias + (Math.random() * 2 - 1)), 1, 5);
   if (studio.status === "restructuring" || studio.status === "acquired") count = Math.max(1, count - 1);
@@ -519,9 +610,13 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
 
   const usedTitles = new Set<string>();
   const productions: RivalProduction[] = [];
+  /* posters are locked at greenlight; the working copies below remember
+     what this slate has used so a studio never repeats its own art */
+  let posterRecent = [...(studio.posterRecent ?? [])];
+  let franchises = studio.franchises.map((f) => ({ ...f }));
   for (let i = 0; i < count; i++) {
     /* franchise first: a studio with a warm IP keeps feeding it */
-    const fr = maybeContinue(studio);
+    const fr = maybeContinue({ ...studio, franchises });
     let kind: RivalEntryKind;
     let title: string;
     let genres: GenreId[];
@@ -540,7 +635,7 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
     } else {
       kind = "original";
       title = makeTitle({ key: "", baseTitle: "", genres: [], animeType: "shonen", season: 0, popularity: 0, bestScore: 0, lastScore: 0, lastEntryWeek: 0, entries: 0 }, "original");
-      while (usedTitles.has(title) || studio.franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
+      while (usedTitles.has(title) || franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
       usedTitles.add(title);
       genres = pickGenres(studio);
       animeType = studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : Math.random() < 0.5 ? "shonen" : "shojo";
@@ -548,9 +643,18 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
     }
     const medium: MediumId = Math.random() < 0.8 ? p.medium : pick(["tv", "ona", "movie"] as MediumId[]);
     const budget: BudgetId = Math.random() < 0.75 ? p.budget : pick(["indie", "standard", "blockbuster"] as BudgetId[]);
-    const score = computeScore(studio, { genres, franchiseKey, kind }, boost);
+    const score = computeScore({ ...studio, franchises }, { genres, franchiseKey, kind }, boost);
+    const id = `rp${++rivalProdSeq}_${year}_${i}`;
+    const craft = craftForProduction(studio, { id, score });
+    /* permanent key art: franchise continuations prefer the same visual
+       family (Season 1 → Season 2 → Movie reads as one world) */
+    const art = assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey });
+    posterRecent = art.posterRecent;
+    if (franchiseKey && art.posterId) {
+      franchises = franchises.map((f) => (f.key === franchiseKey ? { ...f, posterId: art.posterId } : f));
+    }
     productions.push({
-      id: `rp${++rivalProdSeq}_${year}_${i}`,
+      id,
       title,
       genres,
       animeType,
@@ -561,9 +665,11 @@ function planStudioYear(studio: RivalStudio, year: number, yearStartWeek: number
       franchiseKey,
       kind,
       score,
+      craft,
+      posterId: art.posterId,
     });
   }
-  return productions;
+  return { productions, posterRecent, franchises };
 }
 
 function maybeContinue(studio: RivalStudio): RivalFranchise | null {
@@ -669,7 +775,7 @@ export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: nu
     if (t.notice) notices.push(t.notice);
     const next = t.studio;
     const slate = planStudioYear(next, year, yearStartWeek, boost);
-    return { ...next, productions: slate };
+    return { ...next, productions: slate.productions, posterRecent: slate.posterRecent, franchises: slate.franchises };
   });
   return { world: { ...world, studios, year, yearStartWeek }, notices };
 }
@@ -714,18 +820,25 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       const kind: RivalEntryKind = fr ? "season" : "original";
       let title = fr ? makeTitle(fr, kind) : pick(PUN_TITLES);
       if (!fr) while (studio.franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
+      const id = `rp${++rivalProdSeq}_surp_${week}`;
+      const animeType = fr?.animeType ?? (studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : "shonen");
+      const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind });
+      const art = assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
+      studio.posterRecent = art.posterRecent;
       studio.productions.push({
-        id: `rp${++rivalProdSeq}_surp_${week}`,
+        id,
         title,
         genres,
-        animeType: fr?.animeType ?? (studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : "shonen"),
+        animeType,
         medium: PERSONAS[studio.persona].medium,
         budget: PERSONAS[studio.persona].budget,
         week: week + 4 + Math.floor(Math.random() * 8),
         year: yearOfWeek(week),
         franchiseKey: fr ? fr.key : null,
         kind,
-        score: computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind }),
+        score,
+        craft: craftForProduction(studio, { id, score }),
+        posterId: art.posterId,
       });
       notices.push(`📣 Surprise announcement: ${studio.name} greenlights “${title}” out of nowhere!`);
     }
@@ -770,6 +883,9 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
         fans: f,
         kind: prod.kind,
         hallOfFame: prod.score >= 32,
+        craft: prod.craft ?? craftForProduction(studio, prod),
+        posterId: prod.posterId ?? null,
+        franchiseKey: prod.franchiseKey ?? null,
       });
       releases = releases.slice(-60);
 
@@ -793,7 +909,9 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
               bestScore: Math.max(f.bestScore, prod.score),
               lastScore: prod.score,
               lastEntryWeek: week,
-            };
+              /* the franchise's key art always trails its latest entry */
+              posterId: prod.posterId ?? f.posterId ?? null,
+            } as RivalFranchise;
           });
         } else {
           /* a brand-new line (or a spin-off breaking out as its own IP) */
@@ -808,6 +926,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
             lastScore: prod.score,
             lastEntryWeek: week,
             entries: 1,
+            posterId: prod.posterId ?? null,
           });
           if (isSpin && parent) {
             franchises = franchises.map((f) => (f.key === parent.key ? { ...f, entries: f.entries + 1, lastEntryWeek: week } : f));

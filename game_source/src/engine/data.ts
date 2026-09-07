@@ -521,20 +521,35 @@ export interface ResearchItem {
   name: string;
   rd: number;
   desc: string;
+  /** repeatable projects never land in run.research and can run many times */
+  repeatable?: boolean;
+  /** group label for R&D presentation */
+  section?: "tech" | "merch";
+  /** prerequisite research id shown to the player (engine enforces too) */
+  requires?: string;
 }
 export const RESEARCH: ResearchItem[] = [
   { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Story contribution checks gain +15% effective skill." },
   { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "All live contribution checks gain +12% effective skill." },
   { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
-  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show." },
+  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show. Unlocks the merchandising capability itself — individual product lines still need their own research." },
   { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art contribution checks gain +12% effective skill." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
-  { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%." },
+  { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%. Also unlocks Mobile Game licences.", requires: "merch", section: "merch" },
   { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches a starter set of arc-to-genre fits so the Story Arc screen can label them before you risk a production." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },
+  /* ---- timed merch product research (Part D): each product line needs
+     Merch Division plus its own dedicated project before launch ---- */
+  { id: "merch_plush", name: "Plush Production", rd: 18, desc: "Unlocks the Plushies merchandise line for your franchises.", requires: "merch", section: "merch" },
+  { id: "merch_soundtrack", name: "Soundtrack Publishing", rd: 14, desc: "Unlocks the Soundtrack merchandise line for your franchises.", requires: "merch", section: "merch" },
+  { id: "merch_figures", name: "Scale Figure Licensing", rd: 30, desc: "Unlocks the Scale Figures merchandise line for your franchises.", requires: "merch", section: "merch" },
+  { id: "merch_apparel", name: "Apparel Partnerships", rd: 26, desc: "Unlocks the Clothing Line merchandise line for your franchises.", requires: "merch", section: "merch" },
+  { id: "merch_collectors", name: "Collector Editions", rd: 40, desc: "Unlocks the Collector's Edition merchandise line for your franchises.", requires: "merch", section: "merch" },
+  /* ---- repeatable hidden-affinity R&D (Part F) ---- */
+  { id: "talent_analysis", name: "Talent Analysis", rd: 85, repeatable: true, desc: "An exhaustive profiling programme. On completion, ONE cast member's hidden affinity is permanently revealed. Repeatable until every talent is profiled." },
 ];
 
 /* -------------------------------------------------------------- contracts */

@@ -496,24 +496,34 @@ export interface MerchProduct {
   minScore: number;
   /** popular characters move these */
   charDriven: boolean;
+  /** dedicated research project required before this line can launch
+   *  (on top of the Merch Division capability research) */
+  research: string;
+  /** human name of that research for block messages */
+  researchName: string;
 }
 
 export const MERCH_PRODUCTS: MerchProduct[] = [
-  { id: "plush", label: "Plushies", desc: "Soft, round, irresistible.", cost: 30_000, weeks: 20, mult: 0.65, minPop: 20, minScore: 0, charDriven: true },
-  { id: "ost", label: "Soundtrack", desc: "The opening on repeat, forever.", cost: 20_000, weeks: 16, mult: 0.5, minPop: 0, minScore: 0, charDriven: false },
-  { id: "figures", label: "Scale Figures", desc: "1/7 scale, pre-orders open.", cost: 60_000, weeks: 24, mult: 1.05, minPop: 30, minScore: 0, charDriven: true },
-  { id: "apparel", label: "Clothing Line", desc: "Streetwear collab drop.", cost: 45_000, weeks: 20, mult: 0.85, minPop: 40, minScore: 0, charDriven: false },
-  { id: "collectors", label: "Collector's Edition", desc: "Box set with art cards & storyboards.", cost: 80_000, weeks: 12, mult: 1.5, minPop: 45, minScore: 28, charDriven: false },
-  { id: "mobile", label: "Mobile Game Licence", desc: "Gacha rates sold separately.", cost: 150_000, weeks: 48, mult: 2.1, minPop: 60, minScore: 0, charDriven: true },
+  { id: "plush", label: "Plushies", desc: "Soft, round, irresistible.", cost: 30_000, weeks: 20, mult: 0.65, minPop: 20, minScore: 0, charDriven: true, research: "merch_plush", researchName: "Plush Production" },
+  { id: "ost", label: "Soundtrack", desc: "The opening on repeat, forever.", cost: 20_000, weeks: 16, mult: 0.5, minPop: 0, minScore: 0, charDriven: false, research: "merch_soundtrack", researchName: "Soundtrack Publishing" },
+  { id: "figures", label: "Scale Figures", desc: "1/7 scale, pre-orders open.", cost: 60_000, weeks: 24, mult: 1.05, minPop: 30, minScore: 0, charDriven: true, research: "merch_figures", researchName: "Scale Figure Licensing" },
+  { id: "apparel", label: "Clothing Line", desc: "Streetwear collab drop.", cost: 45_000, weeks: 20, mult: 0.85, minPop: 40, minScore: 0, charDriven: false, research: "merch_apparel", researchName: "Apparel Partnerships" },
+  { id: "collectors", label: "Collector's Edition", desc: "Box set with art cards & storyboards.", cost: 80_000, weeks: 12, mult: 1.5, minPop: 45, minScore: 28, charDriven: false, research: "merch_collectors", researchName: "Collector Editions" },
+  { id: "mobile", label: "Mobile Game Licence", desc: "Gacha rates sold separately.", cost: 150_000, weeks: 48, mult: 2.1, minPop: 60, minScore: 0, charDriven: true, research: "merch2", researchName: "Global Merch" },
 ];
 
 export const MERCH_COOLDOWN = 40; // weeks before the same product line refreshes
+
+/** the capability research that turns merchandising on at all */
+export const MERCH_CAPABILITY_RESEARCH = "merch";
 
 export const merchProductById = (id: string): MerchProduct | null =>
   MERCH_PRODUCTS.find((p) => p.id === id) ?? null;
 
 /** why a product can't launch right now (null = allowed) */
-export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number): string | null {
+export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, research: readonly string[] = ["merch"]): string | null {
+  if (!research.includes(MERCH_CAPABILITY_RESEARCH)) return "Requires Merch Division research (R&D)";
+  if (!research.includes(product.research)) return `Requires ${product.researchName} research (R&D)`;
   if (cash < product.cost) return "Not enough cash";
   if (fr.popularity < product.minPop) return `Needs popularity ${product.minPop}+ (now ${fr.popularity})`;
   if (fr.bestScore < product.minScore) return `Needs a ${product.minScore}+/40 entry on record`;

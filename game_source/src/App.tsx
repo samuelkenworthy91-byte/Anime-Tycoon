@@ -39,9 +39,10 @@ import GameOver from "./components/GameOver";
 import Retrospective from "./components/Retrospective";
 import { beginDynastyMode } from "./engine/legacy";
 import { liveWorkPulseGapMs } from "./engine/studioOps";
+import AwardsCeremony from "./components/AwardsCeremony";
 import { cn } from "./utils/cn";
 
-type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective";
+type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
@@ -112,6 +113,22 @@ export default function App() {
       setSaveStamp((n) => n + 1);
     }
   }, [screen]);
+
+  /* ------------------------------------ awards: a new ceremony year pops
+     the full-screen theatre; leaving returns to the office with the clock
+     still paused (timeSpeed untouched) */
+  const seenCeremonyYear = useRef(0);
+  useEffect(() => {
+    const year = run?.awardsCeremony?.year ?? 0;
+    if (!year || year === seenCeremonyYear.current) return;
+    if (screen === "office" || screen === "produce") {
+      seenCeremonyYear.current = year;
+      setTimeSpeed(0);      /* the live sim halts while the theatre is open */
+      sfx.fanfare();
+      setScreen("awards");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run?.awardsCeremony?.year, screen]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -196,6 +213,7 @@ export default function App() {
     setPaused(false);
     setTimeSpeed(1);
     setSavePicker(false);
+    seenCeremonyYear.current = resumed.awardsCeremony?.year ?? 0; /* an already-seen ceremony must not re-pop */
     dayAccRef.current = save.clock?.acc ?? 0;
     dayCountRef.current = save.clock?.dayCount ?? 0;
     setClockDay(save.clock?.day ?? 0);
@@ -210,6 +228,7 @@ export default function App() {
     clearAllSaves();
     setMeta({ studio, showrunner });
     setRun(initialRun(studio, showrunner));
+    seenCeremonyYear.current = 0;
     setReleased(null);
     setFocus(null);
     setShipId(null);
@@ -224,6 +243,7 @@ export default function App() {
     sfx.fanfare();
     clearAllSaves();
     setRun(initialRun(meta.studio, meta.showrunner));
+    seenCeremonyYear.current = 0;
     setReleased(null);
     setFocus(null);
     setShipId(null);
@@ -556,6 +576,16 @@ export default function App() {
             paused={paused}
             onDone={finishContract}
             onBack={() => { setContract(null); setScreen("office"); }}
+          />
+        )}
+        {screen === "awards" && run?.awardsCeremony && (
+          <AwardsCeremony
+            ceremony={run.awardsCeremony}
+            studio={meta.studio}
+            onDone={() => {
+              setScreen("office");
+              /* the clock stays paused — the player resumes time deliberately */
+            }}
           />
         )}
         {screen === "release" && released && run && (
