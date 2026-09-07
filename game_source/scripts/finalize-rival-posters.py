@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Materialise the audited 160-poster external drop into true runtime WebPs.
 
-Source: 20 compact 4x2 atlases in art_src/rival/external/atlases/.
+Source: 20 high-resolution 4x2 atlases in art_src/rival/external/atlases/.
 Output: one 480x600 WebP per supplied poster in public/rival-posters/generated/.
-The audited TSV owns studio/type/genre/family metadata.  We preserve the six
+The audited TSV owns studio/type/genre/family metadata. We preserve the six
 original live rival visuals, giving 166 live posters + two reserve slots =
 168 total / 28 per rival studio.
 """
@@ -24,7 +24,9 @@ CREATE = ROOT / "src/components/Create.tsx"
 
 POSTER_COUNT = 160
 COLS, ROWS = 4, 2
-CELL_W, CELL_H = 232, 350
+# Large enough to contain every supplied crop at native size. Individual crops
+# are centred within each fixed cell rather than stretched or downsampled.
+CELL_W, CELL_H = 356, 552
 SHEET_W, SHEET_H = CELL_W * COLS, CELL_H * ROWS
 OUT_W, OUT_H = 480, 600
 
@@ -63,7 +65,7 @@ def poster_canvas(cell: Image.Image) -> Image.Image:
     """Preserve the complete tall key visual on a 4:5 runtime canvas.
 
     A blurred/darkened cover of the same art fills the narrow side gutters;
-    the sharp source is contained, never cropped.  This avoids ceremony
+    the sharp source is contained, never cropped. This avoids ceremony
     object-cover losing heads/titles while matching every other 4:5 card.
     """
     rgb = cell.convert("RGB")
