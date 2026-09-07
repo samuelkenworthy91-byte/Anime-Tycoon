@@ -22,19 +22,19 @@ const TYPES: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 
 describe("Cast V3 canonical roster", () => {
-  it("contains exactly 400 unique selectable IDs in four equal roles", () => {
-    expect(CAST_V2).toHaveLength(400);
-    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(400);
-    for (const [, members] of ROLES) expect(members).toHaveLength(100);
+  it("contains exactly 432 unique selectable IDs in four equal roles", () => {
+    expect(CAST_V2).toHaveLength(432);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(432);
+    for (const [, members] of ROLES) expect(members).toHaveLength(108);
     expect(ROLES.flatMap(([, members]) => members).map((member) => member.id).sort())
       .toEqual(CAST_V2.map((member) => member.id).sort());
   });
 
-  it("balances every role at 50 Shonen / 50 Shojo", () => {
+  it("balances every role at 54 Shonen / 54 Shojo", () => {
     for (const [role, members] of ROLES) {
       for (const type of TYPES) {
         const cell = members.filter((member) => member.type === type);
-        expect(cell, `${role}/${type}`).toHaveLength(50);
+        expect(cell, `${role}/${type}`).toHaveLength(54);
       }
     }
   });
@@ -68,6 +68,25 @@ describe("Cast V3 canonical roster", () => {
       }
     }
     expect(measured).toBe(253);
+  });
+
+  it("covers all 253 genre pairs globally within each Anime Type", () => {
+    for (const type of TYPES) {
+      const members = CAST_V2.filter((member) => member.type === type);
+      let measured = 0;
+      for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
+        for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
+          measured += 1;
+          const a = CANONICAL_GENRE_IDS[i];
+          const b = CANONICAL_GENRE_IDS[j];
+          expect(
+            members.some((member) => affinities(member).includes(a) && affinities(member).includes(b)),
+            `${type}/${a}|${b}`,
+          ).toBe(true);
+        }
+      }
+      expect(measured).toBe(253);
+    }
   });
 
   it("includes Samurai and Shinobi in the canonical content", () => {

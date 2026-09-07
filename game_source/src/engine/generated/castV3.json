@@ -7601,6 +7601,614 @@
       "ageBand": "20–29",
       "culturalBasis": "Jamaican-British diaspora; fictional crossover setting. Cultural basis guides identity, not a compulsory costume stereotype.",
       "epithet": "The Retainer's Betrayal"
+    },
+    {
+      "id": "cv3_lead_053",
+      "name": "Ayo Nakamura",
+      "archetype": "Exosuit relay sprinter",
+      "img": "cast/v3/cv3_lead_053.webp",
+      "personality": "Treats every mechanical failure as a team problem and refuses to cross a finish line while a teammate is stranded.",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "sports"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Japanese-Ghanaian",
+      "epithet": "The Last Baton"
+    },
+    {
+      "id": "cv3_lead_054",
+      "name": "Marisol Chen",
+      "archetype": "Office worker stranded in a quiet parallel city",
+      "img": "cast/v3/cv3_lead_054.webp",
+      "personality": "Keeps rebuilding ordinary routines in an impossible world because normality gives frightened people something to hold onto.",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "isekai",
+        "slice"
+      ],
+      "hiddenAff": "sports",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Chinese-Puerto Rican",
+      "epithet": "Home by Closing Time"
+    },
+    {
+      "id": "cv3_lead_055",
+      "name": "Daniel Okoye",
+      "archetype": "Neighbourhood missing-person volunteer",
+      "img": "cast/v3/cv3_lead_055.webp",
+      "personality": "Notices the tiny domestic details professional investigators dismiss and remembers every family waiting for an answer.",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "slice",
+        "mystery"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "British-Nigerian",
+      "epithet": "The Door Left Lit"
+    },
+    {
+      "id": "cv3_lead_056",
+      "name": "Priya Nair",
+      "archetype": "Museum conservator tracing a forbidden love legend",
+      "img": "cast/v3/cv3_lead_056.webp",
+      "personality": "Distrusts grand versions of love stories and searches instead for the ordinary choices hidden beneath the legend.",
+      "role": "protag",
+      "type": "shonen",
+      "visibleAff": [
+        "romance",
+        "mythology"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Indian-British",
+      "epithet": "The Thread Between Names"
+    },
+    {
+      "id": "cv3_lead_057",
+      "name": "Elena Park",
+      "archetype": "Orbital courier test pilot",
+      "img": "cast/v3/cv3_lead_057.webp",
+      "personality": "Talks to damaged machines as if they are crewmates and measures success by who gets home rather than who gets credit.",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "mecha",
+        "space"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Korean-Spanish",
+      "epithet": "Orbit of Her Own"
+    },
+    {
+      "id": "cv3_lead_058",
+      "name": "Malik Adeyemi",
+      "archetype": "Exchange student trapped between an ordinary district and a spirit district",
+      "img": "cast/v3/cv3_lead_058.webp",
+      "personality": "Makes friends before he understands the rules and keeps promises even when each world interprets them differently.",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "isekai",
+        "supernatural"
+      ],
+      "hiddenAff": "cyber",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "British-Nigerian",
+      "epithet": "The Second Doorway"
+    },
+    {
+      "id": "cv3_lead_059",
+      "name": "Tomás Akiyama",
+      "archetype": "Futsal goalkeeper and reluctant comedian",
+      "img": "cast/v3/cv3_lead_059.webp",
+      "personality": "Uses jokes to reset the team after mistakes but becomes fiercely serious when someone is being pushed out.",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "sports",
+        "comedy"
+      ],
+      "hiddenAff": "pirate",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "17-19",
+      "culturalBasis": "Japanese-Brazilian",
+      "epithet": "The Save After Laughter"
+    },
+    {
+      "id": "cv3_lead_060",
+      "name": "Léa Mensah",
+      "archetype": "Apprentice court illusionist",
+      "img": "cast/v3/cv3_lead_060.webp",
+      "personality": "Makes powerful people laugh just long enough to tell them something they would otherwise refuse to hear.",
+      "role": "protag",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "comedy"
+      ],
+      "hiddenAff": "supernatural",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "French-Ghanaian",
+      "epithet": "The Smile Before Dawn"
+    },
+    {
+      "id": "cv3_sidekick_053",
+      "name": "Eirik Sato",
+      "archetype": "Cold-weather salvage mechanic",
+      "img": "cast/v3/cv3_sidekick_053.webp",
+      "personality": "Complains about heroic plans while quietly making sure the equipment needed to survive them actually works.",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "nordic"
+      ],
+      "hiddenAff": "samurai",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Japanese-Norwegian",
+      "epithet": "Steel Under Snow"
+    },
+    {
+      "id": "cv3_sidekick_054",
+      "name": "Zainab Rahman",
+      "archetype": "Folklore archivist displaced into a saga-world",
+      "img": "cast/v3/cv3_sidekick_054.webp",
+      "personality": "Recognises that legends change when real people must live inside them and records the versions nobody else preserves.",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "isekai",
+        "mythology"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Bangladeshi-British",
+      "epithet": "Keeper of Borrowed Tales"
+    },
+    {
+      "id": "cv3_sidekick_055",
+      "name": "Camila Mori",
+      "archetype": "Stage magician assisting an impossible detective",
+      "img": "cast/v3/cv3_sidekick_055.webp",
+      "personality": "Admits exactly when she is deceiving an audience and becomes irritated when supernatural events refuse to play by fair rules.",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "mystery",
+        "magical"
+      ],
+      "hiddenAff": "samurai",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Japanese-Chilean",
+      "epithet": "The Honest Misdirection"
+    },
+    {
+      "id": "cv3_sidekick_056",
+      "name": "Mikkel Okafor",
+      "archetype": "Winter-community medium",
+      "img": "cast/v3/cv3_sidekick_056.webp",
+      "personality": "Speaks softly to the dead and bluntly to the living whenever grief is being used as an excuse to avoid responsibility.",
+      "role": "secondary",
+      "type": "shonen",
+      "visibleAff": [
+        "supernatural",
+        "nordic"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Danish-Nigerian",
+      "epithet": "Footsteps Beneath Frost"
+    },
+    {
+      "id": "cv3_sidekick_057",
+      "name": "Nia Seo",
+      "archetype": "Forensic coder on an occult urban case",
+      "img": "cast/v3/cv3_sidekick_057.webp",
+      "personality": "Can stare at terrifying evidence for hours but checks on the people behind the data before opening another file.",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "cyber"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Korean-Black British",
+      "epithet": "The Unclosed Window"
+    },
+    {
+      "id": "cv3_sidekick_058",
+      "name": "Amara Singh",
+      "archetype": "Virtual-world environment designer",
+      "img": "cast/v3/cv3_sidekick_058.webp",
+      "personality": "Builds beautiful impossible places and then tests every rule herself before asking anyone else to enter them.",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "fantasy"
+      ],
+      "hiddenAff": "martial",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Indian-Kenyan",
+      "epithet": "Architect of Second Skies"
+    },
+    {
+      "id": "cv3_sidekick_059",
+      "name": "Kenji Alvarez",
+      "archetype": "Night-market robotics cook",
+      "img": "cast/v3/cv3_sidekick_059.webp",
+      "personality": "Treats precision as a form of hospitality and repairs anyone's equipment provided they help clean the kitchen afterward.",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "cooking"
+      ],
+      "hiddenAff": "samurai",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Japanese-Mexican",
+      "epithet": "The Midnight Workshop"
+    },
+    {
+      "id": "cv3_sidekick_060",
+      "name": "Noah Adeyemi",
+      "archetype": "Family-diner assistant who hears spirits",
+      "img": "cast/v3/cv3_sidekick_060.webp",
+      "personality": "Feeds difficult customers without judgement but will physically put himself between a frightened person and a bully.",
+      "role": "secondary",
+      "type": "shojo",
+      "visibleAff": [
+        "cooking",
+        "supernatural"
+      ],
+      "hiddenAff": "martial",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "British-Nigerian",
+      "epithet": "The Table Kept Open"
+    },
+    {
+      "id": "cv3_mascot_053",
+      "name": "Luma",
+      "archetype": "Luminous vacuum-gliding moth companion",
+      "img": "cast/v3/cv3_mascot_053.webp",
+      "personality": "Circles isolated crew members until they rejoin the group and flashes warning patterns when unseen disturbances approach.",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "space",
+        "supernatural"
+      ],
+      "hiddenAff": "romance",
+      "gender": "female",
+      "species": "lunar moth",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented orbital habitat",
+      "epithet": "The Returning Light"
+    },
+    {
+      "id": "cv3_mascot_054",
+      "name": "Tundra",
+      "archetype": "Portal-stranded arctic hare",
+      "img": "cast/v3/cv3_mascot_054.webp",
+      "personality": "Appears unimpressed by every new world yet always finds the safest route back to shelter.",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "isekai",
+        "nordic"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "arctic hare",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented northern portal wilderness",
+      "epithet": "The Wrong-World Hare"
+    },
+    {
+      "id": "cv3_mascot_055",
+      "name": "Koru",
+      "archetype": "Armoured spirit pangolin",
+      "img": "cast/v3/cv3_mascot_055.webp",
+      "personality": "Rolls between frightened companions and danger and taps out warnings against stone before anyone else senses trouble.",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "mythology",
+        "supernatural"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "female",
+      "species": "spirit pangolin",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented mythic spirit ecology",
+      "epithet": "The Little Oathkeeper"
+    },
+    {
+      "id": "cv3_mascot_056",
+      "name": "Boltle",
+      "archetype": "Clockwork beetle retainer",
+      "img": "cast/v3/cv3_mascot_056.webp",
+      "personality": "Challenges objects many times its size and becomes deeply offended when anyone tries to carry it instead.",
+      "role": "pet",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "samurai"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "clockwork rhinoceros beetle",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented mechanical fantasy",
+      "epithet": "The Brass Retainer"
+    },
+    {
+      "id": "cv3_mascot_057",
+      "name": "Rook",
+      "archetype": "Haunted-dojo ferret",
+      "img": "cast/v3/cv3_mascot_057.webp",
+      "personality": "Freezes completely when danger is near, then launches into astonishingly disciplined bursts of movement.",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "martial"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "male",
+      "species": "black-footed ferret",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented haunted dojo ecology",
+      "epithet": "The Stillness Before"
+    },
+    {
+      "id": "cv3_mascot_058",
+      "name": "Pippa",
+      "archetype": "Accident-prone spell familiar",
+      "img": "cast/v3/cv3_mascot_058.webp",
+      "personality": "Produces the correct magical effect only after causing two harmless wrong ones and celebrates every recovery as intentional.",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "comedy",
+        "magical"
+      ],
+      "hiddenAff": "mythology",
+      "gender": "female",
+      "species": "axolotl familiar",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented magical academy ecology",
+      "epithet": "The Third Attempt"
+    },
+    {
+      "id": "cv3_mascot_059",
+      "name": "Mikan",
+      "archetype": "Overconfident red-panda retainer",
+      "img": "cast/v3/cv3_mascot_059.webp",
+      "personality": "Insists on formal challenges before immediately tripping over its own oversized practice scabbard.",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "comedy",
+        "samurai"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "red panda",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented castle-town companion species",
+      "epithet": "The Tiny Formality"
+    },
+    {
+      "id": "cv3_mascot_060",
+      "name": "Vela",
+      "archetype": "Techno-familiar owl",
+      "img": "cast/v3/cv3_mascot_060.webp",
+      "personality": "Stores maps and messages perfectly but deliberately withholds them until companions stop arguing long enough to listen.",
+      "role": "pet",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "fantasy"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "female",
+      "species": "horned owl techno-familiar",
+      "ageBand": "adult-equivalent",
+      "culturalBasis": "Invented techno-fantasy city",
+      "epithet": "The Quiet Upload"
+    },
+    {
+      "id": "cv3_villain_053",
+      "name": "Brigadier Astrid Cole",
+      "archetype": "Winter-front commander",
+      "img": "cast/v3/cv3_villain_053.webp",
+      "personality": "Believes survival justifies absolute obedience and mistakes the loyalty she inspires for proof that dissent is weakness.",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "military",
+        "nordic"
+      ],
+      "hiddenAff": "samurai",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40-49",
+      "culturalBasis": "British-Swedish",
+      "epithet": "The Winter Doctrine"
+    },
+    {
+      "id": "cv3_villain_054",
+      "name": "Mara Vélez",
+      "archetype": "Elite team captain and social rival",
+      "img": "cast/v3/cv3_villain_054.webp",
+      "personality": "Understands exactly how affection affects performance and manipulates friendships to keep herself indispensable.",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "romance",
+        "sports"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "20-29",
+      "culturalBasis": "Colombian-American",
+      "epithet": "The Perfect Formation"
+    },
+    {
+      "id": "cv3_villain_055",
+      "name": "Silas Green",
+      "archetype": "Owner of a haunted apartment block",
+      "img": "cast/v3/cv3_villain_055.webp",
+      "personality": "Calls every impossible event a tenant problem so long as acknowledging it would cost him money or control.",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "slice",
+        "supernatural"
+      ],
+      "hiddenAff": "isekai",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "40-49",
+      "culturalBasis": "British-Guyanese",
+      "epithet": "The Man Upstairs"
+    },
+    {
+      "id": "cv3_villain_056",
+      "name": "Daichi Mensah",
+      "archetype": "Armoured-duel robotics magnate",
+      "img": "cast/v3/cv3_villain_056.webp",
+      "personality": "Talks constantly about honour while designing every contest so that only people dependent on him can afford to compete.",
+      "role": "villain",
+      "type": "shonen",
+      "visibleAff": [
+        "mecha",
+        "samurai"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Japanese-Ghanaian",
+      "epithet": "The Gilded Challenge"
+    },
+    {
+      "id": "cv3_villain_057",
+      "name": "Colonel Ingrid Bekele",
+      "archetype": "Commander of an isolated fear-conditioned garrison",
+      "img": "cast/v3/cv3_villain_057.webp",
+      "personality": "Maintains perfect calm while teaching subordinates that fear is a personal defect rather than a warning.",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "horror",
+        "military"
+      ],
+      "hiddenAff": "nordic",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "40-49",
+      "culturalBasis": "Ethiopian-Swedish",
+      "epithet": "The Quiet Barracks"
+    },
+    {
+      "id": "cv3_villain_058",
+      "name": "Rafael Okoye",
+      "archetype": "Director of a privatised emergency network",
+      "img": "cast/v3/cv3_villain_058.webp",
+      "personality": "Controls access to safety through data and argues that anyone outside his system chose the consequences.",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "cyber",
+        "military"
+      ],
+      "hiddenAff": "survival",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Nigerian-Colombian",
+      "epithet": "The Closed Network"
+    },
+    {
+      "id": "cv3_villain_059",
+      "name": "Nadiya Sokolova",
+      "archetype": "Privateer queen of a disputed archipelago",
+      "img": "cast/v3/cv3_villain_059.webp",
+      "personality": "Offers genuine freedom to her crews while ensuring every route to independence ultimately passes through her.",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "pirate"
+      ],
+      "hiddenAff": "military",
+      "gender": "female",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Ukrainian-Tatar",
+      "epithet": "The Salt Crown"
+    },
+    {
+      "id": "cv3_villain_060",
+      "name": "Masato Reed",
+      "archetype": "Dispossessed noble duellist",
+      "img": "cast/v3/cv3_villain_060.webp",
+      "personality": "Treats inherited grievance as a sacred duty and keeps escalating a feud long after everyone he claims to defend wants peace.",
+      "role": "villain",
+      "type": "shojo",
+      "visibleAff": [
+        "fantasy",
+        "samurai"
+      ],
+      "hiddenAff": "shinobi",
+      "gender": "male",
+      "species": "human",
+      "ageBand": "30-39",
+      "culturalBasis": "Japanese-Black British",
+      "epithet": "The House Without Heirs"
     }
   ]
 }
