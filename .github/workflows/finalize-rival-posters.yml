@@ -6,6 +6,7 @@ on:
       - work/final-awards-rival-posters
     paths:
       - game_source/art_src/rival/external/rival_poster_atlas_20.zip
+      - game_source/art_src/rival/external/rival_poster_atlas_20.zip.part-*
 
 permissions:
   contents: write
@@ -26,10 +27,17 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
 
-      - name: Unpack 20 poster atlases
+      - name: Assemble and unpack 20 poster atlases
         run: |
+          SRC=game_source/art_src/rival/external/rival_poster_atlas_20.zip
+          if [ -f "$SRC" ]; then
+            cp "$SRC" /tmp/rival_poster_atlas_20.zip
+          else
+            cat ${SRC}.part-* > /tmp/rival_poster_atlas_20.zip
+          fi
+          unzip -t /tmp/rival_poster_atlas_20.zip
           mkdir -p game_source/public/rival-posters/sheets
-          unzip -o game_source/art_src/rival/external/rival_poster_atlas_20.zip -d game_source/public/rival-posters/sheets
+          unzip -o /tmp/rival_poster_atlas_20.zip -d game_source/public/rival-posters/sheets
 
       - name: Generate 160 stable poster crops and final manifest
         working-directory: game_source
