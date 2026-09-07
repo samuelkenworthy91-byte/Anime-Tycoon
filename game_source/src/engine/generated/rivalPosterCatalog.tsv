@@ -1,0 +1,161 @@
+n	id	studio	persona	animeTypes	genres	family
+1	toei_p001	Toe-i Animation	blockbuster	shonen	samurai,martial	toei-samurai-1
+2	kyo_p002	Kyo-Hani	prestige	shojo	romance,fantasy	kyo-romance-1
+3	sunrise_p003	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-1
+4	kyo_p004	Kyo-Hani	prestige	shojo	romance,mystery	kyo-romance-1
+5	toei_p005	Toe-i Animation	blockbuster	shonen	pirate,martial	toei-pirate-1
+6	madcap_p006	Madcap House	volume	shojo	slice,romance	madcap-slice-1
+7	bones_p007	Boneworks	experimental	shonen,shojo	cyber,supernatural	bones-cyber-1
+8	ttl_p008	Turtle Line	idol	shojo	magical,romance	ttl-magical-1
+9	madcap_p009	Madcap House	volume	shonen	fantasy,military	madcap-fantasy-1
+10	madcap_p010	Madcap House	volume	shojo	slice,romance	madcap-slice-1
+11	sunrise_p011	Sunnyrise	technical	shonen	cyber,samurai	sunrise-cyber-1
+12	ttl_p012	Turtle Line	idol	shojo	romance,idol	ttl-romance-1
+13	madcap_p013	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-1
+14	kyo_p014	Kyo-Hani	prestige	shojo	romance,mystery	kyo-romance-1
+15	sunrise_p015	Sunnyrise	technical	shonen	military,mecha	sunrise-military-1
+16	kyo_p016	Kyo-Hani	prestige	shojo	fantasy,romance	kyo-fantasy-1
+17	toei_p017	Toe-i Animation	blockbuster	shonen	martial,sports	toei-martial-1
+18	bones_p018	Boneworks	experimental	shojo	horror,romance	bones-horror-1
+19	toei_p019	Toe-i Animation	blockbuster	shonen	pirate,fantasy	toei-pirate-1
+20	ttl_p020	Turtle Line	idol	shojo	idol,magical	ttl-idol-1
+21	sunrise_p021	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-1
+22	kyo_p022	Kyo-Hani	prestige	shojo	romance,nordic	kyo-romance-2
+23	madcap_p023	Madcap House	volume	shonen	martial,comedy	
+24	ttl_p024	Turtle Line	idol	shojo	magical,fantasy	ttl-magical-1
+25	sunrise_p025	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-1
+26	ttl_p026	Turtle Line	idol	shojo	romance,slice	ttl-romance-1
+27	madcap_p027	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-1
+28	madcap_p028	Madcap House	volume	shojo	slice,romance	madcap-slice-1
+29	bones_p029	Boneworks	experimental	shonen,shojo	cyber,supernatural	bones-cyber-1
+30	kyo_p030	Kyo-Hani	prestige	shojo	romance,fantasy	kyo-romance-2
+31	toei_p031	Toe-i Animation	blockbuster	shonen	martial,supernatural	toei-martial-1
+32	kyo_p032	Kyo-Hani	prestige	shojo	romance,mystery	kyo-romance-2
+33	sunrise_p033	Sunnyrise	technical	shonen	sports,cyber	sunrise-sports-1
+34	ttl_p034	Turtle Line	idol	shojo	romance,idol	ttl-romance-1
+35	madcap_p035	Madcap House	volume	shonen,shojo	sports,slice	madcap-sports-1
+36	kyo_p036	Kyo-Hani	prestige	shojo	romance,fantasy	kyo-romance-3
+37	sunrise_p037	Sunnyrise	technical	shonen	cyber,samurai	sunrise-cyber-1
+38	ttl_p038	Turtle Line	idol	shojo	magical,idol	ttl-magical-1
+39	madcap_p039	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-2
+40	ttl_p040	Turtle Line	idol	shojo	space,idol	
+41	sunrise_p041	Sunnyrise	technical	shonen	military,cyber	sunrise-military-1
+42	kyo_p042	Kyo-Hani	prestige	shojo	slice,romance	kyo-slice-1
+43	bones_p043	Boneworks	experimental	shonen,shojo	supernatural,horror	bones-supernatural-1
+44	kyo_p044	Kyo-Hani	prestige	shojo	romance,slice	kyo-romance-3
+45	sunrise_p045	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-2
+46	kyo_p046	Kyo-Hani	prestige	shojo	romance,mystery	kyo-romance-3
+47	bones_p047	Boneworks	experimental	shonen,shojo	horror,mystery	bones-horror-1
+48	kyo_p048	Kyo-Hani	prestige	shojo	mythology,romance	
+49	toei_p049	Toe-i Animation	blockbuster	shonen	samurai,fantasy	toei-samurai-1
+50	ttl_p050	Turtle Line	idol	shojo	romance,slice	ttl-romance-2
+51	sunrise_p051	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-2
+52	kyo_p052	Kyo-Hani	prestige	shojo	fantasy,romance	kyo-fantasy-1
+53	bones_p053	Boneworks	experimental	shonen	supernatural,martial	bones-supernatural-1
+54	ttl_p054	Turtle Line	idol	shojo	mythology,romance	ttl-mythology-1
+55	bones_p055	Boneworks	experimental	shonen,shojo	cyber,supernatural	bones-cyber-1
+56	bones_p056	Boneworks	experimental	shojo	horror,romance	bones-horror-1
+57	toei_p057	Toe-i Animation	blockbuster	shonen	mecha,military	toei-mecha-1
+58	madcap_p058	Madcap House	volume	shojo	slice,romance	madcap-slice-2
+59	madcap_p059	Madcap House	volume	shonen	fantasy,martial	madcap-fantasy-2
+60	kyo_p060	Kyo-Hani	prestige	shojo	slice,romance	kyo-slice-1
+61	bones_p061	Boneworks	experimental	shonen,shojo	cyber,mystery	bones-cyber-2
+62	kyo_p062	Kyo-Hani	prestige	shojo	fantasy,romance	kyo-fantasy-1
+63	madcap_p063	Madcap House	volume	shonen,shojo	fantasy,space	madcap-fantasy-2
+64	kyo_p064	Kyo-Hani	prestige	shojo	romance,mystery	kyo-romance-4
+65	sunrise_p065	Sunnyrise	technical	shonen	cyber,sports	sunrise-cyber-1
+66	sunrise_p066	Sunnyrise	technical	shojo	space,romance	sunrise-space-1
+67	toei_p067	Toe-i Animation	blockbuster	shonen	samurai,martial	toei-samurai-1
+68	madcap_p068	Madcap House	volume	shojo	slice,comedy	madcap-slice-2
+69	bones_p069	Boneworks	experimental	shonen,shojo	cyber,supernatural	bones-cyber-2
+70	toei_p070	Toe-i Animation	blockbuster	shonen,shojo	samurai,romance	toei-samurai-2
+71	toei_p071	Toe-i Animation	blockbuster	shonen	sports,martial	toei-sports-1
+72	bones_p072	Boneworks	experimental	shojo	horror,romance	bones-horror-2
+73	bones_p073	Boneworks	experimental	shonen	survival,fantasy	bones-survival-1
+74	ttl_p074	Turtle Line	idol	shojo	magical,romance	ttl-magical-2
+75	toei_p075	Toe-i Animation	blockbuster	shonen	martial,sports	toei-martial-1
+76	sunrise_p076	Sunnyrise	technical	shojo	space,romance	sunrise-space-1
+77	kyo_p077	Kyo-Hani	prestige	shonen,shojo	nordic,fantasy	kyo-nordic-1
+78	kyo_p078	Kyo-Hani	prestige	shojo	slice,romance	kyo-slice-1
+79	sunrise_p079	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-2
+80	ttl_p080	Turtle Line	idol	shojo	idol,romance	ttl-idol-1
+81	toei_p081	Toe-i Animation	blockbuster	shonen	samurai,martial	toei-samurai-2
+82	kyo_p082	Kyo-Hani	prestige	shojo	romance,slice	kyo-romance-4
+83	sunrise_p083	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-3
+84	ttl_p084	Turtle Line	idol	shojo	idol,magical	ttl-idol-1
+85	toei_p085	Toe-i Animation	blockbuster	shonen	pirate,martial	toei-pirate-1
+86	ttl_p086	Turtle Line	idol	shojo	magical,mystery	ttl-magical-2
+87	sunrise_p087	Sunnyrise	technical	shonen	sports,cyber	sunrise-sports-1
+88	bones_p088	Boneworks	experimental	shojo	horror,romance	bones-horror-2
+89	madcap_p089	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-3
+90	sunrise_p090	Sunnyrise	technical	shonen	sports,cyber	sunrise-sports-1
+91	ttl_p091	Turtle Line	idol	shojo	romance,idol	ttl-romance-2
+92	sunrise_p092	Sunnyrise	technical	shonen	sports,cyber	
+93	bones_p093	Boneworks	experimental	shonen,shojo	mythology,supernatural	
+94	toei_p094	Toe-i Animation	blockbuster	shonen	pirate,fantasy	toei-pirate-2
+95	bones_p095	Boneworks	experimental	shojo	horror,romance	bones-horror-2
+96	bones_p096	Boneworks	experimental	shonen,shojo	cyber,supernatural	bones-cyber-2
+97	madcap_p097	Madcap House	volume	shonen,shojo	fantasy,mythology	madcap-fantasy-3
+98	ttl_p098	Turtle Line	idol	shojo	idol,romance	ttl-idol-2
+99	sunrise_p099	Sunnyrise	technical	shonen	space,military	sunrise-space-1
+100	toei_p100	Toe-i Animation	blockbuster	shonen	sports,martial	toei-sports-1
+101	kyo_p101	Kyo-Hani	prestige	shojo	nordic,romance	kyo-nordic-1
+102	madcap_p102	Madcap House	volume	shojo	slice,comedy	madcap-slice-2
+103	bones_p103	Boneworks	experimental	shonen,shojo	supernatural,horror	bones-supernatural-1
+104	kyo_p104	Kyo-Hani	prestige	shojo	mystery,romance	
+105	madcap_p105	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-3
+106	madcap_p106	Madcap House	volume	shojo	cooking,slice	
+107	toei_p107	Toe-i Animation	blockbuster	shonen	mecha,military	toei-mecha-1
+108	toei_p108	Toe-i Animation	blockbuster	shonen,shojo	samurai,romance	toei-samurai-2
+109	toei_p109	Toe-i Animation	blockbuster	shonen	pirate,martial	toei-pirate-2
+110	kyo_p110	Kyo-Hani	prestige	shojo	romance,mythology	kyo-romance-4
+111	ttl_p111	Turtle Line	idol	shojo	idol,slice	ttl-idol-2
+112	bones_p112	Boneworks	experimental	shonen,shojo	supernatural,mystery	bones-supernatural-2
+113	madcap_p113	Madcap House	volume	shonen,shojo	fantasy,mythology	madcap-fantasy-4
+114	ttl_p114	Turtle Line	idol	shojo	romance,mythology	ttl-romance-2
+115	sunrise_p115	Sunnyrise	technical	shonen	cyber,sports	sunrise-cyber-2
+116	sunrise_p116	Sunnyrise	technical	shojo	space,romance	sunrise-space-2
+117	bones_p117	Boneworks	experimental	shonen	supernatural,survival	bones-supernatural-2
+118	madcap_p118	Madcap House	volume	shonen,shojo	sports,slice	madcap-sports-1
+119	madcap_p119	Madcap House	volume	shojo	slice,romance	madcap-slice-3
+120	bones_p120	Boneworks	experimental	shonen	supernatural,shinobi	bones-supernatural-2
+121	bones_p121	Boneworks	experimental	shonen	survival,fantasy	bones-survival-1
+122	ttl_p122	Turtle Line	idol	shojo	magical,fantasy	ttl-magical-2
+123	toei_p123	Toe-i Animation	blockbuster	shonen	martial,sports	
+124	ttl_p124	Turtle Line	idol	shojo	mythology,romance	ttl-mythology-1
+125	sunrise_p125	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-3
+126	ttl_p126	Turtle Line	idol	shojo	romance,mythology	ttl-romance-3
+127	ttl_p127	Turtle Line	idol	shojo	magical,mystery	ttl-magical-3
+128	madcap_p128	Madcap House	volume	shonen,shojo	fantasy,mythology	madcap-fantasy-4
+129	madcap_p129	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-4
+130	ttl_p130	Turtle Line	idol	shojo	romance,idol	ttl-romance-3
+131	madcap_p131	Madcap House	volume	shonen,shojo	fantasy,space	madcap-fantasy-5
+132	kyo_p132	Kyo-Hani	prestige	shonen,shojo	nordic,fantasy	kyo-nordic-1
+133	toei_p133	Toe-i Animation	blockbuster	shonen	samurai,mystery	
+134	ttl_p134	Turtle Line	idol	shojo	idol,magical	ttl-idol-2
+135	bones_p135	Boneworks	experimental	shonen,shojo	cyber,mystery	
+136	bones_p136	Boneworks	experimental	shonen	horror,survival	bones-horror-3
+137	madcap_p137	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-5
+138	ttl_p138	Turtle Line	idol	shojo	magical,idol	ttl-magical-3
+139	sunrise_p139	Sunnyrise	technical	shonen	mecha,space	sunrise-mecha-3
+140	bones_p140	Boneworks	experimental	shonen,shojo	horror,mystery	bones-horror-3
+141	toei_p141	Toe-i Animation	blockbuster	shonen	sports,martial	toei-sports-1
+142	kyo_p142	Kyo-Hani	prestige	shojo	romance,mythology	
+143	bones_p143	Boneworks	experimental	shonen	supernatural,samurai	bones-supernatural-3
+144	sunrise_p144	Sunnyrise	technical	shonen,shojo	cyber,space	sunrise-cyber-2
+145	madcap_p145	Madcap House	volume	shonen	fantasy,survival	madcap-fantasy-5
+146	ttl_p146	Turtle Line	idol	shojo	slice,romance	
+147	sunrise_p147	Sunnyrise	technical	shonen	cyber,sports	sunrise-cyber-2
+148	sunrise_p148	Sunnyrise	technical	shonen,shojo	mecha,magical	
+149	bones_p149	Boneworks	experimental	shonen	shinobi,supernatural	
+150	kyo_p150	Kyo-Hani	prestige	shojo	fantasy,romance	kyo-fantasy-2
+151	madcap_p151	Madcap House	volume	shojo	slice,comedy	madcap-slice-3
+152	toei_p152	Toe-i Animation	blockbuster	shonen	pirate,horror	toei-pirate-2
+153	kyo_p153	Kyo-Hani	prestige	shonen	nordic,military	kyo-nordic-2
+154	kyo_p154	Kyo-Hani	prestige	shojo	fantasy,romance	kyo-fantasy-2
+155	sunrise_p155	Sunnyrise	technical	shonen	space,military	sunrise-space-2
+156	bones_p156	Boneworks	experimental	shojo	horror,romance	bones-horror-3
+157	sunrise_p157	Sunnyrise	technical	shonen	cyber,shinobi	
+158	ttl_p158	Turtle Line	idol	shojo	romance,mythology	ttl-romance-3
+159	bones_p159	Boneworks	experimental	shonen,shojo	supernatural,cyber	bones-supernatural-3
+160	kyo_p160	Kyo-Hani	prestige	shonen,shojo	nordic,fantasy	kyo-nordic-2
