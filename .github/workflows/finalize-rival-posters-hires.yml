@@ -5,7 +5,7 @@ on:
     branches:
       - work/final-awards-rival-posters
     paths:
-      - game_source/art_src/rival/external/atlases/poster_sheet_20.webp
+      - game_source/art_src/rival/external/rival_atlas_chunk_05.zip
 
 permissions:
   contents: write
@@ -19,6 +19,15 @@ jobs:
         with:
           ref: work/final-awards-rival-posters
           fetch-depth: 0
+
+      - name: Restore compact source atlases
+        run: |
+          rm -rf game_source/art_src/rival/external/atlases
+          mkdir -p game_source/art_src/rival/external/atlases
+          for z in game_source/art_src/rival/external/rival_atlas_chunk_*.zip; do
+            unzip -q -o "$z" -d game_source/art_src/rival/external/atlases
+          done
+          test "$(find game_source/art_src/rival/external/atlases -name 'poster_sheet_*.webp' | wc -l)" -eq 20
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,8 +70,10 @@ jobs:
         working-directory: game_source
         run: npm run cast:coverage
 
-      - name: Remove superseded staging shards
+      - name: Remove superseded poster staging
         run: |
+          rm -rf game_source/art_src/rival/external/atlases
+          rm -f game_source/art_src/rival/external/rival_atlas_chunk_*.zip
           rm -f game_source/art_src/rival/external/rivalPosterImages*.json
           rm -f game_source/art_src/rival/external/rival_poster_atlas_20.zip
 
@@ -70,11 +81,11 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add game_source/public/rival-posters/generated \
-                  game_source/src/engine/generated/rivalPosterManifest.json \
-                  game_source/src/components/Create.tsx \
-                  game_source/docs/rival-poster-import-map.csv \
-                  game_source/art_src/rival/external
+          git add -A game_source/public/rival-posters/generated \
+                     game_source/src/engine/generated/rivalPosterManifest.json \
+                     game_source/src/components/Create.tsx \
+                     game_source/docs/rival-poster-import-map.csv \
+                     game_source/art_src/rival/external
           if git diff --cached --quiet; then
             echo 'No generated changes to commit.'
           else
