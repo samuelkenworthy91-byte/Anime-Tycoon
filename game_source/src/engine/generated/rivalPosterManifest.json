@@ -3,10 +3,10 @@
   "capacity": {
     "perStudio": 24,
     "studios": 6,
-    "total": 144
+    "total": 168
   },
   "generated": 6,
-  "pending": 138,
+  "pending": 162,
   "posters": [
     {
       "id": "toei_titanrise",
@@ -2127,6 +2127,371 @@
       "genres": [
         "mecha",
         "magical"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparesun",
+      "img": "rival-posters/toei_sparesun.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "sports",
+        "martial"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparetide",
+      "img": "rival-posters/toei_sparetide.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "pirate",
+        "supernatural"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparezero",
+      "img": "rival-posters/toei_sparezero.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "toei_sparekaiju",
+      "img": "rival-posters/toei_sparekaiju.webp",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "supernatural",
+        "mythology"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparesolar",
+      "img": "rival-posters/sunrise_sparesolar.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "space",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_spareforge",
+      "img": "rival-posters/sunrise_spareforge.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "mecha",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparecrypto",
+      "img": "rival-posters/sunrise_sparecrypto.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "sunrise_sparetundra",
+      "img": "rival-posters/sunrise_sparetundra.webp",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "mystery"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_spareobe",
+      "img": "rival-posters/bones_spareobe.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_sparehive",
+      "img": "rival-posters/bones_sparehive.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror",
+        "survival"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_sparevale",
+      "img": "rival-posters/bones_sparevale.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery",
+        "isekai"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "bones_spareclinic",
+      "img": "rival-posters/bones_spareclinic.webp",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "horror",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_spareharvest",
+      "img": "rival-posters/kyo_spareharvest.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "cooking"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_sparezephyr",
+      "img": "rival-posters/kyo_sparezephyr.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_spareempire",
+      "img": "rival-posters/kyo_spareempire.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology",
+        "military"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "kyo_sparerail",
+      "img": "rival-posters/kyo_sparerail.webp",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparebuffet",
+      "img": "rival-posters/madcap_sparebuffet.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparewap",
+      "img": "rival-posters/madcap_sparewap.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai",
+        "comedy"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparepowerup",
+      "img": "rival-posters/madcap_sparepowerup.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "sports"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "madcap_sparenightout",
+      "img": "rival-posters/madcap_sparenightout.webp",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "romance"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparestarfall",
+      "img": "rival-posters/ttl_sparestarfall.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "space"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparepetal",
+      "img": "rival-posters/ttl_sparepetal.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "idol"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_spareprismwalk",
+      "img": "rival-posters/ttl_spareprismwalk.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "cyber"
+      ],
+      "family": null,
+      "pending": true
+    },
+    {
+      "id": "ttl_sparearia",
+      "img": "rival-posters/ttl_sparearia.webp",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "nordic"
       ],
       "family": null,
       "pending": true
