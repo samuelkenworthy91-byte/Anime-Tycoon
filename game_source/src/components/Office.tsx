@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
@@ -75,6 +75,7 @@ import {
   audienceShowKey,
   studioScore,
   contractDailyOutputEstimateForRun,
+  researchBlockReason,
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
@@ -640,33 +641,54 @@ export default function Office({
               </>;
             })()}
           </div>
-          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO TECH</div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {RESEARCH.map((u) => {
-              const owned = run.research.includes(u.id);
-              const pending = run.researchJobs.find((j) => j.researchId === u.id);
-              return (
-                <div key={u.id} className={cn("ink-card p-3", owned && "border-mint/50")}>
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-viol" />
-                    <span className="font-display text-sm font-extrabold">{u.name}</span>
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-paper/55">{u.desc}</div>
-                  <div className="mt-2">
-                    {owned ? (
-                      <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
-                    ) : pending ? (
-                      <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, (pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7))} DAYS</span>
-                    ) : (
-                      <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={run.rd < u.rd} onClick={() => research(u.id, u.rd)}>
-                        START · {u.rd} RD
-                      </Btn>
-                    )}
-                  </div>
+          {(["tech", "merch"] as const).map((section) => {
+            const items = RESEARCH.filter((u) => (u.section ?? "tech") === section);
+            if (!items.length) return null;
+            return (
+              <Fragment key={section}>
+                <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">
+                  {section === "tech" ? "STUDIO TECH" : "MERCHANDISING OPERATIONS"}
                 </div>
-              );
-            })}
-          </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {items.map((u) => {
+                    const owned = run.research.includes(u.id);
+                    const pending = run.researchJobs.find((j) => j.researchId === u.id);
+                    const block = researchBlockReason(run, u.id);
+                    return (
+                      <div key={u.id} className={cn("ink-card p-3", owned && !u.repeatable && "border-mint/50", block === "ALL CAST PROFILED — every hidden affinity is known" && "border-gold/50 bg-gold/5")}>
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles size={13} className="text-viol" />
+                          <span className="font-display text-sm font-extrabold">{u.name}</span>
+                          {u.repeatable && (
+                            <span className="ml-auto rounded bg-panel3 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyanx">REPEATABLE</span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-paper/55">{u.desc}</div>
+                        {u.requires && !run.research.includes(u.requires) && (
+                          <div className="mt-1 text-[10px] font-bold text-gold">
+                            🔒 Requires {RESEARCH.find((x) => x.id === u.requires)?.name}
+                          </div>
+                        )}
+                        <div className="mt-2">
+                          {owned && !u.repeatable ? (
+                            <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
+                          ) : pending ? (
+                            <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, (pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7))} DAYS</span>
+                          ) : block === "ALL CAST PROFILED — every hidden affinity is known" ? (
+                            <span className="text-xs font-bold text-gold">⭐ ALL CAST PROFILED ✓</span>
+                          ) : (
+                            <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(u.id, u.rd)}>
+                              {u.repeatable && block === null ? "RUN AGAIN" : "START"} · {u.rd} RD
+                            </Btn>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Fragment>
+            );
+          })}
 
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">GENRE LICENCES</div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

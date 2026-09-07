@@ -464,6 +464,8 @@ describe("market lifecycle", () => {
       franchiseKey: null,
       kind: "original",
       score: 30,
+      craft: { story: 30, art: 30, sound: 30 },
+      posterId: "sunrise_orbknights3",
     });
     const out = advanceWeeks({ ...r, rivalWorld: world }, 1);
     expect(out.recentReleases.some((x) => x.genre === "mecha" && x.weight === 1)).toBe(true);

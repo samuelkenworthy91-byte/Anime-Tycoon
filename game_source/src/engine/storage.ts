@@ -50,7 +50,10 @@ export function clearScores() {
  * from a LOAD GAME / SAVE GAME menu. Every slot is an independent key so a
  * corrupt or version-stale slot can never take the others down with it.   */
 
-export const SAVE_VERSION = 4;
+/* v5: the awards/rival-poster/research pass reshapes RunState (rich award
+ * nominees, rival craft + poster ids, merch research gates). Old careers are
+ * NOT migrated — per the project rule they reset to a clean fresh career. */
+export const SAVE_VERSION = 5;
 export type SlotId = "auto" | "1" | "2" | "3";
 export const SLOT_IDS: SlotId[] = ["auto", "1", "2", "3"];
 
@@ -98,7 +101,8 @@ export function loadSlot(id: SlotId): SaveGame | null {
     const raw = localStorage.getItem(slotKey(id)) ?? localStorage.getItem(slotKey(id, 3));
     if (!raw) return null;
     const s = JSON.parse(raw) as SaveGame;
-    if (!s || (s.v !== SAVE_VERSION && s.v !== 3) || !s.run || !s.summary) return null;
+    /* only the current version loads — older careers reset cleanly */
+    if (!s || s.v !== SAVE_VERSION || !s.run || !s.summary) return null;
     return s;
   } catch {
     return null;

@@ -325,20 +325,24 @@ export default function LibraryPanel({
         </div>
         <div className="grid grid-cols-2 gap-1.5">
           {MERCH_PRODUCTS.map((p) => {
-            const block = merchBlock(fr, p, run.week, run.cash);
+            const block = merchBlock(fr, p, run.week, run.cash, run.research ?? []);
             const ret = merchReturn(fr, p);
+            /* research gates get a labelled 🔒 RESEARCH chip so the next
+               unlock is obvious — other gates stay plain-economic */
+            const researchGate = block?.includes("research (R&D)");
             return (
               <div key={p.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-mint/30 bg-mint/5")}>
                 <div className="flex items-center gap-1 text-[11px] font-bold">
                   {p.id === "mobile" && <Gamepad2 size={11} />}
                   {p.label}
+                  {researchGate && <span className="ml-auto rounded bg-viol/25 px-1 py-px text-[7px] font-black tracking-widest text-viol">🔒 R&D</span>}
                 </div>
                 <div className="text-[9px] text-paper/45">{p.desc}</div>
                 <div className="mt-1 text-[9px] text-paper/60">
                   −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(ret)}</b> / {p.weeks} wk
                 </div>
                 {block ? (
-                  <div className="mt-1 text-[9px] text-paper/40">{block}</div>
+                  <div className={cn("mt-1 text-[9px]", researchGate ? "font-bold text-viol" : "text-paper/40")}>{block}</div>
                 ) : (
                   <Btn variant="cyan" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doMerch(p.id)}>
                     LAUNCH
