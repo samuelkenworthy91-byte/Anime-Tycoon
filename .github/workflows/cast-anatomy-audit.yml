@@ -1,0 +1,32 @@
+name: Cast anatomy audit pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "game_source/public/cast/**"
+      - "game_source/src/engine/generated/castV3.json"
+      - "game_source/scripts/castAnatomyAudit.py"
+      - ".github/workflows/cast-anatomy-audit.yml"
+
+jobs:
+  build-audit-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Build live cast audit pack
+        working-directory: game_source
+        run: python scripts/castAnatomyAudit.py --out ../cast-anatomy-audit
+      - name: Upload audit pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-anatomy-audit
+          path: cast-anatomy-audit
+          if-no-files-found: error
+          retention-days: 30
