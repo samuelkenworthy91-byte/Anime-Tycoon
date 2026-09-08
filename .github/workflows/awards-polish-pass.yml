@@ -1,0 +1,62 @@
+name: Awards ceremony polish pass
+
+on:
+  push:
+    branches:
+      - work/final-awards-rival-posters
+    paths:
+      - .github/scripts/awards-polish-pass.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/final-awards-rival-posters
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply awards polish pass
+        run: node .github/scripts/awards-polish-pass.mjs
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated polish pass
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src/engine/awards.ts \
+                  game_source/src/engine/state.ts \
+                  game_source/src/engine/playtestSeed.ts \
+                  game_source/src/engine/audio.ts \
+                  game_source/src/engine/rivals.ts \
+                  game_source/src/components/AwardsCeremony.tsx \
+                  game_source/src/components/awardsCeremony.css \
+                  game_source/src/engine/__tests__/awards-polish.test.ts
+          if git diff --cached --quiet; then
+            echo 'No application changes needed.'
+          else
+            git commit -m 'Polish awards ceremony presentation and audio'
+            git push origin HEAD:work/final-awards-rival-posters
+          fi
