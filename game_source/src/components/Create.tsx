@@ -73,7 +73,7 @@ import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
 
-import { filterCastByVisibleGenre, mixedCastOrder } from "../engine/castDisplayOrder";
+import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
 
 const MIXED_CAST = {
   protag: mixedCastOrder(PROTAGONISTS),
@@ -229,7 +229,7 @@ export default function Create({
   /** which cast role is being picked — CAST is split into one screen per role */
   const [castStep, setCastStep] = useState(0);
   const [castFilterOpen, setCastFilterOpen] = useState(false);
-  const [castGenreFilter, setCastGenreFilter] = useState<GenreId | null>(null);
+  const [castFilters, setCastFilters] = useState<CastBrowseFilter[]>([]);
   const [d, setD] = useState<Draft>(() => {
     const base = freshDraft(run, plan);
     return commission
@@ -417,8 +417,24 @@ export default function Create({
   const CAST_SCREENS = castRows.length;
   const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
   const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];
-  const filteredCastList = filterCastByVisibleGenre(castRow.list, castGenreFilter);
-  const filterGenre = castGenreFilter ? GENRES.find((g) => g.id === castGenreFilter) : null;
+  const filteredCastList = filterCastByFilters(castRow.list, castFilters);
+  const castFilterAtLimit = castFilters.length >= 3;
+  const isCastFilterActive = (kind: CastBrowseFilter["kind"], value: AnimeType | GenreId) =>
+    castFilters.some((filter) => filter.kind === kind && filter.value === value);
+  const toggleCastFilter = (next: CastBrowseFilter) => {
+    sfx.click();
+    setCastFilters((current) => {
+      const existing = current.findIndex((filter) => filter.kind === next.kind && filter.value === next.value);
+      if (existing >= 0) return current.filter((_, index) => index !== existing);
+      const base = next.kind === "type" ? current.filter((filter) => filter.kind !== "type") : current;
+      if (base.length >= 3) return current;
+      return [...base, next];
+    });
+  };
+  const castFilterLabel = (filter: CastBrowseFilter) =>
+    filter.kind === "type"
+      ? ANIME_TYPE_LABEL[filter.value]
+      : (GENRES.find((genre) => genre.id === filter.value)?.label ?? filter.value);
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-ink">
@@ -733,71 +749,114 @@ export default function Create({
                 ))}
               </div>
 
-              {/* genre filter — visible affinities only, so hidden affinities never leak */}
+              {/* cast filters — anime type + visible affinities only; hidden affinities never leak */}
               <div className="rounded-xl border border-line bg-panel2/70 p-2.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => { sfx.click(); setCastFilterOpen((open) => !open); }}
                     className={cn(
                       "btn-press flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-extrabold tracking-wider",
-                      castGenreFilter ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line bg-panel3 text-paper/70"
+                      castFilters.length ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line bg-panel3 text-paper/70"
                     )}
                   >
                     <Filter size={13} />
-                    {castGenreFilter ? `FILTER: ${filterGenre?.label ?? castGenreFilter}` : "FILTER BY GENRE"}
+                    CAST FILTERS · {castFilters.length}/3
                     <span className="rounded bg-abyss/60 px-1.5 py-0.5 text-[9px] text-paper/55">{filteredCastList.length}/{castRow.list.length}</span>
                   </button>
-                  {castGenreFilter && (
+                  {castFilters.length > 0 && (
                     <button
-                      onClick={() => { sfx.click(); setCastGenreFilter(null); }}
+                      onClick={() => { sfx.click(); setCastFilters([]); }}
                       className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1.5 text-[9px] font-bold text-paper/55"
                     >
-                      <X size={11} /> CLEAR
+                      <X size={11} /> CLEAR ALL
                     </button>
                   )}
                   {d.genres.map((genre) => {
                     const g = GENRES.find((x) => x.id === genre);
+                    const active = isCastFilterActive("genre", genre);
+                    const blocked = castFilterAtLimit && !active;
                     return (
                       <button
                         key={genre}
-                        onClick={() => { sfx.click(); setCastGenreFilter(genre); setCastFilterOpen(false); }}
+                        disabled={blocked}
+                        onClick={() => toggleCastFilter({ kind: "genre", value: genre })}
                         className={cn(
                           "btn-press rounded-lg border px-2 py-1.5 text-[9px] font-bold",
-                          castGenreFilter === genre ? "border-mint bg-mint/10 text-mint" : "border-line text-paper/50"
+                          active ? "border-mint bg-mint/10 text-mint" : "border-line text-paper/50",
+                          blocked && "cursor-not-allowed opacity-35"
                         )}
                       >
-                        SHOW: {g?.label ?? genre}
+                        {active ? "FILTERING: " : "FILTER: "}{g?.label ?? genre}
                       </button>
                     );
                   })}
                 </div>
+
+                {castFilters.length > 0 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[9px] font-extrabold tracking-[0.16em] text-paper/35">ACTIVE</span>
+                    {castFilters.map((filter) => (
+                      <button
+                        key={filter.kind + ":" + filter.value}
+                        onClick={() => toggleCastFilter(filter)}
+                        className="btn-press flex items-center gap-1 rounded-full border border-cyanx/45 bg-cyanx/10 px-2 py-1 text-[9px] font-bold text-cyanx"
+                        title="Remove this filter"
+                      >
+                        {castFilterLabel(filter)} <X size={10} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {castFilterOpen && (
                   <div className="mt-2 border-t border-line/60 pt-2">
-                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/40">VISIBLE AFFINITY FILTER</div>
+                    <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/40">ANIME TYPE</div>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      <button
-                        onClick={() => { sfx.click(); setCastGenreFilter(null); setCastFilterOpen(false); }}
-                        className={cn(
-                          "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",
-                          castGenreFilter === null ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/50"
-                        )}
-                      >
-                        ALL
-                      </button>
-                      {GENRES.map((g) => (
-                        <button
-                          key={g.id}
-                          onClick={() => { sfx.click(); setCastGenreFilter(g.id); setCastFilterOpen(false); }}
-                          className={cn(
-                            "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",
-                            castGenreFilter === g.id ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line text-paper/50"
-                          )}
-                        >
-                          {g.label}
-                        </button>
-                      ))}
+                      {(["shonen", "shojo"] as AnimeType[]).map((type) => {
+                        const active = isCastFilterActive("type", type);
+                        const hasTypeFilter = castFilters.some((filter) => filter.kind === "type");
+                        const blocked = castFilterAtLimit && !active && !hasTypeFilter;
+                        return (
+                          <button
+                            key={type}
+                            disabled={blocked}
+                            onClick={() => toggleCastFilter({ kind: "type", value: type })}
+                            className={cn(
+                              "btn-press rounded-full border px-2.5 py-1 text-[9px] font-extrabold",
+                              active ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/55",
+                              blocked && "cursor-not-allowed opacity-35"
+                            )}
+                          >
+                            {ANIME_TYPE_LABEL[type]}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <div className="mt-2 text-[9px] italic text-paper/35">Visible affinities only — hidden affinities never affect filter results.</div>
+
+                    <div className="mt-2.5 text-[9px] font-extrabold tracking-[0.18em] text-paper/40">VISIBLE AFFINITY</div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {GENRES.map((g) => {
+                        const active = isCastFilterActive("genre", g.id);
+                        const blocked = castFilterAtLimit && !active;
+                        return (
+                          <button
+                            key={g.id}
+                            disabled={blocked}
+                            onClick={() => toggleCastFilter({ kind: "genre", value: g.id })}
+                            className={cn(
+                              "btn-press rounded-full border px-2 py-1 text-[9px] font-bold",
+                              active ? "border-cyanx bg-cyanx/10 text-cyanx" : "border-line text-paper/50",
+                              blocked && "cursor-not-allowed opacity-35"
+                            )}
+                          >
+                            {g.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-2 text-[9px] italic text-paper/35">
+                      Up to three filters combine with AND logic. Shonen/Shojo are mutually exclusive. Genre filters use visible affinities only — hidden affinities never affect results.
+                    </div>
                   </div>
                 )}
               </div>

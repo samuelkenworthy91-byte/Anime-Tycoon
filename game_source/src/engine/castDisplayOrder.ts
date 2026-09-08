@@ -1,4 +1,8 @@
-import type { CastMember, GenreId } from "./data";
+import type { AnimeType, CastMember, GenreId } from "./data";
+
+export type CastBrowseFilter =
+  | { kind: "type"; value: AnimeType }
+  | { kind: "genre"; value: GenreId };
 
 /** Stable presentation only. Hidden affinities never influence browsing order. */
 export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
@@ -39,11 +43,29 @@ export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
   return result;
 }
 
-/** Browse-time filter. Only public visible affinities are considered. */
+/**
+ * Browse-time cast filter. Every active filter must match.
+ * Anime type uses the public Shonen/Shojo field; genre matching uses visible
+ * affinities only, so hidden affinities can never leak through filtering.
+ */
+export function filterCastByFilters(
+  members: readonly CastMember[],
+  filters: readonly CastBrowseFilter[],
+): CastMember[] {
+  if (!filters.length) return [...members];
+  return members.filter((member) =>
+    filters.every((filter) =>
+      filter.kind === "type"
+        ? member.type === filter.value
+        : member.visibleAff.includes(filter.value)
+    )
+  );
+}
+
+/** Backwards-compatible one-genre wrapper. */
 export function filterCastByVisibleGenre(
   members: readonly CastMember[],
   genre: GenreId | null,
 ): CastMember[] {
-  if (!genre) return [...members];
-  return members.filter((member) => member.visibleAff.includes(genre));
+  return filterCastByFilters(members, genre ? [{ kind: "genre", value: genre }] : []);
 }
