@@ -1,0 +1,36 @@
+name: Fix awards mixed-pool test
+
+on:
+  push:
+    branches:
+      - work/final-awards-rival-posters
+    paths:
+      - .github/scripts/fix-awards-mixed-pool-test.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/final-awards-rival-posters
+          fetch-depth: 0
+
+      - name: Apply deterministic fixture fix
+        run: node .github/scripts/fix-awards-mixed-pool-test.mjs
+
+      - name: Commit test fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src/engine/__tests__/awards.test.ts
+          if git diff --cached --quiet; then
+            echo 'No test change needed.'
+          else
+            git commit -m 'Make awards mixed-pool integration test deterministic'
+            git push origin HEAD:work/final-awards-rival-posters
+          fi
