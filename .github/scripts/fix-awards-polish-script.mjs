@@ -15,7 +15,7 @@ for (const [from, to] of replacements) src = src.split(from).join(to);
 fs.writeFileSync(patchPath, src);
 
 /* The repairs above alter literals the main patcher also used as search
- * targets. Apply those two title-generation source edits here first. */
+ * targets. Apply those title-generation source edits here first. */
 const rivalsPath = "game_source/src/engine/rivals.ts";
 let rivals = fs.readFileSync(rivalsPath, "utf8");
 
@@ -73,5 +73,12 @@ if (!rivals.includes(newSurpriseBlock)) {
   rivals = rivals.replace(oldSurpriseBlock, newSurpriseBlock);
 }
 
+/* planStudioYear now receives the year-wide registry as a parameter. Remove
+ * the old studio-local registry which would shadow it and defeat uniqueness. */
+rivals = rivals.replace(
+  '  const usedTitles = new Set<string>();\n  const productions: RivalProduction[] = [];',
+  '  const productions: RivalProduction[] = [];'
+);
+
 fs.writeFileSync(rivalsPath, rivals);
-console.log("Awards polish bootstrap repaired and both rival title blocks prepatched.");
+console.log("Awards polish bootstrap repaired; rival title paths use one year-wide registry.");
