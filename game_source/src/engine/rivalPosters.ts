@@ -92,7 +92,11 @@ function fitScore(p: RivalPoster, ctx: PosterPickCtx): number {
 export function pickRivalPoster(ctx: PosterPickCtx): RivalPoster | null {
   const rand = ctx.rand ?? Math.random;
   const recent = new Set(ctx.recent ?? []);
-  const pool = rivalPostersForStudio(ctx.studio);
+  const studioPool = rivalPostersForStudio(ctx.studio);
+  if (!studioPool.length) return null;
+  /* Anime Type is a hard visual constraint: a Shonen release can never be
+     assigned Shojo-only key art, and vice versa. */
+  const pool = studioPool.filter((p) => p.animeTypes.includes(ctx.animeType));
   if (!pool.length) return null;
 
   /* franchise family continuity: prefer a yet-unused image from the same

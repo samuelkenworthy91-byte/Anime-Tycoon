@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { awardNomineeKey, buildCeremony, type AwardNominee } from "../awards";
-import { initRivalWorld } from "../rivals";
+import { initRivalWorld, RIVAL_TITLE_BANK } from "../rivals";
+import { rivalPosterById } from "../rivalPosters";
 
 const nominee = (sourceId: string | null, title: string, studio = "Studio B"): AwardNominee => ({
   sourceId,
@@ -47,5 +48,27 @@ describe("awards ceremony polish", () => {
     expect(titles.length).toBeGreaterThan(6);
     expect(titles.every((title) => title.trim().length >= 5)).toBe(true);
     expect(new Set(titles.map((title) => title.toLowerCase())).size).toBe(titles.length);
+  });
+
+  it("keeps rival title banks cool and clear of workplace gag spam", () => {
+    const banned = /\b(payroll|overtime|deadline|rent|receipt|timesheet|intern|office|business|accountant|meeting|compliance|benefits|emails?|annual leave|lunch break)\b/i;
+    const shonen = Object.values(RIVAL_TITLE_BANK.shonen).flatMap((titles) => titles ?? []);
+    const shojo = Object.values(RIVAL_TITLE_BANK.shojo).flatMap((titles) => titles ?? []);
+    expect(shonen.length).toBeGreaterThan(50);
+    expect(shojo.length).toBeGreaterThan(50);
+    expect([...shonen, ...shojo].some((title) => banned.test(title))).toBe(false);
+    const shojoSet = new Set(shojo.map((title) => title.toLowerCase()));
+    expect(shonen.filter((title) => shojoSet.has(title.toLowerCase()))).toEqual([]);
+  });
+
+  it("keeps rival poster Anime Type aligned with every generated production", () => {
+    const world = initRivalWorld(0);
+    const productions = world.studios.flatMap((studio) => studio.productions);
+    for (const production of productions) {
+      if (!production.posterId) continue;
+      const poster = rivalPosterById(production.posterId);
+      expect(poster).not.toBeNull();
+      expect(poster?.animeTypes).toContain(production.animeType);
+    }
   });
 });

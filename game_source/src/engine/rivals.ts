@@ -566,42 +566,74 @@ const MOVIE_SUB = ["The Movie", "The Final Act", "Film", "Rebellion"];
 /** Rival originals deliberately sound like anime titles, including affectionate
  * parody/allusion, but never copy an existing title verbatim. The primary
  * genre selects the strongest bank; a second genre can widen the pool. */
-const RIVAL_TITLE_BANK: Partial<Record<GenreId, string[]>> = {
-  mecha: ["Mobile Suit: Rent Is Due", "Neon Gear Re:Genesis", "Giant Robot Small Claims", "Mecha Me Later", "Steel Frame Panic!"],
-  isekai: ["I Got Rehired in Another World", "That Time My Rent Became a Quest", "Respawned With No Annual Leave", "Another World, Same Deadline", "My Inventory Is Mostly Receipts"],
-  slice: ["Quiet Days, Loud Neighbours", "My Lunch Break Has a Plot", "After School Overtime", "Ordinary Tuesday EX", "The Club That Forgot Its Purpose"],
-  horror: ["Junji Oh-No", "The Ring Tone Is Coming From Inside", "Chainsaw Intern", "Night Shift of the Living Deadlines", "Cursed VHS Club"],
-  romance: ["Kiss Note", "Love Is Mostly Logistics", "Your Name Was in the Group Chat", "Confession Pending!", "Heartstrings & Red Tape"],
-  sports: ["Blue Locker Room", "Haikyu Later", "Slam Deadline", "Ace of Base Line", "Extra Time! Extra Feelings!"],
-  cyber: ["Ghost in the Payroll", "Serial Experiments: Login", "Psycho-Passcode", "Chrome Hearts, Broken Wi-Fi", "Firewall//Feelings"],
-  fantasy: ["Fullmetal Accountant", "Dungeon Meshi-up", "The Fellowship of the Ping", "Sword Art Offline", "Mana Management!"],
-  idol: ["Oshi No Maybe", "Idol Hands Are the Devil's Workshop", "Encore! But Make It Rent", "Stage Fright☆All Night", "Center Position Pending"],
-  mystery: ["Case Closed for Lunch", "Detective Conan't Make the Deadline", "Murder, She Streamed", "The Locked Room Has Wi-Fi", "Clue Club After Dark"],
-  comedy: ["Nichijou Business", "Daily Lives of Very Tired People", "Gintama Receipt", "Punchline Pending", "Laugh Track Academy"],
-  cooking: ["Food Wars: Fridge Edition", "Attack on Titanobori", "My Hero Macadamia", "Dungeon Meshi-up Deluxe", "Kitchen Shonen Showdown"],
-  military: ["Attack on Timesheets", "86 Unread Emails", "Code Geasslight", "Full Metal Payroll", "Tactical Lunch Break"],
-  supernatural: ["Mob Psycho 9-to-5", "Bleach the Break Room", "Spirit Away Message", "Paranormal Activity Report", "Possessed by Overtime"],
-  space: ["Cowboy Bebop-Up Shop", "Space Dandy-ish", "Galaxy Express Checkout", "Planetes, But With Rent", "Orbital Overtime"],
-  magical: ["Sailor Mood", "Cardcaptor Overtime", "Magical Girl Compliance Dept.", "Pretty Cure-ish", "Moon Prism Payroll"],
-  survival: ["Made in a Miss", "Promised Never-Landlord", "Battle Royale With Cheese", "Last Train, No Signal", "Respawn Denied"],
-  pirate: ["One More Piece", "Grand Line Item", "Pirate King of HR", "Treasure Island Dispute", "Straw Hat, No Benefits"],
-  martial: ["One Punch Overtime", "My Heroic Internship", "Fist of the Lunch Star", "Dragon Call Z", "Uppercut Academia"],
-  mythology: ["Fate/Stay Employed", "Saint Seiya Later", "Record of Ragnarok-and-Roll", "Gods' Day Off", "Myth Taken Identity"],
-  nordic: ["Saga of the Very Tired North", "Vinland Landlord", "Thorfinn's Day Off", "Longship, Short Notice", "North Sea Side Story"],
-  samurai: ["Rurouni Deadline", "Samurai Champloo-ish", "Blade Runner-Up!", "Seven Samurai, Eight Meetings", "Ronin With Benefits"],
-  shinobi: ["Ninja Scroll Down", "Hidden Leaf on Read", "Shinobi No Show", "Shadow Clone Overtime", "Kunai Ask You Something?"],
+/* awards-title-v5-type-banks: titles and posters share the same Anime Type + genres. */
+export const RIVAL_TITLE_BANK: Record<AnimeType, Partial<Record<GenreId, string[]>>> = {
+  shonen: {
+    mecha: ["Neon Gear Re:Genesis", "Mobile Aegis: Iron Horizon", "Code Argent Rebellion", "Gurren Star Breaker"],
+    isekai: ["Reborn Beyond the Seventh Gate", "Slime Crown Chronicle", "Overlord of the Empty Throne", "Another World, Zero Map"],
+    slice: ["Silver Spoon Summer", "After-School Riot Club", "Daily Lives of the Unlucky Three", "Blue Sky Detour"],
+    horror: ["Chainsaw Moon", "Ghoul City: Red Veil", "Parasyte Bloom", "Devil Nocturne"],
+    romance: ["Golden Time Loop", "Blue Spring Signal", "Dress-Up Summer", "Toradora Afterglow"],
+    sports: ["Blue Cage Eleven", "Haikyu Horizon", "Slam Blaze", "Diamond Ace: Final Inning"],
+    cyber: ["Ghost in the Neon Shell", "Psycho-Pass: Zero Signal", "Serial Experiment IX", "Akira Protocol"],
+    fantasy: ["Fullmetal Vanguard", "Black Clover: Ash Crown", "Seven Deadly Suns", "Magi of the Sapphire Gate"],
+    idol: ["Oshi no Nova", "Starlight Revue Zero", "Prism Beat Vanguard", "Love Livewire!"],
+    mystery: ["Case Closed: Black Rose", "Detective Midnight", "Locked Room Requiem", "Hyouka After Dark"],
+    comedy: ["Gintama: Silver Noise", "Nichijou Panic", "Daily Lives: Chaos Mode", "Grand Blue Detour"],
+    cooking: ["Food Wars: Crimson Plate", "Dungeon Feast Chronicle", "Sweetness & Steel", "Bento Battle Royale"],
+    military: ["86: Ashen Front", "Code Argent: Black Rebellion", "Iron-Blood Vanguard", "Valkyria Zero"],
+    supernatural: ["Mob Psycho: Eclipse", "Hollow Moon Requiem", "Cursed Crown", "Soul Eater Nocturne"],
+    space: ["Cowboy Nebula", "Outlaw Starfall", "Planetes: Blue Orbit", "Crimson Galaxy Rail"],
+    magical: ["Fate/Prism Breaker", "Moon Prism Vanguard", "Arcana Blade: Zero", "Magical Knights Nova"],
+    survival: ["Abyssbound", "Promised Nevermore", "Deadman Wonderworld", "Last Train, No Signal!"],
+    pirate: ["One Last Piece", "Grand Line: Crimson Tide", "Red Flag Odyssey", "Straw Hat Eclipse"],
+    martial: ["One Punch Horizon", "Hero Academia: Iron Pulse", "Dragon Soul Zeta", "Fist of the North Sky"],
+    mythology: ["Fate/Starfall", "Saint Astra", "Ragnarok Record: Zero", "Olympus Requiem"],
+    nordic: ["Vinland Ashes", "Saga of the Northern Wolf", "North Sea Requiem", "Longship Horizon"],
+    samurai: ["Rurouni Ember", "Champloo Requiem", "Seven Blades at Dawn", "Ronin Moon"],
+    shinobi: ["Hidden Leaf Eclipse", "Ninja Scroll: Black Wind", "Shinobi Requiem", "Shadow Clone Genesis"],
+  },
+  shojo: {
+    mecha: ["Escaflowne Hearts", "Rose Gear Waltz", "Starlight Mecha Serenade", "Crystal Frame Promise"],
+    isekai: ["The Saint's Second Bloom", "Villainess of the Moonlit Court", "Red-Haired Princess Beyond the Gate", "The Duke and the Silver Familiar"],
+    slice: ["Kimi ni Someday", "Orange After Rain", "Blue Spring Letters", "Honey Cloverlight"],
+    horror: ["Crimson Petal Nocturne", "Vampire Rose Refrain", "The Girl Beyond Midnight", "Black Lily House"],
+    romance: ["Kimi ni Starlight", "Lovely Complex: Afterglow", "Ao Haru Moon", "Starlight Confession"],
+    sports: ["Chihaya in Bloom", "Aim for the Starlight", "Blooming Ace", "Crimson Court Serenade"],
+    cyber: ["Plastic Memories: Violet Signal", "Digital Rose", "Eden of Starlight", "Neon Heart Protocol"],
+    fantasy: ["Moonlit Dawn Princess", "Snow White with the Crimson Crown", "Yona of the Silver Sky", "Rose of the Crystal Kingdom"],
+    idol: ["Oshi no Starlight", "Nana: Encore", "Full Moon Serenade", "Prism Stage! Refrain"],
+    mystery: ["Gosick Rose", "Phantom Thief St. Moon", "Velvet Casebook", "The Raven in the Rose Tower"],
+    comedy: ["Host Club Afterglow", "Lovely Chaos", "Maid of the Moon Cafe", "Skip a Beat!"],
+    cooking: ["Kitchen Princess Refrain", "Sweetness & Starlight", "Bento Hearts", "Sugar Petal Patisserie"],
+    military: ["Violet Letters", "White Lily Front", "Rose of the Iron Battalion", "Princess General Requiem"],
+    supernatural: ["Kamisama Moonlight", "Spirit Bloom", "Fruits of the Moon Shrine", "Silver Bell Yokai"],
+    space: ["Sailor Nebula", "Galaxy Rose", "Starlight Express: Andromeda", "Astra Hearts"],
+    magical: ["Sailor Moonlight Prism", "Cardcaptor Starlight", "Princess Tutu Noir", "Tokyo Mew Stardust"],
+    survival: ["Red Garden Requiem", "Children of the Black Rose", "Moonlit Sanctuary", "Glass Garden: Last Bloom"],
+    pirate: ["Crimson Sailor Rose", "Mermaid Voyage Refrain", "Moonlit Corsair", "Treasure of the Glass Sea"],
+    martial: ["Revolutionary Girl Iron Rose", "Rose-Fist Princess", "Moonlit Dojo Hearts", "Crimson Ribbon Duel"],
+    mythology: ["Celestial Maiden Reborn", "Fushigi Constellation", "Moon Shrine Promise", "Star Goddess Refrain"],
+    nordic: ["Snow Flower Saga", "North Wind Princess", "Aurora Rose Chronicle", "Winter Sea Serenade"],
+    samurai: ["Hakuoki: Crimson Petal", "Moonlit Ronin Kiss", "Scarlet Blade Promise", "Edo Rose Refrain"],
+    shinobi: ["Shinobi Moonflower", "Hidden Blossom Chronicle", "Kunoichi Starlight", "Shadow Rose Promise"],
+  },
 };
 
-function makeOriginalTitle(genres: GenreId[], animeType: AnimeType): string {
-  const pool = genres.flatMap((genre) => RIVAL_TITLE_BANK[genre] ?? []);
-  const base = pick(pool.length ? pool : PUN_TITLES);
-  if (animeType === "shojo" && Math.random() < 0.18 && !/[!☆]$/.test(base)) return base + "!";
-  return base;
+const RIVAL_TITLE_FALLBACK: Record<AnimeType, string[]> = {
+  shonen: ["Crimson Horizon", "Neon Requiem", "Black Star Vanguard", "Zero Eclipse", "Ash Crown Chronicle"],
+  shojo: ["Starlight Refrain", "Moonflower Promise", "Velvet Rose Serenade", "Blue Spring Afterglow", "Crystal Hearts Chronicle"],
+};
+
+export function makeOriginalTitle(genres: GenreId[], animeType: AnimeType): string {
+  const bank = RIVAL_TITLE_BANK[animeType];
+  const pool = genres.flatMap((genre) => bank[genre] ?? []);
+  return pick(pool.length ? pool : RIVAL_TITLE_FALLBACK[animeType]);
 }
 
 function uniqueTitle(base: string, usedTitles: Set<string>): string {
   if (!usedTitles.has(base.toLowerCase())) return base;
-  const tags = ["Again", "Next Beat", "Second Cour", "Encore", "Re:Mix", "After Hours"];
+  const tags = ["Refrain", "Afterglow", "Zero", "Another Sky", "Crimson Arc", "Eclipse", "Nova", "Re:Verse"];
   for (const tag of tags) {
     const candidate = base + ": " + tag;
     if (!usedTitles.has(candidate.toLowerCase())) return candidate;
@@ -626,7 +658,7 @@ function makeTitle(fr: RivalFranchise, kind: RivalEntryKind): string {
     case "reboot":
       return `${fr.baseTitle} Re:`;
     default:
-      return pick(PUN_TITLES);
+      return makeOriginalTitle(fr.genres, fr.animeType);
   }
 }
 

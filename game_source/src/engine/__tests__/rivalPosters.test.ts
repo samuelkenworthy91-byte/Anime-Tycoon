@@ -53,15 +53,22 @@ describe("pickRivalPoster", () => {
     expect(pickRivalPoster({ studio: "Nobody", animeType: "shonen", genres: ["mecha"], rand: rnd0 })).toBeNull();
   });
 
-  it("respects recent-use avoidance; consecutive greenlights don't repeat", () => {
+  it("respects recent-use avoidance within the requested Anime Type", () => {
     const recent: string[] = [];
-    for (let i = 0; i < 4; i++) {
+    /* The synthetic Toe-i pool has exactly three Shonen-compatible posters.
+       Use each once before cooldown fallback is allowed to repeat one. */
+    for (let i = 0; i < 3; i++) {
       const p = pickRivalPoster({ studio: "Toe-i Frontier", animeType: "shonen", genres: ["mecha"], recent, rand: () => 0.5 });
       expect(p).toBeTruthy();
+      expect(p!.animeTypes).toContain("shonen");
       expect(recent).not.toContain(p!.id);
       recent.push(p!.id);
     }
-    expect(new Set(recent).size).toBe(4);
+    expect(new Set(recent).size).toBe(3);
+    const fallback = pickRivalPoster({ studio: "Toe-i Frontier", animeType: "shonen", genres: ["mecha"], recent, rand: () => 0.5 });
+    expect(fallback).toBeTruthy();
+    expect(fallback!.animeTypes).toContain("shonen");
+    expect(["t1", "t2", "t3"]).toContain(fallback!.id);
   });
 
   it("when the whole pool is on cooldown it falls back to the least-recent slice", () => {
