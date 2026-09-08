@@ -534,6 +534,7 @@ export function migrateRun(raw: unknown): RunState {
             art: typeof n.art === "number" ? n.art : n.score,
             sound: typeof n.sound === "number" ? n.sound : n.score,
             audience: typeof n.audience === "number" ? n.audience : n.score * 400,
+            sourceId: typeof n.sourceId === "string" ? n.sourceId : null,
             posterId: n.posterId ?? null,
             draft: n.draft ? migrateDraftV2(n.draft) : null,
             protag: n.protag ?? null,
@@ -2509,6 +2510,7 @@ export function releaseProject(
         score: result.total,
         ...playerCraftFor(result.total, result.points),
         audience: result.fans,
+        sourceId: projectId,
         posterId: null,
         draft: {
           ...draft,

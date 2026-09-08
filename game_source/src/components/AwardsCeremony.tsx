@@ -25,8 +25,11 @@ const AOTY_EXTRA_MS = 2200;
 const fmtCash = (n: number) => `£${Math.round(n).toLocaleString("en-GB")}`;
 const fmtFans = (n: number) => `+${n.toLocaleString("en-GB")} FANS`;
 
+const nomineeKey = (n: AwardNominee) =>
+  n.sourceId?.trim() || `${n.player ? "player" : "rival"}|${n.studio.trim().toLowerCase()}|${n.title.trim().toLowerCase()}`;
+
 const sameNominee = (a: AwardNominee | null | undefined, b: AwardNominee | null | undefined) =>
-  !!a && !!b && a.title === b.title && a.studio === b.studio;
+  !!a && !!b && nomineeKey(a) === nomineeKey(b);
 
 function fallbackDraft(n: AwardNominee): Draft {
   const lead = castById(n.protag ?? "");
@@ -129,9 +132,12 @@ function WinnerPoster({ nominee }: { nominee: AwardNominee }) {
 function NomineeList({ cat, beat }: { cat: AwardCategory; beat: BeatKind }) {
   const winner = cat.winner;
   const settled = beat === "envelope" || beat === "reveal";
+  const nominees = cat.nominees.filter(
+    (nominee, index, list) => list.findIndex((candidate) => nomineeKey(candidate) === nomineeKey(nominee)) === index
+  );
   return (
     <div className={cn("aw-nominee-list", settled && "aw-list-settle")}>
-      {cat.nominees.map((nominee, index) => {
+      {nominees.map((nominee, index) => {
         const wins = sameNominee(nominee, winner);
         const lit = wins && beat === "reveal";
         return (
@@ -199,6 +205,7 @@ export default function AwardsCeremony({
 
   useEffect(() => {
     primeAudio();
+    sfx.stopCeremony();
     switch (phase.t) {
       case "closed":
         sfx.whoosh();
@@ -206,6 +213,7 @@ export default function AwardsCeremony({
         break;
       case "opening":
         sfx.whoosh();
+        sfx.audienceSwell();
         schedule(2400);
         break;
       case "category":
@@ -213,24 +221,25 @@ export default function AwardsCeremony({
           sfx.phase();
           schedule(BEAT_MS.intro + (isAoty ? 500 : 0));
         } else if (phase.beat === "nominees") {
-          sfx.stamp();
           schedule(BEAT_MS.nominees + (isAoty ? 600 : 0));
         } else if (phase.beat === "envelope") {
-          sfx.reveal();
+          sfx.drumroll(!!isAoty);
           schedule(BEAT_MS.envelope + (isAoty ? 1000 : 0));
         } else {
-          if (isAoty) sfx.fanfare();
-          else if (cat?.winner.player) sfx.cash();
-          else sfx.stamp();
-          if (cat?.winner.player && !isAoty) window.setTimeout(() => sfx.coin(), 620);
+          sfx.applause(!!isAoty);
+          if (isAoty) sfx.fanfare(true);
           schedule(BEAT_MS.reveal + (isAoty ? AOTY_EXTRA_MS : 0));
         }
         break;
       case "summary":
-        sfx.fanfare();
+        sfx.applause(true);
+        sfx.fanfare(true);
         break;
     }
-    return () => window.clearTimeout(timer.current);
+    return () => {
+      window.clearTimeout(timer.current);
+      sfx.stopCeremony();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(phase)]);
 
@@ -244,12 +253,12 @@ export default function AwardsCeremony({
     <div className="fixed inset-0 z-[90] select-none overflow-hidden bg-[#060409] font-display text-paper">
       <div className="absolute inset-0 bg-cover bg-center opacity-95" style={{ backgroundImage: "url(/awards/stage-bg.webp)" }} />
       <div className="absolute inset-0 bg-[radial-gradient(110%_76%_at_50%_108%,rgba(255,190,90,.16),transparent_62%)]" />
-      <img src="/awards/valance.webp" alt="" className="pointer-events-none absolute inset-x-0 top-0 z-40 h-auto w-full" />
+      <img src="/awards/valance.webp" alt="" className="aw-valance pointer-events-none absolute inset-x-0 top-0 z-40 h-auto w-full" />
 
       {(phase.t === "closed" || phase.t === "opening") && (
         <>
-          <img src="/awards/curtain-left.webp" alt="" className={cn("aw-curtain", phase.t === "closed" ? "closed-l" : "open-l")} />
-          <img src="/awards/curtain-right.webp" alt="" className={cn("aw-curtain", phase.t === "closed" ? "closed-r" : "open-r")} />
+          <img src="/awards/curtain-left.webp" alt="" className={cn("aw-curtain aw-curtain-left", phase.t === "closed" ? "closed-l" : "open-l")} />
+          <img src="/awards/curtain-right.webp" alt="" className={cn("aw-curtain aw-curtain-right", phase.t === "closed" ? "closed-r" : "open-r")} />
         </>
       )}
 
@@ -278,7 +287,7 @@ export default function AwardsCeremony({
       <div className="absolute inset-0 z-10 flex flex-col items-center">
         {phase.t === "opening" && (
           <div className="relative z-40 flex h-full w-full flex-col items-center justify-center px-6 text-center">
-            <div className="aw-title-reveal aw-marquee mt-[-10vh]">
+            <div className="aw-title-reveal aw-marquee aw-opening-title">
               <div className="text-[10px] font-bold tracking-[0.5em] text-gold/90 sm:text-xs">{studio.toUpperCase()} PRESENTS</div>
               <div className="mt-2 bg-gradient-to-b from-[#fff3c4] via-[#ffd66a] to-[#b8831a] bg-clip-text text-4xl font-black tracking-[0.18em] text-transparent drop-shadow-[0_4px_18px_rgba(255,190,60,.4)] sm:text-6xl">THE LONDON</div>
               <div className="bg-gradient-to-b from-[#fff3c4] via-[#ffd66a] to-[#b8831a] bg-clip-text text-4xl font-black tracking-[0.18em] text-transparent drop-shadow-[0_4px_18px_rgba(255,190,60,.4)] sm:text-6xl">ANIME AWARDS</div>
@@ -288,8 +297,8 @@ export default function AwardsCeremony({
         )}
 
         {phase.t === "category" && cat && (
-          <div className="flex h-full w-full flex-col items-center px-4 pb-14 pt-[8vh]" key={`${cat.id}-${phase.beat}`}>
-            <div className={cn("text-center", (phase.beat === "intro" || phase.beat === "nominees") && "aw-rise")}>
+          <div className="aw-category-stage flex h-full w-full flex-col items-center px-4 pb-14" key={`${cat.id}-${phase.beat}`}>
+            <div className={cn("aw-category-header text-center", (phase.beat === "intro" || phase.beat === "nominees") && "aw-rise")}>
               <div className={cn("text-[9px] font-black tracking-[0.5em] sm:text-[11px]", isAoty ? "text-gold" : "text-gold/80")}>
                 {isAoty ? "★ THE SUPER-FINALE ★" : `AWARD ${phase.ci + 1} OF ${order.length}`}
               </div>
@@ -373,7 +382,7 @@ export default function AwardsCeremony({
 
       {phase.t !== "summary" && phase.t !== "closed" && (
         <div className="absolute bottom-3 right-3 z-[70] flex gap-2">
-          <button onClick={() => setPhase({ t: "summary" })} className="rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[8px] font-bold tracking-[0.16em] text-paper/45 backdrop-blur">SKIP CEREMONY</button>
+          <button onClick={() => { sfx.stopCeremony(); setPhase({ t: "summary" }); }} className="rounded-lg border border-white/10 bg-black/45 px-3 py-2 text-[8px] font-bold tracking-[0.16em] text-paper/45 backdrop-blur">SKIP CEREMONY</button>
           <button onClick={next} className="rounded-lg border border-gold/25 bg-black/55 px-4 py-2 text-[9px] font-black tracking-[0.18em] text-gold backdrop-blur">NEXT ›</button>
         </div>
       )}

@@ -3,6 +3,19 @@
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let muted = localStorage.getItem("kirameki.muted") === "1";
+const ceremonySources = new Set<AudioScheduledSourceNode>();
+
+function trackCeremony(node: AudioScheduledSourceNode) {
+  ceremonySources.add(node);
+  node.addEventListener("ended", () => ceremonySources.delete(node), { once: true });
+}
+
+function stopCeremonyAudio() {
+  for (const node of ceremonySources) {
+    try { node.stop(); } catch { /* already stopped */ }
+  }
+  ceremonySources.clear();
+}
 
 function ac(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -36,7 +49,7 @@ export function setMuted(m: boolean) {
   if (master) master.gain.value = m ? 0 : 0.5;
 }
 
-function tone(freq: number, dur: number, type: OscillatorType = "square", vol = 0.5, delay = 0, slideTo?: number) {
+function tone(freq: number, dur: number, type: OscillatorType = "square", vol = 0.5, delay = 0, slideTo?: number, ceremony = false) {
   const c = ac();
   if (!c || !master) return;
   const t0 = c.currentTime + delay;
@@ -49,11 +62,12 @@ function tone(freq: number, dur: number, type: OscillatorType = "square", vol = 
   g.gain.exponentialRampToValueAtTime(vol, t0 + 0.008);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   o.connect(g).connect(master);
+  if (ceremony) trackCeremony(o);
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
 
-function noise(dur: number, vol = 0.4, cutoff = 1800, delay = 0) {
+function noise(dur: number, vol = 0.4, cutoff = 1800, delay = 0, ceremony = false) {
   const c = ac();
   if (!c || !master) return;
   const t0 = c.currentTime + delay;
@@ -69,10 +83,40 @@ function noise(dur: number, vol = 0.4, cutoff = 1800, delay = 0) {
   const g = c.createGain();
   g.gain.value = vol;
   src.connect(f).connect(g).connect(master);
+  if (ceremony) trackCeremony(src);
   src.start(t0);
 }
 
 export const sfx = {
+  stopCeremony() {
+    stopCeremonyAudio();
+  },
+  audienceSwell() {
+    noise(0.45, 0.08, 4300, 0, true);
+    noise(0.7, 0.09, 5200, 0.28, true);
+    noise(0.9, 0.08, 6000, 0.62, true);
+    tone(330, 0.34, "sine", 0.07, 0.18, 440, true);
+    tone(440, 0.34, "sine", 0.06, 0.54, 660, true);
+  },
+  drumroll(grand = false) {
+    const beats = grand ? 34 : 26;
+    for (let i = 0; i < beats; i++) {
+      const p = i / Math.max(1, beats - 1);
+      const delay = i * (grand ? 0.075 : 0.082);
+      noise(0.07, 0.08 + p * 0.13, 850 + p * 1800, delay, true);
+      tone(72 + p * 28, 0.055, "triangle", 0.055 + p * 0.06, delay, undefined, true);
+    }
+    tone(105, 0.42, "sine", 0.12, beats * (grand ? 0.075 : 0.082) - 0.12, 70, true);
+  },
+  applause(grand = false) {
+    const bursts = grand ? 24 : 16;
+    for (let i = 0; i < bursts; i++) {
+      const delay = (i % 8) * 0.085 + Math.floor(i / 8) * 0.3;
+      noise(0.11 + (i % 3) * 0.035, grand ? 0.19 : 0.14, 5200 + (i % 5) * 700, delay, true);
+    }
+    noise(grand ? 2.4 : 1.7, grand ? 0.085 : 0.06, 7000, 0.06, true);
+    [660, 784, 880, 988].forEach((f, i) => tone(f, 0.24, "sine", grand ? 0.08 : 0.05, 0.16 + i * 0.17, f * 1.08, true));
+  },
   click() {
     tone(720, 0.06, "square", 0.22);
   },
@@ -120,10 +164,10 @@ export const sfx = {
     noise(0.09, 0.5, 500);
     tone(90, 0.12, "sine", 0.5);
   },
-  fanfare() {
+  fanfare(ceremony = false) {
     const seq = [523, 523, 523, 659, 784, 1046];
-    seq.forEach((f, i) => tone(f, i === seq.length - 1 ? 0.4 : 0.12, "square", 0.26, i * 0.11));
-    seq.forEach((f, i) => tone(f / 2, 0.12, "triangle", 0.18, i * 0.11));
+    seq.forEach((f, i) => tone(f, i === seq.length - 1 ? 0.4 : 0.12, "square", 0.26, i * 0.11, undefined, ceremony));
+    seq.forEach((f, i) => tone(f / 2, 0.12, "triangle", 0.18, i * 0.11, undefined, ceremony));
   },
   fail() {
     [420, 360, 300, 220].forEach((f, i) => tone(f, 0.16, "sawtooth", 0.2, i * 0.14));

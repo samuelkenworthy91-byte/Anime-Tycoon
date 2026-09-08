@@ -37,6 +37,8 @@ export interface AwardNominee {
   sound: number;
   /** audience / fandom / reach (fans earned by the broadcast) */
   audience: number;
+  /** stable production identity — prevents one release appearing twice in the same category */
+  sourceId?: string | null;
   /** key art identity — rival poster manifest id for rivals */
   posterId?: string | null;
   /** frozen production identity used to reproduce the player show's exact official key visual */
@@ -172,6 +174,7 @@ export function rivalNominee(r: RivalRelease): AwardNominee {
     art: r.craft.art,
     sound: r.craft.sound,
     audience: r.fans,
+    sourceId: `${r.studioId}:${r.week}:${r.title}`,
     posterId: r.posterId ?? null,
     draft: null,
     protag: null,
@@ -300,10 +303,30 @@ const NOMINEES_PER_CATEGORY = 4;
  * the same independent slate — a show CAN be nominated in several
  * categories and can win several awards, exactly like a real awards night.
  */
+export function awardNomineeKey(n: AwardNominee): string {
+  const source = n.sourceId?.trim();
+  if (source) return source;
+  return `${n.player ? "player" : "rival"}|${n.studio.trim().toLowerCase()}|${n.title.trim().toLowerCase()}`;
+}
+
+/** Old saves and edge-case simulation paths can hand the ceremony the same
+ * release more than once. Collapse those duplicates before any category is
+ * ranked so a production can never occupy two nominee slots in one award. */
+export function dedupeAwardSlate(shows: AwardNominee[]): AwardNominee[] {
+  const seen = new Set<string>();
+  return shows.filter((show) => {
+    const key = awardNomineeKey(show);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremony {
+  const uniqueShows = dedupeAwardSlate(shows);
   const categories: AwardCategory[] = [];
   for (const def of AWARD_CATEGORIES) {
-    const pool = shows.filter((n) => def.eligible(n));
+    const pool = uniqueShows.filter((n) => def.eligible(n));
     if (!pool.length) continue;
     const ranked = rankFor(def, pool);
     const nominees = ranked.slice(0, NOMINEES_PER_CATEGORY);

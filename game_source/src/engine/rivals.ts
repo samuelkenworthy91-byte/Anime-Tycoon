@@ -563,6 +563,54 @@ const SEQUEL_SUB = ["Return", "Re:Ignition", "Awakening", "Requiem", "Storm", "A
 const SPINOFF_SUB = ["Gaiden", "Origins", "Side Story", "Another Story", "After Story", "Zero"];
 const MOVIE_SUB = ["The Movie", "The Final Act", "Film", "Rebellion"];
 
+/** Rival originals deliberately sound like anime titles, including affectionate
+ * parody/allusion, but never copy an existing title verbatim. The primary
+ * genre selects the strongest bank; a second genre can widen the pool. */
+const RIVAL_TITLE_BANK: Partial<Record<GenreId, string[]>> = {
+  mecha: ["Mobile Suit: Rent Is Due", "Neon Gear Re:Genesis", "Giant Robot Small Claims", "Mecha Me Later", "Steel Frame Panic!"],
+  isekai: ["I Got Rehired in Another World", "That Time My Rent Became a Quest", "Respawned With No Annual Leave", "Another World, Same Deadline", "My Inventory Is Mostly Receipts"],
+  slice: ["Quiet Days, Loud Neighbours", "My Lunch Break Has a Plot", "After School Overtime", "Ordinary Tuesday EX", "The Club That Forgot Its Purpose"],
+  horror: ["Junji Oh-No", "The Ring Tone Is Coming From Inside", "Chainsaw Intern", "Night Shift of the Living Deadlines", "Cursed VHS Club"],
+  romance: ["Kiss Note", "Love Is Mostly Logistics", "Your Name Was in the Group Chat", "Confession Pending!", "Heartstrings & Red Tape"],
+  sports: ["Blue Locker Room", "Haikyu Later", "Slam Deadline", "Ace of Base Line", "Extra Time! Extra Feelings!"],
+  cyber: ["Ghost in the Payroll", "Serial Experiments: Login", "Psycho-Passcode", "Chrome Hearts, Broken Wi-Fi", "Firewall//Feelings"],
+  fantasy: ["Fullmetal Accountant", "Dungeon Meshi-up", "The Fellowship of the Ping", "Sword Art Offline", "Mana Management!"],
+  idol: ["Oshi No Maybe", "Idol Hands Are the Devil's Workshop", "Encore! But Make It Rent", "Stage Fright☆All Night", "Center Position Pending"],
+  mystery: ["Case Closed for Lunch", "Detective Conan't Make the Deadline", "Murder, She Streamed", "The Locked Room Has Wi-Fi", "Clue Club After Dark"],
+  comedy: ["Nichijou Business", "Daily Lives of Very Tired People", "Gintama Receipt", "Punchline Pending", "Laugh Track Academy"],
+  cooking: ["Food Wars: Fridge Edition", "Attack on Titanobori", "My Hero Macadamia", "Dungeon Meshi-up Deluxe", "Kitchen Shonen Showdown"],
+  military: ["Attack on Timesheets", "86 Unread Emails", "Code Geasslight", "Full Metal Payroll", "Tactical Lunch Break"],
+  supernatural: ["Mob Psycho 9-to-5", "Bleach the Break Room", "Spirit Away Message", "Paranormal Activity Report", "Possessed by Overtime"],
+  space: ["Cowboy Bebop-Up Shop", "Space Dandy-ish", "Galaxy Express Checkout", "Planetes, But With Rent", "Orbital Overtime"],
+  magical: ["Sailor Mood", "Cardcaptor Overtime", "Magical Girl Compliance Dept.", "Pretty Cure-ish", "Moon Prism Payroll"],
+  survival: ["Made in a Miss", "Promised Never-Landlord", "Battle Royale With Cheese", "Last Train, No Signal", "Respawn Denied"],
+  pirate: ["One More Piece", "Grand Line Item", "Pirate King of HR", "Treasure Island Dispute", "Straw Hat, No Benefits"],
+  martial: ["One Punch Overtime", "My Heroic Internship", "Fist of the Lunch Star", "Dragon Call Z", "Uppercut Academia"],
+  mythology: ["Fate/Stay Employed", "Saint Seiya Later", "Record of Ragnarok-and-Roll", "Gods' Day Off", "Myth Taken Identity"],
+  nordic: ["Saga of the Very Tired North", "Vinland Landlord", "Thorfinn's Day Off", "Longship, Short Notice", "North Sea Side Story"],
+  samurai: ["Rurouni Deadline", "Samurai Champloo-ish", "Blade Runner-Up!", "Seven Samurai, Eight Meetings", "Ronin With Benefits"],
+  shinobi: ["Ninja Scroll Down", "Hidden Leaf on Read", "Shinobi No Show", "Shadow Clone Overtime", "Kunai Ask You Something?"],
+};
+
+function makeOriginalTitle(genres: GenreId[], animeType: AnimeType): string {
+  const pool = genres.flatMap((genre) => RIVAL_TITLE_BANK[genre] ?? []);
+  const base = pick(pool.length ? pool : PUN_TITLES);
+  if (animeType === "shojo" && Math.random() < 0.18 && !/[!☆]$/.test(base)) return base + "!";
+  return base;
+}
+
+function uniqueTitle(base: string, usedTitles: Set<string>): string {
+  if (!usedTitles.has(base.toLowerCase())) return base;
+  const tags = ["Again", "Next Beat", "Second Cour", "Encore", "Re:Mix", "After Hours"];
+  for (const tag of tags) {
+    const candidate = base + ": " + tag;
+    if (!usedTitles.has(candidate.toLowerCase())) return candidate;
+  }
+  let n = 2;
+  while (usedTitles.has((base + " " + n).toLowerCase())) n += 1;
+  return base + " " + n;
+}
+
 let rivalProdSeq = 0;
 
 function makeTitle(fr: RivalFranchise, kind: RivalEntryKind): string {
@@ -589,7 +637,8 @@ function planStudioYear(
   studio: RivalStudio,
   year: number,
   yearStartWeek: number,
-  boost = 0
+  boost = 0,
+  usedTitles = new Set<string>()
 ): { productions: RivalProduction[]; posterRecent: string[]; franchises: RivalFranchise[] } {
   const empty = { productions: [], posterRecent: studio.posterRecent ?? [], franchises: studio.franchises };
   if (studio.status === "collapsed") return empty;
@@ -608,7 +657,6 @@ function planStudioYear(
   }
   weeks.sort((a, b) => a - b);
 
-  const usedTitles = new Set<string>();
   const productions: RivalProduction[] = [];
   /* posters are locked at greenlight; the working copies below remember
      what this slate has used so a studio never repeats its own art */
@@ -634,13 +682,13 @@ function planStudioYear(
       franchiseKey = fr.key;
     } else {
       kind = "original";
-      title = makeTitle({ key: "", baseTitle: "", genres: [], animeType: "shonen", season: 0, popularity: 0, bestScore: 0, lastScore: 0, lastEntryWeek: 0, entries: 0 }, "original");
-      while (usedTitles.has(title) || franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
-      usedTitles.add(title);
       genres = pickGenres(studio);
       animeType = studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : Math.random() < 0.5 ? "shonen" : "shojo";
+      title = uniqueTitle(makeOriginalTitle(genres, animeType), usedTitles);
       franchiseKey = null;
     }
+    title = uniqueTitle(title, usedTitles);
+    usedTitles.add(title.toLowerCase());
     const medium: MediumId = Math.random() < 0.8 ? p.medium : pick(["tv", "ona", "movie"] as MediumId[]);
     const budget: BudgetId = Math.random() < 0.75 ? p.budget : pick(["indie", "standard", "blockbuster"] as BudgetId[]);
     const score = computeScore({ ...studio, franchises }, { genres, franchiseKey, kind }, boost);
@@ -770,11 +818,17 @@ function yearTransition(studio: RivalStudio, year: number): { studio: RivalStudi
 export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number }): { world: RivalWorld; notices: string[] } {
   const notices: string[] = [];
   const boost = opts?.qualityBoost ?? 0;
+  const usedTitles = new Set(
+    world.studios.flatMap((studio) => [
+      ...studio.releases.filter((release) => release.year === year).map((release) => release.title.toLowerCase()),
+      ...studio.productions.filter((production) => production.year === year).map((production) => production.title.toLowerCase()),
+    ])
+  );
   const studios = world.studios.map((st) => {
     const t = yearTransition(st, year);
     if (t.notice) notices.push(t.notice);
     const next = t.studio;
-    const slate = planStudioYear(next, year, yearStartWeek, boost);
+    const slate = planStudioYear(next, year, yearStartWeek, boost, usedTitles);
     return { ...next, productions: slate.productions, posterRecent: slate.posterRecent, franchises: slate.franchises };
   });
   return { world: { ...world, studios, year, yearStartWeek }, notices };
@@ -818,10 +872,14 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       const fr = maybeContinue(studio);
       const genres = fr ? [...fr.genres] : pickGenres(studio);
       const kind: RivalEntryKind = fr ? "season" : "original";
-      let title = fr ? makeTitle(fr, kind) : pick(PUN_TITLES);
-      if (!fr) while (studio.franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;
-      const id = `rp${++rivalProdSeq}_surp_${week}`;
       const animeType = fr?.animeType ?? (studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : "shonen");
+      const usedTitles = new Set(world.studios.flatMap((s) => [
+        ...s.releases.map((release) => release.title.toLowerCase()),
+        ...s.productions.map((production) => production.title.toLowerCase()),
+        ...s.franchises.map((franchise) => franchise.baseTitle.toLowerCase()),
+      ]));
+      const title = uniqueTitle(fr ? makeTitle(fr, kind) : makeOriginalTitle(genres, animeType), usedTitles);
+      const id = `rp${++rivalProdSeq}_surp_${week}`;
       const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind });
       const art = assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
       studio.posterRecent = art.posterRecent;

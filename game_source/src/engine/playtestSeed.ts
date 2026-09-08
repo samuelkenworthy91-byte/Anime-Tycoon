@@ -4,7 +4,7 @@ import { advanceWeeks, initialRun, type RunState } from "./state";
 import { loadSlot, saveSlot, type SaveData } from "./storage";
 import type { AwardNominee } from "./awards";
 
-const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v3";
+const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v4";
 const PLAYTEST_WEEK = 95;
 const PLAYTEST_DAY = PLAYTEST_WEEK * 7 + 6;
 
@@ -48,6 +48,7 @@ function nominee(
     art,
     sound,
     audience,
+    sourceId: `playtest:${index}:${title}`,
     posterId: null,
     draft,
     protag: lead.id,
@@ -60,10 +61,10 @@ export function makeAwardsPlaytestSave(): SaveData {
   const simulated = advanceWeeks(initialRun("Anime Runner", "steady"), PLAYTEST_WEEK);
 
   const yearShows: AwardNominee[] = [
-    nominee(0, "Neon Ronin Refrain", "shonen", ["samurai", "martial"], 36, 47, 53, 42, 19_800),
-    nominee(1, "Petals After Rain", "shojo", ["romance", "slice"], 35, 52, 43, 48, 23_600),
-    nominee(2, "Aegis Hearts", "shonen", ["mecha", "military"], 34, 42, 51, 45, 17_900),
-    nominee(3, "Starlit Overtime", "shojo", ["slice", "fantasy"], 32, 45, 40, 50, 15_700),
+    nominee(0, "My Heroic Overtime", "shonen", ["samurai", "martial"], 36, 47, 53, 42, 19_800),
+    nominee(1, "Kiss Note: Hearts in the Margin", "shojo", ["romance", "slice"], 35, 52, 43, 48, 23_600),
+    nominee(2, "Mobile Suit: Rent Is Due", "shonen", ["mecha", "military"], 34, 42, 51, 45, 17_900),
+    nominee(3, "Sailor Mood After School", "shojo", ["slice", "fantasy"], 32, 45, 40, 50, 15_700),
   ];
 
   const staff = Array.from({ length: 6 }, () => rollHire(PLAYTEST_WEEK));

@@ -203,3 +203,54 @@
   .aw-confetti-piece { display: none; }
   .aw-marquee,.aw-spotlight,.aw-nominee-row-wait { animation: none; }
 }
+
+
+/* awards-polish-v3: stable curtains + mobile-safe stage */
+.aw-valance {
+  z-index: 60 !important;
+  max-height: 18vh;
+  object-fit: fill;
+}
+
+.aw-curtain {
+  top: 0 !important;
+  bottom: auto !important;
+  height: 100% !important;
+  width: 52vw !important;
+  max-width: 52vw !important;
+  object-fit: cover;
+  z-index: 30;
+  will-change: transform;
+}
+.aw-curtain-left { left: 0 !important; right: auto !important; object-position: right center; }
+.aw-curtain-right { right: 0 !important; left: auto !important; object-position: left center; }
+.aw-opening-title { margin-top: 7vh; }
+.aw-category-stage {
+  padding-top: max(18vh, calc(env(safe-area-inset-top, 0px) + 7rem));
+  min-height: 0;
+}
+.aw-category-header {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  .aw-valance { max-height: 16vh; }
+  .aw-category-stage {
+    padding-top: max(16vh, calc(env(safe-area-inset-top, 0px) + 6.6rem));
+    padding-left: .85rem !important;
+    padding-right: .85rem !important;
+  }
+  .aw-category-header .aw-marquee {
+    font-size: clamp(1.65rem, 8.3vw, 2.35rem) !important;
+    line-height: 1.08;
+  }
+  .aw-opening-title { margin-top: 9vh; }
+}
+
+@media (max-height: 760px) {
+  .aw-valance { max-height: 14vh; }
+  .aw-category-stage { padding-top: max(14vh, 5.6rem); }
+  .aw-opening-title { margin-top: 10vh; transform: scale(.9); }
+}
