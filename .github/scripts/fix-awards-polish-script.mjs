@@ -8,7 +8,7 @@ const replacements = [
   ['const candidate = `${base}: ${tag}`;', 'const candidate = base + ": " + tag;'],
   ['while (usedTitles.has(`${base} ${n}`.toLowerCase())) n += 1;', 'while (usedTitles.has((base + " " + n).toLowerCase())) n += 1;'],
   ['return `${base} ${n}`;', 'return base + " " + n;'],
-  ['while (usedTitles.has(title) || franchises.some((f) => f.baseTitle === title)) title = `${title} 2`;', 'while (usedTitles.has(title) || franchises.some((f) => f.baseTitle === title)) title = title + " 2";'],
+  ['title = `${title} 2`;', 'title = title + " 2";'],
 ];
 for (const [from, to] of replacements) src = src.split(from).join(to);
 fs.writeFileSync(path, src);
