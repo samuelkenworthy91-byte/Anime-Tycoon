@@ -6,6 +6,7 @@ on:
       - work/final-awards-rival-posters
     paths:
       - .github/scripts/awards-polish-pass.mjs
+      - .github/workflows/awards-polish-pass.yml
 
 permissions:
   contents: write
