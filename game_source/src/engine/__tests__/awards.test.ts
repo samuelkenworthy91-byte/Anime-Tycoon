@@ -276,7 +276,7 @@ describe("ceremony integration", () => {
     let world = initRivalWorld(0);
     world = { ...world, studios: world.studios.map((s) => ({ ...s, status: "active" })) };
     for (let w = 1; w <= 48; w++) world = tickRivalWeek(world, w, { playerAiringGenres: new Set() }).world;
-    const c = runCeremony(1, [mk({ title: "Mine", player: true, score: 24, audience: 12_000 })], world);
+    const c = runCeremony(1, [mk({ title: "Mine", player: true, score: 40, story: 80, art: 80, sound: 80, audience: 1_000_000 })], world);
     expect(c).toBeTruthy();
     expect(c!.categories.length).toBeGreaterThanOrEqual(5);
     const all = c!.categories.flatMap((x) => x.nominees);
