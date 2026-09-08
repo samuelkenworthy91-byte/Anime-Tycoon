@@ -14,13 +14,16 @@ describe("Year 2 awards playtest save", () => {
     expect(save.clock.day).toBe(6);
   });
 
-  it("contains a credible 8-9/10 player slate for the ceremony", () => {
+  it("contains a credible 8-9/10 player slate with frozen official poster drafts", () => {
     const run = makeAwardsPlaytestSave().run as RunState;
 
     expect(run.showsMade).toBeGreaterThanOrEqual(8);
     expect(run.yearShows).toHaveLength(4);
     expect(run.yearShows.every((show) => show.player)).toBe(true);
     expect(run.yearShows.every((show) => show.score >= 32 && show.score <= 36)).toBe(true);
+    expect(run.yearShows.every((show) => show.draft?.title === show.title)).toBe(true);
+    expect(run.yearShows.every((show) => show.draft?.protag === show.protag)).toBe(true);
+    expect(run.yearShows.every((show) => JSON.stringify(show.draft?.genres) === JSON.stringify(show.genres))).toBe(true);
     expect(new Set(run.yearShows.map((show) => show.animeType))).toEqual(new Set(["shonen", "shojo"]));
   });
 
@@ -35,5 +38,8 @@ describe("Year 2 awards playtest save", () => {
       expect.arrayContaining(["writing", "animation", "score", "fanfav", "shonen", "shojo", "aoty"]),
     );
     expect(next.awardsCeremony?.categories.some((category) => category.nominees.some((nominee) => nominee.player))).toBe(true);
+    const playerNominees = next.awardsCeremony?.categories.flatMap((category) => category.nominees).filter((nominee) => nominee.player) ?? [];
+    expect(playerNominees.length).toBeGreaterThan(0);
+    expect(playerNominees.every((nominee) => nominee.draft?.title === nominee.title)).toBe(true);
   });
 });
