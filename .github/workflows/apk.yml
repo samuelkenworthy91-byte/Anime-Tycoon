@@ -43,7 +43,7 @@ jobs:
       - name: Apply awards ceremony polish pass
         if: github.ref == 'refs/heads/work/final-awards-rival-posters'
         run: |
-          # Repair/prepatch the one-shot helper before applying the validated source changes.
+          # Prepatch both rival title paths, then apply the rest of the awards polish.
           node .github/scripts/fix-awards-polish-script.mjs
           node .github/scripts/awards-polish-pass.mjs
 
