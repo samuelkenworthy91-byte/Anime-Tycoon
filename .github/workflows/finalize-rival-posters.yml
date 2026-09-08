@@ -5,8 +5,11 @@ on:
     branches:
       - work/final-awards-rival-posters
     paths:
-      - game_source/art_src/rival/external/rival_poster_atlas_20.zip
-      - game_source/art_src/rival/external/rival_poster_atlas_20.zip.part-*
+      - game_source/art_src/rival/external/poster_*.png
+      - game_source/art_src/rival/external/manifest.csv
+      - game_source/src/engine/generated/rivalPosterCatalog.tsv
+      - game_source/scripts/finalize-rival-posters.mjs
+      - .github/workflows/finalize-rival-posters.yml
 
 permissions:
   contents: write
@@ -27,19 +30,16 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
 
-      - name: Assemble and unpack 20 poster atlases
+      - name: Verify 160 uploaded individual posters
         run: |
-          SRC=game_source/art_src/rival/external/rival_poster_atlas_20.zip
-          if [ -f "$SRC" ]; then
-            cp "$SRC" /tmp/rival_poster_atlas_20.zip
-          else
-            cat ${SRC}.part-* > /tmp/rival_poster_atlas_20.zip
-          fi
-          unzip -t /tmp/rival_poster_atlas_20.zip
-          mkdir -p game_source/public/rival-posters/sheets
-          unzip -o /tmp/rival_poster_atlas_20.zip -d game_source/public/rival-posters/sheets
+          count=$(find game_source/art_src/rival/external -maxdepth 1 -type f -name 'poster_*.png' | wc -l | tr -d ' ')
+          echo "Found ${count} supplied poster PNGs"
+          test "$count" -eq 160
+          for n in $(seq -w 1 160); do
+            test -f "game_source/art_src/rival/external/poster_${n}.png"
+          done
 
-      - name: Generate 160 stable poster crops and final manifest
+      - name: Generate runtime poster files and final manifest
         working-directory: game_source
         run: node scripts/finalize-rival-posters.mjs
 
@@ -64,8 +64,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            game_source/public/rival-posters/sheets \
-            game_source/public/rival-posters/atlas \
+            game_source/public/rival-posters/imported \
             game_source/src/engine/generated/rivalPosterManifest.json \
             game_source/docs/rival-poster-import-map.csv \
             game_source/src/components/Create.tsx
@@ -73,5 +72,5 @@ jobs:
             echo "No generated changes to commit."
             exit 0
           fi
-          git commit -m "Finalize 160 rival poster atlas import [generated]"
+          git commit -m "Finalize 160 rival poster import [generated]"
           git push origin HEAD:work/final-awards-rival-posters
