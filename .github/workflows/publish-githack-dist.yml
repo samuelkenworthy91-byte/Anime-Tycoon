@@ -1,0 +1,57 @@
+name: Publish GitHack dist
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "game_source/src/**"
+      - "game_source/public/**"
+      - "game_source/package.json"
+      - "game_source/package-lock.json"
+      - "game_source/vite.config.*"
+      - ".github/workflows/publish-githack-dist.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  publish-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build browser dist
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit refreshed dist
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f game_source/dist
+          if git diff --cached --quiet; then
+            echo 'dist already current'
+          else
+            git commit -m 'Refresh GitHack browser build'
+            git push origin HEAD:main
+          fi
