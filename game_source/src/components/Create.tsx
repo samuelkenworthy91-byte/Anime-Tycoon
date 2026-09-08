@@ -265,15 +265,22 @@ export default function Create({
   /** genre pairings this studio has already PROVEN (combo knowledge > 0),
    *  both genres licensed — quick-pick chips on the genre step. Nothing
    *  here reads the hidden combo table, so unknown formulas never leak. */
-  const knownPairings = useMemo(
-    () =>
-      Object.entries(run.comboLevels)
-        .filter(([key, lv]) => lv > 0 && key.split("|").every((g) => run.genresUnlocked.includes(g as never)))
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 4)
-        .map(([key, lv]) => ({ key, genres: key.split("|") as GenreId[], lv })),
-    [run.comboLevels, run.genresUnlocked]
-  );
+  const knownPairings = useMemo(() => {
+    const firstGenre = d.genres[0];
+    if (!firstGenre || d.genres.length !== 1) return [];
+    return Object.entries(run.comboLevels)
+      .filter(([key, lv]) => {
+        if (lv <= 0) return false;
+        const pair = key.split("|") as GenreId[];
+        return pair.includes(firstGenre) && pair.every((g) => run.genresUnlocked.includes(g));
+      })
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([key, lv]) => {
+        const genres = key.split("|") as GenreId[];
+        return { key, genres, partner: genres.find((g) => g !== firstGenre)!, lv };
+      });
+  }, [d.genres, run.comboLevels, run.genresUnlocked]);
 
   /** arcs whose fit against EVERY picked genre the studio already knows
    *  (arcGenreKnowledge row revealed). Sorted strong→neutral; KNOWN RISK
@@ -639,22 +646,21 @@ export default function Create({
                     KNOWN FITS ✦ — PROVEN BY YOUR STUDIO
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {knownPairings.map(({ key, genres, lv }) => {
-                      const active = comboKey(d.genres) === key;
-                      const tip = `Proven pairing — combo knowledge Lv${lv}. Tap to ${active ? "drop the second genre" : "use this pairing"}.`;
+                    {knownPairings.map(({ key, genres, partner, lv }) => {
+                      const firstGenre = d.genres[0];
+                      const partnerLabel = GENRES.find((x) => x.id === partner)?.label ?? partner;
+                      const tip = `Known fit with ${GENRES.find((x) => x.id === firstGenre)?.label ?? firstGenre} — combo knowledge Lv${lv}. Tap to add ${partnerLabel}.`;
                       return (
                         <button
                           key={key}
                           title={tip}
-                          onClick={() => set({ genres: active ? [genres[0]] : [...genres] })}
+                          onClick={() => set({ genres: [firstGenre, partner] })}
                           className={cn(
                             "btn-press flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-extrabold",
-                            active
-                              ? "border-mint bg-mint/15 text-mint"
-                              : "border-line bg-panel2/80 text-paper/80 hover:border-mint/50"
+                            "border-line bg-panel2/80 text-paper/80 hover:border-mint/50"
                           )}
                         >
-                          {genres.map((g) => GENRES.find((x) => x.id === g)!.label).join(" + ")}
+                          {partnerLabel}
                           <span className="rounded bg-panel3 px-1 text-[8px] font-extrabold text-gold">Lv{lv}</span>
                         </button>
                       );
