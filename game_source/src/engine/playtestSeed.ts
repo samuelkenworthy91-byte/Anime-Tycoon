@@ -4,7 +4,7 @@ import { advanceWeeks, initialRun, type RunState } from "./state";
 import { loadSlot, saveSlot, type SaveData } from "./storage";
 import type { AwardNominee } from "./awards";
 
-const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v1";
+const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v2";
 const PLAYTEST_WEEK = 95;
 const PLAYTEST_DAY = PLAYTEST_WEEK * 7 + 6;
 
