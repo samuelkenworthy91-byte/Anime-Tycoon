@@ -4,28 +4,17 @@ This folder is the source drop for externally-produced rival poster art.
 
 ## Current canonical import format
 
-The live rival-poster expansion uses **160 already-cropped individual PNGs**:
+The live rival-poster expansion uses **160 already-cropped individual PNGs** named `poster_001.png` through `poster_160.png`.
 
-    poster_001.png
-    poster_002.png
-    ...
-    poster_160.png
+The stable poster-to-studio/type/genre/family assignment is stored in `src/engine/generated/rivalPosterCatalog.tsv`.
 
-The stable poster-to-studio/type/genre/family assignment is stored in:
+Run `node scripts/finalize-rival-posters.mjs` to verify and materialize the runtime set. It retains the six original Toe-i posters and generates a manifest with **28 slots per studio × 6 studios = 168 total**, currently **166 live + 2 reserve**.
 
-    src/engine/generated/rivalPosterCatalog.tsv
-
-Run:
-
-    node scripts/finalize-rival-posters.mjs
-
-The finaliser verifies all 160 numbered PNGs, copies them to stable runtime filenames under `public/rival-posters/imported/`, retains the six original Toe-i runtime posters, generates the final manifest at 28 slots per studio / 168 total, writes the import map, and keeps KNOWN FITS contextual to the first selected genre.
-
-The GitHub workflow `.github/workflows/finalize-rival-posters.yml` is scoped to `work/final-awards-rival-posters` as the reusable staging/finalisation branch. It runs the import, test suite, production build, and Cast V3 coverage audit. Validated runtime assets can then be fast-forwarded to `main`.
+The staging workflow `.github/workflows/finalize-rival-posters.yml` runs the import, test suite, production build, and Cast V3 coverage audit on `work/final-awards-rival-posters`.
 
 ## Future art drops
 
-Already-cropped individual files are preferred because they avoid contact-sheet crop errors. If art is generated on 4×2 sheets with black dividers, crop it to individual images before adding it here, then assign stable IDs/tags in the catalog.
+Already-cropped individual files are preferred. If art is generated on 4×2 sheets with black dividers, crop it to individual images first, then assign stable IDs/tags in the catalog.
 
 ## Artwork requirements
 
