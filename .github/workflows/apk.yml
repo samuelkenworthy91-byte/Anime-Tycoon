@@ -7,6 +7,7 @@ on:
       - main
       - arena/01a0615b-anime-tycoon
       - arena/01a0759f-anime-tycoon
+      - work/final-awards-rival-posters
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
@@ -40,6 +41,10 @@ jobs:
         working-directory: game_source
         run: npm ci
 
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test
+
       - name: Build web app and sync Capacitor
         working-directory: game_source
         run: npm run apk:sync
@@ -55,7 +60,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: anime-tycoon-debug-apk
+          name: anime-runner-awards-playtest-apk
           path: game_source/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
