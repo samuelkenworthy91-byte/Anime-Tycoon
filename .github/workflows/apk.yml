@@ -12,6 +12,7 @@ on:
       - "game_source/**"
       - ".github/workflows/apk.yml"
       - ".github/scripts/awards-title-layout-v5.mjs"
+      - ".github/scripts/awards-v5-validation-fixes.mjs"
 
 permissions:
   contents: write
@@ -42,7 +43,9 @@ jobs:
 
       - name: Apply awards title and winner-layout polish
         if: github.ref == 'refs/heads/work/final-awards-rival-posters'
-        run: node .github/scripts/awards-title-layout-v5.mjs
+        run: |
+          node .github/scripts/awards-title-layout-v5.mjs
+          node .github/scripts/awards-v5-validation-fixes.mjs
 
       - name: Install dependencies
         working-directory: game_source
@@ -73,7 +76,8 @@ jobs:
                   game_source/src/engine/rivalPosters.ts \
                   game_source/src/engine/playtestSeed.ts \
                   game_source/src/components/awardsCeremony.css \
-                  game_source/src/engine/__tests__/awards-polish.test.ts
+                  game_source/src/engine/__tests__/awards-polish.test.ts \
+                  game_source/src/engine/__tests__/rivalPosters.test.ts
           if git diff --cached --quiet; then
             echo 'No application changes needed.'
           else
