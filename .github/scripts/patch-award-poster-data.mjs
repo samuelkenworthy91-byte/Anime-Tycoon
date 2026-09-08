@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 
+// One-shot branch migration for award key-visual identity.
 function patch(path, replacements) {
   let source = fs.readFileSync(path, "utf8");
   for (const [from, to] of replacements) {
