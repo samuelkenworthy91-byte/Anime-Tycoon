@@ -219,6 +219,7 @@ describe("ceremony integration", () => {
       expect(r.craft.sound).toBeGreaterThan(0);
       expect(() => rivalNominee(r)).not.toThrow();
       expect(rivalNominee(r).posterId === null || typeof rivalNominee(r).posterId === "string").toBe(true);
+      expect(rivalNominee(r).draft).toBeNull();
     }
   });
 
@@ -246,6 +247,8 @@ describe("ceremony integration", () => {
     const out = releaseProject(r, id, { spent: 0, hype: 40 })!;
     const entry = out.run.yearShows.find((n) => n.player)!;
     expect(entry.title).toBe("Award Bait Zero");
+    expect(entry.draft).toEqual(expect.objectContaining({ title: "Award Bait Zero", protag: d.protag, animeType: d.animeType }));
+    expect(entry.draft?.genres).toEqual(d.genres);
     /* real production/result data — story actually dominates the point mix */
     expect(entry.score).toBe(out.result.total);
     expect(entry.story).toBeGreaterThan(entry.art);

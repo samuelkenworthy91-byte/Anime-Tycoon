@@ -16,7 +16,7 @@
  *  tie-breakers — never by dice. Ties resolve by (1) overall score,
  *  (2) audience, (3) title, so the same slate always gives the same show.
  * ========================================================================== */
-import type { AnimeType, GenreId } from "./data";
+import type { AnimeType, Draft, GenreId } from "./data";
 import type { RivalRelease } from "./rivals";
 
 /* ----------------------------------------------------------------- types */
@@ -39,7 +39,9 @@ export interface AwardNominee {
   audience: number;
   /** key art identity — rival poster manifest id for rivals */
   posterId?: string | null;
-  /** player shows render their poster from the lead cast portrait */
+  /** frozen production identity used to reproduce the player show's exact official key visual */
+  draft?: Draft | null;
+  /** lead id retained for legacy saves / safe fallback poster rendering */
   protag?: string | null;
 }
 
@@ -171,6 +173,7 @@ export function rivalNominee(r: RivalRelease): AwardNominee {
     sound: r.craft.sound,
     audience: r.fans,
     posterId: r.posterId ?? null,
+    draft: null,
     protag: null,
   };
 }

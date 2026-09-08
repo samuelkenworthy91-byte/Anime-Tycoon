@@ -535,6 +535,7 @@ export function migrateRun(raw: unknown): RunState {
             sound: typeof n.sound === "number" ? n.sound : n.score,
             audience: typeof n.audience === "number" ? n.audience : n.score * 400,
             posterId: n.posterId ?? null,
+            draft: n.draft ? migrateDraftV2(n.draft) : null,
             protag: n.protag ?? null,
           };
         })
@@ -2509,6 +2510,12 @@ export function releaseProject(
         ...playerCraftFor(result.total, result.points),
         audience: result.fans,
         posterId: null,
+        draft: {
+          ...draft,
+          genres: [...draft.genres],
+          arcs: [...draft.arcs],
+          sliders: [...draft.sliders] as [number, number, number],
+        },
         protag: draft.protag,
       },
     ],
