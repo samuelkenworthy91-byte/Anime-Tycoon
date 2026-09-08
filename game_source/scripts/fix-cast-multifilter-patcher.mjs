@@ -5,16 +5,17 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const target = path.join(here, "patch-cast-multifilter.mjs");
-const source = fs.readFileSync(target, "utf8");
-const lines = source.split(/\r?\n/);
-let changed = false;
-const fixed = lines.map((line) => {
-  if (line.includes("key={") && line.includes("filter.kind") && line.includes("filter.value")) {
-    changed = true;
-    return '                        key={filter.kind + ":" + filter.value}';
-  }
-  return line;
-});
-if (!changed) throw new Error("Could not find malformed cast-filter key line to repair");
-fs.writeFileSync(target, fixed.join("\n"));
+let source = fs.readFileSync(target, "utf8");
+
+const mapPos = source.indexOf("castFilters.map((filter)");
+if (mapPos < 0) throw new Error("Could not find active cast-filter map in patcher");
+const keyStart = source.indexOf("key={", mapPos);
+if (keyStart < 0) throw new Error("Could not find malformed key start in patcher");
+const valuePos = source.indexOf("filter.value", keyStart);
+if (valuePos < 0) throw new Error("Could not find filter.value in malformed key");
+const keyEnd = source.indexOf("}", valuePos);
+if (keyEnd < 0) throw new Error("Could not find malformed key end in patcher");
+
+source = source.slice(0, keyStart) + 'key={filter.kind + ":" + filter.value}' + source.slice(keyEnd + 1);
+fs.writeFileSync(target, source);
 console.log("Repaired cast multi-filter patcher escaping.");
