@@ -19,17 +19,9 @@ Run:
 
     node scripts/finalize-rival-posters.mjs
 
-The finaliser:
-- verifies all 160 numbered PNGs exist;
-- copies them to stable runtime filenames under `public/rival-posters/imported/`;
-- retains the six original Toe-i runtime posters;
-- generates `src/engine/generated/rivalPosterManifest.json`;
-- guarantees **28 slots per studio × 6 studios = 168 total**;
-- produces **166 live posters + 2 pending reserve slots**;
-- writes `docs/rival-poster-import-map.csv` for traceability;
-- keeps KNOWN FITS contextual to the first selected genre.
+The finaliser verifies all 160 numbered PNGs, copies them to stable runtime filenames under `public/rival-posters/imported/`, retains the six original Toe-i runtime posters, generates the final manifest at 28 slots per studio / 168 total, writes the import map, and keeps KNOWN FITS contextual to the first selected genre.
 
-The GitHub workflow `.github/workflows/finalize-rival-posters.yml` is scoped to `work/final-awards-rival-posters` as the reusable staging/finalisation branch. It runs the import, test suite, production build, and Cast V3 coverage audit whenever the numbered source posters/catalog/finaliser change there. Validated runtime assets can then be fast-forwarded to `main`.
+The GitHub workflow `.github/workflows/finalize-rival-posters.yml` is scoped to `work/final-awards-rival-posters` as the reusable staging/finalisation branch. It runs the import, test suite, production build, and Cast V3 coverage audit. Validated runtime assets can then be fast-forwarded to `main`.
 
 ## Future art drops
 
