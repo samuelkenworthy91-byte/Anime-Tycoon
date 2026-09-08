@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 
+// One-shot branch maintenance helper: stabilise the mixed player/rival pool test.
 const path = "game_source/src/engine/__tests__/awards.test.ts";
 let source = fs.readFileSync(path, "utf8");
 const oldText = 'const c = runCeremony(1, [mk({ title: "Mine", player: true, score: 24, audience: 12_000 })], world);';
