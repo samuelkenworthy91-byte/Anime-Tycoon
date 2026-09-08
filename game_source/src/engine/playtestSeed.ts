@@ -1,4 +1,5 @@
-import { GENRES, PROTAGONISTS, rollHire } from "./data";
+import { GENRES, PROTAGONISTS } from "./data";
+import { rollHire } from "./careers";
 import { advanceWeeks, initialRun, type RunState } from "./state";
 import { loadSlot, saveSlot, type SaveData } from "./storage";
 import type { AwardNominee } from "./awards";
