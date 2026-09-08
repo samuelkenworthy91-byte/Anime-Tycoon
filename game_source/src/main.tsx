@@ -3,6 +3,10 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./mobile-layout.css";
 import App from "./App";
+import { seedAwardsPlaytestSlot3 } from "./engine/playtestSeed";
+
+/* This playtest build seeds manual slot 3 once per install/update marker. */
+seedAwardsPlaytestSlot3();
 
 /*
  * Office owns the forecast state, but its original panel lives inside the
