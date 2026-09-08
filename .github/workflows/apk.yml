@@ -7,6 +7,7 @@ on:
       - main
       - arena/01a0615b-anime-tycoon
       - arena/01a0759f-anime-tycoon
+      - arena/01a07ca1-anime-tycoon
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
