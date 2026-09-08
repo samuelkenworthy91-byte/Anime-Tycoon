@@ -42,7 +42,9 @@ jobs:
 
       - name: Apply awards ceremony polish pass
         if: github.ref == 'refs/heads/work/final-awards-rival-posters'
-        run: node .github/scripts/awards-polish-pass.mjs
+        run: |
+          node .github/scripts/fix-awards-polish-script.mjs
+          node .github/scripts/awards-polish-pass.mjs
 
       - name: Install dependencies
         working-directory: game_source
