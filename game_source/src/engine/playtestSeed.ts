@@ -1,10 +1,10 @@
-import { GENRES, PROTAGONISTS } from "./data";
+import { GENRES, PROTAGONISTS, type Draft } from "./data";
 import { rollHire } from "./careers";
 import { advanceWeeks, initialRun, type RunState } from "./state";
 import { loadSlot, saveSlot, type SaveData } from "./storage";
 import type { AwardNominee } from "./awards";
 
-const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v2";
+const PLAYTEST_MARKER = "kirameki.playtest.awards-y2.slot3.v3";
 const PLAYTEST_WEEK = 95;
 const PLAYTEST_DAY = PLAYTEST_WEEK * 7 + 6;
 
@@ -19,19 +19,38 @@ function nominee(
   sound: number,
   audience: number,
 ): AwardNominee {
+  const lead = PROTAGONISTS[index % PROTAGONISTS.length];
+  const draft: Draft = {
+    title,
+    genres: [...genres],
+    medium: "tv",
+    budget: "standard",
+    slot: "midnight",
+    animeType,
+    audience: "teens",
+    protag: lead.id,
+    protagName: lead.name,
+    secondary: "",
+    pet: "",
+    villain: "",
+    arcs: [],
+    sliders: [58, 58, 58],
+    season: 1,
+  };
   return {
     title,
     studio: "Anime Runner",
     player: true,
     animeType,
-    genres,
+    genres: [...genres],
     score,
     story,
     art,
     sound,
     audience,
     posterId: null,
-    protag: PROTAGONISTS[index % PROTAGONISTS.length].id,
+    draft,
+    protag: lead.id,
   };
 }
 
