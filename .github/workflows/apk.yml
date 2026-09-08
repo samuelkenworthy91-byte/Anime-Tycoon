@@ -43,6 +43,7 @@ jobs:
       - name: Apply awards ceremony polish pass
         if: github.ref == 'refs/heads/work/final-awards-rival-posters'
         run: |
+          # Repair the one-shot patch bootstrap, then apply the actual game changes.
           node .github/scripts/fix-awards-polish-script.mjs
           node .github/scripts/awards-polish-pass.mjs
 
