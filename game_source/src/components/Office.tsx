@@ -673,7 +673,7 @@ export default function Office({
                           {owned && !u.repeatable ? (
                             <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
                           ) : pending ? (
-                            <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, (pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7))} DAYS</span>
+                            <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, Math.ceil((pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7)))} DAYS</span>
                           ) : block === "ALL CAST PROFILED — every hidden affinity is known" ? (
                             <span className="text-xs font-bold text-gold">⭐ ALL CAST PROFILED ✓</span>
                           ) : (

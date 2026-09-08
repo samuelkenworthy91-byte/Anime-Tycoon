@@ -862,7 +862,7 @@ export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
 /* ------------------------------------------------------------- showrunners */
 export interface Showrunner {
-  id: "steady" | "vision" | "producer" | "marketer";
+  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research";
   name: string;
   title: string;
   img: string;
@@ -877,6 +877,10 @@ export const SHOWRUNNERS: Showrunner[] = [
   { id: "vision", name: "Akari Natsume", title: "The Visionary Director", img: "img/showrunner-b.jpg", sprite: "img/sprite-worker-6.png", portrait: "img/portrait-worker-6.png", perk: "Vision — dramatic arcs hit harder, no review below 3/10." },
   { id: "producer", name: "Haruto Mori", title: "The Mogul Producer", img: "img/showrunner-c.jpg", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Golden Rolodex — contracts pay 40% more and advances are bigger." },
   { id: "marketer", name: "Sana Kobayashi", title: "The Hype Machine", img: "img/showrunner-d.jpg", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "Buzz Engine — shows open with +10 hype and marketing runs faster." },
+  { id: "operations", name: "Elliot Mercer", title: "The Line Producer", img: "img/portrait-showrunner-operations.png", sprite: "img/sprite-showrunner-operations.png", portrait: "img/portrait-showrunner-operations.png", perk: "On Schedule — +10 percentage points of production scheduling capacity and 10% lower production burn." },
+  { id: "franchise", name: "Freja Lindholm", title: "The Franchise Architect", img: "img/portrait-showrunner-franchise.png", sprite: "img/sprite-showrunner-franchise.png", portrait: "img/portrait-showrunner-franchise.png", perk: "Long View — sequels and continuations add 25% less franchise fatigue." },
+  { id: "mentor", name: "Amara Okafor", title: "The Talent Coach", img: "img/portrait-showrunner-mentor.png", sprite: "img/sprite-showrunner-mentor.png", portrait: "img/portrait-showrunner-mentor.png", perk: "Best Work — staff gain 25% more weekly work XP and recover 25% more stamina while resting." },
+  { id: "research", name: "Ravi Shah", title: "The R&D Lead", img: "img/portrait-showrunner-research.png", sprite: "img/sprite-showrunner-research.png", portrait: "img/portrait-showrunner-research.png", perk: "Rapid Prototyping — research projects take 25% less time. Research data costs are unchanged." },
 ];
 
 /* --------------------------------------------------------------- reviewers */

@@ -373,10 +373,10 @@ export function studioPointMult(heads: Heads, staff: Staff[], legends: LegendRec
 }
 
 /** studio-wide speed / burn effects from the Production Manager */
-export function studioProduction(heads: Heads, staff: Staff[]): { speed: number; burnMult: number } {
+export function studioProduction(heads: Heads, staff: Staff[], showrunner = ""): { speed: number; burnMult: number } {
   const pm = heads.production;
   const active = !!pm && staff.some((s) => s.id === pm);
-  return { speed: active ? 0.08 : 0, burnMult: active ? 0.9 : 1 };
+  return { speed: (active ? 0.08 : 0) + (showrunner === "operations" ? 0.1 : 0), burnMult: (active ? 0.9 : 1) * (showrunner === "operations" ? 0.9 : 1) };
 }
 
 /* ------------------------------------------------------- salary politics */

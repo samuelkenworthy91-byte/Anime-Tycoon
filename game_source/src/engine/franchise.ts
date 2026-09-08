@@ -397,7 +397,7 @@ export function recordContinuation(
   d: Draft,
   result: { total: number; revenue: number; fans: number; hallOfFame: boolean },
   week: number,
-  opts?: { fatigueAdd?: number }
+  opts?: { fatigueAdd?: number; fatigueMult?: number }
 ): { franchise: Franchise; verdict: ExpectationVerdict } {
   const kind = (d.continuation ?? "season") as EntryKind;
   const def = continuationDef(kind);
@@ -408,7 +408,7 @@ export function recordContinuation(
   const cast = fr.cast.map((c) => ({ ...c, popularity: clampPct(c.popularity + charDelta) }));
 
   let popularity = clampPct(fr.popularity + verdict.popDelta);
-  let fatigue = clampPct(fr.fatigue + (def?.fatigueAdd ?? 12) + verdict.fatigueExtra + (opts?.fatigueAdd ?? 0));
+  let fatigue = clampPct(fr.fatigue + ((def?.fatigueAdd ?? 12) + verdict.fatigueExtra + (opts?.fatigueAdd ?? 0)) * (opts?.fatigueMult ?? 1));
   if (kind === "reboot") {
     fatigue = 12;
     popularity = clampPct(Math.max(popularity, 30 + result.total));

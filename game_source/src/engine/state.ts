@@ -188,6 +188,8 @@ import {
   rushResearchCost,
   showrunnerContractSkill,
   researchWeeks,
+  weeklyWorkXpMult,
+  staminaRecoveryMult,
   trainingWeeks,
   type ContractAssignment,
   type ResearchJob,
@@ -652,7 +654,7 @@ export function forecastWeek(r: RunState): WeekForecast {
     .filter((p) => p.week === w && p.amount !== 0)
     .map((p) => ({ label: p.label, amount: p.amount }));
   const income = payoutsDue.reduce((a, p) => a + p.amount, 0);
-  const burnMult = studioProduction(r.heads ?? {}, r.staff).burnMult;
+  const burnMult = studioProduction(r.heads ?? {}, r.staff, r.showrunner).burnMult;
   const burn = activeProjects(r.projects).reduce((a, p) => a + Math.round(p.weeklyBurn * burnMult), 0);
   const lateFees = activeProjects(r.projects)
     .filter((p) => w > p.deadlineWeek)
@@ -772,7 +774,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
-  const studio = { ...studioProduction(heads, staffArr), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
+  const studio = { ...studioProduction(heads, staffArr, r.showrunner), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
 
   for (let i = 1; i <= n; i++) {
@@ -902,7 +904,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         ...trainingJobs.map((j) => j.staffId),
       ]);
       const drain = Math.max(1, 3 - fx.staminaSave);
-      const rest = 9 + fx.staminaRest;
+      const rest = (9 + fx.staminaRest) * staminaRecoveryMult(r.showrunner);
       staffArr = staffArr.map((st) => {
         let nx = { ...st };
         const proj = busy.has(st.id) ? projectOfStaff(projects, st.id) : null;
@@ -920,13 +922,13 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
           const m = personMod(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)), { bonds });
-          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult);
+          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner));
           nx = g.staff;
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
         } else if (opBusy.has(st.id)) {
           if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.max(12, nx.stamina - Math.max(1, drain - 1));
-          const g = gainXp(nx, Math.max(1, WEEKLY_XP - 1) * dynFx.xpMult);
+          const g = gainXp(nx, Math.max(1, WEEKLY_XP - 1) * dynFx.xpMult * weeklyWorkXpMult(r.showrunner));
           nx = g.staff;
         } else {
           if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.min(100, nx.stamina + rest);
@@ -1927,7 +1929,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
   }
 
-  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
+  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
   const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds: nx.bonds ?? {} });
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
   const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
@@ -1940,12 +1942,12 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
     const busy = production || !!contract;
     if (resting[st.id]) {
-      st.stamina = Math.min(100, st.stamina + 50 + baseFx.staminaRest * 2);
+      st.stamina = Math.min(100, st.stamina + (50 + baseFx.staminaRest * 2) * staminaRecoveryMult(nx.showrunner));
       if (st.stamina >= 100) delete resting[st.id];
       return st;
     }
     if (!busy) {
-      st.stamina = Math.min(100, st.stamina + 18 + baseFx.staminaRest);
+      st.stamina = Math.min(100, st.stamina + (18 + baseFx.staminaRest) * staminaRecoveryMult(nx.showrunner));
       return st;
     }
     const drain = Math.max(5, 9 - baseFx.staminaSave);
@@ -2326,7 +2328,7 @@ export function releaseProject(
       { ...draft, continuation: kind as Draft["continuation"] },
       resShape,
       r.week,
-      { fatigueAdd: r.dynasty ? dynastyDifficulty(r).fatigueAdd : 0 }
+      { fatigueAdd: r.dynasty ? dynastyDifficulty(r).fatigueAdd : 0, fatigueMult: r.showrunner === "franchise" ? 0.75 : 1 }
     );
     const v = judged.verdict;
     franchises[prevFr.key] = judged.franchise;
@@ -2722,7 +2724,7 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   if (r.rd < rdCost) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
-  const weeks = researchWeeks(rdCost, r.facilities.archive ?? 0);
+  const weeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
   const job: ResearchJob = {
     id: `research_${id}_${r.week}`, researchId: id, name: def.name,
     startWeek: r.week, completesWeek: r.week + weeks,
@@ -2731,7 +2733,7 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   };
   return {
     ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],
-    notices: [...r.notices, `🔬 ${def.name} begins — ${weeks * 7} days in R&D (cost ${rdCost} RD).`],
+    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${rdCost} RD).`],
   };
 }
 
