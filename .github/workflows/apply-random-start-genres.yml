@@ -1,0 +1,78 @@
+name: Apply random starting genres
+
+on:
+  push:
+    branches:
+      - work/random-start-genres
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/random-start-genres
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply focused source change
+        shell: python
+        run: |
+          from pathlib import Path
+
+          app_path = Path('game_source/src/App.tsx')
+          app = app_path.read_text()
+
+          anchor = 'import type { MilestoneId, MilestoneOutcome } from "./engine/projects";'
+          helper_import = 'import { randomStartingGenres } from "./engine/startingGenres";\n' + anchor
+          if helper_import not in app:
+              if anchor not in app:
+                  raise SystemExit('App import anchor not found')
+              app = app.replace(anchor, helper_import, 1)
+
+          replacements = {
+              '    setRun(initialRun(studio, showrunner));': '    setRun({ ...initialRun(studio, showrunner), genresUnlocked: randomStartingGenres() });',
+              '    setRun(initialRun(meta.studio, meta.showrunner));': '    setRun({ ...initialRun(meta.studio, meta.showrunner), genresUnlocked: randomStartingGenres() });',
+          }
+          for old, new in replacements.items():
+              if new in app:
+                  continue
+              if app.count(old) != 1:
+                  raise SystemExit(f'Expected exactly one App occurrence: {old!r}')
+              app = app.replace(old, new, 1)
+          app_path.write_text(app)
+
+          helper = Path('game_source/src/engine/startingGenres.ts')
+          helper.write_text('''import { GENRES, type GenreId } from "./data";\n\n/** Pick two different genres uniformly from the live canonical genre pool. */\nexport function randomStartingGenres(rng: () => number = Math.random): [GenreId, GenreId] {\n  const pool = GENRES.map((genre) => genre.id);\n  if (pool.length < 2) throw new Error("At least two genres are required to start a career");\n\n  const firstIndex = Math.floor(rng() * pool.length);\n  const [first] = pool.splice(firstIndex, 1);\n  const secondIndex = Math.floor(rng() * pool.length);\n  const [second] = pool.splice(secondIndex, 1);\n  return [first, second];\n}\n''')
+
+          test = Path('game_source/src/engine/__tests__/starting-genres.test.ts')
+          test.write_text('''import { describe, expect, it } from "vitest";\nimport { GENRES } from "../data";\nimport { randomStartingGenres } from "../startingGenres";\n\ndescribe("random starting genres", () => {\n  it("returns exactly two different canonical genres", () => {\n    const picked = randomStartingGenres(() => 0);\n    expect(picked).toEqual([GENRES[0].id, GENRES[1].id]);\n    expect(new Set(picked).size).toBe(2);\n    expect(picked.every((id) => GENRES.some((genre) => genre.id === id))).toBe(true);\n  });\n\n  it("can select genres from the far end of the live pool without duplicating", () => {\n    const picked = randomStartingGenres(() => 0.999999);\n    expect(picked).toHaveLength(2);\n    expect(new Set(picked).size).toBe(2);\n    expect(picked.every((id) => GENRES.some((genre) => genre.id === id))).toBe(true);\n  });\n});\n''')
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production bundle
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit verified change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/App.tsx game_source/src/engine/startingGenres.ts game_source/src/engine/__tests__/starting-genres.test.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "Randomise starting genre unlocks"
+          git push origin HEAD:work/random-start-genres
