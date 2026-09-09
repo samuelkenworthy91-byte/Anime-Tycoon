@@ -6,6 +6,7 @@ on:
       - work/cast-v4-runtime-integration
     paths:
       - "CAST_V4_UPLOAD_TO_WORK_BRANCH.zip"
+      - "game_source/src/engine/castCoverage.ts"
 
 permissions:
   contents: write
