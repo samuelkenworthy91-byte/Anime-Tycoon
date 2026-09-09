@@ -23,6 +23,7 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
+import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
 import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
@@ -229,7 +230,7 @@ export default function App() {
     sfx.fanfare();
     clearAllSaves();
     setMeta({ studio, showrunner });
-    setRun(initialRun(studio, showrunner));
+    setRun({ ...initialRun(studio, showrunner), genresUnlocked: randomStartingGenres() });
     seenCeremonyYear.current = 0;
     setReleased(null);
     setFocus(null);
@@ -244,7 +245,7 @@ export default function App() {
   const restart = useCallback(() => {
     sfx.fanfare();
     clearAllSaves();
-    setRun(initialRun(meta.studio, meta.showrunner));
+    setRun({ ...initialRun(meta.studio, meta.showrunner), genresUnlocked: randomStartingGenres() });
     seenCeremonyYear.current = 0;
     setReleased(null);
     setFocus(null);
