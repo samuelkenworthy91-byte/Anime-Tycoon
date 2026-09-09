@@ -1,0 +1,34 @@
+name: Final auction documentation cleanup v2
+
+on:
+  push:
+    branches:
+      - work/auction-ceremony-hidden-arcs
+    paths:
+      - .github/workflows/auction-final-cleanup-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - name: Restore baseline scoring doc and trim hidden-arc manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git show FETCH_HEAD:game_source/docs/SCORING_BALANCE_MATRIX.json > game_source/docs/SCORING_BALANCE_MATRIX.json
+          head -n 81 game_source/docs/USER_AUCTION_IP_HIDDEN_ARCS.csv > /tmp/hidden-arcs.csv
+          cp /tmp/hidden-arcs.csv game_source/docs/USER_AUCTION_IP_HIDDEN_ARCS.csv
+          rm -f .github/workflows/auction-final-cleanup.yml .github/workflows/auction-final-cleanup-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Clean auction integration documentation"
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
