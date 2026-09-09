@@ -4,7 +4,7 @@ Completed against live `main` on 9 September 2026.
 
 ## Live systems
 
-- Canonical 80-property annual IP auction catalogue and poster pipeline retained.
+- Canonical 100-property annual IP auction catalogue and poster pipeline retained.
 - Licensed adaptations use canonical property characters and bypass normal employee casting.
 - Property-specific hidden story blueprints can be discovered and reused studio-wide.
 - Nine stage-aware production rescue/polish interventions remain live, with capital-project synergies.
