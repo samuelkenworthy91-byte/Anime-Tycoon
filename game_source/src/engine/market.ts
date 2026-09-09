@@ -129,8 +129,10 @@ export function marketMult(m: MarketState, recs: ReleaseRecord[], d: Draft, week
   return Math.max(0.6, Math.min(1.5, gm * am * mm));
 }
 
-/** each extra show you have on air splits the audience's attention */
-export const attentionMult = (airingCount: number) => Math.max(0.8, 1 - 0.07 * airingCount);
+/** each OTHER show you have on air splits the audience's attention.
+ *  Scale remains powerful, but four simultaneous broadcasts now compete
+ *  meaningfully for the same viewers instead of bottoming out at ×0.80. */
+export const attentionMult = (airingCount: number) => Math.max(0.65, 1 - 0.10 * Math.max(0, airingCount));
 
 /* --------------------------------------------------------- distributors */
 export interface Partner {

@@ -679,6 +679,10 @@ function planStudioYear(
   if (studio.status === "restructuring" || studio.status === "acquired") count = Math.max(1, count - 1);
   if (studio.momentum < -20) count = Math.max(1, count - 1);
   if (studio.momentum >= 15) count = Math.min(5, count + 1);
+  /* Once the player becomes a serious contender, major rivals answer with
+     denser slates rather than politely leaving the calendar empty. */
+  if (boost >= 2.25 && studio.tier >= 3) count = Math.min(5, count + 1);
+  if (boost >= 4.5 && studio.tier >= 4) count = Math.min(5, count + 1);
 
   /* spread release weeks across the year, roughly in production order */
   const weeks: number[] = [];
@@ -912,7 +916,8 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       ]));
       const title = uniqueTitle(fr ? makeTitle(fr, kind) : makeOriginalTitle(genres, animeType), usedTitles);
       const id = `rp${++rivalProdSeq}_surp_${week}`;
-      const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind });
+      const responseBoost = world.playerRank === 1 ? Math.min(3, 1 + Math.max(0, world.year - 1) * 0.25) : 0;
+      const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind }, responseBoost);
       const art = assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
       studio.posterRecent = art.posterRecent;
       studio.productions.push({
@@ -1117,17 +1122,35 @@ export function computeRankings(world: RivalWorld, player: RankingInput): Rankin
 export function finalizeYear(world: RivalWorld, player: RankingInput): { world: RivalWorld; notices: string[] } {
   const ranked = computeRankings(world, player);
   const notices: string[] = [];
+  const playerEntry = ranked.find((r) => r.id === "player");
+  const playerRank = playerEntry?.rank ?? 1;
+  /* Dominance creates enemies. A champion studio makes every serious rival
+     more motivated and more willing to fight over releases, talent and IP. */
+  const dominanceHeat = playerRank === 1
+    ? Math.min(12, 5 + player.masterpieces * 0.6 + player.awards * 0.12)
+    : playerRank <= 3 ? 2 : playerRank >= 6 ? -1 : 0;
   const studios = world.studios.map((st) => {
     const entry = ranked.find((r) => r.id === st.id);
-    return { ...st, prevRank: st.rank || (entry?.rank ?? 1), rank: entry?.rank ?? 1 };
+    const proximity = playerRank === 1 && (entry?.rank ?? 99) <= 4 ? 2 : 0;
+    const rivalry = clampPct(st.rivalry + dominanceHeat + proximity);
+    const momentumLift = playerRank === 1 && st.status !== "collapsed" ? ((entry?.rank ?? 99) <= 3 ? 3 : 1) : 0;
+    return {
+      ...st,
+      prevRank: st.rank || (entry?.rank ?? 1),
+      rank: entry?.rank ?? 1,
+      rivalry,
+      momentum: clamp(st.momentum + momentumLift, -30, 30),
+    };
   });
-  const playerEntry = ranked.find((r) => r.id === "player");
+  if (playerRank === 1 && player.releases >= 2) {
+    notices.push("🔥 INDUSTRY RESPONSE — the #1 studio has a target on its back. Rivals are investing to catch you.");
+  }
   return {
     world: {
       ...world,
       studios,
-      playerPrevRank: world.playerRank || (playerEntry?.rank ?? 1),
-      playerRank: playerEntry?.rank ?? 1,
+      playerPrevRank: world.playerRank || playerRank,
+      playerRank,
     },
     notices,
   };
@@ -1237,10 +1260,24 @@ export function rivalTalentAvailable(world: RivalWorld, week: number): RivalTale
   return out;
 }
 
-export function removeRivalTalent(world: RivalWorld, talentId: string): RivalWorld {
+export function removeRivalTalent(world: RivalWorld, talentId: string, week = world.yearStartWeek, compensation = 0): RivalWorld {
   return {
     ...world,
-    studios: world.studios.map((s) => ({ ...s, talent: s.talent.filter((t) => t.id !== talentId) })),
+    studios: world.studios.map((s) => {
+      if (!s.talent.some((t) => t.id === talentId)) return s;
+      const remaining = s.talent.filter((t) => t.id !== talentId);
+      /* A poached studio recruits again. The replacement is unavailable for
+         at least half a year, so stealing a star hurts without permanently
+         emptying every rival roster. */
+      const replacementIndex = 10_000 + yearOfWeek(week) * 1_000 + (hashStr(talentId) % 997);
+      const replacement = genTalent(s, replacementIndex, week + 24);
+      return {
+        ...s,
+        talent: [...remaining, replacement],
+        revenue: s.revenue + Math.max(0, Math.round(compensation)),
+        reputation: clampPct(s.reputation + 1),
+      };
+    }),
   };
 }
 
