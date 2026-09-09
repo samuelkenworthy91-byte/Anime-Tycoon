@@ -18,23 +18,34 @@ const ROLES: [string, CastMember[]][] = [
   ["mascot", PETS],
   ["villain", VILLAINS],
 ];
+const ROLE_TOTALS: Record<string, number> = { lead: 185, sidekick: 181, mascot: 184, villain: 186 };
+const ROLE_TYPE_TOTALS: Record<string, number> = {
+  "lead:shonen": 90,
+  "lead:shojo": 95,
+  "sidekick:shonen": 89,
+  "sidekick:shojo": 92,
+  "mascot:shonen": 90,
+  "mascot:shojo": 94,
+  "villain:shonen": 92,
+  "villain:shojo": 94,
+};
 const TYPES: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 
-describe("Cast V3 canonical roster", () => {
-  it("contains exactly 432 unique selectable IDs in four equal roles", () => {
-    expect(CAST_V2).toHaveLength(432);
-    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(432);
-    for (const [, members] of ROLES) expect(members).toHaveLength(108);
+describe("Cast V4 canonical roster", () => {
+  it("contains exactly 736 unique selectable IDs while preserving all four roles", () => {
+    expect(CAST_V2).toHaveLength(736);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(736);
+    for (const [role, members] of ROLES) expect(members, role).toHaveLength(ROLE_TOTALS[role]);
     expect(ROLES.flatMap(([, members]) => members).map((member) => member.id).sort())
       .toEqual(CAST_V2.map((member) => member.id).sort());
   });
 
-  it("balances every role at 54 Shonen / 54 Shojo", () => {
+  it("matches the final optimized role × type bucket sizes", () => {
     for (const [role, members] of ROLES) {
       for (const type of TYPES) {
         const cell = members.filter((member) => member.type === type);
-        expect(cell, `${role}/${type}`).toHaveLength(54);
+        expect(cell, `${role}/${type}`).toHaveLength(ROLE_TYPE_TOTALS[`${role}:${type}`]);
       }
     }
   });
@@ -48,45 +59,25 @@ describe("Cast V3 canonical roster", () => {
     }
   });
 
-  it("provides practical all-genre coverage in every role × Type group", () => {
-    for (const [role, members] of ROLES) {
-      for (const type of TYPES) {
-        const covered = new Set(members.filter((member) => member.type === type).flatMap(affinities));
-        for (const genre of CANONICAL_GENRE_IDS) expect(covered.has(genre), `${role}/${type}/${genre}`).toBe(true);
-      }
-    }
-  });
-
-  it("covers all 253 genre pairs in each of the four roles", () => {
+  it("covers all 253 pairs inside every exact role × anime-type bucket", () => {
     let measured = 0;
     for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
       for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
         measured += 1;
         const a = CANONICAL_GENRE_IDS[i];
         const b = CANONICAL_GENRE_IDS[j];
-        for (const [role, members] of ROLES) expect(members.some((member) => affinities(member).includes(a) && affinities(member).includes(b)), `${role}/${a}|${b}`).toBe(true);
+        for (const [role, members] of ROLES) {
+          for (const type of TYPES) {
+            const bucket = members.filter((member) => member.type === type);
+            expect(
+              bucket.some((member) => affinities(member).includes(a) && affinities(member).includes(b)),
+              `${role}/${type}/${a}|${b}`,
+            ).toBe(true);
+          }
+        }
       }
     }
     expect(measured).toBe(253);
-  });
-
-  it("covers all 253 genre pairs globally within each Anime Type", () => {
-    for (const type of TYPES) {
-      const members = CAST_V2.filter((member) => member.type === type);
-      let measured = 0;
-      for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
-        for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
-          measured += 1;
-          const a = CANONICAL_GENRE_IDS[i];
-          const b = CANONICAL_GENRE_IDS[j];
-          expect(
-            members.some((member) => affinities(member).includes(a) && affinities(member).includes(b)),
-            `${type}/${a}|${b}`,
-          ).toBe(true);
-        }
-      }
-      expect(measured).toBe(253);
-    }
   });
 
   it("includes Samurai and Shinobi in the canonical content", () => {

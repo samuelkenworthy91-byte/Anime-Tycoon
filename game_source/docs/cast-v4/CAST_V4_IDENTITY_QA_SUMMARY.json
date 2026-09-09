@@ -1,0 +1,24 @@
+{
+  "v4_records": 304,
+  "existing_preserved": 432,
+  "final_roster": 736,
+  "new_duplicate_full_names": [],
+  "new_name_collisions_with_existing": [],
+  "legacy_duplicate_full_names": {
+    "Rook": [
+      "cv3_mascot_011",
+      "cv3_mascot_057"
+    ]
+  },
+  "human_gender_counts": {
+    "male": 86,
+    "female": 105,
+    "nonbinary": 37
+  },
+  "mascot_count": 76,
+  "japanese_human_count": 12,
+  "runtime_portraits": 304,
+  "runtime_size": "512x512 WebP",
+  "strict_coverage": "2024/2024",
+  "hidden_affinity_copy_policy": "identity copy generated from visible genres and portrait concept only; hidden affinity retained as mechanical field only"
+}

@@ -9,7 +9,7 @@ import {
   type GenreId,
 } from "../data";
 
-type PendingCast = {
+type MechanicalCast = {
   id: string;
   role: CastRole;
   type: AnimeType;
@@ -25,7 +25,7 @@ const batchPaths = [
   "art_src/cast_v4_upload_staging/batch_04_241-304/CAST_V4_MECHANICS.csv",
 ];
 
-function readBatch(path: string): PendingCast[] {
+function readBatch(path: string): MechanicalCast[] {
   const lines = readFileSync(resolve(process.cwd(), path), "utf8").trim().split(/\r?\n/);
   expect(lines.shift()).toBe(
     "id,role,anime_type,visible_genre_1,visible_genre_2,hidden_genre,batch,filename",
@@ -43,40 +43,43 @@ function readBatch(path: string): PendingCast[] {
   });
 }
 
-const pending = batchPaths.flatMap(readBatch);
+const mechanics = batchPaths.flatMap(readBatch);
 const roles: CastRole[] = ["protag", "secondary", "pet", "villain"];
 const types: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: { visibleAff: [GenreId, GenreId]; hiddenAff: GenreId }) => [
   ...member.visibleAff,
   member.hiddenAff,
 ] as GenreId[];
-
 const pairs: [GenreId, GenreId][] = CANONICAL_GENRE_IDS.flatMap((a, index) =>
   CANONICAL_GENRE_IDS.slice(index + 1).map((b) => [a, b] as [GenreId, GenreId]),
 );
 
-describe("Cast V4 staging mechanical manifest", () => {
-  it("defines exactly 304 new stable IDs with valid three-affinity records", () => {
-    expect(CAST_V2).toHaveLength(432);
-    expect(pending).toHaveLength(304);
-    expect(new Set(pending.map((member) => member.id)).size).toBe(304);
-    expect(new Set(pending.map((member) => member.filename)).size).toBe(304);
+describe("Cast V4 canonical mechanics after runtime integration", () => {
+  it("keeps exactly 304 locked V4 stable IDs and a 736-member live roster", () => {
+    expect(mechanics).toHaveLength(304);
+    expect(new Set(mechanics.map((member) => member.id)).size).toBe(304);
+    expect(new Set(mechanics.map((member) => member.filename)).size).toBe(304);
+    expect(CAST_V2).toHaveLength(736);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(736);
 
-    const existingIds = new Set(CAST_V2.map((member) => member.id));
-    for (const member of pending) {
-      expect(existingIds.has(member.id), member.id).toBe(false);
-      expect(roles).toContain(member.role);
-      expect(types).toContain(member.type);
-      expect(member.filename).toMatch(new RegExp(`__${member.id}\\.png$`));
-      const memberAffinities = affinities(member);
-      expect(new Set(memberAffinities).size, member.id).toBe(3);
+    const liveById = new Map(CAST_V2.map((member) => [member.id, member]));
+    for (const expected of mechanics) {
+      const actual = liveById.get(expected.id);
+      expect(actual, expected.id).toBeTruthy();
+      expect(actual!.role, expected.id).toBe(expected.role);
+      expect(actual!.type, expected.id).toBe(expected.type);
+      expect(actual!.visibleAff, expected.id).toEqual(expected.visibleAff);
+      expect(actual!.hiddenAff, expected.id).toBe(expected.hiddenAff);
+      expect(actual!.img, expected.id).toBe(`cast/v4/${expected.id}.webp`);
+      const memberAffinities = affinities(actual!);
+      expect(new Set(memberAffinities).size, expected.id).toBe(3);
       for (const genre of memberAffinities) {
-        expect(CANONICAL_GENRE_IDS, `${member.id}/${genre}`).toContain(genre);
+        expect(CANONICAL_GENRE_IDS, `${expected.id}/${genre}`).toContain(genre);
       }
     }
   });
 
-  it("matches the exact optimized additions per role/type bucket", () => {
+  it("retains the exact optimized V4 additions per role/type bucket", () => {
     const expected: Record<string, number> = {
       "protag:shonen": 36,
       "protag:shojo": 41,
@@ -90,23 +93,19 @@ describe("Cast V4 staging mechanical manifest", () => {
     for (const role of roles) {
       for (const type of types) {
         expect(
-          pending.filter((member) => member.role === role && member.type === type),
+          mechanics.filter((member) => member.role === role && member.type === type),
           `${role}:${type}`,
         ).toHaveLength(expected[`${role}:${type}`]);
       }
     }
   });
 
-  it("would take the 432 live cast to 736 and close all 2,024 strict role/type pair cells", () => {
-    const future = [...CAST_V2, ...pending];
-    expect(future).toHaveLength(736);
-    expect(new Set(future.map((member) => member.id)).size).toBe(736);
+  it("permanently closes all 2,024 strict role/type genre-pair cells", () => {
     expect(pairs).toHaveLength(253);
-
     let coveredCells = 0;
     for (const role of roles) {
       for (const type of types) {
-        const members = future.filter((member) => member.role === role && member.type === type);
+        const members = CAST_V2.filter((member) => member.role === role && member.type === type);
         for (const [genreA, genreB] of pairs) {
           const witness = members.some((member) => {
             const memberAffinities = affinities(member);
