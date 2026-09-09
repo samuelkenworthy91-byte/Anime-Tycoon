@@ -47,4 +47,35 @@ replace_once(
     "empty studio event guard",
 )
 
+# The old deterministic balance fixtures predate exact genre/combo direction
+# fingerprints. Make the fixtures aim at the same targets the live project
+# pipeline now uses; otherwise a test intended to isolate CAST or point scaling
+# accidentally simulates deliberately wrong sliders and collapses to the 4/10 floor.
+replace_once(
+    "scripts/cast-v2-balance.test.ts",
+    'import { computeResult } from "../src/engine/scoring";\n',
+    'import { computeResult } from "../src/engine/scoring";\nimport { genreTargetFor } from "../src/engine/genreTargets";\n',
+    "cast balance target import",
+)
+replace_once(
+    "scripts/cast-v2-balance.test.ts",
+    '    sliders: [50, 50, 50],\n',
+    '    sliders: genreTargetFor([genre]).ideal,\n',
+    "cast balance exact sliders",
+)
+replace_once(
+    "scripts/scoring-balance.test.ts",
+    'import { computeResult, seededRng } from "../src/engine/scoring";\n',
+    'import { computeResult, seededRng } from "../src/engine/scoring";\nimport { genreTargetFor } from "../src/engine/genreTargets";\n',
+    "scoring balance target import",
+)
+old_genre_def = '''const genreDef = () => {\n  const defs = GENRES.map((g) => GENRE(g));\n  const n = defs.length;\n  const ideal = [0, 1, 2].map((i) => Math.round(defs.reduce((a, g) => a + g.ideal[i], 0) / n)) as [number, number, number];\n  const ratio = [0, 1, 2].map((i) => defs.reduce((a, g) => a + g.ratio[i], 0) / n) as [number, number, number];\n  return { defs, ideal, ratio };\n};\n'''
+new_genre_def = '''const genreDef = () => {\n  const defs = GENRES.map((g) => GENRE(g));\n  const target = genreTargetFor(GENRES);\n  return { defs, ideal: target.ideal, ratio: target.ratio };\n};\n'''
+replace_once(
+    "scripts/scoring-balance.test.ts",
+    old_genre_def,
+    new_genre_def,
+    "scoring balance exact combo target",
+)
+
 print("decision hardmode post-integration balance tuning applied")
