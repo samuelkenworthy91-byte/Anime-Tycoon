@@ -16,11 +16,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Upload exact worktree
+
+      - name: Upload Cast V4 staging pool
         uses: actions/upload-artifact@v4
         with:
-          name: cast-v4-worktree
-          path: .
-          include-hidden-files: true
+          name: cast-v4-staging
+          path: game_source/art_src/cast_v4_upload_staging
           retention-days: 1
           if-no-files-found: error
+
+      - name: Upload existing runtime portrait reference
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-v2-runtime-reference
+          path: game_source/public/cast/v2
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload code and canonical content slice
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-v4-code-slice
+          path: |
+            game_source/package.json
+            game_source/package-lock.json
+            game_source/tsconfig*.json
+            game_source/vite.config.*
+            game_source/vitest.config.*
+            game_source/src
+            game_source/scripts
+            game_source/docs/content-v3
+          retention-days: 1
+          if-no-files-found: warn
