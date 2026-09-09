@@ -18,9 +18,9 @@ for (const [filename, ip] of expected) {
 }
 for (const filename of files.filter((name) => /^poster_\d{3}\.webp$/i.test(name))) {
   const slot = Number(filename.slice(7, 10));
-  if (slot < 1 || slot > 80) problems.push(`${filename} is outside reserved slots 001–080`);
+  if (slot < 1 || slot > 100) problems.push(`${filename} is outside reserved slots 001–100`);
 }
-console.log(`Auction IP posters: ${expected.size - problems.filter((p) => p.includes("is missing")).length}/${expected.size} assigned assets present; ${files.filter((name) => /^poster_\d{3}\.webp$/i.test(name)).length}/80 reserved slots populated.`);
+console.log(`Auction IP posters: ${expected.size - problems.filter((p) => p.includes("is missing")).length}/${expected.size} assigned assets present; ${files.filter((name) => /^poster_\d{3}\.webp$/i.test(name)).length}/100 reserved slots populated.`);
 if (problems.length) {
   console.error(problems.join("\n"));
   process.exitCode = 1;

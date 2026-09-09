@@ -1,0 +1,101 @@
+posterSlot,filename,catalogId,title,homageReference,animeType,genre1,genre2
+1,poster_001.webp,user_ip_001,"Crystal Quest: Four Hearts, One Tomorrow",Final Fantasy I,shonen,fantasy,mythology
+2,poster_002.webp,user_ip_002,Lifestream Rebellion: A Brighter Tomorrow,Final Fantasy VII,shonen,cyber,fantasy
+3,poster_003.webp,user_ip_003,Relic of the Wild: Kingdom at Dawn,The Legend of Zelda,shonen,fantasy,mythology
+4,poster_004.webp,user_ip_004,The Flamebound Heir: A Kingdom Endures,Fire Emblem: The Binding Blade,shonen,fantasy,military
+5,poster_005.webp,user_ip_005,Three Banners Academy,Fire Emblem: Three Houses,shojo,fantasy,military
+6,poster_006.webp,user_ip_006,The Black Ledger: A Deadly Mind Game,Death Note,shonen,mystery,supernatural
+7,poster_007.webp,user_ip_007,Solar Fist: A Brighter World,Dragon Ball Z,shonen,martial,supernatural
+8,poster_008.webp,user_ip_008,Star Dragon Trail: Beyond Tomorrow,Dragon Ball GT,shonen,martial,space
+9,poster_009.webp,user_ip_009,Brotherhood of Brass: Alchemical Dawn,Fullmetal Alchemist: Brotherhood,shonen,magical,military
+10,poster_010.webp,user_ip_010,Infernal Requiem: A Brighter Hell,Devil May Cry,shonen,supernatural,horror
+11,poster_011.webp,user_ip_011,The Nameless Smile,Monster,shojo,mystery,horror
+12,poster_012.webp,user_ip_012,Covenant of Midnight,Fate/stay night,shonen,magical,supernatural
+13,poster_013.webp,user_ip_013,Battle School Orion,Ender's Game,shonen,space,military
+14,poster_014.webp,user_ip_014,Rising Eleven: From Streets to Stardom,FIFA story mode,shonen,sports,slice
+15,poster_015.webp,user_ip_015,Iron Howlers: Stormfront Mechs,Chromehounds,shonen,mecha,military
+16,poster_016.webp,user_ip_016,Ash Throne Legion,"Warhammer 40,000",shonen,space,mecha
+17,poster_017.webp,user_ip_017,Starfall Rebellion,Star Wars,shonen,space,mythology
+18,poster_018.webp,user_ip_018,Moonlit Maze,Labyrinth,shojo,isekai,magical
+19,poster_019.webp,user_ip_019,Wildspark Quest,Pokémon,shojo,magical,sports
+20,poster_020.webp,user_ip_020,Cyber Crests,Digimon,shonen,cyber,isekai
+21,poster_021.webp,user_ip_021,Soul Tide,Bleach,shonen,supernatural,martial
+22,poster_022.webp,user_ip_022,Hidden Storm,Naruto,shonen,shinobi,martial
+23,poster_023.webp,user_ip_023,Grand Horizon Voyage,One Piece,shonen,pirate,martial
+24,poster_024.webp,user_ip_024,Tidebreak Champions,Blitzball / Final Fantasy X,shonen,sports,fantasy
+25,poster_025.webp,user_ip_025,War of Three Banners,Romance of the Three Kingdoms,shonen,military,martial
+26,poster_026.webp,user_ip_026,A Pocketful of Tomorrows,About Time,shojo,romance,supernatural
+27,poster_027.webp,user_ip_027,Ashfall Dominion,Reign of Fire,shonen,survival,horror
+28,poster_028.webp,user_ip_028,Northern Oath,Vinland Saga,shonen,nordic,military
+29,poster_029.webp,user_ip_029,Snowbound Hunger,Let the Right One In,shojo,nordic,horror
+30,poster_030.webp,user_ip_030,Radio Rebels,The Boat That Rocked,shojo,idol,comedy
+31,poster_031.webp,user_ip_031,Midnight Soul Run,The Blues Brothers,shojo,idol,comedy
+32,poster_032.webp,user_ip_032,The Seventh Trace,Se7en,shonen,mystery,horror
+33,poster_033.webp,user_ip_033,Lineup of Shadows,The Usual Suspects,shonen,mystery,horror
+34,poster_034.webp,user_ip_034,Velvet Appetite,Hannibal Lecter,shojo,horror,mystery
+35,poster_035.webp,user_ip_035,Crestfall Dominion,Record of Grancrest War,shonen,fantasy,military
+36,poster_036.webp,user_ip_036,The Hidden Striker,She's the Man,shojo,romance,comedy
+37,poster_037.webp,user_ip_037,The Final Ronin,The Last Samurai,shonen,samurai,martial
+38,poster_038.webp,user_ip_038,Retro Newsroom,Anchorman,shojo,comedy,slice
+39,poster_039.webp,user_ip_039,The Devourer Queen,Monstress,shojo,fantasy,horror
+40,poster_040.webp,user_ip_040,Awakened,Heroes,shojo,supernatural,mystery
+41,poster_041.webp,user_ip_041,Beyond the Veil,Stranger Things,shonen,supernatural,horror
+42,poster_042.webp,user_ip_042,Phantom Arsenal,Metal Gear Solid,shonen,military,cyber
+43,poster_043.webp,user_ip_043,Velvet Shade,Shade,shojo,idol,comedy
+44,poster_044.webp,user_ip_044,Whisper Society,Gossip Girl,shojo,romance,mystery
+45,poster_045.webp,user_ip_045,Golden Coast,The O.C.,shojo,romance,slice
+46,poster_046.webp,user_ip_046,Crown of Embers,Game of Thrones,shojo,fantasy,military
+47,poster_047.webp,user_ip_047,Wheel of Ages,The Wheel of Time,shojo,fantasy,mythology
+48,poster_048.webp,user_ip_048,Rogue Rhythm Ronin,Samurai Champloo,shonen,samurai,martial
+49,poster_049.webp,user_ip_049,Starlight Outlaws,Cowboy Bebop,shonen,space,cyber
+50,poster_050.webp,user_ip_050,The Black Spire,The Dark Tower,shonen,fantasy,horror
+51,poster_051.webp,user_ip_051,Rising Tempest,Metal Gear Rising: Revengeance,shonen,cyber,mecha
+52,poster_052.webp,user_ip_052,Sunwheel Exiles,The Al Bhed / Final Fantasy X,shojo,cyber,survival
+53,poster_053.webp,user_ip_053,Whisper Keyhouse,Locke & Key,shojo,supernatural,mystery
+54,poster_054.webp,user_ip_054,Thornwall Abbey,Redwall,shojo,fantasy,military
+55,poster_055.webp,user_ip_055,Dungeon Banquet,Delicious in Dungeon,shojo,cooking,fantasy
+56,poster_056.webp,user_ip_056,Inferno Kitchen,Hell's Kitchen,shonen,cooking,survival
+57,poster_057.webp,user_ip_057,Feast Challenger,Man v. Food,shonen,cooking,comedy
+58,poster_058.webp,user_ip_058,Scarlet Circle,Squid Game,shonen,survival,mystery
+59,poster_059.webp,user_ip_059,Target Homeroom,Assassination Classroom,shonen,comedy,martial
+60,poster_060.webp,user_ip_060,Aether Online,Sword Art Online,shonen,isekai,cyber
+61,poster_061.webp,user_ip_061,Spiral Tide,Final Fantasy X,shojo,fantasy,romance
+62,poster_062.webp,user_ip_062,Black File,Men in Black,shonen,space,comedy
+63,poster_063.webp,user_ip_063,Plastic Kingdom,Mean Girls,shojo,comedy,slice
+64,poster_064.webp,user_ip_064,Poison Petals,Heathers,shojo,comedy,horror
+65,poster_065.webp,user_ip_065,Winter Maw,The Grey,shonen,survival,nordic
+66,poster_066.webp,user_ip_066,Thousand Bad Ends,A Million Ways to Die in the West,shojo,comedy,martial
+67,poster_067.webp,user_ip_067,Starspark Stunt,Hot Rod,shojo,comedy,sports
+68,poster_068.webp,user_ip_068,Shadowmaw,The Demonata,shonen,horror,supernatural
+69,poster_069.webp,user_ip_069,Stormheart Castle,Howl's Moving Castle novel series,shojo,magical,romance
+70,poster_070.webp,user_ip_070,Sword and Rose,The Princess Bride,shojo,romance,comedy
+71,poster_071.webp,user_ip_071,Lionheart War,Final Fantasy Tactics: The War of the Lions,shonen,fantasy,military
+72,poster_072.webp,user_ip_072,The Obsidian Archive,The Magnus Archives,shojo,mystery,horror
+73,poster_073.webp,user_ip_073,500 Days of Sunlight,500 Days of Summer,shojo,romance,slice
+74,poster_074.webp,user_ip_074,Moonstake Hunter,Buffy the Vampire Slayer,shojo,supernatural,martial
+75,poster_075.webp,user_ip_075,Parasol Academy,The Umbrella Academy,shojo,supernatural,mystery
+76,poster_076.webp,user_ip_076,Starbound Slumber,Passengers,shojo,romance,space
+77,poster_077.webp,user_ip_077,Silicon Heart,Her,shojo,romance,cyber
+78,poster_078.webp,user_ip_078,The Last Letter,The Notebook,shojo,romance,slice
+79,poster_079.webp,user_ip_079,Hidden Dragon Moon,"Crouching Tiger, Hidden Dragon",shojo,martial,romance
+80,poster_080.webp,user_ip_080,Bullet Requiem,Max Payne,shonen,mystery,cyber
+81,poster_081.webp,user_ip_081,Skyshard Chronicle,Dark Cloud,shojo,fantasy,magical
+82,poster_082.webp,user_ip_082,Bramble & Beak,Banjo-Kazooie,shojo,comedy,fantasy
+83,poster_083.webp,user_ip_083,Scarlet Tail,Conker's Bad Fur Day,shonen,comedy,survival
+84,poster_084.webp,user_ip_084,Mindgate Zero,Psi-Ops: The Mindgate Conspiracy,shonen,supernatural,military
+85,poster_085.webp,user_ip_085,Sea of the Second Sun,Life of Pi,shojo,survival,mythology
+86,poster_086.webp,user_ip_086,Ashen Mile,The Road,shojo,survival,horror
+87,poster_087.webp,user_ip_087,Tideborn Drift,Waterworld,shonen,pirate,survival
+88,poster_088.webp,user_ip_088,Townlight Rhythm,Footloose,shojo,romance,idol
+89,poster_089.webp,user_ip_089,Autumn Chalkheart,Good Will Hunting,shojo,slice,romance
+90,poster_090.webp,user_ip_090,Paper Constellations,Wish I Was Here,shojo,slice,comedy
+91,poster_091.webp,user_ip_091,Golden Whistle,Ted Lasso,shojo,sports,slice
+92,poster_092.webp,user_ip_092,Primate Panic,Ape Escape,shojo,comedy,cyber
+93,poster_093.webp,user_ip_093,Ashfall Junction,Jericho,shojo,survival,military
+94,poster_094.webp,user_ip_094,Smile Trigger,Happy!,shonen,comedy,supernatural
+95,poster_095.webp,user_ip_095,Wings of Yesterday,The Butterfly Effect,shojo,supernatural,mystery
+96,poster_096.webp,user_ip_096,Desert Formula,Breaking Bad,shonen,mystery,survival
+97,poster_097.webp,user_ip_097,The Last Windkeeper,Avatar: The Last Airbender,shonen,magical,martial
+98,poster_098.webp,user_ip_098,Aether Divide,Arcane,shojo,cyber,magical
+99,poster_099.webp,user_ip_099,Starwind Outlaws,Firefly,shonen,space,pirate
+100,poster_100.webp,user_ip_100,Pine Veil,Twin Peaks,shojo,mystery,supernatural
