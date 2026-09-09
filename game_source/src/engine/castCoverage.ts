@@ -1,32 +1,23 @@
 /* ============================================================================
- *  CAST V3 COVERAGE — canonical closure invariants
+ * CAST V4 COVERAGE — strict Role × Anime Type × genre-pair invariant
  *
- *  The 32-character closure now on main was designed to guarantee TWO
- *  complementary things across the 23 canonical genres / 253 unordered pairs:
+ * 23 canonical genres produce 253 unordered pairs. The final 736-character
+ * roster must provide a same-character witness for every pair inside each of
+ * the eight exact Role × Anime Type buckets:
  *
- *    1. every pair has a same-member witness in EACH CAST ROLE, with anime
- *       types mixed inside that role (4 × 253 = 1,012 role cells);
- *    2. every pair has a same-member witness in EACH ANIME TYPE, with roles
- *       mixed inside that type (2 × 253 = 506 type cells).
+ *   4 roles × 2 anime types × 253 pairs = 2,024 required cells.
  *
- *  Together that is 1,518 required canonical coverage cells. It is NOT the
- *  impossible role × anime-type intersection grid: one 54-member bucket with
- *  three distinct affinities per member can witness at most 162 pair slots,
- *  so demanding all 253 pairs in each of eight intersections cannot be the
- *  acceptance rule for this roster.
- *
- *  A witness carries BOTH genres among visibleAff + hiddenAff, matching the
- *  canonical Cast V3 tests and the closure manifest maths.
+ * A witness carries BOTH genres anywhere among visibleAff + hiddenAff.
+ * Hidden affinity counts mechanically but remains hidden from public copy.
  * ========================================================================== */
-import { CANONICAL_GENRE_IDS, CAST_V2, type AnimeType, type CastMember, type GenreId } from "./data";
+import { CANONICAL_GENRE_IDS, CAST_V2, type AnimeType, type CastMember, type CastRole, type GenreId } from "./data";
 
-export const CAST_COVERAGE_ROLES = ["protag", "secondary", "pet", "villain"] as const;
+export const CAST_COVERAGE_ROLES: CastRole[] = ["protag", "secondary", "pet", "villain"];
 export const CAST_COVERAGE_TYPES: AnimeType[] = ["shonen", "shojo"];
 
-export type CoverageDimension = "role" | "type";
-
 export interface CoverageCell {
-  dimension: CoverageDimension;
+  role: CastRole;
+  type: AnimeType;
   group: string;
   pair: [GenreId, GenreId];
   covered: boolean;
@@ -55,54 +46,43 @@ function witnessFor(members: CastMember[], pair: [GenreId, GenreId]): string | u
 export function computeCoverage(roster: CastMember[] = CAST_V2) {
   const members = roster.filter(selectable);
   const pairs = genrePairs();
+  const cells: CoverageCell[] = [];
 
-  const roleCells: CoverageCell[] = [];
   for (const role of CAST_COVERAGE_ROLES) {
-    const bucket = members.filter((m) => m.role === role);
-    for (const pair of pairs) {
-      const witness = witnessFor(bucket, pair);
-      roleCells.push({ dimension: "role", group: role, pair, covered: !!witness, witness });
+    for (const type of CAST_COVERAGE_TYPES) {
+      const bucket = members.filter((m) => m.role === role && m.type === type);
+      for (const pair of pairs) {
+        const witness = witnessFor(bucket, pair);
+        cells.push({
+          role,
+          type,
+          group: `${role}:${type}`,
+          pair,
+          covered: !!witness,
+          witness,
+        });
+      }
     }
   }
 
-  const typeCells: CoverageCell[] = [];
-  for (const type of CAST_COVERAGE_TYPES) {
-    const bucket = members.filter((m) => m.type === type);
-    for (const pair of pairs) {
-      const witness = witnessFor(bucket, pair);
-      typeCells.push({ dimension: "type", group: type, pair, covered: !!witness, witness });
-    }
-  }
-
-  const cells = [...roleCells, ...typeCells];
-  const roleCovered = roleCells.filter((c) => c.covered).length;
-  const typeCovered = typeCells.filter((c) => c.covered).length;
-
+  const covered = cells.filter((c) => c.covered).length;
   return {
     pairs: pairs.length,
-    roleRequired: roleCells.length,
-    roleCovered,
-    typeRequired: typeCells.length,
-    typeCovered,
     required: cells.length,
-    covered: roleCovered + typeCovered,
-    roleCells,
-    typeCells,
+    covered,
     cells,
-    groups: [
-      ...CAST_COVERAGE_ROLES.map((x) => `role:${x}`),
-      ...CAST_COVERAGE_TYPES.map((x) => `type:${x}`),
-    ],
+    groups: CAST_COVERAGE_ROLES.flatMap((role) =>
+      CAST_COVERAGE_TYPES.map((type) => `${role}:${type}`),
+    ),
   };
 }
 
-/** per-group roll-up for reports */
+/** per exact Role × Type bucket roll-up for reports */
 export function groupSummary(cells: CoverageCell[]) {
   const out = new Map<string, { required: number; covered: number; missing: string[] }>();
   for (const c of cells) {
-    const key = `${c.dimension}:${c.group}`;
-    let row = out.get(key);
-    if (!row) out.set(key, (row = { required: 0, covered: 0, missing: [] }));
+    let row = out.get(c.group);
+    if (!row) out.set(c.group, (row = { required: 0, covered: 0, missing: [] }));
     row.required += 1;
     if (c.covered) row.covered += 1;
     else row.missing.push(`${c.pair[0]}|${c.pair[1]}`);
