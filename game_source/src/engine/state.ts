@@ -196,6 +196,17 @@ import {
   type TrainingJob,
 } from "./studioOps";
 import { rollStudioEvent, type StudioEvent } from "./events";
+import { genreTargetFor } from "./genreTargets";
+import {
+  consumeDecisionModifiers,
+  decisionMerchMult,
+  decisionReleaseFansMult,
+  decisionReleaseQualityBonus,
+  decisionReleaseSalesMult,
+  decisionResearchSpeedMult,
+  modifierMatchesDraft,
+  type DecisionModifier,
+} from "./decisionEvents";
 import {
   buildCeremony,
   playerCraftFor,
@@ -331,6 +342,10 @@ export interface RunState {
   marketEvents: MarketEvent[];
   /** pending studio dilemmas — 2–3 responses with real trade-offs */
   studioEvents: StudioEvent[];
+  /** persistent one-use / timed consequences created by executive decisions */
+  decisionModifiers: DecisionModifier[];
+  /** recent template ids prevent the decision deck feeling repetitive */
+  studioEventHistory: string[];
   /** small freelance jobs now occupy real staff over real calendar weeks */
   contractJobs: ContractAssignment[];
   /** staff courses finish after several weeks instead of instantly */
@@ -341,6 +356,8 @@ export interface RunState {
   audienceTest: AudienceTestJob | null;
   /** how many distinct findings have been extracted from each release */
   audienceTestCounts: Record<string, number>;
+  /** distinct released series that completed at least one audience panel, keyed by exact genre combo */
+  audienceComboSeries: Record<string, string[]>;
   /** persistent findings that can be consulted later in R&D / Records */
   audienceInsights: AudienceInsight[];
   /** employees who have exhausted their energy and are actively recuperating */
@@ -469,11 +486,14 @@ export function initialRun(studio: string, showrunner: string): RunState {
     commissions: [],
     marketEvents: [],
     studioEvents: [],
+    decisionModifiers: [],
+    studioEventHistory: [],
     contractJobs: [],
     trainingJobs: [],
     researchJobs: [],
     audienceTest: null,
     audienceTestCounts: {},
+    audienceComboSeries: {},
     audienceInsights: [],
     staffResting: {},
     revBoostUntil: 0,
@@ -564,6 +584,8 @@ export function migrateRun(raw: unknown): RunState {
     }) : [],
     marketEvents: Array.isArray(r.marketEvents) ? r.marketEvents : [],
     studioEvents: Array.isArray(r.studioEvents) ? r.studioEvents : [],
+    decisionModifiers: Array.isArray(r.decisionModifiers) ? r.decisionModifiers : [],
+    studioEventHistory: Array.isArray(r.studioEventHistory) ? r.studioEventHistory : [],
     contractJobs: Array.isArray(r.contractJobs) ? r.contractJobs.map((j) => ({ ...j, showrunner: !!j.showrunner, liveProgressThisWeek: j.liveProgressThisWeek ?? 0 })) : [],
     trainingJobs: Array.isArray(r.trainingJobs) ? r.trainingJobs : [],
     researchJobs: Array.isArray(r.researchJobs) ? r.researchJobs : [],
@@ -571,6 +593,7 @@ export function migrateRun(raw: unknown): RunState {
       ? { ...r.audienceTest, draft: migrateDraftV2(r.audienceTest.draft, unlocked) }
       : null,
     audienceTestCounts: r.audienceTestCounts && typeof r.audienceTestCounts === "object" ? r.audienceTestCounts : {},
+    audienceComboSeries: r.audienceComboSeries && typeof r.audienceComboSeries === "object" ? r.audienceComboSeries : {},
     audienceInsights: Array.isArray(r.audienceInsights) ? r.audienceInsights : [],
     day: typeof r.day === "number" ? r.day : (r.week ?? 0) * 7,
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
@@ -1060,9 +1083,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
-    /* the occasional studio dilemma — slow cadence so it feels special */
+    /* High-stakes studio/industry decisions. Roughly 4 per industry year;
+       every one is blocking and the App halts the live clock immediately. */
     studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
-    if (w % 9 === 0 && studioEvents.length === 0 && Math.random() < 0.45) {
+    if (w % 7 === 0 && studioEvents.length === 0 && Math.random() < 0.60) {
       const sev = rollStudioEvent(w, {
         crew: staffArr.map((s) => ({
           id: s.id,
@@ -1075,10 +1099,16 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           .filter((p) => p.stage !== "airing" && p.stage !== "done")
           .map((p) => ({ id: p.id, title: p.draft.title, stage: p.stage, hype: p.hype, issues: p.issues })),
         topFranchise: topFranchiseFor(franchises),
+        market,
+        genresUnlocked: r.genresUnlocked,
+        mediumsUnlocked: r.mediumsUnlocked as MediumId[],
+        researchJobs,
+        yearShows,
+        research,
       });
       if (sev) {
         studioEvents = [sev];
-        notices.push("🎬 A studio dilemma lands on your desk — open the market to decide.");
+        notices.push("⚠ EXECUTIVE DECISION — the studio clock has stopped until you choose.");
       }
     }
 
@@ -1328,6 +1358,10 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   }
 
   let p = makeProject(d, r.week, r.day ?? r.week * 7);
+  const decisionQuality = decisionReleaseQualityBonus(r, d);
+  if (decisionQuality.length) {
+    for (const bonus of decisionQuality) p = { ...p, points: { ...p.points, [bonus.point]: p.points[bonus.point] + bonus.amount } };
+  }
   /* the Hype Machine opens every show with a ready-made buzz */
   if (r.showrunner === "marketer") p = { ...p, hype: p.hype + 10 };
   const partner = commission ? partnerById(commission.partnerId) : null;
@@ -1354,6 +1388,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
     projects: [...r.projects, p],
     commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
+    decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "releaseQuality" && modifierMatchesDraft(m, d, r.week)),
     /* the quick "SEASON N" button is spent the moment that season is greenlit —
        otherwise it keeps offering a season that's already on the floor */
     pendingSequel:
@@ -1488,13 +1523,7 @@ export const AUDIENCE_TEST_MAX_FINDINGS = 6;
 export const audienceShowKey = (r: Pick<RunState, "showsMade" | "lastDraft">) =>
   r.lastDraft ? `${r.showsMade}:${r.lastDraft.title}` : "";
 
-const blendedGenreMemo = (draft: Draft) => {
-  const defs = draft.genres.map((id) => GENRES.find((g) => g.id === id)).filter(Boolean) as typeof GENRES;
-  const n = Math.max(1, defs.length);
-  const ideal: [number, number, number] = [0, 1, 2].map((i) => Math.round(defs.reduce((a, g) => a + g.ideal[i], 0) / n)) as [number, number, number];
-  const ratio: [number, number, number] = [0, 1, 2].map((i) => defs.reduce((a, g) => a + g.ratio[i], 0) / n) as [number, number, number];
-  return { ideal, ratio };
-};
+const blendedGenreMemo = (draft: Draft) => genreTargetFor(draft.genres);
 
 function audienceFinding(job: AudienceTestJob): { text: string; learnArcGenre?: string } {
   const { draft } = job;
@@ -1681,6 +1710,10 @@ function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; 
   if (r.audienceTest && (nx.day ?? nx.week * 7) >= r.audienceTest.completesDay) {
     const found = audienceFinding(r.audienceTest);
     const counts = { ...(nx.audienceTestCounts ?? {}), [r.audienceTest.showKey]: r.audienceTest.round + 1 };
+    const testedComboKey = comboKey(r.audienceTest.draft.genres);
+    const testedSeries = new Set(nx.audienceComboSeries?.[testedComboKey] ?? []);
+    testedSeries.add(r.audienceTest.showKey);
+    const audienceComboSeries = { ...(nx.audienceComboSeries ?? {}), [testedComboKey]: [...testedSeries] };
     const insight: AudienceInsight = { showKey: r.audienceTest.showKey, title: r.audienceTest.title, text: found.text, day: nx.day ?? nx.week * 7 };
     const genreKnowledge = r.audienceTest.draft.genres.reduce((acc, genre) => {
       acc[genre] = Math.min(12, (acc[genre] ?? 0) + 1);
@@ -1694,6 +1727,7 @@ function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; 
       genreKnowledge,
       arcGenreKnowledge,
       audienceTestCounts: counts,
+      audienceComboSeries,
       audienceInsights: [...(nx.audienceInsights ?? []), insight].slice(-30),
       audienceTest: null,
       notices: [...nx.notices, `👥 TEST AUDIENCE: ${found.text} (+${AUDIENCE_TEST_RD} RD)`].slice(-40),
@@ -2180,6 +2214,7 @@ export function marketMultiplierFor(r: RunState, p: Project): number {
       marketMult(r.market ?? initMarket(), r.recentReleases ?? [], p.draft, r.week) *
         attentionMult(othersAiring) *
         boost *
+        decisionReleaseSalesMult(r, p.draft) *
         100
     ) / 100
   );
@@ -2205,6 +2240,14 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     audienceBar: dynastyAudienceBar(r),
     castAffinityDiscovered: r.castAffinityDiscovered,
   });
+  const decisionFanMult = decisionReleaseFansMult(r, d);
+  if (Math.abs(decisionFanMult - 1) > 0.001) {
+    out = {
+      ...out,
+      fans: Math.round(out.fans * decisionFanMult),
+      breakdown: [...out.breakdown, { label: "Decision-event audience effect", pts: `×${decisionFanMult.toFixed(2)} fans` }],
+    };
+  }
   const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
   if (scope.audienceMult !== 1) {
     out = {
@@ -2526,6 +2569,10 @@ export function releaseProject(
     lastResult: result,
     lastDraft: draft,
     notices,
+    decisionModifiers: consumeDecisionModifiers(
+      r.decisionModifiers ?? [],
+      (m) => ["releaseSales", "releaseFans", "marketBrief"].includes(m.kind) && modifierMatchesDraft(m, draft, r.week),
+    ),
     /* the finished team is freed for the next production */
     projects: r.projects.map((x) => (x.id === projectId ? { ...released, staffIds: [] } : x)),
   };
@@ -2724,7 +2771,9 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   if (r.rd < rdCost) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
-  const weeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
+  const baseResearchWeeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
+  const researchDecisionMult = decisionResearchSpeedMult(r);
+  const weeks = Math.max(0.25, baseResearchWeeks * researchDecisionMult);
   const job: ResearchJob = {
     id: `research_${id}_${r.week}`, researchId: id, name: def.name,
     startWeek: r.week, completesWeek: r.week + weeks,
@@ -2733,7 +2782,8 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   };
   return {
     ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],
-    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${rdCost} RD).`],
+    decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "researchSpeed" && m.expiresWeek >= r.week && m.uses > 0),
+    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${rdCost} RD).${researchDecisionMult < 1 ? " Decision-event acceleration applied." : ""}`],
   };
 }
 
@@ -3002,7 +3052,8 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const product = merchProductById(productId);
   if (!fr || !product) return null;
   if (merchBlock(fr, product, r.week, r.cash, r.research ?? [])) return null;
-  const total = merchReturn(fr, product);
+  const merchDecisionMult = decisionMerchMult(r);
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {
@@ -3021,6 +3072,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     ...r,
     cash: r.cash - product.cost,
     payouts,
+    decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "merch" && m.expiresWeek >= r.week && m.uses > 0),
     franchises: { ...r.franchises, [franchiseKey]: next },
     notices: [
       ...r.notices,

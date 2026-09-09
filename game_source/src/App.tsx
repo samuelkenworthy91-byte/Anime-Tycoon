@@ -40,6 +40,8 @@ import Retrospective from "./components/Retrospective";
 import { beginDynastyMode } from "./engine/legacy";
 import { liveWorkPulseGapMs } from "./engine/studioOps";
 import AwardsCeremony from "./components/AwardsCeremony";
+import DecisionEventOverlay from "./components/DecisionEventOverlay";
+import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
 
 type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";
@@ -625,6 +627,16 @@ export default function App() {
               <Pause size={15} />
             </button>
           </div>
+        )}
+
+        {run && run.studioEvents.length > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+          <DecisionEventOverlay
+            event={run.studioEvents[0]}
+            onChoose={(choiceId) => {
+              setTimeSpeed(0);
+              setRun((current) => current ? (resolveStudioEvent(current, current.studioEvents[0].id, choiceId) ?? current) : current);
+            }}
+          />
         )}
 
         {paused && pauseMenu}

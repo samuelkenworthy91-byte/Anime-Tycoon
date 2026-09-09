@@ -12,12 +12,14 @@ import {
   dateLabel,
   castById,
   formatGBP,
+  comboKey,
   staffPoint,
   type PointType,
 } from "../engine/data";
 import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
 import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, studioKnowledgeEmphasis } from "../engine/studioOps";
+import { genreTargetFor } from "../engine/genreTargets";
 import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
@@ -242,24 +244,31 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
               const defs = genres.map((id) => GENRES.find((g) => g.id === id)).filter((g) => !!g);
               const known = defs.map((g) => run.genreKnowledge?.[g!.id] ?? 0);
               const k = known.length ? Math.min(...known) : 0;
-              const ideal = defs.length
-                ? Math.round(defs.reduce((a, g) => a + g!.ideal[phase!.idx], 0) / defs.length)
-                : 50;
-              /* the same blended ideal drives the early hint, the working
-                 read and the exact estimate — no second knowledge calculation */
-              const emphasis = studioKnowledgeEmphasis(ideal, phase!.a, phase!.b);
+              const exactTarget = genreTargetFor(genres).ideal[phase!.idx];
+              const testedSeries = run.audienceComboSeries?.[comboKey(genres)]?.length ?? 0;
+              const exactComboLearned = genres.length === 2 && testedSeries >= 3;
+              const exactSingles = defs.map((g) => ({ id: g!.id, label: g!.label, target: genreTargetFor([g!.id]).ideal[phase!.idx] }));
+              const emphasis = studioKnowledgeEmphasis(exactTarget, phase!.a, phase!.b);
               return (
                 <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 px-3 py-2">
                   <div className="text-[9px] font-extrabold tracking-[0.2em] text-cyanx">STUDIO KNOWLEDGE</div>
-                  {k <= 0 ? (
+                  {exactComboLearned ? (
+                    <div className="mt-1 space-y-1 text-[10px] font-bold text-mint">
+                      <div>EXACT COMBO TARGET · <span className="text-neon2">{phase!.a} {exactTarget}%</span> · {phase!.b} {100 - exactTarget}%</div>
+                      {exactSingles.map((g) => (
+                        <div key={g.id} className="text-paper/75">{g.label}: {phase!.a} {g.target}% · {phase!.b} {100 - g.target}%</div>
+                      ))}
+                      <div className="text-[9px] text-cyanx">Verified from {testedSeries} separate test-audience series using this exact combo.</div>
+                    </div>
+                  ) : k <= 0 ? (
                     <div className="mt-0.5 text-[10px] text-paper/55">No data on {defs.map((g) => g!.label).join("/") || "this genre"} yet — ship it or run a test audience to learn what works.</div>
                   ) : k <= 2 ? (
                     <div className="mt-0.5 text-[10px] text-paper/55">Early read: {emphasis} appears more important for {phase!.name.toLowerCase()}.</div>
                   ) : k <= 5 ? (
-                    <div className="mt-0.5 text-[10px] text-paper/55">Working read: the blend leans toward <b className="text-paper/85">{emphasis}</b> — more releases narrow the slider target.</div>
+                    <div className="mt-0.5 text-[10px] text-paper/55">Working read: the combo leans toward <b className="text-paper/85">{emphasis}</b> — test audiences on three separate series reveal the exact values.</div>
                   ) : (
                     <div className="mt-0.5 text-[10px] font-bold text-mint">
-                      Studio estimate: <span className="text-neon2">{phase!.a}</span> around {Math.round(ideal / 5) * 5}% · {phase!.b} around {100 - Math.round(ideal / 5) * 5}%
+                      Studio estimate: <span className="text-neon2">{phase!.a}</span> around {Math.round(exactTarget / 5) * 5}% · {phase!.b} around {100 - Math.round(exactTarget / 5) * 5}%
                     </div>
                   )}
                 </div>
