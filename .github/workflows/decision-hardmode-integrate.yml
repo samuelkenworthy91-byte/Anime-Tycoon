@@ -6,10 +6,12 @@ on:
       - work/decision-events-hardmode
     paths:
       - 'game_source/scripts/apply-decision-hardmode.py'
+      - 'game_source/scripts/fix-decision-hardmode-apply.py'
       - 'game_source/src/engine/decisionEvents.ts'
       - 'game_source/src/engine/genreTargets.ts'
       - 'game_source/src/engine/projectActions.ts'
       - 'game_source/src/components/DecisionEventOverlay.tsx'
+      - 'game_source/src/engine/__tests__/genre-targets-hardmode.test.ts'
       - '.github/workflows/decision-hardmode-integrate.yml'
 
 permissions:
@@ -30,6 +32,10 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: game_source/package-lock.json
+
+      - name: Harden integration patch and targets
+        working-directory: game_source
+        run: python3 scripts/fix-decision-hardmode-apply.py
 
       - name: Apply integration
         id: integrate
