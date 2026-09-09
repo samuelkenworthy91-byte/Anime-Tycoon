@@ -1,0 +1,58 @@
+name: One-shot anti-snowball difficulty v2
+
+on:
+  push:
+    branches: [work/anti-snowball-difficulty]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/anti-snowball-difficulty
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply integrated difficulty pass
+        run: |
+          python game_source/scripts/apply_anti_snowball.py
+          python game_source/scripts/patch_anti_snowball_tests.py
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production browser bundle
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit verified difficulty pass and remove temporary tooling
+        shell: bash
+        run: |
+          rm -f \
+            game_source/scripts/apply_anti_snowball.py \
+            game_source/scripts/patch_anti_snowball_tests.py \
+            .github/workflows/one-shot-anti-snowball.yml \
+            .github/workflows/one-shot-anti-snowball-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Rebalance campaign against early studio snowball"
+          git pull --rebase origin work/anti-snowball-difficulty
+          git push origin HEAD:work/anti-snowball-difficulty
