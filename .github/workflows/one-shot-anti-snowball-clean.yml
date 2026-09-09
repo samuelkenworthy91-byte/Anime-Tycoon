@@ -1,0 +1,30 @@
+name: Clean anti-snowball verification artifacts
+
+on:
+  push:
+    branches: [work/anti-snowball-difficulty]
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/anti-snowball-difficulty
+          fetch-depth: 0
+      - name: Restore generated artifacts from main
+        shell: bash
+        run: |
+          git fetch origin main
+          git checkout origin/main -- game_source/dist/index.html game_source/docs/SCORING_BALANCE_MATRIX.json
+          rm -f .github/workflows/one-shot-anti-snowball-clean.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Clean anti-snowball verification artifacts"
+          git pull --rebase origin work/anti-snowball-difficulty
+          git push origin HEAD:work/anti-snowball-difficulty
