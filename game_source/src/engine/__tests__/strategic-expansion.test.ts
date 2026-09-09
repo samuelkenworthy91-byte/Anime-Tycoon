@@ -8,10 +8,10 @@ import { initialRun } from "../state";
 
 const draft: Draft = {
   title: "Test Production",
-  medium: "fanweb",
+  medium: "tv",
   budget: "indie",
-  scope: "short",
-  slot: "web",
+  scope: "standard",
+  slot: "midnight",
   animeType: "shonen",
   genres: ["sports"],
   audience: "teens",

@@ -68,7 +68,7 @@ const richRun = (over: Partial<RunState> = {}): RunState => ({
   mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
   cash: 50_000_000,
   rd: 500,
-  officeLevel: 4, // Global Campus: 10 room slots
+  officeLevel: 4, // Global Campus: 12 room slots
   staff: [worker("a"), worker("b")],
   ...over,
 });
@@ -103,8 +103,8 @@ describe("building facilities", () => {
 
 /* ------------------------------------------------------------ capacity */
 describe("room capacity", () => {
-  it("offices grant 1/3/5/7/10 slots", () => {
-    expect([0, 1, 2, 3, 4].map((lvl) => officeSlots(richRun({ officeLevel: lvl })))).toEqual([1, 3, 5, 7, 10]);
+  it("offices grant 1/3/5/7/12 slots", () => {
+    expect([0, 1, 2, 3, 4].map((lvl) => officeSlots(richRun({ officeLevel: lvl })))).toEqual([1, 3, 5, 7, 12]);
   });
 
   it("cannot build past the slot count — choices matter", () => {
