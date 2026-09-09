@@ -28,6 +28,7 @@ import {
   productionPointScore,
   reviewExpectationAdjustment,
 } from "./production";
+import { genreTargetFor } from "./genreTargets";
 
 export interface Points {
   story: number;
@@ -172,13 +173,13 @@ const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
  * These are directional starting constants, exercised by the seeded
  * balance matrix (scripts/scoring-balance.test.ts) and tuned by audit +
  * playtesting. They are NOT magic numbers. */
-export const RAW_QUALITY_BASE = 10;
-export const RAW_QUALITY_FLOOR = 14;
+export const RAW_QUALITY_BASE = 9;
+export const RAW_QUALITY_FLOOR = 12;
 export const RAW_QUALITY_CEILING = 40;
 /** saturating point conversion (see production.ts) scaled into quality */
 export const POINT_QUALITY_SCALE = 0.55;
 /** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
-export const TOP_QUALITY_SLOPE = 0.12;
+export const TOP_QUALITY_SLOPE = 0.15;
 /** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
  *  early career meaningful while staying far flatter than the old curve */
 export const CRAFT_LIFT = 2.6;
@@ -196,7 +197,7 @@ export const COMBO_QUALITY_WEIGHT = 0.5;
 export const CHEM_QUALITY_WEIGHT = 0.6;
 /** per-critic variance. Wide enough that four simultaneous 10s are rare
  *  even for an elite master, tight enough that 9s are repeatable. */
-export const REVIEW_NOISE_RANGE = 0.5;
+export const REVIEW_NOISE_RANGE = 0.70;
 
 export const CAST_BASE_QUALITY = 0.5;
 export const VISIBLE_CAST_QUALITY = 0.6;
@@ -302,12 +303,21 @@ export function computeResult(opts: {
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
   const perPhase: number[] = [];
+  const sliderFits: number[] = [];
   for (let p = 0; p < 3; p++) {
     const diff = Math.abs(draft.sliders[p] - genreIdeal[p]);
-    const pts = clamp(4 - (diff / 100) * 4 * 1.7, 0, 4);
+    const pts = clamp(4 - (diff / 100) * 4 * 2.1, 0, 4);
     perPhase.push(pts);
     sliderPart += pts;
+    sliderFits.push(
+      diff <= 4 ? 1.04 :
+      diff <= 8 ? 1.00 :
+      diff <= 14 ? 0.92 :
+      diff <= 22 ? 0.80 :
+      diff <= 32 ? 0.68 : 0.56
+    );
   }
+  const sliderFitMult = sliderFits.reduce((a, b) => a + b, 0) / Math.max(1, sliderFits.length);
 
   /* ---- casting: lead + supporting + pet + villain each contribute */
   const protag = castById(draft.protag);
@@ -319,6 +329,11 @@ export function computeResult(opts: {
   ];
   const castParts = castSlots.map(([role, member]) => ({ role, member, ...castContribution(member, role, draft) }));
   const casting = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
+  const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
+  const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
+  /* Bad casting now hurts the WHOLE production instead of merely missing a tiny bonus.
+     Four completely unsuitable roles can cut raw quality by roughly a third. */
+  const castFitMult = clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
   const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
   const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
     if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
@@ -392,6 +407,11 @@ export function computeResult(opts: {
   const comboFactor =
     1 + (comboMult(draft.genres, comboDiscovered) - 1) * COMBO_QUALITY_WEIGHT
     + (comboLevelBonus(comboLevel) - 1) * COMBO_QUALITY_WEIGHT;
+  /* Direction, pairing and casting are now hard gates. Great raw craft cannot
+     completely rescue a production whose creative brief is badly wrong. */
+  raw *= sliderFitMult;
+  raw *= genreTargetFor(draft.genres).comboQualityMult;
+  raw *= castFitMult;
   raw *= comboFactor;
   raw -= issues * ISSUE_QUALITY_COST;
 
@@ -409,7 +429,9 @@ export function computeResult(opts: {
      best is a record only. A slow EMA expectation nudges reviewers a
      little (≤ ±0.75) so unchanged mastery slowly feels less special
      without ever poisoning future releases. */
-  const floor = showrunner === "vision" ? 3 : 1;
+  /* Hard mode has a humane critic floor: disastrous work bottoms out around 4/10,
+     but getting above that now demands correct direction, pairing and casting. */
+  const floor = 4;
   const expectationAdj = reviewExpectationAdjustment(reviewExpectation);
   const audienceAdj = -Math.max(0, audienceBar ?? 0) * 0.07;
   /* absolute-quality mapping with a soft cap above quality 36

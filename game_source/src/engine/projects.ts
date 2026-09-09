@@ -39,6 +39,7 @@ import {
   type Staff,
 } from "./data";
 import { computeResult, type Points, type ShowResult } from "./scoring";
+import { genreTargetFor } from "./genreTargets";
 import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
 
 /* ------------------------------------------------------------- costs */
@@ -204,6 +205,8 @@ export interface Project {
   airedWeek: number | null;
   /** the deal financing this show — null/undefined = fully self-funded */
   commission?: ProjectCommission | null;
+  /** small spontaneous polish win rolled as the edit bay hands off to marketing */
+  lastMinuteBoost?: { type: PointType; points: number } | null;
   /** production automation (engine/automation.ts) — null = fully manual */
   auto?: AutoState | null;
 }
@@ -617,6 +620,11 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
     : p.draft;
   const draft: Draft = o.rename ? { ...directed, ...o.rename } : directed;
   const nx = NEXT_STAGE[p.stage] ?? p.stage;
+  /* A small post-QC chance for one last inspired bubble before marketing.
+     It is deliberately modest: 24% chance, +2..6 in one craft. */
+  const lastMinuteBoost = done === "edit" && Math.random() < 0.24
+    ? { type: (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)], points: 2 + Math.floor(Math.random() * 5) }
+    : null;
   return {
     ...p,
     draft,
@@ -626,10 +634,11 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
     milestonesDone: [...p.milestonesDone, done],
     liveQuality: { story: 0, art: 0, sound: 0 },
     points: {
-      story: p.points.story + o.points.story,
-      art: p.points.art + o.points.art,
-      sound: p.points.sound + o.points.sound,
+      story: p.points.story + o.points.story + (lastMinuteBoost?.type === "story" ? lastMinuteBoost.points : 0),
+      art: p.points.art + o.points.art + (lastMinuteBoost?.type === "art" ? lastMinuteBoost.points : 0),
+      sound: p.points.sound + o.points.sound + (lastMinuteBoost?.type === "sound" ? lastMinuteBoost.points : 0),
     },
+    lastMinuteBoost,
     /* Final editing is a one-way quality pass: notes may be cleared, never manufactured. */
     issues: done === "edit" ? Math.max(0, p.issues - (o.squashed ?? 0)) : p.issues + o.issues,
     spent: p.spent + o.spent,
@@ -668,12 +677,9 @@ export interface ScoringContext {
 export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResult {
   const d = p.draft;
   const genres = d.genres;
-  const avgOf = (pick: (i: number) => number[]) =>
-    [0, 1, 2].map((i) => pick(i).reduce((a, b) => a + b, 0) / Math.max(1, genres.length));
-  const ideal = avgOf((i) => genres.map((g) => GENRES.find((x) => x.id === g)!.ideal[i])).map(Math.round) as [number, number, number];
-  const ratio = (genres.length
-    ? avgOf((i) => genres.map((g) => GENRES.find((x) => x.id === g)!.ratio[i]))
-    : [0.34, 0.33, 0.33]) as [number, number, number];
+  const productionTarget = genreTargetFor(genres);
+  const ideal = productionTarget.ideal;
+  const ratio = productionTarget.ratio;
 
   const key = comboKey(genres);
   const comboLevel = ctx.comboLevels[key] ?? 0;

@@ -294,6 +294,17 @@ export function rollAdvancedDecision(week: number, ctx: AdvancedDecisionContext)
         { id: "joke", label: "QUOTE-POST A TERRIBLE JOKE", effect: "50/50 energy: +12,000 or −8,000 fans", effects: [{ type: "fans", amount: Math.random() < 0.5 ? 12_000 : -8_000 }] },
       ]),
 
+    () => make(week, "creative_consultant", "A CREATIVE CONSULTANT HAS AN OPENING", "NEXT PRODUCTION",
+      `A famously difficult development consultant can spend one week shaping your NEXT greenlight. They are expensive, but their notes are unusually specific.`, [
+        { id: "story", label: "BOOK STORY DEVELOPMENT", effect: "−£45,000 · next production starts +8 Story", effects: [
+          { type: "cash", amount: -45_000 }, { type: "modifier", modifier: { kind: "releaseQuality", label: "Consultant story development", expiresWeek: week + 14, uses: 1, flat: 8, pointType: "story" } },
+        ] },
+        { id: "visual", label: "BOOK VISUAL DEVELOPMENT", effect: "−£45,000 · next production starts +8 Art", effects: [
+          { type: "cash", amount: -45_000 }, { type: "modifier", modifier: { kind: "releaseQuality", label: "Consultant visual development", expiresWeek: week + 14, uses: 1, flat: 8, pointType: "art" } },
+        ] },
+        { id: "pass", label: "PASS", effect: "no cost", effects: [] },
+      ]),
+
     () => make(week, "investor", "AN INVESTOR OFFERS A LIFELINE", "FINANCE",
       `A media investor offers immediate working capital. Their terms are legal, aggressive and very public.`, [
         { id: "take", label: "TAKE THE CAPITAL", effect: "+£300,000 · −20,000 fans · next release ×0.85 sales", effects: [

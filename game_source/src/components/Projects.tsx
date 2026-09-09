@@ -15,6 +15,7 @@ import {
   Users,
   Banknote,
   Zap,
+  Trash2,
 } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -67,6 +68,7 @@ function ProjectCard({
   onDelegate,
   onTakeOver,
   onResume,
+  onScrap,
   onContinueSeason,
 }: {
   p: Project;
@@ -77,6 +79,7 @@ function ProjectCard({
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
+  onScrap: (projectId: string) => void;
   /** jump straight into creating this IP's next season while it's still on air */
   onContinueSeason?: (franchiseKey: string) => void;
 }) {
@@ -395,6 +398,23 @@ function ProjectCard({
       )}
 
       {/* actions */}
+      {inPipeline && p.lastMinuteBoost && (
+        <div className="mt-2 rounded-lg border border-mint/40 bg-mint/10 px-2.5 py-2 text-[10px] font-bold text-mint">
+          ✨ LAST-MINUTE BREAKTHROUGH · +{p.lastMinuteBoost.points} {p.lastMinuteBoost.type.toUpperCase()} before marketing
+        </div>
+      )}
+      {inPipeline && (
+        <Btn
+          variant="ghost"
+          className="mt-2 w-full border-neon/40 !py-1.5 text-[10px] text-neon"
+          onClick={() => {
+            const clawback = p.commission ? ` Commission advance £${p.commission.advance.toLocaleString("en-GB")} will also be clawed back.` : "";
+            if (window.confirm(`SCRAP “${p.draft.title}”? £${Math.round(p.spent).toLocaleString("en-GB")} already spent will be lost.${clawback} This cannot be undone.`)) onScrap(p.id);
+          }}
+        >
+          <Trash2 size={13} /> SCRAP PROJECT · WRITE OFF {formatGBPShort(p.spent)}
+        </Btn>
+      )}
       {!auto && p.milestone && !p.rush && (
         <Btn big variant="primary" className="anim-ring mt-2 w-full" onClick={() => onMilestone(p.id)}>
           <Play size={17} /> ASSIGN {MILESTONE_LABEL[p.milestone].toUpperCase()} LEAD
@@ -424,6 +444,7 @@ export default function ProjectsPanel({
   onDelegate,
   onTakeOver,
   onResume,
+  onScrap,
   onContinueSeason,
 }: {
   run: RunState;
@@ -434,6 +455,7 @@ export default function ProjectsPanel({
   onDelegate: (projectId: string, headSlot: HeadSlot | null) => void;
   onTakeOver: (projectId: string) => void;
   onResume: (projectId: string) => void;
+  onScrap: (projectId: string) => void;
   /** greenlight the next season of an IP straight from its airing card */
   onContinueSeason?: (franchiseKey: string) => void;
 }) {
@@ -497,6 +519,7 @@ export default function ProjectsPanel({
           onDelegate={onDelegate}
           onTakeOver={onTakeOver}
           onResume={onResume}
+          onScrap={onScrap}
           onContinueSeason={onContinueSeason}
         />
       ))}

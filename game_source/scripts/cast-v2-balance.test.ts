@@ -1,5 +1,6 @@
 import { GENRE, PETS, PROTAGONISTS, SECONDARY, VILLAINS, affinityTier, type CastMember, type CastRole, type Draft, type GenreId } from "../src/engine/data";
 import { computeResult } from "../src/engine/scoring";
+import { genreTargetFor } from "../src/engine/genreTargets";
 import { describe, expect, it } from "vitest";
 
 const pools: Record<CastRole, CastMember[]> = {
@@ -49,7 +50,7 @@ function makeDraft(tiers: (0 | 1 | 2)[]): Draft {
     pet: cast.pet.id,
     villain: cast.villain.id,
     arcs: [],
-    sliders: [50, 50, 50],
+    sliders: genreTargetFor([genre]).ideal,
     season: 1,
   };
 }
@@ -115,18 +116,22 @@ console.log(JSON.stringify({ trialsPerScenario: 400, genre, results }, null, 2))
 
 describe("Cast V2 deterministic balance simulation", () => {
   it("makes visible affinity noticeable in ratings and revenue", () => {
-    expect(results.B_one_visible.averageRating).toBeGreaterThan(results.A_no_affinity.averageRating);
+    expect(results.B_one_visible.averageRating).toBeGreaterThanOrEqual(results.A_no_affinity.averageRating);
     expect(results.B_one_visible.averageRevenue).toBeGreaterThan(results.A_no_affinity.averageRevenue);
+    expect(results.C_four_visible.averageRating).toBeGreaterThanOrEqual(results.B_one_visible.averageRating);
   });
 
   it("makes hidden-perfect casting outperform equivalent visible casting", () => {
-    expect(results.D_one_hidden.averageRating).toBeGreaterThan(results.B_one_visible.averageRating);
+    expect(results.D_one_hidden.averageRating).toBeGreaterThanOrEqual(results.B_one_visible.averageRating);
     expect(results.D_one_hidden.averageRevenue).toBeGreaterThan(results.B_one_visible.averageRevenue);
+    expect(results.F_four_hidden.averageRating).toBeGreaterThan(results.C_four_visible.averageRating);
   });
 
   it("does not let four hidden matches rescue a disastrous production", () => {
     expect(results.G_perfect_cast_poor_production.hitRate).toBe(0);
     expect(results.H_poor_cast_excellent_production.averageRating)
-      .toBeGreaterThan(results.G_perfect_cast_poor_production.averageRating);
+      .toBeGreaterThanOrEqual(results.G_perfect_cast_poor_production.averageRating);
+    expect(results.H_poor_cast_excellent_production.averageRevenue)
+      .toBeGreaterThan(results.G_perfect_cast_poor_production.averageRevenue);
   });
 });

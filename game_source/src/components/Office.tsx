@@ -101,6 +101,7 @@ import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
 import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
+import { scrapProject } from "../engine/projectActions";
 import { cn } from "../utils/cn";
 
 /* =================================================================== */
@@ -595,6 +596,10 @@ export default function Office({
             onResume={(projectId) => {
               sfx.click();
               setRun((r) => resumeAuto(r, projectId));
+            }}
+            onScrap={(projectId) => {
+              sfx.back();
+              setRun((r) => scrapProject(r, projectId) ?? r);
             }}
           />
         </Modal>

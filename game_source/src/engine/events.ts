@@ -15,6 +15,7 @@ import { moraleDelta, moraleOf } from "./careers";
 import type { PointType, Staff } from "./data";
 import type { Project } from "./projects";
 import type { RunState } from "./state";
+import { rollAdvancedDecision, resolveAdvancedDecision, type AdvancedDecisionContext, type AdvancedDecisionEvent } from "./decisionEvents";
 
 export type StudioEventKind =
   | "viral"
@@ -23,7 +24,8 @@ export type StudioEventKind =
   | "argument"
   | "castpopular"
   | "backlash"
-  | "convention";
+  | "convention"
+  | "decision";
 
 export interface EventChoice {
   id: string;
@@ -39,6 +41,10 @@ export interface StudioEvent {
   expiresWeek: number;
   text: string;
   choices: EventChoice[];
+  /** full-screen high-stakes decision metadata */
+  headline?: string;
+  category?: string;
+  payload?: AdvancedDecisionEvent["payload"];
   /** project the event centres on (may have shipped by the time you answer) */
   projectId?: string;
   franchiseKey?: string;
@@ -46,13 +52,20 @@ export interface StudioEvent {
 
 let studioEventSeq = 0;
 
-export interface StudioEventContext {
+export interface StudioEventContext extends AdvancedDecisionContext {
   crew: { id: string; name: string; role: Staff["role"]; level: number; morale: number }[];
   active: { id: string; title: string; stage: string; hype: number; issues: number }[];
   topFranchise: { key: string; title: string; popularity: number } | null;
 }
 
 export function rollStudioEvent(week: number, ctx: StudioEventContext): StudioEvent | null {
+  if (!ctx.crew.length && !ctx.active.length && !ctx.topFranchise) return null;
+  /* Most rolls now come from the broad executive-decision deck. The original
+     production dilemmas remain as the studio-floor half of the same system. */
+  if (Math.random() < 0.72) {
+    const advanced = rollAdvancedDecision(week, ctx);
+    if (advanced) return advanced as StudioEvent;
+  }
   const kinds: StudioEventKind[] = [];
   if (ctx.active.length > 0) kinds.push("viral", "leak", "backlash", "castpopular", "convention");
   if (ctx.crew.length >= 1) kinds.push("incredible");
@@ -181,6 +194,7 @@ export function resolveStudioEvent(run: RunState, eventId: string, choiceId: str
   if (!ev) return null;
   const choice = ev.choices.find((c) => c.id === choiceId);
   if (!choice) return null;
+  if (ev.kind === "decision") return resolveAdvancedDecision(run, ev as AdvancedDecisionEvent, choiceId);
   const rest = (run.studioEvents ?? []).filter((x) => x.id !== eventId);
 
   let cash = run.cash;

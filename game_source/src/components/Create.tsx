@@ -247,6 +247,7 @@ export default function Create({
   const planFr = plan ? run.franchises[plan.key] : undefined;
   const planDef = plan ? continuationDef(plan.kind) : null;
   const expectation = planFr && plan ? expectedScore(planFr, plan.kind) : null;
+  const marketBrief = (run.decisionModifiers ?? []).find((m) => m.kind === "marketBrief" && m.expiresWeek >= run.week && m.uses > 0);
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
@@ -487,6 +488,30 @@ export default function Create({
           </div>
         </div>
       </div>
+
+      {marketBrief && (
+        <div className="relative z-10 border-b border-gold/30 bg-gold/10 px-3 py-2 text-[10px] text-paper/80">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
+            <b className="tracking-wider text-gold">MARKET BRIEF</b>
+            <span>{marketBrief.label}</span>
+            <span className="text-cyanx">Match it by week {marketBrief.expiresWeek} for ×{(marketBrief.mult ?? 1).toFixed(2)} release sales.</span>
+            <Btn
+              variant="gold"
+              className="ml-auto !px-2 !py-1 text-[9px]"
+              onClick={() => {
+                const medium = marketBrief.medium ?? d.medium;
+                set({
+                  genres: marketBrief.genres?.slice(0, 2) ?? d.genres,
+                  audience: marketBrief.audience ?? d.audience,
+                  medium,
+                  slot: slotForMedium(medium, d.slot),
+                });
+                setStep(2);
+              }}
+            >USE BRIEF</Btn>
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 gap-4 p-3 md:p-4">
         {/* main step content */}
