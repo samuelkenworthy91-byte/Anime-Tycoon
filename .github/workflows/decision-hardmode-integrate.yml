@@ -8,6 +8,7 @@ on:
       - 'game_source/scripts/apply-decision-hardmode.py'
       - 'game_source/scripts/fix-decision-hardmode-apply-v2.py'
       - 'game_source/scripts/fix-decision-hardmode-apply-v3.py'
+      - 'game_source/scripts/post-tune-decision-hardmode.py'
       - 'game_source/src/engine/decisionEvents.ts'
       - 'game_source/src/engine/genreTargets.ts'
       - 'game_source/src/engine/projectActions.ts'
@@ -59,6 +60,10 @@ jobs:
       - name: Fail if integration failed
         if: steps.integrate.outputs.code != '0'
         run: exit 1
+
+      - name: Tune integrated hardmode balance
+        working-directory: game_source
+        run: python3 scripts/post-tune-decision-hardmode.py
 
       - name: Install
         working-directory: game_source
