@@ -26,6 +26,7 @@ import {
 import genreV2Runtime from "./generated/genreV3.json";
 
 import arcV3Runtime from "./generated/arcV3.json";
+import { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";
 
 /* ------------------------------------------------------------------ types */
 export type GenreId =
@@ -698,6 +699,7 @@ export const ARCS: Arc[] = [
   { id: "narr_pov", name: "POV Switch", cost: 16_000, q: 5, f: 0.01, syn: ["mystery", "mystery", "horror"], synQ: 3, desc: "Retell the conflict through the eyes of somebody the audience mistrusted.", unlock: { kind: "rd", cost: 22 } },
   { id: "narr_sacrifice", name: "Heroic Sacrifice", cost: 24_000, q: 6, f: 0.03, syn: ["martial", "fantasy", "military"], synQ: 4, anti: ["comedy", "cooking"], antiQ: -3, desc: "One character pays the bill for everybody else's tomorrow.", unlock: { kind: "score", n: 30 } },
   ...arcV3Runtime.add_arcs as Arc[],
+  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: seed.id, name: seed.name, cost: seed.cost, q: seed.q, f: seed.f, syn: [...seed.syn] as GenreId[], synQ: seed.synQ, synF: seed.synF, anti: [...seed.anti] as GenreId[], antiQ: seed.antiQ, antiF: seed.antiF, desc: seed.desc, unlock: { kind: "studioArc" } as const })),
 ];
 
 /* ------------------------------------------- hidden arc synergies (shipped to discover) */
@@ -746,6 +748,7 @@ export const ARC_COMBOS: ArcCombo[] = [
   { id: "backwards_training", name: "Training After the Test", arcs: ["tournament", "montage"], q: -3, f: -0.01, ordered: true },
   { id: "spoiled_mystery", name: "Mystery Spoiled Early", arcs: ["narr_villainreveal", "case"], q: -3, f: -0.01, ordered: true },
   ...arcV3Runtime.add_combos as ArcCombo[],
+  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: `combo_${seed.id}`, name: seed.comboName, arcs: [seed.id, seed.partnerArc], q: 2, f: 0.015 } as ArcCombo)),
 ];
 
 const containsInOrder = (haystack: string[], needles: string[]) => {

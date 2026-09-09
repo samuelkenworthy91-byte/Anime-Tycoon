@@ -43,10 +43,12 @@ import { liveWorkPulseGapMs } from "./engine/studioOps";
 import AwardsCeremony from "./components/AwardsCeremony";
 import DecisionEventOverlay from "./components/DecisionEventOverlay";
 import LicensedCreate from "./components/LicensedCreate";
+import AuctionForecast from "./components/AuctionForecast";
+import AuctionCeremony from "./components/AuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
 
-type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";
+type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
@@ -63,6 +65,7 @@ export default function App() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [licensedIpId, setLicensedIpId] = useState<string | null>(null);
+  const [auctionId, setAuctionId] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
@@ -134,6 +137,19 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run?.awardsCeremony?.year, screen]);
+
+  /* ------------------------------------ annual rights forecast: like other attention events,
+     the live clock stops and the player explicitly decides whether to engage. */
+  const seenAuctionPrompt = useRef<string | null>(null);
+  useEffect(() => {
+    const id = run?.ipMarket.pendingPromptId ?? null;
+    if (!id || id === seenAuctionPrompt.current) return;
+    if (screen === "office" || screen === "produce") {
+      seenAuctionPrompt.current = id;
+      setTimeSpeed(0);
+      sfx.fanfare();
+    }
+  }, [run?.ipMarket.pendingPromptId, screen]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -284,6 +300,10 @@ export default function App() {
 
   const licensedShow = useCallback((ipId: string) => {
     sfx.select(); setContPlan(null); setPendingCommission(null); setLicensedIpId(ipId); setScreen("licensed");
+  }, []);
+
+  const enterAuction = useCallback((id: string) => {
+    sfx.select(); setAuctionId(id); setTimeSpeed(0); setScreen("auction");
   }, []);
 
   /** a continuation chosen in the franchise library */
@@ -528,6 +548,7 @@ export default function App() {
             setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
             onNewShow={newShow}
             onLicensed={licensedShow}
+            onAuction={enterAuction}
             onContract={takeContract}
             onCommission={takeCommission}
             onContinue={continueFranchise}
@@ -590,6 +611,12 @@ export default function App() {
             onDone={finishContract}
             onBack={() => { setContract(null); setScreen("office"); }}
           />
+        )}
+        {run && run.ipMarket.pendingPromptId && (screen === "office" || screen === "produce") && (
+          <AuctionForecast run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} onEnter={enterAuction} />
+        )}
+        {screen === "auction" && run && auctionId && (
+          <AuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} auctionId={auctionId} onDone={() => { setAuctionId(null); setScreen("office"); }} />
         )}
         {screen === "awards" && run?.awardsCeremony && (
           <AwardsCeremony

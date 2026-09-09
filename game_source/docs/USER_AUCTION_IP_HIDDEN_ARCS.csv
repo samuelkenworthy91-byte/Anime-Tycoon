@@ -1,0 +1,101 @@
+posterSlot,title,arcId,hiddenArc,nativeGenre1,nativeGenre2,comboPartnerArcId,comboPartnerArc
+1,"Crystal Quest: Four Hearts, One Tomorrow",ip_arc_001,Crystal Pilgrimage,fantasy,mythology,lore,Worldbuilding Dive
+2,Lifestream Rebellion: A Brighter Tomorrow,ip_arc_002,Broken World Reunion,cyber,fantasy,launch,Launch Arc
+3,Relic of the Wild: Kingdom at Dawn,ip_arc_003,Relic Dungeon Cycle,fantasy,mythology,lore,Worldbuilding Dive
+4,The Flamebound Heir: A Kingdom Endures,ip_arc_004,Exiled Heir Campaign,fantasy,military,war,War Arc
+5,Three Banners Academy,ip_arc_005,Academy Route Split,fantasy,military,war,War Arc
+6,The Black Ledger: A Deadly Mind Game,ip_arc_006,Mindgame Pursuit,mystery,supernatural,twist,Plot Twist
+7,Solar Fist: A Brighter World,ip_arc_007,Ascension Battle,martial,supernatural,origin,Origin Story
+8,Star Dragon Trail: Beyond Tomorrow,ip_arc_008,Cosmic Dragon Hunt,martial,space,origin,Origin Story
+9,Brotherhood of Brass: Alchemical Dawn,ip_arc_009,Equivalent Exchange,magical,military,war,War Arc
+10,Infernal Requiem: A Brighter Hell,ip_arc_010,Demon Contract Hunt,supernatural,horror,cliffhanger,Cliffhanger
+11,The Nameless Smile,ip_arc_011,Psychological Pursuit,mystery,horror,twist,Plot Twist
+12,Covenant of Midnight,ip_arc_012,Ritual Grail War,magical,supernatural,cliffhanger,Cliffhanger
+13,Battle School Orion,ip_arc_013,Battle School Command,space,military,war,War Arc
+14,Rising Eleven: From Streets to Stardom,ip_arc_014,Career Breakthrough,sports,slice,tournament,Tournament Arc
+15,Iron Howlers: Stormfront Mechs,ip_arc_015,Mercenary Mech Contract,mecha,military,war,War Arc
+16,Ash Throne Legion,ip_arc_016,Crusade of Attrition,space,mecha,launch,Launch Arc
+17,Starfall Rebellion,ip_arc_017,Rebel Rescue,space,mythology,launch,Launch Arc
+18,Moonlit Maze,ip_arc_018,Labyrinth Bargain,isekai,magical,lore,Worldbuilding Dive
+19,Wildspark Quest,ip_arc_019,Creature League,magical,sports,tournament,Tournament Arc
+20,Cyber Crests,ip_arc_020,Digital Evolution,cyber,isekai,launch,Launch Arc
+21,Soul Tide,ip_arc_021,Spirit Realm Rescue,supernatural,martial,origin,Origin Story
+22,Hidden Storm,ip_arc_022,Clan Examination,shinobi,martial,origin,Origin Story
+23,Grand Horizon Voyage,ip_arc_023,Island Liberation,pirate,martial,origin,Origin Story
+24,Tidebreak Champions,ip_arc_024,Sphere League Tournament,sports,fantasy,tournament,Tournament Arc
+25,War of Three Banners,ip_arc_025,Three Kingdom Stratagem,military,martial,war,War Arc
+26,A Pocketful of Tomorrows,ip_arc_026,Second Chance Timeline,romance,supernatural,confession,Confession
+27,Ashfall Dominion,ip_arc_027,Dragon Siege,survival,horror,cliffhanger,Cliffhanger
+28,Northern Oath,ip_arc_028,Saga Voyage,nordic,military,war,War Arc
+29,Snowbound Hunger,ip_arc_029,Winter Invitation,nordic,horror,cliffhanger,Cliffhanger
+30,Radio Rebels,ip_arc_030,Pirate Broadcast,idol,comedy,live,Live Performance
+31,Midnight Soul Run,ip_arc_031,Band Reunites,idol,comedy,live,Live Performance
+32,The Seventh Trace,ip_arc_032,Seven Clue Countdown,mystery,horror,twist,Plot Twist
+33,Lineup of Shadows,ip_arc_033,Unreliable Lineup,mystery,horror,twist,Plot Twist
+34,Velvet Appetite,ip_arc_034,Predator’s Table,horror,mystery,twist,Plot Twist
+35,Crestfall Dominion,ip_arc_035,Crest War,fantasy,military,war,War Arc
+36,The Hidden Striker,ip_arc_036,Hidden Identity Season,romance,comedy,confession,Confession
+37,The Final Ronin,ip_arc_037,Last Stand of the Old Guard,samurai,martial,origin,Origin Story
+38,Retro Newsroom,ip_arc_038,Broadcast Meltdown,comedy,slice,festival,Festival Episode
+39,The Devourer Queen,ip_arc_039,Ancient Monster Pact,fantasy,horror,cliffhanger,Cliffhanger
+40,Awakened,ip_arc_040,Awakening Ensemble,supernatural,mystery,twist,Plot Twist
+41,Beyond the Veil,ip_arc_041,Mirror World Incursion,supernatural,horror,cliffhanger,Cliffhanger
+42,Phantom Arsenal,ip_arc_042,Stealth Infiltration,military,cyber,war,War Arc
+43,Velvet Shade,ip_arc_043,Drag House Rivalry,idol,comedy,live,Live Performance
+44,Whisper Society,ip_arc_044,Anonymous Scandal,romance,mystery,twist,Plot Twist
+45,Golden Coast,ip_arc_045,Coastal Love Triangle,romance,slice,confession,Confession
+46,Crown of Embers,ip_arc_046,Succession War,fantasy,military,war,War Arc
+47,Wheel of Ages,ip_arc_047,Turning Wheel Prophecy,fantasy,mythology,lore,Worldbuilding Dive
+48,Rogue Rhythm Ronin,ip_arc_048,Road Duel,samurai,martial,origin,Origin Story
+49,Starlight Outlaws,ip_arc_049,Bounty of the Week,space,cyber,launch,Launch Arc
+50,The Black Spire,ip_arc_050,Tower Pilgrimage,fantasy,horror,cliffhanger,Cliffhanger
+51,Rising Tempest,ip_arc_051,Revenge Duel,cyber,mecha,launch,Launch Arc
+52,Sunwheel Exiles,ip_arc_052,Forbidden Technology Exodus,cyber,survival,launch,Launch Arc
+53,Whisper Keyhouse,ip_arc_053,Keyed Door Mystery,supernatural,mystery,twist,Plot Twist
+54,Thornwall Abbey,ip_arc_054,Abbey Siege,fantasy,military,war,War Arc
+55,Dungeon Banquet,ip_arc_055,Dungeon Meal Expedition,cooking,fantasy,lore,Worldbuilding Dive
+56,Inferno Kitchen,ip_arc_056,Pressure Kitchen Elimination,cooking,survival,hook,Cold Open Hook
+57,Feast Challenger,ip_arc_057,Impossible Food Challenge,cooking,comedy,festival,Festival Episode
+58,Scarlet Circle,ip_arc_058,Elimination Game,survival,mystery,twist,Plot Twist
+59,Target Homeroom,ip_arc_059,Impossible Teacher Mission,comedy,martial,festival,Festival Episode
+60,Aether Online,ip_arc_060,Death-Game Floor,isekai,cyber,launch,Launch Arc
+61,Spiral Tide,ip_arc_061,Summoner Pilgrimage,fantasy,romance,confession,Confession
+62,Black File,ip_arc_062,Secret Agency Case,space,comedy,festival,Festival Episode
+63,Plastic Kingdom,ip_arc_063,Social Clique Coup,comedy,slice,festival,Festival Episode
+64,Poison Petals,ip_arc_064,Deadly Popularity Pact,comedy,horror,festival,Festival Episode
+65,Winter Maw,ip_arc_065,Pack Survival,survival,nordic,hook,Cold Open Hook
+66,Thousand Bad Ends,ip_arc_066,Absurd Frontier Deathtrap,comedy,martial,festival,Festival Episode
+67,Starspark Stunt,ip_arc_067,Impossible Stunt,comedy,sports,tournament,Tournament Arc
+68,Shadowmaw,ip_arc_068,Demon Realm Breach,horror,supernatural,cliffhanger,Cliffhanger
+69,Stormheart Castle,ip_arc_069,Moving Castle Bargain,magical,romance,confession,Confession
+70,Sword and Rose,ip_arc_070,Storybook Rescue,romance,comedy,confession,Confession
+71,Lionheart War,ip_arc_071,Tactical Succession War,fantasy,military,war,War Arc
+72,The Obsidian Archive,ip_arc_072,Statement Casefile,mystery,horror,twist,Plot Twist
+73,500 Days of Sunlight,ip_arc_073,Nonlinear Romance,romance,slice,confession,Confession
+74,Moonstake Hunter,ip_arc_074,Monster of the Week,supernatural,martial,origin,Origin Story
+75,Parasol Academy,ip_arc_075,Apocalypse Family,supernatural,mystery,twist,Plot Twist
+76,Starbound Slumber,ip_arc_076,Awake Alone,romance,space,confession,Confession
+77,Silicon Heart,ip_arc_077,Synthetic Intimacy,romance,cyber,confession,Confession
+78,The Last Letter,ip_arc_078,Memory Love Story,romance,slice,confession,Confession
+79,Hidden Dragon Moon,ip_arc_079,Wuxia Forbidden Love,martial,romance,confession,Confession
+80,Bullet Requiem,ip_arc_080,Noir Bullet Time,mystery,cyber,twist,Plot Twist
+81,Skyshard Chronicle,ip_arc_081,Village Restoration,fantasy,magical,lore,Worldbuilding Dive
+82,Bramble & Beak,ip_arc_082,Collectathon Quest,comedy,fantasy,festival,Festival Episode
+83,Scarlet Tail,ip_arc_083,Bad-Taste Escalation,comedy,survival,festival,Festival Episode
+84,Mindgate Zero,ip_arc_084,Psychic Conspiracy,supernatural,military,war,War Arc
+85,Sea of the Second Sun,ip_arc_085,Survival Fable,survival,mythology,lore,Worldbuilding Dive
+86,Ashen Mile,ip_arc_086,Road of Ash,survival,horror,cliffhanger,Cliffhanger
+87,Tideborn Drift,ip_arc_087,Floating Settlement War,pirate,survival,hook,Cold Open Hook
+88,Townlight Rhythm,ip_arc_088,Dance Rebellion,romance,idol,confession,Confession
+89,Autumn Chalkheart,ip_arc_089,Genius Mentorship,slice,romance,confession,Confession
+90,Paper Constellations,ip_arc_090,Family Dream Detour,slice,comedy,festival,Festival Episode
+91,Golden Whistle,ip_arc_091,Believe Rebuild,sports,slice,tournament,Tournament Arc
+92,Primate Panic,ip_arc_092,Primate Gadget Chase,comedy,cyber,festival,Festival Episode
+93,Ashfall Junction,ip_arc_093,Aftermath Community,survival,military,war,War Arc
+94,Smile Trigger,ip_arc_094,Imaginary Partner Case,comedy,supernatural,festival,Festival Episode
+95,Wings of Yesterday,ip_arc_095,Causal Ripple,supernatural,mystery,twist,Plot Twist
+96,Desert Formula,ip_arc_096,Criminal Transformation,mystery,survival,twist,Plot Twist
+97,The Last Windkeeper,ip_arc_097,Four Nations Journey,magical,martial,origin,Origin Story
+98,Aether Divide,ip_arc_098,Twin City Revolution,cyber,magical,launch,Launch Arc
+99,Starwind Outlaws,ip_arc_099,Found-Family Job,space,pirate,launch,Launch Arc
+100,Pine Veil,ip_arc_100,Dream Logic Investigation,mystery,supernatural,twist,Plot Twist
