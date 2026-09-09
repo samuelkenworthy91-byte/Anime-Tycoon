@@ -1,0 +1,26 @@
+name: Cast V4 Worktree Export
+
+on:
+  push:
+    branches:
+      - work/cast-v4-runtime-integration
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Upload exact worktree
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-v4-worktree
+          path: .
+          include-hidden-files: true
+          retention-days: 1
+          if-no-files-found: error
