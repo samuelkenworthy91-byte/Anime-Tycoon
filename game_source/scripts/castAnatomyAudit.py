@@ -3,7 +3,7 @@
 
 This script is intentionally read-only with respect to runtime artwork. It:
 - reads the actual selectable cast from src/engine/generated/castV3.json
-- requires exactly 432 unique cast IDs and image paths
+- requires exactly 736 unique cast IDs and image paths
 - opens every referenced runtime portrait under public/
 - records format, size, file size and SHA-256
 - emits a CSV seeded as PENDING_VISUAL_QC
@@ -23,7 +23,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-EXPECTED_CAST = 432
+EXPECTED_CAST = 736
 EXPECTED_SIZE = (512, 512)
 CONTACT_COLUMNS = 4
 CONTACT_ROWS = 4
@@ -107,7 +107,7 @@ def main() -> None:
 
     rows: list[dict[str, Any]] = []
     invalid: list[str] = []
-    source_counts: dict[str, int] = {"v2": 0, "v3": 0, "other": 0}
+    source_counts: dict[str, int] = {"v2": 0, "v3": 0, "v4": 0, "other": 0}
 
     for ordinal, member in enumerate(cast, start=1):
         img = str(member["img"])
@@ -116,6 +116,8 @@ def main() -> None:
             source_set = "v2"
         elif "/v3/" in f"/{img}":
             source_set = "v3"
+        elif "/v4/" in f"/{img}":
+            source_set = "v4"
         else:
             source_set = "other"
         source_counts[source_set] += 1
