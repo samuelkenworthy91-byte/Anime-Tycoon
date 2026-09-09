@@ -1,0 +1,56 @@
+name: Decision Hardmode Integration
+
+on:
+  push:
+    branches:
+      - work/decision-events-hardmode
+    paths:
+      - 'game_source/scripts/apply-decision-hardmode.py'
+      - 'game_source/src/engine/decisionEvents.ts'
+      - 'game_source/src/engine/genreTargets.ts'
+      - 'game_source/src/engine/projectActions.ts'
+      - 'game_source/src/components/DecisionEventOverlay.tsx'
+      - '.github/workflows/decision-hardmode-integrate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: ${{ !contains(github.event.head_commit.message, '[decision-hardmode integrated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/decision-events-hardmode
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply integration
+        working-directory: game_source
+        run: python3 scripts/apply-decision-hardmode.py
+
+      - name: Install
+        working-directory: game_source
+        run: npm ci
+
+      - name: Test
+        working-directory: game_source
+        run: npm test
+
+      - name: Build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit integrated result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src game_source/scripts
+          git commit -m 'Integrate decision events and hard-mode scoring [decision-hardmode integrated]' || exit 0
+          git push origin HEAD:work/decision-events-hardmode
