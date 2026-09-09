@@ -214,6 +214,7 @@ import {
   type AwardCeremony,
   type AwardNominee,
 } from "./awards";
+import { initIPMarket, licensedRevenue, migrateIPMarket, tickIPMarket, ipById, type IPMarketState } from "./ip";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -364,6 +365,12 @@ export interface RunState {
   staffResting: Record<string, boolean>;
   /** overseas licensing deal: +15% revenue until this week */
   revBoostUntil: number;
+  /** auction calendar, adaptation contracts and studio-wide discovered story blueprints */
+  ipMarket: IPMarketState;
+  /** one-off strategic spending is recorded for finance/history UI */
+  strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
+  capitalProjects: string[];
+  staffContracts: Record<string, { expiresWeek: number; bonus: number; exclusive: boolean }>;
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -385,6 +392,8 @@ export const arcLockReason = (a: Arc, r: RunState): string | null => {
       return r.bestScore >= u.n ? null : `Requires a ${u.n}/40 review score (best: ${r.bestScore})`;
     case "staff":
       return r.staff.length >= u.n ? null : `Requires ${u.n} staff hired (${r.staff.length}/${u.n})`;
+    case "studioArc":
+      return r.ipMarket.studioArcs.includes(a.id) ? null : "Hidden studio blueprint — discover through a licensed property";
   }
 };
 
@@ -497,6 +506,10 @@ export function initialRun(studio: string, showrunner: string): RunState {
     audienceInsights: [],
     staffResting: {},
     revBoostUntil: 0,
+    ipMarket: initIPMarket(0),
+    strategicSpend: [],
+    capitalProjects: [],
+    staffContracts: {},
   };
 }
 
@@ -537,6 +550,7 @@ export function migrateRun(raw: unknown): RunState {
       ...pr,
       draft: migrateDraftV2(pr.draft, unlocked),
       rush: null,
+      interventions: Array.isArray(pr.interventions) ? pr.interventions : [],
       liveQuality: { ...(pr.liveQuality ?? { story: 0, art: 0, sound: 0 }) },
     })) : [],
     /* older saves may carry bare-bones award slate entries — backfill the
@@ -603,6 +617,10 @@ export function migrateRun(raw: unknown): RunState {
     arcKnowledge: r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {},
     arcGenreKnowledge: migrateArcGenreKnowledge(r.arcGenreKnowledge),
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
+    ipMarket: migrateIPMarket((r as { ipMarket?: unknown }).ipMarket, r.week ?? 0),
+    strategicSpend: Array.isArray(r.strategicSpend) ? r.strategicSpend : [],
+    capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
+    staffContracts: r.staffContracts && typeof r.staffContracts === "object" ? r.staffContracts : {},
     /* additive migration: an old save simply starts with the neutral
        expectation; only the studio's own past releases move it forward */
     reviewExpectation: typeof r.reviewExpectation === "number" ? r.reviewExpectation : REVIEW_EXPECTATION_SEED,
@@ -780,6 +798,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   rivalWorld = { ...rivalWorld, studios: rivalWorld.studios.map((s) => ({ ...s, talent: [...s.talent] })) };
   let partners = { ...(r.partners ?? {}) };
   let franchises = { ...(r.franchises ?? {}) };
+  let ipMarket = migrateIPMarket(r.ipMarket, r.week);
 
   /* facilities + department heads + retired legends → studio-wide effects */
   const baseFx = facilityFX(r.facilities);
@@ -964,6 +983,16 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       });
     }
 
+    /* Rights market is deliberately weekly, never per-frame. Rival bids use
+       persistent rival reputation/tier/genre strategy and can beat the player. */
+    {
+      const ipTick = tickIPMarket(ipMarket, { week: w, cash, fans, awards, bestScore: r.bestScore, showsMade: r.showsMade }, rivalWorld);
+      ipMarket = ipTick.market;
+      cash += ipTick.cashDelta;
+      rivalWorld = ipTick.world;
+      notices.push(...ipTick.notices);
+    }
+
     /* ------- quarterly reviews: raises requested, rivals come calling ------- */
     if (w % 12 === 0) {
       for (const st of staffArr) {
@@ -981,7 +1010,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           });
           staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
           notices.push(`${st.name} requests a salary review (£${marketSalary(st).toLocaleString("en-GB")}/wk).`);
-        } else if (poachable(st) && Math.random() < 0.35) {
+        } else if (poachable(st) && !(r.staffContracts?.[st.id]?.exclusive && r.staffContracts[st.id].expiresWeek > w) && Math.random() < 0.35) {
           const poacher = pickPoacher(rivalWorld);
           if (poacher) {
             const offer = Math.round((st.salary * 1.6) / 10) * 10;
@@ -1270,6 +1299,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     studioEvents,
     franchises,
     partners,
+    ipMarket,
     notices: notices.slice(-40),
   };
 }
@@ -1305,6 +1335,16 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
     const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
     if (r.officeLevel < scope.minOffice) return `${scope.label} requires ${OFFICES[scope.minOffice].name} or larger`;
     if (r.staff.length < scope.minStaff) return `${scope.label} needs at least ${scope.minStaff} staff on the books`;
+    if (d.licensedIpId) {
+      const contract = r.ipMarket.owned[d.licensedIpId];
+      const ip = ipById(d.licensedIpId);
+      if (!contract || !ip) return "The studio does not own these adaptation rights";
+      if (contract.expiresWeek <= r.week) return "These adaptation rights have expired";
+      if (!d.licensedArcId || !ip.availableArcs.some((a) => a.id === d.licensedArcId)) return "Choose a valid property story arc";
+      const selected = ip.availableArcs.find((a) => a.id === d.licensedArcId)!;
+      if ((selected.minAdaptations ?? 0) > contract.adaptations) return "Complete the previous adaptation first";
+      if (selected.requiresSequelRights && !contract.sequelRights) return "Negotiate sequel rights first";
+    }
   }
   if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
   if (d?.continuation) {
@@ -1397,7 +1437,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -2282,6 +2322,7 @@ export function castBreakthroughsForRelease(
   draft: Draft,
   discovered: readonly string[],
 ): { castId: string; name: string; genre: GenreId }[] {
+  if (draft.licensedIpId) return [];
   const releasedCastIds = [draft.protag, draft.secondary, draft.pet, draft.villain];
   return [...new Set(releasedCastIds)].flatMap((castId) => {
     const member = castById(castId);
@@ -2304,6 +2345,27 @@ export function releaseProject(
   const draft = p.draft;
   const breakthroughs = castBreakthroughsForRelease(draft, r.castAffinityDiscovered);
   result = { ...result, castBreakthroughs: breakthroughs };
+
+  /* Licensed adaptations carry fan expectations and royalties. Canonical
+     characters are not employees and therefore never create cast discoveries. */
+  const licensedIp = draft.licensedIpId ? ipById(draft.licensedIpId) : null;
+  const licensedContract = draft.licensedIpId ? r.ipMarket.owned[draft.licensedIpId] : null;
+  if (licensedIp && licensedContract) {
+    const { royalty, ownershipRevenue, net } = licensedRevenue(result.revenue, licensedContract);
+    const expectationGap = result.total - Math.round(14 + licensedIp.expectationLevel * 0.2);
+    const fanMult = expectationGap >= 4 ? 1.28 : expectationGap < -5 ? 0.55 : expectationGap < 0 ? 0.82 : 1.08;
+    result = {
+      ...result,
+      revenue: net,
+      fans: Math.round(result.fans * fanMult + licensedIp.fanbase * (expectationGap >= 0 ? 45 : 10)),
+      breakdown: [
+        ...result.breakdown,
+        { label: `${licensedIp.title} royalty (${Math.round(licensedContract.royaltyRate * 100)}%)`, pts: `−£${royalty.toLocaleString("en-GB")}` },
+        { label: `Production ownership (${Math.round(licensedContract.ownershipShare * 100)}%)`, pts: `+£${ownershipRevenue.toLocaleString("en-GB")}` },
+        { label: `Existing fan expectations`, pts: expectationGap >= 0 ? `met · fans ×${fanMult.toFixed(2)}` : `missed · backlash ×${fanMult.toFixed(2)}` },
+      ],
+    };
+  }
 
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */
   const deal = p.commission;
@@ -2425,7 +2487,10 @@ export function releaseProject(
     }
   } else {
     /* an original — a brand-new IP record is born */
-    franchises[fkey] = createFranchise(fkey, draft, castSeed, resShape, r.week);
+    const created = createFranchise(fkey, draft, castSeed, resShape, r.week);
+    /* licensed characters are property presentation data, not employee-cast
+       records; never display an unrelated staff portrait in the library */
+    franchises[fkey] = draft.licensedIpId ? { ...created, cast: [] } : created;
   }
   const ck = comboKey(draft.genres);
   const notices = [...r.notices, ...frNotices];
@@ -2475,6 +2540,21 @@ export function releaseProject(
 
   const released: Project = { ...p, stage: "airing", result, airedWeek: start };
 
+  const hiddenBlueprint = licensedIp?.specialArcUnlock;
+  const blueprintDiscovered = !!hiddenBlueprint && !r.ipMarket.studioArcs.includes(hiddenBlueprint) && result.total >= 24;
+  const nextIpMarket = licensedIp && licensedContract ? {
+    ...r.ipMarket,
+    owned: { ...r.ipMarket.owned, [licensedIp.id]: {
+      ...licensedContract,
+      adaptations: licensedContract.adaptations + 1,
+      bestScore: Math.max(licensedContract.bestScore, result.total),
+      discoveredArcs: blueprintDiscovered ? [...licensedContract.discoveredArcs, hiddenBlueprint!] : licensedContract.discoveredArcs,
+    } },
+    studioArcs: blueprintDiscovered ? [...r.ipMarket.studioArcs, hiddenBlueprint!] : r.ipMarket.studioArcs,
+    history: [...r.ipMarket.history, `${licensedIp.title} adapted: ${result.total}/40.`],
+  } : r.ipMarket;
+  if (blueprintDiscovered) notices.push(`🧠 Hidden story blueprint discovered: ${hiddenBlueprint!.replace(/_/g, " ").toUpperCase()} — now available to original productions.`);
+
   const run: RunState = {
     ...r,
     cash: r.cash - extra.spent + bonusCash,
@@ -2515,6 +2595,7 @@ export function releaseProject(
        poison future reviews, and a deliberate flop cannot soften the bar. */
     reviewExpectation: nextReviewExpectation(r.reviewExpectation, result.quality),
     franchises,
+    ipMarket: nextIpMarket,
     pendingSequel:
       result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
     hallOfFame: result.hallOfFame

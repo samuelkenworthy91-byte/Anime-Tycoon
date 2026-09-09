@@ -45,6 +45,7 @@ import {
 import Portrait from "./Portrait";
 import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
+import { INTERVENTIONS, interventionBlock } from "../engine/spending";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -70,6 +71,7 @@ function ProjectCard({
   onResume,
   onScrap,
   onContinueSeason,
+  onIntervention,
 }: {
   p: Project;
   run: RunState;
@@ -82,6 +84,7 @@ function ProjectCard({
   onScrap: (projectId: string) => void;
   /** jump straight into creating this IP's next season while it's still on air */
   onContinueSeason?: (franchiseKey: string) => void;
+  onIntervention: (projectId: string, interventionId: string) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
@@ -224,6 +227,15 @@ function ProjectCard({
           <Banknote size={10} /> {formatGBPShort(p.spent)} spent
         </span>
       </div>
+
+      {inPipeline && (
+        <details className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
+          <summary className="cursor-pointer text-[10px] font-black tracking-widest text-gold">PAID PRODUCTION INTERVENTIONS</summary>
+          <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+            {INTERVENTIONS.map((d) => { const block=interventionBlock(run,p,d); return <button key={d.id} disabled={!!block} title={block??d.description} onClick={()=>onIntervention(p.id,d.id)} className={cn("rounded-lg border p-2 text-left text-[9px]",block?"border-line/40 opacity-35":"border-gold/35 bg-gold/5 hover:border-gold")}><b className="block text-paper">{d.name}</b><span className="text-gold">−{formatGBPShort(d.cost)}</span><span className="ml-1 text-paper/40">{block??d.description}</span></button>})}
+          </div>
+        </details>
+      )}
 
       {/* team */}
       {inPipeline && (
@@ -446,6 +458,7 @@ export default function ProjectsPanel({
   onResume,
   onScrap,
   onContinueSeason,
+  onIntervention,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -458,6 +471,7 @@ export default function ProjectsPanel({
   onScrap: (projectId: string) => void;
   /** greenlight the next season of an IP straight from its airing card */
   onContinueSeason?: (franchiseKey: string) => void;
+  onIntervention: (projectId: string, interventionId: string) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
@@ -521,6 +535,7 @@ export default function ProjectsPanel({
           onResume={onResume}
           onScrap={onScrap}
           onContinueSeason={onContinueSeason}
+          onIntervention={onIntervention}
         />
       ))}
 

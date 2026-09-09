@@ -29,6 +29,7 @@ import {
   Award,
   Clock,
   Swords,
+  Gavel,
 } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
 import { sfx } from "../engine/audio";
@@ -88,6 +89,8 @@ import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
 import Poster from "./Poster";
 import { genreTitleCss } from "../engine/poster";
+import IPMarket from "./IPMarket";
+import { applyIntervention } from "../engine/spending";
 import type { HofEntry } from "../engine/state";
 
 /** hall-of-fame list rows speak in the show's genre font too */
@@ -109,6 +112,7 @@ export default function Office({
   run,
   setRun,
   onNewShow,
+  onLicensed,
   onContract,
   onCommission,
   onContinue,
@@ -121,6 +125,7 @@ export default function Office({
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
   onNewShow: (sequelKey?: string) => void;
+  onLicensed: (ipId: string) => void;
   onContract: (c: Contract) => void;
   onCommission: (c: Commission) => void;
   onContinue: (plan: ContinuationPlan) => void;
@@ -130,7 +135,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more">(null);
+  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more">(null);
   const [fcOpen, setFcOpen] = useState(false);
   const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
@@ -368,6 +373,7 @@ export default function Office({
                         ≈ {formatGBPShort(fc.cashAfter)}
                       </span>
                     </div>
+                    {run.strategicSpend.length > 0 && <><div className="mt-1 border-t border-line/60 pt-1 text-[9px] font-extrabold tracking-[0.2em] text-gold">RECENT ONE-OFF STRATEGIC SPEND</div>{run.strategicSpend.slice(-3).reverse().map(s=><div key={s.id} className="flex justify-between gap-2"><span className="truncate text-paper/55">{s.label} · W{s.week}</span><span className="shrink-0 font-bold text-gold">{s.amount?`−${formatGBPShort(s.amount)}`:"5 RD"}</span></div>)}</>}
                   </div>
                   {fc.cashAfter < 0 ? (
                     <div className="mt-2 rounded-lg border border-neon/50 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon">
@@ -420,7 +426,7 @@ export default function Office({
             variant={newShowBlocked ? "ghost" : "primary"}
             disabled={!!newShowBlocked}
             className="!min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]"
-            onClick={() => onNewShow()}
+            onClick={() => setModal("newproject")}
           >
             <Clapperboard size={15} /> NEW SHOW
           </Btn>
@@ -457,11 +463,21 @@ export default function Office({
       </div>
 
       {/* ----------------------------------------------------------- MORE */}
+      {modal === "newproject" && (
+        <Modal title="NEW PROJECT" onClose={() => setModal(null)}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button className="btn-press ink-card p-4 text-left" onClick={() => { setModal(null); onNewShow(); }}><Clapperboard size={22} className="text-neon"/><div className="mt-2 font-display text-lg font-black">ORIGINAL PRODUCTION</div><div className="text-xs text-paper/55">Choose genre, audience and every cast role from your studio roster.</div></button>
+            <button className="btn-press ink-card p-4 text-left" onClick={() => setModal("auctions")}><Gavel size={22} className="text-gold"/><div className="mt-2 font-display text-lg font-black">LICENSED ADAPTATION</div><div className="text-xs text-paper/55">Use canonical property characters. Requires owned adaptation rights.</div></button>
+          </div>
+        </Modal>
+      )}
+
       {modal === "more" && (
         <Modal title="STUDIO MENU" onClose={() => setModal(null)}>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("facilities")}><Hammer size={16} className="text-gold"/><span className="text-xs font-bold">STUDIO ROOMS</span></button>
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("market")}><BarChart3 size={16} className="text-mint"/><span className="text-xs font-bold">MARKET</span></button>
+            <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("auctions")}><Gavel size={16} className="text-gold"/><span className="text-xs font-bold">IP AUCTIONS</span></button>
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("research")}><FlaskConical size={16} className="text-viol"/><span className="text-xs font-bold">R&amp;D</span></button>
             {seriesList.length > 0 && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("sequels")}><Clapperboard size={16} className="text-gold"/><span className="text-xs font-bold">LIBRARY</span></button>}
             {nextOffice && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("relocate")}><Building2 size={16} className="text-cyanx"/><span className="text-xs font-bold">MOVE STUDIO</span></button>}
@@ -471,6 +487,12 @@ export default function Office({
             {run.dynasty && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("dynasty")}><Crown size={16} className="text-gold"/><span className="text-xs font-bold">DYNASTY</span></button>}
           </div>
           {seq && <Btn variant="gold" className="mt-3 w-full" onClick={() => { setModal(null); onNewShow(run.pendingSequel!); }}><Zap size={15}/> START SEASON {seq.season + 1}</Btn>}
+        </Modal>
+      )}
+
+      {modal === "auctions" && (
+        <Modal title="IP RIGHTS & AUCTIONS" onClose={() => setModal(null)}>
+          <IPMarket run={run} setRun={setRun} onAdapt={(ipId) => { setModal(null); onLicensed(ipId); }}/>
         </Modal>
       )}
 
@@ -584,6 +606,10 @@ export default function Office({
             onContinueSeason={(key) => {
               setModal(null);
               onContinue({ key, kind: "season" });
+            }}
+            onIntervention={(projectId, interventionId) => {
+              sfx.cash();
+              setRun((r) => applyIntervention(r, projectId, interventionId) ?? r);
             }}
             onDelegate={(projectId, headSlot: HeadSlot | null) => {
               sfx.whoosh();

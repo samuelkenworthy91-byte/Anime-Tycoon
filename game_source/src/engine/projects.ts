@@ -209,6 +209,8 @@ export interface Project {
   lastMinuteBoost?: { type: PointType; points: number } | null;
   /** production automation (engine/automation.ts) — null = fully manual */
   auto?: AutoState | null;
+  /** paid, once-per-project contextual interventions */
+  interventions?: string[];
 }
 
 /** delegation state for AUTO MANAGE (see engine/automation.ts) */

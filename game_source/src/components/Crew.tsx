@@ -68,6 +68,7 @@ import { projectOfStaff } from "../engine/projects";
 import { rollHire } from "../engine/careers";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
+import { signStaffContract } from "../engine/spending";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -350,6 +351,16 @@ function StaffCard({
               )}
               <span className="col-span-2 text-paper/45">Market rate: {formatGBP(marketSalary(s))}/wk</span>
             </div>
+          </div>
+
+          {/* training */}
+          <div className="rounded-xl border border-gold/30 bg-gold/5 p-2">
+            <div className="text-[8px] font-bold tracking-[0.2em] text-gold">RETENTION &amp; EXCLUSIVITY</div>
+            {run.staffContracts[s.id]?.expiresWeek > run.week ? (
+              <div className="mt-1 text-[9px] text-mint">Exclusive through week {run.staffContracts[s.id].expiresWeek} · rival poaching blocked</div>
+            ) : (
+              <Btn variant="gold" className="mt-1 !px-2 !py-1 text-[9px]" onClick={()=>setRun(r=>signStaffContract(r,s.id,2,true)??r)}>2-YEAR EXCLUSIVE · {formatGBP(Math.round(s.salary*48))} EST.</Btn>
+            )}
           </div>
 
           {/* training */}

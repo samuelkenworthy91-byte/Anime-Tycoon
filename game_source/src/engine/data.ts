@@ -150,7 +150,8 @@ export type ArcUnlock =
   | { kind: "hits"; n: number }
   | { kind: "shows"; n: number }
   | { kind: "score"; n: number }
-  | { kind: "staff"; n: number };
+  | { kind: "staff"; n: number }
+  | { kind: "studioArc" };
 
 export interface Arc {
   id: string;
@@ -204,6 +205,11 @@ export interface Draft {
   crossKey?: string;
   /** spin-off featured character (cast id from the parent IP) */
   spinChar?: string;
+  /** external adaptation rights; absent means an original studio production */
+  licensedIpId?: string;
+  licensedArcId?: string;
+  /** canonical property character names are presentation data, never employees */
+  licensedCharacters?: string[];
 }
 
 /* ---------------------------------------------------------------- genres */
@@ -601,9 +607,16 @@ export interface Promo {
 }
 export const PROMOS: Promo[] = [
   { id: "pv", name: "Teaser PV", cost: 12_000, hype: 10, desc: "30 seconds of vibes, zero plot." },
+  { id: "character", name: "Character Spotlight", cost: 18_000, hype: 12, desc: "Sell one personality, not the whole premise." },
   { id: "kv", name: "Key Visual Blitz", cost: 26_000, hype: 18, desc: "Station posters everywhere." },
+  { id: "creator", name: "Creator & Influencer Push", cost: 34_000, hype: 20, desc: "Risk the campaign on people audiences already trust." },
   { id: "mag", name: "Magazine Spread", cost: 48_000, hype: 26, desc: "Six glossy pages of hype." },
+  { id: "stream", name: "Streaming Launch Campaign", cost: 62_000, hype: 31, desc: "Platform takeovers and a coordinated countdown.", locked: true },
+  { id: "international", name: "International Promotion", cost: 82_000, hype: 34, desc: "Localised trailers and overseas press.", locked: true },
   { id: "stage", name: "Expo Stage Event", cost: 95_000, hype: 40, desc: "Cast on stage, fans in tears.", locked: true },
+  { id: "premiere", name: "Premiere Event", cost: 120_000, hype: 44, desc: "A costly red-carpet signal of confidence.", locked: true },
+  { id: "collector", name: "Collector Campaign", cost: 145_000, hype: 35, desc: "Lower reach, stronger high-spend fan intent.", locked: true },
+  { id: "awards", name: "Awards Campaign", cost: 180_000, hype: 30, desc: "Screeners and trade press; prestige rather than raw reach.", locked: true },
 ];
 
 /* ---------------------------------------------------------- cast helpers */
@@ -656,6 +669,13 @@ export const ARCS: Arc[] = [
   { id: "guildwar", name: "Guild War", cost: 34_000, q: 5, f: 0.07, syn: ["fantasy", "martial"], synQ: 4, desc: "Factions, betrayals, and a siege that spans two episodes.", unlock: { kind: "hits", n: 3 } },
   { id: "expansion", name: "Studio Expansion Arc", cost: 24_000, q: 3, f: 0.05, desc: "The meta-narrative: your own studio, animated.", unlock: { kind: "staff", n: 6 } },
   { id: "idolfest", name: "Idol Festival", cost: 22_000, q: 2, f: 0.1, syn: ["idol"], synQ: 4, desc: "Three nights. One stage. Zero dry eyes.", unlock: { kind: "genre", genre: "idol" } },
+  /* property-derived blueprints: situational, not flat upgrades */
+  { id: "bottle_episode", name: "Bottle Episode", cost: 3_000, q: 5, f: -0.02, syn: ["slice", "mystery"], synQ: 3, anti: ["martial", "sports"], antiQ: -5, desc: "One room, one script, nowhere for weak writing to hide.", unlock: { kind: "studioArc" } },
+  { id: "underworld_journey", name: "Underworld Journey", cost: 29_000, q: 5, f: 0.04, syn: ["fantasy", "supernatural", "horror"], synQ: 4, anti: ["slice"], antiQ: -3, desc: "A costly descent whose symbolism can overwhelm a light premise.", unlock: { kind: "studioArc" } },
+  { id: "body_swap", name: "Body Swap", cost: 12_000, q: 3, f: 0.05, syn: ["comedy", "romance"], synQ: 4, anti: ["military"], antiQ: -3, desc: "Performance-driven chaos with a continuity trap in every scene.", unlock: { kind: "studioArc" } },
+  { id: "corruption", name: "Corruption Arc", cost: 20_000, q: 5, f: 0.01, syn: ["horror", "military", "supernatural"], synQ: 4, anti: ["comedy"], antiQ: -4, desc: "A slow moral collapse: powerful when earned, bleak when forced.", unlock: { kind: "studioArc" } },
+  { id: "graduation", name: "Graduation Arc", cost: 14_000, q: 4, f: 0.04, syn: ["slice", "romance"], synQ: 4, anti: ["martial"], antiQ: -2, desc: "Closure and change, with no spectacle to mask shallow relationships.", unlock: { kind: "studioArc" } },
+  { id: "multiverse", name: "Multiverse Arc", cost: 44_000, q: 2, f: 0.12, syn: ["space", "fantasy"], synQ: 5, anti: ["slice", "cooking"], antiQ: -6, desc: "Huge novelty and hype; catastrophic continuity risk.", unlock: { kind: "studioArc" } },
   /* --------------------------------------- discovery-era narrative beats */
   { id: "narr_slowburn", name: "Slow-Burn Introduction", cost: 9_000, q: 4, f: 0.01, syn: ["slice", "romance", "mystery"], synQ: 3, anti: ["sports", "martial"], antiQ: -2, desc: "Let the cast breathe before the plot starts squeezing." },
   { id: "narr_flashforward", name: "Flash-Forward Teaser", cost: 13_000, q: 3, f: 0.04, syn: ["mystery", "cyber", "mystery"], synQ: 3, anti: ["slice"], antiQ: -1, desc: "Show the destination first and dare viewers to work out the road.", unlock: { kind: "shows", n: 2 } },

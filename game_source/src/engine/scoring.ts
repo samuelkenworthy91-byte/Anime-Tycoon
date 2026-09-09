@@ -327,7 +327,10 @@ export function computeResult(opts: {
   const castSlots: [CastRole, CastMember][] = [
     ["protag", protag], ["secondary", sec], ["pet", pet], ["villain", vil],
   ];
-  const castParts = castSlots.map(([role, member]) => ({ role, member, ...castContribution(member, role, draft) }));
+  const licensed = !!draft.licensedIpId;
+  const castParts = castSlots.map(([role, member]) => licensed
+    ? { role, member, totalQuality: 0, baseQuality: 0, salesBonus: 0, typeModifier: 1, tier: 1 as 0|1|2 }
+    : { role, member, ...castContribution(member, role, draft) });
   const casting = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
   const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
   const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
@@ -416,7 +419,7 @@ export function computeResult(opts: {
   raw -= issues * ISSUE_QUALITY_COST;
 
   /* ---- hidden cast chemistry (discovered by experimenting) */
-  const matchingChems = castChemFor(draft);
+  const matchingChems = licensed ? [] : castChemFor(draft);
   const chemMult = matchingChems.reduce((a, c) => a * c.mult, 1);
   const chemDiscovered = matchingChems.filter((c) => !castCombos.includes(c.id)).map((c) => c.id);
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
@@ -514,7 +517,9 @@ export function computeResult(opts: {
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
     { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
     { label: "Direction sliders", pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)}` },
-    { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
+    licensed
+      ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
+      : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
     { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
     { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)}` },

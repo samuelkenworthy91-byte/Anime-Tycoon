@@ -28,8 +28,8 @@ describe("V3 content integration", () => {
     expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
   });
   it("loads unique arcs and valid combo references", () => {
-    expect(ARCS).toHaveLength(84); expect(ARC_COMBOS).toHaveLength(49);
-    expect(new Set(ARCS.map(a => a.id)).size).toBe(84);
+    expect(ARCS).toHaveLength(90); expect(ARC_COMBOS).toHaveLength(49);
+    expect(new Set(ARCS.map(a => a.id)).size).toBe(90);
     expect(new Set(ARC_COMBOS.map(a => a.id)).size).toBe(49);
     for (const combo of ARC_COMBOS) for (const id of combo.arcs) expect(ARCS.some(a => a.id === id)).toBe(true);
   });

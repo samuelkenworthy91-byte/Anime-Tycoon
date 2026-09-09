@@ -42,10 +42,11 @@ import { beginDynastyMode } from "./engine/legacy";
 import { liveWorkPulseGapMs } from "./engine/studioOps";
 import AwardsCeremony from "./components/AwardsCeremony";
 import DecisionEventOverlay from "./components/DecisionEventOverlay";
+import LicensedCreate from "./components/LicensedCreate";
 import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
 
-type Screen = "title" | "office" | "create" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";
+type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
@@ -61,6 +62,7 @@ export default function App() {
   const [shipId, setShipId] = useState<string | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
+  const [licensedIpId, setLicensedIpId] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
@@ -278,6 +280,10 @@ export default function App() {
     setContPlan(key ? { key, kind: "season" } : null);
     setPendingCommission(null);
     setScreen("create");
+  }, []);
+
+  const licensedShow = useCallback((ipId: string) => {
+    sfx.select(); setContPlan(null); setPendingCommission(null); setLicensedIpId(ipId); setScreen("licensed");
   }, []);
 
   /** a continuation chosen in the franchise library */
@@ -521,6 +527,7 @@ export default function App() {
             run={run}
             setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
             onNewShow={newShow}
+            onLicensed={licensedShow}
             onContract={takeContract}
             onCommission={takeCommission}
             onContinue={continueFranchise}
@@ -544,6 +551,9 @@ export default function App() {
             }}
             onUnlockArc={unlockArc}
           />
+        )}
+        {screen === "licensed" && run && licensedIpId && (
+          <LicensedCreate run={run} ipId={licensedIpId} onBegin={(d) => { beginProduction(d); setLicensedIpId(null); }} onCancel={() => { setLicensedIpId(null); setScreen("office"); }}/>
         )}
         {screen === "produce" && run && focus && projectById(run, focus.projectId) && (
           <Produce
