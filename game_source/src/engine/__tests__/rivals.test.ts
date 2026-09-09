@@ -16,6 +16,7 @@ import {
 import {
   advanceWeeks,
   hireRivalTalent,
+  rivalTalentPoachTerms,
   initialRun,
   migrateRun,
   studioRankings,
@@ -249,17 +250,23 @@ describe("staff poaching & rival talent", () => {
     expect(staff.xp).toBeGreaterThanOrEqual(0);
   });
 
-  it("hireRivalTalent pays the fee, adds staff, and heats the rivalry", () => {
-    const r = richRun();
+  it("hireRivalTalent requires prestige, pays a real buyout, and the rival recruits again", () => {
+    const r = richRun({ week: 48, bestScore: 36, hits: 8, awards: 8, fans: 800_000, showsMade: 12 });
     const t = rivalTalentAvailable(r.rivalWorld, r.week)[0];
+    const terms = rivalTalentPoachTerms(r, t.id)!;
+    expect(terms.blockedReason).toBeNull();
+    expect(terms.askingPrice).toBeGreaterThan(t.cost);
     const before = r.rivalWorld.studios.find((s) => s.id === t.studioId)!.rivalry;
+    const beforeRoster = r.rivalWorld.studios.find((s) => s.id === t.studioId)!.talent.length;
     const out = hireRivalTalent(r, t.id)!;
     expect(out).toBeTruthy();
-    expect(out.cash).toBe(r.cash - t.cost);
+    expect(out.cash).toBe(r.cash - terms.askingPrice);
     expect(out.staff.length).toBe(r.staff.length + 1);
     expect(rivalTalentAvailable(out.rivalWorld, r.week).some((x) => x.id === t.id)).toBe(false);
-    const after = out.rivalWorld.studios.find((s) => s.id === t.studioId)!.rivalry;
-    expect(after).toBeGreaterThan(before);
+    const source = out.rivalWorld.studios.find((s) => s.id === t.studioId)!;
+    expect(source.rivalry).toBeGreaterThan(before);
+    expect(source.talent.length).toBe(beforeRoster);
+    expect(source.talent.some((x) => x.availableWeek > r.week)).toBe(true);
   });
 
   it("a successful rival poach strengthens the poaching studio", () => {

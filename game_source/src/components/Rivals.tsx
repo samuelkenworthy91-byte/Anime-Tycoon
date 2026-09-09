@@ -23,7 +23,7 @@ import {
   type RankingEntry,
   type RivalStudio,
 } from "../engine/rivals";
-import { hireRivalTalent, studioRankings, type RunState } from "../engine/state";
+import { campaignPressureFor, hireRivalTalent, rivalTalentPoachTerms, studioRankings, type RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 
 const genreLabel = (id: string) => GENRES.find((g) => g.id === id)?.label ?? id;
@@ -234,7 +234,9 @@ function TalentTab({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) 
       </p>
       {available.map((t) => {
         const studio = run.rivalWorld.studios.find((s) => s.id === t.studioId);
-        const blocked = run.cash < t.cost;
+        const terms = rivalTalentPoachTerms(run, t.id);
+        const price = terms?.askingPrice ?? t.cost;
+        const blocked = !terms || !!terms.blockedReason || run.cash < price;
         return (
           <div key={t.id} className="ink-card flex items-center gap-2 p-2.5">
             <UserRound size={16} className="shrink-0 text-cyanx" />
@@ -246,8 +248,8 @@ function TalentTab({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) 
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <div className="font-display text-xs font-extrabold text-gold">{formatGBP(t.cost)}</div>
-              <div className="text-[9px] text-paper/40">signing fee</div>
+              <div className="font-display text-xs font-extrabold text-gold">{formatGBP(price)}</div>
+              <div className={cn("max-w-[150px] text-[9px]", terms?.blockedReason ? "text-neon" : "text-paper/40")}>{terms?.blockedReason ?? "buyout + signing"}</div>
             </div>
             <Btn
               variant="cyan"
@@ -258,7 +260,7 @@ function TalentTab({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) 
                 setRun((r) => hireRivalTalent(r, t.id) ?? r);
               }}
             >
-              {full ? "FULL" : "POACH"}
+              {full ? "FULL" : terms?.blockedReason ? "LOCKED" : "POACH"}
             </Btn>
           </div>
         );
@@ -279,9 +281,17 @@ export default function RivalsPanel({
 }) {
   const [tab, setTab] = useState<"rankings" | "studios" | "talent">("rankings");
   const entries = studioRankings(run);
+  const pressure = campaignPressureFor(run);
 
   return (
     <div className="space-y-2 text-[12px]">
+      <div className="rounded-lg border border-gold/25 bg-gold/5 px-2.5 py-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[9px] font-bold tracking-[0.18em] text-paper/50">INDUSTRY PRESSURE</span>
+          <span className="font-display text-xs font-extrabold text-gold">{pressure.level.toFixed(1)}/6 · {pressure.band.toUpperCase()}</span>
+        </div>
+        <div className="mt-0.5 text-[9px] text-paper/45">Success attracts competition: next-year rival pressure +{pressure.rivalBoost.toFixed(1)} · payroll ×{pressure.salaryMult.toFixed(2)} · parallel productions suffer management strain.</div>
+      </div>
       <div className="mb-2 flex gap-1">
         {(
           [

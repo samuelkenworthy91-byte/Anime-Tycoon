@@ -206,10 +206,11 @@ describe("market multipliers", () => {
     expect(marketMult(worst, flood, draft(), 5)).toBeGreaterThanOrEqual(0.6);
   });
 
-  it("splits audience attention across simultaneous releases", () => {
+  it("splits audience attention more sharply across simultaneous releases", () => {
     expect(attentionMult(0)).toBe(1);
-    expect(attentionMult(1)).toBeCloseTo(0.93, 5);
-    expect(attentionMult(10)).toBe(0.8); // floor
+    expect(attentionMult(1)).toBeCloseTo(0.9, 5);
+    expect(attentionMult(3)).toBeCloseTo(0.7, 5);
+    expect(attentionMult(10)).toBe(0.65); // anti-snowball floor
   });
 
   it("marketMultiplierFor reflects airing rivals and licensing boosts", () => {
@@ -496,7 +497,8 @@ describe("money balance", () => {
     const singles = attentionMult(0);
     const stacked = attentionMult(3);
     expect(stacked).toBeLessThan(singles);
-    expect(stacked).toBeGreaterThanOrEqual(0.8);
+    expect(stacked).toBeCloseTo(0.7, 5);
+    expect(stacked).toBeGreaterThanOrEqual(0.65);
   });
 });
 

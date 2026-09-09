@@ -215,6 +215,7 @@ import {
   type AwardNominee,
 } from "./awards";
 import { initIPMarket, licensedRevenue, migrateIPMarket, tickIPMarket, ipById, type IPMarketState } from "./ip";
+import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -652,8 +653,22 @@ export function migrateRun(raw: unknown): RunState {
 }
 
 export const office = (r: RunState) => OFFICES[r.officeLevel];
+
+/** Campaign pressure is derived from existing save fields: no migration or
+ * hidden difficulty state. Exposed for the Rivals screen and tuning tests. */
+export const campaignPressureFor = (r: RunState) => industryPressure({
+  week: r.week,
+  cash: r.cash,
+  fans: r.fans,
+  awards: r.awards,
+  hits: r.hits,
+  bestScore: r.bestScore,
+  showsMade: r.showsMade,
+  playerRank: r.rivalWorld?.playerRank,
+});
+
 export const weeklyOutgoings = (r: RunState) =>
-  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) + facilityUpkeep(r.facilities);
+  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * campaignPressureFor(r).salaryMult + facilityUpkeep(r.facilities);
 
 /** the studio's staff capacity — dynasty investments can add desks */
 export const staffCapacity = (r: RunState) =>
@@ -705,7 +720,7 @@ export function forecastWeek(r: RunState): WeekForecast {
   if (burn > 0) costsDue.push({ label: "Project production", amount: burn });
   if (lateFees > 0) costsDue.push({ label: "Deadline penalties", amount: lateFees });
   if (payday > 0) {
-    const wages = r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * 4;
+    const wages = r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * campaignPressureFor(r).salaryMult * 4;
     const rent = office(r).rent * 4;
     const upkeep = facilityUpkeep(r.facilities) * 4;
     if (wages > 0) costsDue.push({ label: "Wages", amount: Math.round(wages) });
@@ -804,12 +819,13 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   const baseFx = facilityFX(r.facilities);
   const spm = studioPointMult(heads, staffArr, legends);
   const dynFx = dynastyFX(r);
+  const managementMult = managementOutputMult(activeProjects(projects).length, r.officeLevel, Object.values(heads).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
   const fx = {
     ...baseFx,
     pointMult: {
-      story: baseFx.pointMult.story * spm.story * dynFx.pointMult,
-      art: baseFx.pointMult.art * spm.art * dynFx.pointMult,
-      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult,
+      story: baseFx.pointMult.story * spm.story * dynFx.pointMult * managementMult,
+      art: baseFx.pointMult.art * spm.art * dynFx.pointMult * managementMult,
+      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult * managementMult,
     },
     speed: baseFx.speed + dynFx.speed,
     rdWeekly: baseFx.rdWeekly + dynFx.rdWeekly,
@@ -1250,9 +1266,12 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         awards,
       });
       rivalWorld = fy.world;
-      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: r.dynasty ? dynastyDifficulty(r).rivalBoost : 0 });
+      notices.push(...fy.notices);
+      const pressure = industryPressure({ week: w, cash, fans, awards, hits: r.hits, bestScore: r.bestScore, showsMade: r.showsMade, playerRank: rivalWorld.playerRank });
+      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0) });
       rivalWorld = py.world;
       notices.push(...py.notices);
+      if (pressure.level >= 1) notices.push(`📈 INDUSTRY PRESSURE ${pressure.level.toFixed(1)}/6 · ${pressure.band.toUpperCase()} — next year rivals gain +${pressure.rivalBoost.toFixed(1)} quality pressure.`);
 
       /* dynasty mode re-tabulates the all-time industry records each year */
       if (dynasty) {
@@ -1809,6 +1828,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     /* Existing morale, traits, specialisations and bonds now modify the live
        percentile check instead of a removed weekly quality calculation. */
     effective *= personMod(st, project, team, { bonds: r.bonds ?? {} }).out;
+    effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -1835,6 +1855,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
   if (r.research.includes("pipeline")) skill *= 1.12;
   if (type === "story" && r.research.includes("storyboard")) skill *= 1.15;
   if (type === "art" && r.research.includes("mocap")) skill *= 1.12;
+  skill *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
 }
@@ -1988,12 +2009,13 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
   const baseFx = facilityFX(nx.facilities);
   const spm = studioPointMult(nx.heads ?? {}, nx.staff, nx.legends ?? []);
   const dynFx = dynastyFX(nx);
+  const managementMult = managementOutputMult(activeProjects(nx.projects).length, nx.officeLevel, Object.values(nx.heads ?? {}).filter(Boolean).length, nx.capitalProjects.includes("flagship_hq"));
   const fx = {
     ...baseFx,
     pointMult: {
-      story: baseFx.pointMult.story * spm.story * dynFx.pointMult,
-      art: baseFx.pointMult.art * spm.art * dynFx.pointMult,
-      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult,
+      story: baseFx.pointMult.story * spm.story * dynFx.pointMult * managementMult,
+      art: baseFx.pointMult.art * spm.art * dynFx.pointMult * managementMult,
+      sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult * managementMult,
     },
     speed: baseFx.speed + dynFx.speed,
   };
@@ -2277,7 +2299,7 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     reviewExpectation: r.reviewExpectation,
     franchises: r.franchises,
     fans: r.fans,
-    audienceBar: dynastyAudienceBar(r),
+    audienceBar: dynastyAudienceBar(r) + campaignPressureFor(r).audienceBar,
     castAffinityDiscovered: r.castAffinityDiscovered,
   });
   const decisionFanMult = decisionReleaseFansMult(r, d);
@@ -2928,23 +2950,43 @@ export function respondPoach(
 
 /* ------------------------------------------------------- rival talent */
 
-/** hire a notable away from a rival studio: pay the signing fee, they join
-    your crew with a full career — and the rival studio remembers the insult */
+/** live buyout / willingness terms for one rival notable */
+export function rivalTalentPoachTerms(r: RunState, talentId: string): TalentPoachTerms | null {
+  const t = rivalTalentById(r.rivalWorld, talentId);
+  const studio = t ? r.rivalWorld.studios.find((s) => s.id === t.studioId) : undefined;
+  if (!t || !studio || studio.status === "collapsed" || t.availableWeek > r.week) return null;
+  return talentPoachTerms({
+    week: r.week,
+    cash: r.cash,
+    fans: r.fans,
+    awards: r.awards,
+    hits: r.hits,
+    bestScore: r.bestScore,
+    showsMade: r.showsMade,
+    playerRank: r.rivalWorld.playerRank,
+    officeLevel: r.officeLevel,
+  }, t, studio);
+}
+
+/** Rival stars are under contract: reputation earns the conversation, then
+    the player pays a real buyout + signing package. The rival recruits again. */
 export function hireRivalTalent(r: RunState, talentId: string): RunState | null {
   const t = rivalTalentById(r.rivalWorld, talentId);
-  if (!t) return null;
+  const terms = rivalTalentPoachTerms(r, talentId);
+  if (!t || !terms || terms.blockedReason) return null;
   if (r.staff.length >= staffCapacity(r)) return null;
-  if (r.cash < t.cost) return null;
+  if (r.cash < terms.askingPrice) return null;
   const staff = rivalTalentToStaff(t, r.week);
   const studioName = r.rivalWorld.studios.find((s) => s.id === t.studioId)?.name ?? "a rival studio";
+  const compensation = Math.round(terms.askingPrice * 0.35);
   return {
     ...r,
-    cash: r.cash - t.cost,
+    cash: r.cash - terms.askingPrice,
     staff: [...r.staff, staff],
-    rivalWorld: bumpRivalry(removeRivalTalent(r.rivalWorld, talentId), t.studioId, 4),
+    rivalWorld: bumpRivalry(removeRivalTalent(r.rivalWorld, talentId, r.week, compensation), t.studioId, 10),
     notices: [
       ...r.notices,
-      `🤝 ${t.name} (Lv${t.level} ${staff.role}) leaves ${studioName} and signs with ${r.studio} for £${t.cost.toLocaleString("en-GB")}. They won't forget this.`,
+      `🤝 ${t.name} (Lv${t.level} ${staff.role}) leaves ${studioName}: £${terms.askingPrice.toLocaleString("en-GB")} buyout/signing package after their employer counter-offer. ${studioName} will recruit a replacement.`,
     ],
   };
 }

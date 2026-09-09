@@ -285,10 +285,26 @@ export const PRESENTATION_ORDER: AwardCategoryId[] = [
 /** stable, deterministic ordering for one category:
  *  1. primary metric   2. overall score   3. audience   4. title (a-z)
  *  Winner = first. No dice anywhere. */
-function rankFor(def: AwardCategoryDef, pool: AwardNominee[]): AwardNominee[] {
+function juryTaste(year: number, def: AwardCategoryDef, n: AwardNominee): number {
+  /* Fan Favourite remains a literal audience vote. Jury categories have a
+     small deterministic taste swing: enough to split close races, never
+     enough to make a mediocre show beat an obvious masterpiece. */
+  if (def.id === "fanfav") return 0;
+  const h = hashStr(`${year}|${def.id}|${awardNomineeKey(n)}`);
+  const unit = (h % 10_001) / 10_000; // stable 0..1
+  const range = def.id === "aoty" ? 0.85 : def.tier === 2 ? 0.70 : 1.05;
+  return (unit - 0.5) * 2 * range;
+}
+
+function rankFor(def: AwardCategoryDef, pool: AwardNominee[], year: number): AwardNominee[] {
   return [...pool].sort((a, b) => {
-    const m = def.metric(b) - def.metric(a);
-    if (m !== 0) return m;
+    const rawA = def.metric(a);
+    const rawB = def.metric(b);
+    /* Exact metric ties keep the documented score/audience/title tie-break. */
+    if (rawA !== rawB) {
+      const m = (rawB + juryTaste(year, def, b)) - (rawA + juryTaste(year, def, a));
+      if (m !== 0) return m;
+    }
     if (b.score !== a.score) return b.score - a.score;
     if (b.audience !== a.audience) return b.audience - a.audience;
     return a.title.localeCompare(b.title);
@@ -328,7 +344,7 @@ export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremon
   for (const def of AWARD_CATEGORIES) {
     const pool = uniqueShows.filter((n) => def.eligible(n));
     if (!pool.length) continue;
-    const ranked = rankFor(def, pool);
+    const ranked = rankFor(def, pool, year);
     const nominees = ranked.slice(0, NOMINEES_PER_CATEGORY);
     categories.push({
       id: def.id,

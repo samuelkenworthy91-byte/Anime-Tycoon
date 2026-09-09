@@ -29,6 +29,7 @@ import {
   reviewExpectationAdjustment,
 } from "./production";
 import { genreTargetFor } from "./genreTargets";
+import { fanBaseSalesMultiplier } from "./difficulty";
 
 export interface Points {
   story: number;
@@ -483,7 +484,7 @@ export function computeResult(opts: {
     franchiseMult *
     merch *
     local *
-    (1 + Math.log1p(fanBase / 60_000) * 0.8);
+    fanBaseSalesMultiplier(fanBase);
 
   /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
@@ -525,6 +526,7 @@ export function computeResult(opts: {
     { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)}` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
+    { label: "Established audience", pts: `×${fanBaseSalesMultiplier(fanBase).toFixed(2)} sales (cap ×1.80)` },
     { label: "Commercial impact", pts: commercial.label },
   ];
   if (chemFactor !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemFactor.toFixed(2)}` });
