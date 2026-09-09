@@ -1057,7 +1057,7 @@ export default function Create({
                   </div>
                 )}
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {ARCS.map((a) => {
+                  {ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)).map((a) => {
                     const on = d.arcs.includes(a.id);
                     const reason = arcLockReason(a, run);
                     const baseLocked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;

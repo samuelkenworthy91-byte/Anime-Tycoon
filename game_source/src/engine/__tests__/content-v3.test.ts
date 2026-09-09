@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ARCS, ARC_COMBOS, CAST_V2, WORKER_LOOKS } from "../data";
+import { AUCTION_IPS } from "../ip";
 import original from "../generated/castV2.json";
 import { mixedCastOrder } from "../castDisplayOrder";
 
@@ -28,9 +29,9 @@ describe("V3 content integration", () => {
     expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
   });
   it("loads unique arcs and valid combo references", () => {
-    expect(ARCS).toHaveLength(90); expect(ARC_COMBOS).toHaveLength(49);
-    expect(new Set(ARCS.map(a => a.id)).size).toBe(90);
-    expect(new Set(ARC_COMBOS.map(a => a.id)).size).toBe(49);
+    expect(ARCS).toHaveLength(90 + AUCTION_IPS.length); expect(ARC_COMBOS).toHaveLength(49 + AUCTION_IPS.length);
+    expect(new Set(ARCS.map(a => a.id)).size).toBe(ARCS.length);
+    expect(new Set(ARC_COMBOS.map(a => a.id)).size).toBe(ARC_COMBOS.length);
     for (const combo of ARC_COMBOS) for (const id of combo.arcs) expect(ARCS.some(a => a.id === id)).toBe(true);
   });
   it("mixes every role without omissions, mutation or hidden-affinity influence", () => {

@@ -1,7 +1,9 @@
 import { GENRES, type AnimeType, type AudienceId, type GenreId, type MediumId } from "./data";
 import type { RivalWorld } from "./rivals";
+import { USER_IP_CATALOG } from "./userIpCatalog";
+import { IP_HIDDEN_ARC_BY_SLOT } from "./ipHiddenArcs";
 
-export type IPSourceType = "manga" | "light_novel" | "jrpg" | "visual_novel" | "webcomic" | "game";
+export type IPSourceType = "manga" | "light_novel" | "jrpg" | "visual_novel" | "webcomic" | "game" | "film" | "tv" | "novel" | "comic" | "audio_drama" | "tabletop";
 export type IPRarity = "cult" | "emerging" | "recognised" | "premium" | "legendary";
 export type AuctionType = "open" | "sealed" | "distressed" | "invite";
 
@@ -18,105 +20,116 @@ export interface AuctionIP {
   posterPalette: [string, string, string]; rarity: IPRarity; minimumStudioPrestige: number; specialRules: string[];
 }
 
-const sourceTypes: IPSourceType[] = ["manga", "light_novel", "jrpg", "visual_novel", "webcomic", "game"];
 const rarityValue: Record<IPRarity, number> = { cult: 1, emerging: 2, recognised: 3, premium: 4, legendary: 5 };
-const rightsScale: Record<IPRarity, number> = { cult: .35, emerging: .6, recognised: 1.2, premium: 2.5, legendary: 6 };
+const rightsScale: Record<IPRarity, number> = { cult: .12, emerging: .38, recognised: 1.2, premium: 2.5, legendary: 6 };
 const arc = (id: string, name: string, extra: Partial<IPArc> = {}): IPArc => ({ id, name, ...extra });
-const chars = (names: string[]): IPCharacter[] => [
-  { role: "protagonist", name: names[0], description: "The story's central viewpoint." },
-  { role: "companion", name: names[1], description: "A defining ally, foil or rival." },
-  { role: "antagonist", name: names[2], description: "The principal opposing force." },
-  ...(names[3] ? [{ role: "mascot" as const, name: names[3], description: "A property-specific supporting icon." }] : []),
-];
+const FIRST = ["Ari","Mira","Ren","Sena","Noa","Kai","Iris","Theo","Nia","Sol","Emi","Rowan","Juno","Vale","Mika","Rin","Tess","Leo","Aya","Pax"];
+const LAST = ["Vale","Sorn","Quill","Mori","Venn","Kade","Grey","Bloom","Reed","Aster","Hale","Wren","Cole","Finch","Rose","Mercer","Bell","Ash","Line","Voss"];
+const MASCOTS = ["Pip","Mote","Nib","Bit","Chime","Loop","Morrow","Puff","Comma","Beacon"];
+const charsFor = (slot:number):IPCharacter[] => {
+  const n=(k:number)=>`${FIRST[(slot*3+k*5)%FIRST.length]} ${LAST[(slot*7+k*3)%LAST.length]}`;
+  return [
+    {role:"protagonist",name:n(0),description:"The property’s central viewpoint."},
+    {role:"companion",name:n(1),description:"A defining ally, foil or rival."},
+    {role:"antagonist",name:n(2),description:"The principal opposing force."},
+    {role:"mascot",name:MASCOTS[slot%MASCOTS.length],description:"A property-specific supporting icon."},
+  ];
+};
+const rarityFor=(slot:number):IPRarity => slot%10===0?"legendary":slot%5===0?"premium":slot%3===0?"recognised":slot%2===0?"emerging":"cult";
+const paletteFor=(genres:GenreId[],slot:number):[string,string,string] => {
+  const a=GENRES.find(g=>g.id===genres[0])?.color??"#6d5bc3"; const b=GENRES.find(g=>g.id===genres[1])?.color??"#d15c82";
+  return [a,b,slot%2?"#f0d58b":"#d8e5f0"];
+};
 
-type Seed = [string,string,string[],string[],AudienceId,AnimeType,IPRarity,number,number,number,number,string[],[string,string][],string|undefined,[string,string,string],string[]];
-const genreAlias: Record<string, GenreId> = { action:"martial", drama:"mystery", thriller:"mystery", racing:"sports", "sci-fi":"space", school:"slice", adventure:"fantasy" };
-const studioBlueprints = new Set(["bottle_episode","underworld_journey","body_swap","corruption","graduation","multiverse"]);
-const seeds: Seed[] = [
- ["Ashen Bell Requiem","A bell-forged swordswoman hunts the spirits that stole her name.",["action","supernatural"],["tragic","kinetic"],"teens","shonen","recognised",64,58,60,57,["Iona Vale","Brother Cinder","The Pale Cantor","Chime"],[["first_toll","The First Toll"],["cathedral_siege","Siege of Glass Cathedral"],["nameless_duel","The Nameless Duel"]],"siege",["#200f25","#d24b54","#f1c66b"],["Sword choreography demands strong animation."]],
- ["Clans of the Hollow Moon","Exiled heirs weaponise forbidden moon-script in a war between hidden clans.",["action","shinobi"],["secretive","rivalry"],"teens","shonen","premium",79,76,72,70,["Ren Kisar","Mara Venn","Lord Eclipse","Inkfox"],[["broken_seal","The Broken Seal"],["five_clan_trials","Five-Clan Trials"],["moonfall_war","Moonfall War"]],"tournament",["#071a24","#36a7a2","#d9d0a7"],["Dense clan continuity raises adaptation risk."]],
- ["The Brasswake Voyage","A runaway cartographer races sky-pirates toward a city inside a storm.",["adventure","comedy"],["buoyant","found-family"],"family","shonen","recognised",71,55,83,52,["Milo Quill","Captain Sena","Admiral Gilt","Pip-Pip"],[["stolen_map","The Stolen Map"],["cloud_regatta","Cloud Regatta"],["eye_of_storm","Eye of the Storm"]],"road_trip",["#0b3150","#e07032","#f6e3a5"],["Merch rights are especially valuable."]],
- ["Wolf at the Iron Gate","A disgraced shield-maiden survives a mercenary kingdom built on betrayal.",["historical","action"],["grim","political"],"adults","shonen","premium",82,69,38,84,["Yrsa Fen","Tomas Reed","King Vargan"],[["red_snow","Red Snow"],["black_banner","The Black Banner"],["iron_gate","The Iron Gate"]],"betrayal",["#17191d","#85342f","#c4b8a0"],["Critic favourite; limited family appeal."]],
- ["Titan Parliament","Teen pilots are drafted into a constitutional war fought with walking citadels.",["mecha","political"],["operatic","cerebral"],"adults","shonen","legendary",93,91,76,94,["Asha Kade","Prince Ro","Chancellor Vey","Unit M-8"],[["first_vote","The First Vote"],["orbital_coup","Orbital Coup"],["last_constitution","The Last Constitution"]],"political_coup",["#10182e","#ad3948","#e3c670"],["Creator approval can delay release.","Legendary expectations."]],
- ["Pocket Wilds: Amber","A rural courier befriends tiny myth-beasts and uncovers a vanishing season.",["fantasy","adventure"],["warm","mysterious"],"kids","shonen","premium",88,62,99,61,["Tavi Moss","Juniper Vale","Director Sable","Nib"],[["first_bond","The First Bond"],["amber_league","Amber League"],["vanishing_spring","The Vanishing Spring"]],"monster_hunt",["#244c3d","#e3a62f","#f4e8c6"],["Exceptional merchandise potential."]],
- ["Redline Ronin","An obsolete courier android enters illegal races to buy a human memory.",["racing","cyberpunk"],["fast","melancholic"],"teens","shonen","emerging",52,42,58,48,["R-09 Kai","Mika Torque","Saint Velocity"],[["junkyard_start","Junkyard Start"],["neon_circuit","Neon Circuit"],["memory_finish","Memory Finish"]],"training",["#130d23","#ef315f","#28d7df"],["Sleeper opportunity in crowded markets."]],
- ["Crown of One Hundred Duels","A pacifist prince must win a ritual war without taking a life.",["action","historical"],["honourable","tense"],"teens","shonen","recognised",67,63,44,66,["Prince Eiren","Mae the Spear","General Koro"],[["first_duel","First Bloodless Duel"],["hundred_blades","Hall of Hundred Blades"],["empty_throne","The Empty Throne"]],"rival_redemption",["#251714","#9e3d28","#e8c578"],["Violence without deaths is a binding creator rule."]],
- ["Ward 13 After Midnight","Hospital interns discover each floor is haunted by a different unfinished death.",["horror","supernatural"],["clinical","dread"],"adults","shonen","cult",35,54,23,65,["Dr Emi Sorn","Nurse Hal","The Night Matron","Pager"],[["night_shift","First Night Shift"],["sealed_ward","The Sealed Ward"],["code_black","Code Black"]],"bottle_episode",["#101719","#7e182c","#dce5df"],["Low fanbase, strong critical ceiling."]],
- ["Moth House Testament","Estranged sisters inherit a mansion that edits their childhood memories.",["horror","mystery"],["gothic","psychological"],"adults","shojo","premium",68,84,31,86,["Nami Orrell","Yua Orrell","Aunt Silken","Morrow"],[["inheritance","The Inheritance"],["paper_rooms","The Paper Rooms"],["true_testament","The True Testament"]],"flashback",["#160e1c","#6d416c","#d8c5a5"],["Non-linear structure is hard to adapt."]],
- ["Static Children","Students hear tomorrow's emergency broadcasts through broken cassette players.",["supernatural","thriller"],["analog","paranoid"],"teens","shonen","emerging",43,61,30,68,["Leo An","Cass Mori","Voice Zero"],[["first_broadcast","First Broadcast"],["dead_air","Dead Air Week"],["tomorrow_live","Tomorrow, Live"]],"false_protagonist",["#131a25","#cf5d49","#dfd2b1"],["Unreliable narration increases volatility."]],
- ["The Orchard Below","A village sends one child each winter to bargain with the roots beneath it.",["horror","fantasy"],["folk","somber"],"adults","shojo","recognised",49,75,35,73,["Edda Bloom","Fen Ash","The Root King","Pome"],[["winter_gift","The Winter Gift"],["root_market","Root Market"],["spring_debt","Spring Debt"]],"underworld_journey",["#192318","#6c8a43","#d0b475"],["Folk-horror tone must be protected."]],
- ["Letters to the Last Platform","Two commuters fall in love through notes left one day apart in time.",["romance","sci-fi"],["tender","wistful"],"teens","shojo","recognised",62,67,41,53,["Aya Hoshi","Noel Grey","The Conductor"],[["missed_train","The Missed Train"],["summer_letters","Summer Letters"],["last_platform","The Last Platform"]],"time_skip",["#26324a","#d76f88","#f3d7c9"],["Romance ending may not be altered."]],
- ["Roseguard Academy","A scholarship duellist navigates courtship, class and ceremonial sword clubs.",["romance","school"],["sparkling","competitive"],"teens","shojo","premium",77,59,68,49,["Lina Rose","Prince Adel","Sabine Noir","Petit"],[["first_term","First Term"],["rose_tournament","Rose Tournament"],["graduation_waltz","Graduation Waltz"]],"graduation",["#341a3c","#d0558a","#f4d9b1"],["High costume and music expectations."]],
- ["Second Lead Syndrome","A background actor realises she is trapped in a romance comic's discarded timeline.",["romance","comedy"],["meta","bittersweet"],"teens","shojo","cult",38,57,34,55,["Mina Page","Theo Ink","Heroine Prime"],[["panel_break","Break the Panel"],["second_route","The Second Route"],["rewrite_kiss","Rewrite the Kiss"]],"villain_perspective",["#fff0f4","#d35a8b","#3e2947"],["Small fanbase but unusually loyal."]],
- ["Winter Camellia Contract","A divorce lawyer and a shrine heir fake an engagement to stop a supernatural merger.",["romance","supernatural"],["mature","wry"],"adults","shojo","recognised",55,72,29,58,["Rei Kama","Shun Mori","Lady Frost"],[["false_vows","False Vows"],["spirit_mediation","Spirit Mediation"],["camellia_hearing","Camellia Hearing"]],"body_swap",["#172435","#b4385d","#e8ddd2"],["Dialogue quality drives reception."]],
- ["Prism Oath Jubilee","Retired magical heroines reunite when their old mascot is accused of treason.",["magical","comedy"],["colourful","mature"],"family","shojo","premium",81,73,96,70,["Mara Prism","Yuki Gleam","Regent Null","Bibi"],[["reunion_live","Reunion Live"],["broken_colours","Broken Colours"],["jubilee_oath","Jubilee Oath"]],"found_family",["#28184b","#e5509a","#ffe678"],["Merch monster with cross-generational fans."]],
- ["Satellite Hearts","An orbital idol unit broadcasts concerts to colonies drifting out of radio range.",["idol","sci-fi"],["hopeful","lonely"],"teens","shojo","recognised",74,62,92,56,["Ciel Amani","Unit Sol","Manager Umbra","Bit"],[["debut_signal","Debut Signal"],["silent_colony","Silent Colony"],["last_encore","Last Encore"]],"rescue",["#101a47","#6be3e5","#ff6aa8"],["Soundtrack performance strongly affects merch."]],
- ["Velvet Hex Club","Five fashion students sew protective spells into stage costumes.",["magical","school"],["stylish","friendly"],"teens","shojo","emerging",46,49,88,45,["Zara Vell","Nico Hem","Dean Ravel","Thimble"],[["first_stitch","First Stitch"],["runway_curse","Runway Curse"],["velvet_finale","Velvet Finale"]],"beach_holiday",["#32104a","#bb3ed0","#f5b85b"],["Collector campaign performs well."]],
- ["Idol // Error","A virtual singer becomes self-aware during a televised elimination franchise.",["idol","cyberpunk"],["glossy","unsettling"],"adults","shojo","premium",84,78,91,88,["EVA-7","Momo Chen","Producer Root","Loop"],[["first_render","First Render"],["elimination","Elimination Week"],["open_source_heart","Open Source Heart"]],"corruption",["#071b26","#f03e93","#51f1dc"],["Expensive, volatile and potentially enormous."]],
- ["Eleven Seconds Left","A bench player can rewind only the final eleven seconds of a basketball game.",["sports","supernatural"],["urgent","earnest"],"teens","shonen","recognised",69,48,53,51,["Dai Mercer","Ko Lin","Coach Hara"],[["bench_year","The Bench Year"],["regional_clock","Regional Clock"],["eleven_seconds","Eleven Seconds"]],"training",["#0b2340","#e75f2d","#f1e4cf"],["Sports staging rewards pacing."]],
- ["Queen's Gambit Eleven","A tactical prodigy rebuilds a bankrupt women's football club.",["sports","drama"],["grounded","strategic"],"family","shojo","premium",73,71,45,62,["Imani Cole","Sara Beck","Chairman Vale"],[["relegation","Relegation Line"],["winter_transfer","Winter Transfer"],["promotion_day","Promotion Day"]],"rival_redemption",["#102b24","#d8aa30","#e9ece1"],["Critic favourite with moderate merch."]],
- ["Ramen King Zero","A street cook battles corporate chefs using recipes inherited from a vanished district.",["cooking","action"],["comic","competitive"],"family","shonen","emerging",58,36,74,44,["Ken Broth","Mia Salt","Chef Crown","Eggy"],[["night_market","Night Market"],["broth_trials","Broth Trials"],["zero_bowl","The Zero Bowl"]],"tournament",["#40150d","#e87820","#f4d35e"],["Affordable and merchandise-friendly."]],
- ["Velocity Bloom","A shy track cyclist joins a flamboyant all-girls velodrome team.",["sports","slice"],["uplifting","colourful"],"teens","shojo","cult",31,43,47,38,["Hana Spoke","Luz Bell","Rika Vale","Puff"],[["first_lap","First Lap"],["summer_circuit","Summer Circuit"],["bloom_sprint","Bloom Sprint"]],"road_trip",["#153d55","#ec6b8f","#f3e37c"],["Cheap cult property with breakout potential."]],
- ["The Glass Savepoint","A healer learns every JRPG resurrection creates a parallel abandoned party.",["fantasy","sci-fi"],["epic","philosophical"],"adults","shonen","legendary",86,94,63,96,["Sera Quen","Bram Axis","The Last Save","Cursor"],[["first_wipe","The First Wipe"],["discarded_world","Discarded World"],["final_save","Final Save"]],"multiverse",["#10203b","#7356c8","#e6bf65"],["Adaptation nightmare; huge prestige upside."]],
- ["Lumenfall Tactics","Young officers command a rebellion where every victory permanently reshapes the map.",["fantasy","political"],["strategic","heroic"],"teens","shonen","premium",78,82,65,79,["Captain Elian","Nara Voss","Archduke Sorn","Mote"],[["border_keep","Border Keep"],["council_coup","Council Coup"],["lumenfall","Lumenfall"]],"political_coup",["#122538","#8f3e50","#e5cb81"],["Branching canon requires continuity spend."]],
- ["Songs of the Salt Crown","A tide-mage assembles a broken party to dethrone an immortal sea oracle.",["fantasy","adventure"],["mythic","romantic"],"family","shojo","recognised",70,65,79,64,["Neris Salt","Odo Finch","Oracle Brine","Kelp"],[["drowned_road","The Drowned Road"],["four_harbours","Four Harbours"],["salt_crown","The Salt Crown"]],"underworld_journey",["#113647","#38a4a1","#e6cb83"],["International appeal is high."]],
- ["Clockwork Pilgrims","A mismatched party crosses a mechanical continent before its weekly reset.",["fantasy","comedy"],["adventurous","eccentric"],"family","shonen","emerging",53,45,82,50,["Pax Wren","Gilda Cog","Abbot Hour","Tick"],[["monday_gate","Monday Gate"],["reset_road","Reset Road"],["sunday_engine","Sunday Engine"]],"road_trip",["#28202f","#b66a3c","#e1c56d"],["Strong ensemble and mascot sales."]],
- ["Black Envelope Society","Seven scholarship students receive invitations predicting one another's crimes.",["mystery","thriller"],["elite","paranoid"],"teens","shojo","premium",76,80,38,83,["Nell Graves","Ari Wynn","The Registrar"],[["first_letter","First Letter"],["masked_trial","Masked Trial"],["black_commencement","Black Commencement"]],"survival_game",["#11131d","#a42135","#e4d8be"],["High expectations and audience volatility."]],
- ["The Sixth Witness","A courtroom illustrator spots a person erased from every murder scene.",["mystery","drama"],["procedural","haunting"],"adults","shojo","recognised",44,86,18,69,["Mara Line","Detective Sol","The Blank Man"],[["first_sketch","First Sketch"],["silent_jury","Silent Jury"],["sixth_witness","The Sixth Witness"]],"false_protagonist",["#171a22","#66768e","#d3b76a"],["Prestige-heavy, low merchandise ceiling."]],
- ["Mercy Protocol","A rescue android investigates why survivors keep refusing evacuation.",["sci-fi","thriller"],["cold","humane"],"adults","shonen","recognised",51,79,32,74,["MERCY-4","Dr Sen","Protocol Prime","Beacon"],[["red_zone","Red Zone"],["refusal","The Refusal"],["mercy_override","Mercy Override"]],"rescue",["#0c2029","#d55448","#c6e5df"],["Sound and direction matter more than spectacle."]],
- ["Paper Kingdom Murders","A children's-book editor enters unfinished manuscripts to solve an author's death.",["mystery","fantasy"],["whimsical","macabre"],"family","shojo","premium",65,74,71,77,["Bea Folio","Sir Margin","The Red Editor","Comma"],[["missing_page","The Missing Page"],["ink_labyrinth","Ink Labyrinth"],["final_draft","Final Draft"]],"monster_hunt",["#2a1735","#b43a66","#e8d595"],["Distinct art direction is mandatory."]],
- ["Apartment 404","Four broke flatmates hide the fact their apartment is a portal helpdesk.",["comedy","supernatural"],["chaotic","cosy"],"teens","shonen","cult",37,32,67,35,["Jo Park","Tess Rune","Landlord Null","Key-Key"],[["wrong_door","The Wrong Door"],["rent_week","Rent Week"],["portal_party","Portal Party"]],"bottle_episode",["#1c2440","#e36d60","#f1dc8b"],["Very cheap, strong writing dependency."]],
- ["Three Lunches a Day","A widowed father secretly reviews school cafeterias with his blunt young daughter.",["cooking","slice"],["gentle","funny"],"family","shojo","emerging",42,52,61,28,["Taro Bell","Mina Bell","Inspector Roux","Bento"],[["first_lunch","First Lunch"],["sports_day_bento","Sports Day Bento"],["last_cafeteria","Last Cafeteria"]],"found_family",["#315746","#ef9b45","#f5e8c8"],["Low risk and modest ceiling."]],
- ["Dungeon Union Local 9","Fantasy henchmen organise for safer traps and fairer hero encounters.",["comedy","fantasy"],["satirical","warm"],"adults","shonen","recognised",57,63,73,47,["Grob Nine","Lina Ledger","Lord Overtime","Mimic"],[["first_meeting","First Meeting"],["strike_dungeon","Strike Dungeon"],["new_contract","New Contract"]],"heist",["#242036","#9c6540","#e6d488"],["Satire can underperform with kids."]],
- ["My Roommate Is the Ending","A novelist's cancelled final boss moves into her tiny apartment.",["comedy","romance"],["meta","romantic"],"teens","shojo","emerging",48,41,76,42,["Iri Quill","Doom Rex","Editor May","Blob"],[["move_in","Move-In Arc"],["deadline_date","Deadline Date"],["true_ending","The True Ending"]],"villain_perspective",["#27152f","#dc557c","#f2cf9c"],["Social campaign affinity is high."]],
- ["Summer Detour Club","Five graduates take the wrong train and postpone adulthood for one impossible week.",["slice","adventure"],["nostalgic","sunny"],"teens","shojo","cult",29,59,40,37,["Nao Summer","Kit Vale","Inspector Monday","Ticket"],[["wrong_train","The Wrong Train"],["seven_stops","Seven Stops"],["monday_home","Monday Home"]],"graduation",["#276578","#e58b4d","#f5e39c"],["Cheap sleeper with awards potential."]],
-];
-
-export const AUCTION_IPS: AuctionIP[] = seeds.map((s, index) => {
-  const [title,description,rawGenres,toneTags,audience,animeType,rarity,fanbase,prestige,merch,difficulty,names,arcs,special,palette,rules] = s;
-  const genreTags = rawGenres.map((g) => genreAlias[g] ?? g as GenreId);
-  const tier = rarityValue[rarity];
-  const value = Math.round((20_000 + fanbase * 2_500 + prestige * 2_000 + merch * 1_000) * rightsScale[rarity] / 5_000) * 5_000;
-  const id = `ip_${String(index + 1).padStart(3,"0")}`;
-  return { id,title,sourceType:sourceTypes[index % sourceTypes.length],description,genreTags,toneTags,audience,animeType,
-    fanbase,prestige,merchPotential:merch,adaptationDifficulty:difficulty,rightsBaseValue:value,minimumBid:Math.round(value*0.62/5000)*5000,
-    royaltyRate:Math.max(0.05,0.18-tier*0.02),licenseLength:144+tier*48,ownershipSharePotential:Math.min(0.8,0.35+tier*0.08),
-    sequelRightsAvailable:index%5!==0,merchRightsAvailable:index%4!==0,internationalRightsAvailable:index%3!==0,
-    creatorControl:Math.min(95,25+difficulty*0.65),audienceVolatility:Math.min(95,20+difficulty*0.6),expectationLevel:Math.round((fanbase+prestige)/2),
-    scopeComplexity:difficulty,characters:chars(names),availableArcs:arcs.map(([aid,name],i)=>arc(`${id}_${aid}`,name,{minAdaptations:i>1?1:0,requiresSequelRights:i>1})),
-    specialArcUnlock:special && studioBlueprints.has(special) ? special : undefined,posterSlot:index+1,posterAsset:`/auction-ip/poster_${String(index+1).padStart(3,"0")}.webp`,posterPalette:palette,rarity,minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:rules };
+export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
+  const slot=raw.slot; const rarity=rarityFor(slot); const tier=rarityValue[rarity]; const genres=[...raw.genres] as GenreId[];
+  const fanbase=Math.min(98,38+((slot*17)%58)+tier*2); const prestige=Math.min(96,40+((slot*13)%42)+tier*4);
+  const merch=Math.min(98,35+((slot*19)%50)+tier*4); const difficulty=Math.min(96,42+((slot*11)%43)+tier*5);
+  const rights=Math.round((220_000+fanbase*6_500+prestige*5_500)*rightsScale[rarity]/5000)*5000;
+  const id=raw.id; const hidden=IP_HIDDEN_ARC_BY_SLOT[slot];
+  return {
+    id,title:raw.title,sourceType:raw.sourceType as IPSourceType,
+    description:`A sought-after ${String(raw.sourceType).replaceAll("_"," ")} property with a distinctive ${hidden?.name.toLowerCase() ?? "story"} identity.`,
+    genreTags:genres,toneTags:[genres[0],genres[1]],audience:(genres.includes("horror")||genres.includes("mystery")?"adults":genres.includes("comedy")||genres.includes("sports")?"family":"teens") as AudienceId,
+    animeType:raw.animeType as AnimeType,fanbase,prestige,merchPotential:merch,adaptationDifficulty:difficulty,
+    rightsBaseValue:rights,minimumBid:Math.round(rights*.68/5000)*5000,royaltyRate:Math.max(.06,.18-tier*.02),licenseLength:144+slot%3*48,
+    ownershipSharePotential:.45+tier*.07,sequelRightsAvailable:true,merchRightsAvailable:true,internationalRightsAvailable:true,
+    creatorControl:Math.min(95,24+difficulty*.62),audienceVolatility:Math.min(95,18+difficulty*.58),expectationLevel:Math.round((fanbase+prestige)/2),scopeComplexity:difficulty,
+    characters:charsFor(slot),availableArcs:[arc(`${id}_opening`,"Opening Movement"),arc(`${id}_turn`,"Turning Point"),arc(`${id}_legacy`,"Legacy Finale",{minAdaptations:1,requiresSequelRights:true})],
+    specialArcUnlock:hidden?.id,posterSlot:slot,posterAsset:raw.posterAsset,posterPalette:paletteFor(genres,slot),rarity,
+    minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:[`Signature blueprint: ${hidden?.name ?? "Unknown"}.`,`A ${difficulty>=78?"demanding":"flexible"} adaptation with fan expectations to match.`]
+  };
 });
 
 export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; }
 export interface AuctionBid { studioId:"player"|string; amount:number; week:number; }
-export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; }
-export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; }
-export function licensedRevenue(gross:number,contract:Pick<IPContract,"royaltyRate"|"ownershipShare">){const royalty=Math.round(gross*contract.royaltyRate);const ownershipRevenue=Math.round((gross-royalty)*contract.ownershipShare);return {royalty,ownershipRevenue,net:Math.max(0,gross-royalty+ownershipRevenue)};}
+export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; playerSkipped?:boolean; }
+export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; }
 
-export const initIPMarket = (week=0):IPMarketState => ({nextAuctionWeek:week+4,auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0});
-export function migrateIPMarket(raw:unknown,week:number):IPMarketState { const b=initIPMarket(week); const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>; return {...b,...r,auctions:Array.isArray(r.auctions)?r.auctions:[],owned:r.owned&&typeof r.owned==="object"?r.owned:{},rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[]}; }
+export const WEEKS_PER_YEAR=48;
+export const AUCTION_YEAR_CHANCE=.68;
+const AUCTION_EARLIEST=6, AUCTION_LATEST=42;
+export function scheduleNextAuctionWeek(fromWeek:number,rng=Math.random){
+  let year=Math.floor(Math.max(0,fromWeek)/WEEKS_PER_YEAR); const startingYear=year; const offset=Math.max(0,fromWeek-year*WEEKS_PER_YEAR);
+  for(let attempts=0;attempts<18;attempts++,year++){
+    const low=year===startingYear?Math.max(AUCTION_EARLIEST,offset):AUCTION_EARLIEST;
+    if(low>AUCTION_LATEST)continue;
+    if(rng()<=AUCTION_YEAR_CHANCE)return year*WEEKS_PER_YEAR+low+Math.floor(rng()*(AUCTION_LATEST-low+1));
+  }
+  return (year+1)*WEEKS_PER_YEAR+24;
+}
+
+export function licensedRevenue(gross:number,contract:Pick<IPContract,"royaltyRate"|"ownershipShare">){const royalty=Math.round(gross*contract.royaltyRate);const ownershipRevenue=Math.round((gross-royalty)*contract.ownershipShare);return {royalty,ownershipRevenue,net:Math.max(0,gross-royalty+ownershipRevenue)};}
+export const initIPMarket = (week=0,rng=Math.random):IPMarketState => ({nextAuctionWeek:scheduleNextAuctionWeek(week,rng),auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0,pendingPromptId:null,annualAuctionVersion:1});
+export function migrateIPMarket(raw:unknown,week:number):IPMarketState { const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>; const fresh=initIPMarket(week); const annual=r.annualAuctionVersion===1; return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions:Array.isArray(r.auctions)?r.auctions:[],owned:r.owned&&typeof r.owned==="object"?r.owned:{},rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1}; }
 export const ipById=(id:string)=>AUCTION_IPS.find(x=>x.id===id)??null;
 export function studioPrestige(run:{fans:number;awards:number;bestScore:number;showsMade:number}) { return Math.min(100,Math.round(run.fans/15000+run.awards*4+run.bestScore+run.showsMade/4)); }
 export function generateAuction(run:{week:number;fans:number;awards:number;bestScore:number;showsMade:number;ipMarket:IPMarketState},rng=Math.random):IPAuction|null {
- const prestige=studioPrestige(run); const unavailable=new Set([...Object.keys(run.ipMarket.owned),...Object.keys(run.ipMarket.rivalOwned),...run.ipMarket.auctions.filter(a=>!a.resolved).map(a=>a.ipId)]);
- const eligible=AUCTION_IPS.filter(ip=>!unavailable.has(ip.id)&&ip.minimumStudioPrestige<=prestige+15); if(!eligible.length)return null;
- const band=Math.min(5,1+Math.floor(run.week/96)); const weighted=eligible.filter(ip=>rarityValue[ip.rarity]<=band+1); const ip=(weighted.length?weighted:eligible)[Math.floor(rng()*(weighted.length||eligible.length))];
- const types:AuctionType[]=prestige>=65?["open","sealed","invite","distressed"]:["open","open","sealed","distressed"]; const type=types[Math.floor(rng()*types.length)];
- const min=type==="distressed"?Math.round(ip.minimumBid*.72/5000)*5000:ip.minimumBid; return {id:`auc_${run.week}_${ip.id}`,ipId:ip.id,type,opensWeek:run.week,closesWeek:run.week+(type==="sealed"?3:4),currentBid:min,leadingStudioId:null,playerMaxBid:0,bids:[],appraisalLevel:0,resolved:false,winnerId:null,winningBid:0};
+  const prestige=studioPrestige(run); const unavailable=new Set([...Object.keys(run.ipMarket.owned),...Object.keys(run.ipMarket.rivalOwned),...run.ipMarket.auctions.filter(a=>!a.resolved).map(a=>a.ipId)]);
+  const eligible=AUCTION_IPS.filter(ip=>!unavailable.has(ip.id)&&ip.minimumStudioPrestige<=prestige+15); if(!eligible.length)return null;
+  const band=Math.min(5,1+Math.floor(run.week/96)); const weighted=eligible.filter(ip=>rarityValue[ip.rarity]<=band+1); const pool=weighted.length?weighted:eligible; const ip=pool[Math.floor(rng()*pool.length)];
+  const types:AuctionType[]=prestige>=65?["open","sealed","invite","distressed"]:["open","open","sealed","distressed"]; const type=types[Math.floor(rng()*types.length)];
+  const min=type==="distressed"?Math.round(ip.minimumBid*.72/5000)*5000:ip.minimumBid; return {id:`auc_${run.week}_${ip.id}`,ipId:ip.id,type,opensWeek:run.week,closesWeek:run.week+1,currentBid:min,leadingStudioId:null,playerMaxBid:0,bids:[],appraisalLevel:0,resolved:false,winnerId:null,winningBid:0,playerSkipped:false};
 }
-export function placePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number):IPMarketState|null { const a=m.auctions.find(x=>x.id===auctionId); if(!a||a.resolved||amount<=a.currentBid||amount>cash)return null; return {...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,currentBid:amount,leadingStudioId:"player",playerMaxBid:amount,bids:[...x.bids,{studioId:"player",amount,week:x.opensWeek}]}:x),history:[...m.history,`Bid placed: £${amount.toLocaleString("en-GB")}`]}; }
+const candidateFor=(ip:AuctionIP,world:RivalWorld,current:number,rng=Math.random)=>{
+  const candidates=world.studios.filter(s=>s.status!=="collapsed"&&s.reputation>=ip.minimumStudioPrestige*.7).map(s=>{
+    const fit=s.preferred.some(g=>ip.genreTags.includes(g))?18:0; const appetite=(s.reputation+s.tier*12+fit+rng()*18)/120; const ceiling=Math.round(ip.rightsBaseValue*(.72+appetite)/5000)*5000; return {s,ceiling,score:s.reputation+s.tier*8+fit};
+  }).filter(x=>x.ceiling>=current).sort((a,b)=>b.score-a.score||b.ceiling-a.ceiling); return candidates[0]??null;
+};
+const makeContract=(ip:AuctionIP,week:number,price:number):IPContract=>({ipId:ip.id,acquiredWeek:week,expiresWeek:week+ip.licenseLength,purchasePrice:price,royaltyRate:ip.royaltyRate,ownershipShare:.3,sequelRights:false,merchRights:false,internationalRights:false,adaptations:0,bestScore:0,discoveredArcs:[]});
+const resolveForAI=(m:IPMarketState,a:IPAuction,world:RivalWorld,rng=Math.random)=>{const ip=ipById(a.ipId)!;const c=candidateFor(ip,world,a.currentBid,rng);const resolved={...a,resolved:true,winnerId:c?.s.id??null,winningBid:c?Math.max(a.currentBid,ip.minimumBid):0,leadingStudioId:c?.s.id??null,bids:c?[...a.bids,{studioId:c.s.id,amount:Math.max(a.currentBid,ip.minimumBid),week:a.closesWeek}]:a.bids};return {...m,auctions:m.auctions.map(x=>x.id===a.id?resolved:x),rivalOwned:c?{...m.rivalOwned,[ip.id]:c.s.id}:m.rivalOwned,history:[...m.history,c?`${c.s.name} wins ${ip.title}.`:`${ip.title} leaves the room unsold.`].slice(-100),pendingPromptId:m.pendingPromptId===a.id?null:m.pendingPromptId};};
+export function dismissAuctionPrompt(m:IPMarketState,auctionId:string):IPMarketState{return {...m,pendingPromptId:m.pendingPromptId===auctionId?null:m.pendingPromptId};}
+export function skipAuctionOpportunity(m:IPMarketState,auctionId:string,world:RivalWorld,rng=Math.random):IPMarketState {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved)return dismissAuctionPrompt(m,auctionId);const tagged={...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,playerSkipped:true}:x),pendingPromptId:null};return resolveForAI(tagged,{...a,playerSkipped:true},world,rng);}
+export function withdrawAuction(m:IPMarketState,auctionId:string,world:RivalWorld,rng=Math.random):IPMarketState {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved)return m;return resolveForAI(m,a,world,rng);}
+export function bidIncrementOptions(currentBid:number){return [.05,.10,.25,.50].map(p=>Math.max(10_000,Math.round(currentBid*p/5000)*5000));}
+export function placeLivePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number,week:number,world:RivalWorld,rng=Math.random):{market:IPMarketState;cashDelta:number;notice:string}|null {
+  const a=m.auctions.find(x=>x.id===auctionId),ip=a&&ipById(a.ipId); if(!a||!ip||a.resolved||a.playerSkipped||amount<=a.currentBid||amount>cash)return null;
+  let next:IPAuction={...a,currentBid:amount,leadingStudioId:"player",playerMaxBid:Math.max(a.playerMaxBid,amount),bids:[...a.bids,{studioId:"player",amount,week}]}; const c=candidateFor(ip,world,amount+10_000,rng);
+  if(c){let counter=Math.round(Math.max(amount+10_000,amount*1.06)/5000)*5000;if(counter<=c.ceiling){next={...next,currentBid:counter,leadingStudioId:c.s.id,bids:[...next.bids,{studioId:c.s.id,amount:counter,week}]};return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),history:[...m.history,`${c.s.name} counters at £${counter.toLocaleString("en-GB")}.`].slice(-100)},cashDelta:0,notice:`${c.s.name} counters your bid.`};}}
+  next={...next,resolved:true,winnerId:"player",winningBid:amount}; return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),owned:{...m.owned,[ip.id]:makeContract(ip,week,amount)},history:[...m.history,`Rights won: ${ip.title} for £${amount.toLocaleString("en-GB")}.`].slice(-100),pendingPromptId:null},cashDelta:-amount,notice:`🏆 Rights won: ${ip.title}.`};
+}
+export function placePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number):IPMarketState|null {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved||amount<=a.currentBid||amount>cash)return null;return {...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,currentBid:amount,leadingStudioId:"player",playerMaxBid:amount,bids:[...x.bids,{studioId:"player",amount,week:x.opensWeek}]}:x),history:[...m.history,`Bid placed: £${amount.toLocaleString("en-GB")}`]};}
 export function appraiseAuction(m:IPMarketState,auctionId:string):IPMarketState { return {...m,auctions:m.auctions.map(a=>a.id===auctionId?{...a,appraisalLevel:Math.min(3,a.appraisalLevel+1) as 0|1|2|3}:a)}; }
 export function tickIPMarket(m:IPMarketState,run:{week:number;cash:number;fans:number;awards:number;bestScore:number;showsMade:number},world:RivalWorld,rng=Math.random):{market:IPMarketState;cashDelta:number;notices:string[];world:RivalWorld} {
- let market={...m,auctions:m.auctions.map(a=>({...a,bids:[...a.bids]})),owned:{...m.owned},rivalOwned:{...m.rivalOwned},history:[...m.history]}; let cashDelta=0; const notices:string[]=[]; let nextWorld=world;
- if(run.week>=market.nextAuctionWeek){const a=generateAuction({...run,ipMarket:market},rng);if(a){market.auctions=[...market.auctions.filter(x=>run.week-x.closesWeek<24),a];notices.push(`🔨 New rights auction: ${ipById(a.ipId)?.title}`);}market.nextAuctionWeek=run.week+8;}
- market.auctions=market.auctions.map(a=>{ if(a.resolved)return a; const ip=ipById(a.ipId)!; let next=a;
-   if(run.week<a.closesWeek&&rng()<0.55){const candidates=nextWorld.studios.filter(s=>s.status!=="collapsed"&&s.reputation>=ip.minimumStudioPrestige*.7);if(candidates.length){const s=candidates.sort((x,y)=>{const xf=x.preferred.some(g=>ip.genreTags.includes(g))?15:0;const yf=y.preferred.some(g=>ip.genreTags.includes(g))?15:0;return (y.reputation+y.tier*8+yf)-(x.reputation+x.tier*8+xf);})[0];const appetite=(s.reputation+s.tier*12+(s.preferred.some(g=>ip.genreTags.includes(g))?18:0)+rng()*20)/120;const ceiling=ip.rightsBaseValue*(.7+appetite);if(next.currentBid<ceiling){const bid=Math.round(Math.max(next.currentBid*1.08,next.currentBid+10_000)/5000)*5000;next={...next,currentBid:bid,leadingStudioId:s.id,bids:[...next.bids,{studioId:s.id,amount:bid,week:run.week}]};if(a.leadingStudioId==="player")notices.push(`⚠️ ${s.name} outbid you on ${ip.title}.`);}}}
-   if(run.week>=next.closesWeek){next={...next,resolved:true,winnerId:next.leadingStudioId,winningBid:next.currentBid};if(next.leadingStudioId==="player"&&run.cash+cashDelta>=next.currentBid){cashDelta-=next.currentBid;market.owned[ip.id]={ipId:ip.id,acquiredWeek:run.week,expiresWeek:run.week+ip.licenseLength,purchasePrice:next.currentBid,royaltyRate:ip.royaltyRate,ownershipShare:.3,sequelRights:false,merchRights:false,internationalRights:false,adaptations:0,bestScore:0,discoveredArcs:[]};notices.push(`🏆 Rights won: ${ip.title} for £${next.currentBid.toLocaleString("en-GB")}.`);}else if(next.leadingStudioId){market.rivalOwned[ip.id]=next.leadingStudioId;const owner=nextWorld.studios.find(s=>s.id===next.leadingStudioId);notices.push(`${owner?.name??next.leadingStudioId} wins ${ip.title}.`);}}
-   return next; });
- market.history=[...market.history,...notices].slice(-100); return {market,cashDelta,notices,world:nextWorld};
+  let market={...m,auctions:m.auctions.map(a=>({...a,bids:[...a.bids]})),owned:{...m.owned},rivalOwned:{...m.rivalOwned},history:[...m.history]}; const notices:string[]=[]; let cashDelta=0;
+  market.auctions=market.auctions.map(a=>a); for(const a of market.auctions.filter(a=>!a.resolved&&run.week>=a.closesWeek)){
+    const ip=ipById(a.ipId)!;
+    if(a.leadingStudioId==="player" && run.cash+cashDelta>=a.currentBid){
+      const resolved={...a,resolved:true,winnerId:"player",winningBid:a.currentBid};
+      market={...market,auctions:market.auctions.map(x=>x.id===a.id?resolved:x),owned:{...market.owned,[ip.id]:makeContract(ip,run.week,a.currentBid)},pendingPromptId:market.pendingPromptId===a.id?null:market.pendingPromptId,history:[...market.history,`Rights won: ${ip.title} for £${a.currentBid.toLocaleString("en-GB")}.`].slice(-100)};
+      cashDelta-=a.currentBid; notices.push(`🏆 Rights won: ${ip.title}.`);
+    }else{
+      market=resolveForAI(market,a,world,rng); notices.push(`${ip.title} auction closed.`);
+    }
+  }
+  if(run.week>=market.nextAuctionWeek&&!market.auctions.some(a=>!a.resolved)){
+    const a=generateAuction({...run,ipMarket:market},rng); const nextYear=(Math.floor(run.week/WEEKS_PER_YEAR)+1)*WEEKS_PER_YEAR; market.nextAuctionWeek=scheduleNextAuctionWeek(nextYear,rng);
+    if(a){market.auctions=[...market.auctions.filter(x=>run.week-x.closesWeek<96),a];market.pendingPromptId=a.id;notices.push(`🔨 Rights forecast: ${ipById(a.ipId)?.title} is going to auction.`);}
+  }
+  market.history=[...market.history,...notices].slice(-100);return {market,cashDelta,notices,world};
 }
 export function negotiateRights(m:IPMarketState,ipId:string,kind:"sequel"|"merch"|"international"|"royalty"|"ownership",legalTier:number,rng=Math.random):{market:IPMarketState;cost:number;success:boolean}|null {const c=m.owned[ipId],ip=ipById(ipId);if(!c||!ip)return null;const cost=Math.round(ip.rightsBaseValue*(kind==="royalty"?.45:kind==="ownership"?.3:.18)/5000)*5000;const chance=Math.min(.82,.28+legalTier*.14+m.legalReputation*.01-ip.creatorControl*.002);const success=rng()<chance;let next={...c};if(success){if(kind==="sequel")next.sequelRights=true;if(kind==="merch")next.merchRights=true;if(kind==="international")next.internationalRights=true;if(kind==="royalty")next.royaltyRate=Math.max(.02,next.royaltyRate-.04);if(kind==="ownership")next.ownershipShare=Math.min(ip.ownershipSharePotential,next.ownershipShare+.1);}return {market:{...m,owned:{...m.owned,[ipId]:next},legalReputation:Math.min(20,m.legalReputation+(success?1:0)),history:[...m.history,`${ip.title}: ${kind} negotiation ${success?"succeeded":"failed"}.`]},cost,success};}
-export const SOURCE_LABEL:Record<IPSourceType,string>={manga:"Manga",light_novel:"Light novel",jrpg:"JRPG",visual_novel:"Visual novel",webcomic:"Webcomic",game:"Game"};
+export const SOURCE_LABEL:Record<IPSourceType,string>={manga:"Manga",light_novel:"Light novel",jrpg:"JRPG",visual_novel:"Visual novel",webcomic:"Webcomic",game:"Game",film:"Film",tv:"TV series",novel:"Novel",comic:"Comic",audio_drama:"Audio drama",tabletop:"Tabletop property"};
 export const AUCTION_TYPE_LABEL:Record<AuctionType,string>={open:"Open auction",sealed:"Sealed bid",distressed:"Distressed sale",invite:"Invite-only"};
 export const genreLabel=(id:GenreId)=>GENRES.find(g=>g.id===id)?.label??id;
-export const preferredMediumForIP=(ip:AuctionIP):MediumId=>ip.rarity==="legendary"?"movie":ip.sourceType==="webcomic"?"ona":"tv";
+export const preferredMediumForIP=(ip:AuctionIP):MediumId=>ip.sourceType==="film"?"movie":ip.rarity==="legendary"?"movie":ip.sourceType==="webcomic"?"ona":"tv";

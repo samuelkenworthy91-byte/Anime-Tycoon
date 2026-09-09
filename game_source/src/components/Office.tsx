@@ -113,6 +113,7 @@ export default function Office({
   setRun,
   onNewShow,
   onLicensed,
+  onAuction,
   onContract,
   onCommission,
   onContinue,
@@ -126,6 +127,7 @@ export default function Office({
   setRun: (fn: (r: RunState) => RunState) => void;
   onNewShow: (sequelKey?: string) => void;
   onLicensed: (ipId: string) => void;
+  onAuction: (auctionId: string) => void;
   onContract: (c: Contract) => void;
   onCommission: (c: Commission) => void;
   onContinue: (plan: ContinuationPlan) => void;
@@ -492,7 +494,7 @@ export default function Office({
 
       {modal === "auctions" && (
         <Modal title="IP RIGHTS & AUCTIONS" onClose={() => setModal(null)}>
-          <IPMarket run={run} setRun={setRun} onAdapt={(ipId) => { setModal(null); onLicensed(ipId); }}/>
+          <IPMarket run={run} setRun={setRun} onAdapt={(ipId) => { setModal(null); onLicensed(ipId); }} onEnterAuction={(auctionId) => { setModal(null); onAuction(auctionId); }}/>
         </Modal>
       )}
 
