@@ -5,7 +5,7 @@ import type { BudgetId, PointType } from "./data";
 
    Each office grants a number of ROOM SLOTS. A facility occupies one
    slot regardless of tier, so a small studio must specialise: you
-   cannot own everything until the campus.  Upgrades never take a new
+   cannot own everything until the campus. Upgrades never take a new
    slot, they deepen the room you already have.
    ==================================================================== */
 
@@ -19,26 +19,26 @@ export type FacilityId =
   | "training"
   | "canteen"
   | "render"
-  | "archive";
+  | "archive"
+  | "legal"
+  | "data";
 
 /** owned rooms: facility id → tier (1..maxTier) */
 export type Facilities = Partial<Record<FacilityId, number>>;
 
 export interface FacilityTier {
-  cost: number; // build / upgrade price
-  rd: number; // research points required
-  upkeep: number; // weekly running cost once at this tier
+  cost: number;
+  rd: number;
+  upkeep: number;
 }
 
 export interface FacilityDef {
   id: FacilityId;
   name: string;
-  /** which studio strategy this belongs to (shown as a chip) */
   category: "production" | "marketing" | "people" | "revenue";
   color: string;
   blurb: string;
   tiers: FacilityTier[];
-  /** exact numeric effect lines for a given tier (1-based) */
   effects: (tier: number) => string[];
 }
 
@@ -113,8 +113,8 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 600_000, rd: 55, upkeep: 1_350 },
     ],
     effects: (t) => [
-      `All hype gains +${[25, 50, 80][t - 1]}%`,
-      `Promo campaigns cost −${[10, 20, 30][t - 1]}%`,
+      `All campaign hype gains +${[25, 50, 80][t - 1]}%`,
+      `Marketing campaign prices −${[10, 20, 30][t - 1]}%`,
       ...(t >= 2 ? ["Premium campaigns unlocked"] : []),
     ],
   },
@@ -196,19 +196,46 @@ export const FACILITY_DEFS: FacilityDef[] = [
       `Research projects finish ${t} week${t > 1 ? "s" : ""} sooner`,
     ],
   },
+  {
+    id: "legal",
+    name: "Legal & Rights Desk",
+    category: "revenue",
+    color: "#e5c07b",
+    blurb: "Rights specialists, contract redlines and the people who notice the clause everyone else missed.",
+    tiers: [
+      { cost: 95_000, rd: 15, upkeep: 650 },
+      { cost: 310_000, rd: 45, upkeep: 1_300 },
+      { cost: 900_000, rd: 90, upkeep: 2_100 },
+    ],
+    effects: (t) => [
+      `Rights-negotiation success chance +${t * 14}%`,
+      `Co-production partner revenue share −${t * 2} percentage points`,
+    ],
+  },
+  {
+    id: "data",
+    name: "Audience Data Lab",
+    category: "marketing",
+    color: "#72e6ff",
+    blurb: "Panels, trend models and audience segmentation without pretending a spreadsheet can write the show.",
+    tiers: [
+      { cost: 110_000, rd: 20, upkeep: 700 },
+      { cost: 350_000, rd: 50, upkeep: 1_400 },
+      { cost: 1_000_000, rd: 100, upkeep: 2_200 },
+    ],
+    effects: (t) => [
+      `Auction cards pre-reveal ${t} appraisal layer${t > 1 ? "s" : ""}`,
+      `Auction appraisal cost −${t} RD (minimum 2 RD)`,
+      ...(t >= 1 ? ["Marketing campaign fit is forecast before purchase"] : []),
+    ],
+  },
 ];
 
-export const facilityDef = (id: FacilityId): FacilityDef =>
-  FACILITY_DEFS.find((f) => f.id === id)!;
-
+export const facilityDef = (id: FacilityId): FacilityDef => FACILITY_DEFS.find((f) => f.id === id)!;
 export const MAX_TIER = 3;
 
-/* ------------------------------------------------------------- slots */
-export const slotsUsed = (fac: Facilities): number =>
-  Object.values(fac).filter((t) => (t ?? 0) > 0).length;
+export const slotsUsed = (fac: Facilities): number => Object.values(fac).filter((t) => (t ?? 0) > 0).length;
 
-/* -------------------------------------------------------------- cost */
-/** cost of the NEXT tier for a facility (build if unowned), null if maxed */
 export function nextTier(fac: Facilities, id: FacilityId): { tier: number; cost: number; rd: number } | null {
   const cur = fac[id] ?? 0;
   const def = facilityDef(id);
@@ -217,7 +244,6 @@ export function nextTier(fac: Facilities, id: FacilityId): { tier: number; cost:
   return { tier: cur + 1, cost: t.cost, rd: t.rd };
 }
 
-/** weekly running cost of every room at its current tier */
 export function facilityUpkeep(fac: Facilities): number {
   let sum = 0;
   for (const [id, tier] of Object.entries(fac) as [FacilityId, number][]) {
@@ -227,39 +253,27 @@ export function facilityUpkeep(fac: Facilities): number {
   return sum;
 }
 
-/* ----------------------------------------------------------- effects */
-/** the aggregate mechanical effect of every room, ready to be applied */
 export interface FacilityFX {
-  /** multiplier on weekly production point gains per discipline */
   pointMult: Record<PointType, number>;
-  /** flat team-speed bonus on every stage */
   speed: number;
-  /** extra speed during the animation stage */
   speedAnimation: number;
-  /** extra issues fixed per week during post */
   issueFix: number;
-  /** issues coming out of a milestone sprint are reduced by this */
   issueGuard: number;
-  /** multiplier on hype gains (marketing stage + promo campaigns) */
   hypeMult: number;
-  /** promo campaign price discount 0..1 */
   promoDiscount: number;
-  /** premium promo campaigns available without the research */
   promoUnlock: boolean;
-  /** release revenue multiplier from merchandising */
   merchMult: number;
-  /** extra skill points taught by sprints / releases */
   trainSkill: number;
-  /** extra idle stamina recovery per week */
   staminaRest: number;
-  /** reduced stamina drain per week for assigned staff */
   staminaSave: number;
-  /** weekly morale bonus for everyone (a happy canteen) */
   moraleRest: number;
-  /** flat research points per week */
   rdWeekly: number;
-  /** multiplier on research earned from sprints */
   rdMult: number;
+  legalNegotiationBonus: number;
+  coProductionShareReduction: number;
+  dataReveal: number;
+  appraisalRdDiscount: number;
+  campaignForecast: boolean;
 }
 
 export const NO_FX: FacilityFX = {
@@ -278,13 +292,15 @@ export const NO_FX: FacilityFX = {
   moraleRest: 0,
   rdWeekly: 0,
   rdMult: 1,
+  legalNegotiationBonus: 0,
+  coProductionShareReduction: 0,
+  dataReveal: 0,
+  appraisalRdDiscount: 0,
+  campaignForecast: false,
 };
 
 export function facilityFX(fac: Facilities | undefined): FacilityFX {
-  const fx: FacilityFX = {
-    ...NO_FX,
-    pointMult: { ...NO_FX.pointMult },
-  };
+  const fx: FacilityFX = { ...NO_FX, pointMult: { ...NO_FX.pointMult } };
   if (!fac) return fx;
   const tier = (id: FacilityId) => fac[id] ?? 0;
 
@@ -335,9 +351,20 @@ export function facilityFX(fac: Facilities | undefined): FacilityFX {
     fx.rdMult *= [1.25, 1.5, 2][ar - 1];
   }
 
+  const legal = tier("legal");
+  if (legal) {
+    fx.legalNegotiationBonus += legal * 0.14;
+    fx.coProductionShareReduction += legal * 0.02;
+  }
+
+  const data = tier("data");
+  if (data) {
+    fx.dataReveal = data;
+    fx.appraisalRdDiscount = data;
+    fx.campaignForecast = true;
+  }
+
   return fx;
 }
 
-/** render-farm speed for a given project budget (blockbusters gain double) */
-export const fxSpeedFor = (fx: FacilityFX, budget: BudgetId): number =>
-  fx.speed * (budget === "blockbuster" ? 2 : 1);
+export const fxSpeedFor = (fx: FacilityFX, budget: BudgetId): number => fx.speed * (budget === "blockbuster" ? 2 : 1);
