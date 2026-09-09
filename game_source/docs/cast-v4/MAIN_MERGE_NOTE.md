@@ -1,1 +1,0 @@
-Cast V4 runtime integration reached main on 2026-09-09. This temporary marker exists only to sequence the final audit-script compatibility fix with the GitHack refresh commit and may be removed after verification.
