@@ -1,0 +1,456 @@
+name: Temp auction ceremony implementation
+
+on:
+  push:
+    branches: [work/auction-ceremony-hidden-arcs]
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply integrated auction pass
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import csv, json, re
+
+          root = Path('game_source')
+          docs = root / 'docs'
+          src = root / 'src'
+          engine = src / 'engine'
+          components = src / 'components'
+
+          rows = list(csv.DictReader((docs / 'USER_AUCTION_IP_CATALOG.csv').open(encoding='utf-8')))
+          assert len(rows) == 100, f'Expected 100 user IPs, found {len(rows)}'
+
+          source_types = [
+            'jrpg','jrpg','game','jrpg','jrpg','manga','manga','tv','manga','game',
+            'manga','visual_novel','novel','game','game','tabletop','film','film','game','tv',
+            'manga','manga','manga','game','novel','film','film','manga','film','film',
+            'film','film','film','novel','light_novel','film','film','film','comic','tv',
+            'tv','game','tv','tv','tv','tv','novel','tv','tv','novel',
+            'game','game','comic','novel','manga','tv','tv','tv','manga','light_novel',
+            'jrpg','film','film','film','film','film','film','novel','novel','film',
+            'jrpg','audio_drama','film','tv','comic','film','film','film','film','game',
+            'jrpg','game','game','game','film','novel','film','film','film','film',
+            'tv','game','tv','tv','film','tv','tv','tv','tv','tv'
+          ]
+          assert len(source_types) == 100
+
+          hidden_names = [
+            'Crystal Pilgrimage','Broken World Reunion','Relic Dungeon Cycle','Exiled Heir Campaign','Academy Route Split',
+            'Mindgame Pursuit','Ascension Battle','Cosmic Dragon Hunt','Equivalent Exchange','Demon Contract Hunt',
+            'Psychological Pursuit','Ritual Grail War','Battle School Command','Career Breakthrough','Mercenary Mech Contract',
+            'Crusade of Attrition','Rebel Rescue','Labyrinth Bargain','Creature League','Digital Evolution',
+            'Spirit Realm Rescue','Clan Examination','Island Liberation','Sphere League Tournament','Three Kingdom Stratagem',
+            'Second Chance Timeline','Dragon Siege','Saga Voyage','Winter Invitation','Pirate Broadcast',
+            'Band Reunites','Seven Clue Countdown','Unreliable Lineup','Predator’s Table','Crest War',
+            'Hidden Identity Season','Last Stand of the Old Guard','Broadcast Meltdown','Ancient Monster Pact','Awakening Ensemble',
+            'Mirror World Incursion','Stealth Infiltration','Drag House Rivalry','Anonymous Scandal','Coastal Love Triangle',
+            'Succession War','Turning Wheel Prophecy','Road Duel','Bounty of the Week','Tower Pilgrimage',
+            'Revenge Duel','Forbidden Technology Exodus','Keyed Door Mystery','Abbey Siege','Dungeon Meal Expedition',
+            'Pressure Kitchen Elimination','Impossible Food Challenge','Elimination Game','Impossible Teacher Mission','Death-Game Floor',
+            'Summoner Pilgrimage','Secret Agency Case','Social Clique Coup','Deadly Popularity Pact','Pack Survival',
+            'Absurd Frontier Deathtrap','Impossible Stunt','Demon Realm Breach','Moving Castle Bargain','Storybook Rescue',
+            'Tactical Succession War','Statement Casefile','Nonlinear Romance','Monster of the Week','Apocalypse Family',
+            'Awake Alone','Synthetic Intimacy','Memory Love Story','Wuxia Forbidden Love','Noir Bullet Time',
+            'Village Restoration','Collectathon Quest','Bad-Taste Escalation','Psychic Conspiracy','Survival Fable',
+            'Road of Ash','Floating Settlement War','Dance Rebellion','Genius Mentorship','Family Dream Detour',
+            'Believe Rebuild','Primate Gadget Chase','Aftermath Community','Imaginary Partner Case','Causal Ripple',
+            'Criminal Transformation','Four Nations Journey','Twin City Revolution','Found-Family Job','Dream Logic Investigation'
+          ]
+          assert len(hidden_names) == 100 and len(set(hidden_names)) == 100
+
+          partner_labels = {
+            'twist':'Plot Twist','tournament':'Tournament Arc','war':'War Arc','confession':'Confession',
+            'live':'Live Performance','festival':'Festival Episode','origin':'Origin Story','lore':'Worldbuilding Dive',
+            'launch':'Launch Arc','cliffhanger':'Cliffhanger','case':'Case File','montage':'Training Montage','hook':'Cold Open Hook'
+          }
+          def partner_for(gs):
+              s = set(gs)
+              if 'mystery' in s: return 'twist'
+              if 'sports' in s: return 'tournament'
+              if 'military' in s: return 'war'
+              if 'romance' in s: return 'confession'
+              if 'idol' in s: return 'live'
+              if 'comedy' in s: return 'festival'
+              if s & {'samurai','shinobi','martial'}: return 'origin'
+              if s & {'cyber','space','mecha'}: return 'launch'
+              if s & {'horror','supernatural'}: return 'cliffhanger'
+              if s & {'fantasy','mythology','isekai','magical'}: return 'lore'
+              return 'hook'
+          def anti_for(gs):
+              s=set(gs)
+              prefs = ['slice','horror','military','cooking','sports','romance','comedy','cyber']
+              if 'horror' in s: prefs = ['slice'] + prefs
+              elif 'comedy' in s: prefs = ['horror'] + prefs
+              elif 'military' in s: prefs = ['slice'] + prefs
+              elif 'romance' in s: prefs = ['military'] + prefs
+              elif 'sports' in s: prefs = ['horror'] + prefs
+              return next(x for x in prefs if x not in s)
+
+          # Source-of-truth TS catalogue used by the live auction engine.
+          catalog = []
+          hidden = []
+          hidden_csv = []
+          for i, (row, st, arc_name) in enumerate(zip(rows, source_types, hidden_names), start=1):
+              genres = [row['genre1'], row['genre2']]
+              aid = f'ip_arc_{i:03d}'
+              partner = partner_for(genres)
+              anti = anti_for(genres)
+              catalog.append({
+                  'slot': i, 'id': f'ip_{i:03d}', 'title': row['title'], 'sourceType': st,
+                  'animeType': row['animeType'], 'genres': genres, 'hiddenArcId': aid,
+                  'posterAsset': f'/auction-ip/poster_{i:03d}.webp'
+              })
+              hidden.append({
+                  'slot': i, 'id': aid, 'name': arc_name,
+                  'cost': 14000 + (i % 7) * 3000, 'q': 2, 'f': 0.02,
+                  'syn': genres, 'synQ': 4, 'synF': 0.025,
+                  'anti': [anti], 'antiQ': -3, 'antiF': -0.01,
+                  'partnerArc': partner,
+                  'comboName': f'{arc_name} + {partner_labels[partner]}',
+                  'desc': f'A signature {arc_name.lower()} structure learned from {row["title"]}; exceptional with its native genres, but transferable to other productions once mastered.'
+              })
+              hidden_csv.append([i, row['title'], aid, arc_name, row['genre1'], row['genre2'], partner, partner_labels[partner]])
+
+          def ts_obj(obj):
+              return json.dumps(obj, ensure_ascii=False, separators=(',', ':'))
+
+          (engine / 'userIpCatalog.ts').write_text(
+              '// Generated from docs/USER_AUCTION_IP_CATALOG.csv. Keep stable slot/id ordering.\n'
+              'export const USER_IP_CATALOG = [\n' +
+              ''.join(f'  {ts_obj(x)},\n' for x in catalog) +
+              '] as const;\n', encoding='utf-8')
+
+          (engine / 'ipHiddenArcs.ts').write_text(
+              '// One hidden studio-wide story blueprint for every user IP. No runtime copyright/reference names live here.\n'
+              'export const IP_HIDDEN_ARC_SEEDS = [\n' +
+              ''.join(f'  {ts_obj(x)},\n' for x in hidden) +
+              '] as const;\n\n'
+              'export const IP_HIDDEN_ARC_BY_SLOT = Object.fromEntries(IP_HIDDEN_ARC_SEEDS.map((x) => [x.slot, x])) as Record<number, (typeof IP_HIDDEN_ARC_SEEDS)[number]>;\n',
+              encoding='utf-8')
+
+          with (docs / 'USER_AUCTION_IP_HIDDEN_ARCS.csv').open('w', encoding='utf-8', newline='') as f:
+              w=csv.writer(f); w.writerow(['posterSlot','title','arcId','hiddenArc','nativeGenre1','nativeGenre2','comboPartnerArcId','comboPartnerArc'])
+              w.writerows(hidden_csv)
+
+          # Replace the engine catalogue/auction behavior while keeping its public API compatible.
+          ip_ts = r'''import { GENRES, type AnimeType, type AudienceId, type GenreId, type MediumId } from "./data";
+          import type { RivalWorld } from "./rivals";
+          import { USER_IP_CATALOG } from "./userIpCatalog";
+          import { IP_HIDDEN_ARC_BY_SLOT } from "./ipHiddenArcs";
+
+          export type IPSourceType = "manga" | "light_novel" | "jrpg" | "visual_novel" | "webcomic" | "game" | "film" | "tv" | "novel" | "comic" | "audio_drama" | "tabletop";
+          export type IPRarity = "cult" | "emerging" | "recognised" | "premium" | "legendary";
+          export type AuctionType = "open" | "sealed" | "distressed" | "invite";
+
+          export interface IPCharacter { role: "protagonist" | "companion" | "antagonist" | "mascot"; name: string; description: string; }
+          export interface IPArc { id: string; name: string; minAdaptations?: number; requiresSequelRights?: boolean; }
+          export interface AuctionIP {
+            id: string; title: string; sourceType: IPSourceType; description: string; genreTags: GenreId[];
+            toneTags: string[]; audience: AudienceId; animeType: AnimeType; fanbase: number; prestige: number;
+            merchPotential: number; adaptationDifficulty: number; rightsBaseValue: number; minimumBid: number;
+            royaltyRate: number; licenseLength: number; ownershipSharePotential: number;
+            sequelRightsAvailable: boolean; merchRightsAvailable: boolean; internationalRightsAvailable: boolean;
+            creatorControl: number; audienceVolatility: number; expectationLevel: number; scopeComplexity: number;
+            characters: IPCharacter[]; availableArcs: IPArc[]; specialArcUnlock?: string; posterSlot: number; posterAsset: string;
+            posterPalette: [string, string, string]; rarity: IPRarity; minimumStudioPrestige: number; specialRules: string[];
+          }
+
+          const rarityValue: Record<IPRarity, number> = { cult: 1, emerging: 2, recognised: 3, premium: 4, legendary: 5 };
+          const rightsScale: Record<IPRarity, number> = { cult: .35, emerging: .6, recognised: 1.2, premium: 2.5, legendary: 6 };
+          const arc = (id: string, name: string, extra: Partial<IPArc> = {}): IPArc => ({ id, name, ...extra });
+          const FIRST = ["Ari","Mira","Ren","Sena","Noa","Kai","Iris","Theo","Nia","Sol","Emi","Rowan","Juno","Vale","Mika","Rin","Tess","Leo","Aya","Pax"];
+          const LAST = ["Vale","Sorn","Quill","Mori","Venn","Kade","Grey","Bloom","Reed","Aster","Hale","Wren","Cole","Finch","Rose","Mercer","Bell","Ash","Line","Voss"];
+          const MASCOTS = ["Pip","Mote","Nib","Bit","Chime","Loop","Morrow","Puff","Comma","Beacon"];
+          const charsFor = (slot:number):IPCharacter[] => {
+            const n=(k:number)=>`${FIRST[(slot*3+k*5)%FIRST.length]} ${LAST[(slot*7+k*3)%LAST.length]}`;
+            return [
+              {role:"protagonist",name:n(0),description:"The property’s central viewpoint."},
+              {role:"companion",name:n(1),description:"A defining ally, foil or rival."},
+              {role:"antagonist",name:n(2),description:"The principal opposing force."},
+              {role:"mascot",name:MASCOTS[slot%MASCOTS.length],description:"A property-specific supporting icon."},
+            ];
+          };
+          const rarityFor=(slot:number):IPRarity => slot%10===0?"legendary":slot%5===0?"premium":slot%3===0?"recognised":slot%2===0?"emerging":"cult";
+          const paletteFor=(genres:GenreId[],slot:number):[string,string,string] => {
+            const a=GENRES.find(g=>g.id===genres[0])?.color??"#6d5bc3"; const b=GENRES.find(g=>g.id===genres[1])?.color??"#d15c82";
+            return [a,b,slot%2?"#f0d58b":"#d8e5f0"];
+          };
+
+          export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
+            const slot=raw.slot; const rarity=rarityFor(slot); const tier=rarityValue[rarity]; const genres=[...raw.genres] as GenreId[];
+            const fanbase=Math.min(98,38+((slot*17)%58)+tier*2); const prestige=Math.min(96,40+((slot*13)%42)+tier*4);
+            const merch=Math.min(98,35+((slot*19)%50)+tier*4); const difficulty=Math.min(96,42+((slot*11)%43)+tier*5);
+            const rights=Math.round((220_000+fanbase*6_500+prestige*5_500)*rightsScale[rarity]/5000)*5000;
+            const id=raw.id; const hidden=IP_HIDDEN_ARC_BY_SLOT[slot];
+            return {
+              id,title:raw.title,sourceType:raw.sourceType as IPSourceType,
+              description:`A sought-after ${SOURCE_LABEL[raw.sourceType as IPSourceType].toLowerCase()} property with a distinctive ${hidden?.name.toLowerCase() ?? "story"} identity.`,
+              genreTags:genres,toneTags:[genres[0],genres[1]],audience:(genres.includes("horror")||genres.includes("mystery")?"adults":genres.includes("comedy")||genres.includes("sports")?"family":"teens") as AudienceId,
+              animeType:raw.animeType as AnimeType,fanbase,prestige,merchPotential:merch,adaptationDifficulty:difficulty,
+              rightsBaseValue:rights,minimumBid:Math.round(rights*.68/5000)*5000,royaltyRate:Math.max(.06,.18-tier*.02),licenseLength:144+slot%3*48,
+              ownershipSharePotential:.45+tier*.07,sequelRightsAvailable:true,merchRightsAvailable:true,internationalRightsAvailable:true,
+              creatorControl:Math.min(95,24+difficulty*.62),audienceVolatility:Math.min(95,18+difficulty*.58),expectationLevel:Math.round((fanbase+prestige)/2),scopeComplexity:difficulty,
+              characters:charsFor(slot),availableArcs:[arc(`${id}_opening`,"Opening Movement"),arc(`${id}_turn`,"Turning Point"),arc(`${id}_legacy`,"Legacy Finale",{minAdaptations:1,requiresSequelRights:true})],
+              specialArcUnlock:hidden?.id,posterSlot:slot,posterAsset:raw.posterAsset,posterPalette:paletteFor(genres,slot),rarity,
+              minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:[`Signature blueprint: ${hidden?.name ?? "Unknown"}.`,`A ${difficulty>=78?"demanding":"flexible"} adaptation with fan expectations to match.`]
+            };
+          });
+
+          export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; }
+          export interface AuctionBid { studioId:"player"|string; amount:number; week:number; }
+          export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; playerSkipped?:boolean; }
+          export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; }
+
+          export const WEEKS_PER_YEAR=48;
+          export const AUCTION_YEAR_CHANCE=.68;
+          const AUCTION_EARLIEST=6, AUCTION_LATEST=42;
+          export function scheduleNextAuctionWeek(fromWeek:number,rng=Math.random){
+            let year=Math.floor(Math.max(0,fromWeek)/WEEKS_PER_YEAR); const startingYear=year; const offset=Math.max(0,fromWeek-year*WEEKS_PER_YEAR);
+            for(let attempts=0;attempts<18;attempts++,year++){
+              const low=year===startingYear?Math.max(AUCTION_EARLIEST,offset):AUCTION_EARLIEST;
+              if(low>AUCTION_LATEST)continue;
+              if(rng()<=AUCTION_YEAR_CHANCE)return year*WEEKS_PER_YEAR+low+Math.floor(rng()*(AUCTION_LATEST-low+1));
+            }
+            return (year+1)*WEEKS_PER_YEAR+24;
+          }
+
+          export function licensedRevenue(gross:number,contract:Pick<IPContract,"royaltyRate"|"ownershipShare">){const royalty=Math.round(gross*contract.royaltyRate);const ownershipRevenue=Math.round((gross-royalty)*contract.ownershipShare);return {royalty,ownershipRevenue,net:Math.max(0,gross-royalty+ownershipRevenue)};}
+          export const initIPMarket = (week=0,rng=Math.random):IPMarketState => ({nextAuctionWeek:scheduleNextAuctionWeek(week,rng),auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0,pendingPromptId:null,annualAuctionVersion:1});
+          export function migrateIPMarket(raw:unknown,week:number):IPMarketState { const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>; const fresh=initIPMarket(week); const annual=r.annualAuctionVersion===1; return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions:Array.isArray(r.auctions)?r.auctions:[],owned:r.owned&&typeof r.owned==="object"?r.owned:{},rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1}; }
+          export const ipById=(id:string)=>AUCTION_IPS.find(x=>x.id===id)??null;
+          export function studioPrestige(run:{fans:number;awards:number;bestScore:number;showsMade:number}) { return Math.min(100,Math.round(run.fans/15000+run.awards*4+run.bestScore+run.showsMade/4)); }
+          export function generateAuction(run:{week:number;fans:number;awards:number;bestScore:number;showsMade:number;ipMarket:IPMarketState},rng=Math.random):IPAuction|null {
+            const prestige=studioPrestige(run); const unavailable=new Set([...Object.keys(run.ipMarket.owned),...Object.keys(run.ipMarket.rivalOwned),...run.ipMarket.auctions.filter(a=>!a.resolved).map(a=>a.ipId)]);
+            const eligible=AUCTION_IPS.filter(ip=>!unavailable.has(ip.id)&&ip.minimumStudioPrestige<=prestige+15); if(!eligible.length)return null;
+            const band=Math.min(5,1+Math.floor(run.week/96)); const weighted=eligible.filter(ip=>rarityValue[ip.rarity]<=band+1); const pool=weighted.length?weighted:eligible; const ip=pool[Math.floor(rng()*pool.length)];
+            const types:AuctionType[]=prestige>=65?["open","sealed","invite","distressed"]:["open","open","sealed","distressed"]; const type=types[Math.floor(rng()*types.length)];
+            const min=type==="distressed"?Math.round(ip.minimumBid*.72/5000)*5000:ip.minimumBid; return {id:`auc_${run.week}_${ip.id}`,ipId:ip.id,type,opensWeek:run.week,closesWeek:run.week+1,currentBid:min,leadingStudioId:null,playerMaxBid:0,bids:[],appraisalLevel:0,resolved:false,winnerId:null,winningBid:0,playerSkipped:false};
+          }
+          const candidateFor=(ip:AuctionIP,world:RivalWorld,current:number,rng=Math.random)=>{
+            const candidates=world.studios.filter(s=>s.status!=="collapsed"&&s.reputation>=ip.minimumStudioPrestige*.7).map(s=>{
+              const fit=s.preferred.some(g=>ip.genreTags.includes(g))?18:0; const appetite=(s.reputation+s.tier*12+fit+rng()*18)/120; const ceiling=Math.round(ip.rightsBaseValue*(.72+appetite)/5000)*5000; return {s,ceiling,score:s.reputation+s.tier*8+fit};
+            }).filter(x=>x.ceiling>=current).sort((a,b)=>b.score-a.score||b.ceiling-a.ceiling); return candidates[0]??null;
+          };
+          const makeContract=(ip:AuctionIP,week:number,price:number):IPContract=>({ipId:ip.id,acquiredWeek:week,expiresWeek:week+ip.licenseLength,purchasePrice:price,royaltyRate:ip.royaltyRate,ownershipShare:.3,sequelRights:false,merchRights:false,internationalRights:false,adaptations:0,bestScore:0,discoveredArcs:[]});
+          const resolveForAI=(m:IPMarketState,a:IPAuction,world:RivalWorld,rng=Math.random)=>{const ip=ipById(a.ipId)!;const c=candidateFor(ip,world,a.currentBid,rng);const resolved={...a,resolved:true,winnerId:c?.s.id??null,winningBid:c?Math.max(a.currentBid,ip.minimumBid):0,leadingStudioId:c?.s.id??null,bids:c?[...a.bids,{studioId:c.s.id,amount:Math.max(a.currentBid,ip.minimumBid),week:a.closesWeek}]:a.bids};return {...m,auctions:m.auctions.map(x=>x.id===a.id?resolved:x),rivalOwned:c?{...m.rivalOwned,[ip.id]:c.s.id}:m.rivalOwned,history:[...m.history,c?`${c.s.name} wins ${ip.title}.`:`${ip.title} leaves the room unsold.`].slice(-100),pendingPromptId:m.pendingPromptId===a.id?null:m.pendingPromptId};};
+          export function dismissAuctionPrompt(m:IPMarketState,auctionId:string):IPMarketState{return {...m,pendingPromptId:m.pendingPromptId===auctionId?null:m.pendingPromptId};}
+          export function skipAuctionOpportunity(m:IPMarketState,auctionId:string,world:RivalWorld,rng=Math.random):IPMarketState {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved)return dismissAuctionPrompt(m,auctionId);const tagged={...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,playerSkipped:true}:x),pendingPromptId:null};return resolveForAI(tagged,{...a,playerSkipped:true},world,rng);}
+          export function withdrawAuction(m:IPMarketState,auctionId:string,world:RivalWorld,rng=Math.random):IPMarketState {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved)return m;return resolveForAI(m,a,world,rng);}
+          export function bidIncrementOptions(currentBid:number){return [.05,.10,.25,.50].map(p=>Math.max(10_000,Math.round(currentBid*p/5000)*5000));}
+          export function placeLivePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number,week:number,world:RivalWorld,rng=Math.random):{market:IPMarketState;cashDelta:number;notice:string}|null {
+            const a=m.auctions.find(x=>x.id===auctionId),ip=a&&ipById(a.ipId); if(!a||!ip||a.resolved||a.playerSkipped||amount<=a.currentBid||amount>cash)return null;
+            let next:{[K in keyof IPAuction]:IPAuction[K]}={...a,currentBid:amount,leadingStudioId:"player",playerMaxBid:Math.max(a.playerMaxBid,amount),bids:[...a.bids,{studioId:"player",amount,week}]}; const c=candidateFor(ip,world,amount+10_000,rng);
+            if(c){let counter=Math.round(Math.max(amount+10_000,amount*1.06)/5000)*5000;if(counter<=c.ceiling){next={...next,currentBid:counter,leadingStudioId:c.s.id,bids:[...next.bids,{studioId:c.s.id,amount:counter,week}]};return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),history:[...m.history,`${c.s.name} counters at £${counter.toLocaleString("en-GB")}.`].slice(-100)},cashDelta:0,notice:`${c.s.name} counters your bid.`};}}
+            next={...next,resolved:true,winnerId:"player",winningBid:amount}; return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),owned:{...m.owned,[ip.id]:makeContract(ip,week,amount)},history:[...m.history,`Rights won: ${ip.title} for £${amount.toLocaleString("en-GB")}.`].slice(-100),pendingPromptId:null},cashDelta:-amount,notice:`🏆 Rights won: ${ip.title}.`};
+          }
+          export function placePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number):IPMarketState|null {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved||amount<=a.currentBid||amount>cash)return null;return {...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,currentBid:amount,leadingStudioId:"player",playerMaxBid:amount,bids:[...x.bids,{studioId:"player",amount,week:x.opensWeek}]}:x),history:[...m.history,`Bid placed: £${amount.toLocaleString("en-GB")}`]};}
+          export function appraiseAuction(m:IPMarketState,auctionId:string):IPMarketState { return {...m,auctions:m.auctions.map(a=>a.id===auctionId?{...a,appraisalLevel:Math.min(3,a.appraisalLevel+1) as 0|1|2|3}:a)}; }
+          export function tickIPMarket(m:IPMarketState,run:{week:number;cash:number;fans:number;awards:number;bestScore:number;showsMade:number},world:RivalWorld,rng=Math.random):{market:IPMarketState;cashDelta:number;notices:string[];world:RivalWorld} {
+            let market={...m,auctions:m.auctions.map(a=>({...a,bids:[...a.bids]})),owned:{...m.owned},rivalOwned:{...m.rivalOwned},history:[...m.history]}; const notices:string[]=[];
+            market.auctions=market.auctions.map(a=>a); for(const a of market.auctions.filter(a=>!a.resolved&&run.week>=a.closesWeek)){market=resolveForAI(market,a,world,rng);const ip=ipById(a.ipId);notices.push(`${ip?.title??"The IP"} auction closed.`);}
+            if(run.week>=market.nextAuctionWeek&&!market.auctions.some(a=>!a.resolved)){
+              const a=generateAuction({...run,ipMarket:market},rng); const nextYear=(Math.floor(run.week/WEEKS_PER_YEAR)+1)*WEEKS_PER_YEAR; market.nextAuctionWeek=scheduleNextAuctionWeek(nextYear,rng);
+              if(a){market.auctions=[...market.auctions.filter(x=>run.week-x.closesWeek<96),a];market.pendingPromptId=a.id;notices.push(`🔨 Rights forecast: ${ipById(a.ipId)?.title} is going to auction.`);}
+            }
+            market.history=[...market.history,...notices].slice(-100);return {market,cashDelta:0,notices,world};
+          }
+          export function negotiateRights(m:IPMarketState,ipId:string,kind:"sequel"|"merch"|"international"|"royalty"|"ownership",legalTier:number,rng=Math.random):{market:IPMarketState;cost:number;success:boolean}|null {const c=m.owned[ipId],ip=ipById(ipId);if(!c||!ip)return null;const cost=Math.round(ip.rightsBaseValue*(kind==="royalty"?.45:kind==="ownership"?.3:.18)/5000)*5000;const chance=Math.min(.82,.28+legalTier*.14+m.legalReputation*.01-ip.creatorControl*.002);const success=rng()<chance;let next={...c};if(success){if(kind==="sequel")next.sequelRights=true;if(kind==="merch")next.merchRights=true;if(kind==="international")next.internationalRights=true;if(kind==="royalty")next.royaltyRate=Math.max(.02,next.royaltyRate-.04);if(kind==="ownership")next.ownershipShare=Math.min(ip.ownershipSharePotential,next.ownershipShare+.1);}return {market:{...m,owned:{...m.owned,[ipId]:next},legalReputation:Math.min(20,m.legalReputation+(success?1:0)),history:[...m.history,`${ip.title}: ${kind} negotiation ${success?"succeeded":"failed"}.`]},cost,success};}
+          export const SOURCE_LABEL:Record<IPSourceType,string>={manga:"Manga",light_novel:"Light novel",jrpg:"JRPG",visual_novel:"Visual novel",webcomic:"Webcomic",game:"Game",film:"Film",tv:"TV series",novel:"Novel",comic:"Comic",audio_drama:"Audio drama",tabletop:"Tabletop property"};
+          export const AUCTION_TYPE_LABEL:Record<AuctionType,string>={open:"Open auction",sealed:"Sealed bid",distressed:"Distressed sale",invite:"Invite-only"};
+          export const genreLabel=(id:GenreId)=>GENRES.find(g=>g.id===id)?.label??id;
+          export const preferredMediumForIP=(ip:AuctionIP):MediumId=>ip.sourceType==="film"?"movie":ip.rarity==="legendary"?"movie":ip.sourceType==="webcomic"?"ona":"tv";
+          '''
+          # Strip workflow indentation from the authored TS block.
+          ip_ts='\n'.join(line[10:] if line.startswith('          ') else line for line in ip_ts.splitlines()).strip()+"\n"
+          (engine / 'ip.ts').write_text(ip_ts, encoding='utf-8')
+
+          # Append generated hidden arcs and their combo hooks to the canonical arc tables.
+          data_path=engine/'data.ts'; data=data_path.read_text(encoding='utf-8')
+          if 'from "./ipHiddenArcs"' not in data:
+              data=data.replace('import arcV3Runtime from "./generated/arcV3.json";','import arcV3Runtime from "./generated/arcV3.json";\nimport { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";')
+          marker='  { id: "multiverse", name: "Multiverse Arc", cost: 44_000, q: 2, f: 0.12, syn: ["space", "fantasy"], synQ: 5, anti: ["slice", "cooking"], antiQ: -6, desc: "Huge novelty and hype; catastrophic continuity risk.", unlock: { kind: "studioArc" } },\n];'
+          if marker in data:
+              data=data.replace(marker, marker[:-3]+'  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: seed.id, name: seed.name, cost: seed.cost, q: seed.q, f: seed.f, syn: [...seed.syn] as GenreId[], synQ: seed.synQ, synF: seed.synF, anti: [...seed.anti] as GenreId[], antiQ: seed.antiQ, antiF: seed.antiF, desc: seed.desc, unlock: { kind: "studioArc" } as const })),\n];')
+          else:
+              raise SystemExit('Could not locate end of studio arc block')
+          combo_re=re.compile(r'(export const ARC_COMBOS: ArcCombo\[\] = \[.*?)(\n\];)',re.S)
+          m=combo_re.search(data)
+          if not m: raise SystemExit('Could not locate ARC_COMBOS')
+          if 'combo_${seed.id}' not in m.group(1):
+              insert='\n  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: `combo_${seed.id}`, name: seed.comboName, arcs: [seed.id, seed.partnerArc], q: 2, f: 0.015 } as ArcCombo)),'
+              data=data[:m.end(1)]+insert+data[m.end(1):]
+          data_path.write_text(data,encoding='utf-8')
+
+          # Hide undiscovered per-IP blueprints from the original-production browser.
+          create_path=components/'Create.tsx'; create=create_path.read_text(encoding='utf-8')
+          old='{ARCS.map((a) => {'
+          new='{ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)).map((a) => {'
+          if old not in create: raise SystemExit('Create ARCS map marker missing')
+          create=create.replace(old,new,1); create_path.write_text(create,encoding='utf-8')
+
+          # Licensed adaptations may use one already-mastered studio blueprint in place of the generic hook.
+          licensed = r'''import { useMemo, useState } from "react";
+          import { ChevronLeft, Clapperboard, Lock, Sparkles, Users } from "lucide-react";
+          import { Btn } from "../fx/fx";
+          import { ARCS, BUDGETS, MEDIUMS, PRODUCTION_SCOPES, PROTAGONISTS, SECONDARY, PETS, VILLAINS, formatGBP, mediumAllowsScope, slotForMedium, type BudgetId, type Draft, type MediumId, type ScopeId } from "../engine/data";
+          import { ipById, preferredMediumForIP } from "../engine/ip";
+          import { draftCost } from "../engine/projects";
+          import { arcLockReason, startBlockReason, type RunState } from "../engine/state";
+          import { cn } from "../utils/cn";
+
+          export default function LicensedCreate({run,ipId,onBegin,onCancel}:{run:RunState;ipId:string;onBegin:(d:Draft)=>void;onCancel:()=>void}) {
+           const ip=ipById(ipId)!; const contract=run.ipMarket.owned[ipId]; const initialMedium=(run.mediumsUnlocked.includes(preferredMediumForIP(ip))?preferredMediumForIP(ip):"fanweb") as MediumId;
+           const available=ip.availableArcs.filter(a=>(a.minAdaptations??0)<=contract.adaptations&&(!a.requiresSequelRights||contract.sequelRights));
+           const learnedBlueprints=ARCS.filter(a=>a.unlock?.kind==="studioArc"&&!arcLockReason(a,run));
+           const [arcId,setArcId]=useState(available[0]?.id??""); const [studioArcId,setStudioArcId]=useState(""); const [medium,setMedium]=useState<MediumId>(initialMedium); const [budget,setBudget]=useState<BudgetId>("standard"); const [scope,setScope]=useState<ScopeId>("standard"); const [sliders,setSliders]=useState<[number,number,number]>([50,50,50]);
+           const draft=useMemo<Draft>(()=>({title:ip.title,medium,budget,scope,slot:slotForMedium(medium,"midnight"),animeType:ip.animeType,genres:ip.genreTags.slice(0,2),audience:ip.audience,protag:PROTAGONISTS[0].id,protagName:ip.characters[0].name,secondary:SECONDARY[0].id,pet:PETS[0].id,villain:VILLAINS[0].id,secondaryName:ip.characters[1].name,petName:ip.characters.find(c=>c.role==="mascot")?.name??"",villainName:ip.characters.find(c=>c.role==="antagonist")?.name??ip.characters[2].name,arcs:[arcId,studioArcId||"hook","finale"].filter(Boolean),sliders,season:contract.adaptations+1,franchiseKey:contract.adaptations?ip.title:undefined,continuation:contract.adaptations?"season":undefined,licensedIpId:ip.id,licensedArcId:arcId,licensedCharacters:ip.characters.map(c=>c.name)}),[ip,contract,arcId,studioArcId,medium,budget,scope,sliders]);
+           const block=startBlockReason(run,draft);
+           return <div className="relative flex h-full flex-col overflow-hidden bg-ink gridlines"><header className="z-10 flex items-center gap-2 border-b border-line bg-ink/85 p-3 pr-[76px]"><Btn variant="ghost" onClick={onCancel}><ChevronLeft size={15}/>BACK</Btn><div><div className="font-display text-lg font-black">LICENSED ADAPTATION</div><div className="text-[9px] text-gold">{ip.title} · canonical cast · no employment casting</div></div></header><main className="nice-scroll z-10 mx-auto w-full max-w-4xl flex-1 overflow-y-auto p-4"><div className="grid gap-3 md:grid-cols-[1fr_1.3fr]"><section className="ink-card p-4"><h2 className="font-display text-xl font-black">{ip.title}</h2><p className="mt-1 text-xs text-paper/60">{ip.description}</p><div className="mt-3 text-[10px] font-black tracking-widest text-cyanx"><Users size={12} className="mr-1 inline"/>CANONICAL CHARACTERS</div>{ip.characters.map(c=><div key={c.name} className="mt-1 rounded border border-line bg-panel2 p-2 text-xs"><b>{c.name}</b><span className="ml-2 text-paper/45">{c.role}</span></div>)}<div className="mt-3 rounded-lg border border-viol/30 bg-viol/5 p-2 text-[10px] text-paper/55"><b className="text-viol">HIDDEN BLUEPRINT</b><br/>Every property can teach the studio a unique story structure after a strong adaptation. It remains secret until discovered.</div><div className="mt-3 text-[10px] text-paper/50">Existing fanbase {ip.fanbase}k · expected standard ≈{Math.round(14+ip.expectationLevel*.2)}/40 · royalty {Math.round(contract.royaltyRate*100)}%</div></section><section className="space-y-3"><div className="ink-card p-3"><div className="text-[10px] font-black tracking-widest text-gold">PROPERTY ARC</div>{ip.availableArcs.map(a=>{const locked=!available.includes(a);return <button key={a.id} disabled={locked} onClick={()=>setArcId(a.id)} className={cn("mt-1.5 w-full rounded-lg border p-2 text-left text-xs",arcId===a.id?"border-gold bg-gold/10":"border-line",locked&&"opacity-35")} >{locked&&<Lock size={10} className="mr-1 inline"/>}<b>{a.name}</b>{a.requiresSequelRights&&<span className="ml-2 text-[9px] text-paper/45">sequel rights</span>}</button>})}</div>{learnedBlueprints.length>0&&<div className="ink-card p-3"><div className="text-[10px] font-black tracking-widest text-viol"><Sparkles size={11} className="mr-1 inline"/>STUDIO BLUEPRINT</div><div className="mt-1 text-[9px] text-paper/45">Optional: use a hidden arc learned from another licensed property.</div><button onClick={()=>setStudioArcId("")} className={cn("mt-2 rounded border px-2 py-1 text-[9px]",!studioArcId?"border-viol text-viol":"border-line")}>DEFAULT HOOK</button><div className="mt-2 grid gap-1 sm:grid-cols-2">{learnedBlueprints.map(a=><button key={a.id} onClick={()=>setStudioArcId(a.id)} className={cn("rounded border p-2 text-left text-[10px]",studioArcId===a.id?"border-viol bg-viol/10":"border-line")}><b>{a.name}</b><div className="mt-0.5 text-[8px] text-paper/40">{a.desc}</div></button>)}</div></div>}<div className="ink-card p-3"><div className="text-[10px] font-black tracking-widest text-gold">FORMAT · BUDGET · SCOPE</div><div className="mt-2 flex flex-wrap gap-1">{(Object.keys(MEDIUMS) as MediumId[]).filter(m=>run.mediumsUnlocked.includes(m)).map(m=><button key={m} onClick={()=>{setMedium(m);if(!mediumAllowsScope(m,scope))setScope("standard")}} className={cn("rounded border px-2 py-1 text-[10px]",medium===m?"border-cyanx text-cyanx":"border-line")}>{MEDIUMS[m].label}</button>)}</div><div className="mt-2 flex gap-1">{(Object.keys(BUDGETS) as BudgetId[]).map(b=><button key={b} onClick={()=>setBudget(b)} className={cn("flex-1 rounded border p-2 text-[10px]",budget===b?"border-gold text-gold":"border-line")}>{BUDGETS[b].label}<br/>{formatGBP(BUDGETS[b].cost)}</button>)}</div><div className="mt-2 flex gap-1">{(Object.keys(PRODUCTION_SCOPES) as ScopeId[]).filter(s=>mediumAllowsScope(medium,s)).map(s=><button key={s} onClick={()=>setScope(s)} className={cn("flex-1 rounded border p-1 text-[9px]",scope===s?"border-mint text-mint":"border-line")}>{PRODUCTION_SCOPES[s].label}</button>)}</div></div><div className="ink-card p-3"><div className="text-[10px] font-black tracking-widest text-gold">PRODUCTION DIRECTION</div>{["Writing / spectacle","Animation density","Music / atmosphere"].map((label,i)=><label key={label} className="mt-2 block text-[10px] text-paper/60">{label}<input className="mt-1 w-full accent-pink-500" type="range" min="0" max="100" value={sliders[i]} onChange={e=>setSliders(old=>old.map((v,j)=>j===i?Number(e.target.value):v) as [number,number,number])}/></label>)}</div><div className="ink-card p-3 text-xs"><div className="flex justify-between"><span>Estimated production</span><b className="text-gold">{formatGBP(draftCost(draft))}</b></div><div className="mt-1 text-[9px] text-paper/45">Staff are assigned on the live project board after greenlight. Marketing is selected at release prep.</div><Btn big variant="gold" className="mt-3 w-full" disabled={!!block} onClick={()=>onBegin(draft)}><Clapperboard size={17}/>GREENLIGHT ADAPTATION</Btn>{block&&<div className="mt-2 text-center text-[10px] text-neon">{block}</div>}</div></section></div></main></div>;
+          }
+          '''
+          licensed='\n'.join(line[10:] if line.startswith('          ') else line for line in licensed.splitlines()).strip()+"\n"
+          (components/'LicensedCreate.tsx').write_text(licensed,encoding='utf-8')
+
+          forecast = r'''import { Gavel, SkipForward, X } from "lucide-react";
+          import { Btn } from "../fx/fx";
+          import { dismissAuctionPrompt, genreLabel, ipById, skipAuctionOpportunity, SOURCE_LABEL, type IPAuction } from "../engine/ip";
+          import { formatGBPShort } from "../engine/data";
+          import type { RunState } from "../engine/state";
+
+          export default function AuctionForecast({run,setRun,onEnter}:{run:RunState;setRun:(fn:(r:RunState)=>RunState)=>void;onEnter:(id:string)=>void}){
+            const id=run.ipMarket.pendingPromptId; const auction=id?run.ipMarket.auctions.find(a=>a.id===id):null; const ip=auction?ipById(auction.ipId):null; if(!auction||!ip)return null;
+            const close=()=>setRun(r=>({...r,ipMarket:dismissAuctionPrompt(r.ipMarket,auction.id)}));
+            const skip=()=>setRun(r=>({...r,ipMarket:skipAuctionOpportunity(r.ipMarket,auction.id,r.rivalWorld),notices:[...r.notices,`Skipped rights auction: ${ip.title}.`]}));
+            const enter=()=>{setRun(r=>({...r,ipMarket:dismissAuctionPrompt(r.ipMarket,auction.id)}));onEnter(auction.id)};
+            return <div className="fixed inset-0 z-[95] overflow-y-auto bg-[#151022] px-5 pb-[calc(env(safe-area-inset-bottom,0px)+42px)] pt-[calc(env(safe-area-inset-top,0px)+24px)] text-paper"><div className="mx-auto flex min-h-full max-w-2xl flex-col justify-center"><div className="mb-3 text-center"><div className="text-[10px] font-black tracking-[.45em] text-cyanx">INDUSTRY FORECAST</div><div className="mt-1 font-display text-3xl font-black text-gold">RIGHTS AUCTION ALERT</div><div className="mt-1 text-xs text-paper/45">A rare IP rights room has opened. Auction opportunities can occur at most once per industry year.</div></div><div className="ink-card grid gap-4 p-4 sm:grid-cols-[160px_1fr]"><div className="relative mx-auto aspect-[4/5] w-40 overflow-hidden rounded-xl border border-gold/45 bg-panel2"><img src={ip.posterAsset} alt={`${ip.title} poster`} className="h-full w-full object-cover"/><div className="absolute inset-0 ring-1 ring-inset ring-white/10"/></div><div><div className="font-display text-2xl font-black">{ip.title}</div><div className="mt-1 text-[10px] font-bold tracking-widest text-gold">{SOURCE_LABEL[ip.sourceType].toUpperCase()} · {ip.genreTags.map(genreLabel).join(" / ").toUpperCase()}</div><p className="mt-3 text-sm text-paper/65">{ip.description}</p><div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="rounded border border-line bg-panel2 p-2"><span className="text-paper/40">Opening bid</span><br/><b className="text-mint">{formatGBPShort(auction.currentBid)}</b></div><div className="rounded border border-line bg-panel2 p-2"><span className="text-paper/40">Window</span><br/><b>THIS WEEK</b></div><div className="rounded border border-line bg-panel2 p-2"><span className="text-paper/40">Fanbase</span><br/><b>≈{ip.fanbase}k</b></div><div className="rounded border border-line bg-panel2 p-2"><span className="text-paper/40">Prestige</span><br/><b>{ip.prestige}</b></div></div><div className="mt-4 rounded-lg border border-viol/30 bg-viol/5 p-2 text-[10px] text-paper/55"><b className="text-viol">UNKNOWN STORY BLUEPRINT</b> · a strong adaptation can permanently teach your studio this property’s hidden arc.</div></div></div><div className="mt-4 grid gap-2 sm:grid-cols-3"><Btn variant="ghost" onClick={skip}><SkipForward size={14}/>SKIP AUCTION</Btn><Btn variant="ghost" onClick={close}><X size={14}/>RETURN TO GAME</Btn><Btn big variant="gold" onClick={enter}><Gavel size={17}/>ENTER AUCTION</Btn></div></div></div>;
+          }
+          '''
+          forecast='\n'.join(line[10:] if line.startswith('          ') else line for line in forecast.splitlines()).strip()+"\n"
+          (components/'AuctionForecast.tsx').write_text(forecast,encoding='utf-8')
+
+          ceremony = r'''import { Gavel, LogOut, Trophy } from "lucide-react";
+          import { Btn } from "../fx/fx";
+          import { sfx } from "../engine/audio";
+          import { bidIncrementOptions, genreLabel, ipById, placeLivePlayerBid, SOURCE_LABEL, withdrawAuction } from "../engine/ip";
+          import { formatGBPShort } from "../engine/data";
+          import type { RunState } from "../engine/state";
+          import "./awardsCeremony.css";
+
+          export default function AuctionCeremony({run,setRun,auctionId,onDone}:{run:RunState;setRun:(fn:(r:RunState)=>RunState)=>void;auctionId:string;onDone:()=>void}){
+            const auction=run.ipMarket.auctions.find(a=>a.id===auctionId); const ip=auction?ipById(auction.ipId):null; if(!auction||!ip)return <div className="fixed inset-0 z-[90] grid place-items-center bg-ink"><Btn onClick={onDone}>RETURN</Btn></div>;
+            const increments=bidIncrementOptions(auction.currentBid); const leader=auction.leadingStudioId==="player"?run.studio:run.rivalWorld.studios.find(s=>s.id===auction.leadingStudioId)?.name??"No bidder";
+            const bid=(inc:number)=>setRun(r=>{const out=placeLivePlayerBid(r.ipMarket,auction.id,auction.currentBid+inc,r.cash,r.week,r.rivalWorld);if(!out)return r;sfx.select();if(out.cashDelta<0)sfx.fanfare(true);return {...r,cash:r.cash+out.cashDelta,ipMarket:out.market,notices:[...r.notices,out.notice]};});
+            const withdraw=()=>setRun(r=>({...r,ipMarket:withdrawAuction(r.ipMarket,auction.id,r.rivalWorld),notices:[...r.notices,`Withdrew from ${ip.title} rights auction.`]}));
+            const winner=auction.resolved?(auction.winnerId==="player"?run.studio:run.rivalWorld.studios.find(s=>s.id===auction.winnerId)?.name??"No sale"):null;
+            return <div className="fixed inset-0 z-[90] select-none overflow-hidden bg-[#060409] font-display text-paper"><div className="absolute inset-0 bg-cover bg-center opacity-95" style={{backgroundImage:"url(/awards/stage-bg.webp)"}}/><div className="absolute inset-0 bg-[radial-gradient(110%_76%_at_50%_108%,rgba(255,190,90,.18),transparent_62%)]"/><img src="/awards/valance.webp" alt="" className="aw-valance pointer-events-none absolute inset-x-0 top-0 z-40 h-auto w-full"/><img src="/awards/curtain-left.webp" alt="" className="aw-curtain aw-curtain-left open-l"/><img src="/awards/curtain-right.webp" alt="" className="aw-curtain aw-curtain-right open-r"/><div className="relative z-20 mx-auto flex h-full max-w-5xl flex-col px-4 pb-6 pt-[calc(env(safe-area-inset-top,0px)+38px)]"><div className="text-center"><div className="text-[9px] font-black tracking-[.55em] text-gold">THE INDUSTRY RIGHTS AUCTION</div><div className="mt-1 bg-gradient-to-b from-[#fff3c4] via-[#ffd66a] to-[#b8831a] bg-clip-text text-3xl font-black tracking-[.08em] text-transparent sm:text-5xl">{ip.title}</div><div className="mt-1 text-[10px] tracking-widest text-paper/50">{SOURCE_LABEL[ip.sourceType]} · {ip.genreTags.map(genreLabel).join(" / ")}</div></div><div className="mt-4 grid min-h-0 flex-1 gap-4 overflow-y-auto md:grid-cols-[minmax(180px,320px)_1fr]"><div className="mx-auto w-full max-w-[300px]"><div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]"><img src={ip.posterAsset} alt={`${ip.title} poster`} className="absolute inset-0 h-full w-full object-cover"/><div className="absolute inset-0 ring-1 ring-inset ring-white/10"/></div></div><div className="flex flex-col justify-center"><div className="rounded-2xl border border-gold/35 bg-black/45 p-4 text-center shadow-2xl backdrop-blur"><div className="text-[9px] font-black tracking-[.45em] text-paper/45">CURRENT BID</div><div className="mt-1 text-4xl font-black text-gold sm:text-6xl">{formatGBPShort(auction.currentBid)}</div><div className="mt-2 text-xs text-paper/55">Leading: <b className={auction.leadingStudioId==="player"?"text-mint":"text-neon"}>{leader}</b></div>{auction.resolved?<div className="mt-5"><Trophy className="mx-auto text-gold" size={34}/><div className="mt-2 text-[10px] font-black tracking-[.45em] text-gold">SOLD</div><div className="mt-1 text-2xl font-black">{winner}</div>{auction.winnerId==="player"&&<div className="mx-auto mt-3 max-w-md rounded border border-viol/35 bg-viol/10 p-2 text-[10px] text-paper/60">The property’s hidden arc remains secret. Deliver a 24/40+ adaptation to master it permanently for originals and other licensed productions.</div>}<Btn big variant="gold" className="mt-5" onClick={onDone}>RETURN TO STUDIO</Btn></div>:<><div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">{increments.map((inc,i)=><Btn key={inc} variant="gold" disabled={run.cash<auction.currentBid+inc} onClick={()=>bid(inc)}>+{[5,10,25,50][i]}%<span className="ml-1 text-[8px] opacity-65">{formatGBPShort(inc)}</span></Btn>)}</div><div className="mt-3 text-[9px] text-paper/40">AI studios value genre fit, reputation and prestige. If nobody counters your bid, the hammer falls immediately.</div><div className="mt-4 flex flex-wrap justify-center gap-2"><Btn variant="ghost" onClick={onDone}>RETURN TO STUDIO</Btn><Btn variant="ghost" onClick={withdraw}><LogOut size={13}/>WITHDRAW</Btn></div></>}</div><div className="mt-3 rounded-xl border border-line/60 bg-black/35 p-3"><div className="text-[9px] font-black tracking-widest text-paper/45">BID HISTORY</div>{auction.bids.length===0?<div className="mt-2 text-xs text-paper/35">The room is waiting for the opening move.</div>:auction.bids.slice(-6).reverse().map((b,i)=><div key={`${b.studioId}-${b.amount}-${i}`} className="mt-1 flex justify-between text-xs"><span>{b.studioId==="player"?run.studio:run.rivalWorld.studios.find(s=>s.id===b.studioId)?.name??b.studioId}</span><b>{formatGBPShort(b.amount)}</b></div>)}</div></div></div></div></div>;
+          }
+          '''
+          ceremony='\n'.join(line[10:] if line.startswith('          ') else line for line in ceremony.splitlines()).strip()+"\n"
+          (components/'AuctionCeremony.tsx').write_text(ceremony,encoding='utf-8')
+
+          # Rights-market tab now enters the theatrical live room instead of bidding inline.
+          market_path=components/'IPMarket.tsx'; market=market_path.read_text(encoding='utf-8')
+          market=market.replace('import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, genreLabel, ipById, negotiateRights, placePlayerBid } from "../engine/ip";','import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, genreLabel, ipById, negotiateRights } from "../engine/ip";')
+          market=market.replace('export default function IPMarket({run,setRun,onAdapt}:{run:RunState;setRun:(fn:(r:RunState)=>RunState)=>void;onAdapt:(ipId:string)=>void}) {','export default function IPMarket({run,setRun,onAdapt,onEnterAuction}:{run:RunState;setRun:(fn:(r:RunState)=>RunState)=>void;onAdapt:(ipId:string)=>void;onEnterAuction:(auctionId:string)=>void}) {')
+          market=re.sub(r'\n const bid=\(id:string,amount:number\)=>setRun\(r=>\{.*?\}\);','',market,count=1)
+          market=market.replace('<b className="text-gold">RIGHTS MARKET</b> · Auctions tick weekly. Rivals value genre fit, reputation and studio tier. Hidden terms can be revealed through Data Lab appraisals; the Archive &amp; Research Room acts as the current Legal/Data capability.','<b className="text-gold">RIGHTS MARKET</b> · A rights opportunity has a random chance to appear and can fire at most once per 48-week industry year. Entering launches the live auction room; returned opportunities remain here until the end of the week.')
+          # Replace old computed inline bid button with ceremony entry.
+          market=re.sub(r'const inc=Math\.max\(10_000,Math\.round\(a\.currentBid\*\.08/5000\)\*5000\);const reveal=a\.appraisalLevel;', 'const reveal=a.appraisalLevel;', market)
+          old='<Btn variant="gold" disabled={run.cash<a.currentBid+inc} onClick={()=>bid(a.id,a.currentBid+inc)}>BID {formatGBPShort(a.currentBid+inc)}</Btn>'
+          if old not in market: raise SystemExit('IPMarket bid button marker missing')
+          market=market.replace(old,'<Btn variant="gold" onClick={()=>onEnterAuction(a.id)}><Gavel size={12}/> ENTER AUCTION · {formatGBPShort(a.currentBid)}</Btn>')
+          market_path.write_text(market,encoding='utf-8')
+
+          # Office callback chain for reopening an auction after RETURN TO GAME.
+          office_path=components/'Office.tsx'; office=office_path.read_text(encoding='utf-8')
+          office=office.replace('  onLicensed,\n  onContract,','  onLicensed,\n  onAuction,\n  onContract,',1)
+          office=office.replace('  onLicensed: (ipId: string) => void;\n  onContract:', '  onLicensed: (ipId: string) => void;\n  onAuction: (auctionId: string) => void;\n  onContract:',1)
+          old='<IPMarket run={run} setRun={setRun} onAdapt={(ipId) => { setModal(null); onLicensed(ipId); }}/>'
+          if old not in office: raise SystemExit('Office IPMarket marker missing')
+          office=office.replace(old,'<IPMarket run={run} setRun={setRun} onAdapt={(ipId) => { setModal(null); onLicensed(ipId); }} onEnterAuction={(auctionId) => { setModal(null); onAuction(auctionId); }}/>')
+          office_path.write_text(office,encoding='utf-8')
+
+          # App: annual forecast alert pauses the clock, with skip/return/enter choices; auction is a full screen like awards.
+          app_path=src/'App.tsx'; app=app_path.read_text(encoding='utf-8')
+          app=app.replace('import LicensedCreate from "./components/LicensedCreate";','import LicensedCreate from "./components/LicensedCreate";\nimport AuctionForecast from "./components/AuctionForecast";\nimport AuctionCeremony from "./components/AuctionCeremony";')
+          app=app.replace('type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards";','type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";')
+          app=app.replace('  const [licensedIpId, setLicensedIpId] = useState<string | null>(null);','  const [licensedIpId, setLicensedIpId] = useState<string | null>(null);\n  const [auctionId, setAuctionId] = useState<string | null>(null);')
+          awards_marker='  /* ------------------------------------------------------- game clock */'
+          auction_effect='''  /* ------------------------------------ annual rights forecast: like other attention events,\n     the live clock stops and the player explicitly decides whether to engage. */\n  const seenAuctionPrompt = useRef<string | null>(null);\n  useEffect(() => {\n    const id = run?.ipMarket.pendingPromptId ?? null;\n    if (!id || id === seenAuctionPrompt.current) return;\n    if (screen === "office" || screen === "produce") {\n      seenAuctionPrompt.current = id;\n      setTimeSpeed(0);\n      sfx.fanfare();\n    }\n  }, [run?.ipMarket.pendingPromptId, screen]);\n\n'''
+          if awards_marker not in app: raise SystemExit('App game clock marker missing')
+          app=app.replace(awards_marker,auction_effect+awards_marker,1)
+          licensed_marker='  const licensedShow = useCallback((ipId: string) => {\n    sfx.select(); setContPlan(null); setPendingCommission(null); setLicensedIpId(ipId); setScreen("licensed");\n  }, []);'
+          if licensed_marker not in app: raise SystemExit('licensedShow marker missing')
+          app=app.replace(licensed_marker,licensed_marker+'\n\n  const enterAuction = useCallback((id: string) => {\n    sfx.select(); setAuctionId(id); setTimeSpeed(0); setScreen("auction");\n  }, []);')
+          app=app.replace('            onLicensed={licensedShow}\n            onContract=', '            onLicensed={licensedShow}\n            onAuction={enterAuction}\n            onContract=',1)
+          render_marker='        {screen === "awards" && run?.awardsCeremony && ('
+          if render_marker not in app: raise SystemExit('Awards render marker missing')
+          auction_render='''        {run && run.ipMarket.pendingPromptId && (screen === "office" || screen === "produce") && (\n          <AuctionForecast run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} onEnter={enterAuction} />\n        )}\n        {screen === "auction" && run && auctionId && (\n          <AuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} auctionId={auctionId} onDone={() => { setAuctionId(null); setScreen("office"); }} />\n        )}\n'''
+          app=app.replace(render_marker,auction_render+render_marker,1)
+          app_path.write_text(app,encoding='utf-8')
+
+          # Engine tests: 100 live IPs, unique hidden arcs, annual cadence, prompt semantics, four bid choices.
+          test = r'''import { describe, expect, it } from "vitest";
+          import { ARCS } from "../data";
+          import { AUCTION_IPS, bidIncrementOptions, dismissAuctionPrompt, initIPMarket, scheduleNextAuctionWeek, tickIPMarket } from "../ip";
+          import { initRivalWorld } from "../rivals";
+
+          describe("annual live IP auctions", () => {
+            it("uses the full 100-property user catalogue and gives every IP one unique hidden studio arc", () => {
+              expect(AUCTION_IPS).toHaveLength(100);
+              const ids=AUCTION_IPS.map(ip=>ip.specialArcUnlock);
+              expect(ids.every(Boolean)).toBe(true);
+              expect(new Set(ids).size).toBe(100);
+              for(const id of ids){const a=ARCS.find(x=>x.id===id);expect(a?.unlock).toEqual({kind:"studioArc"});expect(a?.syn?.length).toBeGreaterThanOrEqual(2);}
+            });
+            it("schedules no more than one candidate inside a 48-week year and can skip years", () => {
+              const seq=[0.2,0.5]; let i=0; const week=scheduleNextAuctionWeek(0,()=>seq[i++]??0.5); expect(week).toBeGreaterThanOrEqual(6); expect(week).toBeLessThanOrEqual(42);
+              const skip=[0.99,0.2,0.0]; i=0; const later=scheduleNextAuctionWeek(0,()=>skip[i++]??0); expect(later).toBeGreaterThanOrEqual(48+6);
+            });
+            it("creates a one-week prompted opportunity and schedules the following opportunity no earlier than next industry year", () => {
+              const base=initIPMarket(0,()=>0); const m={...base,nextAuctionWeek:10}; const world=initRivalWorld();
+              const out=tickIPMarket(m,{week:10,cash:1_000_000,fans:0,awards:0,bestScore:0,showsMade:0},world,()=>0);
+              const live=out.market.auctions.find(a=>!a.resolved); expect(live).toBeTruthy(); expect(live?.closesWeek).toBe(11); expect(out.market.pendingPromptId).toBe(live?.id); expect(out.market.nextAuctionWeek).toBeGreaterThanOrEqual(48+6);
+              expect(dismissAuctionPrompt(out.market,live!.id).pendingPromptId).toBeNull();
+            });
+            it("offers four escalating live bid increments",()=>{const x=bidIncrementOptions(200_000);expect(x).toHaveLength(4);expect(x[0]).toBeLessThan(x[1]);expect(x[1]).toBeLessThan(x[2]);expect(x[2]).toBeLessThan(x[3]);});
+          });
+          '''
+          test='\n'.join(line[10:] if line.startswith('          ') else line for line in test.splitlines()).strip()+"\n"
+          (engine/'__tests__'/'annual-auction-hidden-arcs.test.ts').write_text(test,encoding='utf-8')
+
+          # Documentation of the actual implemented flow.
+          (docs/'ANNUAL_LIVE_AUCTION_FLOW.md').write_text('''# Annual Live IP Auction Flow\n\n- Auction opportunities are rare event rolls: at most one candidate can fire in each 48-week industry year, and some years have no auction.\n- A fired opportunity pauses the live clock and opens the full-screen forecast alert.\n- **Skip Auction** declines participation and resolves the room to AI. **Return to Game** hides the alert but keeps the auction available in Rights Market until the end of the current week. **Enter Auction** opens the theatrical stage.\n- The stage deliberately reuses the awards visual language: stage background, red curtains, valance, gold presentation and poster focus.\n- Four bid controls raise the current price by approximately **5% / 10% / 25% / 50%** (rounded to the economy's £5k increments, minimum £10k). AI studios counter instantly based on reputation, tier and genre fit. If no AI studio is willing to beat the player's offer, the hammer falls immediately.\n- Each of the 100 user catalogue IPs owns exactly one hidden studio blueprint. A 24/40+ licensed adaptation discovers it. Once discovered, the arc is available to original productions and as an optional blueprint on other licensed adaptations.\n- Every hidden arc strongly synergises with its source property's two canonical genres and has a discoverable combo with an existing standard arc; each also has a situational anti-fit so it is not a flat universal upgrade.\n''',encoding='utf-8')
+          PY
+      - name: Install, test and build
+        working-directory: game_source
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Commit verified implementation and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/temp-auction-ceremony.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Implement annual live IP auction ceremonies"
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
