@@ -21,7 +21,7 @@ export interface AuctionIP {
 }
 
 const rarityValue: Record<IPRarity, number> = { cult: 1, emerging: 2, recognised: 3, premium: 4, legendary: 5 };
-const rightsScale: Record<IPRarity, number> = { cult: .35, emerging: .6, recognised: 1.2, premium: 2.5, legendary: 6 };
+const rightsScale: Record<IPRarity, number> = { cult: .12, emerging: .38, recognised: 1.2, premium: 2.5, legendary: 6 };
 const arc = (id: string, name: string, extra: Partial<IPArc> = {}): IPArc => ({ id, name, ...extra });
 const FIRST = ["Ari","Mira","Ren","Sena","Noa","Kai","Iris","Theo","Nia","Sol","Emi","Rowan","Juno","Vale","Mika","Rin","Tess","Leo","Aya","Pax"];
 const LAST = ["Vale","Sorn","Quill","Mori","Venn","Kade","Grey","Bloom","Reed","Aster","Hale","Wren","Cole","Finch","Rose","Mercer","Bell","Ash","Line","Voss"];
@@ -111,13 +111,22 @@ export function placeLivePlayerBid(m:IPMarketState,auctionId:string,amount:numbe
 export function placePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number):IPMarketState|null {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved||amount<=a.currentBid||amount>cash)return null;return {...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,currentBid:amount,leadingStudioId:"player",playerMaxBid:amount,bids:[...x.bids,{studioId:"player",amount,week:x.opensWeek}]}:x),history:[...m.history,`Bid placed: £${amount.toLocaleString("en-GB")}`]};}
 export function appraiseAuction(m:IPMarketState,auctionId:string):IPMarketState { return {...m,auctions:m.auctions.map(a=>a.id===auctionId?{...a,appraisalLevel:Math.min(3,a.appraisalLevel+1) as 0|1|2|3}:a)}; }
 export function tickIPMarket(m:IPMarketState,run:{week:number;cash:number;fans:number;awards:number;bestScore:number;showsMade:number},world:RivalWorld,rng=Math.random):{market:IPMarketState;cashDelta:number;notices:string[];world:RivalWorld} {
-  let market={...m,auctions:m.auctions.map(a=>({...a,bids:[...a.bids]})),owned:{...m.owned},rivalOwned:{...m.rivalOwned},history:[...m.history]}; const notices:string[]=[];
-  market.auctions=market.auctions.map(a=>a); for(const a of market.auctions.filter(a=>!a.resolved&&run.week>=a.closesWeek)){market=resolveForAI(market,a,world,rng);const ip=ipById(a.ipId);notices.push(`${ip?.title??"The IP"} auction closed.`);}
+  let market={...m,auctions:m.auctions.map(a=>({...a,bids:[...a.bids]})),owned:{...m.owned},rivalOwned:{...m.rivalOwned},history:[...m.history]}; const notices:string[]=[]; let cashDelta=0;
+  market.auctions=market.auctions.map(a=>a); for(const a of market.auctions.filter(a=>!a.resolved&&run.week>=a.closesWeek)){
+    const ip=ipById(a.ipId)!;
+    if(a.leadingStudioId==="player" && run.cash+cashDelta>=a.currentBid){
+      const resolved={...a,resolved:true,winnerId:"player",winningBid:a.currentBid};
+      market={...market,auctions:market.auctions.map(x=>x.id===a.id?resolved:x),owned:{...market.owned,[ip.id]:makeContract(ip,run.week,a.currentBid)},pendingPromptId:market.pendingPromptId===a.id?null:market.pendingPromptId,history:[...market.history,`Rights won: ${ip.title} for £${a.currentBid.toLocaleString("en-GB")}.`].slice(-100)};
+      cashDelta-=a.currentBid; notices.push(`🏆 Rights won: ${ip.title}.`);
+    }else{
+      market=resolveForAI(market,a,world,rng); notices.push(`${ip.title} auction closed.`);
+    }
+  }
   if(run.week>=market.nextAuctionWeek&&!market.auctions.some(a=>!a.resolved)){
     const a=generateAuction({...run,ipMarket:market},rng); const nextYear=(Math.floor(run.week/WEEKS_PER_YEAR)+1)*WEEKS_PER_YEAR; market.nextAuctionWeek=scheduleNextAuctionWeek(nextYear,rng);
     if(a){market.auctions=[...market.auctions.filter(x=>run.week-x.closesWeek<96),a];market.pendingPromptId=a.id;notices.push(`🔨 Rights forecast: ${ipById(a.ipId)?.title} is going to auction.`);}
   }
-  market.history=[...market.history,...notices].slice(-100);return {market,cashDelta:0,notices,world};
+  market.history=[...market.history,...notices].slice(-100);return {market,cashDelta,notices,world};
 }
 export function negotiateRights(m:IPMarketState,ipId:string,kind:"sequel"|"merch"|"international"|"royalty"|"ownership",legalTier:number,rng=Math.random):{market:IPMarketState;cost:number;success:boolean}|null {const c=m.owned[ipId],ip=ipById(ipId);if(!c||!ip)return null;const cost=Math.round(ip.rightsBaseValue*(kind==="royalty"?.45:kind==="ownership"?.3:.18)/5000)*5000;const chance=Math.min(.82,.28+legalTier*.14+m.legalReputation*.01-ip.creatorControl*.002);const success=rng()<chance;let next={...c};if(success){if(kind==="sequel")next.sequelRights=true;if(kind==="merch")next.merchRights=true;if(kind==="international")next.internationalRights=true;if(kind==="royalty")next.royaltyRate=Math.max(.02,next.royaltyRate-.04);if(kind==="ownership")next.ownershipShare=Math.min(ip.ownershipSharePotential,next.ownershipShare+.1);}return {market:{...m,owned:{...m.owned,[ipId]:next},legalReputation:Math.min(20,m.legalReputation+(success?1:0)),history:[...m.history,`${ip.title}: ${kind} negotiation ${success?"succeeded":"failed"}.`]},cost,success};}
 export const SOURCE_LABEL:Record<IPSourceType,string>={manga:"Manga",light_novel:"Light novel",jrpg:"JRPG",visual_novel:"Visual novel",webcomic:"Webcomic",game:"Game",film:"Film",tv:"TV series",novel:"Novel",comic:"Comic",audio_drama:"Audio drama",tabletop:"Tabletop property"};

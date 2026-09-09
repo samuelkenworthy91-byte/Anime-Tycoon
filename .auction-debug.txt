@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "<stdin>", line 8, in <module>
-  File "<original-auction-generator>", line 265, in <module>
-SystemExit: Could not locate end of studio arc block
