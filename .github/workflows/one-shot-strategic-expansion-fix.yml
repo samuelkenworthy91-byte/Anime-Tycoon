@@ -1,0 +1,79 @@
+name: One-shot strategic expansion validation fix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/one-shot-strategic-expansion-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply capacity and regression-fixture corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          data = Path('game_source/src/engine/data.ts')
+          text = data.read_text()
+          old = 'name: "Sakuga Global Campus", maxStaff: 12, rent: 55_000, cost: 18_000_000, desks: 13, projects: 5, slots: 10'
+          new = 'name: "Sakuga Global Campus", maxStaff: 12, rent: 55_000, cost: 18_000_000, desks: 13, projects: 5, slots: 12'
+          if old not in text:
+              raise SystemExit('Global Campus slot signature not found')
+          data.write_text(text.replace(old, new, 1))
+
+          test = Path('game_source/src/engine/__tests__/facilities.test.ts')
+          text = test.read_text()
+          text = text.replace('officeLevel: 4, // Global Campus: 10 room slots', 'officeLevel: 4, // Global Campus: 12 room slots')
+          text = text.replace('it("offices grant 1/3/5/7/10 slots", () => {', 'it("offices grant 1/3/5/7/12 slots", () => {')
+          text = text.replace('toEqual([1, 3, 5, 7, 10]);', 'toEqual([1, 3, 5, 7, 12]);')
+          test.write_text(text)
+
+          strategic = Path('game_source/src/engine/__tests__/strategic-expansion.test.ts')
+          text = strategic.read_text()
+          text = text.replace('medium: "fanweb",', 'medium: "tv",', 1)
+          text = text.replace('scope: "short",', 'scope: "standard",', 1)
+          text = text.replace('slot: "web",', 'slot: "midnight",', 1)
+          strategic.write_text(text)
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build browser dist
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated repair and refreshed dist
+        run: |
+          rm .github/workflows/one-shot-strategic-expansion-fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src/engine/data.ts game_source/src/engine/__tests__/facilities.test.ts game_source/src/engine/__tests__/strategic-expansion.test.ts
+          git add -f game_source/dist
+          git add -u .github/workflows/one-shot-strategic-expansion-fix.yml
+          git commit -m 'Align facility capacity and validate strategic expansion'
+          git push origin HEAD:main
