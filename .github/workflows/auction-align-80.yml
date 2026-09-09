@@ -1,0 +1,84 @@
+name: Align auction catalogue to 80 posters
+
+on:
+  push:
+    branches:
+      - work/auction-ceremony-hidden-arcs
+    paths:
+      - .github/workflows/auction-align-80.yml
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Keep exactly 80 user IPs and source-specific hidden arcs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def trim_slot_lines(path: str, limit: int = 80):
+              p = Path(path)
+              lines = p.read_text(encoding='utf-8').splitlines()
+              kept = []
+              for line in lines:
+                  m = re.search(r'"slot":(\d+)', line)
+                  if m and int(m.group(1)) > limit:
+                      continue
+                  kept.append(line)
+              p.write_text('\n'.join(kept) + '\n', encoding='utf-8')
+
+          trim_slot_lines('game_source/src/engine/userIpCatalog.ts')
+          trim_slot_lines('game_source/src/engine/ipHiddenArcs.ts')
+
+          csv = Path('game_source/docs/USER_AUCTION_IP_CATALOG.csv')
+          rows = csv.read_text(encoding='utf-8').splitlines()
+          out = [rows[0]]
+          for row in rows[1:]:
+              try:
+                  slot = int(row.split(',', 1)[0])
+              except Exception:
+                  continue
+              if slot <= 80:
+                  out.append(row)
+          csv.write_text('\n'.join(out) + '\n', encoding='utf-8')
+
+          test = Path('game_source/src/engine/__tests__/ip-expansion.test.ts')
+          text = test.read_text(encoding='utf-8')
+          text = text.replace('inside the 100-asset contract', 'inside the 80-asset contract')
+          text = text.replace('x.posterSlot<=100', 'x.posterSlot<=80')
+          test.write_text(text, encoding='utf-8')
+
+          readme = Path('game_source/public/auction-ip/README.md')
+          readme.write_text('''# Auction IP poster drop folder\n\nPlace the user-created WebP posters here using the stable names `poster_001.webp` through `poster_080.webp`. These 80 slots map directly to the live auction IP catalogue. Missing files automatically use the in-game labelled fallback card, so the auction system remains playable before the art drop is installed.\n\nThe 80-IP Shonen/Shojo and genre mapping is recorded in `docs/USER_AUCTION_IP_CATALOG.csv`. The old Work-built 37-property seed catalogue has been replaced by this live 80-property catalogue.\n\nRun `npm run auction-ip:validate-posters` to report missing, oversized, or out-of-range poster assets.\n''', encoding='utf-8')
+          PY
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run complete test suite
+        working-directory: game_source
+        run: npm test
+      - name: Build production app
+        working-directory: game_source
+        run: npm run build
+      - name: Commit verified 80-poster contract and remove verifier
+        run: |
+          rm -f .github/workflows/auction-align-80.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Align live auction catalogue to 80 user posters"
+          git pull --rebase origin work/auction-ceremony-hidden-arcs
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
