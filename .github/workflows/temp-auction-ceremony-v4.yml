@@ -1,0 +1,57 @@
+name: Temp auction ceremony materialize v4
+
+on:
+  push:
+    branches: [work/auction-ceremony-hidden-arcs]
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply v3 generator and commit generated implementation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, textwrap
+          wf=Path('.github/workflows/temp-auction-ceremony-v3.yml').read_text(encoding='utf-8')
+          m=re.search(r"          python - <<'PY'\n(.*?)\n          PY",wf,re.S)
+          if not m: raise SystemExit('Could not extract v3 generator')
+          code=textwrap.dedent(m.group(1))
+          exec(compile(code,'<auction-generator-v4>','exec'),{'__name__':'__main__'})
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source
+          git commit -m "Materialize annual live auction implementation"
+          git pull --rebase origin work/auction-ceremony-hidden-arcs
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
+      - name: Run full tests and build, capture diagnostics
+        shell: bash
+        run: |
+          set +e
+          cd game_source
+          npm ci > ../.auction-ci-debug.txt 2>&1
+          CI1=$?
+          if [ $CI1 -eq 0 ]; then npm test >> ../.auction-ci-debug.txt 2>&1; T=$?; else T=$CI1; fi
+          if [ $T -eq 0 ]; then npm run build >> ../.auction-ci-debug.txt 2>&1; B=$?; else B=$T; fi
+          cd ..
+          echo "npm_ci=$CI1 tests=$T build=$B" >> .auction-ci-debug.txt
+          git add .auction-ci-debug.txt
+          git commit -m "Capture auction verification diagnostics" || true
+          git pull --rebase origin work/auction-ceremony-hidden-arcs
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
+          exit $B
