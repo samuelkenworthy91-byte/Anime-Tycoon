@@ -7,6 +7,7 @@ on:
     paths:
       - 'game_source/scripts/apply-decision-hardmode.py'
       - 'game_source/scripts/fix-decision-hardmode-apply-v2.py'
+      - 'game_source/scripts/fix-decision-hardmode-apply-v3.py'
       - 'game_source/src/engine/decisionEvents.ts'
       - 'game_source/src/engine/genreTargets.ts'
       - 'game_source/src/engine/projectActions.ts'
@@ -35,7 +36,7 @@ jobs:
 
       - name: Harden integration patch and targets
         working-directory: game_source
-        run: python3 scripts/fix-decision-hardmode-apply-v2.py
+        run: python3 scripts/fix-decision-hardmode-apply-v3.py
 
       - name: Apply integration
         id: integrate
