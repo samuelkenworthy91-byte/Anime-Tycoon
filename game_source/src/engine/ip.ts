@@ -14,7 +14,7 @@ export interface AuctionIP {
   royaltyRate: number; licenseLength: number; ownershipSharePotential: number;
   sequelRightsAvailable: boolean; merchRightsAvailable: boolean; internationalRightsAvailable: boolean;
   creatorControl: number; audienceVolatility: number; expectationLevel: number; scopeComplexity: number;
-  characters: IPCharacter[]; availableArcs: IPArc[]; specialArcUnlock?: string; posterAsset: string;
+  characters: IPCharacter[]; availableArcs: IPArc[]; specialArcUnlock?: string; posterSlot: number; posterAsset: string;
   posterPalette: [string, string, string]; rarity: IPRarity; minimumStudioPrestige: number; specialRules: string[];
 }
 
@@ -84,7 +84,7 @@ export const AUCTION_IPS: AuctionIP[] = seeds.map((s, index) => {
     sequelRightsAvailable:index%5!==0,merchRightsAvailable:index%4!==0,internationalRightsAvailable:index%3!==0,
     creatorControl:Math.min(95,25+difficulty*0.65),audienceVolatility:Math.min(95,20+difficulty*0.6),expectationLevel:Math.round((fanbase+prestige)/2),
     scopeComplexity:difficulty,characters:chars(names),availableArcs:arcs.map(([aid,name],i)=>arc(`${id}_${aid}`,name,{minAdaptations:i>1?1:0,requiresSequelRights:i>1})),
-    specialArcUnlock:special && studioBlueprints.has(special) ? special : undefined,posterAsset:`/auction-ip/${id}.webp`,posterPalette:palette,rarity,minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:rules };
+    specialArcUnlock:special && studioBlueprints.has(special) ? special : undefined,posterSlot:index+1,posterAsset:`/auction-ip/poster_${String(index+1).padStart(3,"0")}.webp`,posterPalette:palette,rarity,minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:rules };
 });
 
 export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; }

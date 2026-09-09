@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BarChart3, Gavel, Lock, Scale, ScrollText, Trophy } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, genreLabel, ipById, negotiateRights, placePlayerBid } from "../engine/ip";
@@ -7,7 +7,7 @@ import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { CAPITAL_PROJECTS, buyCapitalProject } from "../engine/spending";
 
-function KeyArt({ipId}:{ipId:string}) { const ip=ipById(ipId)!; return <div className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-xl border border-paper/15" style={{background:`linear-gradient(145deg,${ip.posterPalette[0]},${ip.posterPalette[1]} 62%,${ip.posterPalette[2]})`}}><div className="absolute inset-0 gridlines opacity-30"/><div className="absolute inset-x-2 bottom-2 font-display text-sm font-black leading-[.9] text-white drop-shadow">{ip.title.toUpperCase()}</div><div className="absolute left-2 top-2 rounded bg-black/55 px-1 text-[7px] font-black tracking-widest">{ip.sourceType.toUpperCase()}</div></div>; }
+function KeyArt({ipId}:{ipId:string}) { const ip=ipById(ipId)!; const [loaded,setLoaded]=useState(false); return <div className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-xl border border-paper/15" style={{background:`linear-gradient(145deg,${ip.posterPalette[0]},${ip.posterPalette[1]} 62%,${ip.posterPalette[2]})`}}><div className="absolute inset-0 gridlines opacity-30"/>{!loaded&&<><div className="absolute inset-x-2 bottom-2 font-display text-sm font-black leading-[.9] text-white drop-shadow">{ip.title.toUpperCase()}</div><div className="absolute left-2 top-2 rounded bg-black/55 px-1 text-[7px] font-black tracking-widest">{ip.sourceType.toUpperCase()}</div></>}<img src={ip.posterAsset} alt={`${ip.title} poster`} className="absolute inset-0 h-full w-full object-cover" onLoad={()=>setLoaded(true)} onError={e=>{e.currentTarget.style.display="none";setLoaded(false)}}/></div>; }
 
 export default function IPMarket({run,setRun,onAdapt}:{run:RunState;setRun:(fn:(r:RunState)=>RunState)=>void;onAdapt:(ipId:string)=>void}) {
  const active=run.ipMarket.auctions.filter(a=>!a.resolved); const owned=Object.values(run.ipMarket.owned); const legal=run.facilities.archive??0;

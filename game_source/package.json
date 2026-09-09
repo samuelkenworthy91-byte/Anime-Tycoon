@@ -17,6 +17,8 @@
     "cast-v2:validate-assets": "node scripts/validate-cast-v2-assets.mjs",
     "cast-v2:balance": "vitest run scripts/cast-v2-balance.test.ts --reporter=verbose",
     "content-v3:generate": "node scripts/generate-content-v3-runtime.mjs",
+    "auction-ip:manifest": "node scripts/export-auction-ip-manifest.mjs",
+    "auction-ip:validate-posters": "node scripts/validate-auction-ip-posters.mjs",
     "cast:coverage": "node scripts/castCoverage.mjs"
   },
   "dependencies": {
