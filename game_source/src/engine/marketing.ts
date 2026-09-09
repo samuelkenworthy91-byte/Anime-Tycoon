@@ -100,7 +100,7 @@ export const STRATEGIC_CAMPAIGNS: StrategicCampaign[] = [
     hype: 15,
     description: "Prestige screenings, critic access and festival positioning: narrower reach, stronger high-end attention.",
     minTier: 3,
-    genres: ["mystery", "historical" as GenreId, "nordic", "romance", "slice"],
+    genres: ["mystery", "military", "nordic", "romance", "slice"],
     audiences: ["adults"],
     mediums: ["movie", "special"],
     capitalSynergy: "screening_theatre",
