@@ -4,11 +4,11 @@ import { AUCTION_IPS, bidIncrementOptions, dismissAuctionPrompt, initIPMarket, s
 import { initRivalWorld } from "../rivals";
 
 describe("annual live IP auctions", () => {
-  it("uses the full 100-property user catalogue and gives every IP one unique hidden studio arc", () => {
-    expect(AUCTION_IPS).toHaveLength(100);
+  it("uses the full 80-property user catalogue and gives every IP one unique hidden studio arc", () => {
+    expect(AUCTION_IPS).toHaveLength(80);
     const ids=AUCTION_IPS.map(ip=>ip.specialArcUnlock);
     expect(ids.every(Boolean)).toBe(true);
-    expect(new Set(ids).size).toBe(100);
+    expect(new Set(ids).size).toBe(80);
     for(const id of ids){const a=ARCS.find(x=>x.id===id);expect(a?.unlock).toEqual({kind:"studioArc"});expect(a?.syn?.length).toBeGreaterThanOrEqual(2);}
   });
   it("schedules no more than one candidate inside a 48-week year and can skip years", () => {
