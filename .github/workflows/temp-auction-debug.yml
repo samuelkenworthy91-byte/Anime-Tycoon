@@ -1,0 +1,41 @@
+name: Temp auction generator debug
+
+on:
+  push:
+    branches: [work/auction-ceremony-hidden-arcs]
+
+permissions:
+  contents: write
+
+jobs:
+  debug:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - name: Capture exact generator failure
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, textwrap, traceback
+          wf=Path('.github/workflows/temp-auction-ceremony.yml').read_text(encoding='utf-8')
+          m=re.search(r"          python - <<'PY'\n(.*?)\n          PY",wf,re.S)
+          try:
+              if not m: raise RuntimeError('generator extraction failed')
+              code=textwrap.dedent(m.group(1))
+              exec(compile(code,'<original-auction-generator>','exec'),{'__name__':'__main__'})
+              detail='ORIGINAL GENERATOR COMPLETED WITHOUT ERROR\n'
+          except BaseException:
+              detail=traceback.format_exc()
+          Path('.auction-debug.txt').write_text(detail,encoding='utf-8')
+          print(detail)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .auction-debug.txt
+          git commit -m "Capture auction generator failure" || true
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
