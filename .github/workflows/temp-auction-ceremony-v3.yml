@@ -1,0 +1,70 @@
+name: Temp auction ceremony implementation v3
+
+on:
+  push:
+    branches: [work/auction-ceremony-hidden-arcs]
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/auction-ceremony-hidden-arcs
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply robust integrated auction pass
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, textwrap
+          wf=Path('.github/workflows/temp-auction-ceremony.yml').read_text(encoding='utf-8')
+          m=re.search(r"          python - <<'PY'\n(.*?)\n          PY",wf,re.S)
+          if not m: raise SystemExit('Could not extract generator')
+          code=textwrap.dedent(m.group(1))
+          code=code.replace(
+            'description:`A sought-after ${SOURCE_LABEL[raw.sourceType as IPSourceType].toLowerCase()} property with a distinctive ${hidden?.name.toLowerCase() ?? "story"} identity.`,',
+            'description:`A sought-after ${String(raw.sourceType).replaceAll("_"," ")} property with a distinctive ${hidden?.name.toLowerCase() ?? "story"} identity.`,')
+          code=code.replace(
+            'let next:{[K in keyof IPAuction]:IPAuction[K]}={...a,currentBid:amount,leadingStudioId:"player",playerMaxBid:Math.max(a.playerMaxBid,amount),bids:[...a.bids,{studioId:"player",amount,week}]};',
+            'let next:IPAuction={...a,currentBid:amount,leadingStudioId:"player",playerMaxBid:Math.max(a.playerMaxBid,amount),bids:[...a.bids,{studioId:"player",amount,week}]};')
+          old='''marker='  { id: "multiverse", name: "Multiverse Arc", cost: 44_000, q: 2, f: 0.12, syn: ["space", "fantasy"], synQ: 5, anti: ["slice", "cooking"], antiQ: -6, desc: "Huge novelty and hype; catastrophic continuity risk.", unlock: { kind: "studioArc" } },\\n];'
+          if marker in data:
+              data=data.replace(marker, marker[:-3]+'  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: seed.id, name: seed.name, cost: seed.cost, q: seed.q, f: seed.f, syn: [...seed.syn] as GenreId[], synQ: seed.synQ, synF: seed.synF, anti: [...seed.anti] as GenreId[], antiQ: seed.antiQ, antiF: seed.antiF, desc: seed.desc, unlock: { kind: "studioArc" } as const })),\\n];')
+          else:
+              raise SystemExit('Could not locate end of studio arc block')'''
+          new='''studio_arc_start=data.find('/* property-derived blueprints: situational, not flat upgrades */')
+          if studio_arc_start < 0: raise SystemExit('Could not locate studio blueprint block')
+          arc_end=data.find('\\n];',studio_arc_start)
+          if arc_end < 0: raise SystemExit('Could not locate ARCS terminator')
+          hidden_insert='\\n  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: seed.id, name: seed.name, cost: seed.cost, q: seed.q, f: seed.f, syn: [...seed.syn] as GenreId[], synQ: seed.synQ, synF: seed.synF, anti: [...seed.anti] as GenreId[], antiQ: seed.antiQ, antiF: seed.antiF, desc: seed.desc, unlock: { kind: "studioArc" } as const })),'
+          data=data[:arc_end]+hidden_insert+data[arc_end:]'''
+          if old not in code: raise SystemExit('Could not replace old hidden-arc insertion block')
+          code=code.replace(old,new,1)
+          exec(compile(code,'<auction-generator-v3>','exec'),{'__name__':'__main__'})
+          PY
+      - name: Install, test and build
+        working-directory: game_source
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Commit verified implementation
+        shell: bash
+        run: |
+          rm -f .github/workflows/temp-auction-ceremony.yml .github/workflows/temp-auction-ceremony-v2.yml .github/workflows/temp-auction-ceremony-v3.yml .github/workflows/temp-auction-debug.yml .auction-debug.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Implement annual live IP auction ceremonies"
+          git pull --rebase origin work/auction-ceremony-hidden-arcs
+          git push origin HEAD:work/auction-ceremony-hidden-arcs
