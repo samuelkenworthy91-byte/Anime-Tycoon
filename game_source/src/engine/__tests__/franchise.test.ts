@@ -74,7 +74,7 @@ const res = (total: number, over: Partial<{ revenue: number; fans: number; hallO
 });
 
 const mkFr = (over: Partial<Franchise> = {}): Franchise => ({
-  ...createFranchise("IP", draft({ title: "IP" }), seed, res(28), 10),
+  ...createFranchise("IP", draft({ title: "IP" }), seed, res(34), 10),
   ...over,
 });
 

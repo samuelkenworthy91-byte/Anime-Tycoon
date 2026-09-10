@@ -108,6 +108,7 @@ import {
   continuationBlock,
   continuationDef,
   createFranchise,
+  SEQUEL_SCORE_THRESHOLD,
   franchiseBoost,
   MERCH_COOLDOWN,
   merchBlock,
@@ -2635,7 +2636,7 @@ export function releaseProject(
     franchises,
     ipMarket: nextIpMarket,
     pendingSequel:
-      result.total >= 30 ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
+      result.total >= SEQUEL_SCORE_THRESHOLD ? fkey : draft.franchiseKey === r.pendingSequel ? null : r.pendingSequel,
     hallOfFame: result.hallOfFame
       ? [...r.hallOfFame, { title: draft.title, score: result.total, genres: draft.genres, animeType: draft.animeType, protag: draft.protag, week: r.week }]
       : r.hallOfFame,

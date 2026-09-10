@@ -7,7 +7,6 @@ import type { ShowResult } from "./engine/scoring";
 import {
   advanceWeeks,
   applyMilestone,
-  forecastWeek,
   initialRun,
   tickStudioDay,
   tickStudioWorkPulse,
@@ -23,6 +22,7 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
+import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
 import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
@@ -174,10 +174,6 @@ export default function App() {
           setWorkPulses(daily.pulses);
           if (daily.attention) setTimeSpeed(0);
           if (weekBoundary) {
-            if (forecastWeek(n).cashAfter < 0) {
-              setTimeSpeed(0);
-              return { ...n, notices: [...n.notices, "⏸ Calendar paused: next week would bankrupt the studio."] };
-            }
             const before = n;
             n = advanceWeeks(n, 1, { liveDaysAlreadyApplied: true });
             const attention =
@@ -186,10 +182,16 @@ export default function App() {
               n.marketEvents.length > before.marketEvents.length || n.studioEvents.length > before.studioEvents.length || n.staffEvents.length > before.staffEvents.length ||
               n.contractJobs.length < before.contractJobs.length || n.trainingJobs.length < before.trainingJobs.length || n.researchJobs.length < before.researchJobs.length;
             if (attention) setTimeSpeed(0);
-            if (n.cash < 0) {
-              if (n.bailouts < 2) n = { ...n, bailouts: n.bailouts + 1, cash: n.cash + 150_000, notices: [...n.notices, "Emergency crowdfunding from the fans! (+£150,000)"] };
-              else { setScreen("gameover"); return n; }
+
+            const insolvency = applyWeeklyInsolvency(n);
+            n = insolvency.run;
+            if (insolvency.reprieveIssued) setTimeSpeed(0);
+            if (insolvency.shutdown) {
+              setTimeSpeed(0);
+              setScreen("gameover");
+              return n;
             }
+
             if (n.week >= MAX_WEEKS && !n.dynasty) setScreen("retrospective");
           }
           return n;
@@ -629,7 +631,14 @@ export default function App() {
           />
         )}
         {screen === "release" && released && run && (
-          <Release draft={released.draft} result={released.result} studio={run.studio} onContinue={continueFromRelease} />
+          <Release
+            draft={released.draft}
+            result={released.result}
+            studio={run.studio}
+            careerWeek={run.week}
+            showsMadeBefore={Math.max(0, run.showsMade - 1)}
+            onContinue={continueFromRelease}
+          />
         )}
         {screen === "retrospective" && run && (
           <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />

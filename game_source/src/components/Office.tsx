@@ -379,10 +379,10 @@ export default function Office({
                   </div>
                   {fc.cashAfter < 0 ? (
                     <div className="mt-2 rounded-lg border border-neon/50 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon">
-                      At this rate the studio bounces next week
-                      {run.bailouts < 2
-                        ? " — the fans can crowdfund a rescue, but a contract or a cheaper week buys you time NOW."
-                        : " — no bailouts left. Take a contract or this is the last week."}
+                      Next week leaves the studio below £0. Debt is allowed, but eight consecutive negative weeks ends the lease.
+                      {(run.negativeCashWeeks ?? 0) > 0
+                        ? ` Current debt streak: ${run.negativeCashWeeks ?? 0}/8 weeks.`
+                        : " The landlord clock starts when the first negative week closes."}
                     </div>
                   ) : fc.net < 0 && fc.payday > 0 ? (
                     <div className="mt-2 rounded-lg border border-gold/40 bg-gold/10 px-2 py-1.5 text-[10px] text-gold">

@@ -66,6 +66,7 @@ import {
   type ScopeId,
   type SlotId,
 } from "../engine/data";
+import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
 import { arcLockReason, formatLockReason, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
@@ -155,8 +156,11 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     protag: protagChar?.id ?? base.protag,
     protagName: protagChar?.name ?? base.protagName,
     secondary: castOf("secondary")?.id ?? base.secondary,
+    secondaryName: castOf("secondary")?.name,
     pet: castOf("pet")?.id ?? base.pet,
+    petName: castOf("pet")?.name,
     villain: castOf("villain")?.id ?? base.villain,
+    villainName: castOf("villain")?.name,
     franchiseKey: plan.key,
     season: plan.kind === "season" || plan.kind === "reboot" ? fr.season + 1 : fr.season,
     continuation: plan.kind,
@@ -251,9 +255,11 @@ export default function Create({
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
-  const comboDiscovered = d.genres.length === 2 && (comboKey(d.genres) in run.comboLevels);
+  const currentComboKey = comboKey(d.genres);
+  const comboResearchKnown = d.genres.length === 2 && secretComboResearched(run.research, currentComboKey);
+  const comboDiscovered = d.genres.length === 2 && ((currentComboKey in run.comboLevels) || comboResearchKnown);
   const combo = comboLabel(d.genres, comboDiscovered);
-  const comboLv = run.comboLevels[comboKey(d.genres)] ?? 0;
+  const comboLv = run.comboLevels[currentComboKey] ?? 0;
   const cost = draftCost(d);
   const weeks = draftWeeks(d);
   /** why this draft can't be greenlit right now (null = good to go) */
@@ -261,6 +267,10 @@ export default function Create({
   const arcLimit = PRODUCTION_SCOPES[d.scope ?? "standard"].arcLimit;
   const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
   const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));
+  const learnedArcClashes = useMemo(
+    () => arcClashesFor(d.arcs).filter((c) => run.arcCombos.includes(c.id)),
+    [d.arcs, run.arcCombos]
+  );
 
   /* — KNOWLEDGE QUICK PICKS (only what the studio itself has discovered) — */
   /** genre pairings this studio has already PROVEN (combo knowledge > 0),
@@ -406,6 +416,10 @@ export default function Create({
     q += combos.reduce((sum, c) => sum + c.q, 0);
     f += combos.reduce((sum, c) => sum + c.f, 0);
     if (combos.some((c) => !run.arcCombos.includes(c.id))) known = false;
+    const clashes = arcClashesFor(d.arcs);
+    q += clashes.reduce((sum, c) => sum + c.q, 0);
+    f += clashes.reduce((sum, c) => sum + c.f, 0);
+    if (clashes.some((c) => !run.arcCombos.includes(c.id))) known = false;
     return { q, f, known };
   }, [d.arcs, d.genres, run.arcKnowledge, run.arcGenreKnowledge, run.arcCombos]);
 
@@ -672,7 +686,11 @@ export default function Create({
                   <span className="ml-2 text-xs italic text-viol">Experimental pairing — nobody knows if it works…</span>
                 )}
                 {combo.secret && comboDiscovered && (
-                  <span className="ml-2 text-xs text-viol">✦ ×{combo.mult.toFixed(2)} review score — you discovered this!</span>
+                  <span className="ml-2 text-xs text-viol">
+                    {comboResearchKnown
+                      ? `✦ R&D CONFIRMED · ×${combo.mult.toFixed(2)} review score`
+                      : `✦ ×${combo.mult.toFixed(2)} review score — you discovered this!`}
+                  </span>
                 )}
                 {d.genres.length > 0 && (
                   <span className="ml-2 text-xs text-gold">
@@ -1013,7 +1031,7 @@ export default function Create({
                 {d.arcs.length >= 2 && (
                   <div className="rounded-xl border border-line bg-panel2/60 p-2.5">
                     <div className="text-[9px] font-extrabold tracking-[0.18em] text-paper/45">STUDIO STORY KNOWLEDGE</div>
-                    {learnedArcCombos.length > 0 ? (
+                    {learnedArcCombos.length > 0 || learnedArcClashes.length > 0 ? (
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
                         {learnedArcCombos.map((c) => {
                           const rating = arcComboRating(c);
@@ -1023,6 +1041,11 @@ export default function Create({
                             </span>
                           );
                         })}
+                        {learnedArcClashes.map((c) => (
+                          <span key={c.id} className="rounded-lg border border-neon/60 bg-neon/10 px-2 py-1 text-[10px] font-extrabold text-neon">
+                            KNOWN BAD STRUCTURE · {c.name} ↦
+                          </span>
+                        ))}
                       </div>
                     ) : (
                       <div className="mt-1 text-[10px] italic text-viol">No proven structure here yet — release it, or research narrative analytics.</div>

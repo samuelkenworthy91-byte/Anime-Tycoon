@@ -57,7 +57,9 @@ function driveToReady(r: RunState, p: Project): RunState {
   return r;
 }
 
-/** produce S1 end to end and put it on the air; returns [run, franchiseKey, p1id] */
+/** produce S1 end to end and put it on the air; returns [run, franchiseKey, p1id].
+ * These tests exercise simultaneous-season timing, not scoring variance, so the
+ * resulting test IP is explicitly granted the new 32/40 sequel-rights floor. */
 function airSeasonOne(r: RunState): [RunState, string, string] {
   const started = startProject(r, draft({}));
   expect(started).toBeTruthy();
@@ -69,7 +71,16 @@ function airSeasonOne(r: RunState): [RunState, string, string] {
   expect(out).toBeTruthy();
   r = out!.run;
   expect(projectById(r, p1id)?.stage).toBe("airing");
-  return [r, projectById(r, p1id)!.draft.franchiseKey ?? projectById(r, p1id)!.draft.title, p1id];
+  const frKey = projectById(r, p1id)!.draft.franchiseKey ?? projectById(r, p1id)!.draft.title;
+  const fr = r.franchises[frKey];
+  r = {
+    ...r,
+    franchises: {
+      ...r.franchises,
+      [frKey]: { ...fr, lastScore: 32, bestScore: Math.max(32, fr.bestScore) },
+    },
+  };
+  return [r, frKey, p1id];
 }
 
 const seasonDraftFor = (r: RunState, frKey: string): Draft => {

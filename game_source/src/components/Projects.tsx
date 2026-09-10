@@ -32,6 +32,7 @@ import {
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
+import { SEQUEL_SCORE_THRESHOLD } from "../engine/franchise";
 import {
   MILESTONE_LABEL,
   PRODUCTION_STAGES,
@@ -188,6 +189,13 @@ function ProjectCard({
           const fr = run.franchises[fkey];
           if (!fr) return null;
           const nextNo = fr.season + 1;
+          if (fr.lastScore < SEQUEL_SCORE_THRESHOLD) {
+            return (
+              <div className="mt-1.5 rounded-lg border border-neon/40 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon2">
+                NO SEQUEL RIGHTS — latest entry {fr.lastScore}/40. Use SERIES for a spin-off or reboot.
+              </div>
+            );
+          }
           const inFlight = run.projects.some(
             (x) =>
               x.id !== p.id &&
@@ -511,7 +519,7 @@ export default function ProjectsPanel({
           </b>
           {" → "}
           <b className={fc.cashAfter < 0 ? "text-neon" : "text-paper/90"}>≈{formatGBPShort(fc.cashAfter)} in the bank</b>
-          {fc.cashAfter < 0 && <b className="block font-bold text-neon">BANKRUPT NEXT WEEK — take a contract first!</b>}
+          {fc.cashAfter < 0 && <b className="block font-bold text-neon">DEBT WARNING — recover before 8 consecutive weeks below £0 or the landlord shuts the studio.</b>}
         </span>
       </div>
 
