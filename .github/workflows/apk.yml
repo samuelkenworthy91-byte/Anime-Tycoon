@@ -8,6 +8,7 @@ on:
       - arena/01a0615b-anime-tycoon
       - arena/01a0759f-anime-tycoon
       - work/final-awards-rival-posters
+      - work/consequences-discovery-critical-voice
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
@@ -60,7 +61,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: anime-runner-awards-title-layout-v5-apk
+          name: anime-runner-consequences-discovery-apk
           path: game_source/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
