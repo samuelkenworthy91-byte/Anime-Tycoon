@@ -1,0 +1,34 @@
+name: Patch final sequel-rights edges
+
+on:
+  push:
+    branches:
+      - work/consequences-discovery-critical-voice
+    paths:
+      - "scripts/final-sequel-edges.mjs"
+      - ".github/workflows/final-sequel-edges.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/consequences-discovery-critical-voice
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply sequel-rights edge fixes
+        run: node scripts/final-sequel-edges.mjs
+      - name: Commit source fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/engine/state.ts game_source/src/components/Projects.tsx
+          git diff --cached --check
+          git commit -m "Close remaining 32-point sequel-rights edges"
+          git push origin HEAD:work/consequences-discovery-critical-voice
