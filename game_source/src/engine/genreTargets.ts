@@ -25,6 +25,8 @@ export const SINGLE_GENRE_DIRECTION: Record<string, [number, number, number]> = 
   martial: [62, 94, 44], mythology: [88, 72, 78], nordic: [72, 42, 62],
   samurai: [78, 90, 50], shinobi: [86, 78, 36],
   vampire: [64, 54, 82], grimdark: [78, 74, 64],
+  monster_taming: [56, 78, 54], crime: [92, 46, 36], kaiju: [52, 92, 78],
+  cosmic_horror: [92, 58, 92], arabia: [76, 68, 46],
 };
 
 function genreDirection(id: string): [number, number, number] {
