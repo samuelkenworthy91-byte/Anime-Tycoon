@@ -1,0 +1,30 @@
+name: Fix Genre 30 Rescue Reference
+
+on:
+  push:
+    branches:
+      - work/genre30-full-integration
+    paths:
+      - game_source/scripts/fix-genre30-rescue.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node game_source/scripts/fix-genre30-rescue.mjs
+      - run: |
+          rm -f game_source/scripts/fix-genre30-rescue.mjs .github/workflows/genre30-fix-rescue.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix Kaiju survival arc-combo reference"
+          git push origin HEAD:work/genre30-full-integration
