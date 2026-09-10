@@ -1,0 +1,34 @@
+name: Finish consequences branch
+
+on:
+  push:
+    branches:
+      - work/consequences-discovery-critical-voice
+    paths:
+      - "scripts/finish-consequences-branch.mjs"
+      - ".github/workflows/finish-consequences-branch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/consequences-discovery-critical-voice
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply targeted source patches
+        run: node scripts/finish-consequences-branch.mjs
+      - name: Commit generated edits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/components/Office.tsx game_source/src/components/Projects.tsx game_source/src/components/Create.tsx game_source/src/components/Release.tsx game_source/src/engine/projects.ts game_source/src/engine/franchise.ts
+          git diff --cached --check
+          git commit -m "Finish consequences branch rules and planner polish"
+          git push origin HEAD:work/consequences-discovery-critical-voice
