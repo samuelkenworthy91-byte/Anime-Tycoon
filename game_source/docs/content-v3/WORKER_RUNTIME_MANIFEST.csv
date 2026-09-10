@@ -15,3 +15,11 @@ worker_23,sprite,sprite-worker-23.png,448,640,worker_23,21,game_source/public/im
 worker_23,portrait,portrait-worker-23.png,224,224,worker_23,21,game_source/public/img/portrait-worker-23.png,"(768, 536, 1152, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
 producer,sprite,sprite-showrunner-producer.png,448,640,producer,,game_source/public/img/sprite-showrunner-producer.png,"(1152, 536, 1536, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
 producer,portrait,portrait-showrunner-producer.png,224,224,producer,,game_source/public/img/portrait-showrunner-producer.png,"(1152, 536, 1536, 1024)",PASS_ASSET_PREVIEW_ENGINE_PLACEMENT_PENDING
+worker_24,sprite,sprite-worker-24.png,448,640,worker_24,22,game_source/public/img/sprite-worker-24.png,"magenta master: sprite_punk_01_female.png",PASS_RUNTIME_QC
+worker_24,portrait,portrait-worker-24.png,224,224,worker_24,22,game_source/public/img/portrait-worker-24.png,"magenta master: portrait_punk_01_female.png",PASS_RUNTIME_QC
+worker_25,sprite,sprite-worker-25.png,448,640,worker_25,23,game_source/public/img/sprite-worker-25.png,"magenta master: sprite_punk_02_male.png",PASS_RUNTIME_QC
+worker_25,portrait,portrait-worker-25.png,224,224,worker_25,23,game_source/public/img/portrait-worker-25.png,"magenta master: portrait_punk_02_male.png",PASS_RUNTIME_QC
+worker_26,sprite,sprite-worker-26.png,448,640,worker_26,24,game_source/public/img/sprite-worker-26.png,"magenta master: sprite_bohemian_01_female.png",PASS_RUNTIME_QC
+worker_26,portrait,portrait-worker-26.png,224,224,worker_26,24,game_source/public/img/portrait-worker-26.png,"magenta master: portrait_bohemian_01_female.png",PASS_RUNTIME_QC
+worker_27,sprite,sprite-worker-27.png,448,640,worker_27,25,game_source/public/img/sprite-worker-27.png,"magenta master: sprite_bohemian_02_male.png",PASS_RUNTIME_QC
+worker_27,portrait,portrait-worker-27.png,224,224,worker_27,25,game_source/public/img/portrait-worker-27.png,"magenta master: portrait_bohemian_02_male.png",PASS_RUNTIME_QC

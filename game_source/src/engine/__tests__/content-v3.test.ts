@@ -22,11 +22,13 @@ describe("V3 content integration", () => {
     for (const member of original.cast) expect(CAST_V2.find(c => c.id === member.id)).toMatchObject(member);
     expect(CAST_V2.every(c => c.epithet && c.epithet.split(/\s+/).length >= 2)).toBe(true);
   });
-  it("adds seven worker looks after the existing fifteen", () => {
-    expect(WORKER_LOOKS).toHaveLength(22);
+  it("adds eleven worker looks after the original fifteen", () => {
+    expect(WORKER_LOOKS).toHaveLength(26);
     expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
     expect(WORKER_LOOKS[15].sprite).toContain("sprite-worker-17.png");
     expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
+    expect(WORKER_LOOKS[22].sprite).toContain("sprite-worker-24.png");
+    expect(WORKER_LOOKS[25].sprite).toContain("sprite-worker-27.png");
   });
   it("loads unique arcs and valid combo references", () => {
     expect(ARCS).toHaveLength(90 + AUCTION_IPS.length); expect(ARC_COMBOS).toHaveLength(49 + AUCTION_IPS.length);
