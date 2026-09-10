@@ -1,0 +1,39 @@
+name: Fix franchise test fixture
+
+on:
+  push:
+    branches:
+      - work/consequences-discovery-critical-voice
+    paths:
+      - ".github/workflows/fix-franchise-test-fixture.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/consequences-discovery-critical-voice
+          fetch-depth: 0
+      - name: Update eligible default franchise fixture
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('game_source/src/engine/__tests__/franchise.test.ts')
+          s = p.read_text()
+          old = '...createFranchise("IP", draft({ title: "IP" }), seed, res(28), 10),'
+          new = '...createFranchise("IP", draft({ title: "IP" }), seed, res(34), 10),'
+          assert s.count(old) == 1, 'fixture target missing or ambiguous'
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Commit fixture update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/engine/__tests__/franchise.test.ts
+          git diff --cached --check
+          git commit -m "Align franchise tests with 32-point sequel gate"
+          git push origin HEAD:work/consequences-discovery-critical-voice
