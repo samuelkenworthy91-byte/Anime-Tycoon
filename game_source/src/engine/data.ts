@@ -89,7 +89,7 @@ export interface Staff {
   id: string;
   name: string;
   role: StaffRole;
-  /** per-discipline skill 10..99 */
+  /** raw per-discipline skill 10..999; staffPoint() applies mastery diminishing returns */
   story: number;
   art: number;
   sound: number;
@@ -107,12 +107,14 @@ export interface Staff {
   xp?: number;
   /** 0..100 — long-term happiness (stamina is short-term energy) */
   morale?: number;
-  /** 1-3 personality trait ids (see TRAIT_DEFS) */
+  /** 2-4 personality trait ids for newly generated staff (old saves retain theirs) */
   traits?: string[];
   /** specialisation id (see SPEC_DEFS), role-specific */
   spec?: string;
   /** favourite genre — matters for the Genre Fanatic trait & morale */
   favGenre?: GenreId;
+  /** shipped productions by genre; used for personal novice → mastery performance */
+  genreExperience?: Partial<Record<GenreId, number>>;
   /** week this person signed with the studio */
   joinedWeek?: number;
   /** shipped shows this person worked on (most recent last) */

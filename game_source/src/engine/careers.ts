@@ -123,8 +123,8 @@ export interface SpecDef {
   special?: "sequel" | "movie" | "speed";
 }
 
-export const SPEC_OUTPUT_BONUS = 0.25; // +25% on matching projects
-export const SPEC_SPEED_BONUS = 0.1; // production-speed spec: +10% pace, always
+export const SPEC_OUTPUT_BONUS = 0.35; // +35% on matching projects
+export const SPEC_SPEED_BONUS = 0.15; // production-speed spec: +15% pace, always
 
 export const SPEC_DEFS: SpecDef[] = [
   /* writers */
@@ -180,18 +180,30 @@ export interface TraitDef {
 }
 
 export const TRAIT_DEFS: TraitDef[] = [
-  { id: "perfectionist", name: "Perfectionist", desc: "+15% output · −20% personal pace", good: true },
-  { id: "fast", name: "Fast Worker", desc: "+25% personal pace", good: true },
-  { id: "team", name: "Team Player", desc: "+0.08 speed to any team they join", good: true },
-  { id: "genius", name: "Difficult Genius", desc: "+30% output · teammates −1 morale/wk", good: false },
-  { id: "mentor", name: "Mentor", desc: "teammates earn +50% XP · bonds with juniors faster", good: true },
-  { id: "crunch", name: "Crunch Monster", desc: "output never drops below 85% from exhaustion", good: true },
-  { id: "fragile", name: "Fragile Confidence", desc: "morale swings ×2 (hits AND flops)", good: false },
-  { id: "reliable", name: "Reliable", desc: "output never below 90% from stamina or morale", good: true },
-  { id: "fanatic", name: "Genre Fanatic", desc: "+30% output on favourite genre · +1 morale/wk on it, −1 off it", good: true },
-  { id: "adapt", name: "Adaptation Expert", desc: "+20% output on season 2+ projects", good: true },
-  { id: "movie", name: "Movie Specialist", desc: "+25% output on movie projects", good: true },
-  { id: "veteran", name: "Franchise Veteran", desc: "+15% output on franchise & season 2+ projects", good: true },
+  { id: "perfectionist", name: "Perfectionist", desc: "+30% output · −25% personal pace", good: true },
+  { id: "fast", name: "Fast Worker", desc: "+40% personal pace · −5% output", good: true },
+  { id: "team", name: "Team Player", desc: "+0.12 team speed aura", good: true },
+  { id: "genius", name: "Difficult Genius", desc: "+50% output · teammates −2 morale/wk", good: false },
+  { id: "mentor", name: "Mentor", desc: "junior teammates +75% XP · mentor relationships form after 5 weeks", good: true },
+  { id: "crunch", name: "Crunch Monster", desc: "condition output never below 92% while working", good: true },
+  { id: "fragile", name: "Fragile Confidence", desc: "morale swings ×2", good: false },
+  { id: "reliable", name: "Reliable", desc: "condition output never below 95%", good: true },
+  { id: "fanatic", name: "Genre Fanatic", desc: "+65% output on favourite genre · +2 morale/wk on it, −2 off it", good: true },
+  { id: "adapt", name: "Adaptation Expert", desc: "+35% output on licensed adaptations and season 2+", good: true },
+  { id: "movie", name: "Movie Specialist", desc: "+40% output on movie projects", good: true },
+  { id: "veteran", name: "Franchise Veteran", desc: "+25% output on franchise & season 2+ projects", good: true },
+  { id: "researcher", name: "Research Hound", desc: "studio research duration −8% each · stacks to −24%", good: true },
+  { id: "gossip", name: "Industry Gossip", desc: "releases they worked on gain +10% fans", good: true },
+  { id: "publicist", name: "Fan Whisperer", desc: "releases they worked on gain +15% fans", good: true },
+  { id: "organizer", name: "Production Organizer", desc: "+0.10 team speed aura", good: true },
+  { id: "fixer", name: "Continuity Hawk", desc: "+30% output while a project carries editing notes", good: true },
+  { id: "prodigy", name: "Fast Learner", desc: "+50% personal XP earned", good: true },
+  { id: "ensemble", name: "Ensemble Brain", desc: "+15% output on teams of 3+", good: true },
+  { id: "lonewolf", name: "Lone Wolf", desc: "+25% output on teams of 1–2 · −10% on teams of 4+", good: false },
+  { id: "closer", name: "Finisher", desc: "+25% output during Sound, Post and Marketing stages", good: true },
+  { id: "starter", name: "Concept Ace", desc: "+25% output during Concept and Pre-production", good: true },
+  { id: "lorekeeper", name: "Lore Keeper", desc: "+30% output on licensed IP and franchise productions", good: true },
+  { id: "networker", name: "Industry Networker", desc: "contracts they work on pay +15% each · team cap +45%", good: true },
 ];
 
 export const traitDef = (id: string): TraitDef | null => TRAIT_DEFS.find((t) => t.id === id) ?? null;
@@ -211,7 +223,7 @@ function idHash(id: string): number {
 const GENRE_IDS = GENRES.map((g) => g.id);
 
 function pickTraits(seedA: number, seedB: number): string[] {
-  const count = 1 + (seedA % 3); // 1..3
+  const count = 2 + (seedA % 3); // 2..4: candidates should feel meaningfully distinct
   const ids: string[] = [];
   let x = seedB;
   while (ids.length < count) {
@@ -249,6 +261,7 @@ export function ensureCareer(s: Staff, week: number): Staff {
     traits: s.traits ?? pickTraits(h, h >> 3),
     spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,
     favGenre: s.favGenre ?? GENRE_IDS[(h >> 5) % GENRE_IDS.length],
+    genreExperience: s.genreExperience && typeof s.genreExperience === "object" ? { ...s.genreExperience } : {},
     joinedWeek: s.joinedWeek ?? week,
     shows: s.shows ?? [],
     awardsWon: s.awardsWon ?? 0,
@@ -306,9 +319,72 @@ export const BOND_DESC: Record<BondKind, string> = {
 
 export function bondBetween(bonds: Record<string, number>, a: Staff, b: Staff): BondInfo | null {
   const weeks = bonds[bondKey(a.id, b.id)] ?? 0;
-  if (weeks < BOND_WEEKS) return null;
+  const threshold = hasTrait(a, "mentor") || hasTrait(b, "mentor") ? 5 : BOND_WEEKS;
+  if (weeks < threshold) return null;
   const kind = bondKind(a, b);
   return { kind, desc: BOND_DESC[kind] };
+}
+
+/* ------------------------------------------------ personal genre craft */
+/** Three real shipped productions takes an unfamiliar genre to neutral. */
+export const GENRE_NEUTRAL_SHOWS = 3;
+
+export const genreShows = (s: Staff, genre: GenreId): number =>
+  Math.max(0, Math.floor(s.genreExperience?.[genre] ?? 0));
+
+/** Professional specialisation/fandom supplies a starting familiarity floor,
+ * while the stored counter always remains the number actually shipped. */
+export function genreFamiliarity(s: Staff, genre: GenreId): number {
+  let floor = 0;
+  const d = specDef(s.spec);
+  if (d?.genres?.includes(genre)) floor = Math.max(floor, 3);
+  if (s.favGenre === genre) floor = Math.max(floor, 4);
+  return Math.max(genreShows(s, genre), floor);
+}
+
+export function genreExperienceMultiplier(familiarity: number): number {
+  const n = Math.max(0, Math.floor(familiarity));
+  if (n === 0) return 0.60;
+  if (n === 1) return 0.75;
+  if (n === 2) return 0.90;
+  if (n === 3) return 1.00;
+  return Math.min(1.25, Math.round((1 + (n - 3) * 0.04) * 100) / 100);
+}
+
+export function genreExperienceLabel(familiarity: number): string {
+  const n = Math.max(0, Math.floor(familiarity));
+  if (n === 0) return "UNTESTED";
+  if (n === 1) return "ROOKIE";
+  if (n === 2) return "LEARNING";
+  if (n === 3) return "NEUTRAL";
+  if (n <= 5) return "COMFORTABLE";
+  if (n <= 8) return "EXPERIENCED";
+  return "EXPERT";
+}
+
+/** Average genre readiness across the production's one/two genres. */
+export function staffGenreMultiplier(s: Staff, genres: GenreId[]): number {
+  if (!genres.length) return 1;
+  return genres.reduce((sum, g) => sum + genreExperienceMultiplier(genreFamiliarity(s, g)), 0) / genres.length;
+}
+
+/** Employed Research Hounds accelerate the studio's research desk. */
+export function staffResearchDurationMult(staff: Staff[]): number {
+  const n = staff.filter((s) => hasTrait(s, "researcher")).length;
+  return Math.max(0.76, 1 - Math.min(3, n) * 0.08);
+}
+
+/** Project-specific audience personalities only count if they actually shipped it. */
+export function staffReleaseFanMult(staff: Staff[]): number {
+  const gossip = staff.filter((s) => hasTrait(s, "gossip")).length;
+  const publicists = staff.filter((s) => hasTrait(s, "publicist")).length;
+  return Math.min(1.55, 1 + gossip * 0.10 + publicists * 0.15);
+}
+
+/** Networkers improve freelance terms only when assigned to that contract. */
+export function contractCrewPayMult(staff: Staff[]): number {
+  const n = staff.filter((s) => hasTrait(s, "networker")).length;
+  return 1 + Math.min(3, n) * 0.15;
 }
 
 /* ----------------------------------------------------- per-person output */
@@ -332,26 +408,31 @@ export interface CareerCtx {
 /** the full personal multiplier set for one staff member on one project */
 export function personMod(s: Staff, p: Project, team: Staff[], ctx: CareerCtx): PersonMod {
   let cond = staminaFactor(s) * moraleF(s);
-  if (hasTrait(s, "crunch")) cond = Math.max(0.85, cond);
-  if (hasTrait(s, "reliable")) cond = Math.max(0.9, cond);
+  if (hasTrait(s, "crunch")) cond = Math.max(0.92, cond);
+  if (hasTrait(s, "reliable")) cond = Math.max(0.95, cond);
 
-  let out = cond;
+  let out = cond * staffGenreMultiplier(s, p.draft.genres);
   let pace = cond;
   let aura = 0;
   let xpMult = 1;
 
-  /* traits */
-  if (hasTrait(s, "perfectionist")) {
-    out *= 1.15;
-    pace *= 0.8;
-  }
-  if (hasTrait(s, "fast")) pace *= 1.25;
-  if (hasTrait(s, "team")) aura += 0.08;
-  if (hasTrait(s, "genius")) out *= 1.3;
-  if (hasTrait(s, "fanatic") && s.favGenre && p.draft.genres.includes(s.favGenre)) out *= 1.3;
-  if (hasTrait(s, "adapt") && p.draft.season > 1) out *= 1.2;
-  if (hasTrait(s, "movie") && p.draft.medium === "movie") out *= 1.25;
-  if (hasTrait(s, "veteran") && (p.draft.franchiseKey || p.draft.season > 1)) out *= 1.15;
+  /* traits — deliberately large enough that hiring personality matters */
+  if (hasTrait(s, "perfectionist")) { out *= 1.30; pace *= 0.75; }
+  if (hasTrait(s, "fast")) { pace *= 1.40; out *= 0.95; }
+  if (hasTrait(s, "team")) aura += 0.12;
+  if (hasTrait(s, "genius")) out *= 1.50;
+  if (hasTrait(s, "fanatic") && s.favGenre && p.draft.genres.includes(s.favGenre)) out *= 1.65;
+  if (hasTrait(s, "adapt") && (p.draft.season > 1 || !!p.draft.licensedIpId)) out *= 1.35;
+  if (hasTrait(s, "movie") && p.draft.medium === "movie") out *= 1.40;
+  if (hasTrait(s, "veteran") && (p.draft.franchiseKey || p.draft.season > 1)) out *= 1.25;
+  if (hasTrait(s, "organizer")) aura += 0.10;
+  if (hasTrait(s, "fixer") && p.issues > 0) out *= 1.30;
+  if (hasTrait(s, "prodigy")) xpMult *= 1.50;
+  if (hasTrait(s, "ensemble") && team.length >= 3) out *= 1.15;
+  if (hasTrait(s, "lonewolf")) out *= team.length <= 2 ? 1.25 : team.length >= 4 ? 0.90 : 1;
+  if (hasTrait(s, "closer") && ["sound", "post", "marketing"].includes(p.stage)) out *= 1.25;
+  if (hasTrait(s, "starter") && ["concept", "preprod"].includes(p.stage)) out *= 1.25;
+  if (hasTrait(s, "lorekeeper") && (!!p.draft.licensedIpId || !!p.draft.franchiseKey)) out *= 1.30;
 
   /* specialisation */
   const d = specDef(s.spec);
@@ -371,11 +452,11 @@ export function personMod(s: Staff, p: Project, team: Staff[], ctx: CareerCtx): 
     if (bond.kind === "mentorship") {
       if (s.level < mate.level) {
         out *= 1.05;
-        xpMult *= 1.5;
+        xpMult *= 1.75;
       } else out *= 1.03;
     }
     /* mentors boost every junior teammate's XP */
-    if (hasTrait(mate, "mentor") && mate.level > s.level) xpMult *= 1.5;
+    if (hasTrait(mate, "mentor") && mate.level > s.level) xpMult *= 1.75;
   }
 
   return { out, pace, aura, xpMult };
@@ -522,8 +603,10 @@ export function toLegend(s: Staff, week: number): LegendRec {
 export const yearsEmployed = (s: Staff, week: number) =>
   Math.max(0, (week - (s.joinedWeek ?? 0)) / 48);
 
-export function recordShow(s: Staff, title: string, score: number, week: number): Staff {
+export function recordShow(s: Staff, title: string, score: number, week: number, genres: GenreId[] = []): Staff {
   const shows = [...(s.shows ?? []), { title, score, week }].slice(-20);
   const best = s.bestShow && s.bestShow.score >= score ? s.bestShow : { title, score };
-  return { ...s, shows, bestShow: best };
+  const genreExperience = { ...(s.genreExperience ?? {}) };
+  for (const genre of new Set(genres)) genreExperience[genre] = genreShows(s, genre) + 1;
+  return { ...s, shows, bestShow: best, genreExperience };
 }

@@ -156,11 +156,11 @@ describe("xp & levels", () => {
 
 /* ------------------------------------------------------------- traits */
 describe("traits", () => {
-  it("new hires get 1-3 traits and a role-matching spec", () => {
+  it("new hires get 2-4 traits and a role-matching spec", () => {
     for (let i = 0; i < 10; i++) {
       const s = rollHire(0);
-      expect(s.traits!.length).toBeGreaterThanOrEqual(1);
-      expect(s.traits!.length).toBeLessThanOrEqual(3);
+      expect(s.traits!.length).toBeGreaterThanOrEqual(2);
+      expect(s.traits!.length).toBeLessThanOrEqual(4);
       expect(specDef(s.spec)!.role).toBe(s.role);
       expect(s.morale).toBe(70);
     }
@@ -181,9 +181,10 @@ describe("traits", () => {
     const base = personMod(worker("n"), p, [], noBonds);
     const fast = personMod(worker("f", { traits: ["fast"] }), p, [], noBonds);
     const perf = personMod(worker("p", { traits: ["perfectionist"] }), p, [], noBonds);
-    expect(fast.pace).toBeCloseTo(base.pace * 1.25);
-    expect(perf.out).toBeCloseTo(base.out * 1.15);
-    expect(perf.pace).toBeCloseTo(base.pace * 0.8);
+    expect(fast.pace).toBeCloseTo(base.pace * 1.40);
+    expect(fast.out).toBeCloseTo(base.out * 0.95);
+    expect(perf.out).toBeCloseTo(base.out * 1.30);
+    expect(perf.pace).toBeCloseTo(base.pace * 0.75);
   });
 
   it("Genre Fanatic shines on the favourite genre only", () => {
@@ -194,15 +195,15 @@ describe("traits", () => {
     const fanNoSpec = { ...fan, spec: "w_mystery" };
     const on2 = personMod(fanNoSpec, proj({ genres: ["sports"] }), [], noBonds);
     const off2 = personMod(fanNoSpec, proj({ genres: ["slice"] }), [], noBonds);
-    expect(on2.out).toBeCloseTo(off2.out * 1.3);
+    expect(on2.out).toBeGreaterThan(off2.out * 2.5);
     expect(on.out).toBeGreaterThan(off.out);
   });
 
   it("Reliable floors output; Team Player adds team speed", () => {
     const exhausted = worker("e", { stamina: 12, morale: 10, traits: ["reliable"] });
-    expect(personMod(exhausted, proj(), [], noBonds).out).toBeGreaterThanOrEqual(0.9);
+    expect(personMod(exhausted, proj(), [], noBonds).out).toBeGreaterThan(personMod({ ...exhausted, traits: [] }, proj(), [], noBonds).out);
     const tp = worker("t", { traits: ["team"] });
-    expect(personMod(tp, proj(), [], noBonds).aura).toBeCloseTo(0.08);
+    expect(personMod(tp, proj(), [], noBonds).aura).toBeCloseTo(0.12);
     const p = proj();
     const mods: StaffModFn = (s, pr, team) => personMod(s, pr, team, noBonds);
     const withTp = teamSpeed({ ...p, staffIds: ["t"] }, [tp], undefined, mods);
@@ -219,11 +220,11 @@ describe("specialisations", () => {
     );
   });
 
-  it("a matching genre gives +25% output", () => {
+  it("a matching specialisation is strongly better than an unfamiliar genre", () => {
     const s = worker("s", { spec: "w_action" }); // shonen/sports/mecha
     const on = personMod(s, proj({ genres: ["sports"] }), [], noBonds);
     const off = personMod(s, proj({ genres: ["slice"] }), [], noBonds);
-    expect(on.out).toBeCloseTo(off.out * 1.25);
+    expect(on.out).toBeGreaterThan(off.out * 2);
   });
 
   it("the production-speed spec paces, the sequel spec matches continuations", () => {
@@ -235,7 +236,7 @@ describe("specialisations", () => {
     const adapt = worker("ad", { spec: "w_adapt" });
     const s2 = personMod(adapt, proj({ season: 2, genres: ["slice"] }), [], noBonds);
     const s1 = personMod(adapt, proj({ season: 1, genres: ["slice"] }), [], noBonds);
-    expect(s2.out).toBeCloseTo(s1.out * 1.25);
+    expect(s2.out).toBeCloseTo(s1.out * 1.35);
   });
 
   it("spec bonuses flow into live percentile production", () => {

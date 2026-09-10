@@ -21,6 +21,7 @@ import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
   GENRES,
+  SHOWRUNNERS,
   POINT_COLOR,
   ROLE_LABEL,
   ROLE_POINT,
@@ -41,6 +42,10 @@ import {
   MAX_LEVEL,
   bondBetween,
   intensiveGainFor,
+  genreExperienceLabel,
+  genreExperienceMultiplier,
+  genreFamiliarity,
+  genreShows,
   intensiveRdCost,
   levelProgress,
   levelTitle,
@@ -70,6 +75,7 @@ import { rollHire } from "../engine/careers";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
+import { showrunnerStats } from "../engine/studioOps";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -176,6 +182,50 @@ function AbilitySheet({ info, onClose }: { info: AbilityInfo | null; onClose: ()
         <div className="mt-1 font-display text-lg font-extrabold">{info.title}</div>
         <p className="mt-1 text-xs leading-relaxed text-paper/60">{info.body}</p>
         <p className="mt-2 text-[9px] text-paper/40">Exact values — no hidden mechanics.</p>
+      </div>
+    </div>
+  );
+}
+
+function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: Staff | null; canHire: boolean; onHire: (s: Staff) => void; onClose: () => void }) {
+  if (!candidate) return null;
+  const spec = specDef(candidate.spec);
+  const rows = GENRES.map((g) => {
+    const familiarity = genreFamiliarity(candidate, g.id);
+    const shipped = genreShows(candidate, g.id);
+    const mult = genreExperienceMultiplier(familiarity);
+    const preferred = candidate.favGenre === g.id ? "FAVOURITE" : spec?.genres?.includes(g.id) ? "SPECIALISM" : "";
+    return { g, familiarity, shipped, mult, preferred };
+  }).sort((a, b) => b.mult - a.mult || a.g.label.localeCompare(b.g.label));
+  return (
+    <div className="fixed inset-0 z-[97] flex items-end justify-center bg-abyss/80 p-3 backdrop-blur-md sm:items-center" onClick={onClose}>
+      <div className="nice-scroll anim-pop max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-cyanx/40 bg-panel p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start gap-3">
+          <Portrait img={workerLook(candidate).portrait} name={candidate.name} alt={candidate.name} className="h-20 w-20 shrink-0 rounded-xl border border-line object-cover" />
+          <div className="min-w-0 flex-1">
+            <div className="text-[9px] font-extrabold tracking-[0.25em] text-cyanx">CANDIDATE DOSSIER</div>
+            <div className="font-display text-xl font-extrabold">{candidate.name}</div>
+            <div className="text-[10px] text-paper/55">{ROLE_LABEL[candidate.role]} · Lv{candidate.level} {levelTitle(candidate.level)}</div>
+            <div className="mt-1 text-[10px] text-gold">Sign {formatGBP(candidate.cost)} · {formatGBP(candidate.salary)}/wk</div>
+          </div>
+          <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={17}/></button>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{candidate[t]}</div></div>)}
+        </div>
+        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3">
+          <div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>
+          {spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}
+          {(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}
+        </div>
+        <div className="mt-3">
+          <div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div>
+          <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
+            {rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}
+          </div>
+          <div className="mt-1.5 text-[9px] text-paper/45">Unfamiliar non-preferred genres start at ×0.60. Three shipped productions reaches neutral ×1.00. Specialisms/favourites provide a starting familiarity floor.</div>
+        </div>
+        <Btn big variant="cyan" className="mt-4 w-full" disabled={!canHire} onClick={() => onHire(candidate)}>{canHire ? `HIRE · ${formatGBP(candidate.cost)}` : "CANNOT HIRE"}</Btn>
       </div>
     </div>
   );
@@ -504,6 +554,7 @@ export default function CrewPanel({
   maxStaff: number;
 }) {
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
+  const [candidate, setCandidate] = useState<Staff | null>(null);
   const [intense, setIntense] = useState<null | { before: Staff; after: Staff }>(null);
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= maxStaff) return;
@@ -522,6 +573,8 @@ export default function CrewPanel({
     setRun((r) => ({ ...r, cash: r.cash - 8_000, candidates: [rollHire(r.week), rollHire(r.week), rollHire(r.week)] }));
   };
 
+  const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
+  const runnerCraft = showrunnerStats(run.showrunner, run.showsMade);
   const headSlots: HeadSlot[] = ["writer", "animator", "composer", "production"];
   const anyHeadUnlocked = run.officeLevel >= 2;
 
@@ -536,6 +589,16 @@ export default function CrewPanel({
           ))}
         </div>
       )}
+
+      <div className="ink-card border-gold/45 p-3">
+        <div className="flex items-center gap-3">
+          <Portrait img={runner.portrait} name={runner.name} alt={runner.name} className="h-14 w-14 rounded-xl border border-gold/40 object-cover" />
+          <div className="min-w-0 flex-1"><div className="text-[8px] font-extrabold tracking-[0.25em] text-gold">FOUNDING SHOWRUNNER · ACTUAL CURRENT STATS</div><div className="font-display text-base font-extrabold">{runner.name}</div><div className="text-[9px] text-paper/50">{runner.title}</div></div>
+          <div className="grid grid-cols-3 gap-1 text-center">{(["story","art","sound"] as PointType[]).map((t)=><div key={t} className="rounded-md bg-panel2 px-1.5 py-1"><div className="text-[7px] text-paper/35">{t.toUpperCase()}</div><div className="font-display text-sm font-extrabold" style={{color:POINT_COLOR[t]}}>{runnerCraft[t]}</div></div>)}</div>
+        </div>
+        <div className="mt-2 text-[10px] leading-relaxed text-paper/60"><b className="text-gold">PERK:</b> {runner.perk}</div>
+        <div className="mt-1 text-[8px] text-paper/35">These Story/Art/Sound values are the exact numbers used when the showrunner personally leads a rush or contract seat, and improve as the studio ships work.</div>
+      </div>
 
       {/* ---------------------------------------------- department heads */}
       {anyHeadUnlocked && (
@@ -634,7 +697,7 @@ export default function CrewPanel({
             {run.candidates.map((c) => {
               const cSpec = specDef(c.spec);
               return (
-                <div key={c.id} className="ink-card p-2.5">
+                <div key={c.id} role="button" tabIndex={0} onClick={() => setCandidate(c)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setCandidate(c); }} className="ink-card cursor-pointer p-2.5 hover:border-cyanx/50">
                   <div className="flex items-center gap-2">
                     <Portrait img={workerLook(c).portrait} name={c.name} alt={c.name} className="h-10 w-10 shrink-0 rounded-lg border border-line object-cover" />
                     <div className="min-w-0 flex-1">
@@ -647,15 +710,16 @@ export default function CrewPanel({
                     <Btn
                       variant="cyan"
                       className="!px-3 !py-1.5 text-xs"
-                      onClick={() => hire(c)}
+                      onClick={(e) => { e.stopPropagation(); hire(c); }}
                       disabled={run.cash < c.cost || run.staff.length >= maxStaff}
                     >
                       HIRE
                     </Btn>
                   </div>
+                  <div className="mt-1 text-[8px] font-extrabold tracking-wider text-cyanx">TAP CARD FOR FULL STATS, GENRE READINESS & EXACT MECHANICS</div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {cSpec && (
-                      <button onClick={() => { sfx.click(); setSheet(specAbility(c)); }} className="btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol">
+                      <button onClick={(e) => { e.stopPropagation(); sfx.click(); setSheet(specAbility(c)); }} className="btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold text-viol">
                         ★ {cSpec.name}
                       </button>
                     )}
@@ -664,7 +728,7 @@ export default function CrewPanel({
                       return t ? (
                         <button
                           key={tid}
-                          onClick={() => { sfx.click(); const hit = traitAbilities(c).find((a) => a.title === t.name); if (hit) setSheet(hit); }}
+                          onClick={(e) => { e.stopPropagation(); sfx.click(); const hit = traitAbilities(c).find((a) => a.title === t.name); if (hit) setSheet(hit); }}
                           className={cn("btn-press ink-chip px-1.5 py-0.5 text-[8px] font-bold", t.good ? "text-mint" : "text-neon2")}
                         >
                           {t.name}
@@ -684,6 +748,7 @@ export default function CrewPanel({
         </div>
       </div>
       <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
+      <CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />
       {intense && <IntensiveReveal before={intense.before} after={intense.after} onClose={() => setIntense(null)} />}
     </div>
   );

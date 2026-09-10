@@ -1,6 +1,7 @@
 import { BookOpen, ChevronRight, HelpCircle, Sparkles } from "lucide-react";
 import { COMBO, GENRES, type GenreId } from "../engine/data";
 import type { RunState } from "../engine/state";
+import { GENRE_MASTERY_KNOWLEDGE } from "../engine/studioOps";
 import { cn } from "../utils/cn";
 
 type Selection = { kind: "genre"; key: GenreId } | { kind: "pair"; key: string } | null;
@@ -32,8 +33,8 @@ export default function KnowledgeDossier({ run, selection, onSelect }: { run: Ru
         }</span></div>
         <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>DIRECTION MEMO</b><br/><span className="text-paper/60">{
           k < 3 ? "Audience direction preferences are still fuzzy." :
-          k < 6 ? `The studio has a working read on this genre. More releases narrow the slider targets.` :
-          `Plot ${g.ideal[0]}% · Sakuga ${g.ideal[1]}% · Music ${g.ideal[2]}%`
+          k < GENRE_MASTERY_KNOWLEDGE ? `High-confidence read only. More releases/research narrow the slider targets; exact numbers unlock at MASTERED (${GENRE_MASTERY_KNOWLEDGE}).` :
+          `MASTERED · exact scoring targets: Plot ${g.ideal[0]}% · Sakuga ${g.ideal[1]}% · Music ${g.ideal[2]}%`
         }</span></div>
         <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px] sm:col-span-2"><b>STORY KNOWLEDGE</b><br/><span className="text-paper/60">{learnedArcs} arc relationship{learnedArcs===1?"":"s"} learned for this genre. Test audiences and repeated releases add more evidence.</span></div>
       </div>

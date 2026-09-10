@@ -18,7 +18,8 @@ import {
 } from "../engine/data";
 import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
-import { rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, studioKnowledgeEmphasis } from "../engine/studioOps";
+import { exactDirectionKnown, rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, showrunnerStats, studioKnowledgeEmphasis } from "../engine/studioOps";
+import { personMod, staffGenreMultiplier } from "../engine/careers";
 import { genreTargetFor } from "../engine/genreTargets";
 import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import Portrait from "./Portrait";
@@ -51,6 +52,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
     villainName: project.draft.villainName ?? castById(project.draft.villain).name,
   }));
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
+  const runnerStats = showrunnerStats(run.showrunner, run.showsMade);
   const team = useMemo(() => run.staff.filter((s) => project.staffIds.includes(s.id)), [run.staff, project.staffIds]);
   const [crunch, setCrunch] = useState(false);
   const [shown, setShown] = useState(0);
@@ -175,7 +177,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
     const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === "steady" ? 0.75 : 1);
     const ideaPool = [
       ...team.map((st) => ({ name: st.name, skill: Math.round(staffPoint(st, phase!.type)) })),
-      { name: runner.name, skill: Math.min(99, 48 + run.showsMade * 2) },
+      { name: runner.name, skill: runnerStats[phase!.type] },
     ];
     const idea = Math.random() < 0.32 && ideaPool.length ? ideaPool[Math.floor(Math.random() * ideaPool.length)] : null;
     shownRef.current = 0;
@@ -246,19 +248,20 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
               const k = known.length ? Math.min(...known) : 0;
               const exactTarget = genreTargetFor(genres).ideal[phase!.idx];
               const testedSeries = run.audienceComboSeries?.[comboKey(genres)]?.length ?? 0;
-              const exactComboLearned = genres.length === 2 && testedSeries >= 3;
+              const exactKnown = exactDirectionKnown(known, genres.length === 2 ? testedSeries : 0);
               const exactSingles = defs.map((g) => ({ id: g!.id, label: g!.label, target: genreTargetFor([g!.id]).ideal[phase!.idx] }));
               const emphasis = studioKnowledgeEmphasis(exactTarget, phase!.a, phase!.b);
               return (
                 <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 px-3 py-2">
                   <div className="text-[9px] font-extrabold tracking-[0.2em] text-cyanx">STUDIO KNOWLEDGE</div>
-                  {exactComboLearned ? (
+                  {exactKnown ? (
                     <div className="mt-1 space-y-1 text-[10px] font-bold text-mint">
-                      <div>EXACT COMBO TARGET · <span className="text-neon2">{phase!.a} {exactTarget}%</span> · {phase!.b} {100 - exactTarget}%</div>
+                      <div>EXACT SCORING TARGET · <span className="text-neon2">{phase!.a} {exactTarget}%</span> · {phase!.b} {100 - exactTarget}%</div>
+                      <button type="button" onClick={() => setSlider(exactTarget)} className="btn-press rounded-md border border-mint/50 bg-mint/10 px-2 py-1 text-[9px] font-extrabold text-mint">SET SLIDER TO {exactTarget}%</button>
                       {exactSingles.map((g) => (
                         <div key={g.id} className="text-paper/75">{g.label}: {phase!.a} {g.target}% · {phase!.b} {100 - g.target}%</div>
                       ))}
-                      <div className="text-[9px] text-cyanx">Verified from {testedSeries} separate test-audience series using this exact combo.</div>
+                      <div className="text-[9px] text-cyanx">100% exact: this is the same target used by final scoring. {testedSeries >= 3 ? `Verified from ${testedSeries} exact-combo audience studies.` : "Unlocked because every selected genre is MASTERED."}</div>
                     </div>
                   ) : k <= 0 ? (
                     <div className="mt-0.5 text-[10px] text-paper/55">No data on {defs.map((g) => g!.label).join("/") || "this genre"} yet — ship it or run a test audience to learn what works.</div>
@@ -268,7 +271,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
                     <div className="mt-0.5 text-[10px] text-paper/55">Working read: the combo leans toward <b className="text-paper/85">{emphasis}</b> — test audiences on three separate series reveal the exact values.</div>
                   ) : (
                     <div className="mt-0.5 text-[10px] font-bold text-mint">
-                      Studio estimate: <span className="text-neon2">{phase!.a}</span> around {Math.round(exactTarget / 5) * 5}% · {phase!.b} around {100 - Math.round(exactTarget / 5) * 5}%
+                      High-confidence estimate: <span className="text-neon2">{phase!.a}</span> around {Math.round(exactTarget / 5) * 5}% · {phase!.b} around {100 - Math.round(exactTarget / 5) * 5}% · reach MASTERED for the exact scoring target.
                     </div>
                   )}
                 </div>
@@ -285,13 +288,15 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
           </button>
           <div className="mt-4 space-y-2">
             {candidates.map((st) => {
-              const skill = Math.round(staffPoint(st, phase!.type) * (0.72 + st.stamina / 360));
+              const mod = personMod(st, project, team, { bonds: run.bonds });
+              const skill = Math.round(staffPoint(st, phase!.type) * mod.out);
               const range = rushOutcomeRange(skill);
-              const support = rushTeamSupport(team.filter((x) => x.id !== st.id).map((x) => staffPoint(x, phase!.type)));
+              const support = rushTeamSupport(team.filter((x) => x.id !== st.id).map((x) => Math.round(staffPoint(x, phase!.type) * personMod(x, project, team, { bonds: run.bonds }).out)));
+              const genreMult = staffGenreMultiplier(st, project.draft.genres);
               const img = WORKER_LOOKS[workerLookIndex(st)]?.sprite;
-              return <button key={st.id} onClick={() => choose({ leadId: st.id, leadName: st.name, skill, type: phase!.type, cost: 0, slider }, img)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-cyanx/60"><img src={img} alt="" className="h-12 w-10 shrink-0 object-contain drop-shadow-lg"/><div className="min-w-0 flex-1"><div className="truncate text-sm font-bold">{st.name}</div><div className="text-[10px] text-paper/50">{POINT_LABEL[phase!.type]} {staffPoint(st, phase!.type)} · energy {Math.round(st.stamina)}% · team support +{support}</div></div><div className="text-right"><div className="font-display text-lg font-extrabold" style={{color:POINT_COLOR[phase!.type]}}>SKILL {skill}</div><div className="text-[9px] font-bold text-paper/50">RANGE {range.min + support}–{range.max + support}</div></div></button>;
+              return <button key={st.id} onClick={() => choose({ leadId: st.id, leadName: st.name, skill, type: phase!.type, cost: 0, slider }, img)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-cyanx/60"><img src={img} alt="" className="h-12 w-10 shrink-0 object-contain drop-shadow-lg"/><div className="min-w-0 flex-1"><div className="truncate text-sm font-bold">{st.name}</div><div className="text-[10px] text-paper/50">{POINT_LABEL[phase!.type]} {staffPoint(st, phase!.type)} · genre readiness ×{genreMult.toFixed(2)} · team support +{support}</div></div><div className="text-right"><div className="font-display text-lg font-extrabold" style={{color:POINT_COLOR[phase!.type]}}>SKILL {skill}</div><div className="text-[9px] font-bold text-paper/50">RANGE {range.min + support}–{range.max + support}</div></div></button>;
             })}
-            <button onClick={() => choose({ leadId: "showrunner", leadName: runner.name, skill: Math.min(99, 44 + run.showsMade * 3), type: phase!.type, cost: 0, slider }, runner.sprite)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-gold/60"><Portrait img={runner.portrait} name={runner.name} className="h-10 w-10 rounded-lg"/><div className="flex-1"><div className="text-sm font-bold">{runner.name} (showrunner)</div><div className="text-[10px] text-paper/50">Free · improves with studio experience</div></div></button>
+            <button onClick={() => choose({ leadId: "showrunner", leadName: runner.name, skill: runnerStats[phase!.type], type: phase!.type, cost: 0, slider }, runner.sprite)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-gold/60"><Portrait img={runner.portrait} name={runner.name} className="h-10 w-10 rounded-lg"/><div className="flex-1"><div className="text-sm font-bold">{runner.name} (showrunner)</div><div className="text-[10px] text-paper/50">Actual {POINT_LABEL[phase!.type]} skill {runnerStats[phase!.type]} · Story {runnerStats.story} · Art {runnerStats.art} · Sound {runnerStats.sound}</div></div></button>
             <button disabled={run.cash < outsourceCost + (crunch ? crunchCost : 0)} onClick={() => choose({ leadId: `outsource:${milestone}`, leadName: "Famous Studio", skill: 78, type: phase!.type, cost: outsourceCost, slider }, null)} className={cn("btn-press ink-card flex w-full items-center gap-3 border-gold/40 p-3 text-left", run.cash < outsourceCost + (crunch ? crunchCost : 0) && "pointer-events-none opacity-40")}><span className="rounded-lg bg-panel3 p-2 text-gold"><Building2 size={17}/></span><div className="flex-1"><div className="text-sm font-bold text-gold">Outsource the rush</div><div className="text-[10px] text-paper/50">Reliable high skill without using an employee.</div></div><span className="font-display text-sm font-extrabold text-gold">{formatGBP(outsourceCost)}</span></button>
           </div>
           <Btn variant="ghost" className="mt-3" onClick={() => setMode("plan")}><ChevronLeft size={16}/> DIRECTION</Btn>
