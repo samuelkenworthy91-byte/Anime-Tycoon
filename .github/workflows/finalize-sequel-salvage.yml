@@ -1,0 +1,45 @@
+name: Finalize sequel salvage rule
+
+on:
+  push:
+    branches:
+      - work/consequences-discovery-critical-voice
+    paths:
+      - ".github/workflows/finalize-sequel-salvage.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/consequences-discovery-critical-voice
+      - name: Lock sub-32 IPs to spin-off or reboot only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('game_source/src/engine/franchise.ts')
+          text = p.read_text()
+          old = '''  if ((kind === "season" || kind === "movie") && fr.lastScore < SEQUEL_SCORE_THRESHOLD) {
+              return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). A spin-off or reboot can still rescue the IP.`;
+            }'''
+          new = '''  if (fr.lastScore < SEQUEL_SCORE_THRESHOLD && kind !== "spinoff" && kind !== "reboot") {
+              return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). Below that mark, only a spin-off or reboot can continue the IP.`;
+            }'''
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected one sequel-rights block, found {text.count(old)}')
+          p.write_text(text.replace(old, new))
+          PY
+      - name: Commit source fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/engine/franchise.ts
+          git diff --cached --check
+          git commit -m "Restrict sub-32 franchises to spin-offs and reboots"
+          git push origin HEAD:work/consequences-discovery-critical-voice
