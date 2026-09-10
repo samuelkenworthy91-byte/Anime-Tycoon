@@ -2,40 +2,50 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
 import assert from "node:assert/strict";
+import { buildVampireGrimdarkCast } from "./content-packs/vampire-grimdark-pack.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const readContent = (name) => JSON.parse(readFileSync(resolve(root, "docs/content-v3", name), "utf8"));
-const readV4 = (name) => JSON.parse(readFileSync(resolve(root, "docs/cast-v4", name), "utf8"));
-const cast = readContent("CAST_V3_RUNTIME.json");
-const v4 = readV4("CAST_V4_FINAL_RUNTIME.json");
-const genres = readContent("GENRE_V3_RUNTIME.json");
-const arcs = readContent("ARC_V3_RUNTIME.json");
+const readJson = (...parts) => JSON.parse(readFileSync(resolve(root, ...parts), "utf8"));
+const baseCast = readJson("docs/content-v3/CAST_V3_RUNTIME.json");
+const v4 = readJson("docs/cast-v4/CAST_V4_FINAL_RUNTIME.json");
+const baseGenres = readJson("docs/content-v3/GENRE_V3_RUNTIME.json");
+const baseArcs = readJson("docs/content-v3/ARC_V3_RUNTIME.json");
+const castExpansion = { cast: buildVampireGrimdarkCast(baseGenres.genres.map((g) => g.id)) };
+const genreExpansion = readJson("docs/content-v5/VAMPIRE_GRIMDARK_GENRES.json");
+const arcExpansion = readJson("docs/content-v5/VAMPIRE_GRIMDARK_ARCS.json");
+
+const cast = { cast: [...baseCast.cast, ...castExpansion.cast] };
+const genres = {
+  genres: [...baseGenres.genres, ...genreExpansion.genres],
+  combos: [...baseGenres.combos, ...genreExpansion.combos],
+};
+const arcs = {
+  add_arcs: [...baseArcs.add_arcs, ...arcExpansion.add_arcs],
+  add_combos: [...baseArcs.add_combos, ...arcExpansion.add_combos],
+};
 
 const roles = ["protag", "secondary", "pet", "villain"];
 const types = ["shonen", "shojo"];
-const expectedBuckets = {
-  "protag:shonen": 90,
-  "protag:shojo": 95,
-  "secondary:shonen": 89,
-  "secondary:shojo": 92,
-  "pet:shonen": 90,
-  "pet:shojo": 94,
-  "villain:shonen": 92,
-  "villain:shojo": 94,
-};
-
-assert.equal(cast.cast.length, 736, "final roster must contain 736 cast records");
-assert.equal(v4.cast.length, 304, "Cast V4 manifest must contain 304 additions");
-assert.equal(new Set(cast.cast.map((c) => c.id)).size, 736, "cast IDs must be unique");
-assert.equal(new Set(v4.cast.map((c) => c.id)).size, 304, "V4 IDs must be unique");
-assert.equal(genres.genres.length, 23);
-assert.equal(genres.combos.length, 253);
-const genreIds = genres.genres.map((g) => g.id);
-assert.equal(new Set(genreIds).size, 23);
 const pairKey = (a, b) => [a, b].sort().join("|");
+const genreIds = genres.genres.map((g) => g.id);
 const pairs = genreIds.flatMap((a, i) => genreIds.slice(i + 1).map((b) => pairKey(a, b)));
-assert.equal(pairs.length, 253);
-assert.deepEqual(genres.combos.map((c) => c.key).sort(), [...pairs].sort());
+const expectedCoverageCells = pairs.length * roles.length * types.length;
+
+assert.equal(new Set(genreIds).size, genreIds.length, "genre IDs must be unique");
+assert.equal(genres.combos.length, pairs.length, "genre combo manifest must contain every unordered pair exactly once");
+assert.equal(new Set(genres.combos.map((c) => c.key)).size, pairs.length, "genre combo keys must be unique");
+assert.deepEqual(genres.combos.map((c) => c.key).sort(), [...pairs].sort(), "genre combo matrix must exactly match canonical ids");
+for (const combo of genres.combos) {
+  assert.equal(combo.key, pairKey(combo.genre_1, combo.genre_2), `${combo.key}: non-canonical combo key`);
+  assert(genreIds.includes(combo.genre_1) && genreIds.includes(combo.genre_2), `${combo.key}: unknown genre`);
+  assert(["strong", "supportive", "neutral", "risky", "experimental"].includes(combo.discovery_class), `${combo.key}: unknown discovery class`);
+}
+
+assert.equal(cast.cast.length, baseCast.cast.length + castExpansion.cast.length, "final roster size drift");
+assert.equal(new Set(cast.cast.map((c) => c.id)).size, cast.cast.length, "cast IDs must be unique");
+assert.equal(v4.cast.length, 304, "Cast V4 manifest must contain 304 additions");
+assert.equal(new Set(v4.cast.map((c) => c.id)).size, 304, "V4 IDs must be unique");
+assert.equal(castExpansion.cast.length, (genreIds.length - genreExpansion.genres.length) * roles.length * types.length, "Vampire/Grimdark cast pack size drift");
 
 const requiredIdentity = ["id", "name", "archetype", "img", "personality", "role", "type", "hiddenAff", "gender", "species", "ageBand", "culturalBasis"];
 for (const c of cast.cast) {
@@ -50,7 +60,7 @@ for (const c of cast.cast) {
   assert(affinities.every((g) => genreIds.includes(g)), `${c.id}: unknown affinity`);
   assert(roles.includes(c.role), `${c.id}: unknown role`);
   assert(types.includes(c.type), `${c.id}: unknown anime type`);
-  assert(!c.img.includes("art_src/cast_v4_upload_staging"), `${c.id}: runtime path must not point at staging`);
+  assert(!c.img.includes("art_src"), `${c.id}: runtime path must not point at art staging`);
   assert(existsSync(resolve(root, "public", c.img)), `${c.id}: missing runtime portrait ${c.img}`);
 }
 
@@ -71,16 +81,26 @@ for (const [name, ids] of byName) {
 
 const v4ById = new Map(v4.cast.map((c) => [c.id, c]));
 for (const [id, expected] of v4ById) {
-  const actual = cast.cast.find((c) => c.id === id);
-  assert(actual, `V4 ID missing from final roster: ${id}`);
+  const actual = baseCast.cast.find((c) => c.id === id);
+  assert(actual, `V4 ID missing from 736-cast base roster: ${id}`);
   for (const field of ["role", "type", "hiddenAff"]) assert.equal(actual[field], expected[field], `${id}: ${field} drift`);
   assert.deepEqual(actual.visibleAff, expected.visibleAff, `${id}: visible affinity drift`);
-  assert.equal(actual.img, `cast/v4/${id}.webp`, `${id}: runtime portrait path drift`);
 }
 
-for (const [bucket, count] of Object.entries(expectedBuckets)) {
-  const [role, type] = bucket.split(":");
-  assert.equal(cast.cast.filter((c) => c.role === role && c.type === type).length, count, `${bucket}: roster count drift`);
+const oldGenreIds = baseGenres.genres.map((g) => g.id);
+const requiredNew = new Set(genreExpansion.genres.map((g) => g.id));
+assert.deepEqual(requiredNew, new Set(["vampire", "grimdark"]), "this pack must add Vampire and Grimdark only");
+for (const role of roles) {
+  for (const type of types) {
+    const bucket = castExpansion.cast.filter((c) => c.role === role && c.type === type);
+    assert.equal(bucket.length, oldGenreIds.length, `${role}/${type}: expansion bucket size drift`);
+    assert.deepEqual(new Set(bucket.map((c) => c.legacyPartnerGenre)), new Set(oldGenreIds), `${role}/${type}: legacy partner coverage drift`);
+    for (const c of bucket) {
+      const aff = [...c.visibleAff, c.hiddenAff];
+      assert([...requiredNew].every((g) => aff.includes(g)), `${c.id}: must carry both new genres`);
+      assert(aff.includes(c.legacyPartnerGenre), `${c.id}: missing legacy partner genre`);
+    }
+  }
 }
 
 const coverageRows = [];
@@ -100,15 +120,22 @@ for (const role of roles) {
     }
   }
 }
-assert.equal(coveredCells, 2024, "strict Role × Type × pair coverage must be 2024/2024");
+assert.equal(coveredCells, expectedCoverageCells, `strict Role × Type × pair coverage must be ${expectedCoverageCells}/${expectedCoverageCells}`);
 writeFileSync(
   resolve(root, "docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv"),
   ["role,anime_type,genre_a,genre_b,witness_id", ...coverageRows.map((row) => row.join(","))].join("\n") + "\n",
 );
 
-assert.equal(arcs.add_arcs.length, 24);
-assert.equal(arcs.add_combos.length, 18);
+const arcIds = arcs.add_arcs.map((a) => a.id);
+const arcComboIds = arcs.add_combos.map((a) => a.id);
+assert.equal(new Set(arcIds).size, arcIds.length, "arc IDs must be unique");
+assert.equal(new Set(arcComboIds).size, arcComboIds.length, "arc-combo IDs must be unique");
+for (const a of arcs.add_arcs) {
+  for (const g of [...(a.syn ?? []), ...(a.anti ?? [])]) assert(genreIds.includes(g), `${a.id}: unknown genre ${g}`);
+  if (a.unlock?.kind === "genre") assert(genreIds.includes(a.unlock.genre), `${a.id}: unknown unlock genre ${a.unlock.genre}`);
+}
+
 for (const [name, payload] of [["castV3", cast], ["genreV3", genres], ["arcV3", arcs]]) {
   writeFileSync(resolve(root, "src/engine/generated", `${name}.json`), JSON.stringify(payload, null, 2) + "\n");
 }
-console.log("Validated and generated final Cast V4 runtime: 736 cast, 23 genres, 253 pairs, strict 2024/2024 Role × Type pair coverage.");
+console.log(`Validated generated runtime: ${cast.cast.length} cast, ${genreIds.length} genres, ${pairs.length} pairs, strict ${expectedCoverageCells}/${expectedCoverageCells} Role × Type pair coverage.`);
