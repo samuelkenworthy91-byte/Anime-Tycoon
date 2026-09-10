@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Draft } from "../data";
-import { SEQUEL_SCORE_THRESHOLD, createFranchise } from "../franchise";
+import {
+  SEQUEL_SCORE_THRESHOLD,
+  continuationBlock,
+  createFranchise,
+  type EntryKind,
+} from "../franchise";
 import { initialRun, startBlockReason, startProject, type RunState } from "../state";
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -53,15 +58,32 @@ describe("state-level sequel rights", () => {
     expect(SEQUEL_SCORE_THRESHOLD).toBe(32);
   });
 
-  it("refuses Season 2 and sequel film at 31/40 but leaves the reboot route greenlightable", () => {
+  it("allows only spin-off or reboot below 32/40", () => {
+    const run = runWithScore(31);
+    const fr = run.franchises["Threshold Story"];
+    const opts = { week: run.week, franchiseCount: 2, officeLevel: 2, projects: [] };
+    const blocked: Exclude<EntryKind, "original" | "spinoff" | "reboot">[] = [
+      "season",
+      "movie",
+      "ova",
+      "side",
+      "prequel",
+      "crossover",
+    ];
+
+    for (const kind of blocked) {
+      expect(continuationBlock(fr, kind, opts), `${kind} should be blocked`).toContain("32/40");
+    }
+    expect(continuationBlock(fr, "spinoff", opts)).toBeNull();
+    expect(continuationBlock(fr, "reboot", opts)).toBeNull();
+  });
+
+  it("refuses Season 2 at 31/40 but leaves the reboot route greenlightable", () => {
     const run = runWithScore(31);
     const season = draft({ franchiseKey: "Threshold Story", continuation: "season", season: 2 });
-    const movie = draft({ franchiseKey: "Threshold Story", continuation: "movie", medium: "movie", season: 1 });
     const reboot = draft({ franchiseKey: "Threshold Story", continuation: "reboot", season: 2 });
     expect(startBlockReason(run, season)).toContain("32/40");
-    expect(startBlockReason(run, movie)).toContain("32/40");
     expect(startProject(run, season)).toBeNull();
-    expect(startProject(run, movie)).toBeNull();
     expect(startBlockReason(run, reboot)).toBeNull();
     expect(startProject(run, reboot)).toBeTruthy();
   });
