@@ -1,96 +1,3 @@
-const GRIMDARK_VISIBLE = new Set([
-  "vg_lead_shonen_sports",
-  "vg_lead_shonen_fantasy",
-  "vg_lead_shonen_mystery",
-  "vg_lead_shonen_military",
-  "vg_lead_shonen_space",
-  "vg_lead_shonen_magical",
-  "vg_lead_shonen_survival",
-  "vg_lead_shonen_pirate",
-  "vg_lead_shonen_martial",
-  "vg_lead_shonen_mythology",
-  "vg_lead_shonen_nordic",
-  "vg_lead_shonen_samurai",
-  "vg_lead_shonen_shinobi",
-  "vg_sidekick_shonen_mecha",
-  "vg_sidekick_shonen_isekai",
-  "vg_sidekick_shonen_slice",
-  "vg_sidekick_shonen_horror",
-  "vg_sidekick_shonen_romance",
-  "vg_sidekick_shonen_sports",
-  "vg_sidekick_shonen_cyber",
-  "vg_sidekick_shonen_fantasy",
-  "vg_sidekick_shonen_idol",
-  "vg_sidekick_shonen_mystery",
-  "vg_sidekick_shonen_comedy",
-  "vg_sidekick_shonen_cooking",
-  "vg_sidekick_shonen_military",
-  "vg_sidekick_shonen_supernatural",
-  "vg_sidekick_shonen_space",
-  "vg_sidekick_shonen_magical",
-  "vg_sidekick_shonen_survival",
-  "vg_sidekick_shonen_pirate",
-  "vg_sidekick_shonen_martial",
-  "vg_sidekick_shonen_mythology",
-  "vg_sidekick_shonen_nordic",
-  "vg_sidekick_shonen_samurai",
-  "vg_sidekick_shonen_shinobi",
-  "vg_mascot_shonen_mecha",
-  "vg_mascot_shonen_isekai",
-  "vg_mascot_shonen_slice",
-  "vg_mascot_shonen_horror",
-  "vg_mascot_shonen_romance",
-  "vg_mascot_shonen_sports",
-  "vg_mascot_shonen_cyber",
-  "vg_mascot_shonen_fantasy",
-  "vg_mascot_shonen_idol",
-  "vg_mascot_shonen_mystery",
-  "vg_mascot_shonen_comedy",
-  "vg_mascot_shonen_cooking",
-  "vg_mascot_shonen_military",
-  "vg_mascot_shonen_supernatural",
-  "vg_mascot_shonen_space",
-  "vg_mascot_shonen_magical",
-  "vg_mascot_shonen_survival",
-  "vg_mascot_shonen_pirate",
-  "vg_mascot_shonen_martial",
-  "vg_mascot_shonen_mythology",
-  "vg_mascot_shonen_nordic",
-  "vg_mascot_shonen_samurai",
-  "vg_mascot_shonen_shinobi",
-  "vg_mascot_shojo_isekai",
-  "vg_mascot_shojo_horror",
-  "vg_mascot_shojo_mythology",
-  "vg_villain_shonen_mecha",
-  "vg_villain_shonen_isekai",
-  "vg_villain_shonen_slice",
-  "vg_villain_shonen_horror",
-  "vg_villain_shonen_romance",
-  "vg_villain_shonen_sports",
-  "vg_villain_shonen_cyber",
-  "vg_villain_shonen_fantasy",
-  "vg_villain_shonen_idol",
-  "vg_villain_shonen_mystery",
-  "vg_villain_shonen_comedy",
-  "vg_villain_shonen_cooking",
-  "vg_villain_shonen_military",
-  "vg_villain_shonen_supernatural",
-  "vg_villain_shonen_space",
-  "vg_villain_shonen_magical",
-  "vg_villain_shonen_survival",
-  "vg_villain_shonen_pirate",
-  "vg_villain_shonen_martial",
-  "vg_villain_shonen_mythology",
-  "vg_villain_shonen_nordic",
-  "vg_villain_shonen_samurai",
-  "vg_villain_shonen_shinobi",
-  "vg_villain_shojo_cyber",
-  "vg_villain_shojo_survival",
-  "vg_villain_shojo_pirate",
-  "vg_villain_shojo_martial",
-  "vg_villain_shojo_mythology"
-]);
-
 const ROLE_TOKENS = { protag: "lead", secondary: "sidekick", pet: "mascot", villain: "villain" };
 const TYPES = ["shonen", "shojo"];
 const ROLES = ["protag", "secondary", "pet", "villain"];
@@ -99,15 +6,27 @@ const SURNAMES = ["Ashcombe","Velasco","Morcant","Drazic","Bellamy","Okafor","Ko
 const MASCOT_STEMS = ["Nox","Morrow","Cinder","Velvet","Gloom","Pip","Rune","Orbit","Miso","Fanglet","Bramble","Hex","Rooklet","Ember","Mothkin","Grit","Poppet","Vanta","Kettle","Talon","Biscuit","Sablewing","Lumen"];
 const LABELS = { mecha:"Mecha", isekai:"Isekai", slice:"Slice of Life", horror:"Horror", romance:"Romance", sports:"Sports", cyber:"Cyberpunk", fantasy:"Fantasy", idol:"Idol", mystery:"Mystery", comedy:"Comedy", cooking:"Cooking", military:"Military", supernatural:"Supernatural", space:"Space", magical:"Magical", survival:"Survival", pirate:"Pirate", martial:"Martial Arts", mythology:"Mythology", nordic:"Nordic", samurai:"Samurai", shinobi:"Shinobi" };
 
+const LEAD_SHONEN_GRIMDARK = new Set(["sports","fantasy","mystery","military","space","magical","survival","pirate","martial","mythology","nordic","samurai","shinobi"]);
+const MASCOT_SHOJO_GRIMDARK = new Set(["isekai","horror","mythology"]);
+const VILLAIN_SHOJO_GRIMDARK = new Set(["cyber","survival","pirate","martial","mythology"]);
+
+function primaryGenre(role, type, genre) {
+  if (type === "shonen" && (role === "secondary" || role === "pet" || role === "villain")) return "grimdark";
+  if (role === "protag" && type === "shonen" && LEAD_SHONEN_GRIMDARK.has(genre)) return "grimdark";
+  if (role === "pet" && type === "shojo" && MASCOT_SHOJO_GRIMDARK.has(genre)) return "grimdark";
+  if (role === "villain" && type === "shojo" && VILLAIN_SHOJO_GRIMDARK.has(genre)) return "grimdark";
+  return "vampire";
+}
+
 function humanName(genreIndex, bucketIndex) {
-  const given = GIVEN[(genreIndex * 3 + bucketIndex * 7) % GIVEN.length];
-  const surname = SURNAMES[(genreIndex * 11 + bucketIndex * 17) % SURNAMES.length];
+  const given = GIVEN[genreIndex % GIVEN.length];
+  const surname = SURNAMES[(bucketIndex * 23 + genreIndex) % SURNAMES.length];
   return `${given} ${surname}`;
 }
 
-function identity(id, role, type, genre, genreIndex, bucketIndex) {
+function identity(role, type, genre, genreIndex, bucketIndex) {
   const label = LABELS[genre] ?? genre;
-  const primary = GRIMDARK_VISIBLE.has(id) ? "grimdark" : "vampire";
+  const primary = primaryGenre(role, type, genre);
   const other = primary === "vampire" ? "grimdark" : "vampire";
   if (role === "pet") {
     const stem = MASCOT_STEMS[genreIndex % MASCOT_STEMS.length];
@@ -128,7 +47,7 @@ export function buildVampireGrimdarkCast(baseGenreIds) {
       for (let genreIndex = 0; genreIndex < baseGenreIds.length; genreIndex += 1) {
         const genre = baseGenreIds[genreIndex];
         const id = `vg_${ROLE_TOKENS[role]}_${type}_${genre}`;
-        const ident = identity(id, role, type, genre, genreIndex, bucketIndex);
+        const ident = identity(role, type, genre, genreIndex, bucketIndex);
         cast.push({
           id,
           name: ident.name,
