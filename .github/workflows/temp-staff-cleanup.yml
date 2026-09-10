@@ -1,0 +1,30 @@
+name: Temp staff progression cleanup
+
+on:
+  push:
+    branches: [work/staff-999-progression]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/staff-999-progression
+          fetch-depth: 0
+      - name: Restore unrelated generated scoring snapshot
+        shell: bash
+        run: |
+          git fetch origin main
+          git checkout origin/main -- game_source/docs/SCORING_BALANCE_MATRIX.json
+          rm -f .github/workflows/temp-staff-cleanup.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Remove incidental scoring balance output"
+          git pull --rebase origin work/staff-999-progression
+          git push origin HEAD:work/staff-999-progression
