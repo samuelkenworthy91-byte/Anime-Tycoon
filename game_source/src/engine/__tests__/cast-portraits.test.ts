@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, "../../..");
 describe("independent runtime cast portraits", () => {
   it("maps every canonical cast ID to one unique stable-ID-based portrait", () => {
     expect(CAST_V2).toHaveLength(1440);
-    expect(new Set(CAST_V2.map((member) => member.img)).size).toBe(920);
+    expect(new Set(CAST_V2.map((member) => member.img)).size).toBe(1440);
     for (const member of CAST_V2) {
       if (member.id.startsWith("g30_")) {
         expect(member.img, member.id).toBe(`cast/v6/${member.id}.webp`);
@@ -22,7 +22,7 @@ describe("independent runtime cast portraits", () => {
     }
   });
 
-  it("ships exactly 920 readable, non-empty runtime portraits", () => {
+  it("ships exactly 1,440 readable, non-empty runtime portraits", () => {
     const files = ["v2", "v3", "v4", "v5", "v6"].flatMap(v =>
       readdirSync(path.join(ROOT, "public", "cast", v))
         .filter(f => f.endsWith(".webp") || f.endsWith(".png"))
