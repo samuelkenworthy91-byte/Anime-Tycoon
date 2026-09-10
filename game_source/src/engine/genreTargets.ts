@@ -30,6 +30,20 @@ function unit(seed: number, shift: number): number {
   return ((x ^ (x >>> 13)) >>> 0) / 0xffffffff;
 }
 
+/**
+ * Pair quality is intentionally banded instead of nearly neutral. A visibly
+ * incompatible pairing must be capable of dragging down an otherwise strong
+ * production, while strong and experimental pairings create a meaningful lift.
+ */
+export function genrePairQualityMultiplier(baseCombo: number): number {
+  if (baseCombo < 0.82) return clamp(0.68 + Math.max(0, baseCombo - 0.60) * 0.45, 0.68, 0.78);
+  if (baseCombo < 0.90) return clamp(0.80 + (baseCombo - 0.82) * 0.75, 0.80, 0.86);
+  if (baseCombo < 0.97) return clamp(0.88 + (baseCombo - 0.90) * 0.85, 0.88, 0.94);
+  if (baseCombo < 1.08) return 1;
+  if (baseCombo < 1.20) return clamp(1.06 + (baseCombo - 1.08) * 0.65, 1.06, 1.14);
+  return clamp(1.18 + (baseCombo - 1.20) * 0.6, 1.18, 1.30);
+}
+
 export function genreTargetFor(genres: GenreId[]): GenreProductionTarget {
   const ids = [...genres].sort();
   const key = ids.length ? ids.join("+") : "neutral";
@@ -45,6 +59,6 @@ export function genreTargetFor(genres: GenreId[]): GenreProductionTarget {
   const total = rawRatio.reduce((a, b) => a + b, 0) || 1;
   const ratio = rawRatio.map((v) => v / total) as [number, number, number];
   const baseCombo = comboMult(ids as GenreId[], true);
-  const comboQualityMult = baseCombo >= 1 ? clamp(1 + (baseCombo - 1) * 0.9, 1, 1.24) : clamp(1 - (1 - baseCombo) * 1.8, 0.62, 1);
+  const comboQualityMult = genrePairQualityMultiplier(baseCombo);
   return { key, ideal, ratio, comboQualityMult };
 }
