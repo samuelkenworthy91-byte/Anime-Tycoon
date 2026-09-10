@@ -17,19 +17,20 @@ import { migrateRun as migrateRunState } from "../state";
 import { ensureCareer, rollHire } from "../careers";
 import { ARCS } from "../data";
 
-const SCAFFOLD_IDS: GenreId[] = ["samurai", "shinobi"];
+const LEGACY_EXPANSION_IDS = ["samurai", "shinobi"] as GenreId[];
+const CURRENT_EXPANSION_IDS = ["vampire", "grimdark"] as GenreId[];
+const ALL_EXPANSION_IDS = [...LEGACY_EXPANSION_IDS, ...CURRENT_EXPANSION_IDS];
 
-describe("Samurai + Shinobi canonical content", () => {
-  it("exposes 23 active genre ids: canonical 23 including Samurai and Shinobi", () => {
-    expect(GENRES).toHaveLength(23);
-    expect(SCAFFOLD_IDS.every((id) => GENRES.some((g) => g.id === id))).toBe(true);
-    /* original 21 unchanged and in order */
-    expect(CANONICAL_GENRE_IDS).toHaveLength(23);
+describe("canonical genre expansion regressions", () => {
+  it("exposes 25 active canonical genre ids", () => {
+    expect(GENRES).toHaveLength(25);
+    expect(ALL_EXPANSION_IDS.every((id) => GENRES.some((g) => g.id === id))).toBe(true);
+    expect(CANONICAL_GENRE_IDS).toHaveLength(25);
     expect(GENRES.map((g) => g.id)).toEqual(CANONICAL_GENRE_IDS);
   });
 
-  it("gives the scaffold ids a complete runtime entry (label/icon/desc/ideal/ratio/rd)", () => {
-    for (const id of SCAFFOLD_IDS) {
+  it("gives expansion ids complete runtime entries", () => {
+    for (const id of ALL_EXPANSION_IDS) {
       const g = GENRE(id);
       expect(g.label).toBeTruthy();
       expect(g.desc).toBeTruthy();
@@ -49,61 +50,57 @@ describe("Samurai + Shinobi canonical content", () => {
     expect(martial.ideal).toEqual([62, 78, 48]);
   });
 
-  it("initialises the market with all 23 slots at neutral heat", () => {
+  it("initialises the market with all 25 genre keys", () => {
     const market = initMarket();
-    for (const id of SCAFFOLD_IDS) {
+    for (const id of ALL_EXPANSION_IDS) {
       expect(typeof market.genres[id]).toBe("number");
-      /* initMarket can randomly heat two risers/fallers, so just verify the key is present */
       expect(Number.isFinite(market.genres[id])).toBe(true);
     }
-    expect(Object.keys(market.genres)).toHaveLength(23);
+    expect(Object.keys(market.genres)).toHaveLength(25);
   });
 
-  it("staff favourite-genre picking accepts the scaffold ids", () => {
-    /* deterministic: try a batch of hires and give one an explicit scaffold fav */
+  it("staff favourite-genre picking accepts canonical ids", () => {
     const hires = Array.from({ length: 40 }, (_, i) => rollHire(i));
     expect(hires.every((s) => GENRES.some((g) => g.id === s.favGenre))).toBe(true);
     const forced = ensureCareer({ ...hires[0], favGenre: "samurai" as GenreId }, 0);
     expect(forced.favGenre).toBe("samurai");
   });
 
-  it("supports positive and negative arcs for both new genres", () => {
-    for (const id of SCAFFOLD_IDS) {
-      expect(ARCS.some(a => a.syn?.includes(id))).toBe(true);
-      expect(ARCS.some(a => a.anti?.includes(id))).toBe(true);
+  it("supports authored story arcs for all expansion genres", () => {
+    for (const id of ALL_EXPANSION_IDS) {
+      expect(ARCS.some(a => a.syn?.includes(id) || a.anti?.includes(id)), id).toBe(true);
     }
   });
 
-  it("slot preferences reference the scaffold ids where provisionally assigned", () => {
+  it("preserves established Samurai and Shinobi slot preferences", () => {
     expect(SLOTS.prime.best).toContain("samurai");
     expect(SLOTS.midnight.best).toContain("shinobi");
   });
 
-  it("audience fit defaults exist for both scaffold ids", () => {
+  it("keeps audience fit lookup safe for every active genre", () => {
     for (const audience of Object.values(AUDIENCES)) {
-      for (const id of SCAFFOLD_IDS) expect(typeof audience.fit[id]).toBe("number");
+      for (const id of CANONICAL_GENRE_IDS) expect(Number.isFinite(audience.fit[id] ?? 1), `${audience.label}/${id}`).toBe(true);
     }
   });
 
-  it("loads every canonical pair and its authored multiplier", () => {
-    expect(manifest.combos).toHaveLength(253);
+  it("loads all 300 canonical pairs and their authored multipliers", () => {
+    expect(manifest.combos).toHaveLength(300);
     for (const pair of manifest.combos) {
       expect(comboMult([pair.genre_1, pair.genre_2] as GenreId[])).toBe(pair.learned_multiplier);
     }
     expect(COMBO[comboKey(["samurai", "military"])]).toBe(1.22);
     expect(COMBO[comboKey(["shinobi", "mystery"])]).toBe(1.22);
+    expect(COMBO[comboKey(["vampire", "horror"] as GenreId[])]).toBe(1.27);
+    expect(COMBO[comboKey(["grimdark", "space"] as GenreId[])]).toBe(1.27);
   });
 
-  it("migration accepts the scaffold ids as active genres and defaults old saves safely", () => {
-    /* new ids are valid active genres through the migration layer */
-    expect(migrateActiveGenre("samurai")).toBe("samurai");
-    expect(migrateActiveGenre("shinobi")).toBe("shinobi");
-    /* an old save (rival markets / knowledge) migrates without the ids and stays valid */
+  it("migration accepts expansion ids and preserves old sparse records", () => {
+    for (const id of ALL_EXPANSION_IDS) expect(migrateActiveGenre(id)).toBe(id);
     const migrated = migrateGenreRecord({ mecha: 3, slice: 1 });
     expect(migrated).toEqual({ mecha: 3, slice: 1 });
   });
 
-  it("full migrateRun on a 21-genre-era save adds the ids without touching old data", () => {
+  it("full migrateRun expands an older save without auto-unlocking researched genres", () => {
     const legacy = {
       week: 10,
       cash: 100_000,
@@ -120,12 +117,8 @@ describe("Samurai + Shinobi canonical content", () => {
     const r = migrateRunState(legacy);
     expect(r.genresUnlocked).toContain("slice");
     expect(r.genresUnlocked).toContain("fantasy");
-    /* scaffold genres are NOT auto-unlocked — they must be researched */
     expect(r.genresUnlocked).not.toContain("samurai");
-    /* market now has all 23 keys with defaults */
-    expect(r.market.genres.samurai).toBeDefined();
-    expect(r.market.genres.shinobi).toBeDefined();
+    expect(r.genresUnlocked).not.toContain("vampire" as GenreId);
+    for (const id of ALL_EXPANSION_IDS) expect(r.market.genres[id]).toBeDefined();
   });
 });
-
-
