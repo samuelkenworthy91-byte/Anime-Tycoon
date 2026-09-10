@@ -227,8 +227,8 @@ export function continuationBlock(
     projects?: Project[];
   }
 ): string | null {
-  if ((kind === "season" || kind === "movie") && fr.lastScore < SEQUEL_SCORE_THRESHOLD) {
-    return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). A spin-off or reboot can still rescue the IP.`;
+  if (fr.lastScore < SEQUEL_SCORE_THRESHOLD && kind !== "spinoff" && kind !== "reboot") {
+    return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). Below that mark, only a spin-off or reboot can continue the IP.`;
   }
   if (kind === "season") {
     /* one next-season per franchise on the floor at a time: the previous
