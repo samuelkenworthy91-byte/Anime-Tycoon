@@ -30,6 +30,7 @@ import {
 } from "./production";
 import { genreTargetFor } from "./genreTargets";
 import { fanBaseSalesMultiplier } from "./difficulty";
+import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
 
 export interface Points {
   story: number;
@@ -71,8 +72,12 @@ export interface ShowResult {
   /** raw quality (0..~42) — feeds the studio's all-time best and the
    *  slow rolling review expectation, NOT the review denominator */
   quality: number;
-  /** arc synergies newly discovered by shipping this season */
+  /** positive arc synergies and negative arc clashes newly learned this release */
   arcCombosDiscovered: string[];
+  /** ids of negative ordered structures that actually fired this release */
+  arcClashes?: string[];
+  /** commercial genre-pair effect applied to every weekly sales point */
+  genreSalesMult?: number;
   /** populated only by the release transaction, never by draft preview */
   castBreakthroughs?: { castId: string; name: string; genre: string }[];
 }
@@ -251,7 +256,7 @@ export function computeResult(opts: {
   comboDiscovered: boolean;
   /** cast chemistry ids already discovered this run */
   castCombos: string[];
-  /** arc synergy ids already discovered this run */
+  /** arc synergy/clash ids already discovered this run */
   arcCombos: string[];
   /** best raw quality the studio has ever shipped — kept as a RECORD only.
    *  Reviews are absolute-quality based and no longer divided by it. */
@@ -385,13 +390,21 @@ export function computeResult(opts: {
     }
   });
 
-  /* ---- hidden arc synergies: the right arcs together pay off (shipped to discover) */
+  /* ---- hidden story structures: synergies are rewarding, clashes hurt */
   const arcCombosHit = arcCombosFor(draft.arcs);
-  const arcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
-  const arcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
-  arcQ += arcComboQ;
-  arcsF += arcComboF;
-  const arcCombosDiscovered = arcCombosHit.filter((c) => !arcCombos.includes(c.id)).map((c) => c.id);
+  const baseArcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
+  const baseArcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
+  const arcComboQ = baseArcComboQ > 0 ? baseArcComboQ * 1.6 : baseArcComboQ;
+  const arcComboF = baseArcComboF > 0 ? baseArcComboF * 1.5 : baseArcComboF;
+  const arcClashesHit = arcClashesFor(draft.arcs);
+  const arcClashQ = arcClashesHit.reduce((a, c) => a + c.q, 0);
+  const arcClashF = arcClashesHit.reduce((a, c) => a + c.f, 0);
+  arcQ += arcComboQ + arcClashQ;
+  arcsF += arcComboF + arcClashF;
+  const arcCombosDiscovered = [
+    ...arcCombosHit.filter((c) => !arcCombos.includes(c.id)).map((c) => c.id),
+    ...arcClashesHit.filter((c) => !arcCombos.includes(c.id)).map((c) => c.id),
+  ];
 
   const slot = SLOTS[draft.slot];
   const slotFit = slot.best.some((g) => draft.genres.includes(g)) ? 1 : 0;
@@ -408,15 +421,21 @@ export function computeResult(opts: {
     + casting
     + arcQuality
     + slotFit * SLOT_QUALITY_POINTS;
+  const actualComboMult = comboMult(draft.genres, true);
   const comboFactor =
-    1 + (comboMult(draft.genres, comboDiscovered) - 1) * COMBO_QUALITY_WEIGHT
+    1 + (actualComboMult - 1) * COMBO_QUALITY_WEIGHT
     + (comboLevelBonus(comboLevel) - 1) * COMBO_QUALITY_WEIGHT;
-  /* Direction, pairing and casting are now hard gates. Great raw craft cannot
+  /* Direction, pairing and casting are hard gates. Great raw craft cannot
      completely rescue a production whose creative brief is badly wrong. */
   raw *= sliderFitMult;
   raw *= genreTargetFor(draft.genres).comboQualityMult;
   raw *= castFitMult;
   raw *= comboFactor;
+  /* One genuinely broken story structure should be visible in the reviews;
+     multiple clashes can bottom out at a severe but recoverable 28% cut. */
+  const arcClashSeverity = arcClashesHit.reduce((sum, clash) => sum + Math.abs(clash.q), 0);
+  const arcStructureMult = clamp(1 - arcClashSeverity * 0.018, 0.72, 1);
+  raw *= arcStructureMult;
   raw -= issues * ISSUE_QUALITY_COST;
 
   /* ---- hidden cast chemistry (discovered by experimenting) */
@@ -468,10 +487,11 @@ export function computeResult(opts: {
   const merch = research.includes("merch2") ? 1.3 : research.includes("merch") ? 1.18 : 1;
   const local = research.includes("local") ? 1.12 : 1;
   const budgetScope = BUDGETS[draft.budget].scope;
+  const genreEffect = genreReleaseEffect(draft.genres);
   /* reviews use an absolute-quality scale now (a good show is ~5.5–7.5/10,
      not 8–10 like the old curve), so the review→sales curve is softened
-     from ^2.1 to ^1.2: a decent show keeps pre-overhaul revenue, is not
-     auto-rich, and excellence still pays ~1.8× more. */
+     from ^2.1 to ^1.2. Genre coherence now independently affects word of
+     mouth, so a technically decent but incoherent pairing can still stall. */
   const appeal =
     Math.pow(total / 40, 1.2) *
     slot.reach *
@@ -480,6 +500,7 @@ export function computeResult(opts: {
     audFit *
     budgetScope *
     (1 + arcsF * 1.5) *
+    genreEffect.salesMultiplier *
     (1 + hype / 90) *
     franchiseMult *
     merch *
@@ -523,15 +544,19 @@ export function computeResult(opts: {
       : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
     { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
-    { label: `Genre combo ×${comboMult(draft.genres, comboDiscovered).toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)}` },
+    { label: `Genre combo ×${actualComboMult.toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)} quality` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
     { label: `Hype`, pts: `${Math.round(hype)}%` },
     { label: "Established audience", pts: `×${fanBaseSalesMultiplier(fanBase).toFixed(2)} sales (cap ×1.80)` },
     { label: "Commercial impact", pts: commercial.label },
   ];
+  if (genreEffect.salesMultiplier !== 1)
+    breakdown.push({ label: `${genreEffect.secret ? "Secret" : "Genre"} pairing word of mouth`, pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
   if (chemFactor !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemFactor.toFixed(2)}` });
   if (arcCombosHit.length > 0)
-    breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ} Q` });
+    breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ.toFixed(1)} Q` });
+  if (arcClashesHit.length > 0)
+    breakdown.push({ label: `Story clash: ${arcClashesHit.map((c) => c.name).join(", ")}`, pts: `×${arcStructureMult.toFixed(2)} quality` });
   const affNotes: string[] = [];
   for (const m of [protag, sec, pet, vil]) {
     const visibleHit = m.visibleAff.filter((g) => draft.genres.includes(g));
@@ -544,7 +569,7 @@ export function computeResult(opts: {
     breakdown.push({ label: "Anime Type casting", pts: "Matching traditions strengthen individual cast contributions" });
   if (publicSalesMultiplier > 1)
     breakdown.push({ label: "Known Correct Cast commercial lift", pts: `×${publicSalesMultiplier.toFixed(3)} sales` });
-  if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: "✦" });
+  if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
 
   return {
     reviews,
@@ -567,6 +592,8 @@ export function computeResult(opts: {
     secretDiscovered,
     quality,
     arcCombosDiscovered,
+    arcClashes: arcClashesHit.map((c) => c.id),
+    genreSalesMult: genreEffect.salesMultiplier,
   };
 }
 
