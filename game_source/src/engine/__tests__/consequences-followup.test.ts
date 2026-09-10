@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Draft } from "../data";
-import { RESEARCH } from "../data";
+import { PETS, RESEARCH } from "../data";
 import {
   RESEARCHABLE_SECRET_COMBOS,
   arcClashesFor,
@@ -16,6 +16,8 @@ import {
 import { computeProjectResult, makeProject } from "../projects";
 import { contextualReviewQuote } from "../reviewNarrative";
 
+const mascotId = PETS[0].id;
+
 const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Memory Test",
   medium: "tv",
@@ -28,7 +30,7 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   protagName: "Aki",
   secondary: "rival",
   secondaryName: "Riko",
-  pet: "none",
+  pet: mascotId,
   petName: "Mochi",
   villain: "warlord",
   villainName: "Gharn",
@@ -43,7 +45,7 @@ const seed = {
   protagName: "Aki",
   secondary: "rival",
   secondaryName: "Riko",
-  pet: "none",
+  pet: mascotId,
   petName: "Mochi",
   villain: "warlord",
   villainName: "Gharn",
@@ -93,7 +95,7 @@ describe("continuation character billing memory", () => {
       protagName: "Akira",
       secondary: "rival",
       secondaryName: "Renamed Rival",
-      pet: "none",
+      pet: mascotId,
       petName: "Bean",
       villain: "warlord",
       villainName: "The Iron King",
