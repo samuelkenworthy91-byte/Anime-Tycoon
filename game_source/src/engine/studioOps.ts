@@ -1,4 +1,4 @@
-import { staffPoint, type Contract, type PointType, type Staff } from "./data";
+import { STAFF_EFFECTIVE_SKILL_CAP, staffPoint, type Contract, type PointType, type Staff } from "./data";
 
 export interface ContractAssignment {
   id: string;
@@ -110,14 +110,17 @@ export const projectedContractTotal = (contract: Contract, crew: Staff[], resear
 /** Better staff need less Research Data to reach the same boost confidence. */
 export function rushResearchCost(skill: number, chance: number): number {
   const base = chance >= 0.8 ? 14 : chance >= 0.5 ? 8 : 4;
-  const expertise = Math.max(0.48, 1.15 - Math.min(99, skill) / 160);
+  const s = Math.max(0, Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill));
+  const legacyExpertise = 1.15 - Math.min(99, s) / 160;
+  const masteryDiscount = Math.max(0, s - 99) / 500;
+  const expertise = Math.max(0.35, legacyExpertise - masteryDiscount);
   return Math.max(1, Math.round(base * expertise));
 }
 
 export const rushStreamPoint = (skill: number, roll: number) =>
-  Math.max(2, Math.round(Math.min(99, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));
+  Math.max(2, Math.round(Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));
 
-export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(99, skill) * 0.13));
+export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill) * 0.13));
 
 /** Which side of a direction slider the studio's knowledge points at.
  *  Derived from the SAME blended direction `ideal` used by scoring and by
@@ -127,7 +130,7 @@ export const studioKnowledgeEmphasis = (ideal: number, a: string, b: string): st
 
 /** Stronger rush specialists now have a substantially higher floor AND ceiling. */
 export function rushOutcomeRange(skill: number): { min: number; max: number } {
-  const s = Math.max(1, Math.min(99, Math.round(skill)));
+  const s = Math.max(1, Math.min(STAFF_EFFECTIVE_SKILL_CAP, Math.round(skill)));
   const min = Math.max(4, Math.round(8 + s * 0.45));
   const max = Math.max(min + 6, Math.round(18 + s * 0.90));
   return { min, max };
@@ -135,4 +138,4 @@ export function rushOutcomeRange(skill: number): { min: number; max: number } {
 
 /** The rest of the assigned production team still matters during a lead spotlight. */
 export const rushTeamSupport = (skills: number[]) =>
-  Math.min(30, Math.round(skills.reduce((a, v) => a + Math.max(0, Math.min(99, v)) * 0.08, 0)));
+  Math.min(60, Math.round(skills.reduce((a, v) => a + Math.max(0, Math.min(STAFF_EFFECTIVE_SKILL_CAP, v)) * 0.08, 0)));
