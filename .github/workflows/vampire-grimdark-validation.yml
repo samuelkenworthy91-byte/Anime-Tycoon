@@ -1,0 +1,70 @@
+name: Vampire Grimdark Validation
+
+on:
+  push:
+    branches:
+      - work/vampire-grimdark-25-genres
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game_source
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare 25-genre content
+        run: npm run content:prepare
+
+      - name: Verify generated catalog sizes
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const cast = JSON.parse(readFileSync('src/engine/generated/castV3.json', 'utf8')).cast;
+          const genre = JSON.parse(readFileSync('src/engine/generated/genreV3.json', 'utf8'));
+          const arcs = JSON.parse(readFileSync('src/engine/generated/arcV3.json', 'utf8'));
+          const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
+          assert(cast.length === 920, `expected 920 cast, got ${cast.length}`);
+          assert(new Set(cast.map(x => x.id)).size === 920, 'cast IDs are not unique');
+          assert(new Set(cast.map(x => x.name)).size === 920, 'cast names are not unique');
+          assert(genre.genres.length === 25, `expected 25 genres, got ${genre.genres.length}`);
+          assert(genre.combos.length === 300, `expected 300 pairs, got ${genre.combos.length}`);
+          for (const id of ['vampire','grimdark']) assert(genre.genres.some(g => g.id === id), `missing ${id}`);
+          assert(arcs.add_arcs.some(a => a.syn?.includes('vampire') || a.anti?.includes('vampire')), 'Vampire has no story support');
+          assert(arcs.add_arcs.some(a => a.syn?.includes('grimdark') || a.anti?.includes('grimdark')), 'Grimdark has no story support');
+          const vg = cast.filter(x => x.id.startsWith('vg_'));
+          assert(vg.length === 184, `expected 184 expansion cast, got ${vg.length}`);
+          for (const m of vg) {
+            const aff = [...m.visibleAff, m.hiddenAff];
+            assert(aff.includes('vampire') && aff.includes('grimdark'), `${m.id}: missing expansion affinity`);
+          }
+          console.log(`Validated ${cast.length} cast, ${genre.genres.length} genres, ${genre.combos.length} pairs, ${arcs.add_arcs.length} expansion/runtime arcs.`);
+          NODE
+
+      - name: Verify runtime portraits
+        run: |
+          count=$(find public/cast/v5 -maxdepth 1 -type f -name 'vg_*.png' | wc -l)
+          test "$count" -eq 184
+          echo "Validated $count Vampire/Grimdark runtime portraits."
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
