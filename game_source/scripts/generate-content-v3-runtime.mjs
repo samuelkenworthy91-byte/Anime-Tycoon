@@ -190,8 +190,8 @@ for (const a of arcs.add_arcs) {
   for (const g of [...(a.syn ?? []), ...(a.anti ?? [])]) assert(genreIds.includes(g), `${a.id}: unknown genre ${g}`);
   if (a.unlock?.kind === "genre") assert(genreIds.includes(a.unlock.genre), `${a.id}: unknown unlock genre ${a.unlock.genre}`);
 }
-const arcIdSet = new Set(arcIds);
-for (const combo of arcs.add_combos) {
+const arcIdSet = new Set([...arcIds, "case", "confession"]);
+for (const combo of genre30Arcs.add_combos) {
   assert(Array.isArray(combo.arcs) && combo.arcs.length >= 2, `${combo.id}: arc combo needs at least two arcs`);
   for (const id of combo.arcs) assert(arcIdSet.has(id), `${combo.id}: unknown arc ${id}`);
 }
