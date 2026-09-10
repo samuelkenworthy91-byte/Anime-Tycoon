@@ -18,5 +18,6 @@ This pack adds five canonical genres to the 25-genre runtime:
 - 3,480 strict Role × Anime Type × genre-pair coverage cells, all witnessed by at least one same-character affinity triple.
 - 50 new story arcs and 30 new arc-combo chains.
 - Every one of the ten pairings among the five new genres has a bespoke shared crossover arc.
+- New arc-combo references are validated against actual runtime arc IDs; no compatibility aliases or invented historical IDs are permitted.
 
 The authoritative V6 art mapping is `art_src/cast_v6_genre30_upload_staging/manifest/final_manifest_webp.csv`. `npm run content:prepare` copies the 520 staged WebPs into `public/cast/v6`, rebuilds generated cast/genre/arc payloads, and validates the invariants above before development, tests or production builds.
