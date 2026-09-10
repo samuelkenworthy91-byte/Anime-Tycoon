@@ -22,7 +22,9 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
       - name: Apply staff depth patch
-        run: python game_source/scripts/temp_staff_depth_patch.py
+        run: |
+          python game_source/scripts/temp_staff_depth_patch.py
+          python game_source/scripts/temp_staff_depth_testfix.py
       - name: Full tests and production build
         working-directory: game_source
         run: |
@@ -32,7 +34,8 @@ jobs:
       - name: Commit verified implementation
         shell: bash
         run: |
-          rm -f game_source/scripts/temp_staff_depth_patch.py .github/workflows/temp-staff-depth.yml
+          rm -f game_source/scripts/temp_staff_depth_patch.py game_source/scripts/temp_staff_depth_testfix.py .github/workflows/temp-staff-depth.yml
+          git checkout -- game_source/docs/SCORING_BALANCE_MATRIX.json game_source/docs/SCORING_BALANCE_V2.md 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
