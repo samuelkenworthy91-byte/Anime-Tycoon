@@ -1,0 +1,135 @@
+name: Temp staff 999 progression verification
+
+on:
+  push:
+    branches: [work/staff-999-progression]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/staff-999-progression
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Implement 999-level staff progression
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('game_source')
+
+          def replace_once(path, old, new, label):
+              p = root / path
+              s = p.read_text(encoding='utf-8')
+              if old not in s:
+                  raise SystemExit(f'{label}: target not found in {path}')
+              p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+          # ---------------------------------------------------------------- data: raw stats can reach 999, but their production value
+          # uses a smooth post-99 mastery curve so late-game growth remains
+          # meaningful without multiplying output tenfold.
+          replace_once(
+              'src/engine/data.ts',
+              'export const staffPoint = (s: Staff, t: PointType) => (t === "story" ? s.story : t === "art" ? s.art : s.sound);\nexport const staffMain = (s: Staff) => staffPoint(s, ROLE_POINT[s.role]);',
+              '''export const STAFF_STAT_CAP = 999;\n/** Practical ceiling of a 999 raw craft stat after diminishing mastery returns. */\nexport const STAFF_EFFECTIVE_SKILL_CAP = 240;\n\nexport const staffRawPoint = (s: Staff, t: PointType) => (t === "story" ? s.story : t === "art" ? s.art : s.sound);\n\n/**\n * Preserve the original 0..99 balance exactly. Beyond 99, every raw point\n * still improves the employee, but with logarithmic mastery returns so a\n * 999-stat legend is roughly 2.4x the old maximum rather than 10x.\n */\nexport function effectiveStaffSkill(raw: number): number {\n  const value = Math.max(0, Math.min(STAFF_STAT_CAP, raw));\n  if (value <= 99) return value;\n  return Math.min(STAFF_EFFECTIVE_SKILL_CAP, 99 + 60 * Math.log1p((value - 99) / 100));\n}\n\nexport const staffPoint = (s: Staff, t: PointType) => effectiveStaffSkill(staffRawPoint(s, t));\nexport const staffMain = (s: Staff) => staffPoint(s, ROLE_POINT[s.role]);''',
+              'staff stat curve',
+          )
+
+          # ------------------------------------------------------------- careers
+          p = root / 'src/engine/careers.ts'
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('  ROLE_POINT,\n', '  ROLE_POINT,\n  STAFF_STAT_CAP,\n', 1)
+          s = s.replace('   Twelve-level careers driven by XP, specialisations that interact', '   Long-form careers driven by XP, specialisations that interact', 1)
+          start = s.index('export const CAREER_TITLES = [')
+          end = s.index('\n\n/** add XP; every level gained', start)
+          level_block = '''export const CAREER_TITLES = [\n  "Trainee",\n  "Junior",\n  "Staffer",\n  "Key Staff",\n  "Senior",\n  "Lead",\n  "Chief",\n  "Director",\n  "Veteran",\n  "Master",\n  "Luminary",\n  "Living Legend",\n] as const;\n\n/** Staff can keep developing for the entire campaign and deep Dynasty saves. */\nexport const MAX_LEVEL = 999;\n\n/** The original 12 thresholds are preserved byte-for-byte for existing saves. */\nconst LEGACY_XP_LEVELS = [0, 100, 260, 500, 850, 1350, 2050, 3000, 4250, 5900, 8000, 10700] as const;\n\n/**\n * Cumulative XP needed to reach each level (index = level - 1). After Lv12,\n * mastery levels deliberately slow down rather than ending. The gap starts\n * around 2.9k XP and grows smoothly, making Lv999 a true endless-save goal.\n */\nexport const XP_LEVELS: number[] = [...LEGACY_XP_LEVELS];\nfor (let level = 13; level <= MAX_LEVEL; level += 1) {\n  const mastery = level - 12;\n  const gap = Math.round(2800 + mastery * 22 + Math.sqrt(mastery) * 80);\n  XP_LEVELS.push(XP_LEVELS[XP_LEVELS.length - 1] + gap);\n}\n\n/** Higher levels retain familiar early titles, then gain long-run prestige ranks. */\nconst CAREER_TITLE_MILESTONES: { level: number; title: string }[] = [\n  ...CAREER_TITLES.map((title, i) => ({ level: i + 1, title })),\n  { level: 25, title: "Grandmaster" },\n  { level: 50, title: "Industry Icon" },\n  { level: 100, title: "Auteur" },\n  { level: 250, title: "Hall of Famer" },\n  { level: 500, title: "Immortal" },\n  { level: 750, title: "Mythic" },\n  { level: 999, title: "Pinnacle" },\n];\n\nexport const levelFromXp = (xp: number): number => {\n  const value = Math.max(0, xp);\n  let lo = 0;\n  let hi = XP_LEVELS.length - 1;\n  while (lo < hi) {\n    const mid = Math.ceil((lo + hi) / 2);\n    if (XP_LEVELS[mid] <= value) lo = mid;\n    else hi = mid - 1;\n  }\n  return Math.min(MAX_LEVEL, lo + 1);\n};\n\nexport const levelTitle = (lvl: number) => {\n  const level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(lvl)));\n  return [...CAREER_TITLE_MILESTONES].reverse().find((x) => level >= x.level)?.title ?? CAREER_TITLES[0];\n};\n\n/** progress 0..1 inside the current level */\nexport function levelProgress(xp: number): number {\n  const lvl = levelFromXp(xp);\n  if (lvl >= MAX_LEVEL) return 1;\n  const lo = XP_LEVELS[lvl - 1];\n  const hi = XP_LEVELS[lvl];\n  return Math.max(0, Math.min(1, (xp - lo) / (hi - lo)));\n}\n'''
+          s = s[:start] + level_block + s[end:]
+          s = s.replace('story: Math.min(99, out.story + (main === "story" ? 2 : 1)),', 'story: Math.min(STAFF_STAT_CAP, out.story + (main === "story" ? 2 : 1)),')
+          s = s.replace('art: Math.min(99, out.art + (main === "art" ? 2 : 1)),', 'art: Math.min(STAFF_STAT_CAP, out.art + (main === "art" ? 2 : 1)),')
+          s = s.replace('sound: Math.min(99, out.sound + (main === "sound" ? 2 : 1)),', 'sound: Math.min(STAFF_STAT_CAP, out.sound + (main === "sound" ? 2 : 1)),')
+
+          old_ensure = '''export function ensureCareer(s: Staff, week: number): Staff {\n  if (s.xp !== undefined && s.traits && s.spec && s.shows) return s;\n  const h = idHash(s.id);\n  const roleSpecs = SPEC_DEFS.filter((d) => d.role === s.role);\n  return {\n    ...s,\n    xp: s.xp ?? XP_LEVELS[Math.max(0, Math.min(MAX_LEVEL, s.level) - 1)],\n    morale: s.morale ?? 70,\n    traits: s.traits ?? pickTraits(h, h >> 3),\n    spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,\n    favGenre: s.favGenre ?? GENRE_IDS[(h >> 5) % GENRE_IDS.length],\n    joinedWeek: s.joinedWeek ?? week,\n    shows: s.shows ?? [],\n    awardsWon: s.awardsWon ?? 0,\n    bestShow: s.bestShow ?? null,\n  };\n}'''
+          new_ensure = '''export function ensureCareer(s: Staff, week: number): Staff {\n  const h = idHash(s.id);\n  const roleSpecs = SPEC_DEFS.filter((d) => d.role === s.role);\n  const savedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(s.level || 1)));\n  const xp = Math.max(0, s.xp ?? XP_LEVELS[savedLevel - 1]);\n  const inferredLevel = levelFromXp(xp);\n  /* Old max-level saves continued banking XP even though Lv12 could not move.\n     On first load, honour that earned XP and grant the missing level stat growth. */\n  const retroLevels = Math.max(0, inferredLevel - savedLevel);\n  const main = ROLE_POINT[s.role];\n  const grow = (point: PointType) => Math.min(\n    STAFF_STAT_CAP,\n    Math.max(0, s[point]) + retroLevels * (main === point ? 2 : 1),\n  );\n  return {\n    ...s,\n    level: inferredLevel,\n    xp,\n    story: grow("story"),\n    art: grow("art"),\n    sound: grow("sound"),\n    morale: s.morale ?? 70,\n    traits: s.traits ?? pickTraits(h, h >> 3),\n    spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,\n    favGenre: s.favGenre ?? GENRE_IDS[(h >> 5) % GENRE_IDS.length],\n    joinedWeek: s.joinedWeek ?? week,\n    shows: s.shows ?? [],\n    awardsWon: s.awardsWon ?? 0,\n    bestShow: s.bestShow ?? null,\n  };\n}'''
+          if old_ensure not in s:
+              raise SystemExit('ensureCareer block not found')
+          s = s.replace(old_ensure, new_ensure, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # ---------------------------------------------------------------- state training: raw craft can now pass 99.
+          p = root / 'src/engine/state.ts'
+          s = p.read_text(encoding='utf-8')
+          if '  STAFF_STAT_CAP,\n' not in s:
+              s = s.replace('  ROLE_POINT,\n', '  ROLE_POINT,\n  STAFF_STAT_CAP,\n', 1)
+          s = s.replace('Math.min(99, s[job.focus] + 1)', 'Math.min(STAFF_STAT_CAP, s[job.focus] + 1)')
+          s = s.replace('Math.min(99, s[taught] + fx.trainSkill)', 'Math.min(STAFF_STAT_CAP, s[taught] + fx.trainSkill)')
+          p.write_text(s, encoding='utf-8')
+
+          # ------------------------------------------------------------- studio ops: post-99 expertise keeps helping rushes.
+          p = root / 'src/engine/studioOps.ts'
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('import { staffPoint, type Contract, type PointType, type Staff } from "./data";', 'import { STAFF_EFFECTIVE_SKILL_CAP, staffPoint, type Contract, type PointType, type Staff } from "./data";', 1)
+          old = '''export function rushResearchCost(skill: number, chance: number): number {\n  const base = chance >= 0.8 ? 14 : chance >= 0.5 ? 8 : 4;\n  const expertise = Math.max(0.48, 1.15 - Math.min(99, skill) / 160);\n  return Math.max(1, Math.round(base * expertise));\n}\n\nexport const rushStreamPoint = (skill: number, roll: number) =>\n  Math.max(2, Math.round(Math.min(99, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));\n\nexport const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(99, skill) * 0.13));'''
+          new = '''export function rushResearchCost(skill: number, chance: number): number {\n  const base = chance >= 0.8 ? 14 : chance >= 0.5 ? 8 : 4;\n  const s = Math.max(0, Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill));\n  const legacyExpertise = 1.15 - Math.min(99, s) / 160;\n  const masteryDiscount = Math.max(0, s - 99) / 500;\n  const expertise = Math.max(0.35, legacyExpertise - masteryDiscount);\n  return Math.max(1, Math.round(base * expertise));\n}\n\nexport const rushStreamPoint = (skill: number, roll: number) =>\n  Math.max(2, Math.round(Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill) * (0.045 + Math.max(0, Math.min(1, roll)) * 0.035)));\n\nexport const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math.min(STAFF_EFFECTIVE_SKILL_CAP, skill) * 0.13));'''
+          if old not in s:
+              raise SystemExit('studioOps rush block not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('const s = Math.max(1, Math.min(99, Math.round(skill)));', 'const s = Math.max(1, Math.min(STAFF_EFFECTIVE_SKILL_CAP, Math.round(skill)));', 1)
+          s = s.replace('Math.min(30, Math.round(skills.reduce((a, v) => a + Math.max(0, Math.min(99, v)) * 0.08, 0)));', 'Math.min(60, Math.round(skills.reduce((a, v) => a + Math.max(0, Math.min(STAFF_EFFECTIVE_SKILL_CAP, v)) * 0.08, 0)));', 1)
+          p.write_text(s, encoding='utf-8')
+
+          # --------------------------------------------------------------- Crew UI: 3-digit stats and a logarithmic 0..999 bar.
+          p = root / 'src/components/Crew.tsx'
+          s = p.read_text(encoding='utf-8')
+          if '  STAFF_STAT_CAP,\n' not in s:
+              s = s.replace('  ROLE_POINT,\n', '  ROLE_POINT,\n  STAFF_STAT_CAP,\n', 1)
+          old = 'style={{ width: `${s[t]}%`, background: POINT_COLOR[t] }}'
+          new = 'style={{ width: `${Math.round((Math.log1p(Math.max(0, Math.min(STAFF_STAT_CAP, s[t]))) / Math.log1p(STAFF_STAT_CAP)) * 100)}%`, background: POINT_COLOR[t] }}'
+          if old not in s:
+              raise SystemExit('Crew stat bar target not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # -------------------------------------------------------------- tests: update old 12-level assumption + add regression coverage.
+          p = root / 'src/engine/__tests__/careers.test.ts'
+          s = p.read_text(encoding='utf-8')
+          old = '''  it("has a 12-level career with rising thresholds", () => {\n    expect(CAREER_TITLES).toHaveLength(12);\n    expect(XP_LEVELS).toHaveLength(12);\n    for (let i = 2; i < XP_LEVELS.length; i++) {\n      expect(XP_LEVELS[i] - XP_LEVELS[i - 1]).toBeGreaterThan(XP_LEVELS[i - 1] - XP_LEVELS[i - 2]);\n    }\n    expect(levelFromXp(0)).toBe(1);\n    expect(levelFromXp(XP_LEVELS[5])).toBe(6);\n    expect(levelFromXp(999_999)).toBe(MAX_LEVEL);\n  });'''
+          new = '''  it("extends staff careers to level 999 while preserving the original early thresholds", () => {\n    expect(CAREER_TITLES).toHaveLength(12);\n    expect(MAX_LEVEL).toBe(999);\n    expect(XP_LEVELS).toHaveLength(MAX_LEVEL);\n    expect(XP_LEVELS.slice(0, 12)).toEqual([0, 100, 260, 500, 850, 1350, 2050, 3000, 4250, 5900, 8000, 10700]);\n    for (let i = 1; i < XP_LEVELS.length; i++) expect(XP_LEVELS[i]).toBeGreaterThan(XP_LEVELS[i - 1]);\n    expect(levelFromXp(0)).toBe(1);\n    expect(levelFromXp(XP_LEVELS[5])).toBe(6);\n    expect(levelFromXp(XP_LEVELS[MAX_LEVEL - 1])).toBe(MAX_LEVEL);\n  });'''
+          if old not in s:
+              raise SystemExit('legacy career-level test not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+
+          test = root / 'src/engine/__tests__/staff-999.test.ts'
+          test.write_text('''import { describe, expect, it } from "vitest";\nimport { effectiveStaffSkill, STAFF_EFFECTIVE_SKILL_CAP, STAFF_STAT_CAP, type Staff } from "../data";\nimport { ensureCareer, gainXp, levelFromXp, levelTitle, MAX_LEVEL, XP_LEVELS } from "../careers";\n\nconst staff = (over: Partial<Staff> = {}): Staff => ({\n  id: "mastery", name: "Mastery Worker", role: "writer", story: 99, art: 99, sound: 99,\n  level: 12, salary: 2000, cost: 0, stamina: 100, portrait: 0, xp: XP_LEVELS[11],\n  morale: 70, traits: [], spec: "w_action", favGenre: "sports", joinedWeek: 0, shows: [],\n  awardsWon: 0, bestShow: null, ...over,\n});\n\ndescribe("999-level staff progression", () => {\n  it("has 999 career levels and 999 raw craft caps", () => {\n    expect(MAX_LEVEL).toBe(999);\n    expect(STAFF_STAT_CAP).toBe(999);\n    expect(XP_LEVELS).toHaveLength(999);\n    expect(levelFromXp(XP_LEVELS[998])).toBe(999);\n    expect(levelTitle(999)).toBe("Pinnacle");\n  });\n\n  it("keeps improving stats after the old 99 cap", () => {\n    const nextXp = XP_LEVELS[12] - XP_LEVELS[11];\n    const out = gainXp(staff(), nextXp);\n    expect(out.staff.level).toBe(13);\n    expect(out.staff.story).toBe(101);\n    expect(out.staff.art).toBe(100);\n    expect(out.staff.sound).toBe(100);\n  });\n\n  it("honours XP banked by an old max-level save", () => {\n    const migrated = ensureCareer(staff({ xp: XP_LEVELS[15] }), 400);\n    expect(migrated.level).toBe(16);\n    expect(migrated.story).toBe(107);\n    expect(migrated.art).toBe(103);\n    expect(migrated.sound).toBe(103);\n  });\n\n  it("preserves old balance through 99, then gives diminishing but real mastery returns", () => {\n    expect(effectiveStaffSkill(60)).toBe(60);\n    expect(effectiveStaffSkill(99)).toBe(99);\n    expect(effectiveStaffSkill(150)).toBeGreaterThan(99);\n    expect(effectiveStaffSkill(999)).toBeGreaterThan(200);\n    expect(effectiveStaffSkill(999)).toBeLessThanOrEqual(STAFF_EFFECTIVE_SKILL_CAP);\n  });\n});\n''', encoding='utf-8')
+
+          doc = root / 'docs/STAFF_PROGRESSION_999.md'
+          doc.write_text('''# Staff Progression — 999 cap\n\nStaff career levels and raw Story / Art / Sound stats now cap at **999**.\n\n- The original Level 1–12 XP thresholds are unchanged, preserving early-game and old-save balance.\n- Level 13–999 uses a long-run mastery XP curve, so experienced employees continue progressing through the campaign and Dynasty Mode.\n- Every level still grants +2 to the employee's main discipline and +1 to both off-disciplines, up to 999.\n- Timed training and facility teaching can also raise raw craft beyond the old 99 cap.\n- Mechanical output preserves the old 0–99 curve exactly. Stats above 99 use diminishing logarithmic returns, approaching an effective skill of about 240 at raw 999. This keeps mastery valuable without recreating the early snowball problem.\n- Existing saves that banked XP while stuck at the old Level 12 ceiling receive their earned mastery levels and corresponding stat growth when the employee is normalised.\n- Career titles continue beyond Living Legend with Grandmaster, Industry Icon, Auteur, Hall of Famer, Immortal, Mythic and Pinnacle milestones.\n''', encoding='utf-8')
+          PY
+      - name: Run full tests and production build
+        working-directory: game_source
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Commit verified staff progression
+        shell: bash
+        run: |
+          rm -f .github/workflows/temp-staff-999.yml
+          git checkout -- game_source/dist 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Extend staff progression to level 999"
+          git pull --rebase origin work/staff-999-progression
+          git push origin HEAD:work/staff-999-progression
