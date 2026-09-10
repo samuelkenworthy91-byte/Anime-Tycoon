@@ -2,21 +2,8 @@
  * Poster design — the pure half of the key-visual system.
  *
  * `posterDesign(draft, opts)` turns a show's metadata into everything the
- * <Poster/> renderer needs:
- *
- *   font        — genre-appropriate title typography: every genre is mapped
- *                 to a display family plus casing/tracking/italic/skew and a
- *                 genre-coloured glow. See POSTER_FONTS.
- *   titleLines  — the title balanced across up to 3 lines
- *   kicker      — the studio banner line ("MAGICLAMP PRESENTS",
- *                 "SEASON 2 — THE CONTINUING STORY"…)
- *   ribbon      — SEASON/MOVIE/OVA tab, when this is a continuation
- *   billing     — cinema-style condensed credit segments for the foot strip
- *   decos       — little decorations sprinkled over the artwork
- *   tilt        — deterministic paper rotation for wall posters
- *
- * Rendering lives in src/components/Poster.tsx; this module stays UI-free so
- * the design of every poster is unit-testable.
+ * <Poster/> renderer needs: genre typography, title layout, billing, decorative
+ * motifs and deterministic wall-poster presentation.
  */
 
 import { GENRE, GENRES, MEDIUMS, SLOTS, type AnimeType, type Draft, type GenreId, type Genre } from "./data";
@@ -69,6 +56,11 @@ export const POSTER_FONTS: Record<GenreId, PosterFont> = {
   shinobi: { ...PLAYFAIR, weight: 700, italic: false, upperCase: true, tracking: 0.06, skew: 1, scale: 0.98 },
   vampire: { ...PLAYFAIR, weight: 800, italic: true, upperCase: true, tracking: 0.045, skew: 0, scale: 1.02, glow: "#b91c1c" },
   grimdark: { ...BLACKOPS, weight: 400, italic: false, upperCase: true, tracking: 0.035, skew: -1, scale: 0.98, glow: "#78716c" },
+  monster_taming: { ...COMFORTAA, weight: 700, italic: false, upperCase: true, tracking: 0.035, skew: -2, scale: 1.02, glow: "#34d399" },
+  crime: { ...BLACKOPS, weight: 400, italic: false, upperCase: true, tracking: 0.055, skew: -3, scale: 0.98, glow: "#94a3b8" },
+  kaiju: { ...ANTON, weight: 400, italic: false, upperCase: true, tracking: 0.055, skew: -4, scale: 1.08, glow: "#f97316" },
+  cosmic_horror: { ...CREEPSTER, weight: 400, italic: false, upperCase: true, tracking: 0.075, skew: 1, scale: 1.04, glow: "#6366f1" },
+  arabia: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.06, skew: -1, scale: 1.02, glow: "#d97706" },
 };
 
 export const posterFontFor = (genre: GenreId): PosterFont => POSTER_FONTS[genre];
@@ -98,6 +90,11 @@ export const POSTER_DECOS: Record<GenreId, PosterDeco[]> = {
   pirate: ["speedlines", "stars"], mythology: ["runes", "stars"], nordic: ["fog", "stars"],
   samurai: ["speedlines", "burst"], shinobi: ["fog", "speedlines"],
   vampire: ["drips", "fog", "hearts"], grimdark: ["fog", "runes", "reticle"],
+  monster_taming: ["sparkles", "stars", "speedlines"],
+  crime: ["reticle", "fog", "neonBars"],
+  kaiju: ["burst", "speedlines", "reticle"],
+  cosmic_horror: ["runes", "fog", "orbit"],
+  arabia: ["runes", "stars", "petals"],
 };
 
 export function titleLines(title: string, maxLines = 3): string[] {
