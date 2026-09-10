@@ -1,0 +1,86 @@
+name: Genre 30 Validation
+
+on:
+  push:
+    branches:
+      - work/genre30-full-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game_source
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare 30-genre runtime
+        run: npm run content:prepare
+
+      - name: Verify release catalog and coverage
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, readdirSync } from 'node:fs';
+          const cast = JSON.parse(readFileSync('src/engine/generated/castV3.json', 'utf8')).cast;
+          const genre = JSON.parse(readFileSync('src/engine/generated/genreV3.json', 'utf8'));
+          const arcs = JSON.parse(readFileSync('src/engine/generated/arcV3.json', 'utf8'));
+          const coverage = readFileSync('docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv', 'utf8').trim().split(/\r?\n/);
+          const ids = ['monster_taming','crime','kaiju','cosmic_horror','arabia'];
+          const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
+
+          assert(cast.length === 1440, `expected 1440 cast, got ${cast.length}`);
+          assert(new Set(cast.map(x => x.id)).size === 1440, 'cast IDs are not unique');
+          assert(genre.genres.length === 30, `expected 30 genres, got ${genre.genres.length}`);
+          assert(genre.combos.length === 435, `expected 435 pairs, got ${genre.combos.length}`);
+          assert(coverage.length === 3481, `expected coverage header + 3480 cells, got ${coverage.length}`);
+          for (const id of ids) {
+            assert(genre.genres.some(g => g.id === id), `missing genre ${id}`);
+            assert(genre.combos.filter(c => c.genre_1 === id || c.genre_2 === id).length === 29, `${id}: expected 29 pair rows`);
+          }
+
+          const v6 = cast.filter(x => x.id.startsWith('g30_'));
+          assert(v6.length === 520, `expected 520 Genre 30 cast, got ${v6.length}`);
+          assert(new Set(v6.map(x => x.name)).size === 520, 'Genre 30 display names are not unique');
+          const oldNames = new Set(cast.filter(x => !x.id.startsWith('g30_')).map(x => x.name));
+          assert(v6.every(x => !oldNames.has(x.name)), 'Genre 30 name collides with existing roster');
+          for (const role of ['protag','secondary','pet','villain']) for (const type of ['shonen','shojo']) {
+            const bucket = v6.filter(x => x.role === role && x.type === type);
+            assert(bucket.length === 65, `${role}/${type}: expected 65 Genre 30 cast, got ${bucket.length}`);
+          }
+
+          const portraitFiles = readdirSync('public/cast/v6').filter(f => /^g30_.*\.webp$/.test(f));
+          assert(portraitFiles.length === 520, `expected 520 V6 runtime portraits, got ${portraitFiles.length}`);
+          const expectedFiles = new Set(v6.map(x => x.img.replace('cast/v6/','')));
+          assert(portraitFiles.every(f => expectedFiles.has(f)), 'unexpected V6 portrait filename');
+
+          const v6Arcs = arcs.add_arcs.filter(a => a.id.startsWith('g30_'));
+          const v6ArcCombos = arcs.add_combos.filter(a => a.id.startsWith('g30_'));
+          assert(v6Arcs.length === 50, `expected 50 Genre 30 arcs, got ${v6Arcs.length}`);
+          assert(v6ArcCombos.length === 30, `expected 30 Genre 30 arc combos, got ${v6ArcCombos.length}`);
+          const arcIds = new Set([...arcs.add_arcs.map(a => a.id),
+            'hook','lore','montage','tournament','beach','festival','launch','live','case','twist','filler','timeskip','crossover','finale','origin','redemption','mascot','musical','confession','cliffhanger','sakuga','collab','ova','war']);
+          for (const combo of v6ArcCombos) for (const id of combo.arcs) assert(arcIds.has(id), `${combo.id}: unknown arc ${id}`);
+
+          console.log(`Validated ${cast.length} cast, ${genre.genres.length} genres, ${genre.combos.length} pairs, 3480 strict coverage cells, ${v6.length} Genre 30 cast, ${v6Arcs.length} new arcs and ${v6ArcCombos.length} new arc combos.`);
+          NODE
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
