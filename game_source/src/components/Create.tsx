@@ -66,6 +66,7 @@ import {
   type ScopeId,
   type SlotId,
 } from "../engine/data";
+import { secretComboResearched } from "../engine/creativeDiscovery";
 import { arcLockReason, formatLockReason, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
@@ -251,9 +252,11 @@ export default function Create({
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
-  const comboDiscovered = d.genres.length === 2 && (comboKey(d.genres) in run.comboLevels);
+  const currentComboKey = comboKey(d.genres);
+  const comboResearchKnown = d.genres.length === 2 && secretComboResearched(run.research, currentComboKey);
+  const comboDiscovered = d.genres.length === 2 && ((currentComboKey in run.comboLevels) || comboResearchKnown);
   const combo = comboLabel(d.genres, comboDiscovered);
-  const comboLv = run.comboLevels[comboKey(d.genres)] ?? 0;
+  const comboLv = run.comboLevels[currentComboKey] ?? 0;
   const cost = draftCost(d);
   const weeks = draftWeeks(d);
   /** why this draft can't be greenlit right now (null = good to go) */
@@ -672,7 +675,7 @@ export default function Create({
                   <span className="ml-2 text-xs italic text-viol">Experimental pairing — nobody knows if it works…</span>
                 )}
                 {combo.secret && comboDiscovered && (
-                  <span className="ml-2 text-xs text-viol">✦ ×{combo.mult.toFixed(2)} review score — you discovered this!</span>
+                  <span className="ml-2 text-xs text-viol">✦ ×{combo.mult.toFixed(2)} review score — {comboResearchKnown ? "R&D confirmed this!" : "you discovered this!"}</span>
                 )}
                 {d.genres.length > 0 && (
                   <span className="ml-2 text-xs text-gold">
