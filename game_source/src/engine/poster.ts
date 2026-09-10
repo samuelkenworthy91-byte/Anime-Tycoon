@@ -21,29 +21,19 @@
 
 import { GENRE, GENRES, MEDIUMS, SLOTS, type AnimeType, type Draft, type GenreId, type Genre } from "./data";
 
-/* ------------------------------------------------------------- fonts ---- */
-
 export interface PosterFont {
-  /** CSS font-family stack (display font first, graceful fallbacks) */
   family: string;
   weight: number;
   italic: boolean;
   upperCase: boolean;
-  /** letter-spacing in em */
   tracking: number;
-  /** text-shadow glow colour (defaults to the genre colour) */
   glow?: string;
-  /** transform skew in degrees (jersey stencils lean) */
   skew: number;
-  /** font-size multiplier for faces that render small/large at same px */
   scale: number;
 }
 
 const ANTON: Omit<PosterFont, "upperCase" | "tracking" | "skew"> = {
-  family: '"Anton", "Arial Narrow", "Impact", sans-serif',
-  weight: 400,
-  italic: false,
-  scale: 1.12,
+  family: '"Anton", "Arial Narrow", "Impact", sans-serif', weight: 400, italic: false, scale: 1.12,
 };
 const BLACKOPS: Pick<PosterFont, "family"> = { family: '"Black Ops One", "Arial Black", sans-serif' };
 const CHAKRA: Pick<PosterFont, "family"> = { family: '"Chakra Petch", "Trebuchet MS", sans-serif' };
@@ -53,7 +43,6 @@ const PLAYFAIR: Pick<PosterFont, "family"> = { family: '"Playfair Display", Geor
 const LILITA: Pick<PosterFont, "family"> = { family: '"Lilita One", "Comic Sans MS", cursive' };
 const CREEPSTER: Pick<PosterFont, "family"> = { family: '"Creepster", Impact, fantasy' };
 
-/** one font treatment per genre — this is the "different font per genre" rule */
 export const POSTER_FONTS: Record<GenreId, PosterFont> = {
   sports: { ...ANTON, upperCase: true, tracking: 0.03, italic: true, skew: -7 },
   martial: { ...ANTON, upperCase: true, tracking: 0.01, italic: true, skew: -5 },
@@ -76,14 +65,14 @@ export const POSTER_FONTS: Record<GenreId, PosterFont> = {
   pirate: { ...CINZEL, weight: 700, italic: true, upperCase: true, tracking: 0.035, skew: -2, scale: 1.02 },
   mythology: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.08, skew: 0, scale: 0.98 },
   nordic: { ...PLAYFAIR, weight: 800, italic: false, upperCase: true, tracking: 0.055, skew: 0, scale: 0.98 },
-  /* PROVISIONAL Scaffolding — replace with Work's canonical treatments */
   samurai: { ...CINZEL, weight: 700, italic: false, upperCase: true, tracking: 0.05, skew: 0, scale: 1, glow: "#f4a261" },
   shinobi: { ...PLAYFAIR, weight: 700, italic: false, upperCase: true, tracking: 0.06, skew: 1, scale: 0.98 },
+  vampire: { ...PLAYFAIR, weight: 800, italic: true, upperCase: true, tracking: 0.045, skew: 0, scale: 1.02, glow: "#b91c1c" },
+  grimdark: { ...BLACKOPS, weight: 400, italic: false, upperCase: true, tracking: 0.035, skew: -1, scale: 0.98, glow: "#78716c" },
 };
 
 export const posterFontFor = (genre: GenreId): PosterFont => POSTER_FONTS[genre];
 
-/** plain CSS for rendering one-off genre-typed titles ( Hof list rows etc. ) */
 export const genreTitleCss = (genre: GenreId): Record<string, string | number | undefined> => {
   const f = POSTER_FONTS[genre];
   return {
@@ -95,63 +84,26 @@ export const genreTitleCss = (genre: GenreId): Record<string, string | number | 
   };
 };
 
-/* ----------------------------------------------------- decorations ---- */
-
 export type PosterDeco =
-  | "burst" /* shonen action star-burst behind the title */
-  | "speedlines" /* swept action strokes */
-  | "petals" /* falling flower petals */
-  | "sparkles" /* four-point sparkles */
-  | "hearts" /* little heart confetti */
-  | "checker" /* chequered-flag strip */
-  | "stars" /* rating/affair stars */
-  | "steam" /* rising steam wisps */
-  | "reticle" /* targeting corners */
-  | "hex" /* tech hex tiles */
-  | "orbit" /* planet ring */
-  | "runes" /* floating glyph circle */
-  | "drips" /* horror drips off the top edge */
-  | "fog" /* low fog band */
-  | "glitter" /* idol strobe dots */
-  | "laurel" /* hall-of-fame side laurels */
-  | "neonBars"; /* cyberpunk neon slats */
+  | "burst" | "speedlines" | "petals" | "sparkles" | "hearts" | "checker" | "stars"
+  | "steam" | "reticle" | "hex" | "orbit" | "runes" | "drips" | "fog" | "glitter"
+  | "laurel" | "neonBars";
 
 export const POSTER_DECOS: Record<GenreId, PosterDeco[]> = {
-  slice: ["steam"],
-  fantasy: ["runes"],
-  romance: ["hearts", "petals"],
-  sports: ["stars", "speedlines"],
-  mecha: ["hex", "neonBars"],
-  isekai: ["runes", "sparkles"],
-  horror: ["drips", "fog"],
-  idol: ["glitter", "stars"],
-  mystery: ["fog"],
-  cyber: ["neonBars", "hex"],
-  comedy: ["burst"],
-  cooking: ["steam", "stars"],
-  martial: ["burst", "speedlines"],
-  military: ["reticle", "stars"],
-  supernatural: ["runes", "fog"],
-  space: ["orbit", "stars"],
-  magical: ["sparkles", "glitter"],
-  survival: ["fog", "reticle"],
-  pirate: ["speedlines", "stars"],
-  mythology: ["runes", "stars"],
-  nordic: ["fog", "stars"],
-  /* PROVISIONAL Scaffolding — replace with Work's canonical treatments */
-  samurai: ["speedlines", "burst"],
-  shinobi: ["fog", "speedlines"],
+  slice: ["steam"], fantasy: ["runes"], romance: ["hearts", "petals"], sports: ["stars", "speedlines"],
+  mecha: ["hex", "neonBars"], isekai: ["runes", "sparkles"], horror: ["drips", "fog"], idol: ["glitter", "stars"],
+  mystery: ["fog"], cyber: ["neonBars", "hex"], comedy: ["burst"], cooking: ["steam", "stars"],
+  martial: ["burst", "speedlines"], military: ["reticle", "stars"], supernatural: ["runes", "fog"],
+  space: ["orbit", "stars"], magical: ["sparkles", "glitter"], survival: ["fog", "reticle"],
+  pirate: ["speedlines", "stars"], mythology: ["runes", "stars"], nordic: ["fog", "stars"],
+  samurai: ["speedlines", "burst"], shinobi: ["fog", "speedlines"],
+  vampire: ["drips", "fog", "hearts"], grimdark: ["fog", "runes", "reticle"],
 };
 
-/* ------------------------------------------------------------ layout ---- */
-
-/** word-balance a title over as many lines as look good (cap `maxLines`) */
 export function titleLines(title: string, maxLines = 3): string[] {
   const words = title.split(/\s+/).filter(Boolean);
   if (words.length <= 1 || maxLines <= 1) return [words.join(" ")];
   const cap = Math.min(words.length, maxLines);
-  /* a line is allowed roughly twice the "fair share" of characters; short
-     titles keep one line, long ones break as needed */
   const MAX_LINE = 16;
   const fair = title.length / Math.min(cap, Math.ceil(title.length / MAX_LINE) || 1);
   const target = Math.max(Math.ceil(fair), 10);
@@ -165,7 +117,6 @@ export function titleLines(title: string, maxLines = 3): string[] {
   return out;
 }
 
-/* small deterministic hash → stable per-show tilt + deco phase */
 export function titleHash(title: string): number {
   let h = 2166136261;
   for (let i = 0; i < title.length; i++) {
@@ -175,42 +126,27 @@ export function titleHash(title: string): number {
   return h >>> 0;
 }
 
-/** poster tilt in degrees, deterministic per title (-2.5°..+2.5°) */
 export const posterTilt = (title: string): number => ((titleHash(title) % 21) - 10) / 4;
 
 const CONT_RIBBON: Record<NonNullable<Draft["continuation"]>, string> = {
-  season: "SEASON {n}",
-  movie: "THE MOVIE",
-  ova: "ORIGINAL VIDEO ANIMATION",
-  side: "SIDE STORY",
-  prequel: "THE PREQUEL",
-  spinoff: "SPIN-OFF",
-  reboot: "THE REBOOT",
-  crossover: "CROSSOVER EVENT",
+  season: "SEASON {n}", movie: "THE MOVIE", ova: "ORIGINAL VIDEO ANIMATION", side: "SIDE STORY",
+  prequel: "THE PREQUEL", spinoff: "SPIN-OFF", reboot: "THE REBOOT", crossover: "CROSSOVER EVENT",
 };
 
-/* ------------------------------------------------------------- design ---- */
-
 export interface PosterDesign {
-  /** primary genre driving the look (first picked wins) */
   primary: Genre;
   font: PosterFont;
   lines: string[];
   kicker: string;
-  /** continuation tab text; null for original seasons */
   ribbon: string | null;
-  /** condensed billing-block segments for the bottom strip */
   billing: string[];
-  /** decorations to scatter (union of the show's genres, primary first) */
   decos: PosterDeco[];
   tilt: number;
-  /** true when the poster earns the gold laurel + score medal */
   hallOfFame: boolean;
 }
 
 export interface PosterOptions {
   studio?: string;
-  /** critic total (0-40) once released; drives the medal + laurel */
   score?: number | null;
   hallOfFame?: boolean;
 }
@@ -218,22 +154,12 @@ export interface PosterOptions {
 export function posterDesign(draft: Draft, opts: PosterOptions = {}): PosterDesign {
   const primary = GENRE(draft.genres[0]) ?? GENRES[0];
   const studio = (opts.studio ?? "YOUR STUDIO").toUpperCase();
-
-  /* kicker: the line just above the title */
   let kicker: string;
   if (draft.continuation === "season") kicker = `SEASON ${draft.season} — THE CONTINUING STORY`;
   else if (draft.continuation) kicker = CONT_RIBBON[draft.continuation].replace("{n}", String(draft.season)) + " IN THE SERIES";
   else kicker = `${studio} PRESENTS`;
 
-  /* ribbon tab (top-left diagonal) for continuations */
-  const ribbon = draft.continuation
-    ? CONT_RIBBON[draft.continuation].replace("{n}", String(draft.season))
-    : null;
-
-  /* billing block (cinema credit strip) — a draft always carries medium +
-     slot, but hall-of-fame entries and older saves reach here through
-     hofDesign()'s synthetic draft, so degrade gracefully rather than crash
-     the whole office screen */
+  const ribbon = draft.continuation ? CONT_RIBBON[draft.continuation].replace("{n}", String(draft.season)) : null;
   const medium = (MEDIUMS[draft.medium]?.label ?? "TV").toUpperCase();
   const slot = (SLOTS[draft.slot]?.label ?? "LATE NIGHT").toUpperCase();
   const genreCol = draft.genres.map((g) => GENRE(g).label.toUpperCase()).join(" × ");
@@ -243,11 +169,8 @@ export function posterDesign(draft: Draft, opts: PosterOptions = {}): PosterDesi
     `${genreCol} · ${slot} · ARCH STUDIO SYSTEM`,
   ];
 
-  /* decorations: primary genre's set first, then any extras from other genres */
   const decos: PosterDeco[] = [];
-  for (const g of draft.genres) {
-    for (const d of POSTER_DECOS[g]) if (!decos.includes(d)) decos.push(d);
-  }
+  for (const g of draft.genres) for (const d of POSTER_DECOS[g]) if (!decos.includes(d)) decos.push(d);
 
   return {
     primary,
@@ -262,11 +185,8 @@ export function posterDesign(draft: Draft, opts: PosterOptions = {}): PosterDesi
   };
 }
 
-/* every genre must have both a font and at least one decoration — the test
-   enforces this table's completeness against GENRES */
 export const POSTER_GENRE_IDS = GENRES.map((g) => g.id);
 
-/** hall-of-fame wall entries carry only what the mini poster needs */
 export interface HofEntryLite {
   title: string;
   genres: GenreId[];
