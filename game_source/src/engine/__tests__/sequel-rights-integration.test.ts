@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Draft } from "../data";
 import { createFranchise } from "../franchise";
-import { initialRun, startBlockReason, startProject } from "../state";
+import { initialRun, startBlockReason, startProject, type RunState } from "../state";
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
   title: "Threshold Story",
@@ -37,13 +37,13 @@ const seed = {
 
 const result = (total: number) => ({ total, revenue: 100_000, fans: 10_000, hallOfFame: total >= 32 });
 
-function runWithScore(score: number) {
+function runWithScore(score: number): RunState {
   const fr = createFranchise("Threshold Story", draft(), seed, result(score), 10);
   return {
     ...initialRun("Threshold Studio", "steady"),
     cash: 5_000_000,
     officeLevel: 2,
-    mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"] as const,
+    mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
     franchises: { "Threshold Story": fr },
   };
 }
