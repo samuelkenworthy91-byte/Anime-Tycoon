@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Draft } from "../data";
-import { createFranchise } from "../franchise";
+import { SEQUEL_SCORE_THRESHOLD, createFranchise } from "../franchise";
 import { initialRun, startBlockReason, startProject, type RunState } from "../state";
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -49,12 +49,19 @@ function runWithScore(score: number): RunState {
 }
 
 describe("state-level sequel rights", () => {
-  it("refuses Season 2 at 31/40 but leaves the reboot route greenlightable", () => {
+  it("uses the shared 32/40 sequel-rights floor", () => {
+    expect(SEQUEL_SCORE_THRESHOLD).toBe(32);
+  });
+
+  it("refuses Season 2 and sequel film at 31/40 but leaves the reboot route greenlightable", () => {
     const run = runWithScore(31);
     const season = draft({ franchiseKey: "Threshold Story", continuation: "season", season: 2 });
+    const movie = draft({ franchiseKey: "Threshold Story", continuation: "movie", medium: "movie", season: 1 });
     const reboot = draft({ franchiseKey: "Threshold Story", continuation: "reboot", season: 2 });
     expect(startBlockReason(run, season)).toContain("32/40");
+    expect(startBlockReason(run, movie)).toContain("32/40");
     expect(startProject(run, season)).toBeNull();
+    expect(startProject(run, movie)).toBeNull();
     expect(startBlockReason(run, reboot)).toBeNull();
     expect(startProject(run, reboot)).toBeTruthy();
   });
