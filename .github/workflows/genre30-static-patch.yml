@@ -5,7 +5,7 @@ on:
     branches:
       - work/genre30-full-integration
     paths:
-      - game_source/scripts/finalize-genre30-static.mjs
+      - game_source/scripts/finalize-genre30-static-2.mjs
 
 permissions:
   contents: write
@@ -21,10 +21,10 @@ jobs:
         with:
           node-version: 22
       - name: Apply static 30-genre patches
-        run: node game_source/scripts/finalize-genre30-static.mjs
+        run: node game_source/scripts/finalize-genre30-static-2.mjs
       - name: Commit patched sources
         run: |
-          rm -f game_source/scripts/finalize-genre30-static.mjs .github/workflows/genre30-static-patch.yml
+          rm -f game_source/scripts/finalize-genre30-static.mjs game_source/scripts/finalize-genre30-static-2.mjs .github/workflows/genre30-static-patch.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
