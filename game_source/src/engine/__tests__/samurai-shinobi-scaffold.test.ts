@@ -18,14 +18,15 @@ import { ensureCareer, rollHire } from "../careers";
 import { ARCS } from "../data";
 
 const LEGACY_EXPANSION_IDS = ["samurai", "shinobi"] as GenreId[];
-const CURRENT_EXPANSION_IDS = ["vampire", "grimdark"] as GenreId[];
-const ALL_EXPANSION_IDS = [...LEGACY_EXPANSION_IDS, ...CURRENT_EXPANSION_IDS];
+const V5_EXPANSION_IDS = ["vampire", "grimdark"] as GenreId[];
+const GENRE30_EXPANSION_IDS = ["monster_taming", "crime", "kaiju", "cosmic_horror", "arabia"] as GenreId[];
+const ALL_EXPANSION_IDS = [...LEGACY_EXPANSION_IDS, ...V5_EXPANSION_IDS, ...GENRE30_EXPANSION_IDS];
 
 describe("canonical genre expansion regressions", () => {
-  it("exposes 25 active canonical genre ids", () => {
-    expect(GENRES).toHaveLength(25);
+  it("exposes 30 active canonical genre ids", () => {
+    expect(GENRES).toHaveLength(30);
     expect(ALL_EXPANSION_IDS.every((id) => GENRES.some((g) => g.id === id))).toBe(true);
-    expect(CANONICAL_GENRE_IDS).toHaveLength(25);
+    expect(CANONICAL_GENRE_IDS).toHaveLength(30);
     expect(GENRES.map((g) => g.id)).toEqual(CANONICAL_GENRE_IDS);
   });
 
@@ -56,7 +57,7 @@ describe("canonical genre expansion regressions", () => {
       expect(typeof market.genres[id]).toBe("number");
       expect(Number.isFinite(market.genres[id])).toBe(true);
     }
-    expect(Object.keys(market.genres)).toHaveLength(25);
+    expect(Object.keys(market.genres)).toHaveLength(30);
   });
 
   it("staff favourite-genre picking accepts canonical ids", () => {
@@ -83,8 +84,8 @@ describe("canonical genre expansion regressions", () => {
     }
   });
 
-  it("loads all 300 canonical pairs and their authored multipliers", () => {
-    expect(manifest.combos).toHaveLength(300);
+  it("loads all 435 canonical pairs and their authored multipliers", () => {
+    expect(manifest.combos).toHaveLength(435);
     for (const pair of manifest.combos) {
       expect(comboMult([pair.genre_1, pair.genre_2] as GenreId[])).toBe(pair.learned_multiplier);
     }
@@ -92,6 +93,11 @@ describe("canonical genre expansion regressions", () => {
     expect(COMBO[comboKey(["shinobi", "mystery"])]).toBe(1.22);
     expect(COMBO[comboKey(["vampire", "horror"] as GenreId[])]).toBe(1.27);
     expect(COMBO[comboKey(["grimdark", "space"] as GenreId[])]).toBe(1.27);
+    expect(comboMult(["monster_taming", "kaiju"] as GenreId[])).toBeGreaterThan(1.2);
+    expect(comboMult(["crime", "mystery"] as GenreId[])).toBeGreaterThan(1.2);
+    expect(comboMult(["kaiju", "mecha"] as GenreId[])).toBeGreaterThan(1.2);
+    expect(comboMult(["cosmic_horror", "space"] as GenreId[])).toBeGreaterThan(1.2);
+    expect(comboMult(["arabia", "fantasy"] as GenreId[])).toBeGreaterThan(1.2);
   });
 
   it("migration accepts expansion ids and preserves old sparse records", () => {
@@ -119,6 +125,7 @@ describe("canonical genre expansion regressions", () => {
     expect(r.genresUnlocked).toContain("fantasy");
     expect(r.genresUnlocked).not.toContain("samurai");
     expect(r.genresUnlocked).not.toContain("vampire" as GenreId);
+    for (const id of GENRE30_EXPANSION_IDS) expect(r.genresUnlocked).not.toContain(id);
     for (const id of ALL_EXPANSION_IDS) expect(r.market.genres[id]).toBeDefined();
   });
 });

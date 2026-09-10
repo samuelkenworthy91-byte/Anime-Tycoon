@@ -15,7 +15,7 @@ describe("strict Role × Type pair closure", () => {
   const result = computeCoverage();
 
   it("enumerates every unordered pair from the active genre catalog", () => {
-    expect(GENRES).toHaveLength(25);
+    expect(GENRES).toHaveLength(30);
     expect(result.pairs).toBe(expectedPairs);
     expect(genrePairs()).toHaveLength(expectedPairs);
     expect(new Set(genrePairs().map(([a, b]) => [a, b].sort().join("|"))).size).toBe(expectedPairs);
@@ -28,14 +28,14 @@ describe("strict Role × Type pair closure", () => {
   });
 
   it("audits every strict Role × Type × genre-pair cell", () => {
-    expect(expectedPairs).toBe(300);
+    expect(expectedPairs).toBe(435);
     expect(result.required).toBe(expectedCells);
-    expect(result.required).toBe(2400);
+    expect(result.required).toBe(3480);
     expect(result.cells).toHaveLength(expectedCells);
   });
 
   it("has a same-member witness in the exact role/type bucket for every cell", () => {
-    expect(CAST_V2).toHaveLength(920);
+    expect(CAST_V2).toHaveLength(1440);
     expect(result.covered).toBe(result.required);
     for (const cell of result.cells) {
       expect(cell.covered, `${cell.group}/${cell.pair.join("|")}`).toBe(true);

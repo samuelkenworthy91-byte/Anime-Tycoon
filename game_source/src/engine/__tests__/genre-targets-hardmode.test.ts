@@ -91,7 +91,7 @@ describe("hard-mode direction fingerprints", () => {
       count++;
     }
     expect(count).toBe(expectedPairs);
-    expect(count).toBe(300);
+    expect(count).toBe(435);
     expect(triples.size).toBe(expectedPairs);
   });
 });

@@ -18,25 +18,25 @@ const ROLES: [string, CastMember[]][] = [
   ["mascot", PETS],
   ["villain", VILLAINS],
 ];
-const ROLE_TOTALS: Record<string, number> = { lead: 231, sidekick: 227, mascot: 230, villain: 232 };
+const ROLE_TOTALS: Record<string, number> = { lead: 361, sidekick: 357, mascot: 360, villain: 362 };
 const ROLE_TYPE_TOTALS: Record<string, number> = {
-  "lead:shonen": 113,
-  "lead:shojo": 118,
-  "sidekick:shonen": 112,
-  "sidekick:shojo": 115,
-  "mascot:shonen": 113,
-  "mascot:shojo": 117,
-  "villain:shonen": 115,
-  "villain:shojo": 117,
+  "lead:shonen": 178,
+  "lead:shojo": 183,
+  "sidekick:shonen": 177,
+  "sidekick:shojo": 180,
+  "mascot:shonen": 178,
+  "mascot:shojo": 182,
+  "villain:shonen": 180,
+  "villain:shojo": 182,
 };
 const TYPES: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 const expectedPairs = (CANONICAL_GENRE_IDS.length * (CANONICAL_GENRE_IDS.length - 1)) / 2;
 
-describe("canonical 25-genre cast roster", () => {
-  it("contains exactly 920 unique selectable IDs while preserving all four roles", () => {
-    expect(CAST_V2).toHaveLength(920);
-    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(920);
+describe("canonical 30-genre cast roster", () => {
+  it("contains exactly 1440 unique selectable IDs while preserving all four roles", () => {
+    expect(CAST_V2).toHaveLength(1440);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(1440);
     for (const [role, members] of ROLES) expect(members, role).toHaveLength(ROLE_TOTALS[role]);
     expect(ROLES.flatMap(([, members]) => members).map((member) => member.id).sort())
       .toEqual(CAST_V2.map((member) => member.id).sort());
@@ -79,11 +79,11 @@ describe("canonical 25-genre cast roster", () => {
       }
     }
     expect(measured).toBe(expectedPairs);
-    expect(measured).toBe(300);
+    expect(measured).toBe(435);
   });
 
-  it("includes Samurai, Shinobi, Vampire and Grimdark in canonical content", () => {
-    for (const id of ["samurai", "shinobi", "vampire", "grimdark"] as GenreId[]) {
+  it("includes every expansion genre in canonical content", () => {
+    for (const id of ["samurai", "shinobi", "vampire", "grimdark", "monster_taming", "crime", "kaiju", "cosmic_horror", "arabia"] as GenreId[]) {
       expect(CAST_V2.some((member) => affinities(member).includes(id))).toBe(true);
       expect(CANONICAL_GENRE_IDS).toContain(id);
     }

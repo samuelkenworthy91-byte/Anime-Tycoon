@@ -41,12 +41,12 @@ const affinities = (member: { visibleAff: [GenreId, GenreId]; hiddenAff: GenreId
 const pairs: [GenreId, GenreId][] = CANONICAL_GENRE_IDS.flatMap((a, index) => CANONICAL_GENRE_IDS.slice(index + 1).map((b) => [a, b] as [GenreId, GenreId]));
 
 describe("Cast V4 canonical mechanics after runtime integration", () => {
-  it("keeps exactly 304 locked V4 stable IDs inside the expanded 920-member live roster", () => {
+  it("keeps exactly 304 locked V4 stable IDs inside the expanded 1,440-member live roster", () => {
     expect(mechanics).toHaveLength(304);
     expect(new Set(mechanics.map((member) => member.id)).size).toBe(304);
     expect(new Set(mechanics.map((member) => member.filename)).size).toBe(304);
-    expect(CAST_V2).toHaveLength(920);
-    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(920);
+    expect(CAST_V2).toHaveLength(1440);
+    expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(1440);
 
     const liveById = new Map(CAST_V2.map((member) => [member.id, member]));
     for (const expected of mechanics) {
@@ -75,8 +75,8 @@ describe("Cast V4 canonical mechanics after runtime integration", () => {
     }
   });
 
-  it("permanently closes all 2,400 strict role/type genre-pair cells", () => {
-    expect(pairs).toHaveLength(300);
+  it("permanently closes all 3,480 strict role/type genre-pair cells", () => {
+    expect(pairs).toHaveLength(435);
     let coveredCells = 0;
     for (const role of roles) for (const type of types) {
       const members = CAST_V2.filter((member) => member.role === role && member.type === type);
@@ -89,6 +89,6 @@ describe("Cast V4 canonical mechanics after runtime integration", () => {
         coveredCells += Number(witness);
       }
     }
-    expect(coveredCells).toBe(2400);
+    expect(coveredCells).toBe(3480);
   });
 });

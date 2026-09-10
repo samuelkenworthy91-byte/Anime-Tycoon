@@ -1,11 +1,11 @@
 /* ============================================================================
- * CAST V4 COVERAGE — strict Role × Anime Type × genre-pair invariant
+ * CANONICAL CAST COVERAGE — strict Role × Anime Type × genre-pair invariant
  *
- * 23 canonical genres produce 253 unordered pairs. The final 736-character
+ * The generated canonical genre catalog defines the unordered pair matrix. The live
  * roster must provide a same-character witness for every pair inside each of
  * the eight exact Role × Anime Type buckets:
  *
- *   4 roles × 2 anime types × 253 pairs = 2,024 required cells.
+ *   At 30 genres: 4 roles × 2 anime types × 435 pairs = 3,480 required cells.
  *
  * A witness carries BOTH genres anywhere among visibleAff + hiddenAff.
  * Hidden affinity counts mechanically but remains hidden from public copy.
@@ -24,7 +24,7 @@ export interface CoverageCell {
   witness?: string;
 }
 
-/** all unordered canonical genre pairs — exactly 253 for 23 genres */
+/** All unordered pairs from the generated canonical genre catalog. */
 export function genrePairs(genres: GenreId[] = CANONICAL_GENRE_IDS): [GenreId, GenreId][] {
   const out: [GenreId, GenreId][] = [];
   for (let i = 0; i < genres.length; i += 1) {
