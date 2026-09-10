@@ -81,7 +81,7 @@
     {"id":"g30_combo_crime_romance","name":"Love on the Ledger","arcs":["g30_cr_familydebt","g30_cr_burnedinformant","confession"],"q":4,"f":0.03,"ordered":true},
     {"id":"g30_combo_crime_vampire","name":"Night Syndicate","arcs":["vg_hunterswarrant","g30_x_occultsyndicate","g30_cr_kingpinfall"],"q":5,"f":0.02,"ordered":true},
     {"id":"g30_combo_kaiju_mecha","name":"Steel Against Scale","arcs":["g30_kj_defenseforce","g30_kj_weaponfails","g30_kj_finalcolossus"],"q":5,"f":0.03,"ordered":true},
-    {"id":"g30_combo_kaiju_survival","name":"Get Them Out Alive","arcs":["g30_kj_firstsiren","g30_kj_evacline","narr_rescue"],"q":4,"f":0.03,"ordered":true},
+    {"id":"g30_combo_kaiju_survival","name":"Get Them Out Alive","arcs":["g30_kj_firstsiren","g30_kj_evacline","g30_kj_citybreaker"],"q":4,"f":0.03,"ordered":true},
     {"id":"g30_combo_kaiju_myth","name":"The Old Monster Was a Warning","arcs":["g30_kj_ecology","g30_x_sandcolossus","g30_kj_finalcolossus"],"q":5,"f":0.02,"ordered":true},
     {"id":"g30_combo_cosmic_mystery","name":"The Case That Should Stay Closed","arcs":["g30_ch_forbiddentext","g30_ch_cultplain","case"],"q":5,"f":0.02,"ordered":true},
     {"id":"g30_combo_cosmic_space","name":"Signal Beyond the Map","arcs":["g30_ch_dreamsignal","g30_x_stardevourer","g30_ch_wrongsky"],"q":6,"f":0.02,"ordered":true},
