@@ -1,0 +1,298 @@
+
+> anime-runner@0.0.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source[39m
+
+ [32m✓[39m src/engine/__tests__/franchise.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 105[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/careers.test.ts [2m([22m[2m35 tests[22m[2m)[22m[32m 128[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/rivals.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/market.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 209[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/facilities.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/legacy.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 226[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/awards.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/projects.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/research-awards.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [31m❯[39m src/engine/__tests__/season-flow.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 75[2mms[22m[39m
+[31m     [31m×[31m greenlights and finishes S2 while S1 is still on air[39m[32m 39[2mms[22m[39m
+[31m     [31m×[31m blocks a second production of the same next season[39m[32m 15[2mms[22m[39m
+[31m     [31m×[31m spends the quick-start pendingSequel the moment the season is greenlit[39m[32m 7[2mms[22m[39m
+     [32m✓[39m startBlockReason explains a greenlight the studio cannot afford[32m 1[2mms[22m[39m
+[31m     [31m×[31m is a pure read and itemises exactly what tickWeek will move[39m[32m 5[2mms[22m[39m
+     [32m✓[39m non-payroll weeks carry no wages, and airing projects do not burn[32m 6[2mms[22m[39m
+[90mstdout[2m | scripts/scoring-balance.test.ts
+[22m[39m
+== DETERMINISTIC SCORING MATRIX (1000 rolls/case) → /home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source/docs/SCORING_BALANCE_MATRIX.json
+{
+  "150": {
+    "mean": 5.958,
+    "p10": 5.75,
+    "p90": 6.25,
+    "hof": 0
+  },
+  "250": {
+    "mean": 6.301,
+    "p10": 6,
+    "p90": 6.5,
+    "hof": 0
+  },
+  "350": {
+    "mean": 6.776,
+    "p10": 6.5,
+    "p90": 7,
+    "hof": 0
+  },
+  "450": {
+    "mean": 7.061,
+    "p10": 6.75,
+    "p90": 7.25,
+    "hof": 0
+  },
+  "600": {
+    "mean": 7.311,
+    "p10": 7,
+    "p90": 7.5,
+    "hof": 0
+  },
+  "800": {
+    "mean": 7.74,
+    "p10": 7.5,
+    "p90": 8,
+    "hof": 0.278
+  },
+  "1000": {
+    "mean": 7.996,
+    "p10": 7.75,
+    "p90": 8.25,
+    "hof": 0.71
+  },
+  "1200": {
+    "mean": 8.095,
+    "p10": 7.75,
+    "p90": 8.25,
+    "hof": 0.85
+  }
+}
+┌─────────────┬───────┬─────────┬─────────┐
+│ (index)     │ mean  │ hof     │ ten     │
+├─────────────┼───────┼─────────┼─────────┤
+│ poor        │ [33m4[39m     │ [32m'0.0%'[39m  │ [32m'0.00%'[39m │
+│ mediocre    │ [33m4.827[39m │ [32m'0.0%'[39m  │ [32m'0.00%'[39m │
+│ competent   │ [33m6.495[39m │ [32m'0.0%'[39m  │ [32m'0.00%'[39m │
+│ strong      │ [33m7.4[39m   │ [32m'0.0%'[39m  │ [32m'0.00%'[39m │
+│ exceptional │ [33m8.571[39m │ [32m'99.8%'[39m │ [32m'8.90%'[39m │
+└─────────────┴───────┴─────────┴─────────┘
+
+ [32m✓[39m scripts/scoring-balance.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/automation.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-v2.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/consequences-followup.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/fanweb-commercial.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 206[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/ip-expansion.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/longrun.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 2290[2mms[22m[39m
+     [33m[2m✓[22m[39m survives twelve years with a sane economy across several careers [33m 1799[2mms[22m[39m
+     [33m[2m✓[22m[39m rivals keep producing across a career instead of stagnating [33m 487[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/poster.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/rivalPosters.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/showrunner-expansion.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/samurai-shinobi-scaffold.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+[90mstdout[2m | scripts/cast-v2-balance.test.ts
+[22m[39m{
+  "trialsPerScenario": 400,
+  "genre": "romance",
+  "results": {
+    "A_no_affinity": {
+      "averageRating": 16,
+      "averageSales": 124927,
+      "averageRevenue": 324810,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "B_one_visible": {
+      "averageRating": 16,
+      "averageSales": 128363,
+      "averageRevenue": 333743,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "C_four_visible": {
+      "averageRating": 16.203,
+      "averageSales": 134873,
+      "averageRevenue": 350669,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "D_one_hidden": {
+      "averageRating": 16,
+      "averageSales": 131798,
+      "averageRevenue": 342675,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "E_two_hidden": {
+      "averageRating": 16,
+      "averageSales": 135577,
+      "averageRevenue": 352501,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "F_four_hidden": {
+      "averageRating": 16.672,
+      "averageSales": 147911,
+      "averageRevenue": 384568,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "G_perfect_cast_poor_production": {
+      "averageRating": 16,
+      "averageSales": 101326,
+      "averageRevenue": 263447,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "H_poor_cast_excellent_production": {
+      "averageRating": 16,
+      "averageSales": 164904,
+      "averageRevenue": 428750,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    },
+    "I_perfect_cast_excellent_production": {
+      "averageRating": 20.262,
+      "averageSales": 246715,
+      "averageRevenue": 641459,
+      "failureRate": 0,
+      "hitRate": 0,
+      "blockbusterRate": 0
+    }
+  }
+}
+
+ [32m✓[39m scripts/cast-v2-balance.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/format-progression.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-v4-staging-mechanics.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 161[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/deeper-loop.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/events.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/genre-targets-hardmode.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/audience-time.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/kairosoft-production.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/gds-production.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/intensive-development.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/project-pulses.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/awards-polish.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-coverage.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 208[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/staff-depth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[90mstdout[2m | src/engine/__tests__/content-v3.test.ts[2m > [22m[2mV3 content integration[2m > [22m[2mmixes every role without omissions, mutation or hidden-affinity influence
+[22m[39mprotag: longest visible-genre run 7 → 1
+secondary: longest visible-genre run 6 → 1
+pet: longest visible-genre run 6 → 1
+villain: longest visible-genre run 5 → 1
+
+ [32m✓[39m src/engine/__tests__/content-v3.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 219[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/creative-discovery.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/assets.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/difficulty.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/strategic-expansion.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/edit-balance.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/arc-discovery.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/annual-auction-hidden-arcs.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/decision-hardmode.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-display-filter.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/playtest-qol.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/sequel-rights-integration.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-v4-runtime-assets.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 149[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/rush-edit-tuning.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/insolvency.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/staff-999.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-coverage-2024.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 390[2mms[22m[39m
+     [33m[2m✓[22m[39m has a same-member witness in the exact role/type bucket for every cell [33m 379[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/speed-eta.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/early-reception.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/floor.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/office-shell.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/studio-knowledge.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/cast-portraits.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+ [32m✓[39m src/engine/__tests__/starting-genres.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/engine/__tests__/season-flow.test.ts[2m > [22mmulti-season airing loop[2m > [22mgreenlights and finishes S2 while S1 is still on air
+[31m[1mAssertionError[22m: expected null to be truthy[39m
+
+[32m- Expected:[39m
+true
+
+[31m+ Received:[39m
+null
+
+[36m [2m❯[22m src/engine/__tests__/season-flow.test.ts:[2m95:22[22m[39m
+    [90m 93|[39m     /* greenlight S2 while S1 is STILL airing — capacity should allow …
+    [90m 94|[39m     [35mconst[39m started2 [33m=[39m [34mstartProject[39m(r[33m,[39m [34mseasonDraftFor[39m(r[33m,[39m frKey))[33m;[39m
+    [90m 95|[39m     [34mexpect[39m(started2)[33m.[39m[34mtoBeTruthy[39m()[33m;[39m
+    [90m   |[39m                      [31m^[39m
+    [90m 96|[39m     r [33m=[39m started2[33m![39m[33m;[39m
+    [90m 97|[39m     [35mconst[39m p2 [33m=[39m [34mactiveProjects[39m(r[33m.[39mprojects)[[34m0[39m][33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/engine/__tests__/season-flow.test.ts[2m > [22mmulti-season airing loop[2m > [22mblocks a second production of the same next season
+[31m[1mTypeError[22m: Cannot read properties of null (reading 'franchises')[39m
+[36m [2m❯[22m seasonDraftFor src/engine/__tests__/season-flow.test.ts:[2m76:16[22m[39m
+    [90m 74|[39m
+    [90m 75|[39m [35mconst[39m seasonDraftFor [33m=[39m (r[33m:[39m [33mRunState[39m[33m,[39m frKey[33m:[39m string)[33m:[39m [33mDraft[39m [33m=>[39m {
+    [90m 76|[39m   [35mconst[39m fr [33m=[39m r[33m.[39mfranchises[frKey][33m;[39m
+    [90m   |[39m                [31m^[39m
+    [90m 77|[39m   [35mreturn[39m [34mdraft[39m({
+    [90m 78|[39m     title[33m:[39m [32m`[39m[36m${[39mfr[33m.[39mbaseTitle[36m}[39m[32m S[39m[36m${[39mfr[33m.[39mseason [33m+[39m [34m1[39m[36m}[39m[32m`[39m[33m,[39m
+[90m [2m❯[22m src/engine/__tests__/season-flow.test.ts:[2m136:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/engine/__tests__/season-flow.test.ts[2m > [22mmulti-season airing loop[2m > [22mspends the quick-start pendingSequel the moment the season is greenlit
+[31m[1mTypeError[22m: Cannot read properties of null (reading 'pendingSequel')[39m
+[36m [2m❯[22m src/engine/__tests__/season-flow.test.ts:[2m152:14[22m[39m
+    [90m150|[39m        season must leave it spent (null) afterwards */[39m
+    [90m151|[39m     r [33m=[39m [34mstartProject[39m(r[33m,[39m [34mseasonDraftFor[39m(r[33m,[39m frKey))[33m![39m[33m;[39m
+    [90m152|[39m     [34mexpect[39m(r[33m.[39mpendingSequel)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   |[39m              [31m^[39m
+    [90m153|[39m   }[33m,[39m [34m30000[39m)[33m;[39m
+    [90m154|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/engine/__tests__/season-flow.test.ts[2m > [22mforecastWeek[2m > [22mis a pure read and itemises exactly what tickWeek will move
+[31m[1mTypeError[22m: Cannot read properties of null (reading 'week')[39m
+[36m [2m❯[22m src/engine/__tests__/season-flow.test.ts:[2m172:15[22m[39m
+    [90m170|[39m     /* walk the calendar to the eve of a payroll week while S1 payouts…
+    [90m171|[39m        still landing (12 weekly chunks from release) */[39m
+    [90m172|[39m     [35mwhile[39m ((r[33m.[39mweek [33m+[39m [34m1[39m) [33m%[39m [34m4[39m [33m!==[39m [34m0[39m) r [33m=[39m [34madvanceWeeks[39m(r[33m,[39m [34m1[39m)[33m;[39m
+    [90m   |[39m               [31m^[39m
+    [90m173|[39m     [34mexpect[39m(r[33m.[39mpayouts[33m.[39m[34msome[39m((p) [33m=>[39m p[33m.[39mweek [33m===[39m r[33m.[39mweek [33m+[39m [34m1[39m))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m174|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m58 passed[39m[22m[90m (59)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m502 passed[39m[22m[90m (506)[39m
+[2m   Start at [22m 11:26:08
+[2m   Duration [22m 11.86s[2m (transform 2.09s, setup 0ms, import 19.43s, tests 5.79s, environment 9ms)[22m
+
+
+::error file=/home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source/src/engine/__tests__/season-flow.test.ts,title=src/engine/__tests__/season-flow.test.ts > multi-season airing loop > greenlights and finishes S2 while S1 is still on air,line=95,column=22::AssertionError: expected null to be truthy%0A%0A- Expected:%0Atrue%0A%0A+ Received:%0Anull%0A%0A ❯ src/engine/__tests__/season-flow.test.ts:95:22%0A%0A
+
+::error file=/home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source/src/engine/__tests__/season-flow.test.ts,title=src/engine/__tests__/season-flow.test.ts > multi-season airing loop > blocks a second production of the same next season,line=76,column=16::TypeError: Cannot read properties of null (reading 'franchises')%0A ❯ seasonDraftFor src/engine/__tests__/season-flow.test.ts:76:16%0A ❯ src/engine/__tests__/season-flow.test.ts:136:17%0A%0A
+
+::error file=/home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source/src/engine/__tests__/season-flow.test.ts,title=src/engine/__tests__/season-flow.test.ts > multi-season airing loop > spends the quick-start pendingSequel the moment the season is greenlit,line=152,column=14::TypeError: Cannot read properties of null (reading 'pendingSequel')%0A ❯ src/engine/__tests__/season-flow.test.ts:152:14%0A%0A
+
+::error file=/home/runner/work/Anime-Tycoon/Anime-Tycoon/game_source/src/engine/__tests__/season-flow.test.ts,title=src/engine/__tests__/season-flow.test.ts > forecastWeek > is a pure read and itemises exactly what tickWeek will move,line=172,column=15::TypeError: Cannot read properties of null (reading 'week')%0A ❯ src/engine/__tests__/season-flow.test.ts:172:15%0A%0A
+TEST_EXIT_CODE=1
