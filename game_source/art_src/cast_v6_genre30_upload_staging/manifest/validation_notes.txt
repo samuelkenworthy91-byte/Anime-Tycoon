@@ -1,0 +1,7 @@
+Anime Runner 30 Genre Expansion validation
+52 source sheets generated in workbook order (S01-S52).
+520 portraits cropped and exported as square 768x768 PNG files.
+All portrait filenames exactly match workbook character_id/filename_png values.
+All seven portrait folder counts match their requested ranges.
+Divider lines were removed with a 3-pixel cell-edge inset.
+Portraits were center-square cropped and resized with Lanczos; no stretching was used.

@@ -1,0 +1,521 @@
+sequence,batch_code,sheet_code,sheet_position,character_id,filename_png,name,epithet,role,anime_type,visible_genre_1,visible_genre_2,hidden_genre,staging_filename_webp
+1,B01,S01,R1C1,g30_protag_shonen_001,g30_protag_shonen_001.png,Cassian Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,kaiju,g30_protag_shonen_001.webp
+2,B01,S01,R1C2,g30_protag_shonen_002,g30_protag_shonen_002.png,Ren Locke,The Ashen Viper,protag,shonen,monster_taming,cosmic_horror,arabia,g30_protag_shonen_002.webp
+3,B01,S01,R1C3,g30_protag_shonen_003,g30_protag_shonen_003.png,Soraya Mirren,The Cinder Corsair,protag,shonen,crime,cosmic_horror,mecha,g30_protag_shonen_003.webp
+4,B01,S01,R1C4,g30_protag_shonen_004,g30_protag_shonen_004.png,Nadia Crowe,The Ashen Viper,protag,shonen,kaiju,arabia,mecha,g30_protag_shonen_004.webp
+5,B01,S01,R1C5,g30_protag_shonen_005,g30_protag_shonen_005.png,Asha Locke,The Cinder Corsair,protag,shonen,crime,arabia,isekai,g30_protag_shonen_005.webp
+6,B01,S01,R2C1,g30_protag_shonen_006,g30_protag_shonen_006.png,Lio Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,isekai,g30_protag_shonen_006.webp
+7,B01,S01,R2C2,g30_protag_shonen_007,g30_protag_shonen_007.png,Kael Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,slice,g30_protag_shonen_007.webp
+8,B01,S01,R2C3,g30_protag_shonen_008,g30_protag_shonen_008.png,Soren Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,slice,g30_protag_shonen_008.webp
+9,B01,S01,R2C4,g30_protag_shonen_009,g30_protag_shonen_009.png,Riven Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,horror,g30_protag_shonen_009.webp
+10,B01,S01,R2C5,g30_protag_shonen_010,g30_protag_shonen_010.png,Darian Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,horror,g30_protag_shonen_010.webp
+11,B01,S02,R1C1,g30_protag_shonen_011,g30_protag_shonen_011.png,Yara Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,romance,g30_protag_shonen_011.webp
+12,B01,S02,R1C2,g30_protag_shonen_012,g30_protag_shonen_012.png,Selene Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,romance,g30_protag_shonen_012.webp
+13,B01,S02,R1C3,g30_protag_shonen_013,g30_protag_shonen_013.png,Kestrel Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,sports,g30_protag_shonen_013.webp
+14,B01,S02,R1C4,g30_protag_shonen_014,g30_protag_shonen_014.png,Jin Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,sports,g30_protag_shonen_014.webp
+15,B01,S02,R1C5,g30_protag_shonen_015,g30_protag_shonen_015.png,Aziel Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,cyber,g30_protag_shonen_015.webp
+16,B01,S02,R2C1,g30_protag_shonen_016,g30_protag_shonen_016.png,Cassian Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,cyber,g30_protag_shonen_016.webp
+17,B01,S02,R2C2,g30_protag_shonen_017,g30_protag_shonen_017.png,Ren Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,fantasy,g30_protag_shonen_017.webp
+18,B01,S02,R2C3,g30_protag_shonen_018,g30_protag_shonen_018.png,Soraya Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,fantasy,g30_protag_shonen_018.webp
+19,B01,S02,R2C4,g30_protag_shonen_019,g30_protag_shonen_019.png,Nadia Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,idol,g30_protag_shonen_019.webp
+20,B01,S02,R2C5,g30_protag_shonen_020,g30_protag_shonen_020.png,Asha Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,idol,g30_protag_shonen_020.webp
+21,B01,S03,R1C1,g30_protag_shonen_021,g30_protag_shonen_021.png,Lio Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,mystery,g30_protag_shonen_021.webp
+22,B01,S03,R1C2,g30_protag_shonen_022,g30_protag_shonen_022.png,Kael Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,mystery,g30_protag_shonen_022.webp
+23,B01,S03,R1C3,g30_protag_shonen_023,g30_protag_shonen_023.png,Soren Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,comedy,g30_protag_shonen_023.webp
+24,B01,S03,R1C4,g30_protag_shonen_024,g30_protag_shonen_024.png,Riven Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,comedy,g30_protag_shonen_024.webp
+25,B01,S03,R1C5,g30_protag_shonen_025,g30_protag_shonen_025.png,Darian Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,cooking,g30_protag_shonen_025.webp
+26,B01,S03,R2C1,g30_protag_shonen_026,g30_protag_shonen_026.png,Yara Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,cooking,g30_protag_shonen_026.webp
+27,B01,S03,R2C2,g30_protag_shonen_027,g30_protag_shonen_027.png,Selene Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,military,g30_protag_shonen_027.webp
+28,B01,S03,R2C3,g30_protag_shonen_028,g30_protag_shonen_028.png,Kestrel Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,military,g30_protag_shonen_028.webp
+29,B01,S03,R2C4,g30_protag_shonen_029,g30_protag_shonen_029.png,Jin Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,supernatural,g30_protag_shonen_029.webp
+30,B01,S03,R2C5,g30_protag_shonen_030,g30_protag_shonen_030.png,Aziel Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,supernatural,g30_protag_shonen_030.webp
+31,B01,S04,R1C1,g30_protag_shonen_031,g30_protag_shonen_031.png,Cassian Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,space,g30_protag_shonen_031.webp
+32,B01,S04,R1C2,g30_protag_shonen_032,g30_protag_shonen_032.png,Ren Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,space,g30_protag_shonen_032.webp
+33,B01,S04,R1C3,g30_protag_shonen_033,g30_protag_shonen_033.png,Soraya Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,magical,g30_protag_shonen_033.webp
+34,B01,S04,R1C4,g30_protag_shonen_034,g30_protag_shonen_034.png,Nadia Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,magical,g30_protag_shonen_034.webp
+35,B01,S04,R1C5,g30_protag_shonen_035,g30_protag_shonen_035.png,Asha Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,survival,g30_protag_shonen_035.webp
+36,B01,S04,R2C1,g30_protag_shonen_036,g30_protag_shonen_036.png,Lio Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,survival,g30_protag_shonen_036.webp
+37,B01,S04,R2C2,g30_protag_shonen_037,g30_protag_shonen_037.png,Kael Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,pirate,g30_protag_shonen_037.webp
+38,B01,S04,R2C3,g30_protag_shonen_038,g30_protag_shonen_038.png,Soren Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,pirate,g30_protag_shonen_038.webp
+39,B01,S04,R2C4,g30_protag_shonen_039,g30_protag_shonen_039.png,Riven Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,martial,g30_protag_shonen_039.webp
+40,B01,S04,R2C5,g30_protag_shonen_040,g30_protag_shonen_040.png,Darian Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,martial,g30_protag_shonen_040.webp
+41,B01,S05,R1C1,g30_protag_shonen_041,g30_protag_shonen_041.png,Yara Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,mythology,g30_protag_shonen_041.webp
+42,B01,S05,R1C2,g30_protag_shonen_042,g30_protag_shonen_042.png,Selene Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,mythology,g30_protag_shonen_042.webp
+43,B01,S05,R1C3,g30_protag_shonen_043,g30_protag_shonen_043.png,Kestrel Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,nordic,g30_protag_shonen_043.webp
+44,B01,S05,R1C4,g30_protag_shonen_044,g30_protag_shonen_044.png,Jin Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,nordic,g30_protag_shonen_044.webp
+45,B01,S05,R1C5,g30_protag_shonen_045,g30_protag_shonen_045.png,Aziel Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,samurai,g30_protag_shonen_045.webp
+46,B01,S05,R2C1,g30_protag_shonen_046,g30_protag_shonen_046.png,Cassian Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,samurai,g30_protag_shonen_046.webp
+47,B01,S05,R2C2,g30_protag_shonen_047,g30_protag_shonen_047.png,Ren Locke,The Cinder Corsair,protag,shonen,monster_taming,crime,shinobi,g30_protag_shonen_047.webp
+48,B01,S05,R2C3,g30_protag_shonen_048,g30_protag_shonen_048.png,Soraya Mirren,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,shinobi,g30_protag_shonen_048.webp
+49,B01,S05,R2C4,g30_protag_shonen_049,g30_protag_shonen_049.png,Nadia Crowe,The Cinder Corsair,protag,shonen,monster_taming,crime,vampire,g30_protag_shonen_049.webp
+50,B01,S05,R2C5,g30_protag_shonen_050,g30_protag_shonen_050.png,Asha Locke,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,vampire,g30_protag_shonen_050.webp
+51,B01,S06,R1C1,g30_protag_shonen_051,g30_protag_shonen_051.png,Lio Mirren,The Cinder Corsair,protag,shonen,monster_taming,crime,grimdark,g30_protag_shonen_051.webp
+52,B01,S06,R1C2,g30_protag_shonen_052,g30_protag_shonen_052.png,Kael Crowe,The Ashen Viper,protag,shonen,kaiju,cosmic_horror,grimdark,g30_protag_shonen_052.webp
+53,B01,S06,R1C3,g30_protag_shonen_053,g30_protag_shonen_053.png,Soren Locke,The Cinder Corsair,protag,shonen,mecha,isekai,monster_taming,g30_protag_shonen_053.webp
+54,B01,S06,R1C4,g30_protag_shonen_054,g30_protag_shonen_054.png,Riven Mirren,The Ashen Viper,protag,shonen,slice,horror,arabia,g30_protag_shonen_054.webp
+55,B01,S06,R1C5,g30_protag_shonen_055,g30_protag_shonen_055.png,Darian Crowe,The Cinder Corsair,protag,shonen,romance,sports,arabia,g30_protag_shonen_055.webp
+56,B01,S06,R2C1,g30_protag_shonen_056,g30_protag_shonen_056.png,Yara Locke,The Ashen Viper,protag,shonen,cyber,fantasy,arabia,g30_protag_shonen_056.webp
+57,B01,S06,R2C2,g30_protag_shonen_057,g30_protag_shonen_057.png,Selene Mirren,The Cinder Corsair,protag,shonen,idol,mystery,arabia,g30_protag_shonen_057.webp
+58,B01,S06,R2C3,g30_protag_shonen_058,g30_protag_shonen_058.png,Kestrel Crowe,The Ashen Viper,protag,shonen,comedy,cooking,arabia,g30_protag_shonen_058.webp
+59,B01,S06,R2C4,g30_protag_shonen_059,g30_protag_shonen_059.png,Jin Locke,The Cinder Corsair,protag,shonen,military,supernatural,arabia,g30_protag_shonen_059.webp
+60,B01,S06,R2C5,g30_protag_shonen_060,g30_protag_shonen_060.png,Aziel Mirren,The Ashen Viper,protag,shonen,space,magical,arabia,g30_protag_shonen_060.webp
+61,B01,S07,R1C1,g30_protag_shonen_061,g30_protag_shonen_061.png,Cassian Crowe,The Cinder Corsair,protag,shonen,survival,pirate,arabia,g30_protag_shonen_061.webp
+62,B01,S07,R1C2,g30_protag_shonen_062,g30_protag_shonen_062.png,Ren Locke,The Ashen Viper,protag,shonen,martial,mythology,arabia,g30_protag_shonen_062.webp
+63,B01,S07,R1C3,g30_protag_shonen_063,g30_protag_shonen_063.png,Soraya Mirren,The Cinder Corsair,protag,shonen,nordic,samurai,arabia,g30_protag_shonen_063.webp
+64,B01,S07,R1C4,g30_protag_shonen_064,g30_protag_shonen_064.png,Nadia Crowe,The Ashen Viper,protag,shonen,shinobi,vampire,arabia,g30_protag_shonen_064.webp
+65,B01,S07,R1C5,g30_protag_shonen_065,g30_protag_shonen_065.png,Asha Locke,The Cinder Corsair,protag,shonen,monster_taming,arabia,grimdark,g30_protag_shonen_065.webp
+66,B01,S07,R2C1,g30_protag_shojo_001,g30_protag_shojo_001.png,Selene Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,kaiju,g30_protag_shojo_001.webp
+67,B01,S07,R2C2,g30_protag_shojo_002,g30_protag_shojo_002.png,Kestrel Crowe,The Glass Duelist,protag,shojo,monster_taming,cosmic_horror,arabia,g30_protag_shojo_002.webp
+68,B01,S07,R2C3,g30_protag_shojo_003,g30_protag_shojo_003.png,Jin Locke,The Dune Hunter,protag,shojo,crime,cosmic_horror,mecha,g30_protag_shojo_003.webp
+69,B01,S07,R2C4,g30_protag_shojo_004,g30_protag_shojo_004.png,Aziel Mirren,The Glass Duelist,protag,shojo,kaiju,arabia,mecha,g30_protag_shojo_004.webp
+70,B01,S07,R2C5,g30_protag_shojo_005,g30_protag_shojo_005.png,Cassian Crowe,The Dune Hunter,protag,shojo,crime,arabia,isekai,g30_protag_shojo_005.webp
+71,B01,S08,R1C1,g30_protag_shojo_006,g30_protag_shojo_006.png,Ren Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,isekai,g30_protag_shojo_006.webp
+72,B01,S08,R1C2,g30_protag_shojo_007,g30_protag_shojo_007.png,Soraya Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,slice,g30_protag_shojo_007.webp
+73,B01,S08,R1C3,g30_protag_shojo_008,g30_protag_shojo_008.png,Nadia Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,slice,g30_protag_shojo_008.webp
+74,B01,S08,R1C4,g30_protag_shojo_009,g30_protag_shojo_009.png,Asha Locke,The Dune Hunter,protag,shojo,monster_taming,crime,horror,g30_protag_shojo_009.webp
+75,B01,S08,R1C5,g30_protag_shojo_010,g30_protag_shojo_010.png,Lio Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,horror,g30_protag_shojo_010.webp
+76,B01,S08,R2C1,g30_protag_shojo_011,g30_protag_shojo_011.png,Kael Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,romance,g30_protag_shojo_011.webp
+77,B01,S08,R2C2,g30_protag_shojo_012,g30_protag_shojo_012.png,Soren Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,romance,g30_protag_shojo_012.webp
+78,B01,S08,R2C3,g30_protag_shojo_013,g30_protag_shojo_013.png,Riven Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,sports,g30_protag_shojo_013.webp
+79,B01,S08,R2C4,g30_protag_shojo_014,g30_protag_shojo_014.png,Darian Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,sports,g30_protag_shojo_014.webp
+80,B01,S08,R2C5,g30_protag_shojo_015,g30_protag_shojo_015.png,Yara Locke,The Dune Hunter,protag,shojo,monster_taming,crime,cyber,g30_protag_shojo_015.webp
+81,B01,S09,R1C1,g30_protag_shojo_016,g30_protag_shojo_016.png,Selene Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,cyber,g30_protag_shojo_016.webp
+82,B01,S09,R1C2,g30_protag_shojo_017,g30_protag_shojo_017.png,Kestrel Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,fantasy,g30_protag_shojo_017.webp
+83,B01,S09,R1C3,g30_protag_shojo_018,g30_protag_shojo_018.png,Jin Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,fantasy,g30_protag_shojo_018.webp
+84,B01,S09,R1C4,g30_protag_shojo_019,g30_protag_shojo_019.png,Aziel Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,idol,g30_protag_shojo_019.webp
+85,B01,S09,R1C5,g30_protag_shojo_020,g30_protag_shojo_020.png,Cassian Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,idol,g30_protag_shojo_020.webp
+86,B01,S09,R2C1,g30_protag_shojo_021,g30_protag_shojo_021.png,Ren Locke,The Dune Hunter,protag,shojo,monster_taming,crime,mystery,g30_protag_shojo_021.webp
+87,B01,S09,R2C2,g30_protag_shojo_022,g30_protag_shojo_022.png,Soraya Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,mystery,g30_protag_shojo_022.webp
+88,B01,S09,R2C3,g30_protag_shojo_023,g30_protag_shojo_023.png,Nadia Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,comedy,g30_protag_shojo_023.webp
+89,B01,S09,R2C4,g30_protag_shojo_024,g30_protag_shojo_024.png,Asha Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,comedy,g30_protag_shojo_024.webp
+90,B01,S09,R2C5,g30_protag_shojo_025,g30_protag_shojo_025.png,Lio Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,cooking,g30_protag_shojo_025.webp
+91,B01,S10,R1C1,g30_protag_shojo_026,g30_protag_shojo_026.png,Kael Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,cooking,g30_protag_shojo_026.webp
+92,B01,S10,R1C2,g30_protag_shojo_027,g30_protag_shojo_027.png,Soren Locke,The Dune Hunter,protag,shojo,monster_taming,crime,military,g30_protag_shojo_027.webp
+93,B01,S10,R1C3,g30_protag_shojo_028,g30_protag_shojo_028.png,Riven Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,military,g30_protag_shojo_028.webp
+94,B01,S10,R1C4,g30_protag_shojo_029,g30_protag_shojo_029.png,Darian Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,supernatural,g30_protag_shojo_029.webp
+95,B01,S10,R1C5,g30_protag_shojo_030,g30_protag_shojo_030.png,Yara Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,supernatural,g30_protag_shojo_030.webp
+96,B01,S10,R2C1,g30_protag_shojo_031,g30_protag_shojo_031.png,Selene Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,space,g30_protag_shojo_031.webp
+97,B01,S10,R2C2,g30_protag_shojo_032,g30_protag_shojo_032.png,Kestrel Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,space,g30_protag_shojo_032.webp
+98,B01,S10,R2C3,g30_protag_shojo_033,g30_protag_shojo_033.png,Jin Locke,The Dune Hunter,protag,shojo,monster_taming,crime,magical,g30_protag_shojo_033.webp
+99,B01,S10,R2C4,g30_protag_shojo_034,g30_protag_shojo_034.png,Aziel Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,magical,g30_protag_shojo_034.webp
+100,B01,S10,R2C5,g30_protag_shojo_035,g30_protag_shojo_035.png,Cassian Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,survival,g30_protag_shojo_035.webp
+101,B02,S11,R1C1,g30_protag_shojo_036,g30_protag_shojo_036.png,Ren Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,survival,g30_protag_shojo_036.webp
+102,B02,S11,R1C2,g30_protag_shojo_037,g30_protag_shojo_037.png,Soraya Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,pirate,g30_protag_shojo_037.webp
+103,B02,S11,R1C3,g30_protag_shojo_038,g30_protag_shojo_038.png,Nadia Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,pirate,g30_protag_shojo_038.webp
+104,B02,S11,R1C4,g30_protag_shojo_039,g30_protag_shojo_039.png,Asha Locke,The Dune Hunter,protag,shojo,monster_taming,crime,martial,g30_protag_shojo_039.webp
+105,B02,S11,R1C5,g30_protag_shojo_040,g30_protag_shojo_040.png,Lio Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,martial,g30_protag_shojo_040.webp
+106,B02,S11,R2C1,g30_protag_shojo_041,g30_protag_shojo_041.png,Kael Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,mythology,g30_protag_shojo_041.webp
+107,B02,S11,R2C2,g30_protag_shojo_042,g30_protag_shojo_042.png,Soren Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,mythology,g30_protag_shojo_042.webp
+108,B02,S11,R2C3,g30_protag_shojo_043,g30_protag_shojo_043.png,Riven Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,nordic,g30_protag_shojo_043.webp
+109,B02,S11,R2C4,g30_protag_shojo_044,g30_protag_shojo_044.png,Darian Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,nordic,g30_protag_shojo_044.webp
+110,B02,S11,R2C5,g30_protag_shojo_045,g30_protag_shojo_045.png,Yara Locke,The Dune Hunter,protag,shojo,monster_taming,crime,samurai,g30_protag_shojo_045.webp
+111,B02,S12,R1C1,g30_protag_shojo_046,g30_protag_shojo_046.png,Selene Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,samurai,g30_protag_shojo_046.webp
+112,B02,S12,R1C2,g30_protag_shojo_047,g30_protag_shojo_047.png,Kestrel Crowe,The Dune Hunter,protag,shojo,monster_taming,crime,shinobi,g30_protag_shojo_047.webp
+113,B02,S12,R1C3,g30_protag_shojo_048,g30_protag_shojo_048.png,Jin Locke,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,shinobi,g30_protag_shojo_048.webp
+114,B02,S12,R1C4,g30_protag_shojo_049,g30_protag_shojo_049.png,Aziel Mirren,The Dune Hunter,protag,shojo,monster_taming,crime,vampire,g30_protag_shojo_049.webp
+115,B02,S12,R1C5,g30_protag_shojo_050,g30_protag_shojo_050.png,Cassian Crowe,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,vampire,g30_protag_shojo_050.webp
+116,B02,S12,R2C1,g30_protag_shojo_051,g30_protag_shojo_051.png,Ren Locke,The Dune Hunter,protag,shojo,monster_taming,crime,grimdark,g30_protag_shojo_051.webp
+117,B02,S12,R2C2,g30_protag_shojo_052,g30_protag_shojo_052.png,Soraya Mirren,The Glass Duelist,protag,shojo,kaiju,cosmic_horror,grimdark,g30_protag_shojo_052.webp
+118,B02,S12,R2C3,g30_protag_shojo_053,g30_protag_shojo_053.png,Nadia Crowe,The Dune Hunter,protag,shojo,mecha,isekai,monster_taming,g30_protag_shojo_053.webp
+119,B02,S12,R2C4,g30_protag_shojo_054,g30_protag_shojo_054.png,Asha Locke,The Glass Duelist,protag,shojo,slice,horror,arabia,g30_protag_shojo_054.webp
+120,B02,S12,R2C5,g30_protag_shojo_055,g30_protag_shojo_055.png,Lio Mirren,The Dune Hunter,protag,shojo,romance,sports,arabia,g30_protag_shojo_055.webp
+121,B02,S13,R1C1,g30_protag_shojo_056,g30_protag_shojo_056.png,Kael Crowe,The Glass Duelist,protag,shojo,cyber,fantasy,arabia,g30_protag_shojo_056.webp
+122,B02,S13,R1C2,g30_protag_shojo_057,g30_protag_shojo_057.png,Soren Locke,The Dune Hunter,protag,shojo,idol,mystery,arabia,g30_protag_shojo_057.webp
+123,B02,S13,R1C3,g30_protag_shojo_058,g30_protag_shojo_058.png,Riven Mirren,The Glass Duelist,protag,shojo,comedy,cooking,arabia,g30_protag_shojo_058.webp
+124,B02,S13,R1C4,g30_protag_shojo_059,g30_protag_shojo_059.png,Darian Crowe,The Dune Hunter,protag,shojo,military,supernatural,arabia,g30_protag_shojo_059.webp
+125,B02,S13,R1C5,g30_protag_shojo_060,g30_protag_shojo_060.png,Yara Locke,The Glass Duelist,protag,shojo,space,magical,arabia,g30_protag_shojo_060.webp
+126,B02,S13,R2C1,g30_protag_shojo_061,g30_protag_shojo_061.png,Selene Mirren,The Dune Hunter,protag,shojo,survival,pirate,arabia,g30_protag_shojo_061.webp
+127,B02,S13,R2C2,g30_protag_shojo_062,g30_protag_shojo_062.png,Kestrel Crowe,The Glass Duelist,protag,shojo,martial,mythology,arabia,g30_protag_shojo_062.webp
+128,B02,S13,R2C3,g30_protag_shojo_063,g30_protag_shojo_063.png,Jin Locke,The Dune Hunter,protag,shojo,nordic,samurai,arabia,g30_protag_shojo_063.webp
+129,B02,S13,R2C4,g30_protag_shojo_064,g30_protag_shojo_064.png,Aziel Mirren,The Glass Duelist,protag,shojo,shinobi,vampire,arabia,g30_protag_shojo_064.webp
+130,B02,S13,R2C5,g30_protag_shojo_065,g30_protag_shojo_065.png,Cassian Crowe,The Dune Hunter,protag,shojo,monster_taming,arabia,grimdark,g30_protag_shojo_065.webp
+131,B02,S14,R1C1,g30_secondary_shonen_001,g30_secondary_shonen_001.png,Soren Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,kaiju,g30_secondary_shonen_001.webp
+132,B02,S14,R1C2,g30_secondary_shonen_002,g30_secondary_shonen_002.png,Riven Mirren,The Cinder Corsair,secondary,shonen,monster_taming,cosmic_horror,arabia,g30_secondary_shonen_002.webp
+133,B02,S14,R1C3,g30_secondary_shonen_003,g30_secondary_shonen_003.png,Darian Crowe,The Ashen Viper,secondary,shonen,crime,cosmic_horror,mecha,g30_secondary_shonen_003.webp
+134,B02,S14,R1C4,g30_secondary_shonen_004,g30_secondary_shonen_004.png,Yara Locke,The Cinder Corsair,secondary,shonen,kaiju,arabia,mecha,g30_secondary_shonen_004.webp
+135,B02,S14,R1C5,g30_secondary_shonen_005,g30_secondary_shonen_005.png,Selene Mirren,The Ashen Viper,secondary,shonen,crime,arabia,isekai,g30_secondary_shonen_005.webp
+136,B02,S14,R2C1,g30_secondary_shonen_006,g30_secondary_shonen_006.png,Kestrel Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,isekai,g30_secondary_shonen_006.webp
+137,B02,S14,R2C2,g30_secondary_shonen_007,g30_secondary_shonen_007.png,Jin Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,slice,g30_secondary_shonen_007.webp
+138,B02,S14,R2C3,g30_secondary_shonen_008,g30_secondary_shonen_008.png,Aziel Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,slice,g30_secondary_shonen_008.webp
+139,B02,S14,R2C4,g30_secondary_shonen_009,g30_secondary_shonen_009.png,Cassian Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,horror,g30_secondary_shonen_009.webp
+140,B02,S14,R2C5,g30_secondary_shonen_010,g30_secondary_shonen_010.png,Ren Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,horror,g30_secondary_shonen_010.webp
+141,B02,S15,R1C1,g30_secondary_shonen_011,g30_secondary_shonen_011.png,Soraya Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,romance,g30_secondary_shonen_011.webp
+142,B02,S15,R1C2,g30_secondary_shonen_012,g30_secondary_shonen_012.png,Nadia Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,romance,g30_secondary_shonen_012.webp
+143,B02,S15,R1C3,g30_secondary_shonen_013,g30_secondary_shonen_013.png,Asha Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,sports,g30_secondary_shonen_013.webp
+144,B02,S15,R1C4,g30_secondary_shonen_014,g30_secondary_shonen_014.png,Lio Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,sports,g30_secondary_shonen_014.webp
+145,B02,S15,R1C5,g30_secondary_shonen_015,g30_secondary_shonen_015.png,Kael Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,cyber,g30_secondary_shonen_015.webp
+146,B02,S15,R2C1,g30_secondary_shonen_016,g30_secondary_shonen_016.png,Soren Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,cyber,g30_secondary_shonen_016.webp
+147,B02,S15,R2C2,g30_secondary_shonen_017,g30_secondary_shonen_017.png,Riven Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,fantasy,g30_secondary_shonen_017.webp
+148,B02,S15,R2C3,g30_secondary_shonen_018,g30_secondary_shonen_018.png,Darian Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,fantasy,g30_secondary_shonen_018.webp
+149,B02,S15,R2C4,g30_secondary_shonen_019,g30_secondary_shonen_019.png,Yara Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,idol,g30_secondary_shonen_019.webp
+150,B02,S15,R2C5,g30_secondary_shonen_020,g30_secondary_shonen_020.png,Selene Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,idol,g30_secondary_shonen_020.webp
+151,B02,S16,R1C1,g30_secondary_shonen_021,g30_secondary_shonen_021.png,Kestrel Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,mystery,g30_secondary_shonen_021.webp
+152,B02,S16,R1C2,g30_secondary_shonen_022,g30_secondary_shonen_022.png,Jin Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,mystery,g30_secondary_shonen_022.webp
+153,B02,S16,R1C3,g30_secondary_shonen_023,g30_secondary_shonen_023.png,Aziel Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,comedy,g30_secondary_shonen_023.webp
+154,B02,S16,R1C4,g30_secondary_shonen_024,g30_secondary_shonen_024.png,Cassian Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,comedy,g30_secondary_shonen_024.webp
+155,B02,S16,R1C5,g30_secondary_shonen_025,g30_secondary_shonen_025.png,Ren Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,cooking,g30_secondary_shonen_025.webp
+156,B02,S16,R2C1,g30_secondary_shonen_026,g30_secondary_shonen_026.png,Soraya Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,cooking,g30_secondary_shonen_026.webp
+157,B02,S16,R2C2,g30_secondary_shonen_027,g30_secondary_shonen_027.png,Nadia Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,military,g30_secondary_shonen_027.webp
+158,B02,S16,R2C3,g30_secondary_shonen_028,g30_secondary_shonen_028.png,Asha Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,military,g30_secondary_shonen_028.webp
+159,B02,S16,R2C4,g30_secondary_shonen_029,g30_secondary_shonen_029.png,Lio Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,supernatural,g30_secondary_shonen_029.webp
+160,B02,S16,R2C5,g30_secondary_shonen_030,g30_secondary_shonen_030.png,Kael Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,supernatural,g30_secondary_shonen_030.webp
+161,B02,S17,R1C1,g30_secondary_shonen_031,g30_secondary_shonen_031.png,Soren Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,space,g30_secondary_shonen_031.webp
+162,B02,S17,R1C2,g30_secondary_shonen_032,g30_secondary_shonen_032.png,Riven Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,space,g30_secondary_shonen_032.webp
+163,B02,S17,R1C3,g30_secondary_shonen_033,g30_secondary_shonen_033.png,Darian Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,magical,g30_secondary_shonen_033.webp
+164,B02,S17,R1C4,g30_secondary_shonen_034,g30_secondary_shonen_034.png,Yara Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,magical,g30_secondary_shonen_034.webp
+165,B02,S17,R1C5,g30_secondary_shonen_035,g30_secondary_shonen_035.png,Selene Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,survival,g30_secondary_shonen_035.webp
+166,B02,S17,R2C1,g30_secondary_shonen_036,g30_secondary_shonen_036.png,Kestrel Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,survival,g30_secondary_shonen_036.webp
+167,B02,S17,R2C2,g30_secondary_shonen_037,g30_secondary_shonen_037.png,Jin Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,pirate,g30_secondary_shonen_037.webp
+168,B02,S17,R2C3,g30_secondary_shonen_038,g30_secondary_shonen_038.png,Aziel Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,pirate,g30_secondary_shonen_038.webp
+169,B02,S17,R2C4,g30_secondary_shonen_039,g30_secondary_shonen_039.png,Cassian Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,martial,g30_secondary_shonen_039.webp
+170,B02,S17,R2C5,g30_secondary_shonen_040,g30_secondary_shonen_040.png,Ren Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,martial,g30_secondary_shonen_040.webp
+171,B02,S18,R1C1,g30_secondary_shonen_041,g30_secondary_shonen_041.png,Soraya Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,mythology,g30_secondary_shonen_041.webp
+172,B02,S18,R1C2,g30_secondary_shonen_042,g30_secondary_shonen_042.png,Nadia Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,mythology,g30_secondary_shonen_042.webp
+173,B02,S18,R1C3,g30_secondary_shonen_043,g30_secondary_shonen_043.png,Asha Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,nordic,g30_secondary_shonen_043.webp
+174,B02,S18,R1C4,g30_secondary_shonen_044,g30_secondary_shonen_044.png,Lio Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,nordic,g30_secondary_shonen_044.webp
+175,B02,S18,R1C5,g30_secondary_shonen_045,g30_secondary_shonen_045.png,Kael Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,samurai,g30_secondary_shonen_045.webp
+176,B02,S18,R2C1,g30_secondary_shonen_046,g30_secondary_shonen_046.png,Soren Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,samurai,g30_secondary_shonen_046.webp
+177,B02,S18,R2C2,g30_secondary_shonen_047,g30_secondary_shonen_047.png,Riven Mirren,The Ashen Viper,secondary,shonen,monster_taming,crime,shinobi,g30_secondary_shonen_047.webp
+178,B02,S18,R2C3,g30_secondary_shonen_048,g30_secondary_shonen_048.png,Darian Crowe,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,shinobi,g30_secondary_shonen_048.webp
+179,B02,S18,R2C4,g30_secondary_shonen_049,g30_secondary_shonen_049.png,Yara Locke,The Ashen Viper,secondary,shonen,monster_taming,crime,vampire,g30_secondary_shonen_049.webp
+180,B02,S18,R2C5,g30_secondary_shonen_050,g30_secondary_shonen_050.png,Selene Mirren,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,vampire,g30_secondary_shonen_050.webp
+181,B02,S19,R1C1,g30_secondary_shonen_051,g30_secondary_shonen_051.png,Kestrel Crowe,The Ashen Viper,secondary,shonen,monster_taming,crime,grimdark,g30_secondary_shonen_051.webp
+182,B02,S19,R1C2,g30_secondary_shonen_052,g30_secondary_shonen_052.png,Jin Locke,The Cinder Corsair,secondary,shonen,kaiju,cosmic_horror,grimdark,g30_secondary_shonen_052.webp
+183,B02,S19,R1C3,g30_secondary_shonen_053,g30_secondary_shonen_053.png,Aziel Mirren,The Ashen Viper,secondary,shonen,mecha,isekai,monster_taming,g30_secondary_shonen_053.webp
+184,B02,S19,R1C4,g30_secondary_shonen_054,g30_secondary_shonen_054.png,Cassian Crowe,The Cinder Corsair,secondary,shonen,slice,horror,arabia,g30_secondary_shonen_054.webp
+185,B02,S19,R1C5,g30_secondary_shonen_055,g30_secondary_shonen_055.png,Ren Locke,The Ashen Viper,secondary,shonen,romance,sports,arabia,g30_secondary_shonen_055.webp
+186,B02,S19,R2C1,g30_secondary_shonen_056,g30_secondary_shonen_056.png,Soraya Mirren,The Cinder Corsair,secondary,shonen,cyber,fantasy,arabia,g30_secondary_shonen_056.webp
+187,B02,S19,R2C2,g30_secondary_shonen_057,g30_secondary_shonen_057.png,Nadia Crowe,The Ashen Viper,secondary,shonen,idol,mystery,arabia,g30_secondary_shonen_057.webp
+188,B02,S19,R2C3,g30_secondary_shonen_058,g30_secondary_shonen_058.png,Asha Locke,The Cinder Corsair,secondary,shonen,comedy,cooking,arabia,g30_secondary_shonen_058.webp
+189,B02,S19,R2C4,g30_secondary_shonen_059,g30_secondary_shonen_059.png,Lio Mirren,The Ashen Viper,secondary,shonen,military,supernatural,arabia,g30_secondary_shonen_059.webp
+190,B02,S19,R2C5,g30_secondary_shonen_060,g30_secondary_shonen_060.png,Kael Crowe,The Cinder Corsair,secondary,shonen,space,magical,arabia,g30_secondary_shonen_060.webp
+191,B02,S20,R1C1,g30_secondary_shonen_061,g30_secondary_shonen_061.png,Soren Locke,The Ashen Viper,secondary,shonen,survival,pirate,arabia,g30_secondary_shonen_061.webp
+192,B02,S20,R1C2,g30_secondary_shonen_062,g30_secondary_shonen_062.png,Riven Mirren,The Cinder Corsair,secondary,shonen,martial,mythology,arabia,g30_secondary_shonen_062.webp
+193,B02,S20,R1C3,g30_secondary_shonen_063,g30_secondary_shonen_063.png,Darian Crowe,The Ashen Viper,secondary,shonen,nordic,samurai,arabia,g30_secondary_shonen_063.webp
+194,B02,S20,R1C4,g30_secondary_shonen_064,g30_secondary_shonen_064.png,Yara Locke,The Cinder Corsair,secondary,shonen,shinobi,vampire,arabia,g30_secondary_shonen_064.webp
+195,B02,S20,R1C5,g30_secondary_shonen_065,g30_secondary_shonen_065.png,Selene Mirren,The Ashen Viper,secondary,shonen,monster_taming,arabia,grimdark,g30_secondary_shonen_065.webp
+196,B02,S20,R2C1,g30_secondary_shojo_001,g30_secondary_shojo_001.png,Nadia Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,kaiju,g30_secondary_shojo_001.webp
+197,B02,S20,R2C2,g30_secondary_shojo_002,g30_secondary_shojo_002.png,Asha Locke,The Dune Hunter,secondary,shojo,monster_taming,cosmic_horror,arabia,g30_secondary_shojo_002.webp
+198,B02,S20,R2C3,g30_secondary_shojo_003,g30_secondary_shojo_003.png,Lio Mirren,The Glass Duelist,secondary,shojo,crime,cosmic_horror,mecha,g30_secondary_shojo_003.webp
+199,B02,S20,R2C4,g30_secondary_shojo_004,g30_secondary_shojo_004.png,Kael Crowe,The Dune Hunter,secondary,shojo,kaiju,arabia,mecha,g30_secondary_shojo_004.webp
+200,B02,S20,R2C5,g30_secondary_shojo_005,g30_secondary_shojo_005.png,Soren Locke,The Glass Duelist,secondary,shojo,crime,arabia,isekai,g30_secondary_shojo_005.webp
+201,B03,S21,R1C1,g30_secondary_shojo_006,g30_secondary_shojo_006.png,Riven Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,isekai,g30_secondary_shojo_006.webp
+202,B03,S21,R1C2,g30_secondary_shojo_007,g30_secondary_shojo_007.png,Darian Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,slice,g30_secondary_shojo_007.webp
+203,B03,S21,R1C3,g30_secondary_shojo_008,g30_secondary_shojo_008.png,Yara Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,slice,g30_secondary_shojo_008.webp
+204,B03,S21,R1C4,g30_secondary_shojo_009,g30_secondary_shojo_009.png,Selene Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,horror,g30_secondary_shojo_009.webp
+205,B03,S21,R1C5,g30_secondary_shojo_010,g30_secondary_shojo_010.png,Kestrel Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,horror,g30_secondary_shojo_010.webp
+206,B03,S21,R2C1,g30_secondary_shojo_011,g30_secondary_shojo_011.png,Jin Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,romance,g30_secondary_shojo_011.webp
+207,B03,S21,R2C2,g30_secondary_shojo_012,g30_secondary_shojo_012.png,Aziel Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,romance,g30_secondary_shojo_012.webp
+208,B03,S21,R2C3,g30_secondary_shojo_013,g30_secondary_shojo_013.png,Cassian Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,sports,g30_secondary_shojo_013.webp
+209,B03,S21,R2C4,g30_secondary_shojo_014,g30_secondary_shojo_014.png,Ren Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,sports,g30_secondary_shojo_014.webp
+210,B03,S21,R2C5,g30_secondary_shojo_015,g30_secondary_shojo_015.png,Soraya Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,cyber,g30_secondary_shojo_015.webp
+211,B03,S22,R1C1,g30_secondary_shojo_016,g30_secondary_shojo_016.png,Nadia Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,cyber,g30_secondary_shojo_016.webp
+212,B03,S22,R1C2,g30_secondary_shojo_017,g30_secondary_shojo_017.png,Asha Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,fantasy,g30_secondary_shojo_017.webp
+213,B03,S22,R1C3,g30_secondary_shojo_018,g30_secondary_shojo_018.png,Lio Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,fantasy,g30_secondary_shojo_018.webp
+214,B03,S22,R1C4,g30_secondary_shojo_019,g30_secondary_shojo_019.png,Kael Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,idol,g30_secondary_shojo_019.webp
+215,B03,S22,R1C5,g30_secondary_shojo_020,g30_secondary_shojo_020.png,Soren Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,idol,g30_secondary_shojo_020.webp
+216,B03,S22,R2C1,g30_secondary_shojo_021,g30_secondary_shojo_021.png,Riven Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,mystery,g30_secondary_shojo_021.webp
+217,B03,S22,R2C2,g30_secondary_shojo_022,g30_secondary_shojo_022.png,Darian Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,mystery,g30_secondary_shojo_022.webp
+218,B03,S22,R2C3,g30_secondary_shojo_023,g30_secondary_shojo_023.png,Yara Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,comedy,g30_secondary_shojo_023.webp
+219,B03,S22,R2C4,g30_secondary_shojo_024,g30_secondary_shojo_024.png,Selene Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,comedy,g30_secondary_shojo_024.webp
+220,B03,S22,R2C5,g30_secondary_shojo_025,g30_secondary_shojo_025.png,Kestrel Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,cooking,g30_secondary_shojo_025.webp
+221,B03,S23,R1C1,g30_secondary_shojo_026,g30_secondary_shojo_026.png,Jin Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,cooking,g30_secondary_shojo_026.webp
+222,B03,S23,R1C2,g30_secondary_shojo_027,g30_secondary_shojo_027.png,Aziel Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,military,g30_secondary_shojo_027.webp
+223,B03,S23,R1C3,g30_secondary_shojo_028,g30_secondary_shojo_028.png,Cassian Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,military,g30_secondary_shojo_028.webp
+224,B03,S23,R1C4,g30_secondary_shojo_029,g30_secondary_shojo_029.png,Ren Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,supernatural,g30_secondary_shojo_029.webp
+225,B03,S23,R1C5,g30_secondary_shojo_030,g30_secondary_shojo_030.png,Soraya Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,supernatural,g30_secondary_shojo_030.webp
+226,B03,S23,R2C1,g30_secondary_shojo_031,g30_secondary_shojo_031.png,Nadia Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,space,g30_secondary_shojo_031.webp
+227,B03,S23,R2C2,g30_secondary_shojo_032,g30_secondary_shojo_032.png,Asha Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,space,g30_secondary_shojo_032.webp
+228,B03,S23,R2C3,g30_secondary_shojo_033,g30_secondary_shojo_033.png,Lio Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,magical,g30_secondary_shojo_033.webp
+229,B03,S23,R2C4,g30_secondary_shojo_034,g30_secondary_shojo_034.png,Kael Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,magical,g30_secondary_shojo_034.webp
+230,B03,S23,R2C5,g30_secondary_shojo_035,g30_secondary_shojo_035.png,Soren Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,survival,g30_secondary_shojo_035.webp
+231,B03,S24,R1C1,g30_secondary_shojo_036,g30_secondary_shojo_036.png,Riven Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,survival,g30_secondary_shojo_036.webp
+232,B03,S24,R1C2,g30_secondary_shojo_037,g30_secondary_shojo_037.png,Darian Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,pirate,g30_secondary_shojo_037.webp
+233,B03,S24,R1C3,g30_secondary_shojo_038,g30_secondary_shojo_038.png,Yara Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,pirate,g30_secondary_shojo_038.webp
+234,B03,S24,R1C4,g30_secondary_shojo_039,g30_secondary_shojo_039.png,Selene Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,martial,g30_secondary_shojo_039.webp
+235,B03,S24,R1C5,g30_secondary_shojo_040,g30_secondary_shojo_040.png,Kestrel Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,martial,g30_secondary_shojo_040.webp
+236,B03,S24,R2C1,g30_secondary_shojo_041,g30_secondary_shojo_041.png,Jin Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,mythology,g30_secondary_shojo_041.webp
+237,B03,S24,R2C2,g30_secondary_shojo_042,g30_secondary_shojo_042.png,Aziel Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,mythology,g30_secondary_shojo_042.webp
+238,B03,S24,R2C3,g30_secondary_shojo_043,g30_secondary_shojo_043.png,Cassian Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,nordic,g30_secondary_shojo_043.webp
+239,B03,S24,R2C4,g30_secondary_shojo_044,g30_secondary_shojo_044.png,Ren Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,nordic,g30_secondary_shojo_044.webp
+240,B03,S24,R2C5,g30_secondary_shojo_045,g30_secondary_shojo_045.png,Soraya Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,samurai,g30_secondary_shojo_045.webp
+241,B03,S25,R1C1,g30_secondary_shojo_046,g30_secondary_shojo_046.png,Nadia Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,samurai,g30_secondary_shojo_046.webp
+242,B03,S25,R1C2,g30_secondary_shojo_047,g30_secondary_shojo_047.png,Asha Locke,The Glass Duelist,secondary,shojo,monster_taming,crime,shinobi,g30_secondary_shojo_047.webp
+243,B03,S25,R1C3,g30_secondary_shojo_048,g30_secondary_shojo_048.png,Lio Mirren,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,shinobi,g30_secondary_shojo_048.webp
+244,B03,S25,R1C4,g30_secondary_shojo_049,g30_secondary_shojo_049.png,Kael Crowe,The Glass Duelist,secondary,shojo,monster_taming,crime,vampire,g30_secondary_shojo_049.webp
+245,B03,S25,R1C5,g30_secondary_shojo_050,g30_secondary_shojo_050.png,Soren Locke,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,vampire,g30_secondary_shojo_050.webp
+246,B03,S25,R2C1,g30_secondary_shojo_051,g30_secondary_shojo_051.png,Riven Mirren,The Glass Duelist,secondary,shojo,monster_taming,crime,grimdark,g30_secondary_shojo_051.webp
+247,B03,S25,R2C2,g30_secondary_shojo_052,g30_secondary_shojo_052.png,Darian Crowe,The Dune Hunter,secondary,shojo,kaiju,cosmic_horror,grimdark,g30_secondary_shojo_052.webp
+248,B03,S25,R2C3,g30_secondary_shojo_053,g30_secondary_shojo_053.png,Yara Locke,The Glass Duelist,secondary,shojo,mecha,isekai,monster_taming,g30_secondary_shojo_053.webp
+249,B03,S25,R2C4,g30_secondary_shojo_054,g30_secondary_shojo_054.png,Selene Mirren,The Dune Hunter,secondary,shojo,slice,horror,arabia,g30_secondary_shojo_054.webp
+250,B03,S25,R2C5,g30_secondary_shojo_055,g30_secondary_shojo_055.png,Kestrel Crowe,The Glass Duelist,secondary,shojo,romance,sports,arabia,g30_secondary_shojo_055.webp
+251,B03,S26,R1C1,g30_secondary_shojo_056,g30_secondary_shojo_056.png,Jin Locke,The Dune Hunter,secondary,shojo,cyber,fantasy,arabia,g30_secondary_shojo_056.webp
+252,B03,S26,R1C2,g30_secondary_shojo_057,g30_secondary_shojo_057.png,Aziel Mirren,The Glass Duelist,secondary,shojo,idol,mystery,arabia,g30_secondary_shojo_057.webp
+253,B03,S26,R1C3,g30_secondary_shojo_058,g30_secondary_shojo_058.png,Cassian Crowe,The Dune Hunter,secondary,shojo,comedy,cooking,arabia,g30_secondary_shojo_058.webp
+254,B03,S26,R1C4,g30_secondary_shojo_059,g30_secondary_shojo_059.png,Ren Locke,The Glass Duelist,secondary,shojo,military,supernatural,arabia,g30_secondary_shojo_059.webp
+255,B03,S26,R1C5,g30_secondary_shojo_060,g30_secondary_shojo_060.png,Soraya Mirren,The Dune Hunter,secondary,shojo,space,magical,arabia,g30_secondary_shojo_060.webp
+256,B03,S26,R2C1,g30_secondary_shojo_061,g30_secondary_shojo_061.png,Nadia Crowe,The Glass Duelist,secondary,shojo,survival,pirate,arabia,g30_secondary_shojo_061.webp
+257,B03,S26,R2C2,g30_secondary_shojo_062,g30_secondary_shojo_062.png,Asha Locke,The Dune Hunter,secondary,shojo,martial,mythology,arabia,g30_secondary_shojo_062.webp
+258,B03,S26,R2C3,g30_secondary_shojo_063,g30_secondary_shojo_063.png,Lio Mirren,The Glass Duelist,secondary,shojo,nordic,samurai,arabia,g30_secondary_shojo_063.webp
+259,B03,S26,R2C4,g30_secondary_shojo_064,g30_secondary_shojo_064.png,Kael Crowe,The Dune Hunter,secondary,shojo,shinobi,vampire,arabia,g30_secondary_shojo_064.webp
+260,B03,S26,R2C5,g30_secondary_shojo_065,g30_secondary_shojo_065.png,Soren Locke,The Glass Duelist,secondary,shojo,monster_taming,arabia,grimdark,g30_secondary_shojo_065.webp
+261,B03,S27,R1C1,g30_pet_shonen_001,g30_pet_shonen_001.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,kaiju,g30_pet_shonen_001.webp
+262,B03,S27,R1C2,g30_pet_shonen_002,g30_pet_shonen_002.png,Tikablink,The Ashen Viper,pet,shonen,monster_taming,cosmic_horror,arabia,g30_pet_shonen_002.webp
+263,B03,S27,R1C3,g30_pet_shonen_003,g30_pet_shonen_003.png,Noritooth,The Cinder Corsair,pet,shonen,crime,cosmic_horror,mecha,g30_pet_shonen_003.webp
+264,B03,S27,R1C4,g30_pet_shonen_004,g30_pet_shonen_004.png,Chaidrift,The Ashen Viper,pet,shonen,kaiju,arabia,mecha,g30_pet_shonen_004.webp
+265,B03,S27,R1C5,g30_pet_shonen_005,g30_pet_shonen_005.png,Tofuwhirl,The Cinder Corsair,pet,shonen,crime,arabia,isekai,g30_pet_shonen_005.webp
+266,B03,S27,R2C1,g30_pet_shonen_006,g30_pet_shonen_006.png,Miriflare,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,isekai,g30_pet_shonen_006.webp
+267,B03,S27,R2C2,g30_pet_shonen_007,g30_pet_shonen_007.png,Kikisprite,The Cinder Corsair,pet,shonen,monster_taming,crime,slice,g30_pet_shonen_007.webp
+268,B03,S27,R2C3,g30_pet_shonen_008,g30_pet_shonen_008.png,Mokuwisp,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,slice,g30_pet_shonen_008.webp
+269,B03,S27,R2C4,g30_pet_shonen_009,g30_pet_shonen_009.png,Clinkcoil,The Cinder Corsair,pet,shonen,monster_taming,crime,horror,g30_pet_shonen_009.webp
+270,B03,S27,R2C5,g30_pet_shonen_010,g30_pet_shonen_010.png,Skiffpuff,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,horror,g30_pet_shonen_010.webp
+271,B03,S28,R1C1,g30_pet_shonen_011,g30_pet_shonen_011.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,romance,g30_pet_shonen_011.webp
+272,B03,S28,R1C2,g30_pet_shonen_012,g30_pet_shonen_012.png,Tikablink,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,romance,g30_pet_shonen_012.webp
+273,B03,S28,R1C3,g30_pet_shonen_013,g30_pet_shonen_013.png,Noritooth,The Cinder Corsair,pet,shonen,monster_taming,crime,sports,g30_pet_shonen_013.webp
+274,B03,S28,R1C4,g30_pet_shonen_014,g30_pet_shonen_014.png,Chaidrift,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,sports,g30_pet_shonen_014.webp
+275,B03,S28,R1C5,g30_pet_shonen_015,g30_pet_shonen_015.png,Tofuwhirl,The Cinder Corsair,pet,shonen,monster_taming,crime,cyber,g30_pet_shonen_015.webp
+276,B03,S28,R2C1,g30_pet_shonen_016,g30_pet_shonen_016.png,Miriflare,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,cyber,g30_pet_shonen_016.webp
+277,B03,S28,R2C2,g30_pet_shonen_017,g30_pet_shonen_017.png,Kikisprite,The Cinder Corsair,pet,shonen,monster_taming,crime,fantasy,g30_pet_shonen_017.webp
+278,B03,S28,R2C3,g30_pet_shonen_018,g30_pet_shonen_018.png,Mokuwisp,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,fantasy,g30_pet_shonen_018.webp
+279,B03,S28,R2C4,g30_pet_shonen_019,g30_pet_shonen_019.png,Clinkcoil,The Cinder Corsair,pet,shonen,monster_taming,crime,idol,g30_pet_shonen_019.webp
+280,B03,S28,R2C5,g30_pet_shonen_020,g30_pet_shonen_020.png,Skiffpuff,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,idol,g30_pet_shonen_020.webp
+281,B03,S29,R1C1,g30_pet_shonen_021,g30_pet_shonen_021.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,mystery,g30_pet_shonen_021.webp
+282,B03,S29,R1C2,g30_pet_shonen_022,g30_pet_shonen_022.png,Tikablink,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,mystery,g30_pet_shonen_022.webp
+283,B03,S29,R1C3,g30_pet_shonen_023,g30_pet_shonen_023.png,Noritooth,The Cinder Corsair,pet,shonen,monster_taming,crime,comedy,g30_pet_shonen_023.webp
+284,B03,S29,R1C4,g30_pet_shonen_024,g30_pet_shonen_024.png,Chaidrift,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,comedy,g30_pet_shonen_024.webp
+285,B03,S29,R1C5,g30_pet_shonen_025,g30_pet_shonen_025.png,Tofuwhirl,The Cinder Corsair,pet,shonen,monster_taming,crime,cooking,g30_pet_shonen_025.webp
+286,B03,S29,R2C1,g30_pet_shonen_026,g30_pet_shonen_026.png,Miriflare,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,cooking,g30_pet_shonen_026.webp
+287,B03,S29,R2C2,g30_pet_shonen_027,g30_pet_shonen_027.png,Kikisprite,The Cinder Corsair,pet,shonen,monster_taming,crime,military,g30_pet_shonen_027.webp
+288,B03,S29,R2C3,g30_pet_shonen_028,g30_pet_shonen_028.png,Mokuwisp,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,military,g30_pet_shonen_028.webp
+289,B03,S29,R2C4,g30_pet_shonen_029,g30_pet_shonen_029.png,Clinkcoil,The Cinder Corsair,pet,shonen,monster_taming,crime,supernatural,g30_pet_shonen_029.webp
+290,B03,S29,R2C5,g30_pet_shonen_030,g30_pet_shonen_030.png,Skiffpuff,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,supernatural,g30_pet_shonen_030.webp
+291,B03,S30,R1C1,g30_pet_shonen_031,g30_pet_shonen_031.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,space,g30_pet_shonen_031.webp
+292,B03,S30,R1C2,g30_pet_shonen_032,g30_pet_shonen_032.png,Tikablink,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,space,g30_pet_shonen_032.webp
+293,B03,S30,R1C3,g30_pet_shonen_033,g30_pet_shonen_033.png,Noritooth,The Cinder Corsair,pet,shonen,monster_taming,crime,magical,g30_pet_shonen_033.webp
+294,B03,S30,R1C4,g30_pet_shonen_034,g30_pet_shonen_034.png,Chaidrift,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,magical,g30_pet_shonen_034.webp
+295,B03,S30,R1C5,g30_pet_shonen_035,g30_pet_shonen_035.png,Tofuwhirl,The Cinder Corsair,pet,shonen,monster_taming,crime,survival,g30_pet_shonen_035.webp
+296,B03,S30,R2C1,g30_pet_shonen_036,g30_pet_shonen_036.png,Miriflare,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,survival,g30_pet_shonen_036.webp
+297,B03,S30,R2C2,g30_pet_shonen_037,g30_pet_shonen_037.png,Kikisprite,The Cinder Corsair,pet,shonen,monster_taming,crime,pirate,g30_pet_shonen_037.webp
+298,B03,S30,R2C3,g30_pet_shonen_038,g30_pet_shonen_038.png,Mokuwisp,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,pirate,g30_pet_shonen_038.webp
+299,B03,S30,R2C4,g30_pet_shonen_039,g30_pet_shonen_039.png,Clinkcoil,The Cinder Corsair,pet,shonen,monster_taming,crime,martial,g30_pet_shonen_039.webp
+300,B03,S30,R2C5,g30_pet_shonen_040,g30_pet_shonen_040.png,Skiffpuff,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,martial,g30_pet_shonen_040.webp
+301,B04,S31,R1C1,g30_pet_shonen_041,g30_pet_shonen_041.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,mythology,g30_pet_shonen_041.webp
+302,B04,S31,R1C2,g30_pet_shonen_042,g30_pet_shonen_042.png,Tikablink,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,mythology,g30_pet_shonen_042.webp
+303,B04,S31,R1C3,g30_pet_shonen_043,g30_pet_shonen_043.png,Noritooth,The Cinder Corsair,pet,shonen,monster_taming,crime,nordic,g30_pet_shonen_043.webp
+304,B04,S31,R1C4,g30_pet_shonen_044,g30_pet_shonen_044.png,Chaidrift,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,nordic,g30_pet_shonen_044.webp
+305,B04,S31,R1C5,g30_pet_shonen_045,g30_pet_shonen_045.png,Tofuwhirl,The Cinder Corsair,pet,shonen,monster_taming,crime,samurai,g30_pet_shonen_045.webp
+306,B04,S31,R2C1,g30_pet_shonen_046,g30_pet_shonen_046.png,Miriflare,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,samurai,g30_pet_shonen_046.webp
+307,B04,S31,R2C2,g30_pet_shonen_047,g30_pet_shonen_047.png,Kikisprite,The Cinder Corsair,pet,shonen,monster_taming,crime,shinobi,g30_pet_shonen_047.webp
+308,B04,S31,R2C3,g30_pet_shonen_048,g30_pet_shonen_048.png,Mokuwisp,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,shinobi,g30_pet_shonen_048.webp
+309,B04,S31,R2C4,g30_pet_shonen_049,g30_pet_shonen_049.png,Clinkcoil,The Cinder Corsair,pet,shonen,monster_taming,crime,vampire,g30_pet_shonen_049.webp
+310,B04,S31,R2C5,g30_pet_shonen_050,g30_pet_shonen_050.png,Skiffpuff,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,vampire,g30_pet_shonen_050.webp
+311,B04,S32,R1C1,g30_pet_shonen_051,g30_pet_shonen_051.png,Misotail,The Cinder Corsair,pet,shonen,monster_taming,crime,grimdark,g30_pet_shonen_051.webp
+312,B04,S32,R1C2,g30_pet_shonen_052,g30_pet_shonen_052.png,Tikablink,The Ashen Viper,pet,shonen,kaiju,cosmic_horror,grimdark,g30_pet_shonen_052.webp
+313,B04,S32,R1C3,g30_pet_shonen_053,g30_pet_shonen_053.png,Noritooth,The Cinder Corsair,pet,shonen,mecha,isekai,monster_taming,g30_pet_shonen_053.webp
+314,B04,S32,R1C4,g30_pet_shonen_054,g30_pet_shonen_054.png,Chaidrift,The Ashen Viper,pet,shonen,slice,horror,arabia,g30_pet_shonen_054.webp
+315,B04,S32,R1C5,g30_pet_shonen_055,g30_pet_shonen_055.png,Tofuwhirl,The Cinder Corsair,pet,shonen,romance,sports,arabia,g30_pet_shonen_055.webp
+316,B04,S32,R2C1,g30_pet_shonen_056,g30_pet_shonen_056.png,Miriflare,The Ashen Viper,pet,shonen,cyber,fantasy,arabia,g30_pet_shonen_056.webp
+317,B04,S32,R2C2,g30_pet_shonen_057,g30_pet_shonen_057.png,Kikisprite,The Cinder Corsair,pet,shonen,idol,mystery,arabia,g30_pet_shonen_057.webp
+318,B04,S32,R2C3,g30_pet_shonen_058,g30_pet_shonen_058.png,Mokuwisp,The Ashen Viper,pet,shonen,comedy,cooking,arabia,g30_pet_shonen_058.webp
+319,B04,S32,R2C4,g30_pet_shonen_059,g30_pet_shonen_059.png,Clinkcoil,The Cinder Corsair,pet,shonen,military,supernatural,arabia,g30_pet_shonen_059.webp
+320,B04,S32,R2C5,g30_pet_shonen_060,g30_pet_shonen_060.png,Skiffpuff,The Ashen Viper,pet,shonen,space,magical,arabia,g30_pet_shonen_060.webp
+321,B04,S33,R1C1,g30_pet_shonen_061,g30_pet_shonen_061.png,Misotail,The Cinder Corsair,pet,shonen,survival,pirate,arabia,g30_pet_shonen_061.webp
+322,B04,S33,R1C2,g30_pet_shonen_062,g30_pet_shonen_062.png,Tikablink,The Ashen Viper,pet,shonen,martial,mythology,arabia,g30_pet_shonen_062.webp
+323,B04,S33,R1C3,g30_pet_shonen_063,g30_pet_shonen_063.png,Noritooth,The Cinder Corsair,pet,shonen,nordic,samurai,arabia,g30_pet_shonen_063.webp
+324,B04,S33,R1C4,g30_pet_shonen_064,g30_pet_shonen_064.png,Chaidrift,The Ashen Viper,pet,shonen,shinobi,vampire,arabia,g30_pet_shonen_064.webp
+325,B04,S33,R1C5,g30_pet_shonen_065,g30_pet_shonen_065.png,Tofuwhirl,The Cinder Corsair,pet,shonen,monster_taming,arabia,grimdark,g30_pet_shonen_065.webp
+326,B04,S33,R2C1,g30_pet_shojo_001,g30_pet_shojo_001.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,kaiju,g30_pet_shojo_001.webp
+327,B04,S33,R2C2,g30_pet_shojo_002,g30_pet_shojo_002.png,Noritooth,The Glass Duelist,pet,shojo,monster_taming,cosmic_horror,arabia,g30_pet_shojo_002.webp
+328,B04,S33,R2C3,g30_pet_shojo_003,g30_pet_shojo_003.png,Chaidrift,The Dune Hunter,pet,shojo,crime,cosmic_horror,mecha,g30_pet_shojo_003.webp
+329,B04,S33,R2C4,g30_pet_shojo_004,g30_pet_shojo_004.png,Tofuwhirl,The Glass Duelist,pet,shojo,kaiju,arabia,mecha,g30_pet_shojo_004.webp
+330,B04,S33,R2C5,g30_pet_shojo_005,g30_pet_shojo_005.png,Miriflare,The Dune Hunter,pet,shojo,crime,arabia,isekai,g30_pet_shojo_005.webp
+331,B04,S34,R1C1,g30_pet_shojo_006,g30_pet_shojo_006.png,Kikisprite,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,isekai,g30_pet_shojo_006.webp
+332,B04,S34,R1C2,g30_pet_shojo_007,g30_pet_shojo_007.png,Mokuwisp,The Dune Hunter,pet,shojo,monster_taming,crime,slice,g30_pet_shojo_007.webp
+333,B04,S34,R1C3,g30_pet_shojo_008,g30_pet_shojo_008.png,Clinkcoil,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,slice,g30_pet_shojo_008.webp
+334,B04,S34,R1C4,g30_pet_shojo_009,g30_pet_shojo_009.png,Skiffpuff,The Dune Hunter,pet,shojo,monster_taming,crime,horror,g30_pet_shojo_009.webp
+335,B04,S34,R1C5,g30_pet_shojo_010,g30_pet_shojo_010.png,Misotail,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,horror,g30_pet_shojo_010.webp
+336,B04,S34,R2C1,g30_pet_shojo_011,g30_pet_shojo_011.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,romance,g30_pet_shojo_011.webp
+337,B04,S34,R2C2,g30_pet_shojo_012,g30_pet_shojo_012.png,Noritooth,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,romance,g30_pet_shojo_012.webp
+338,B04,S34,R2C3,g30_pet_shojo_013,g30_pet_shojo_013.png,Chaidrift,The Dune Hunter,pet,shojo,monster_taming,crime,sports,g30_pet_shojo_013.webp
+339,B04,S34,R2C4,g30_pet_shojo_014,g30_pet_shojo_014.png,Tofuwhirl,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,sports,g30_pet_shojo_014.webp
+340,B04,S34,R2C5,g30_pet_shojo_015,g30_pet_shojo_015.png,Miriflare,The Dune Hunter,pet,shojo,monster_taming,crime,cyber,g30_pet_shojo_015.webp
+341,B04,S35,R1C1,g30_pet_shojo_016,g30_pet_shojo_016.png,Kikisprite,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,cyber,g30_pet_shojo_016.webp
+342,B04,S35,R1C2,g30_pet_shojo_017,g30_pet_shojo_017.png,Mokuwisp,The Dune Hunter,pet,shojo,monster_taming,crime,fantasy,g30_pet_shojo_017.webp
+343,B04,S35,R1C3,g30_pet_shojo_018,g30_pet_shojo_018.png,Clinkcoil,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,fantasy,g30_pet_shojo_018.webp
+344,B04,S35,R1C4,g30_pet_shojo_019,g30_pet_shojo_019.png,Skiffpuff,The Dune Hunter,pet,shojo,monster_taming,crime,idol,g30_pet_shojo_019.webp
+345,B04,S35,R1C5,g30_pet_shojo_020,g30_pet_shojo_020.png,Misotail,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,idol,g30_pet_shojo_020.webp
+346,B04,S35,R2C1,g30_pet_shojo_021,g30_pet_shojo_021.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,mystery,g30_pet_shojo_021.webp
+347,B04,S35,R2C2,g30_pet_shojo_022,g30_pet_shojo_022.png,Noritooth,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,mystery,g30_pet_shojo_022.webp
+348,B04,S35,R2C3,g30_pet_shojo_023,g30_pet_shojo_023.png,Chaidrift,The Dune Hunter,pet,shojo,monster_taming,crime,comedy,g30_pet_shojo_023.webp
+349,B04,S35,R2C4,g30_pet_shojo_024,g30_pet_shojo_024.png,Tofuwhirl,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,comedy,g30_pet_shojo_024.webp
+350,B04,S35,R2C5,g30_pet_shojo_025,g30_pet_shojo_025.png,Miriflare,The Dune Hunter,pet,shojo,monster_taming,crime,cooking,g30_pet_shojo_025.webp
+351,B04,S36,R1C1,g30_pet_shojo_026,g30_pet_shojo_026.png,Kikisprite,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,cooking,g30_pet_shojo_026.webp
+352,B04,S36,R1C2,g30_pet_shojo_027,g30_pet_shojo_027.png,Mokuwisp,The Dune Hunter,pet,shojo,monster_taming,crime,military,g30_pet_shojo_027.webp
+353,B04,S36,R1C3,g30_pet_shojo_028,g30_pet_shojo_028.png,Clinkcoil,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,military,g30_pet_shojo_028.webp
+354,B04,S36,R1C4,g30_pet_shojo_029,g30_pet_shojo_029.png,Skiffpuff,The Dune Hunter,pet,shojo,monster_taming,crime,supernatural,g30_pet_shojo_029.webp
+355,B04,S36,R1C5,g30_pet_shojo_030,g30_pet_shojo_030.png,Misotail,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,supernatural,g30_pet_shojo_030.webp
+356,B04,S36,R2C1,g30_pet_shojo_031,g30_pet_shojo_031.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,space,g30_pet_shojo_031.webp
+357,B04,S36,R2C2,g30_pet_shojo_032,g30_pet_shojo_032.png,Noritooth,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,space,g30_pet_shojo_032.webp
+358,B04,S36,R2C3,g30_pet_shojo_033,g30_pet_shojo_033.png,Chaidrift,The Dune Hunter,pet,shojo,monster_taming,crime,magical,g30_pet_shojo_033.webp
+359,B04,S36,R2C4,g30_pet_shojo_034,g30_pet_shojo_034.png,Tofuwhirl,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,magical,g30_pet_shojo_034.webp
+360,B04,S36,R2C5,g30_pet_shojo_035,g30_pet_shojo_035.png,Miriflare,The Dune Hunter,pet,shojo,monster_taming,crime,survival,g30_pet_shojo_035.webp
+361,B04,S37,R1C1,g30_pet_shojo_036,g30_pet_shojo_036.png,Kikisprite,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,survival,g30_pet_shojo_036.webp
+362,B04,S37,R1C2,g30_pet_shojo_037,g30_pet_shojo_037.png,Mokuwisp,The Dune Hunter,pet,shojo,monster_taming,crime,pirate,g30_pet_shojo_037.webp
+363,B04,S37,R1C3,g30_pet_shojo_038,g30_pet_shojo_038.png,Clinkcoil,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,pirate,g30_pet_shojo_038.webp
+364,B04,S37,R1C4,g30_pet_shojo_039,g30_pet_shojo_039.png,Skiffpuff,The Dune Hunter,pet,shojo,monster_taming,crime,martial,g30_pet_shojo_039.webp
+365,B04,S37,R1C5,g30_pet_shojo_040,g30_pet_shojo_040.png,Misotail,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,martial,g30_pet_shojo_040.webp
+366,B04,S37,R2C1,g30_pet_shojo_041,g30_pet_shojo_041.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,mythology,g30_pet_shojo_041.webp
+367,B04,S37,R2C2,g30_pet_shojo_042,g30_pet_shojo_042.png,Noritooth,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,mythology,g30_pet_shojo_042.webp
+368,B04,S37,R2C3,g30_pet_shojo_043,g30_pet_shojo_043.png,Chaidrift,The Dune Hunter,pet,shojo,monster_taming,crime,nordic,g30_pet_shojo_043.webp
+369,B04,S37,R2C4,g30_pet_shojo_044,g30_pet_shojo_044.png,Tofuwhirl,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,nordic,g30_pet_shojo_044.webp
+370,B04,S37,R2C5,g30_pet_shojo_045,g30_pet_shojo_045.png,Miriflare,The Dune Hunter,pet,shojo,monster_taming,crime,samurai,g30_pet_shojo_045.webp
+371,B04,S38,R1C1,g30_pet_shojo_046,g30_pet_shojo_046.png,Kikisprite,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,samurai,g30_pet_shojo_046.webp
+372,B04,S38,R1C2,g30_pet_shojo_047,g30_pet_shojo_047.png,Mokuwisp,The Dune Hunter,pet,shojo,monster_taming,crime,shinobi,g30_pet_shojo_047.webp
+373,B04,S38,R1C3,g30_pet_shojo_048,g30_pet_shojo_048.png,Clinkcoil,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,shinobi,g30_pet_shojo_048.webp
+374,B04,S38,R1C4,g30_pet_shojo_049,g30_pet_shojo_049.png,Skiffpuff,The Dune Hunter,pet,shojo,monster_taming,crime,vampire,g30_pet_shojo_049.webp
+375,B04,S38,R1C5,g30_pet_shojo_050,g30_pet_shojo_050.png,Misotail,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,vampire,g30_pet_shojo_050.webp
+376,B04,S38,R2C1,g30_pet_shojo_051,g30_pet_shojo_051.png,Tikablink,The Dune Hunter,pet,shojo,monster_taming,crime,grimdark,g30_pet_shojo_051.webp
+377,B04,S38,R2C2,g30_pet_shojo_052,g30_pet_shojo_052.png,Noritooth,The Glass Duelist,pet,shojo,kaiju,cosmic_horror,grimdark,g30_pet_shojo_052.webp
+378,B04,S38,R2C3,g30_pet_shojo_053,g30_pet_shojo_053.png,Chaidrift,The Dune Hunter,pet,shojo,mecha,isekai,monster_taming,g30_pet_shojo_053.webp
+379,B04,S38,R2C4,g30_pet_shojo_054,g30_pet_shojo_054.png,Tofuwhirl,The Glass Duelist,pet,shojo,slice,horror,arabia,g30_pet_shojo_054.webp
+380,B04,S38,R2C5,g30_pet_shojo_055,g30_pet_shojo_055.png,Miriflare,The Dune Hunter,pet,shojo,romance,sports,arabia,g30_pet_shojo_055.webp
+381,B04,S39,R1C1,g30_pet_shojo_056,g30_pet_shojo_056.png,Kikisprite,The Glass Duelist,pet,shojo,cyber,fantasy,arabia,g30_pet_shojo_056.webp
+382,B04,S39,R1C2,g30_pet_shojo_057,g30_pet_shojo_057.png,Mokuwisp,The Dune Hunter,pet,shojo,idol,mystery,arabia,g30_pet_shojo_057.webp
+383,B04,S39,R1C3,g30_pet_shojo_058,g30_pet_shojo_058.png,Clinkcoil,The Glass Duelist,pet,shojo,comedy,cooking,arabia,g30_pet_shojo_058.webp
+384,B04,S39,R1C4,g30_pet_shojo_059,g30_pet_shojo_059.png,Skiffpuff,The Dune Hunter,pet,shojo,military,supernatural,arabia,g30_pet_shojo_059.webp
+385,B04,S39,R1C5,g30_pet_shojo_060,g30_pet_shojo_060.png,Misotail,The Glass Duelist,pet,shojo,space,magical,arabia,g30_pet_shojo_060.webp
+386,B04,S39,R2C1,g30_pet_shojo_061,g30_pet_shojo_061.png,Tikablink,The Dune Hunter,pet,shojo,survival,pirate,arabia,g30_pet_shojo_061.webp
+387,B04,S39,R2C2,g30_pet_shojo_062,g30_pet_shojo_062.png,Noritooth,The Glass Duelist,pet,shojo,martial,mythology,arabia,g30_pet_shojo_062.webp
+388,B04,S39,R2C3,g30_pet_shojo_063,g30_pet_shojo_063.png,Chaidrift,The Dune Hunter,pet,shojo,nordic,samurai,arabia,g30_pet_shojo_063.webp
+389,B04,S39,R2C4,g30_pet_shojo_064,g30_pet_shojo_064.png,Tofuwhirl,The Glass Duelist,pet,shojo,shinobi,vampire,arabia,g30_pet_shojo_064.webp
+390,B04,S39,R2C5,g30_pet_shojo_065,g30_pet_shojo_065.png,Miriflare,The Dune Hunter,pet,shojo,monster_taming,arabia,grimdark,g30_pet_shojo_065.webp
+391,B04,S40,R1C1,g30_villain_shonen_001,g30_villain_shonen_001.png,Kael Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,kaiju,g30_villain_shonen_001.webp
+392,B04,S40,R1C2,g30_villain_shonen_002,g30_villain_shonen_002.png,Soren Locke,The Cinder Corsair,villain,shonen,monster_taming,cosmic_horror,arabia,g30_villain_shonen_002.webp
+393,B04,S40,R1C3,g30_villain_shonen_003,g30_villain_shonen_003.png,Riven Mirren,The Ashen Viper,villain,shonen,crime,cosmic_horror,mecha,g30_villain_shonen_003.webp
+394,B04,S40,R1C4,g30_villain_shonen_004,g30_villain_shonen_004.png,Darian Crowe,The Cinder Corsair,villain,shonen,kaiju,arabia,mecha,g30_villain_shonen_004.webp
+395,B04,S40,R1C5,g30_villain_shonen_005,g30_villain_shonen_005.png,Yara Locke,The Ashen Viper,villain,shonen,crime,arabia,isekai,g30_villain_shonen_005.webp
+396,B04,S40,R2C1,g30_villain_shonen_006,g30_villain_shonen_006.png,Selene Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,isekai,g30_villain_shonen_006.webp
+397,B04,S40,R2C2,g30_villain_shonen_007,g30_villain_shonen_007.png,Kestrel Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,slice,g30_villain_shonen_007.webp
+398,B04,S40,R2C3,g30_villain_shonen_008,g30_villain_shonen_008.png,Jin Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,slice,g30_villain_shonen_008.webp
+399,B04,S40,R2C4,g30_villain_shonen_009,g30_villain_shonen_009.png,Aziel Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,horror,g30_villain_shonen_009.webp
+400,B04,S40,R2C5,g30_villain_shonen_010,g30_villain_shonen_010.png,Cassian Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,horror,g30_villain_shonen_010.webp
+401,B05,S41,R1C1,g30_villain_shonen_011,g30_villain_shonen_011.png,Ren Locke,The Ashen Viper,villain,shonen,monster_taming,crime,romance,g30_villain_shonen_011.webp
+402,B05,S41,R1C2,g30_villain_shonen_012,g30_villain_shonen_012.png,Soraya Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,romance,g30_villain_shonen_012.webp
+403,B05,S41,R1C3,g30_villain_shonen_013,g30_villain_shonen_013.png,Nadia Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,sports,g30_villain_shonen_013.webp
+404,B05,S41,R1C4,g30_villain_shonen_014,g30_villain_shonen_014.png,Asha Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,sports,g30_villain_shonen_014.webp
+405,B05,S41,R1C5,g30_villain_shonen_015,g30_villain_shonen_015.png,Lio Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,cyber,g30_villain_shonen_015.webp
+406,B05,S41,R2C1,g30_villain_shonen_016,g30_villain_shonen_016.png,Kael Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,cyber,g30_villain_shonen_016.webp
+407,B05,S41,R2C2,g30_villain_shonen_017,g30_villain_shonen_017.png,Soren Locke,The Ashen Viper,villain,shonen,monster_taming,crime,fantasy,g30_villain_shonen_017.webp
+408,B05,S41,R2C3,g30_villain_shonen_018,g30_villain_shonen_018.png,Riven Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,fantasy,g30_villain_shonen_018.webp
+409,B05,S41,R2C4,g30_villain_shonen_019,g30_villain_shonen_019.png,Darian Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,idol,g30_villain_shonen_019.webp
+410,B05,S41,R2C5,g30_villain_shonen_020,g30_villain_shonen_020.png,Yara Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,idol,g30_villain_shonen_020.webp
+411,B05,S42,R1C1,g30_villain_shonen_021,g30_villain_shonen_021.png,Selene Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,mystery,g30_villain_shonen_021.webp
+412,B05,S42,R1C2,g30_villain_shonen_022,g30_villain_shonen_022.png,Kestrel Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,mystery,g30_villain_shonen_022.webp
+413,B05,S42,R1C3,g30_villain_shonen_023,g30_villain_shonen_023.png,Jin Locke,The Ashen Viper,villain,shonen,monster_taming,crime,comedy,g30_villain_shonen_023.webp
+414,B05,S42,R1C4,g30_villain_shonen_024,g30_villain_shonen_024.png,Aziel Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,comedy,g30_villain_shonen_024.webp
+415,B05,S42,R1C5,g30_villain_shonen_025,g30_villain_shonen_025.png,Cassian Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,cooking,g30_villain_shonen_025.webp
+416,B05,S42,R2C1,g30_villain_shonen_026,g30_villain_shonen_026.png,Ren Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,cooking,g30_villain_shonen_026.webp
+417,B05,S42,R2C2,g30_villain_shonen_027,g30_villain_shonen_027.png,Soraya Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,military,g30_villain_shonen_027.webp
+418,B05,S42,R2C3,g30_villain_shonen_028,g30_villain_shonen_028.png,Nadia Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,military,g30_villain_shonen_028.webp
+419,B05,S42,R2C4,g30_villain_shonen_029,g30_villain_shonen_029.png,Asha Locke,The Ashen Viper,villain,shonen,monster_taming,crime,supernatural,g30_villain_shonen_029.webp
+420,B05,S42,R2C5,g30_villain_shonen_030,g30_villain_shonen_030.png,Lio Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,supernatural,g30_villain_shonen_030.webp
+421,B05,S43,R1C1,g30_villain_shonen_031,g30_villain_shonen_031.png,Kael Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,space,g30_villain_shonen_031.webp
+422,B05,S43,R1C2,g30_villain_shonen_032,g30_villain_shonen_032.png,Soren Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,space,g30_villain_shonen_032.webp
+423,B05,S43,R1C3,g30_villain_shonen_033,g30_villain_shonen_033.png,Riven Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,magical,g30_villain_shonen_033.webp
+424,B05,S43,R1C4,g30_villain_shonen_034,g30_villain_shonen_034.png,Darian Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,magical,g30_villain_shonen_034.webp
+425,B05,S43,R1C5,g30_villain_shonen_035,g30_villain_shonen_035.png,Yara Locke,The Ashen Viper,villain,shonen,monster_taming,crime,survival,g30_villain_shonen_035.webp
+426,B05,S43,R2C1,g30_villain_shonen_036,g30_villain_shonen_036.png,Selene Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,survival,g30_villain_shonen_036.webp
+427,B05,S43,R2C2,g30_villain_shonen_037,g30_villain_shonen_037.png,Kestrel Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,pirate,g30_villain_shonen_037.webp
+428,B05,S43,R2C3,g30_villain_shonen_038,g30_villain_shonen_038.png,Jin Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,pirate,g30_villain_shonen_038.webp
+429,B05,S43,R2C4,g30_villain_shonen_039,g30_villain_shonen_039.png,Aziel Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,martial,g30_villain_shonen_039.webp
+430,B05,S43,R2C5,g30_villain_shonen_040,g30_villain_shonen_040.png,Cassian Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,martial,g30_villain_shonen_040.webp
+431,B05,S44,R1C1,g30_villain_shonen_041,g30_villain_shonen_041.png,Ren Locke,The Ashen Viper,villain,shonen,monster_taming,crime,mythology,g30_villain_shonen_041.webp
+432,B05,S44,R1C2,g30_villain_shonen_042,g30_villain_shonen_042.png,Soraya Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,mythology,g30_villain_shonen_042.webp
+433,B05,S44,R1C3,g30_villain_shonen_043,g30_villain_shonen_043.png,Nadia Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,nordic,g30_villain_shonen_043.webp
+434,B05,S44,R1C4,g30_villain_shonen_044,g30_villain_shonen_044.png,Asha Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,nordic,g30_villain_shonen_044.webp
+435,B05,S44,R1C5,g30_villain_shonen_045,g30_villain_shonen_045.png,Lio Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,samurai,g30_villain_shonen_045.webp
+436,B05,S44,R2C1,g30_villain_shonen_046,g30_villain_shonen_046.png,Kael Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,samurai,g30_villain_shonen_046.webp
+437,B05,S44,R2C2,g30_villain_shonen_047,g30_villain_shonen_047.png,Soren Locke,The Ashen Viper,villain,shonen,monster_taming,crime,shinobi,g30_villain_shonen_047.webp
+438,B05,S44,R2C3,g30_villain_shonen_048,g30_villain_shonen_048.png,Riven Mirren,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,shinobi,g30_villain_shonen_048.webp
+439,B05,S44,R2C4,g30_villain_shonen_049,g30_villain_shonen_049.png,Darian Crowe,The Ashen Viper,villain,shonen,monster_taming,crime,vampire,g30_villain_shonen_049.webp
+440,B05,S44,R2C5,g30_villain_shonen_050,g30_villain_shonen_050.png,Yara Locke,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,vampire,g30_villain_shonen_050.webp
+441,B05,S45,R1C1,g30_villain_shonen_051,g30_villain_shonen_051.png,Selene Mirren,The Ashen Viper,villain,shonen,monster_taming,crime,grimdark,g30_villain_shonen_051.webp
+442,B05,S45,R1C2,g30_villain_shonen_052,g30_villain_shonen_052.png,Kestrel Crowe,The Cinder Corsair,villain,shonen,kaiju,cosmic_horror,grimdark,g30_villain_shonen_052.webp
+443,B05,S45,R1C3,g30_villain_shonen_053,g30_villain_shonen_053.png,Jin Locke,The Ashen Viper,villain,shonen,mecha,isekai,monster_taming,g30_villain_shonen_053.webp
+444,B05,S45,R1C4,g30_villain_shonen_054,g30_villain_shonen_054.png,Aziel Mirren,The Cinder Corsair,villain,shonen,slice,horror,arabia,g30_villain_shonen_054.webp
+445,B05,S45,R1C5,g30_villain_shonen_055,g30_villain_shonen_055.png,Cassian Crowe,The Ashen Viper,villain,shonen,romance,sports,arabia,g30_villain_shonen_055.webp
+446,B05,S45,R2C1,g30_villain_shonen_056,g30_villain_shonen_056.png,Ren Locke,The Cinder Corsair,villain,shonen,cyber,fantasy,arabia,g30_villain_shonen_056.webp
+447,B05,S45,R2C2,g30_villain_shonen_057,g30_villain_shonen_057.png,Soraya Mirren,The Ashen Viper,villain,shonen,idol,mystery,arabia,g30_villain_shonen_057.webp
+448,B05,S45,R2C3,g30_villain_shonen_058,g30_villain_shonen_058.png,Nadia Crowe,The Cinder Corsair,villain,shonen,comedy,cooking,arabia,g30_villain_shonen_058.webp
+449,B05,S45,R2C4,g30_villain_shonen_059,g30_villain_shonen_059.png,Asha Locke,The Ashen Viper,villain,shonen,military,supernatural,arabia,g30_villain_shonen_059.webp
+450,B05,S45,R2C5,g30_villain_shonen_060,g30_villain_shonen_060.png,Lio Mirren,The Cinder Corsair,villain,shonen,space,magical,arabia,g30_villain_shonen_060.webp
+451,B05,S46,R1C1,g30_villain_shonen_061,g30_villain_shonen_061.png,Kael Crowe,The Ashen Viper,villain,shonen,survival,pirate,arabia,g30_villain_shonen_061.webp
+452,B05,S46,R1C2,g30_villain_shonen_062,g30_villain_shonen_062.png,Soren Locke,The Cinder Corsair,villain,shonen,martial,mythology,arabia,g30_villain_shonen_062.webp
+453,B05,S46,R1C3,g30_villain_shonen_063,g30_villain_shonen_063.png,Riven Mirren,The Ashen Viper,villain,shonen,nordic,samurai,arabia,g30_villain_shonen_063.webp
+454,B05,S46,R1C4,g30_villain_shonen_064,g30_villain_shonen_064.png,Darian Crowe,The Cinder Corsair,villain,shonen,shinobi,vampire,arabia,g30_villain_shonen_064.webp
+455,B05,S46,R1C5,g30_villain_shonen_065,g30_villain_shonen_065.png,Yara Locke,The Ashen Viper,villain,shonen,monster_taming,arabia,grimdark,g30_villain_shonen_065.webp
+456,B05,S46,R2C1,g30_villain_shojo_001,g30_villain_shojo_001.png,Soraya Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,kaiju,g30_villain_shojo_001.webp
+457,B05,S46,R2C2,g30_villain_shojo_002,g30_villain_shojo_002.png,Nadia Crowe,The Dune Hunter,villain,shojo,monster_taming,cosmic_horror,arabia,g30_villain_shojo_002.webp
+458,B05,S46,R2C3,g30_villain_shojo_003,g30_villain_shojo_003.png,Asha Locke,The Glass Duelist,villain,shojo,crime,cosmic_horror,mecha,g30_villain_shojo_003.webp
+459,B05,S46,R2C4,g30_villain_shojo_004,g30_villain_shojo_004.png,Lio Mirren,The Dune Hunter,villain,shojo,kaiju,arabia,mecha,g30_villain_shojo_004.webp
+460,B05,S46,R2C5,g30_villain_shojo_005,g30_villain_shojo_005.png,Kael Crowe,The Glass Duelist,villain,shojo,crime,arabia,isekai,g30_villain_shojo_005.webp
+461,B05,S47,R1C1,g30_villain_shojo_006,g30_villain_shojo_006.png,Soren Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,isekai,g30_villain_shojo_006.webp
+462,B05,S47,R1C2,g30_villain_shojo_007,g30_villain_shojo_007.png,Riven Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,slice,g30_villain_shojo_007.webp
+463,B05,S47,R1C3,g30_villain_shojo_008,g30_villain_shojo_008.png,Darian Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,slice,g30_villain_shojo_008.webp
+464,B05,S47,R1C4,g30_villain_shojo_009,g30_villain_shojo_009.png,Yara Locke,The Glass Duelist,villain,shojo,monster_taming,crime,horror,g30_villain_shojo_009.webp
+465,B05,S47,R1C5,g30_villain_shojo_010,g30_villain_shojo_010.png,Selene Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,horror,g30_villain_shojo_010.webp
+466,B05,S47,R2C1,g30_villain_shojo_011,g30_villain_shojo_011.png,Kestrel Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,romance,g30_villain_shojo_011.webp
+467,B05,S47,R2C2,g30_villain_shojo_012,g30_villain_shojo_012.png,Jin Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,romance,g30_villain_shojo_012.webp
+468,B05,S47,R2C3,g30_villain_shojo_013,g30_villain_shojo_013.png,Aziel Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,sports,g30_villain_shojo_013.webp
+469,B05,S47,R2C4,g30_villain_shojo_014,g30_villain_shojo_014.png,Cassian Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,sports,g30_villain_shojo_014.webp
+470,B05,S47,R2C5,g30_villain_shojo_015,g30_villain_shojo_015.png,Ren Locke,The Glass Duelist,villain,shojo,monster_taming,crime,cyber,g30_villain_shojo_015.webp
+471,B05,S48,R1C1,g30_villain_shojo_016,g30_villain_shojo_016.png,Soraya Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,cyber,g30_villain_shojo_016.webp
+472,B05,S48,R1C2,g30_villain_shojo_017,g30_villain_shojo_017.png,Nadia Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,fantasy,g30_villain_shojo_017.webp
+473,B05,S48,R1C3,g30_villain_shojo_018,g30_villain_shojo_018.png,Asha Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,fantasy,g30_villain_shojo_018.webp
+474,B05,S48,R1C4,g30_villain_shojo_019,g30_villain_shojo_019.png,Lio Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,idol,g30_villain_shojo_019.webp
+475,B05,S48,R1C5,g30_villain_shojo_020,g30_villain_shojo_020.png,Kael Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,idol,g30_villain_shojo_020.webp
+476,B05,S48,R2C1,g30_villain_shojo_021,g30_villain_shojo_021.png,Soren Locke,The Glass Duelist,villain,shojo,monster_taming,crime,mystery,g30_villain_shojo_021.webp
+477,B05,S48,R2C2,g30_villain_shojo_022,g30_villain_shojo_022.png,Riven Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,mystery,g30_villain_shojo_022.webp
+478,B05,S48,R2C3,g30_villain_shojo_023,g30_villain_shojo_023.png,Darian Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,comedy,g30_villain_shojo_023.webp
+479,B05,S48,R2C4,g30_villain_shojo_024,g30_villain_shojo_024.png,Yara Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,comedy,g30_villain_shojo_024.webp
+480,B05,S48,R2C5,g30_villain_shojo_025,g30_villain_shojo_025.png,Selene Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,cooking,g30_villain_shojo_025.webp
+481,B05,S49,R1C1,g30_villain_shojo_026,g30_villain_shojo_026.png,Kestrel Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,cooking,g30_villain_shojo_026.webp
+482,B05,S49,R1C2,g30_villain_shojo_027,g30_villain_shojo_027.png,Jin Locke,The Glass Duelist,villain,shojo,monster_taming,crime,military,g30_villain_shojo_027.webp
+483,B05,S49,R1C3,g30_villain_shojo_028,g30_villain_shojo_028.png,Aziel Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,military,g30_villain_shojo_028.webp
+484,B05,S49,R1C4,g30_villain_shojo_029,g30_villain_shojo_029.png,Cassian Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,supernatural,g30_villain_shojo_029.webp
+485,B05,S49,R1C5,g30_villain_shojo_030,g30_villain_shojo_030.png,Ren Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,supernatural,g30_villain_shojo_030.webp
+486,B05,S49,R2C1,g30_villain_shojo_031,g30_villain_shojo_031.png,Soraya Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,space,g30_villain_shojo_031.webp
+487,B05,S49,R2C2,g30_villain_shojo_032,g30_villain_shojo_032.png,Nadia Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,space,g30_villain_shojo_032.webp
+488,B05,S49,R2C3,g30_villain_shojo_033,g30_villain_shojo_033.png,Asha Locke,The Glass Duelist,villain,shojo,monster_taming,crime,magical,g30_villain_shojo_033.webp
+489,B05,S49,R2C4,g30_villain_shojo_034,g30_villain_shojo_034.png,Lio Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,magical,g30_villain_shojo_034.webp
+490,B05,S49,R2C5,g30_villain_shojo_035,g30_villain_shojo_035.png,Kael Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,survival,g30_villain_shojo_035.webp
+491,B05,S50,R1C1,g30_villain_shojo_036,g30_villain_shojo_036.png,Soren Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,survival,g30_villain_shojo_036.webp
+492,B05,S50,R1C2,g30_villain_shojo_037,g30_villain_shojo_037.png,Riven Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,pirate,g30_villain_shojo_037.webp
+493,B05,S50,R1C3,g30_villain_shojo_038,g30_villain_shojo_038.png,Darian Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,pirate,g30_villain_shojo_038.webp
+494,B05,S50,R1C4,g30_villain_shojo_039,g30_villain_shojo_039.png,Yara Locke,The Glass Duelist,villain,shojo,monster_taming,crime,martial,g30_villain_shojo_039.webp
+495,B05,S50,R1C5,g30_villain_shojo_040,g30_villain_shojo_040.png,Selene Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,martial,g30_villain_shojo_040.webp
+496,B05,S50,R2C1,g30_villain_shojo_041,g30_villain_shojo_041.png,Kestrel Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,mythology,g30_villain_shojo_041.webp
+497,B05,S50,R2C2,g30_villain_shojo_042,g30_villain_shojo_042.png,Jin Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,mythology,g30_villain_shojo_042.webp
+498,B05,S50,R2C3,g30_villain_shojo_043,g30_villain_shojo_043.png,Aziel Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,nordic,g30_villain_shojo_043.webp
+499,B05,S50,R2C4,g30_villain_shojo_044,g30_villain_shojo_044.png,Cassian Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,nordic,g30_villain_shojo_044.webp
+500,B05,S50,R2C5,g30_villain_shojo_045,g30_villain_shojo_045.png,Ren Locke,The Glass Duelist,villain,shojo,monster_taming,crime,samurai,g30_villain_shojo_045.webp
+501,B06,S51,R1C1,g30_villain_shojo_046,g30_villain_shojo_046.png,Soraya Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,samurai,g30_villain_shojo_046.webp
+502,B06,S51,R1C2,g30_villain_shojo_047,g30_villain_shojo_047.png,Nadia Crowe,The Glass Duelist,villain,shojo,monster_taming,crime,shinobi,g30_villain_shojo_047.webp
+503,B06,S51,R1C3,g30_villain_shojo_048,g30_villain_shojo_048.png,Asha Locke,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,shinobi,g30_villain_shojo_048.webp
+504,B06,S51,R1C4,g30_villain_shojo_049,g30_villain_shojo_049.png,Lio Mirren,The Glass Duelist,villain,shojo,monster_taming,crime,vampire,g30_villain_shojo_049.webp
+505,B06,S51,R1C5,g30_villain_shojo_050,g30_villain_shojo_050.png,Kael Crowe,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,vampire,g30_villain_shojo_050.webp
+506,B06,S51,R2C1,g30_villain_shojo_051,g30_villain_shojo_051.png,Soren Locke,The Glass Duelist,villain,shojo,monster_taming,crime,grimdark,g30_villain_shojo_051.webp
+507,B06,S51,R2C2,g30_villain_shojo_052,g30_villain_shojo_052.png,Riven Mirren,The Dune Hunter,villain,shojo,kaiju,cosmic_horror,grimdark,g30_villain_shojo_052.webp
+508,B06,S51,R2C3,g30_villain_shojo_053,g30_villain_shojo_053.png,Darian Crowe,The Glass Duelist,villain,shojo,mecha,isekai,monster_taming,g30_villain_shojo_053.webp
+509,B06,S51,R2C4,g30_villain_shojo_054,g30_villain_shojo_054.png,Yara Locke,The Dune Hunter,villain,shojo,slice,horror,arabia,g30_villain_shojo_054.webp
+510,B06,S51,R2C5,g30_villain_shojo_055,g30_villain_shojo_055.png,Selene Mirren,The Glass Duelist,villain,shojo,romance,sports,arabia,g30_villain_shojo_055.webp
+511,B06,S52,R1C1,g30_villain_shojo_056,g30_villain_shojo_056.png,Kestrel Crowe,The Dune Hunter,villain,shojo,cyber,fantasy,arabia,g30_villain_shojo_056.webp
+512,B06,S52,R1C2,g30_villain_shojo_057,g30_villain_shojo_057.png,Jin Locke,The Glass Duelist,villain,shojo,idol,mystery,arabia,g30_villain_shojo_057.webp
+513,B06,S52,R1C3,g30_villain_shojo_058,g30_villain_shojo_058.png,Aziel Mirren,The Dune Hunter,villain,shojo,comedy,cooking,arabia,g30_villain_shojo_058.webp
+514,B06,S52,R1C4,g30_villain_shojo_059,g30_villain_shojo_059.png,Cassian Crowe,The Glass Duelist,villain,shojo,military,supernatural,arabia,g30_villain_shojo_059.webp
+515,B06,S52,R1C5,g30_villain_shojo_060,g30_villain_shojo_060.png,Ren Locke,The Dune Hunter,villain,shojo,space,magical,arabia,g30_villain_shojo_060.webp
+516,B06,S52,R2C1,g30_villain_shojo_061,g30_villain_shojo_061.png,Soraya Mirren,The Glass Duelist,villain,shojo,survival,pirate,arabia,g30_villain_shojo_061.webp
+517,B06,S52,R2C2,g30_villain_shojo_062,g30_villain_shojo_062.png,Nadia Crowe,The Dune Hunter,villain,shojo,martial,mythology,arabia,g30_villain_shojo_062.webp
+518,B06,S52,R2C3,g30_villain_shojo_063,g30_villain_shojo_063.png,Asha Locke,The Glass Duelist,villain,shojo,nordic,samurai,arabia,g30_villain_shojo_063.webp
+519,B06,S52,R2C4,g30_villain_shojo_064,g30_villain_shojo_064.png,Lio Mirren,The Dune Hunter,villain,shojo,shinobi,vampire,arabia,g30_villain_shojo_064.webp
+520,B06,S52,R2C5,g30_villain_shojo_065,g30_villain_shojo_065.png,Kael Crowe,The Glass Duelist,villain,shojo,monster_taming,arabia,grimdark,g30_villain_shojo_065.webp

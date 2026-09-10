@@ -1,0 +1,22 @@
+{
+  "source_sheets": 52,
+  "cropped_portraits": 520,
+  "unique_character_ids": 520,
+  "unique_filenames": 520,
+  "portrait_dimensions": "512x512",
+  "folder_counts": {
+    "portraits_001_080": 80,
+    "portraits_081_160": 80,
+    "portraits_161_240": 80,
+    "portraits_241_320": 80,
+    "portraits_321_400": 80,
+    "portraits_401_480": 80,
+    "portraits_481_520": 40
+  },
+  "sheet_dimension_counts": {
+    "1983x793": 52
+  },
+  "filename_set_matches_workbook": true,
+  "divider_trim_inset_pixels": 3,
+  "resize_method": "center-square crop, then Lanczos resize; no stretching"
+}
