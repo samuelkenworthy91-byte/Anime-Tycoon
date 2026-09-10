@@ -61,15 +61,32 @@ export const researchWeeks = (rd: number, archiveTier: number, showrunner = "") 
 export const weeklyWorkXpMult = (showrunner: string) => showrunner === "mentor" ? 1.25 : 1;
 export const staminaRecoveryMult = (showrunner: string) => showrunner === "mentor" ? 1.25 : 1;
 
+export interface ShowrunnerCraftStats { story: number; art: number; sound: number; }
+const SHOWRUNNER_BASE_CRAFT: Record<string, ShowrunnerCraftStats> = {
+  steady: { story: 62, art: 88, sound: 58 },
+  vision: { story: 90, art: 68, sound: 64 },
+  producer: { story: 70, art: 68, sound: 66 },
+  marketer: { story: 60, art: 64, sound: 82 },
+  operations: { story: 72, art: 80, sound: 68 },
+  franchise: { story: 82, art: 70, sound: 66 },
+  mentor: { story: 76, art: 74, sound: 72 },
+  research: { story: 84, art: 66, sound: 72 },
+};
+
+/** These are the actual craft numbers used whenever the founding showrunner
+ * takes a contract/rush seat. They improve with the studio's shipped work. */
+export function showrunnerStats(showrunner: string, showsMade: number): ShowrunnerCraftStats {
+  const base = SHOWRUNNER_BASE_CRAFT[showrunner] ?? { story: 68, art: 68, sound: 68 };
+  const growth = Math.min(110, Math.round(Math.max(0, showsMade) * 2.2));
+  return {
+    story: Math.min(STAFF_EFFECTIVE_SKILL_CAP, base.story + growth),
+    art: Math.min(STAFF_EFFECTIVE_SKILL_CAP, base.art + growth),
+    sound: Math.min(STAFF_EFFECTIVE_SKILL_CAP, base.sound + growth),
+  };
+}
+
 export function showrunnerContractSkill(showrunner: string, showsMade: number, type: PointType): number {
-  const base = Math.min(90, 50 + showsMade * 2);
-  const speciality =
-    showrunner === "steady" && type === "art" ? 12
-    : showrunner === "vision" && type === "story" ? 12
-    : showrunner === "producer" ? 8
-    : showrunner === "marketer" && type === "sound" ? 8
-    : 0;
-  return Math.min(99, base + speciality);
+  return showrunnerStats(showrunner, showsMade)[type];
 }
 
 /** Showrunners are senior contributors, not another junior desk roll.
@@ -127,6 +144,13 @@ export const rushBoostPoint = (skill: number) => Math.max(6, Math.round(4 + Math
  *  the exact high-knowledge estimate:  ideal >= 50 -> side A, < 50 -> side B. */
 export const studioKnowledgeEmphasis = (ideal: number, a: string, b: string): string =>
   ideal >= 50 ? a : b;
+
+/** One mastery threshold is shared by the dossier and every direction meeting. */
+export const GENRE_MASTERY_KNOWLEDGE = 9;
+export function exactDirectionKnown(knowledge: number[], exactComboTests = 0): boolean {
+  if (!knowledge.length) return false;
+  return knowledge.every((n) => n >= GENRE_MASTERY_KNOWLEDGE) || exactComboTests >= 3;
+}
 
 /** Stronger rush specialists now have a substantially higher floor AND ceiling. */
 export function rushOutcomeRange(skill: number): { min: number; max: number } {

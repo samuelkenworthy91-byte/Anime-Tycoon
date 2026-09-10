@@ -5,6 +5,7 @@ import { sfx, primeAudio } from "../engine/audio";
 import { getScores, newestSave, slotLabel, type SlotId, type ScoreEntry } from "../engine/storage";
 import SaveSlots from "./SaveSlots";
 import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel, type Showrunner } from "../engine/data";
+import { showrunnerStats } from "../engine/studioOps";
 type ShowrunnerId = Showrunner["id"];
 import { cn } from "../utils/cn";
 
@@ -271,6 +272,7 @@ export default function Title({
                           <div className="font-display font-extrabold leading-tight">{s.name}</div>
                           <div className="text-[11px] font-bold text-cyanx">{s.title}</div>
                           <div className="mt-1 text-[11px] leading-snug text-paper/60">{s.perk}</div>
+                          <div className="mt-1 text-[9px] font-extrabold text-gold">STORY {showrunnerStats(s.id, 0).story} · ART {showrunnerStats(s.id, 0).art} · SOUND {showrunnerStats(s.id, 0).sound}</div>
                         </div>
                       </div>
                       {runner === s.id && (

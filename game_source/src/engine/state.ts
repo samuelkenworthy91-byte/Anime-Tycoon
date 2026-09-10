@@ -75,6 +75,7 @@ import {
   WEEKLY_XP,
   bondKey,
   bondKind,
+  contractCrewPayMult,
   ensureCareer,
   gainXp,
   hasTrait,
@@ -90,6 +91,8 @@ import {
   retirementEligible,
   recordShow,
   rollHire,
+  staffReleaseFanMult,
+  staffResearchDurationMult,
   studioPointMult,
   studioProduction,
   toLegend,
@@ -885,13 +888,14 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         const live = job.liveProgressThisWeek ?? 0;
         const progress = Math.min(job.contract.target, job.progress + Math.max(0, baseline - live));
         if (progress >= job.contract.target) {
-          cash += job.contract.pay;
+          const contractPay = Math.round(job.contract.pay * contractCrewPayMult(crew));
+          cash += contractPay;
           rd += job.contract.rd;
           staffArr = staffArr.map((s) => {
             if (!job.staffIds.includes(s.id)) return s;
             return gainXp(s, CONTRACT_XP).staff;
           });
-          notices.push(`✅ Contract delivered: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
+          notices.push(`✅ Contract delivered: ${job.contract.name} (+£${contractPay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
         } else if (w >= job.dueWeek) {
           const consolation = Math.max(1, Math.round(job.contract.rd / 3));
           rd += consolation;
@@ -973,10 +977,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           let dm = 0;
           if (nx.stamina < 35) dm -= 2; // overworked
           const team = staffArr.filter((x) => proj.staffIds.includes(x.id) && x.id !== st.id);
-          if (team.some((x) => hasTrait(x, "genius"))) dm -= 1;
+          if (team.some((x) => hasTrait(x, "genius"))) dm -= 2;
           if (team.some((x) => (bonds[bondKey(st.id, x.id)] ?? 0) >= 8 && bondKind(st, x) === "clash")) dm -= 1;
           if (hasTrait(st, "fanatic") && st.favGenre)
-            dm += proj.draft.genres.includes(st.favGenre) ? 1 : -1;
+            dm += proj.draft.genres.includes(st.favGenre) ? 2 : -2;
           dm += fx.moraleRest;
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
@@ -1989,10 +1993,12 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
   }
   const completed = contractJobs.filter((j) => j.progress >= j.contract.target);
   for (const job of completed) {
-    cash += job.contract.pay;
+    const contractCrew = staff.filter((st) => job.staffIds.includes(st.id));
+    const contractPay = Math.round(job.contract.pay * contractCrewPayMult(contractCrew));
+    cash += contractPay;
     rd += job.contract.rd;
     staff = staff.map((st) => job.staffIds.includes(st.id) ? gainXp(st, CONTRACT_XP).staff : st);
-    notices.push(`🎉 CONTRACT DELIVERED: ${job.contract.name} (+£${job.contract.pay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
+    notices.push(`🎉 CONTRACT DELIVERED: ${job.contract.name} (+£${contractPay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
   }
   if (completed.length) {
     const ids = new Set(completed.map((j) => j.id));
@@ -2309,6 +2315,15 @@ export function previewResult(r: RunState, p: Project): ShowResult {
       ...out,
       fans: Math.round(out.fans * decisionFanMult),
       breakdown: [...out.breakdown, { label: "Decision-event audience effect", pts: `×${decisionFanMult.toFixed(2)} fans` }],
+    };
+  }
+  const releaseCrew = r.staff.filter((s) => p.staffIds.includes(s.id));
+  const staffFanMult = staffReleaseFanMult(releaseCrew);
+  if (Math.abs(staffFanMult - 1) > 0.001) {
+    out = {
+      ...out,
+      fans: Math.round(out.fans * staffFanMult),
+      breakdown: [...out.breakdown, { label: "Crew audience skills", pts: `×${staffFanMult.toFixed(2)} fans` }],
     };
   }
   const scope = PRODUCTION_SCOPES[d.scope ?? "standard"];
@@ -2634,11 +2649,11 @@ export function releaseProject(
         let nx: typeof s = {
           ...s,
           stamina: Math.max(15, s.stamina - 18),
-          story: Math.min(99, s.story + gain),
-          art: Math.min(99, s.art + gain),
-          sound: Math.min(99, s.sound + gain),
+          story: Math.min(STAFF_STAT_CAP, s.story + gain),
+          art: Math.min(STAFF_STAT_CAP, s.art + gain),
+          sound: Math.min(STAFF_STAT_CAP, s.sound + gain),
         };
-        nx = recordShow(nx, draft.title, result.total, r.week);
+        nx = recordShow(nx, draft.title, result.total, r.week, draft.genres);
         nx = moraleDelta(nx, moraleSwing);
         const g = gainXp(nx, xp);
         if (g.levelsGained > 0)
@@ -2877,7 +2892,8 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   if (!def) return null;
   const baseResearchWeeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
   const researchDecisionMult = decisionResearchSpeedMult(r);
-  const weeks = Math.max(0.25, baseResearchWeeks * researchDecisionMult);
+  const staffResearchMult = staffResearchDurationMult(r.staff);
+  const weeks = Math.max(0.25, baseResearchWeeks * researchDecisionMult * staffResearchMult);
   const job: ResearchJob = {
     id: `research_${id}_${r.week}`, researchId: id, name: def.name,
     startWeek: r.week, completesWeek: r.week + weeks,
