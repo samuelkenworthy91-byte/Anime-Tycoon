@@ -1,6 +1,7 @@
 import {
   GENRES,
   ROLE_POINT,
+  STAFF_STAT_CAP,
   rollCandidate,
   staffPoint,
   type GenreId,
@@ -13,7 +14,7 @@ import type { Project } from "./projects";
 /* ====================================================================
    STAFF CAREERS — people, not stat blocks.
 
-   Twelve-level careers driven by XP, specialisations that interact
+   Long-form careers driven by XP, specialisations that interact
    with the shows they work on, personality traits with exact numeric
    effects, morale, relationships that grow between colleagues,
    department heads, salary politics and — for the longest careers —
@@ -34,18 +35,55 @@ export const CAREER_TITLES = [
   "Master",
   "Luminary",
   "Living Legend",
-];
-export const MAX_LEVEL = CAREER_TITLES.length;
+] as const;
 
-/** cumulative XP needed to REACH level n (index n-1) */
-export const XP_LEVELS = [0, 100, 260, 500, 850, 1350, 2050, 3000, 4250, 5900, 8000, 10700];
+/** Staff can keep developing for the entire campaign and deep Dynasty saves. */
+export const MAX_LEVEL = 999;
+
+/** The original 12 thresholds are preserved byte-for-byte for existing saves. */
+const LEGACY_XP_LEVELS = [0, 100, 260, 500, 850, 1350, 2050, 3000, 4250, 5900, 8000, 10700] as const;
+
+/**
+ * Cumulative XP needed to reach each level (index = level - 1). After Lv12,
+ * mastery levels deliberately slow down rather than ending. The gap starts
+ * around 2.9k XP and grows smoothly, making Lv999 a true endless-save goal.
+ */
+export const XP_LEVELS: number[] = [...LEGACY_XP_LEVELS];
+for (let level = 13; level <= MAX_LEVEL; level += 1) {
+  const mastery = level - 12;
+  const gap = Math.round(2800 + mastery * 22 + Math.sqrt(mastery) * 80);
+  XP_LEVELS.push(XP_LEVELS[XP_LEVELS.length - 1] + gap);
+}
+
+/** Higher levels retain familiar early titles, then gain long-run prestige ranks. */
+const CAREER_TITLE_MILESTONES: { level: number; title: string }[] = [
+  ...CAREER_TITLES.map((title, i) => ({ level: i + 1, title })),
+  { level: 25, title: "Grandmaster" },
+  { level: 50, title: "Industry Icon" },
+  { level: 100, title: "Auteur" },
+  { level: 250, title: "Hall of Famer" },
+  { level: 500, title: "Immortal" },
+  { level: 750, title: "Mythic" },
+  { level: 999, title: "Pinnacle" },
+];
 
 export const levelFromXp = (xp: number): number => {
-  let lvl = 1;
-  for (let i = 1; i < XP_LEVELS.length; i++) if (xp >= XP_LEVELS[i]) lvl = i + 1;
-  return lvl;
+  const value = Math.max(0, xp);
+  let lo = 0;
+  let hi = XP_LEVELS.length - 1;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (XP_LEVELS[mid] <= value) lo = mid;
+    else hi = mid - 1;
+  }
+  return Math.min(MAX_LEVEL, lo + 1);
 };
-export const levelTitle = (lvl: number) => CAREER_TITLES[Math.max(0, Math.min(MAX_LEVEL, lvl) - 1)];
+
+export const levelTitle = (lvl: number) => {
+  const level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(lvl)));
+  return [...CAREER_TITLE_MILESTONES].reverse().find((x) => level >= x.level)?.title ?? CAREER_TITLES[0];
+};
+
 /** progress 0..1 inside the current level */
 export function levelProgress(xp: number): number {
   const lvl = levelFromXp(xp);
@@ -54,6 +92,7 @@ export function levelProgress(xp: number): number {
   const hi = XP_LEVELS[lvl];
   return Math.max(0, Math.min(1, (xp - lo) / (hi - lo)));
 }
+
 
 /** add XP; every level gained trains +2 main / +1 off stats */
 export function gainXp(s: Staff, amount: number): { staff: Staff; levelsGained: number } {
@@ -65,9 +104,9 @@ export function gainXp(s: Staff, amount: number): { staff: Staff; levelsGained: 
   for (let l = before; l < after; l++) {
     out = {
       ...out,
-      story: Math.min(99, out.story + (main === "story" ? 2 : 1)),
-      art: Math.min(99, out.art + (main === "art" ? 2 : 1)),
-      sound: Math.min(99, out.sound + (main === "sound" ? 2 : 1)),
+      story: Math.min(STAFF_STAT_CAP, out.story + (main === "story" ? 2 : 1)),
+      art: Math.min(STAFF_STAT_CAP, out.art + (main === "art" ? 2 : 1)),
+      sound: Math.min(STAFF_STAT_CAP, out.sound + (main === "sound" ? 2 : 1)),
     };
   }
   return { staff: out, levelsGained: after - before };
@@ -186,12 +225,26 @@ function pickTraits(seedA: number, seedB: number): string[] {
 /** fill in career fields — deterministic from the staff id, so loading an
     old save always produces the same person */
 export function ensureCareer(s: Staff, week: number): Staff {
-  if (s.xp !== undefined && s.traits && s.spec && s.shows) return s;
   const h = idHash(s.id);
   const roleSpecs = SPEC_DEFS.filter((d) => d.role === s.role);
+  const savedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(s.level || 1)));
+  const xp = Math.max(0, s.xp ?? XP_LEVELS[savedLevel - 1]);
+  const inferredLevel = levelFromXp(xp);
+  /* Old max-level saves continued banking XP even though Lv12 could not move.
+     On first load, honour that earned XP and grant the missing level stat growth. */
+  const retroLevels = Math.max(0, inferredLevel - savedLevel);
+  const main = ROLE_POINT[s.role];
+  const grow = (point: PointType) => Math.min(
+    STAFF_STAT_CAP,
+    Math.max(0, s[point]) + retroLevels * (main === point ? 2 : 1),
+  );
   return {
     ...s,
-    xp: s.xp ?? XP_LEVELS[Math.max(0, Math.min(MAX_LEVEL, s.level) - 1)],
+    level: inferredLevel,
+    xp,
+    story: grow("story"),
+    art: grow("art"),
+    sound: grow("sound"),
     morale: s.morale ?? 70,
     traits: s.traits ?? pickTraits(h, h >> 3),
     spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,

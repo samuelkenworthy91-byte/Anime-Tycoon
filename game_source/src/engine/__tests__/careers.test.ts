@@ -103,15 +103,15 @@ afterEach(() => vi.restoreAllMocks());
 
 /* ------------------------------------------------------------------ XP */
 describe("xp & levels", () => {
-  it("has a 12-level career with rising thresholds", () => {
+  it("extends staff careers to level 999 while preserving the original early thresholds", () => {
     expect(CAREER_TITLES).toHaveLength(12);
-    expect(XP_LEVELS).toHaveLength(12);
-    for (let i = 2; i < XP_LEVELS.length; i++) {
-      expect(XP_LEVELS[i] - XP_LEVELS[i - 1]).toBeGreaterThan(XP_LEVELS[i - 1] - XP_LEVELS[i - 2]);
-    }
+    expect(MAX_LEVEL).toBe(999);
+    expect(XP_LEVELS).toHaveLength(MAX_LEVEL);
+    expect(XP_LEVELS.slice(0, 12)).toEqual([0, 100, 260, 500, 850, 1350, 2050, 3000, 4250, 5900, 8000, 10700]);
+    for (let i = 1; i < XP_LEVELS.length; i++) expect(XP_LEVELS[i]).toBeGreaterThan(XP_LEVELS[i - 1]);
     expect(levelFromXp(0)).toBe(1);
     expect(levelFromXp(XP_LEVELS[5])).toBe(6);
-    expect(levelFromXp(999_999)).toBe(MAX_LEVEL);
+    expect(levelFromXp(XP_LEVELS[MAX_LEVEL - 1])).toBe(MAX_LEVEL);
   });
 
   it("gainXp levels people up and trains their stats", () => {

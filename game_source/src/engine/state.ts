@@ -19,6 +19,7 @@ import {
   PUN_TITLES,
   RIVAL_STUDIOS,
   ROLE_POINT,
+  STAFF_STAT_CAP,
   staffPoint,
   rollContract,
   type Contract,
@@ -911,7 +912,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         if (w < job.completesWeek) { keep.push(job); continue; }
         staffArr = staffArr.map((s) => {
           if (s.id !== job.staffId) return s;
-          let nx = ensureCareer({ ...s, [job.focus]: Math.min(99, s[job.focus] + 1), lastTrainedWeek: w }, w);
+          let nx = ensureCareer({ ...s, [job.focus]: Math.min(STAFF_STAT_CAP, s[job.focus] + 1), lastTrainedWeek: w }, w);
           nx = moraleDelta(nx, 3);
           return gainXp(nx, trainXp(job.tier)).staff;
         });
@@ -1535,7 +1536,7 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
             ...s,
             stamina: Math.max(12, s.stamina - 8),
             ...(taught && fx.trainSkill > 0
-              ? { [taught]: Math.min(99, s[taught] + fx.trainSkill) }
+              ? { [taught]: Math.min(STAFF_STAT_CAP, s[taught] + fx.trainSkill) }
               : {}),
           }
         : s
@@ -1745,7 +1746,7 @@ function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; 
       if ((nx.day ?? nx.week * 7) < due) { keep.push(job); continue; }
       staff = staff.map((s) => {
         if (s.id !== job.staffId) return s;
-        let out = ensureCareer({ ...s, [job.focus]: Math.min(99, s[job.focus] + 1), lastTrainedWeek: nx.week }, nx.week);
+        let out = ensureCareer({ ...s, [job.focus]: Math.min(STAFF_STAT_CAP, s[job.focus] + 1), lastTrainedWeek: nx.week }, nx.week);
         out = moraleDelta(out, 3);
         return gainXp(out, trainXp(job.tier)).staff;
       });

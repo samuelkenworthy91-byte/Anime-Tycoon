@@ -24,6 +24,7 @@ import {
   POINT_COLOR,
   ROLE_LABEL,
   ROLE_POINT,
+  STAFF_STAT_CAP,
   dateLabel,
   formatGBP,
   staffMain,
@@ -279,7 +280,7 @@ function StaffCard({
               <span>{s[t]}</span>
             </div>
             <div className="h-1.5 rounded bg-abyss">
-              <div className="h-full rounded" style={{ width: `${s[t]}%`, background: POINT_COLOR[t] }} />
+              <div className="h-full rounded" style={{ width: `${Math.round((Math.log1p(Math.max(0, Math.min(STAFF_STAT_CAP, s[t]))) / Math.log1p(STAFF_STAT_CAP)) * 100)}%`, background: POINT_COLOR[t] }} />
             </div>
           </div>
         ))}

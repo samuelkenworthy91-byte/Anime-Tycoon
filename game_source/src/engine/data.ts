@@ -879,7 +879,24 @@ export function rollCandidate(week: number): Staff {
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;
   return s;
 }
-export const staffPoint = (s: Staff, t: PointType) => (t === "story" ? s.story : t === "art" ? s.art : s.sound);
+export const STAFF_STAT_CAP = 999;
+/** Practical ceiling of a 999 raw craft stat after diminishing mastery returns. */
+export const STAFF_EFFECTIVE_SKILL_CAP = 240;
+
+export const staffRawPoint = (s: Staff, t: PointType) => (t === "story" ? s.story : t === "art" ? s.art : s.sound);
+
+/**
+ * Preserve the original 0..99 balance exactly. Beyond 99, every raw point
+ * still improves the employee, but with logarithmic mastery returns so a
+ * 999-stat legend is roughly 2.4x the old maximum rather than 10x.
+ */
+export function effectiveStaffSkill(raw: number): number {
+  const value = Math.max(0, Math.min(STAFF_STAT_CAP, raw));
+  if (value <= 99) return value;
+  return Math.min(STAFF_EFFECTIVE_SKILL_CAP, 99 + 60 * Math.log1p((value - 99) / 100));
+}
+
+export const staffPoint = (s: Staff, t: PointType) => effectiveStaffSkill(staffRawPoint(s, t));
 export const staffMain = (s: Staff) => staffPoint(s, ROLE_POINT[s.role]);
 export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
