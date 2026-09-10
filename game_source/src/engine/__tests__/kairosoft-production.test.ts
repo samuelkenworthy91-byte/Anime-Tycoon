@@ -61,9 +61,8 @@ describe("Kairosoft live production", () => {
     })).toBe(true);
   });
 
-  it("all 23 active genres remain present (canonical 21 + Samurai/Shinobi scaffolding)", () => {
-    expect(GENRES).toHaveLength(23);
-    expect(GENRES.map((g) => g.id)).toContain("samurai");
-    expect(GENRES.map((g) => g.id)).toContain("shinobi");
+  it("all 25 active genres remain present", () => {
+    expect(GENRES).toHaveLength(25);
+    for (const id of ["samurai", "shinobi", "vampire", "grimdark"]) expect(GENRES.map((g) => g.id)).toContain(id);
   });
 });

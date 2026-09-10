@@ -81,16 +81,18 @@ describe("hard-mode direction fingerprints", () => {
     expect(minimum).toBeGreaterThanOrEqual(9);
   });
 
-  it("gives all 253 two-genre combinations distinct exact slider triples", () => {
+  it("gives every two-genre combination a distinct exact slider triple", () => {
     const ids = GENRES.map((g) => g.id);
+    const expectedPairs = ids.length * (ids.length - 1) / 2;
     const triples = new Set<string>();
     let count = 0;
     for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
       triples.add(genreTargetFor([ids[i], ids[j]] as GenreId[]).ideal.join(","));
       count++;
     }
-    expect(count).toBe(253);
-    expect(triples.size).toBe(253);
+    expect(count).toBe(expectedPairs);
+    expect(count).toBe(300);
+    expect(triples.size).toBe(expectedPairs);
   });
 });
 
@@ -104,7 +106,7 @@ describe("test-audience exact combo learning", () => {
       lastResult: result,
     };
     run = finishOnePanel(run);
-    run = finishOnePanel(run); // second finding from same show: still one tested series
+    run = finishOnePanel(run);
     const key = comboKey(["romance", "slice"]);
     expect(run.audienceComboSeries[key]).toHaveLength(1);
 
