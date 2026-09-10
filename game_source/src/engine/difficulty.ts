@@ -1,11 +1,11 @@
 /* ======================================================================
  * CAMPAIGN DIFFICULTY / ANTI-SNOWBALL
  *
- * Success should create new problems rather than simply inflate every cost.
- * This module keeps the opening forgiving, then makes the industry react to
- * a studio that is winning early: rivals improve, audiences expect more,
- * salaries rise, elite talent becomes harder to poach, and running several
- * productions at once becomes a genuine management challenge.
+ * The opening is intentionally hard: an unknown studio has to earn critical
+ * credibility instead of turning one strong production into an instant
+ * dynasty. As the studio survives and proves itself, that rookie scepticism
+ * fades; visible success then creates a different kind of pressure as rivals,
+ * audiences and salaries react to a studio that is winning.
  *
  * Everything here is derived from existing save fields, so old saves need no
  * schema migration and immediately receive an appropriate pressure level.
@@ -35,7 +35,7 @@ export interface IndustryPressure {
   band: IndustryPressureBand;
   /** added to next year's rival greenlight quality */
   rivalBoost: number;
-  /** added to the existing audience expectation bar */
+  /** added to the existing review/audience expectation bar */
   audienceBar: number;
   /** multiplier on player staff payroll */
   salaryMult: number;
@@ -44,9 +44,39 @@ export interface IndustryPressure {
 }
 
 /**
- * Career pressure begins gently but reacts immediately to a breakout.
- * Chronology alone never maxes the scale: a struggling studio still gets a
- * manageable campaign, while an early dynasty attracts tougher competition.
+ * Critics do not treat a brand-new bedroom studio like an established house.
+ * This is deliberately separate from the success-pressure level below: Year 1
+ * starts with a sizeable credibility hurdle even at level 0, then the hurdle
+ * falls with time and a modest amount of demonstrated output. A lucky early
+ * smash therefore helps, but cannot erase the whole early-game climb at once.
+ *
+ * scoring.ts converts each audienceBar point to -0.07 on each critic:
+ *   Year 1 base 18 -> about -1.26 / critic
+ *   Year 2 base 12 -> about -0.84 / critic
+ *   Year 3 base  7 -> about -0.49 / critic
+ *   Year 4 base  3 -> about -0.21 / critic
+ * By Year 5 the rookie hurdle is gone; normal industry pressure remains.
+ */
+export function rookieCredibilityBar(input: IndustryPressureInput): number {
+  const year = Math.max(1, Math.floor(Math.max(0, input.week) / 48) + 1);
+  const base = year === 1 ? 18 : year === 2 ? 12 : year === 3 ? 7 : year === 4 ? 3 : 0;
+  if (!base) return 0;
+
+  /* Proof matters, but slowly. This stops rapid-fire early productions from
+     deleting the career curve before the studio has actually aged. */
+  const proofRelief = Math.min(
+    5,
+    Math.max(0, input.showsMade) * 0.30 +
+      Math.max(0, input.hits) * 0.35 +
+      Math.max(0, input.awards) * 0.20,
+  );
+  return round2(Math.max(0, base - proofRelief));
+}
+
+/**
+ * Success pressure reacts immediately to a breakout. Chronology alone never
+ * maxes the scale: a struggling studio still gets a manageable mature game,
+ * while an early dynasty attracts tougher competition.
  */
 export function industryPressure(input: IndustryPressureInput): IndustryPressure {
   const year = Math.max(1, Math.floor(Math.max(0, input.week) / 48) + 1);
@@ -86,14 +116,18 @@ export function industryPressure(input: IndustryPressureInput): IndustryPressure
     level < 3.5 ? "contender" :
     level < 4.75 ? "powerhouse" : "empire";
 
+  const rookieBar = rookieCredibilityBar(input);
+  if (rookieBar > 0) reasons.unshift("new-studio critic scepticism");
+  const successBar = Math.min(6, level * 0.9);
+
   return {
     year,
     level,
     band,
     rivalBoost: round2(Math.min(6, level * 0.95)),
-    /* scoring converts audienceBar at −0.07 per critic; cap keeps reviews
-       fundamentally absolute while an acclaimed studio has to keep evolving. */
-    audienceBar: round2(Math.min(6, level * 0.9)),
+    /* scoring converts audienceBar at -0.07 per critic. Early credibility
+       and later success pressure stack, but come from different causes. */
+    audienceBar: round2(rookieBar + successBar),
     salaryMult: round2(1 + Math.min(0.28, level * 0.045)),
     reasons,
   };
