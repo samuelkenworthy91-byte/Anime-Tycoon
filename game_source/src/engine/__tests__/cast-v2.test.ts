@@ -42,15 +42,14 @@ const draft = (genres: Draft["genres"], animeType: Draft["animeType"] = "shojo")
 });
 
 describe("Cast V2 schema", () => {
-  it("has exactly 23 active genres: the canonical 21 unchanged plus Samurai/Shinobi scaffolding", () => {
-    /* the original 21 remain, in the same order, unchanged */
+  it("keeps the original 21 unchanged and appends Samurai, Shinobi, Vampire and Grimdark", () => {
     const first = GENRES.map((genre) => genre.id).slice(0, 21);
     expect(first).toEqual([
       "mecha", "isekai", "slice", "horror", "romance", "sports", "cyber", "fantasy", "idol", "mystery",
       "comedy", "cooking", "military", "supernatural", "space", "magical", "survival", "pirate", "martial", "mythology", "nordic",
     ]);
-    expect(GENRES).toHaveLength(23);
-    expect(GENRES.map((genre) => genre.id).slice(21)).toEqual(["samurai", "shinobi"]);
+    expect(GENRES).toHaveLength(25);
+    expect(GENRES.map((genre) => genre.id).slice(21)).toEqual(["samurai", "shinobi", "vampire", "grimdark"]);
   });
 
   it("keeps Shonen/Shojo and Racing/Noir out of active genres", () => {
