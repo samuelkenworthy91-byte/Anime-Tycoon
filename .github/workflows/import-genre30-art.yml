@@ -1,0 +1,73 @@
+name: Import Genre 30 Cast Art
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - Anime_Runner_Genre30_520_CLEAN_WEBP_UPLOAD.zip
+
+permissions:
+  contents: write
+
+jobs:
+  import-art:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract upload into canonical staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="$GITHUB_WORKSPACE/Anime_Runner_Genre30_520_CLEAN_WEBP_UPLOAD.zip"
+          TARGET="$GITHUB_WORKSPACE/game_source/art_src/cast_v6_genre30_upload_staging"
+          TMP="$RUNNER_TEMP/genre30-import"
+          test -f "$ZIP"
+          rm -rf "$TMP"
+          mkdir -p "$TMP"
+          unzip -q "$ZIP" -d "$TMP"
+          test -d "$TMP/portraits"
+          test -d "$TMP/manifest"
+          rm -rf "$TARGET"
+          mkdir -p "$TARGET"
+          cp -R "$TMP/portraits" "$TARGET/portraits"
+          cp -R "$TMP/manifest" "$TARGET/manifest"
+
+      - name: Validate 520 portraits and manifest mapping
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="$GITHUB_WORKSPACE/game_source/art_src/cast_v6_genre30_upload_staging"
+          count=$(find "$TARGET/portraits" -maxdepth 1 -type f -name 'g30_*.webp' | wc -l)
+          test "$count" -eq 520
+          python - <<'PY'
+          from pathlib import Path
+          import csv
+          root = Path('game_source/art_src/cast_v6_genre30_upload_staging')
+          manifest = list(csv.DictReader((root / 'manifest/final_manifest_webp.csv').open(encoding='utf-8-sig')))
+          assert len(manifest) == 520, f'expected 520 manifest rows, got {len(manifest)}'
+          ids = [row['character_id'] for row in manifest]
+          assert len(set(ids)) == 520, 'character IDs are not unique'
+          expected = {row['staging_filename_webp'] for row in manifest}
+          actual = {p.name for p in (root / 'portraits').glob('g30_*.webp')}
+          assert expected == actual, f'portrait/manifest mismatch: missing={sorted(expected-actual)[:5]} extra={sorted(actual-expected)[:5]}'
+          for path in (root / 'portraits').glob('g30_*.webp'):
+              assert path.stat().st_size > 0, f'empty portrait: {path.name}'
+          print('Validated 520 unique Genre 30 staging portraits against final manifest.')
+          PY
+
+      - name: Commit imported portraits and remove transfer ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f Anime_Runner_Genre30_520_CLEAN_WEBP_UPLOAD.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A game_source/art_src/cast_v6_genre30_upload_staging Anime_Runner_Genre30_520_CLEAN_WEBP_UPLOAD.zip
+          git diff --cached --quiet && exit 0
+          git commit -m "Import 520 Genre 30 cast portraits"
+          git push origin HEAD:main
