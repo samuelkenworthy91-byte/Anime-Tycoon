@@ -213,6 +213,8 @@ export const CONTINUATIONS: ContinuationDef[] = [
 export const continuationDef = (kind: EntryKind): ContinuationDef | null =>
   CONTINUATIONS.find((c) => c.kind === kind) ?? null;
 
+export const SEQUEL_SCORE_THRESHOLD = 32;
+
 /** why a continuation can't be made right now (null = allowed) */
 export function continuationBlock(
   fr: Franchise,
@@ -225,6 +227,9 @@ export function continuationBlock(
     projects?: Project[];
   }
 ): string | null {
+  if ((kind === "season" || kind === "movie") && fr.lastScore < SEQUEL_SCORE_THRESHOLD) {
+    return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). A spin-off or reboot can still rescue the IP.`;
+  }
   if (kind === "season") {
     /* one next-season per franchise on the floor at a time: the previous
        season can be mid-broadcast without blocking anything, but two
@@ -240,7 +245,7 @@ export function continuationBlock(
     );
     if (dupe) return `Season ${next} is already in production (“${dupe.draft.title}”)`;
   }
-  if (kind === "reboot") {
+  if (kind === "reboot" && fr.lastScore >= SEQUEL_SCORE_THRESHOLD) {
     if (fr.entries.length < 2) return "Needs at least 2 entries to reboot";
     if (fr.fatigue < 40 && opts.week - fr.lastEntryWeek < 96)
       return "Only worth it once the IP is tired (fatigue 40+) or long dormant (2+ years)";
@@ -405,7 +410,21 @@ export function recordContinuation(
   const fans = Math.round(result.fans * verdict.fanMult);
 
   const charDelta = verdict.verdict === "delight" ? 8 : verdict.verdict === "fine" ? 4 : -6;
-  const cast = fr.cast.map((c) => ({ ...c, popularity: clampPct(c.popularity + charDelta) }));
+  const latestBilling: Record<FranchiseChar["role"], { id: string; name?: string }> = {
+    protag: { id: d.protag, name: d.protagName },
+    secondary: { id: d.secondary, name: d.secondaryName },
+    pet: { id: d.pet, name: d.petName },
+    villain: { id: d.villain, name: d.villainName },
+  };
+  const cast = fr.cast.map((c) => {
+    const billing = latestBilling[c.role];
+    return {
+      ...c,
+      id: billing.id || c.id,
+      name: billing.name?.trim() || c.name,
+      popularity: clampPct(c.popularity + charDelta),
+    };
+  });
 
   let popularity = clampPct(fr.popularity + verdict.popDelta);
   let fatigue = clampPct(fr.fatigue + ((def?.fatigueAdd ?? 12) + verdict.fatigueExtra + (opts?.fatigueAdd ?? 0)) * (opts?.fatigueMult ?? 1));

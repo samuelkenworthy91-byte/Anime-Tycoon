@@ -511,7 +511,7 @@ export default function ProjectsPanel({
           </b>
           {" → "}
           <b className={fc.cashAfter < 0 ? "text-neon" : "text-paper/90"}>≈{formatGBPShort(fc.cashAfter)} in the bank</b>
-          {fc.cashAfter < 0 && <b className="block font-bold text-neon">BANKRUPT NEXT WEEK — take a contract first!</b>}
+          {fc.cashAfter < 0 && <b className="block font-bold text-neon">DEBT WARNING — recover before 8 consecutive weeks below £0 or the landlord shuts the studio.</b>}
         </span>
       </div>
 

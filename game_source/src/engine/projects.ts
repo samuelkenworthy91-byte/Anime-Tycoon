@@ -40,6 +40,7 @@ import {
 } from "./data";
 import { computeResult, type Points, type ShowResult } from "./scoring";
 import { genreTargetFor } from "./genreTargets";
+import { secretComboResearched } from "./creativeDiscovery";
 import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
 
 /* ------------------------------------------------------------- costs */
@@ -685,6 +686,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
 
   const key = comboKey(genres);
   const comboLevel = ctx.comboLevels[key] ?? 0;
+  const comboKnown = (key in ctx.comboLevels) || secretComboResearched(ctx.research, key);
   const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
 
   const res = computeResult({
@@ -698,7 +700,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     genreRatio: ratio,
     comboLevel,
     newCombo: !(key in ctx.comboLevels),
-    comboDiscovered: key in ctx.comboLevels,
+    comboDiscovered: comboKnown,
     castCombos: ctx.castCombos,
     arcCombos: ctx.arcCombos,
     studioTop: ctx.studioTop,

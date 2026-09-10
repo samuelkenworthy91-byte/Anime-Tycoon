@@ -293,6 +293,7 @@ export default function Release({
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {result.reviews.map((r, i) => {
                       const quote = contextualReviewQuote({
+                        title: draft.title,
                         outlet: r.outlet,
                         focus: r.focus,
                         score: r.score,
@@ -330,7 +331,9 @@ export default function Release({
                         <span className="rounded-full border border-line px-2 py-1 text-[9px] font-bold tracking-wider" style={{ color: tier.color }}>{tier.label.toUpperCase()}</span>
                       </div>
                       {result.hallOfFame && <div className="mt-2 flex items-center justify-center gap-1 text-[10px] font-extrabold text-gold"><Trophy size={12} /> THE POSTER WILL HANG IN YOUR STUDIO</div>}
-                      {!result.hallOfFame && result.total >= 30 && <div className="mt-2 text-[10px] font-extrabold text-mint">SEQUEL RIGHTS SECURED</div>}
+                      {result.total >= 32
+                        ? <div className="mt-2 text-[10px] font-extrabold text-mint">SEQUEL RIGHTS SECURED · 32/40 THRESHOLD MET</div>
+                        : <div className="mt-2 text-[10px] font-extrabold text-neon">NO SEQUEL RIGHTS · SPIN-OFF / REBOOT ROUTES REMAIN</div>}
                     </div>
                   )}
                 </div>
@@ -368,7 +371,7 @@ export default function Release({
 
                 <div className="mt-2 rounded-xl border border-mint/30 bg-mint/5 p-2 text-center text-[10px] font-bold text-mint">Revenue lands week by week over the {AIR_WEEKS}-week broadcast.</div>
 
-                {draft.franchiseKey && result.total < 30 && <div className="mt-2 rounded-xl border border-neon/40 bg-neon/10 p-2 text-center text-[10px] font-bold text-neon2">The sequel underperformed, but the series remains available from SERIES in the office.</div>}
+                {draft.franchiseKey && result.total < 32 && <div className="mt-2 rounded-xl border border-neon/40 bg-neon/10 p-2 text-center text-[10px] font-bold text-neon2">This entry missed 32/40, so another season or sequel film is locked. Spin-off and reboot routes remain available from SERIES.</div>}
 
                 <details className="mt-3 rounded-xl border border-line/50 bg-panel2/55 p-3">
                   <summary className="cursor-pointer text-[10px] font-bold tracking-widest text-paper/50">DEVELOPMENT REPORT</summary>
