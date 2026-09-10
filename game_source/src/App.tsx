@@ -631,7 +631,14 @@ export default function App() {
           />
         )}
         {screen === "release" && released && run && (
-          <Release draft={released.draft} result={released.result} studio={run.studio} onContinue={continueFromRelease} />
+          <Release
+            draft={released.draft}
+            result={released.result}
+            studio={run.studio}
+            careerWeek={run.week}
+            showsMadeBefore={Math.max(0, run.showsMade - 1)}
+            onContinue={continueFromRelease}
+          />
         )}
         {screen === "retrospective" && run && (
           <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />
