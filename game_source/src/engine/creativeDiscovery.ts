@@ -1,6 +1,50 @@
-import { GENRES, SECRET_COMBOS, comboKey, comboMult, type GenreId } from "./data";
+import { GENRES, RESEARCH, SECRET_COMBOS, comboKey, comboMult, type GenreId } from "./data";
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+export const EXPERIMENTAL_COMBO_RESEARCH_PREFIX = "experimental_combo_";
+export const MAX_RESEARCHABLE_SECRET_COMBOS = 8;
+
+export const secretComboResearchId = (key: string) =>
+  `${EXPERIMENTAL_COMBO_RESEARCH_PREFIX}${key.replaceAll("|", "__")}`;
+
+export const secretComboResearched = (research: readonly string[], key: string) =>
+  research.includes(secretComboResearchId(key));
+
+/**
+ * The strongest experimental pairings can be found two ways: gamble on the
+ * actual release, or spend heavily after Genre Studies to investigate an R&D
+ * hypothesis first. Registration lives here so the generated genre manifest
+ * remains the single source of truth for which combinations are experimental.
+ */
+export const RESEARCHABLE_SECRET_COMBOS = Object.entries(SECRET_COMBOS)
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, MAX_RESEARCHABLE_SECRET_COMBOS)
+  .map(([key, mult], index) => {
+    const ids = key.split("|") as GenreId[];
+    const label = ids.map((id) => GENRES.find((g) => g.id === id)?.label ?? id).join(" × ");
+    return {
+      key,
+      mult,
+      id: secretComboResearchId(key),
+      label,
+      rd: 62 + index * 4,
+    };
+  });
+
+/* Register the studies into the existing timed R&D catalogue. The array is an
+   exported runtime catalogue; this avoids duplicating generated combo data in
+   data.ts and keeps future manifests self-updating. */
+for (const study of RESEARCHABLE_SECRET_COMBOS) {
+  if (RESEARCH.some((item) => item.id === study.id)) continue;
+  RESEARCH.push({
+    id: study.id,
+    name: `Experimental Pair Study: ${study.label}`,
+    rd: study.rd,
+    requires: "genre_studies",
+    desc: `R&D suspects this unlikely pairing may hide an unusual audience response. Complete the study to reveal whether the ${study.label} theory is real before risking a production.`,
+  });
+}
 
 export interface GenreReleaseEffect {
   key: string;
