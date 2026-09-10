@@ -8,14 +8,17 @@ import {
   groupSummary,
 } from "../castCoverage";
 
-describe("Cast V4 strict Role × Type pair closure", () => {
+const expectedPairs = (GENRES.length * (GENRES.length - 1)) / 2;
+const expectedCells = CAST_COVERAGE_ROLES.length * CAST_COVERAGE_TYPES.length * expectedPairs;
+
+describe("strict Role × Type pair closure", () => {
   const result = computeCoverage();
 
-  it("enumerates 253 unordered pairs from 23 canonical genres", () => {
-    expect(GENRES).toHaveLength(23);
-    expect(result.pairs).toBe(253);
-    expect(genrePairs()).toHaveLength(253);
-    expect(new Set(genrePairs().map(([a, b]) => [a, b].sort().join("|"))).size).toBe(253);
+  it("enumerates every unordered pair from the active genre catalog", () => {
+    expect(GENRES).toHaveLength(25);
+    expect(result.pairs).toBe(expectedPairs);
+    expect(genrePairs()).toHaveLength(expectedPairs);
+    expect(new Set(genrePairs().map(([a, b]) => [a, b].sort().join("|"))).size).toBe(expectedPairs);
   });
 
   it("uses four roles and two anime types", () => {
@@ -24,14 +27,15 @@ describe("Cast V4 strict Role × Type pair closure", () => {
     expect(result.groups).toHaveLength(8);
   });
 
-  it("audits exactly 2,024 strict cells", () => {
-    expect(result.required).toBe(4 * 2 * 253);
-    expect(result.required).toBe(2024);
-    expect(result.cells).toHaveLength(2024);
+  it("audits every strict Role × Type × genre-pair cell", () => {
+    expect(expectedPairs).toBe(300);
+    expect(result.required).toBe(expectedCells);
+    expect(result.required).toBe(2400);
+    expect(result.cells).toHaveLength(expectedCells);
   });
 
   it("has a same-member witness in the exact role/type bucket for every cell", () => {
-    expect(CAST_V2).toHaveLength(736);
+    expect(CAST_V2).toHaveLength(920);
     expect(result.covered).toBe(result.required);
     for (const cell of result.cells) {
       expect(cell.covered, `${cell.group}/${cell.pair.join("|")}`).toBe(true);
@@ -46,12 +50,12 @@ describe("Cast V4 strict Role × Type pair closure", () => {
     }
   });
 
-  it("reports all eight buckets as 253/253", () => {
+  it("reports all eight buckets as fully closed", () => {
     const summary = groupSummary(result.cells);
     expect(summary.size).toBe(8);
     for (const [group, row] of summary) {
-      expect(row.required, group).toBe(253);
-      expect(row.covered, group).toBe(253);
+      expect(row.required, group).toBe(expectedPairs);
+      expect(row.covered, group).toBe(expectedPairs);
       expect(row.missing, group).toEqual([]);
     }
   });
