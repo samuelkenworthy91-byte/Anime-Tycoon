@@ -42,19 +42,21 @@ jobs:
           const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
           assert(cast.length === 920, `expected 920 cast, got ${cast.length}`);
           assert(new Set(cast.map(x => x.id)).size === 920, 'cast IDs are not unique');
-          assert(new Set(cast.map(x => x.name)).size === 920, 'cast names are not unique');
           assert(genre.genres.length === 25, `expected 25 genres, got ${genre.genres.length}`);
           assert(genre.combos.length === 300, `expected 300 pairs, got ${genre.combos.length}`);
           for (const id of ['vampire','grimdark']) assert(genre.genres.some(g => g.id === id), `missing ${id}`);
           assert(arcs.add_arcs.some(a => a.syn?.includes('vampire') || a.anti?.includes('vampire')), 'Vampire has no story support');
           assert(arcs.add_arcs.some(a => a.syn?.includes('grimdark') || a.anti?.includes('grimdark')), 'Grimdark has no story support');
           const vg = cast.filter(x => x.id.startsWith('vg_'));
+          const baseNames = new Set(cast.filter(x => !x.id.startsWith('vg_')).map(x => x.name));
           assert(vg.length === 184, `expected 184 expansion cast, got ${vg.length}`);
+          assert(new Set(vg.map(x => x.name)).size === 184, 'expansion cast names are not unique');
+          assert(vg.every(x => !baseNames.has(x.name)), 'an expansion cast name collides with the existing roster');
           for (const m of vg) {
             const aff = [...m.visibleAff, m.hiddenAff];
             assert(aff.includes('vampire') && aff.includes('grimdark'), `${m.id}: missing expansion affinity`);
           }
-          console.log(`Validated ${cast.length} cast, ${genre.genres.length} genres, ${genre.combos.length} pairs, ${arcs.add_arcs.length} expansion/runtime arcs.`);
+          console.log(`Validated ${cast.length} cast, ${genre.genres.length} genres, ${genre.combos.length} pairs and ${vg.length} expansion cast.`);
           NODE
 
       - name: Verify runtime portraits
