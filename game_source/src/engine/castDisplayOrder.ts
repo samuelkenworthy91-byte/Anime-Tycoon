@@ -4,13 +4,41 @@ export type CastBrowseFilter =
   | { kind: "type"; value: AnimeType }
   | { kind: "genre"; value: GenreId };
 
+const GENRE_LABELS: Partial<Record<GenreId, string>> = {
+  slice: "Slice of Life",
+  martial: "Martial Arts",
+  monster_taming: "Monster Taming",
+  cosmic_horror: "Cosmic Horror",
+};
+
+const genreLabel = (genre: GenreId) =>
+  GENRE_LABELS[genre] ?? genre.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const hash = (id: string) => {
+  let h = 2166136261;
+  for (const char of id) h = Math.imul(h ^ char.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+
+const visiblePairKey = (member: CastMember) => [...member.visibleAff].sort().join("|");
+const affinitySet = (member: CastMember) => new Set<GenreId>([...member.visibleAff, member.hiddenAff]);
+const roleTypeKey = (member: CastMember) => `${member.role}|${member.type}`;
+
+function presentationCopy(member: CastMember, matchedGenres: readonly GenreId[]): CastMember {
+  const visible = member.visibleAff.map(genreLabel).join(" × ");
+  if (!matchedGenres.length) return { ...member, epithet: visible };
+
+  const usesHidden = matchedGenres.includes(member.hiddenAff);
+  if (matchedGenres.length === 1) {
+    return { ...member, epithet: usesHidden ? `${visible} · SECRET MATCH` : visible };
+  }
+
+  const matched = matchedGenres.map(genreLabel).join(" × ");
+  return { ...member, epithet: usesHidden ? `${matched} · SECRET MATCH` : matched };
+}
+
 /** Stable presentation order based on overt affinities. */
 export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
-  const hash = (id: string) => {
-    let h = 2166136261;
-    for (const char of id) h = Math.imul(h ^ char.charCodeAt(0), 16777619);
-    return h >>> 0;
-  };
   const remaining = [...members].sort((a, b) => hash(a.id) - hash(b.id) || a.id.localeCompare(b.id));
   const result: CastMember[] = [];
   // Track proportional genre demand, so common genres are spread throughout
@@ -43,29 +71,98 @@ export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
   return result;
 }
 
+function dedupeVisiblePairs(members: readonly CastMember[], matchedGenres: readonly GenreId[]): CastMember[] {
+  const chosen = new Map<string, CastMember>();
+  for (const member of members) {
+    const key = `${roleTypeKey(member)}|${visiblePairKey(member)}`;
+    const current = chosen.get(key);
+    if (!current) {
+      chosen.set(key, member);
+      continue;
+    }
+
+    // A one-genre search should prefer the character for whom the searched
+    // genre is public rather than a reserve portrait whose match is secret.
+    if (matchedGenres.length === 1) {
+      const genre = matchedGenres[0];
+      const currentPublic = current.visibleAff.includes(genre);
+      const nextPublic = member.visibleAff.includes(genre);
+      if (nextPublic !== currentPublic) {
+        if (nextPublic) chosen.set(key, member);
+        continue;
+      }
+    }
+
+    if (hash(member.id) < hash(current.id)) chosen.set(key, member);
+  }
+  const keep = new Set([...chosen.values()].map((member) => member.id));
+  return members.filter((member) => keep.has(member.id)).map((member) => presentationCopy(member, matchedGenres));
+}
+
+function strictOwnersForGenres(members: readonly CastMember[], genres: readonly GenreId[]): CastMember[] {
+  const groups = new Map<string, CastMember[]>();
+  for (const member of members) {
+    const all = affinitySet(member);
+    if (!genres.every((genre) => all.has(genre))) continue;
+    const key = roleTypeKey(member);
+    const group = groups.get(key) ?? [];
+    group.push(member);
+    groups.set(key, group);
+  }
+
+  const pairKey = genres.length === 2 ? [...genres].sort().join("|") : null;
+  const winnerIds = new Set<string>();
+  for (const group of groups.values()) {
+    const ranked = [...group].sort((a, b) => {
+      const score = (member: CastMember) => {
+        let value = 0;
+        if (pairKey && member.castingPairKeys?.includes(pairKey)) value += 10_000;
+        if (genres.length === 2 && visiblePairKey(member) === pairKey) value += 2_000;
+        value += genres.filter((genre) => member.visibleAff.includes(genre)).length * 250;
+        if (!genres.includes(member.hiddenAff)) value += 25;
+        return value;
+      };
+      const diff = score(b) - score(a);
+      return diff || hash(a.id) - hash(b.id) || a.id.localeCompare(b.id);
+    });
+    if (ranked[0]) winnerIds.add(ranked[0].id);
+  }
+
+  return members
+    .filter((member) => winnerIds.has(member.id))
+    .map((member) => presentationCopy(member, genres));
+}
+
 /**
- * Browse-time cast filter. Every active filter must match.
- * Anime type uses the public Shonen/Shojo field. A two-genre query uses the
- * curated casting-connection index when available, allowing a concealed
- * affinity to support eligibility without exposing its label on the card.
+ * Browse-time cast filter.
+ *
+ * Ordinary browsing is deduped by public genre pair inside each Role × Type
+ * bucket so reserve portraits with the same visible pairing do not flood the
+ * select screen. They remain in the runtime pool for old saves and for a
+ * targeted secret-affinity connection that genuinely needs them.
+ *
+ * A two-genre search is strict: exactly one deterministic owner is selected
+ * per Role × Shonen/Shojo bucket whenever coverage exists. Curated
+ * `castingPairKeys` win first, then an exact public pair, then the strongest
+ * public match. This preserves concealed-affinity coverage without showing a
+ * wall of duplicate public pairings.
  */
 export function filterCastByFilters(
   members: readonly CastMember[],
   filters: readonly CastBrowseFilter[],
 ): CastMember[] {
-  if (!filters.length) return [...members];
   const typeFilter = filters.find((filter) => filter.kind === "type");
-  const genres = filters.filter((filter): filter is Extract<CastBrowseFilter, { kind: "genre" }> => filter.kind === "genre").map((filter) => filter.value);
-  return members.filter((member) => {
-    if (typeFilter && member.type !== typeFilter.value) return false;
-    if (!genres.length) return true;
-    const allAffinities = [...member.visibleAff, member.hiddenAff];
-    if (genres.length === 1) return allAffinities.includes(genres[0]);
-    if (genres.length === 2 && member.castingPairKeys) {
-      return member.castingPairKeys.includes([...genres].sort().join("|"));
-    }
-    return genres.every((genre) => allAffinities.includes(genre));
-  });
+  const genres = filters
+    .filter((filter): filter is Extract<CastBrowseFilter, { kind: "genre" }> => filter.kind === "genre")
+    .map((filter) => filter.value);
+
+  const typed = typeFilter ? members.filter((member) => member.type === typeFilter.value) : [...members];
+  if (!genres.length) return dedupeVisiblePairs(typed, []);
+
+  if (genres.length >= 2) return strictOwnersForGenres(typed, genres);
+
+  const matching = typed.filter((member) => affinitySet(member).has(genres[0]));
+  return dedupeVisiblePairs(matching, genres);
 }
 
 /** Backwards-compatible one-genre wrapper. */
