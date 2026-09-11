@@ -31,6 +31,7 @@ import {
   type Arc,
   type Staff,
 } from "./data";
+import { catalogHasSecret, isCastingActive } from "./castCatalog";
 import {
   inferAnimeType,
   isActiveGenre,
@@ -550,7 +551,11 @@ export function migrateRun(raw: unknown): RunState {
     comboLevels: combos.active,
     legacyComboLevels: { ...(r.legacyComboLevels ?? {}), ...combos.legacy },
     castAffinityDiscovered: Array.isArray(r.castAffinityDiscovered)
-      ? [...new Set(r.castAffinityDiscovered.filter((id) => typeof id === "string" && !castById(id).legacyPlaceholder))]
+      ? [...new Set(r.castAffinityDiscovered.filter((id) => {
+          if (typeof id !== "string") return false;
+          const member = castById(id);
+          return isCastingActive(member) && catalogHasSecret(member);
+        }))]
       : [],
     projects: Array.isArray(r.projects) ? r.projects.map((pr) => ({
       ...pr,
@@ -2365,7 +2370,7 @@ export function castBreakthroughsForRelease(
   const releasedCastIds = [draft.protag, draft.secondary, draft.pet, draft.villain];
   return [...new Set(releasedCastIds)].flatMap((castId) => {
     const member = castById(castId);
-    if (member.legacyPlaceholder || discovered.includes(castId) || !draft.genres.includes(member.hiddenAff)) return [];
+    if (!isCastingActive(member) || !catalogHasSecret(member) || discovered.includes(castId) || !draft.genres.includes(member.hiddenAff)) return [];
     return [{ castId, name: member.name, genre: member.hiddenAff }];
   });
 }
@@ -2862,7 +2867,7 @@ export const TALENT_ANALYSIS_RD = 85;
 
 /** every genuinely profileable cast member — valid, non-legacy, selectable */
 export const profileableCastIds = (): string[] =>
-  CAST_V2.filter((m) => !m.legacyPlaceholder).map((m) => m.id);
+  CAST_V2.filter((m) => isCastingActive(m) && catalogHasSecret(m)).map((m) => m.id);
 
 /** ids whose hidden affinity is still unknown to this studio */
 export const undiscoveredProfileIds = (r: Pick<RunState, "castAffinityDiscovered">): string[] =>

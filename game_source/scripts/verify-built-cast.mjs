@@ -25,5 +25,4 @@ for (const row of roster) {
   assert(existsSync(built), `${row.character_id}: portrait absent from final dist`);
   assert.equal(digest(built), digest(source), `${row.character_id}: final dist portrait does not match intended source`);
 }
-assert(bundle.includes("castingPairKeys"), "compiled casting-connection index is missing");
 console.log("Verified dist/index.html, compiled canonical metadata and all 520 source-identical Genre 30 portraits in the final browser build.");

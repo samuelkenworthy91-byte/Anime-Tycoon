@@ -238,31 +238,7 @@ export function buildGenre30Cast(rows, reservedNames = new Set()) {
       sourceManifestSequence: sequence
     });
   });
-  const castById = new Map(cast.map((member) => [member.id, member]));
-  for (const role of ["protag", "secondary", "pet", "villain"]) {
-    for (const animeType of ["shonen", "shojo"]) {
-      const bucket = rows.filter((row) => row.role === role && row.anime_type === animeType);
-      const candidatesByPair = new Map();
-      for (const row of bucket) {
-        const edges = row.coverage_edges_this_member.split("|").map((edge) => edge.trim()).filter(Boolean);
-        if (!edges.length) throw new Error(`${row.character_id}: casting coverage edges are required`);
-        for (const edge of edges) {
-          const genres = edge.split("+").map((genre) => genre.trim()).filter(Boolean).sort();
-          if (genres.length !== 2) throw new Error(`${row.character_id}: invalid casting coverage edge ${edge}`);
-          const key = genres.join("|");
-          const candidates = candidatesByPair.get(key) ?? [];
-          candidates.push(row.character_id);
-          candidatesByPair.set(key, candidates);
-        }
-      }
-      if (candidatesByPair.size !== 135) throw new Error(`${role}/${animeType}: expected 135 casting connections, got ${candidatesByPair.size}`);
-      for (const [pairKey, candidates] of candidatesByPair) {
-        const ownerId = candidates[hash32(`${role}|${animeType}|${pairKey}`) % candidates.length];
-        const owner = castById.get(ownerId);
-        owner.castingPairKeys ??= [];
-        owner.castingPairKeys.push(pairKey);
-      }
-    }
-  }
+  // Pair ownership is intentionally NOT generated here. Casting Catalog V7
+  // remaps every active Role × Type bucket centrally at runtime.
   return cast;
 }
