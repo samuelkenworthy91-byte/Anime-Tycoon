@@ -1,75 +1,91 @@
 import { describe, expect, it } from "vitest";
 import { GENRES, PROTAGONISTS } from "../data";
 import { filterCastByFilters, filterCastByVisibleGenre } from "../castDisplayOrder";
+import { castingCatalogMeta, castingPairKey } from "../castCatalog";
 
-const visiblePairKey = (member: (typeof PROTAGONISTS)[number]) => [...member.visibleAff].sort().join("|");
 const ALL_DISCOVERED = PROTAGONISTS.map((member) => member.id);
 
-describe("cast browse filters", () => {
-  it("keeps source order while removing repeated public pairs from ordinary browsing", () => {
+describe("clean cast browse filters", () => {
+  it("ordinary browsing contains only active, unique public catalogue cards", () => {
     const result = filterCastByFilters(PROTAGONISTS, []);
-    expect(result.length).toBeGreaterThan(0);
-    expect(result.length).toBeLessThan(PROTAGONISTS.length);
+    expect(result).toHaveLength(PROTAGONISTS.length);
 
     for (const type of ["shonen", "shojo"] as const) {
       const cell = result.filter((member) => member.type === type);
-      const keys = cell.map(visiblePairKey);
+      expect(cell).toHaveLength(155);
+      const keys = cell.map((member) => castingPairKey(member.visibleAff[0], member.visibleAff[1]));
       expect(new Set(keys).size).toBe(keys.length);
     }
-
-    const sourceIndex = new Map(PROTAGONISTS.map((member, index) => [member.id, index]));
-    const indexes = result.map((member) => sourceIndex.get(member.id)!);
-    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
-    expect(result).not.toBe(PROTAGONISTS);
   });
 
   it("filters directly by Shonen or Shojo", () => {
     for (const type of ["shonen", "shojo"] as const) {
       const result = filterCastByFilters(PROTAGONISTS, [{ kind: "type", value: type }]);
-      expect(result.length).toBeGreaterThan(0);
-      expect(result.every((m) => m.type === type)).toBe(true);
+      expect(result).toHaveLength(155);
+      expect(result.every((member) => member.type === type)).toBe(true);
     }
   });
 
-  it("supports a strict Type + two-genre query with one owner", () => {
-    const target = PROTAGONISTS.find((member) => member.visibleAff.length >= 2)!;
-    const filters = [
-      { kind: "type" as const, value: target.type },
-      { kind: "genre" as const, value: target.visibleAff[0] },
-      { kind: "genre" as const, value: target.visibleAff[1] },
-    ];
-    const result = filterCastByFilters(PROTAGONISTS, filters);
+  it("supports a strict Type + public pair query with its one designated owner", () => {
+    const target = PROTAGONISTS.find((member) => castingCatalogMeta(member)?.publicPairKey)!;
+    const result = filterCastByFilters(PROTAGONISTS, [
+      { kind: "type", value: target.type },
+      { kind: "genre", value: target.visibleAff[0] },
+      { kind: "genre", value: target.visibleAff[1] },
+    ]);
     expect(result).toHaveLength(1);
-    expect(result[0].type).toBe(target.type);
-    expect([...result[0].visibleAff, result[0].hiddenAff]).toEqual(
-      expect.arrayContaining([target.visibleAff[0], target.visibleAff[1]]),
-    );
-    // An exact public pair exists (the target itself), so strict ownership must
-    // prefer an exact public-pair witness over a hidden-only witness.
-    expect(result[0].visibleAff).toEqual(expect.arrayContaining([target.visibleAff[0], target.visibleAff[1]]));
+    expect(result[0].id).toBe(target.id);
   });
 
-  it("returns cast connected to every genre, including concealed affinities", () => {
-    for (const genre of GENRES.map((g) => g.id)) {
+  it("returns cast connected to every real genre after all secrets are known", () => {
+    for (const genre of GENRES.map((item) => item.id)) {
       const result = filterCastByVisibleGenre(PROTAGONISTS, genre, ALL_DISCOVERED);
-      expect(result.length).toBeGreaterThan(0);
-      expect(result.every((m) => [...m.visibleAff, m.hiddenAff].includes(genre))).toBe(true);
+      expect(result.length, genre).toBeGreaterThan(0);
     }
   });
 
-  it("does not expose a hidden-affinity match until that character has been discovered", () => {
-    for (const genre of GENRES.map((g) => g.id)) {
-      const hiddenOnly = PROTAGONISTS.find((m) => m.hiddenAff === genre && !m.visibleAff.includes(genre));
-      if (!hiddenOnly) continue;
+  it("does not expose a secret genre or secret pair until its owner is discovered", () => {
+    const owner = PROTAGONISTS.find((member) => castingCatalogMeta(member)?.kind === "triple")!;
+    const meta = castingCatalogMeta(owner)!;
+    const secret = meta.secretGenre!;
+    const publicGenre = owner.visibleAff[0];
 
-      const before = filterCastByFilters(PROTAGONISTS, [{ kind: "genre", value: genre }], []);
-      expect(before.some((m) => m.id === hiddenOnly.id)).toBe(false);
+    const beforeGenre = filterCastByFilters(PROTAGONISTS, [{ kind: "genre", value: secret }], []);
+    expect(beforeGenre.some((member) => member.id === owner.id)).toBe(false);
 
-      const after = filterCastByFilters(PROTAGONISTS, [{ kind: "genre", value: genre }], [hiddenOnly.id]);
-      expect(after.some((m) => m.id === hiddenOnly.id)).toBe(true);
-      expect(after.find((m) => m.id === hiddenOnly.id)?.epithet).toContain("SECRET MATCH");
-      expect(hiddenOnly.visibleAff.includes(genre)).toBe(false);
-      expect(hiddenOnly.hiddenAff).toBe(genre);
-    }
+    const afterGenre = filterCastByFilters(PROTAGONISTS, [{ kind: "genre", value: secret }], [owner.id]);
+    expect(afterGenre.some((member) => member.id === owner.id)).toBe(true);
+    expect(afterGenre.find((member) => member.id === owner.id)?.epithet).toContain("SECRET MATCH");
+
+    const beforePair = filterCastByFilters(PROTAGONISTS, [
+      { kind: "type", value: owner.type },
+      { kind: "genre", value: publicGenre },
+      { kind: "genre", value: secret },
+    ], []);
+    expect(beforePair.some((member) => member.id === owner.id)).toBe(false);
+
+    const afterPair = filterCastByFilters(PROTAGONISTS, [
+      { kind: "type", value: owner.type },
+      { kind: "genre", value: publicGenre },
+      { kind: "genre", value: secret },
+    ], [owner.id]);
+    expect(afterPair).toHaveLength(1);
+    expect(afterPair[0].id).toBe(owner.id);
+    expect(afterPair[0].epithet).toContain("SECRET MATCH");
+  });
+
+  it("public-only pair blocks never invent a secret match", () => {
+    const pairOnly = PROTAGONISTS.find((member) => castingCatalogMeta(member)?.kind === "pair")!;
+    const meta = castingCatalogMeta(pairOnly)!;
+    expect(meta.secretGenre).toBeNull();
+    expect(meta.pairKeys).toHaveLength(1);
+    const result = filterCastByFilters(PROTAGONISTS, [
+      { kind: "type", value: pairOnly.type },
+      { kind: "genre", value: pairOnly.visibleAff[0] },
+      { kind: "genre", value: pairOnly.visibleAff[1] },
+    ], ALL_DISCOVERED);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe(pairOnly.id);
+    expect(result[0].epithet).not.toContain("SECRET MATCH");
   });
 });
