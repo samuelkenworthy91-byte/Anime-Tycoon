@@ -1,14 +1,19 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { CAST_V2, type AnimeType, type CastRole, type GenreId } from "../data";
+import { CAST_V2, PETS, PROTAGONISTS, SECONDARY, VILLAINS, type AnimeType, type CastMember, type CastRole, type GenreId } from "../data";
 import { filterCastByFilters } from "../castDisplayOrder";
+import { castingCatalogMeta, isCastingActive } from "../castCatalog";
 
 const ROOT = path.resolve(__dirname, "../../..");
 const v6 = CAST_V2.filter((member) => member.id.startsWith("g30_"));
-const ALL_V6_DISCOVERED = v6.map((member) => member.id);
-const roles: CastRole[] = ["protag", "secondary", "pet", "villain"];
+const ALL_DISCOVERED = CAST_V2.map((member) => member.id);
+const roles: [CastRole, CastMember[]][] = [
+  ["protag", PROTAGONISTS],
+  ["secondary", SECONDARY],
+  ["pet", PETS],
+  ["villain", VILLAINS],
+];
 const types: AnimeType[] = ["shonen", "shojo"];
 const requestedPairs: [GenreId, GenreId][] = [
   ["monster_taming", "crime"], ["monster_taming", "cosmic_horror"], ["monster_taming", "arabia"],
@@ -16,61 +21,49 @@ const requestedPairs: [GenreId, GenreId][] = [
   ["kaiju", "arabia"], ["cosmic_horror", "arabia"],
 ];
 
-describe("cast portrait wiring regression gate", () => {
-  it("passes the full source-to-runtime byte and metadata verifier", () => {
-    expect(() => execFileSync(process.execPath, ["scripts/verify-cast-wiring.mjs"], { cwd: ROOT, stdio: "pipe" })).not.toThrow();
-  });
-
-  it("keeps every Genre 30 source sequence, identity and epithet unique", () => {
+describe("portrait identity survives the casting catalog rebuild", () => {
+  it("keeps all 520 Genre 30 portraits and stable IDs without using their old affinity wiring", () => {
+    expect(v6).toHaveLength(520);
+    expect(new Set(v6.map((member) => member.id)).size).toBe(520);
     expect(new Set(v6.map((member) => member.sourceManifestSequence)).size).toBe(520);
     expect(new Set(v6.map((member) => member.name)).size).toBe(520);
-    expect(new Set(v6.map((member) => member.epithet)).size).toBe(520);
-    expect(v6.some((member) => member.epithet === "The Ashen Viper")).toBe(false);
+    expect(v6.every((member) => member.img === `cast/v6/${member.id}.webp`)).toBe(true);
+    expect(v6.every((member) => (member as CastMember & { castingPairKeys?: string[] }).castingPairKeys === undefined)).toBe(true);
   });
 
-  it("preserves the same canonical 65 affinity cells in all eight Role × Type buckets", () => {
-    const reference = new Map(v6.filter((member) => member.role === "protag" && member.type === "shonen").map((member) => [member.id.slice(-3), [...member.visibleAff, member.hiddenAff]]));
-    expect(reference.size).toBe(65);
-    for (const role of roles) for (const type of types) {
-      const bucket = v6.filter((member) => member.role === role && member.type === type);
-      expect(bucket, `${role}/${type}`).toHaveLength(65);
-      for (const member of bucket) expect([...member.visibleAff, member.hiddenAff], member.id).toEqual(reference.get(member.id.slice(-3)));
+  it("marks every Genre 30 portrait explicitly active or reserve", () => {
+    for (const member of v6) {
+      const meta = castingCatalogMeta(member);
+      expect(meta, member.id).not.toBeNull();
+      expect(meta!.active, member.id).toBe(isCastingActive(member));
+      expect(["triple", "pair", "reserve"]).toContain(meta!.kind);
     }
   });
 
-  it("returns exactly one curated V6 connection in every Role × Type cell", () => {
-    for (const role of roles) for (const type of types) for (const [genreA, genreB] of requestedPairs) {
-      const bucket = v6.filter((member) => member.role === role && member.type === type);
-      const result = filterCastByFilters(bucket, [
-        { kind: "type", value: type }, { kind: "genre", value: genreA }, { kind: "genre", value: genreB },
-      ], ALL_V6_DISCOVERED);
-      expect(result, `${role}/${type}/${genreA}+${genreB}`).toHaveLength(1);
-      expect([...result[0].visibleAff, result[0].hiddenAff]).toEqual(expect.arrayContaining([genreA, genreB]));
-      expect(result[0].castingPairKeys).toContain([genreA, genreB].sort().join("|"));
-    }
-  });
-
-  it("balances all 135 Genre 30 connections and gives Cosmic Horror × Slice of Life two leads", () => {
-    const pairKeys = new Set(v6.flatMap((member) => member.castingPairKeys ?? []));
-    expect(pairKeys.size).toBe(135);
-    for (const pairKey of pairKeys) {
-      const [genreA, genreB] = pairKey.split("|") as [GenreId, GenreId];
-      for (const role of roles) for (const type of types) {
-        const bucket = v6.filter((member) => member.role === role && member.type === type);
-        expect(filterCastByFilters(bucket, [{ kind: "genre", value: genreA }, { kind: "genre", value: genreB }], ALL_V6_DISCOVERED), `${role}/${type}/${pairKey}`).toHaveLength(1);
+  it("resolves formerly problematic new-genre pairs through the global clean catalog, not V6-only wiring", () => {
+    for (const [role, members] of roles) {
+      for (const type of types) {
+        for (const [genreA, genreB] of requestedPairs) {
+          const result = filterCastByFilters(members, [
+            { kind: "type", value: type },
+            { kind: "genre", value: genreA },
+            { kind: "genre", value: genreB },
+          ], ALL_DISCOVERED);
+          expect(result, `${role}/${type}/${genreA}+${genreB}`).toHaveLength(1);
+          expect(result[0].type).toBe(type);
+        }
       }
     }
-    const leads = filterCastByFilters(v6.filter((member) => member.role === "protag"), [
-      { kind: "genre", value: "cosmic_horror" }, { kind: "genre", value: "slice" },
-    ], ALL_V6_DISCOVERED);
-    expect(leads).toHaveLength(2);
-    expect(new Set(leads.map((member) => member.type))).toEqual(new Set(["shonen", "shojo"]));
   });
 
-  it("keeps the committed full roster as the authoritative Genre 30 source", () => {
+  it("keeps source roster metadata as art provenance rather than live casting authority", () => {
     const roster = readFileSync(path.join(ROOT, "docs/content-v6/GENRE30_CAST_ROSTER.csv"), "utf8");
     expect(roster.split(/\r?\n/).filter(Boolean)).toHaveLength(521);
     expect(roster).toContain("coverage_edges_this_member");
     expect(roster).toContain("concept_brief");
+
+    // The archived field can remain for provenance, but no live cast record is
+    // allowed to carry the old curated-owner index into selection.
+    expect(CAST_V2.some((member) => (member as CastMember & { castingPairKeys?: string[] }).castingPairKeys?.length)).toBe(false);
   });
 });
