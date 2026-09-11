@@ -180,7 +180,7 @@ def contact_sheet(rows: list[dict], out: Path, columns: int = 5):
         for offset, label in enumerate(labels):
             draw.text((x, y + image_size + 2 + offset * 15), label, fill="#f4f1e8", font=fit_text(draw, label, image_size, 11))
     out.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(out, "WEBP", quality=80, method=6)
+    canvas.save(out, "WEBP", quality=76, method=6)
 
 
 def similarity_sheet(pairs: list[dict], rows_by_id: dict, out: Path):
