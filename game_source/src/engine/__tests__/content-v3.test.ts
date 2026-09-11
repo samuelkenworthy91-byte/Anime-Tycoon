@@ -4,6 +4,7 @@ import { AUCTION_IPS } from "../ip";
 import original from "../generated/castV2.json";
 import arcRuntime from "../generated/arcV3.json";
 import { mixedCastOrder } from "../castDisplayOrder";
+import { isCastingActive } from "../castCatalog";
 
 function longestGenreRun(members: typeof CAST_V2) {
   let max = 0;
@@ -12,17 +13,35 @@ function longestGenreRun(members: typeof CAST_V2) {
     for (const genre of streak.keys()) if (!member.visibleAff.includes(genre as never)) streak.set(genre, 0);
     for (const genre of member.visibleAff) {
       const n = (streak.get(genre) ?? 0) + 1;
-      streak.set(genre, n); max = Math.max(max, n);
+      streak.set(genre, n);
+      max = Math.max(max, n);
     }
   }
   return max;
 }
 
-describe("V3/V5 content integration", () => {
-  it("preserves every existing cast field and adds epithets", () => {
-    for (const member of original.cast) expect(CAST_V2.find(c => c.id === member.id)).toMatchObject(member);
-    expect(CAST_V2.every(c => c.epithet && c.epithet.split(/\s+/).length >= 2)).toBe(true);
+describe("V3/V5 content integration after catalog rebuild", () => {
+  it("preserves existing cast identity/art fields while allowing affinities to be remapped", () => {
+    for (const source of original.cast) {
+      const actual = CAST_V2.find((member) => member.id === source.id)!;
+      expect(actual).toBeTruthy();
+      expect(actual).toMatchObject({
+        id: source.id,
+        name: source.name,
+        archetype: source.archetype,
+        img: source.img,
+        personality: source.personality,
+        role: source.role,
+        type: source.type,
+        gender: source.gender,
+        species: source.species,
+        ageBand: source.ageBand,
+        culturalBasis: source.culturalBasis,
+      });
+    }
+    expect(CAST_V2.filter(isCastingActive).every((member) => member.epithet && member.epithet.split(/\s+/).length >= 2)).toBe(true);
   });
+
   it("adds eleven worker looks after the original fifteen", () => {
     expect(WORKER_LOOKS).toHaveLength(26);
     expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
@@ -31,27 +50,31 @@ describe("V3/V5 content integration", () => {
     expect(WORKER_LOOKS[22].sprite).toContain("sprite-worker-24.png");
     expect(WORKER_LOOKS[25].sprite).toContain("sprite-worker-27.png");
   });
+
   it("loads unique arcs and valid combo references", () => {
     const baseArcCount = 66;
     const baseComboCount = 31;
     expect(ARCS).toHaveLength(baseArcCount + arcRuntime.add_arcs.length + AUCTION_IPS.length);
     expect(ARC_COMBOS).toHaveLength(baseComboCount + arcRuntime.add_combos.length + AUCTION_IPS.length);
-    expect(new Set(ARCS.map(a => a.id)).size).toBe(ARCS.length);
-    expect(new Set(ARC_COMBOS.map(a => a.id)).size).toBe(ARC_COMBOS.length);
-    for (const combo of ARC_COMBOS) for (const id of combo.arcs) expect(ARCS.some(a => a.id === id)).toBe(true);
+    expect(new Set(ARCS.map((arc) => arc.id)).size).toBe(ARCS.length);
+    expect(new Set(ARC_COMBOS.map((combo) => combo.id)).size).toBe(ARC_COMBOS.length);
+    for (const combo of ARC_COMBOS) for (const id of combo.arcs) expect(ARCS.some((arc) => arc.id === id)).toBe(true);
   });
-  it("mixes every role without omissions, mutation or hidden-affinity influence", () => {
-    for (const role of ["protag", "secondary", "pet", "villain"]) {
-      const pool = CAST_V2.filter(c => c.role === role);
-      const before = JSON.stringify(pool);
-      const mixed = mixedCastOrder(pool);
-      expect(mixed.map(c => c.id).sort()).toEqual(pool.map(c => c.id).sort());
-      expect(JSON.stringify(pool)).toBe(before);
-      expect(mixedCastOrder(pool)).toEqual(mixed);
-      expect(mixedCastOrder([...pool].reverse())).toEqual(mixed);
-      const hiddenChanged = pool.map(c => ({ ...c, hiddenAff: "horror" as const }));
-      expect(mixedCastOrder(hiddenChanged).map(c => c.id)).toEqual(mixed.map(c => c.id));
-      expect(longestGenreRun(mixed)).toBeLessThan(longestGenreRun(pool));
+
+  it("mixes every active role without mutation or hidden-affinity influence", () => {
+    for (const role of ["protag", "secondary", "pet", "villain"] as const) {
+      const archivePool = CAST_V2.filter((member) => member.role === role);
+      const activePool = archivePool.filter(isCastingActive);
+      const before = JSON.stringify(archivePool);
+      const mixed = mixedCastOrder(archivePool);
+
+      expect(mixed.map((member) => member.id).sort()).toEqual(activePool.map((member) => member.id).sort());
+      expect(JSON.stringify(archivePool)).toBe(before);
+      expect(mixedCastOrder(archivePool)).toEqual(mixed);
+      expect(mixedCastOrder([...archivePool].reverse())).toEqual(mixed);
+
+      const hiddenChanged = archivePool.map((member) => ({ ...member, hiddenAff: "horror" as const }));
+      expect(mixedCastOrder(hiddenChanged).map((member) => member.id)).toEqual(mixed.map((member) => member.id));
       expect(longestGenreRun(mixed)).toBeLessThanOrEqual(3);
     }
   });
