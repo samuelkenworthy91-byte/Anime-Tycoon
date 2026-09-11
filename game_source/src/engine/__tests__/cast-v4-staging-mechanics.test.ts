@@ -4,10 +4,16 @@ import { describe, expect, it } from "vitest";
 import {
   CANONICAL_GENRE_IDS,
   CAST_V2,
+  PETS,
+  PROTAGONISTS,
+  SECONDARY,
+  VILLAINS,
   type AnimeType,
+  type CastMember,
   type CastRole,
   type GenreId,
 } from "../data";
+import { catalogPairKeys, isCastingActive } from "../castCatalog";
 
 type MechanicalCast = {
   id: string;
@@ -35,13 +41,19 @@ function readBatch(path: string): MechanicalCast[] {
 }
 
 const mechanics = batchPaths.flatMap(readBatch);
-const roles: CastRole[] = ["protag", "secondary", "pet", "villain"];
+const roles: [CastRole, CastMember[]][] = [
+  ["protag", PROTAGONISTS],
+  ["secondary", SECONDARY],
+  ["pet", PETS],
+  ["villain", VILLAINS],
+];
 const types: AnimeType[] = ["shonen", "shojo"];
-const affinities = (member: { visibleAff: [GenreId, GenreId]; hiddenAff: GenreId }) => [...member.visibleAff, member.hiddenAff] as GenreId[];
-const pairs: [GenreId, GenreId][] = CANONICAL_GENRE_IDS.flatMap((a, index) => CANONICAL_GENRE_IDS.slice(index + 1).map((b) => [a, b] as [GenreId, GenreId]));
+const pairKeys = CANONICAL_GENRE_IDS.flatMap((a, index) =>
+  CANONICAL_GENRE_IDS.slice(index + 1).map((b) => [a, b].sort().join("|")),
+);
 
-describe("Cast V4 canonical mechanics after runtime integration", () => {
-  it("keeps exactly 304 locked V4 stable IDs inside the expanded 1,440-member live roster", () => {
+describe("Cast V4 identity after catalog rebuild", () => {
+  it("keeps exactly 304 locked V4 stable identities and portrait paths inside the 1,440-member archive", () => {
     expect(mechanics).toHaveLength(304);
     expect(new Set(mechanics.map((member) => member.id)).size).toBe(304);
     expect(new Set(mechanics.map((member) => member.filename)).size).toBe(304);
@@ -54,41 +66,39 @@ describe("Cast V4 canonical mechanics after runtime integration", () => {
       expect(actual, expected.id).toBeTruthy();
       expect(actual!.role, expected.id).toBe(expected.role);
       expect(actual!.type, expected.id).toBe(expected.type);
-      expect(actual!.visibleAff, expected.id).toEqual(expected.visibleAff);
-      expect(actual!.hiddenAff, expected.id).toBe(expected.hiddenAff);
       expect(actual!.img, expected.id).toBe(`cast/v4/${expected.id}.webp`);
-      const memberAffinities = affinities(actual!);
-      expect(new Set(memberAffinities).size, expected.id).toBe(3);
-      for (const genre of memberAffinities) expect(CANONICAL_GENRE_IDS, `${expected.id}/${genre}`).toContain(genre);
     }
   });
 
-  it("retains the exact optimized V4 additions per role/type bucket", () => {
+  it("retains the exact V4 source additions per role/type bucket as art provenance", () => {
     const expected: Record<string, number> = {
       "protag:shonen": 36, "protag:shojo": 41,
       "secondary:shonen": 35, "secondary:shojo": 38,
       "pet:shonen": 36, "pet:shojo": 40,
       "villain:shonen": 38, "villain:shojo": 40,
     };
-    for (const role of roles) for (const type of types) {
-      expect(mechanics.filter((member) => member.role === role && member.type === type), `${role}:${type}`).toHaveLength(expected[`${role}:${type}`]);
+    for (const role of ["protag", "secondary", "pet", "villain"] as CastRole[]) {
+      for (const type of types) {
+        expect(mechanics.filter((member) => member.role === role && member.type === type), `${role}:${type}`)
+          .toHaveLength(expected[`${role}:${type}`]);
+      }
     }
   });
 
-  it("permanently closes all 3,480 strict role/type genre-pair cells", () => {
-    expect(pairs).toHaveLength(435);
-    let coveredCells = 0;
-    for (const role of roles) for (const type of types) {
-      const members = CAST_V2.filter((member) => member.role === role && member.type === type);
-      for (const [genreA, genreB] of pairs) {
-        const witness = members.some((member) => {
-          const memberAffinities = affinities(member);
-          return memberAffinities.includes(genreA) && memberAffinities.includes(genreB);
-        });
-        expect(witness, `${role}/${type}/${genreA}+${genreB}`).toBe(true);
-        coveredCells += Number(witness);
+  it("closes all 3,480 role/type pair cells exactly once through the rebuilt catalog", () => {
+    expect(pairKeys).toHaveLength(435);
+    let ownedCells = 0;
+    for (const [role, members] of roles) {
+      for (const type of types) {
+        const bucket = members.filter((member) => member.type === type && isCastingActive(member));
+        expect(bucket, `${role}/${type}`).toHaveLength(155);
+        for (const key of pairKeys) {
+          const owners = bucket.filter((member) => catalogPairKeys(member).includes(key));
+          expect(owners, `${role}/${type}/${key}`).toHaveLength(1);
+          ownedCells += 1;
+        }
       }
     }
-    expect(coveredCells).toBe(3480);
+    expect(ownedCells).toBe(3480);
   });
 });
