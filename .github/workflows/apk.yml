@@ -8,6 +8,7 @@ on:
       - arena/01a0615b-anime-tycoon
       - arena/01a0759f-anime-tycoon
       - work/final-awards-rival-posters
+      - work/casting-catalog-rebuild
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
