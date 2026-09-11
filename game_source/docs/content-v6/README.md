@@ -21,3 +21,5 @@ This pack adds five canonical genres to the 25-genre runtime:
 - New arc-combo references are validated against actual runtime arc IDs; no compatibility aliases or invented historical IDs are permitted.
 
 The authoritative V6 art mapping is `art_src/cast_v6_genre30_upload_staging/manifest/final_manifest_webp.csv`. `npm run content:prepare` copies the 520 staged WebPs into `public/cast/v6`, rebuilds generated cast/genre/arc payloads, and validates the invariants above before development, tests or production builds.
+
+Release candidate validation was explicitly re-triggered on 2026-09-11 before promotion to `main`.
