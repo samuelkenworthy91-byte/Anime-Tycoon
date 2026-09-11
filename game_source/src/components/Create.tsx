@@ -898,7 +898,7 @@ export default function Create({
                       })}
                     </div>
                     <div className="mt-2 text-[9px] italic text-paper/35">
-                      Up to three filters combine with AND logic. Shonen/Shojo are mutually exclusive. Genre filters use visible affinities only — hidden affinities never affect results.
+                      Up to three filters combine with AND logic. Shonen/Shojo are mutually exclusive. Pair filters use balanced casting connections, including concealed affinities without revealing their label.
                     </div>
                   </div>
                 )}
@@ -982,7 +982,7 @@ export default function Create({
 
               {filteredCastList.length === 0 && (
                 <div className="rounded-xl border border-neon/35 bg-neon/5 px-3 py-3 text-center text-[11px] text-paper/65">
-                  No cast member has every selected <b className="text-neon">visible</b> affinity. Remove one genre filter to broaden the list. Hidden affinities stay secret until discovered.
+                  No cast member has this <b className="text-neon">casting connection</b>. Remove one genre filter to broaden the list. Hidden affinity labels stay secret until discovered.
                 </div>
               )}
 

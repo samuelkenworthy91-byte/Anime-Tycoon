@@ -37,14 +37,33 @@ describe("cast portrait wiring regression gate", () => {
     }
   });
 
-  it("does not silently substitute a different pair when a visible-pair filter has no match", () => {
+  it("returns exactly one curated V6 connection in every Role × Type cell", () => {
     for (const role of roles) for (const type of types) for (const [genreA, genreB] of requestedPairs) {
       const bucket = v6.filter((member) => member.role === role && member.type === type);
       const result = filterCastByFilters(bucket, [
         { kind: "type", value: type }, { kind: "genre", value: genreA }, { kind: "genre", value: genreB },
       ]);
-      expect(result.every((member) => member.visibleAff.includes(genreA) && member.visibleAff.includes(genreB)), `${role}/${type}/${genreA}+${genreB}`).toBe(true);
+      expect(result, `${role}/${type}/${genreA}+${genreB}`).toHaveLength(1);
+      expect([...result[0].visibleAff, result[0].hiddenAff]).toEqual(expect.arrayContaining([genreA, genreB]));
+      expect(result[0].castingPairKeys).toContain([genreA, genreB].sort().join("|"));
     }
+  });
+
+  it("balances all 135 Genre 30 connections and gives Cosmic Horror × Slice of Life two leads", () => {
+    const pairKeys = new Set(v6.flatMap((member) => member.castingPairKeys ?? []));
+    expect(pairKeys.size).toBe(135);
+    for (const pairKey of pairKeys) {
+      const [genreA, genreB] = pairKey.split("|") as [GenreId, GenreId];
+      for (const role of roles) for (const type of types) {
+        const bucket = v6.filter((member) => member.role === role && member.type === type);
+        expect(filterCastByFilters(bucket, [{ kind: "genre", value: genreA }, { kind: "genre", value: genreB }]), `${role}/${type}/${pairKey}`).toHaveLength(1);
+      }
+    }
+    const leads = filterCastByFilters(v6.filter((member) => member.role === "protag"), [
+      { kind: "genre", value: "cosmic_horror" }, { kind: "genre", value: "slice" },
+    ]);
+    expect(leads).toHaveLength(2);
+    expect(new Set(leads.map((member) => member.type))).toEqual(new Set(["shonen", "shojo"]));
   });
 
   it("keeps the committed full roster as the authoritative Genre 30 source", () => {

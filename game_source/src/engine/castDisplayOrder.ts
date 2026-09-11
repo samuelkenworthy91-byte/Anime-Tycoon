@@ -4,7 +4,7 @@ export type CastBrowseFilter =
   | { kind: "type"; value: AnimeType }
   | { kind: "genre"; value: GenreId };
 
-/** Stable presentation only. Hidden affinities never influence browsing order. */
+/** Stable presentation order based on overt affinities. */
 export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
   const hash = (id: string) => {
     let h = 2166136261;
@@ -45,21 +45,27 @@ export function mixedCastOrder(members: readonly CastMember[]): CastMember[] {
 
 /**
  * Browse-time cast filter. Every active filter must match.
- * Anime type uses the public Shonen/Shojo field; genre matching uses visible
- * affinities only, so hidden affinities can never leak through filtering.
+ * Anime type uses the public Shonen/Shojo field. A two-genre query uses the
+ * curated casting-connection index when available, allowing a concealed
+ * affinity to support eligibility without exposing its label on the card.
  */
 export function filterCastByFilters(
   members: readonly CastMember[],
   filters: readonly CastBrowseFilter[],
 ): CastMember[] {
   if (!filters.length) return [...members];
-  return members.filter((member) =>
-    filters.every((filter) =>
-      filter.kind === "type"
-        ? member.type === filter.value
-        : member.visibleAff.includes(filter.value)
-    )
-  );
+  const typeFilter = filters.find((filter) => filter.kind === "type");
+  const genres = filters.filter((filter): filter is Extract<CastBrowseFilter, { kind: "genre" }> => filter.kind === "genre").map((filter) => filter.value);
+  return members.filter((member) => {
+    if (typeFilter && member.type !== typeFilter.value) return false;
+    if (!genres.length) return true;
+    const allAffinities = [...member.visibleAff, member.hiddenAff];
+    if (genres.length === 1) return allAffinities.includes(genres[0]);
+    if (genres.length === 2 && member.castingPairKeys) {
+      return member.castingPairKeys.includes([...genres].sort().join("|"));
+    }
+    return genres.every((genre) => allAffinities.includes(genre));
+  });
 }
 
 /** Backwards-compatible one-genre wrapper. */

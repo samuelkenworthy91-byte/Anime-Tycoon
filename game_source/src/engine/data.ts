@@ -145,6 +145,9 @@ export interface CastMember {
   type: AnimeType;
   visibleAff: [GenreId, GenreId];
   hiddenAff: GenreId;
+  /** Curated pair eligibility used by casting filters; hidden labels stay concealed. */
+  castingPairKeys?: string[];
+  sourceManifestSequence?: number;
   gender: string;
   species: string;
   ageBand: string;

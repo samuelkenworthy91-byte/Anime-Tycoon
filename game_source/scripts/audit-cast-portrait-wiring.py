@@ -240,6 +240,7 @@ def main():
             "source_file_exists": source_exists, "runtime_file_exists": runtime_exists, "filename_id_mapping_matches": filename_match,
             "runtime_references_intended_source": intended_source, "metadata_matches_authoritative": metadata_match,
             "portrait_appears_elsewhere": False, "suspected_visual_duplicate_ids": "", "runtime_file": str(runtime),
+            "casting_pair_keys": " | ".join(member.get("castingPairKeys", [])),
         })
 
     sha_groups = defaultdict(list)
@@ -329,6 +330,7 @@ def main():
         "| Visible pair | Count |", "|---|---:|",
         *[f"| {pair} | {count} |" for pair, count in sorted(pair_counts.items())], "",
         "All eight Role × Anime Type buckets contain the same 65 canonical affinity triples and collectively witness all 135 new mechanical pair edges. The visible-pair distribution remains the art-authored 19-pair distribution; changing it would misdescribe the supplied portraits.", "",
+        "Casting browse eligibility is separately balanced across those triples: every one of the 135 expansion connections has exactly one curated candidate in each Role × Anime Type bucket (eight candidates total, including two leads). Concealed affinity labels remain hidden on cast cards.", "",
         "## Similarity review", "",
         f"No exact duplicates were found. All {len(near_pairs)} low-distance pHash pairs were manually inspected on the labelled review sheet and confirmed distinct. The closest-looking Vampire mascot pair still differs in pose and background details; pHash similarity alone does not establish duplicate identity.", "",
         "See `cast-portrait-audit/SIMILARITY_REPORT.csv` and the contact sheets under `cast-portrait-audit/contact-sheets/`.", "",

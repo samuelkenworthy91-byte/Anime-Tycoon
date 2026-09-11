@@ -55,6 +55,8 @@ The repair makes the full Genre 30 roster authoritative, gives every stable ID o
 
 All eight Role × Anime Type buckets contain the same 65 canonical affinity triples and collectively witness all 135 new mechanical pair edges. The visible-pair distribution remains the art-authored 19-pair distribution; changing it would misdescribe the supplied portraits.
 
+Casting browse eligibility is separately balanced across those triples: every one of the 135 expansion connections has exactly one curated candidate in each Role × Anime Type bucket (eight candidates total, including two leads). Concealed affinity labels remain hidden on cast cards.
+
 ## Similarity review
 
 No exact duplicates were found. All 10 low-distance pHash pairs were manually inspected on the labelled review sheet and confirmed distinct. The closest-looking Vampire mascot pair still differs in pose and background details; pHash similarity alone does not establish duplicate identity.

@@ -65,6 +65,20 @@ for (const role of roles) for (const type of types) {
   const bucket = v6Roster.filter((row) => row.role === role && row.anime_type === type);
   assert.equal(bucket.length, 65, `${role}/${type}: V6 bucket count drift`);
   for (const row of bucket) assert.deepEqual([row.visible_genre_1, row.visible_genre_2, row.hidden_genre], reference.get(row.character_id.slice(-3)), `${row.character_id}: Role × Type affinity-cell drift`);
+  const runtimeBucket = bucket.map((row) => castById.get(row.character_id));
+  const connectionCounts = new Map();
+  for (const member of runtimeBucket) {
+    assert(member.castingPairKeys?.length, `${member.id}: curated casting connections are required`);
+    const affinities = new Set([...member.visibleAff, member.hiddenAff]);
+    for (const key of member.castingPairKeys) {
+      const pair = key.split("|");
+      assert.equal(pair.length, 2, `${member.id}: invalid casting connection ${key}`);
+      assert(pair.every((genre) => affinities.has(genre)), `${member.id}: casting connection ${key} is outside its affinity triple`);
+      connectionCounts.set(key, (connectionCounts.get(key) ?? 0) + 1);
+    }
+  }
+  assert.equal(connectionCounts.size, 135, `${role}/${type}: casting-connection count drift`);
+  for (const [key, count] of connectionCounts) assert.equal(count, 1, `${role}/${type}/${key}: expected one curated candidate`);
 }
 
 for (const member of cast.filter((entry) => entry.id.startsWith("vg_"))) {

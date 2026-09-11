@@ -33,20 +33,22 @@ describe("cast browse filters", () => {
     )).toBe(true);
   });
 
-  it("returns only cast with each requested visible affinity", () => {
+  it("returns cast connected to every genre, including concealed affinities", () => {
     for (const genre of GENRES.map((g) => g.id)) {
       const result = filterCastByVisibleGenre(PROTAGONISTS, genre);
       expect(result.length).toBeGreaterThan(0);
-      expect(result.every((m) => m.visibleAff.includes(genre))).toBe(true);
+      expect(result.every((m) => [...m.visibleAff, m.hiddenAff].includes(genre))).toBe(true);
     }
   });
 
-  it("never uses hidden affinities to satisfy genre filters", () => {
+  it("uses hidden affinities for eligibility without changing their concealed field", () => {
     for (const genre of GENRES.map((g) => g.id)) {
       const hiddenOnly = PROTAGONISTS.find((m) => m.hiddenAff === genre && !m.visibleAff.includes(genre));
       if (!hiddenOnly) continue;
       const result = filterCastByFilters(PROTAGONISTS, [{ kind: "genre", value: genre }]);
-      expect(result.some((m) => m.id === hiddenOnly.id)).toBe(false);
+      expect(result.some((m) => m.id === hiddenOnly.id)).toBe(true);
+      expect(hiddenOnly.visibleAff.includes(genre)).toBe(false);
+      expect(hiddenOnly.hiddenAff).toBe(genre);
     }
   });
 });

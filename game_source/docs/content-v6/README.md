@@ -24,4 +24,6 @@ The authoritative V6 identity and affinity roster is `docs/content-v6/GENRE30_CA
 
 The 65 affinity triples in each Role × Anime Type bucket provide complete mechanical coverage of the 135 new pair edges. The supplied art has 19 overt visible-pair themes; those visible affinities remain attached to the portraits they actually depict rather than being relabelled as 65 visual themes.
 
+Casting filters use a generated `castingPairKeys` index derived from `coverage_edges_this_member`. Every one of the 135 expansion connections is assigned to exactly one candidate in each Role × Anime Type bucket. This gives every connection eight V6 candidates overall—two leads, two secondaries, two pets and two villains—without changing or revealing the portrait's concealed affinity label.
+
 Release candidate validation was explicitly re-triggered on 2026-09-11 before promotion to `main`.
