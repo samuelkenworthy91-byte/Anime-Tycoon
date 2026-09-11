@@ -146,6 +146,7 @@ function strictOwnersForGenres(members: readonly CastMember[], genres: readonly 
  * targeted secret-affinity connection that genuinely needs them. A hidden
  * affinity is never eligible until that cast ID is present in the current
  * save's `castAffinityDiscovered` list.
+ * Android and browser builds intentionally share this same discovery gate.
  *
  * A two-genre search is strict: exactly one deterministic owner is selected
  * per Role × Shonen/Shojo bucket whenever coverage exists. Curated
