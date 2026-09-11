@@ -14,6 +14,7 @@ import {
   undiscoveredProfileIds,
   profileableCastIds,
 } from "../state";
+import { catalogHasSecret, isCastingActive } from "../castCatalog";
 import {
   MERCH_CAPABILITY_RESEARCH,
   MERCH_PRODUCTS,
@@ -46,7 +47,7 @@ const warmFr = (over: Partial<Franchise> = {}): Franchise => ({
     {
       title: "IP", genres: ["sports"], medium: "tv", budget: "standard", slot: "midnight",
       animeType: "shonen", audience: "teens", protag: "hero", protagName: "Aki",
-      secondary: "", pet: "", villain: "", arcs: [], sliders: [50, 50, 50], season: 1,
+      secondary: "", pet: "", villain: "warlord", arcs: [], sliders: [50, 50, 50], season: 1,
     },
     { protag: "hero", protagName: "Aki", secondary: "rival", pet: "none", villain: "warlord" } as never,
     TEST_RESULT as never,
@@ -101,11 +102,9 @@ describe("merch research identity", () => {
     expect(merchBlock(fr, plush, 10, 99_000_000, research)).toBe("Requires Plush Production research (R&D)");
     const ost = merchProductById("ost")!;
     expect(merchBlock(fr, ost, 10, 99_000_000, research)).toBe("Requires Soundtrack Publishing research (R&D)");
-    /* with plush research, plush is unblocked but figures still gated */
     const plushResearch: string[] = ["merch", "merch_plush"];
     expect(merchBlock(fr, plush, 10, 99_000_000, plushResearch)).toBeNull();
     expect(merchBlock(fr, merchProductById("figures")!, 10, 99_000_000, plushResearch)).toBe("Requires Scale Figure Licensing research (R&D)");
-    /* mobile line follows VIRTUAL GOODS (merch2), which itself requires merch */
     const m2 = RESEARCH.find((x) => x.id === "merch2")!;
     expect(m2.requires).toBe("merch");
     expect(m2.section).toBe("merch");
@@ -114,9 +113,7 @@ describe("merch research identity", () => {
   it("research-hard gate comes BEFORE cash/capacity gates so players see the true blocker", () => {
     const broke = 0;
     const fr = warmFr();
-    /* broke player: research gate still reported first */
     expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch"])).toBe("Requires Scale Figure Licensing research (R&D)");
-    /* once researched, the OLD economics guard (cash) resumes */
     expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch", "merch_figures"])).not.toBe("Requires Scale Figure Licensing research (R&D)");
     expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch", "merch_figures"])).toBeTruthy();
   });
@@ -132,12 +129,18 @@ describe("TALENT ANALYSIS repeatable research", () => {
     expect(def.repeatable).toBe(true);
   });
 
-  it("profileable cast = valid, non-legacy, selectable cast only", () => {
+  it("profiles only active catalogue characters that genuinely have a secret", () => {
     const ids = profileableCastIds();
-    expect(ids.length).toBeGreaterThan(50);
+    expect(ids).toHaveLength(140 * 8);
+    expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) {
-      const m = CAST_V2.find((c) => c.id === id)!;
-      expect(m.legacyPlaceholder ?? false).toBe(false);
+      const member = CAST_V2.find((cast) => cast.id === id)!;
+      expect(isCastingActive(member), id).toBe(true);
+      expect(catalogHasSecret(member), id).toBe(true);
+      expect(member.legacyPlaceholder ?? false).toBe(false);
+    }
+    for (const member of CAST_V2.filter((cast) => !isCastingActive(cast) || !catalogHasSecret(cast))) {
+      expect(ids, member.id).not.toContain(member.id);
     }
   });
 
@@ -148,12 +151,10 @@ describe("TALENT ANALYSIS repeatable research", () => {
     r = advanceWeeks(r, 20);
     expect(r.research.includes(TALENT_ANALYSIS_ID)).toBe(false);
     expect(r.castAffinityDiscovered).toHaveLength(1);
-    /* and it can be started right again */
     expect(researchBlockReason(r, TALENT_ANALYSIS_ID)).toBeNull();
     r = startResearchProject(r, TALENT_ANALYSIS_ID, 85)!;
     r = advanceWeeks(r, 20);
     expect(r.castAffinityDiscovered).toHaveLength(2);
-    /* reveals never repeat a target */
     expect(new Set(r.castAffinityDiscovered).size).toBe(2);
   });
 
