@@ -432,7 +432,7 @@ export default function Create({
   const CAST_SCREENS = castRows.length;
   const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
   const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];
-  const filteredCastList = filterCastByFilters(castRow.list, castFilters);
+  const filteredCastList = filterCastByFilters(castRow.list, castFilters, run.castAffinityDiscovered);
   const castFilterAtLimit = castFilters.length >= 3;
   const isCastFilterActive = (kind: CastBrowseFilter["kind"], value: AnimeType | GenreId) =>
     castFilters.some((filter) => filter.kind === kind && filter.value === value);

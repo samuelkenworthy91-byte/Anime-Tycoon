@@ -7,6 +7,7 @@ import { filterCastByFilters } from "../castDisplayOrder";
 
 const ROOT = path.resolve(__dirname, "../../..");
 const v6 = CAST_V2.filter((member) => member.id.startsWith("g30_"));
+const ALL_V6_DISCOVERED = v6.map((member) => member.id);
 const roles: CastRole[] = ["protag", "secondary", "pet", "villain"];
 const types: AnimeType[] = ["shonen", "shojo"];
 const requestedPairs: [GenreId, GenreId][] = [
@@ -42,7 +43,7 @@ describe("cast portrait wiring regression gate", () => {
       const bucket = v6.filter((member) => member.role === role && member.type === type);
       const result = filterCastByFilters(bucket, [
         { kind: "type", value: type }, { kind: "genre", value: genreA }, { kind: "genre", value: genreB },
-      ]);
+      ], ALL_V6_DISCOVERED);
       expect(result, `${role}/${type}/${genreA}+${genreB}`).toHaveLength(1);
       expect([...result[0].visibleAff, result[0].hiddenAff]).toEqual(expect.arrayContaining([genreA, genreB]));
       expect(result[0].castingPairKeys).toContain([genreA, genreB].sort().join("|"));
@@ -56,12 +57,12 @@ describe("cast portrait wiring regression gate", () => {
       const [genreA, genreB] = pairKey.split("|") as [GenreId, GenreId];
       for (const role of roles) for (const type of types) {
         const bucket = v6.filter((member) => member.role === role && member.type === type);
-        expect(filterCastByFilters(bucket, [{ kind: "genre", value: genreA }, { kind: "genre", value: genreB }]), `${role}/${type}/${pairKey}`).toHaveLength(1);
+        expect(filterCastByFilters(bucket, [{ kind: "genre", value: genreA }, { kind: "genre", value: genreB }], ALL_V6_DISCOVERED), `${role}/${type}/${pairKey}`).toHaveLength(1);
       }
     }
     const leads = filterCastByFilters(v6.filter((member) => member.role === "protag"), [
       { kind: "genre", value: "cosmic_horror" }, { kind: "genre", value: "slice" },
-    ]);
+    ], ALL_V6_DISCOVERED);
     expect(leads).toHaveLength(2);
     expect(new Set(leads.map((member) => member.type))).toEqual(new Set(["shonen", "shojo"]));
   });

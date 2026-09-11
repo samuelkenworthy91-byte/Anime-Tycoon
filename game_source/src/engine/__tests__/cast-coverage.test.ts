@@ -34,6 +34,7 @@ const TYPES: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 const expectedPairs = (CANONICAL_GENRE_IDS.length * (CANONICAL_GENRE_IDS.length - 1)) / 2;
 const visiblePairKey = (member: CastMember) => [...member.visibleAff].sort().join("|");
+const ALL_DISCOVERED = CAST_V2.map((member) => member.id);
 
 describe("canonical 30-genre cast roster", () => {
   it("contains exactly 1440 unique selectable IDs while preserving all four roles", () => {
@@ -106,7 +107,7 @@ describe("canonical 30-genre cast roster", () => {
           const result = filterCastByFilters(members, [
             { kind: "genre", value: a },
             { kind: "genre", value: b },
-          ]);
+          ], ALL_DISCOVERED);
           expect(result, `${role}/${a}|${b}`).toHaveLength(2);
           expect(new Set(result.map((member) => member.type)), `${role}/${a}|${b}`).toEqual(new Set(TYPES));
           for (const member of result) {
@@ -129,7 +130,7 @@ describe("canonical 30-genre cast roster", () => {
               { kind: "type", value: type },
               { kind: "genre", value: a },
               { kind: "genre", value: b },
-            ]);
+            ], ALL_DISCOVERED);
             expect(result, `${role}/${type}/${a}|${b}`).toHaveLength(1);
             expect(result[0].type).toBe(type);
             expect(affinities(result[0])).toEqual(expect.arrayContaining([a, b]));

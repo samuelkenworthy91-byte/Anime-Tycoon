@@ -21,7 +21,11 @@ const hash = (id: string) => {
 };
 
 const visiblePairKey = (member: CastMember) => [...member.visibleAff].sort().join("|");
-const affinitySet = (member: CastMember) => new Set<GenreId>([...member.visibleAff, member.hiddenAff]);
+const availableAffinitySet = (member: CastMember, discovered: ReadonlySet<string>) => {
+  const available = new Set<GenreId>(member.visibleAff);
+  if (discovered.has(member.id)) available.add(member.hiddenAff);
+  return available;
+};
 const roleTypeKey = (member: CastMember) => `${member.role}|${member.type}`;
 
 function presentationCopy(member: CastMember, matchedGenres: readonly GenreId[]): CastMember {
@@ -99,10 +103,10 @@ function dedupeVisiblePairs(members: readonly CastMember[], matchedGenres: reado
   return members.filter((member) => keep.has(member.id)).map((member) => presentationCopy(member, matchedGenres));
 }
 
-function strictOwnersForGenres(members: readonly CastMember[], genres: readonly GenreId[]): CastMember[] {
+function strictOwnersForGenres(members: readonly CastMember[], genres: readonly GenreId[], discovered: ReadonlySet<string>): CastMember[] {
   const groups = new Map<string, CastMember[]>();
   for (const member of members) {
-    const all = affinitySet(member);
+    const all = availableAffinitySet(member, discovered);
     if (!genres.every((genre) => all.has(genre))) continue;
     const key = roleTypeKey(member);
     const group = groups.get(key) ?? [];
@@ -139,7 +143,9 @@ function strictOwnersForGenres(members: readonly CastMember[], genres: readonly 
  * Ordinary browsing is deduped by public genre pair inside each Role × Type
  * bucket so reserve portraits with the same visible pairing do not flood the
  * select screen. They remain in the runtime pool for old saves and for a
- * targeted secret-affinity connection that genuinely needs them.
+ * targeted secret-affinity connection that genuinely needs them. A hidden
+ * affinity is never eligible until that cast ID is present in the current
+ * save's `castAffinityDiscovered` list.
  *
  * A two-genre search is strict: exactly one deterministic owner is selected
  * per Role × Shonen/Shojo bucket whenever coverage exists. Curated
@@ -150,18 +156,20 @@ function strictOwnersForGenres(members: readonly CastMember[], genres: readonly 
 export function filterCastByFilters(
   members: readonly CastMember[],
   filters: readonly CastBrowseFilter[],
+  discoveredCastIds: readonly string[] = [],
 ): CastMember[] {
   const typeFilter = filters.find((filter) => filter.kind === "type");
   const genres = filters
     .filter((filter): filter is Extract<CastBrowseFilter, { kind: "genre" }> => filter.kind === "genre")
     .map((filter) => filter.value);
 
+  const discovered = new Set(discoveredCastIds);
   const typed = typeFilter ? members.filter((member) => member.type === typeFilter.value) : [...members];
   if (!genres.length) return dedupeVisiblePairs(typed, []);
 
-  if (genres.length >= 2) return strictOwnersForGenres(typed, genres);
+  if (genres.length >= 2) return strictOwnersForGenres(typed, genres, discovered);
 
-  const matching = typed.filter((member) => affinitySet(member).has(genres[0]));
+  const matching = typed.filter((member) => availableAffinitySet(member, discovered).has(genres[0]));
   return dedupeVisiblePairs(matching, genres);
 }
 
@@ -169,6 +177,7 @@ export function filterCastByFilters(
 export function filterCastByVisibleGenre(
   members: readonly CastMember[],
   genre: GenreId | null,
+  discoveredCastIds: readonly string[] = [],
 ): CastMember[] {
-  return filterCastByFilters(members, genre ? [{ kind: "genre", value: genre }] : []);
+  return filterCastByFilters(members, genre ? [{ kind: "genre", value: genre }] : [], discoveredCastIds);
 }
