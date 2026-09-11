@@ -950,10 +950,11 @@ export default function Create({
                 </div>
                 <Btn
                   variant="ghost"
+                  disabled={filteredCastList.length === 0}
                   onClick={() => {
                     sfx.click();
-                    const pool = filteredCastList.length ? filteredCastList : castRow.list;
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    const pick = filteredCastList[Math.floor(Math.random() * filteredCastList.length)];
+                    if (!pick) return;
                     if (castRow.role === "protag") set({ protag: pick.id, protagName: pick.name });
                     else set({ [castRow.role]: pick.id } as Partial<Draft>);
                   }}
@@ -978,6 +979,12 @@ export default function Create({
                   />
                 ))}
               </div>
+
+              {filteredCastList.length === 0 && (
+                <div className="rounded-xl border border-neon/35 bg-neon/5 px-3 py-3 text-center text-[11px] text-paper/65">
+                  No cast member has every selected <b className="text-neon">visible</b> affinity. Remove one genre filter to broaden the list. Hidden affinities stay secret until discovered.
+                </div>
+              )}
 
               {castRow.role === "protag" && (
                 <div className="rounded-xl border border-cyanx/25 bg-cyanx/5 px-3 py-2 text-[10px] text-paper/55">

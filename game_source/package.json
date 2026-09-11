@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "content:prepare": "node scripts/prepare-vampire-grimdark.mjs && node scripts/prepare-genre30.mjs && node scripts/generate-content-v3-runtime.mjs",
+    "content:prepare": "node scripts/prepare-vampire-grimdark.mjs && node scripts/prepare-genre30.mjs && node scripts/generate-content-v3-runtime.mjs && node scripts/verify-cast-wiring.mjs",
     "predev": "npm run content:prepare",
     "dev": "vite",
     "prebuild": "npm run content:prepare",
     "build": "vite build",
+    "postbuild": "node scripts/verify-built-cast.mjs",
     "preview": "vite preview",
     "apk:add": "cap add android",
     "apk:sync": "npm run build && cap sync android",
@@ -23,7 +24,8 @@
     "content-v3:generate": "node scripts/generate-content-v3-runtime.mjs",
     "auction-ip:manifest": "node scripts/export-auction-ip-manifest.mjs",
     "auction-ip:validate-posters": "node scripts/validate-auction-ip-posters.mjs",
-    "cast:coverage": "node scripts/castCoverage.mjs"
+    "cast:coverage": "node scripts/castCoverage.mjs",
+    "cast:portrait-audit": "python3 scripts/audit-cast-portrait-wiring.py"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

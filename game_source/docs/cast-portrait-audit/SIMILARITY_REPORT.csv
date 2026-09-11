@@ -1,0 +1,11 @@
+id_a,id_b,phash_distance,manual_review,review_note
+cv3_lead_023,cv3_sidekick_015,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+cv3_mascot_041,g30_villain_shojo_039,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+cv3_villain_060,vg_lead_shonen_martial,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+sora,g30_protag_shonen_065,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+v4_villain_shojo_020,g30_villain_shonen_017,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+v4_villain_shonen_006,v4_villain_shonen_011,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+v_blackout,g30_villain_shonen_059,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+v_tempest,cv3_lead_028,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+vg_lead_shonen_survival,g30_villain_shojo_064,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."
+vg_mascot_shojo_supernatural,vg_mascot_shojo_samurai,12,distinct,"Different subject, composition, costume, pose, or environment; not a duplicate."

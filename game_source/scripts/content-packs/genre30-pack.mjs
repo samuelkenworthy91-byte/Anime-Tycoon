@@ -162,30 +162,6 @@ export function parseCsv(text) {
   return rows.filter((r) => r.some(Boolean)).map((r) => Object.fromEntries(header.map((h, i) => [h, r[i] ?? ""])));
 }
 
-const GIVEN = [
-  "Aiko","Amara","Ansel","Arden","Ari","Asa","Asha","Cass","Cassia","Dara","Eira","Elian","Emi","Farah","Hana","Haru","Idris","Imani","Jae","Jin",
-  "Kael","Kira","Leila","Lina","Lucan","Mara","Mika","Mina","Nadia","Nao","Niko","Noor","Rhea","Ren","Rin","Samira","Sana","Sora","Tala","Yara"
-];
-const SURNAMES = [
-  "Adebayo","Akhtar","Alvarez","Amari","Azhar","Bako","Bennett","Chen","Cho","Costa","Crowe","Dahl","Darzi","Diallo","Duval","Farouk","Fen","Ferreira","Fischer","Haddad",
-  "Hale","Hassan","Ito","Kade","Kaur","Khan","Kim","Kovacs","Laurent","Locke","Marlow","Mendes","Mensah","Mirren","Mori","Navarro","Nguyen","Nielsen","Njeri","Novak",
-  "Okafor","Okoye","Ortega","Park","Patel","Petrov","Rahman","Ramos","Reyes","Roux","Saad","Santos","Serrano","Silva","Solberg","Tan","Torres","Varga","Vega","Volkov"
-];
-const MASCOT_STEMS = ["Azu","Bram","Chai","Cinder","Clink","Djinni","Ember","Fang","Glim","Kiki","Lumen","Miri","Miso","Moku","Nib","Nori","Orbit","Pebble","Pip","Puck","Riff","Rune","Sable","Skiff","Soot","Talon","Tika","Toto","Vanta","Whisp"];
-const MASCOT_ENDS = ["bean","blink","claw","coil","drift","fang","flare","ling","mite","moth","paw","puff","snap","spark","sprite","tail","tooth","whirl","whisk","wing","wisp"];
-
-function repairName(index, role, used) {
-  const capacity = role === "pet" ? MASCOT_STEMS.length * MASCOT_ENDS.length : GIVEN.length * SURNAMES.length;
-  for (let attempt = 0; attempt < capacity; attempt += 1) {
-    const n = index + attempt;
-    const candidate = role === "pet"
-      ? `${MASCOT_STEMS[n % MASCOT_STEMS.length]}${MASCOT_ENDS[Math.floor(n / MASCOT_STEMS.length) % MASCOT_ENDS.length]}`
-      : `${GIVEN[n % GIVEN.length]} ${SURNAMES[Math.floor(n / GIVEN.length) % SURNAMES.length]}`;
-    if (!used.has(candidate)) return candidate;
-  }
-  throw new Error(`Unable to generate a unique ${role} name`);
-}
-
 const LABELS = Object.fromEntries(GENRE30_NEW_GENRES.map((g) => [g.id, g.label]));
 const FALLBACK_LABELS = {
   mecha:"Mecha", isekai:"Isekai", slice:"Slice of Life", horror:"Horror", romance:"Romance", sports:"Sports", cyber:"Cyber", fantasy:"Fantasy", idol:"Idol", mystery:"Mystery", comedy:"Comedy", cooking:"Cooking", military:"Military", supernatural:"Supernatural", space:"Space", magical:"Magical", survival:"Survival", pirate:"Pirate", martial:"Martial Arts", mythology:"Mythology", nordic:"Nordic", samurai:"Samurai", shinobi:"Shinobi", vampire:"Vampire", grimdark:"Grimdark"
@@ -227,26 +203,28 @@ function culturalBasisFor(row) {
 
 export function buildGenre30Cast(rows, reservedNames = new Set()) {
   const ids = new Set();
-  const manifestNameCount = new Map();
-  for (const row of rows) manifestNameCount.set(row.name, (manifestNameCount.get(row.name) ?? 0) + 1);
-
-  const used = new Set(reservedNames);
-  for (const row of rows) {
-    if ((manifestNameCount.get(row.name) ?? 0) === 1 && row.name && !used.has(row.name)) used.add(row.name);
-  }
+  const names = new Set();
+  const epithets = new Set();
+  const sequences = new Set();
 
   const cast = [];
-  rows.forEach((row, index) => {
+  rows.forEach((row) => {
     if (ids.has(row.character_id)) throw new Error(`Duplicate Genre 30 cast id: ${row.character_id}`);
     ids.add(row.character_id);
-    const keepManifestName = (manifestNameCount.get(row.name) ?? 0) === 1 && row.name && !reservedNames.has(row.name);
-    const name = keepManifestName ? row.name : repairName(index + 100, row.role, used);
-    used.add(name);
+    if (!row.name?.trim()) throw new Error(`${row.character_id}: canonical name is required`);
+    if (names.has(row.name) || reservedNames.has(row.name)) throw new Error(`${row.character_id}: duplicate canonical name ${row.name}`);
+    names.add(row.name);
+    if (!row.epithet?.trim()) throw new Error(`${row.character_id}: canonical epithet is required`);
+    if (epithets.has(row.epithet)) throw new Error(`${row.character_id}: duplicate canonical epithet ${row.epithet}`);
+    epithets.add(row.epithet);
+    const sequence = Number(row.sequence);
+    if (!Number.isInteger(sequence) || sequence < 1 || sequences.has(sequence)) throw new Error(`${row.character_id}: invalid or duplicate source sequence ${row.sequence}`);
+    sequences.add(sequence);
     cast.push({
       id: row.character_id,
-      name,
+      name: row.name,
       archetype: archetypeFor(row),
-      epithet: row.epithet || `The ${labelFor(row.visible_genre_1)} ${row.role === "villain" ? "Threat" : row.role === "pet" ? "Companion" : "Voice"}`,
+      epithet: row.epithet,
       img: `cast/v6/${row.character_id}.webp`,
       personality: personalityFor(row),
       role: row.role,
@@ -257,7 +235,7 @@ export function buildGenre30Cast(rows, reservedNames = new Set()) {
       species: speciesFor(row),
       ageBand: row.role === "pet" ? "ageless" : "adult",
       culturalBasis: culturalBasisFor(row),
-      sourceManifestSequence: Number(row.sequence)
+      sourceManifestSequence: sequence
     });
   });
   return cast;

@@ -21,7 +21,8 @@ const baseArcs = readJson("docs/content-v3/ARC_V3_RUNTIME.json");
 const vgGenres = readJson("docs/content-v5/VAMPIRE_GRIMDARK_GENRES.json");
 const vgArcs = readJson("docs/content-v5/VAMPIRE_GRIMDARK_ARCS.json");
 const genre30Arcs = readJson("docs/content-v6/GENRE30_ARCS.json");
-const genre30Manifest = parseCsv(readFileSync(resolve(root, "art_src/cast_v6_genre30_upload_staging/manifest/final_manifest_webp.csv"), "utf8"));
+const genre30Roster = parseCsv(readFileSync(resolve(root, "docs/content-v6/GENRE30_CAST_ROSTER.csv"), "utf8"));
+const genre30ImageManifest = parseCsv(readFileSync(resolve(root, "art_src/cast_v6_genre30_upload_staging/manifest/final_manifest_webp.csv"), "utf8"));
 
 const roles = ["protag", "secondary", "pet", "villain"];
 const types = ["shonen", "shojo"];
@@ -31,7 +32,17 @@ const baseGenreIds = baseGenres.genres.map((g) => g.id);
 const vgCast = buildVampireGrimdarkCast(baseGenreIds);
 const cast25 = [...baseCast.cast, ...vgCast];
 const genre25Ids = [...baseGenreIds, ...vgGenres.genres.map((g) => g.id)];
-const genre30Cast = buildGenre30Cast(genre30Manifest, new Set(cast25.map((c) => c.name)));
+const imageManifestById = new Map(genre30ImageManifest.map((row) => [row.character_id, row]));
+assert.equal(imageManifestById.size, genre30ImageManifest.length, "Genre 30 image-manifest IDs must be unique");
+for (const row of genre30Roster) {
+  const imageRow = imageManifestById.get(row.character_id);
+  assert(imageRow, `${row.character_id}: missing from Genre 30 image manifest`);
+  for (const field of ["sequence", "name", "epithet", "role", "anime_type", "visible_genre_1", "visible_genre_2", "hidden_genre"]) {
+    assert.equal(imageRow[field], row[field], `${row.character_id}: canonical roster/image-manifest ${field} drift`);
+  }
+  assert.equal(imageRow.staging_filename_webp, `${row.character_id}.webp`, `${row.character_id}: image filename drift`);
+}
+const genre30Cast = buildGenre30Cast(genre30Roster, new Set(cast25.map((c) => c.name)));
 const genre30Combos = buildGenre30Combos(genre25Ids);
 
 const cast = { cast: [...cast25, ...genre30Cast] };
@@ -81,7 +92,8 @@ for (const id of GENRE30_NEW_IDS) {
 assert.equal(v4.cast.length, 304, "Cast V4 manifest must contain 304 additions");
 assert.equal(new Set(v4.cast.map((c) => c.id)).size, 304, "V4 IDs must be unique");
 assert.equal(vgCast.length, 184, `expected 184 Vampire/Grimdark cast, got ${vgCast.length}`);
-assert.equal(genre30Manifest.length, 520, `expected 520 Genre 30 manifest rows, got ${genre30Manifest.length}`);
+assert.equal(genre30Roster.length, 520, `expected 520 Genre 30 roster rows, got ${genre30Roster.length}`);
+assert.equal(genre30ImageManifest.length, 520, `expected 520 Genre 30 image-manifest rows, got ${genre30ImageManifest.length}`);
 assert.equal(genre30Cast.length, 520, `expected 520 Genre 30 cast, got ${genre30Cast.length}`);
 assert.equal(cast.cast.length, 1440, `expected 1,440 total cast, got ${cast.cast.length}`);
 assert.equal(new Set(cast.cast.map((c) => c.id)).size, cast.cast.length, "cast IDs must be unique");
