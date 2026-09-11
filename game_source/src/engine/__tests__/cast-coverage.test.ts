@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   CANONICAL_GENRE_IDS,
   CAST_V2,
-  GENRES,
   PETS,
   PROTAGONISTS,
   SECONDARY,
@@ -12,6 +11,13 @@ import {
   type GenreId,
 } from "../data";
 import { filterCastByFilters } from "../castDisplayOrder";
+import {
+  catalogAvailablePairKeys,
+  catalogPairKeys,
+  castingCatalogMeta,
+  castingPairKey,
+  isCastingActive,
+} from "../castCatalog";
 
 const ROLES: [string, CastMember[]][] = [
   ["lead", PROTAGONISTS],
@@ -19,88 +25,73 @@ const ROLES: [string, CastMember[]][] = [
   ["mascot", PETS],
   ["villain", VILLAINS],
 ];
-const ROLE_TOTALS: Record<string, number> = { lead: 361, sidekick: 357, mascot: 360, villain: 362 };
-const ROLE_TYPE_TOTALS: Record<string, number> = {
-  "lead:shonen": 178,
-  "lead:shojo": 183,
-  "sidekick:shonen": 177,
-  "sidekick:shojo": 180,
-  "mascot:shonen": 178,
-  "mascot:shojo": 182,
-  "villain:shonen": 180,
-  "villain:shojo": 182,
-};
 const TYPES: AnimeType[] = ["shonen", "shojo"];
-const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
-const expectedPairs = (CANONICAL_GENRE_IDS.length * (CANONICAL_GENRE_IDS.length - 1)) / 2;
-const visiblePairKey = (member: CastMember) => [...member.visibleAff].sort().join("|");
 const ALL_DISCOVERED = CAST_V2.map((member) => member.id);
+const ALL_PAIRS = CANONICAL_GENRE_IDS.flatMap((a, index) =>
+  CANONICAL_GENRE_IDS.slice(index + 1).map((b) => castingPairKey(a, b)),
+);
 
-describe("canonical 30-genre cast roster", () => {
-  it("contains exactly 1440 unique selectable IDs while preserving all four roles", () => {
+describe("Casting Catalog V7", () => {
+  it("preserves all 1440 identities but exposes only the clean active catalogue", () => {
     expect(CAST_V2).toHaveLength(1440);
     expect(new Set(CAST_V2.map((member) => member.id)).size).toBe(1440);
-    for (const [role, members] of ROLES) expect(members, role).toHaveLength(ROLE_TOTALS[role]);
-    expect(ROLES.flatMap(([, members]) => members).map((member) => member.id).sort())
-      .toEqual(CAST_V2.map((member) => member.id).sort());
-  });
+    expect(CAST_V2.filter(isCastingActive)).toHaveLength(155 * 8);
+    expect(CAST_V2.filter((member) => !isCastingActive(member))).toHaveLength(1440 - 155 * 8);
 
-  it("matches the expanded role × type bucket sizes", () => {
     for (const [role, members] of ROLES) {
-      for (const type of TYPES) {
-        const cell = members.filter((member) => member.type === type);
-        expect(cell, `${role}/${type}`).toHaveLength(ROLE_TYPE_TOTALS[`${role}:${type}`]);
-      }
+      expect(members, role).toHaveLength(310);
+      for (const type of TYPES) expect(members.filter((member) => member.type === type), `${role}/${type}`).toHaveLength(155);
     }
   });
 
-  it("gives every member two visible and one distinct hidden active affinity", () => {
-    const active = new Set(GENRES.map((genre) => genre.id));
+  it("removes legacy castingPairKeys from every runtime cast record", () => {
     for (const member of CAST_V2) {
-      expect(member.visibleAff, member.id).toHaveLength(2);
-      expect(new Set(affinities(member)).size, member.id).toBe(3);
-      for (const genre of affinities(member)) expect(active.has(genre), `${member.id}/${genre}`).toBe(true);
+      expect((member as CastMember & { castingPairKeys?: string[] }).castingPairKeys, member.id).toBeUndefined();
+      expect(castingCatalogMeta(member), member.id).not.toBeNull();
     }
   });
 
-  it("covers every canonical pair inside every exact role × anime-type bucket", () => {
-    let measured = 0;
-    for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
-      for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
-        measured += 1;
-        const a = CANONICAL_GENRE_IDS[i];
-        const b = CANONICAL_GENRE_IDS[j];
-        for (const [role, members] of ROLES) {
-          for (const type of TYPES) {
-            const bucket = members.filter((member) => member.type === type);
-            expect(
-              bucket.some((member) => affinities(member).includes(a) && affinities(member).includes(b)),
-              `${role}/${type}/${a}|${b}`,
-            ).toBe(true);
-          }
-        }
-      }
-    }
-    expect(measured).toBe(expectedPairs);
-    expect(measured).toBe(435);
-  });
-
-  it("shows no duplicate public genre pair in ordinary browsing within a Role × Type bucket", () => {
-    for (const [role, members] of ROLES) {
-      const browsable = filterCastByFilters(members, []);
+  it("uses 140 triple designations and 15 public-only pair designations per Role × Type bucket", () => {
+    for (const [, members] of ROLES) {
       for (const type of TYPES) {
-        const cell = browsable.filter((member) => member.type === type);
-        const keys = cell.map(visiblePairKey);
-        expect(new Set(keys).size, `${role}/${type}`).toBe(keys.length);
+        const bucket = members.filter((member) => member.type === type);
+        const kinds = bucket.map((member) => castingCatalogMeta(member)!.kind);
+        expect(kinds.filter((kind) => kind === "triple")).toHaveLength(140);
+        expect(kinds.filter((kind) => kind === "pair")).toHaveLength(15);
       }
     }
   });
 
-  it("returns exactly one Shonen and one Shojo owner for every genre pair in every role", () => {
-    let measured = 0;
+  it("gives every canonical pair exactly one designated owner in every Role × Type bucket", () => {
+    expect(ALL_PAIRS).toHaveLength(435);
+    expect(new Set(ALL_PAIRS).size).toBe(435);
+
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        const bucket = members.filter((member) => member.type === type);
+        const counts = new Map<string, number>();
+        for (const member of bucket) {
+          for (const key of catalogPairKeys(member)) counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+        expect(counts.size, `${role}/${type}`).toBe(435);
+        for (const pair of ALL_PAIRS) expect(counts.get(pair), `${role}/${type}/${pair}`).toBe(1);
+      }
+    }
+  });
+
+  it("never repeats a public card pair inside the same Role × Type bucket", () => {
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        const bucket = members.filter((member) => member.type === type);
+        const publicKeys = bucket.map((member) => castingPairKey(member.visibleAff[0], member.visibleAff[1]));
+        expect(new Set(publicKeys).size, `${role}/${type}`).toBe(publicKeys.length);
+      }
+    }
+  });
+
+  it("returns exactly one Shonen and one Shojo owner for every pair after secrets are known", () => {
     for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
       for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
-        measured += 1;
         const a = CANONICAL_GENRE_IDS[i];
         const b = CANONICAL_GENRE_IDS[j];
         for (const [role, members] of ROLES) {
@@ -109,41 +100,38 @@ describe("canonical 30-genre cast roster", () => {
             { kind: "genre", value: b },
           ], ALL_DISCOVERED);
           expect(result, `${role}/${a}|${b}`).toHaveLength(2);
-          expect(new Set(result.map((member) => member.type)), `${role}/${a}|${b}`).toEqual(new Set(TYPES));
-          for (const member of result) {
-            expect(affinities(member), `${role}/${member.type}/${a}|${b}`).toEqual(expect.arrayContaining([a, b]));
-          }
-        }
-      }
-    }
-    expect(measured).toBe(435);
-  });
-
-  it("returns exactly one owner when a Shonen/Shojo type filter is added", () => {
-    for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
-      for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
-        const a = CANONICAL_GENRE_IDS[i];
-        const b = CANONICAL_GENRE_IDS[j];
-        for (const [role, members] of ROLES) {
-          for (const type of TYPES) {
-            const result = filterCastByFilters(members, [
-              { kind: "type", value: type },
-              { kind: "genre", value: a },
-              { kind: "genre", value: b },
-            ], ALL_DISCOVERED);
-            expect(result, `${role}/${type}/${a}|${b}`).toHaveLength(1);
-            expect(result[0].type).toBe(type);
-            expect(affinities(result[0])).toEqual(expect.arrayContaining([a, b]));
-          }
+          expect(new Set(result.map((member) => member.type))).toEqual(new Set(TYPES));
         }
       }
     }
   });
 
-  it("includes every expansion genre in canonical content", () => {
-    for (const id of ["samurai", "shinobi", "vampire", "grimdark", "monster_taming", "crime", "kaiju", "cosmic_horror", "arabia"] as GenreId[]) {
-      expect(CAST_V2.some((member) => affinities(member).includes(id))).toBe(true);
-      expect(CANONICAL_GENRE_IDS).toContain(id);
+  it("returns exactly one owner for a Type + pair query after discovery", () => {
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        for (const key of ALL_PAIRS) {
+          const [a, b] = key.split("|") as [GenreId, GenreId];
+          const result = filterCastByFilters(members, [
+            { kind: "type", value: type },
+            { kind: "genre", value: a },
+            { kind: "genre", value: b },
+          ], ALL_DISCOVERED);
+          expect(result, `${role}/${type}/${key}`).toHaveLength(1);
+          expect(catalogAvailablePairKeys(result[0], new Set(ALL_DISCOVERED))).toContain(key);
+        }
+      }
     }
+  });
+
+  it("keeps secret-owned pairs unavailable until that exact character is discovered", () => {
+    const secretOwner = CAST_V2.find((member) => {
+      const meta = castingCatalogMeta(member);
+      return isCastingActive(member) && meta?.kind === "triple" && meta.pairKeys.some((key) => key !== meta.publicPairKey);
+    })!;
+    const meta = castingCatalogMeta(secretOwner)!;
+    const secretPair = meta.pairKeys.find((key) => key !== meta.publicPairKey)!;
+
+    expect(catalogAvailablePairKeys(secretOwner, new Set())).not.toContain(secretPair);
+    expect(catalogAvailablePairKeys(secretOwner, new Set([secretOwner.id]))).toContain(secretPair);
   });
 });
