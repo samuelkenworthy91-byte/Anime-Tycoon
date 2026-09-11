@@ -6,18 +6,29 @@ import {
   CANONICAL_GENRE_IDS,
   CAST_V2,
   GENRES,
+  PETS,
+  PROTAGONISTS,
+  SECONDARY,
   SLOTS,
+  VILLAINS,
   comboMult,
   type AnimeType,
+  type CastMember,
   type CastRole,
   type GenreId,
 } from "../data";
 import genreRuntime from "../generated/genreV3.json";
 import arcRuntime from "../generated/arcV3.json";
 import { POSTER_DECOS, posterFontFor } from "../poster";
+import { catalogPairKeys, isCastingActive } from "../castCatalog";
 
 const NEW_IDS = ["monster_taming", "crime", "kaiju", "cosmic_horror", "arabia"] as GenreId[];
-const ROLES: CastRole[] = ["protag", "secondary", "pet", "villain"];
+const ROLES: [CastRole, CastMember[]][] = [
+  ["protag", PROTAGONISTS],
+  ["secondary", SECONDARY],
+  ["pet", PETS],
+  ["villain", VILLAINS],
+];
 const TYPES: AnimeType[] = ["shonen", "shojo"];
 const pairKey = (a: GenreId, b: GenreId) => [a, b].sort().join("|");
 const allPairs = CANONICAL_GENRE_IDS.flatMap((a, i) => CANONICAL_GENRE_IDS.slice(i + 1).map((b) => pairKey(a, b)));
@@ -59,30 +70,33 @@ describe("Genre 30 expansion", () => {
     expect(comboMult(["arabia", "fantasy"])).toBeGreaterThan(1.2);
   });
 
-  it("integrates exactly 520 V6 cast with unique identities and stable portrait paths", () => {
+  it("keeps exactly 520 V6 portrait identities while casting is remapped independently", () => {
     expect(CAST_V2).toHaveLength(1440);
     expect(v6).toHaveLength(520);
     expect(new Set(v6.map((c) => c.id)).size).toBe(520);
     expect(new Set(v6.map((c) => c.name)).size).toBe(520);
     const oldNames = new Set(CAST_V2.filter((c) => !c.id.startsWith("g30_")).map((c) => c.name));
     expect(v6.every((c) => !oldNames.has(c.name))).toBe(true);
-    for (const member of v6) {
-      expect(member.img, member.id).toBe(`cast/v6/${member.id}.webp`);
-      expect(member.visibleAff).toHaveLength(2);
-      expect(new Set([...member.visibleAff, member.hiddenAff]).size, member.id).toBe(3);
+    for (const member of v6) expect(member.img, member.id).toBe(`cast/v6/${member.id}.webp`);
+  });
+
+  it("retains 65 V6 identities in each Role × Type source bucket without making V6 its own casting island", () => {
+    for (const role of ["protag", "secondary", "pet", "villain"] as CastRole[]) {
+      for (const type of TYPES) {
+        const bucket = v6.filter((c) => c.role === role && c.type === type);
+        expect(bucket, `${role}/${type}`).toHaveLength(65);
+      }
     }
   });
 
-  it("uses 65 V6 members in every exact Role x Type bucket and closes all 135 new pairs", () => {
-    for (const role of ROLES) for (const type of TYPES) {
-      const bucket = v6.filter((c) => c.role === role && c.type === type);
-      expect(bucket, `${role}/${type}`).toHaveLength(65);
-      for (const key of newPairs) {
-        const [a, b] = key.split("|") as [GenreId, GenreId];
-        expect(bucket.some((c) => {
-          const aff = [...c.visibleAff, c.hiddenAff];
-          return aff.includes(a) && aff.includes(b);
-        }), `${role}/${type}/${key}`).toBe(true);
+  it("closes every new pair exactly once through the rebuilt global catalog", () => {
+    for (const [role, members] of ROLES) {
+      for (const type of TYPES) {
+        const bucket = members.filter((member) => member.type === type && isCastingActive(member));
+        for (const key of newPairs) {
+          const owners = bucket.filter((member) => catalogPairKeys(member).includes(key));
+          expect(owners, `${role}/${type}/${key}`).toHaveLength(1);
+        }
       }
     }
   });
