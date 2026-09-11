@@ -7,6 +7,11 @@ on:
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
+      - "game_source/scripts/**"
+      - "game_source/docs/content-v3/**"
+      - "game_source/docs/content-v5/**"
+      - "game_source/docs/content-v6/**"
+      - "game_source/art_src/cast_v6_genre30_upload_staging/**"
       - "game_source/package.json"
       - "game_source/package-lock.json"
       - "game_source/vite.config.*"
@@ -36,22 +41,43 @@ jobs:
         working-directory: game_source
         run: npm ci
 
-      - name: Run tests
+      - name: Run tests and regenerate runtime
         working-directory: game_source
         run: npm test
+
+      - name: Verify all expansion genres are researchable
+        working-directory: game_source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const runtime = JSON.parse(fs.readFileSync('src/engine/generated/genreV3.json', 'utf8'));
+          const required = ['vampire', 'grimdark', 'monster_taming', 'crime', 'kaiju', 'cosmic_horror', 'arabia'];
+          if (runtime.genres.length !== 30) throw new Error(`Expected 30 genres, got ${runtime.genres.length}`);
+          for (const id of required) {
+            const genre = runtime.genres.find((g) => g.id === id);
+            if (!genre) throw new Error(`Missing expansion genre: ${id}`);
+            if (!(genre.rd > 0)) throw new Error(`Expansion genre is not researchable: ${id}`);
+          }
+          console.log('Verified 30 genres and all 7 expansion genres are researchable in R&D.');
+          NODE
 
       - name: Build browser dist
         working-directory: game_source
         run: npm run build
 
-      - name: Commit refreshed dist
+      - name: Commit refreshed runtime and dist
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -f game_source/dist
+          git add -f \
+            game_source/src/engine/generated/castV3.json \
+            game_source/src/engine/generated/genreV3.json \
+            game_source/src/engine/generated/arcV3.json \
+            game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
+            game_source/dist
           if git diff --cached --quiet; then
-            echo 'dist already current'
+            echo 'runtime and dist already current'
           else
-            git commit -m 'Refresh GitHack browser build'
+            git commit -m 'Refresh Genre 30 runtime and GitHack build'
             git push origin HEAD:main
           fi
