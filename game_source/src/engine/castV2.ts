@@ -1,8 +1,43 @@
 import runtime from "./generated/castV3.json";
+import genreRuntime from "./generated/genreV3.json";
 import type { AnimeType, CastMember, CastRole, GenreId } from "./data";
+import {
+  catalogHasSecret,
+  isCastingActive,
+  rebuildCastingCatalog,
+} from "./castCatalog";
 
-/** Compatibility export name retained for existing consumers and saved-ID lookup. */
-export const CAST_V2 = runtime.cast as CastMember[];
+const CHEMISTRY_CAST_IDS = new Set([
+  "kai", "s_riku", "v_carnage",
+  "emi", "p_nya", "v_nightshade",
+  "kage", "s_chiaki", "v_hollow",
+  "shiro", "s_shin", "v_puppeteer",
+  "kaito", "s_ryo", "v_scuttle",
+  "airi", "s_yuna", "p_piko",
+  "rei", "s_ken", "v_volt",
+  "yuki", "v_titanus", "p_kona",
+  "kenta", "s_eiji", "p_gon",
+  "hikari", "s_nozomi", "p_mochi",
+  "kuro", "s_tobi", "v_kairos",
+  "n_ryoko", "tsubasa", "p_fuwa",
+  "suzume", "s_amber", "p_nibi",
+  "daichi", "s_kanna", "sen",
+  "itsuki", "s_alfred", "v_harlequin",
+  "leo", "s_maki", "p_ponta",
+  "ash", "s_reina", "p_lumen",
+  "zuri", "s_peko", "p_cogsworth",
+]);
+
+/**
+ * Compatibility export name retained for existing consumers and saved-ID lookup.
+ * The source runtime now supplies identity/art only; active casting affinities are
+ * rebuilt by Casting Catalog V7 every load. Legacy castingPairKeys are discarded.
+ */
+export const CAST_V2 = rebuildCastingCatalog(
+  runtime.cast as CastMember[],
+  genreRuntime.genres.map((genre) => genre.id as GenreId),
+  { pinnedActiveIds: CHEMISTRY_CAST_IDS },
+);
 const BY_ID = new Map(CAST_V2.map((member) => [member.id, member]));
 
 export const CAST_WEIGHTS: Record<CastRole, number> = {
@@ -30,19 +65,20 @@ export type AffinityTier = 0 | 1 | 2;
 /** Canonical mechanical tier. Discovery is deliberately not an input. */
 export function affinityTier(member: CastMember, genres: readonly GenreId[]): AffinityTier {
   if (member.legacyPlaceholder) return 0;
-  if (genres.includes(member.hiddenAff)) return 2;
+  if (catalogHasSecret(member) && genres.includes(member.hiddenAff)) return 2;
   return member.visibleAff.some((genre) => genres.includes(genre)) ? 1 : 0;
 }
 
 export function publicAffinities(member: CastMember, discovered: readonly string[]) {
   return {
     visible: member.visibleAff,
-    hidden: discovered.includes(member.id) ? member.hiddenAff : null,
+    hidden: catalogHasSecret(member) && discovered.includes(member.id) ? member.hiddenAff : null,
   };
 }
 
+/** Only active catalogue entries are offered for new productions. */
 export function castList(role: CastRole): CastMember[] {
-  return CAST_V2.filter((member) => member.role === role);
+  return CAST_V2.filter((member) => member.role === role && isCastingActive(member));
 }
 
 function legacyPlaceholder(id: string): CastMember {
@@ -64,7 +100,7 @@ function legacyPlaceholder(id: string): CastMember {
   };
 }
 
-/** Unknown saved IDs never silently become Kai. */
+/** Unknown saved IDs never silently become Kai. Reserve IDs remain readable. */
 export function castById(id: string): CastMember {
   return BY_ID.get(id) ?? legacyPlaceholder(id);
 }
