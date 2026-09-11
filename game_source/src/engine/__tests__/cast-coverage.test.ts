@@ -11,6 +11,7 @@ import {
   type CastMember,
   type GenreId,
 } from "../data";
+import { filterCastByFilters } from "../castDisplayOrder";
 
 const ROLES: [string, CastMember[]][] = [
   ["lead", PROTAGONISTS],
@@ -32,6 +33,7 @@ const ROLE_TYPE_TOTALS: Record<string, number> = {
 const TYPES: AnimeType[] = ["shonen", "shojo"];
 const affinities = (member: CastMember): GenreId[] => [...member.visibleAff, member.hiddenAff];
 const expectedPairs = (CANONICAL_GENRE_IDS.length * (CANONICAL_GENRE_IDS.length - 1)) / 2;
+const visiblePairKey = (member: CastMember) => [...member.visibleAff].sort().join("|");
 
 describe("canonical 30-genre cast roster", () => {
   it("contains exactly 1440 unique selectable IDs while preserving all four roles", () => {
@@ -80,6 +82,61 @@ describe("canonical 30-genre cast roster", () => {
     }
     expect(measured).toBe(expectedPairs);
     expect(measured).toBe(435);
+  });
+
+  it("shows no duplicate public genre pair in ordinary browsing within a Role × Type bucket", () => {
+    for (const [role, members] of ROLES) {
+      const browsable = filterCastByFilters(members, []);
+      for (const type of TYPES) {
+        const cell = browsable.filter((member) => member.type === type);
+        const keys = cell.map(visiblePairKey);
+        expect(new Set(keys).size, `${role}/${type}`).toBe(keys.length);
+      }
+    }
+  });
+
+  it("returns exactly one Shonen and one Shojo owner for every genre pair in every role", () => {
+    let measured = 0;
+    for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
+      for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
+        measured += 1;
+        const a = CANONICAL_GENRE_IDS[i];
+        const b = CANONICAL_GENRE_IDS[j];
+        for (const [role, members] of ROLES) {
+          const result = filterCastByFilters(members, [
+            { kind: "genre", value: a },
+            { kind: "genre", value: b },
+          ]);
+          expect(result, `${role}/${a}|${b}`).toHaveLength(2);
+          expect(new Set(result.map((member) => member.type)), `${role}/${a}|${b}`).toEqual(new Set(TYPES));
+          for (const member of result) {
+            expect(affinities(member), `${role}/${member.type}/${a}|${b}`).toEqual(expect.arrayContaining([a, b]));
+          }
+        }
+      }
+    }
+    expect(measured).toBe(435);
+  });
+
+  it("returns exactly one owner when a Shonen/Shojo type filter is added", () => {
+    for (let i = 0; i < CANONICAL_GENRE_IDS.length; i += 1) {
+      for (let j = i + 1; j < CANONICAL_GENRE_IDS.length; j += 1) {
+        const a = CANONICAL_GENRE_IDS[i];
+        const b = CANONICAL_GENRE_IDS[j];
+        for (const [role, members] of ROLES) {
+          for (const type of TYPES) {
+            const result = filterCastByFilters(members, [
+              { kind: "type", value: type },
+              { kind: "genre", value: a },
+              { kind: "genre", value: b },
+            ]);
+            expect(result, `${role}/${type}/${a}|${b}`).toHaveLength(1);
+            expect(result[0].type).toBe(type);
+            expect(affinities(result[0])).toEqual(expect.arrayContaining([a, b]));
+          }
+        }
+      }
+    }
   });
 
   it("includes every expansion genre in canonical content", () => {
