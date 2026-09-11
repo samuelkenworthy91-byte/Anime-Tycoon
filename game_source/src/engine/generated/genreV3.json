@@ -413,6 +413,132 @@
       "rd": 30,
       "tier": "MID",
       "description": "Stealth, infiltration, espionage and hidden techniques amid rival factions and covert operations."
+    },
+    {
+      "id": "vampire",
+      "label": "Vampire",
+      "icon": "Moon",
+      "ideal": [
+        64,
+        54,
+        76
+      ],
+      "ratio": [
+        0.4,
+        0.3,
+        0.3
+      ],
+      "rd": 48,
+      "tier": "LATE",
+      "description": "Vampires, dhampirs, hunters, occult organisations, bloodline politics and gothic supernatural action."
+    },
+    {
+      "id": "grimdark",
+      "label": "Grimdark",
+      "icon": "Skull",
+      "ideal": [
+        78,
+        74,
+        64
+      ],
+      "ratio": [
+        0.38,
+        0.42,
+        0.2
+      ],
+      "rd": 58,
+      "tier": "LATE",
+      "description": "Brutal dark fantasy, cursed survivors, demons, ruined worlds, terrible bargains and victories that carry a lasting cost."
+    },
+    {
+      "id": "monster_taming",
+      "label": "Monster Taming",
+      "icon": "Sparkles",
+      "ideal": [
+        56,
+        78,
+        54
+      ],
+      "ratio": [
+        0.38,
+        0.4,
+        0.22
+      ],
+      "rd": 44,
+      "tier": "LATE",
+      "description": "Creatures, bonds, collecting, raising and battling; stories about trainers and partners growing together."
+    },
+    {
+      "id": "crime",
+      "label": "Crime",
+      "icon": "Crosshair",
+      "ideal": [
+        92,
+        46,
+        36
+      ],
+      "ratio": [
+        0.55,
+        0.25,
+        0.2
+      ],
+      "rd": 46,
+      "tier": "LATE",
+      "description": "Gangs, detectives, police, heists, underworld organisations and criminal empires."
+    },
+    {
+      "id": "kaiju",
+      "label": "Kaiju",
+      "icon": "MountainSnow",
+      "ideal": [
+        52,
+        92,
+        78
+      ],
+      "ratio": [
+        0.22,
+        0.58,
+        0.2
+      ],
+      "rd": 54,
+      "tier": "LATE",
+      "description": "Giant monsters, defence forces, cities under siege and the ecology of impossible creatures."
+    },
+    {
+      "id": "cosmic_horror",
+      "label": "Cosmic Horror",
+      "icon": "Eye",
+      "ideal": [
+        92,
+        58,
+        92
+      ],
+      "ratio": [
+        0.5,
+        0.25,
+        0.25
+      ],
+      "rd": 64,
+      "tier": "LATE",
+      "description": "Unknowable entities, forbidden knowledge, cults and existential dread beyond ordinary horror."
+    },
+    {
+      "id": "arabia",
+      "label": "Arabia",
+      "icon": "Landmark",
+      "ideal": [
+        76,
+        68,
+        46
+      ],
+      "ratio": [
+        0.44,
+        0.36,
+        0.2
+      ],
+      "rd": 50,
+      "tier": "LATE",
+      "description": "Desert kingdoms, djinn, caravan cities, ancient ruins, palace politics and sword-and-sorcery adventure."
     }
   ],
   "combos": [
@@ -2439,17 +2565,1462 @@
       "first_release_multiplier": 1.12,
       "learned_multiplier": 1.12,
       "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "mecha",
+      "key": "mecha|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1,
+      "discovery_class": "neutral"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "isekai",
+      "key": "isekai|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "slice",
+      "key": "slice|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "horror",
+      "key": "horror|vampire",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "romance",
+      "key": "romance|vampire",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "sports",
+      "key": "sports|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "cyber",
+      "key": "cyber|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "fantasy",
+      "key": "fantasy|vampire",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "idol",
+      "key": "idol|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "mystery",
+      "key": "mystery|vampire",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "comedy",
+      "key": "comedy|vampire",
+      "first_release_multiplier": 0.82,
+      "learned_multiplier": 0.82,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "cooking",
+      "key": "cooking|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "military",
+      "key": "military|vampire",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "supernatural",
+      "key": "supernatural|vampire",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "space",
+      "key": "space|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "magical",
+      "key": "magical|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "survival",
+      "key": "survival|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "pirate",
+      "key": "pirate|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "martial",
+      "key": "martial|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "mythology",
+      "key": "mythology|vampire",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "nordic",
+      "key": "nordic|vampire",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1,
+      "discovery_class": "neutral"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "samurai",
+      "key": "samurai|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "shinobi",
+      "key": "shinobi|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "mecha",
+      "key": "grimdark|mecha",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "isekai",
+      "key": "grimdark|isekai",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "slice",
+      "key": "grimdark|slice",
+      "first_release_multiplier": 0.78,
+      "learned_multiplier": 0.78,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "horror",
+      "key": "grimdark|horror",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "romance",
+      "key": "grimdark|romance",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "sports",
+      "key": "grimdark|sports",
+      "first_release_multiplier": 0.82,
+      "learned_multiplier": 0.82,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "cyber",
+      "key": "cyber|grimdark",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "fantasy",
+      "key": "fantasy|grimdark",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "idol",
+      "key": "grimdark|idol",
+      "first_release_multiplier": 0.8,
+      "learned_multiplier": 0.8,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "mystery",
+      "key": "grimdark|mystery",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "comedy",
+      "key": "comedy|grimdark",
+      "first_release_multiplier": 0.78,
+      "learned_multiplier": 0.78,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "cooking",
+      "key": "cooking|grimdark",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "military",
+      "key": "grimdark|military",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "supernatural",
+      "key": "grimdark|supernatural",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "space",
+      "key": "grimdark|space",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "magical",
+      "key": "grimdark|magical",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "survival",
+      "key": "grimdark|survival",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "pirate",
+      "key": "grimdark|pirate",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "martial",
+      "key": "grimdark|martial",
+      "first_release_multiplier": 1.2,
+      "learned_multiplier": 1.2,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "mythology",
+      "key": "grimdark|mythology",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "nordic",
+      "key": "grimdark|nordic",
+      "first_release_multiplier": 1.2,
+      "learned_multiplier": 1.2,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "samurai",
+      "key": "grimdark|samurai",
+      "first_release_multiplier": 1.2,
+      "learned_multiplier": 1.2,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "grimdark",
+      "genre_2": "shinobi",
+      "key": "grimdark|shinobi",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "vampire",
+      "genre_2": "grimdark",
+      "key": "grimdark|vampire",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "mecha",
+      "key": "mecha|monster_taming",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "isekai",
+      "key": "isekai|monster_taming",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "slice",
+      "key": "monster_taming|slice",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "horror",
+      "key": "horror|monster_taming",
+      "first_release_multiplier": 1.1,
+      "learned_multiplier": 1.1,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "romance",
+      "key": "monster_taming|romance",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "sports",
+      "key": "monster_taming|sports",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "cyber",
+      "key": "cyber|monster_taming",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "fantasy",
+      "key": "fantasy|monster_taming",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "idol",
+      "key": "idol|monster_taming",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.2,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "mystery",
+      "key": "monster_taming|mystery",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "comedy",
+      "key": "comedy|monster_taming",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "cooking",
+      "key": "cooking|monster_taming",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "military",
+      "key": "military|monster_taming",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "supernatural",
+      "key": "monster_taming|supernatural",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1,
+      "discovery_class": "neutral"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "space",
+      "key": "monster_taming|space",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "magical",
+      "key": "magical|monster_taming",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "survival",
+      "key": "monster_taming|survival",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "pirate",
+      "key": "monster_taming|pirate",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "martial",
+      "key": "martial|monster_taming",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "mythology",
+      "key": "monster_taming|mythology",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "nordic",
+      "key": "monster_taming|nordic",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "samurai",
+      "key": "monster_taming|samurai",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "shinobi",
+      "key": "monster_taming|shinobi",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "vampire",
+      "key": "monster_taming|vampire",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "grimdark",
+      "key": "grimdark|monster_taming",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "crime",
+      "key": "crime|monster_taming",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "kaiju",
+      "key": "kaiju|monster_taming",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "cosmic_horror",
+      "key": "cosmic_horror|monster_taming",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.2,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "monster_taming",
+      "genre_2": "arabia",
+      "key": "arabia|monster_taming",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "mecha",
+      "key": "crime|mecha",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.25,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "isekai",
+      "key": "crime|isekai",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "slice",
+      "key": "crime|slice",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.25,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "horror",
+      "key": "crime|horror",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "romance",
+      "key": "crime|romance",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "sports",
+      "key": "crime|sports",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "cyber",
+      "key": "crime|cyber",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "fantasy",
+      "key": "crime|fantasy",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "idol",
+      "key": "crime|idol",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "mystery",
+      "key": "crime|mystery",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "comedy",
+      "key": "comedy|crime",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "cooking",
+      "key": "cooking|crime",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "military",
+      "key": "crime|military",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "supernatural",
+      "key": "crime|supernatural",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "space",
+      "key": "crime|space",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "magical",
+      "key": "crime|magical",
+      "first_release_multiplier": 0.85,
+      "learned_multiplier": 0.85,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "survival",
+      "key": "crime|survival",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "pirate",
+      "key": "crime|pirate",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "martial",
+      "key": "crime|martial",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "mythology",
+      "key": "crime|mythology",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.2,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "nordic",
+      "key": "crime|nordic",
+      "first_release_multiplier": 1.1,
+      "learned_multiplier": 1.1,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "samurai",
+      "key": "crime|samurai",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "shinobi",
+      "key": "crime|shinobi",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "vampire",
+      "key": "crime|vampire",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "grimdark",
+      "key": "crime|grimdark",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "kaiju",
+      "key": "crime|kaiju",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.25,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "cosmic_horror",
+      "key": "cosmic_horror|crime",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "crime",
+      "genre_2": "arabia",
+      "key": "arabia|crime",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "mecha",
+      "key": "kaiju|mecha",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "isekai",
+      "key": "isekai|kaiju",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.23,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "slice",
+      "key": "kaiju|slice",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "horror",
+      "key": "horror|kaiju",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "romance",
+      "key": "kaiju|romance",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "sports",
+      "key": "kaiju|sports",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.25,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "cyber",
+      "key": "cyber|kaiju",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "fantasy",
+      "key": "fantasy|kaiju",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "idol",
+      "key": "idol|kaiju",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.22,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "mystery",
+      "key": "kaiju|mystery",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.2,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "comedy",
+      "key": "comedy|kaiju",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "cooking",
+      "key": "cooking|kaiju",
+      "first_release_multiplier": 0.87,
+      "learned_multiplier": 0.87,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "military",
+      "key": "kaiju|military",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "supernatural",
+      "key": "kaiju|supernatural",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "space",
+      "key": "kaiju|space",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "magical",
+      "key": "kaiju|magical",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "survival",
+      "key": "kaiju|survival",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "pirate",
+      "key": "kaiju|pirate",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "martial",
+      "key": "kaiju|martial",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "mythology",
+      "key": "kaiju|mythology",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "nordic",
+      "key": "kaiju|nordic",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "samurai",
+      "key": "kaiju|samurai",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "shinobi",
+      "key": "kaiju|shinobi",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.23,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "vampire",
+      "key": "kaiju|vampire",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "grimdark",
+      "key": "grimdark|kaiju",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "cosmic_horror",
+      "key": "cosmic_horror|kaiju",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "kaiju",
+      "genre_2": "arabia",
+      "key": "arabia|kaiju",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "mecha",
+      "key": "cosmic_horror|mecha",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "isekai",
+      "key": "cosmic_horror|isekai",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "slice",
+      "key": "cosmic_horror|slice",
+      "first_release_multiplier": 0.8,
+      "learned_multiplier": 0.8,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "horror",
+      "key": "cosmic_horror|horror",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "romance",
+      "key": "cosmic_horror|romance",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.25,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "sports",
+      "key": "cosmic_horror|sports",
+      "first_release_multiplier": 0.87,
+      "learned_multiplier": 0.87,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "cyber",
+      "key": "cosmic_horror|cyber",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "fantasy",
+      "key": "cosmic_horror|fantasy",
+      "first_release_multiplier": 1.1,
+      "learned_multiplier": 1.1,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "idol",
+      "key": "cosmic_horror|idol",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "mystery",
+      "key": "cosmic_horror|mystery",
+      "first_release_multiplier": 1.22,
+      "learned_multiplier": 1.22,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "comedy",
+      "key": "comedy|cosmic_horror",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.23,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "cooking",
+      "key": "cooking|cosmic_horror",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "military",
+      "key": "cosmic_horror|military",
+      "first_release_multiplier": 1.15,
+      "learned_multiplier": 1.15,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "supernatural",
+      "key": "cosmic_horror|supernatural",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "space",
+      "key": "cosmic_horror|space",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "magical",
+      "key": "cosmic_horror|magical",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "survival",
+      "key": "cosmic_horror|survival",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "pirate",
+      "key": "cosmic_horror|pirate",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "martial",
+      "key": "cosmic_horror|martial",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "mythology",
+      "key": "cosmic_horror|mythology",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "nordic",
+      "key": "cosmic_horror|nordic",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "samurai",
+      "key": "cosmic_horror|samurai",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "shinobi",
+      "key": "cosmic_horror|shinobi",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "vampire",
+      "key": "cosmic_horror|vampire",
+      "first_release_multiplier": 1.1,
+      "learned_multiplier": 1.1,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "grimdark",
+      "key": "cosmic_horror|grimdark",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "cosmic_horror",
+      "genre_2": "arabia",
+      "key": "arabia|cosmic_horror",
+      "first_release_multiplier": 1.26,
+      "learned_multiplier": 1.26,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "mecha",
+      "key": "arabia|mecha",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "isekai",
+      "key": "arabia|isekai",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "slice",
+      "key": "arabia|slice",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "horror",
+      "key": "arabia|horror",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "romance",
+      "key": "arabia|romance",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "sports",
+      "key": "arabia|sports",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "cyber",
+      "key": "arabia|cyber",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.21,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "fantasy",
+      "key": "arabia|fantasy",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "idol",
+      "key": "arabia|idol",
+      "first_release_multiplier": 0.85,
+      "learned_multiplier": 0.85,
+      "discovery_class": "risky"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "mystery",
+      "key": "arabia|mystery",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "comedy",
+      "key": "arabia|comedy",
+      "first_release_multiplier": 1.14,
+      "learned_multiplier": 1.14,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "cooking",
+      "key": "arabia|cooking",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "military",
+      "key": "arabia|military",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "supernatural",
+      "key": "arabia|supernatural",
+      "first_release_multiplier": 1.25,
+      "learned_multiplier": 1.25,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "space",
+      "key": "arabia|space",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.24,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "magical",
+      "key": "arabia|magical",
+      "first_release_multiplier": 1.28,
+      "learned_multiplier": 1.28,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "survival",
+      "key": "arabia|survival",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "pirate",
+      "key": "arabia|pirate",
+      "first_release_multiplier": 1.24,
+      "learned_multiplier": 1.24,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "martial",
+      "key": "arabia|martial",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "mythology",
+      "key": "arabia|mythology",
+      "first_release_multiplier": 1.23,
+      "learned_multiplier": 1.23,
+      "discovery_class": "strong"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "nordic",
+      "key": "arabia|nordic",
+      "first_release_multiplier": 1.12,
+      "learned_multiplier": 1.12,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "samurai",
+      "key": "arabia|samurai",
+      "first_release_multiplier": 1,
+      "learned_multiplier": 1.26,
+      "discovery_class": "experimental"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "shinobi",
+      "key": "arabia|shinobi",
+      "first_release_multiplier": 1.13,
+      "learned_multiplier": 1.13,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "vampire",
+      "key": "arabia|vampire",
+      "first_release_multiplier": 1.11,
+      "learned_multiplier": 1.11,
+      "discovery_class": "supportive"
+    },
+    {
+      "genre_1": "arabia",
+      "genre_2": "grimdark",
+      "key": "arabia|grimdark",
+      "first_release_multiplier": 1.27,
+      "learned_multiplier": 1.27,
+      "discovery_class": "strong"
     }
-  ],
-  "baseSourceSha256": {
-    "CAST_V2_MASTER.json": "f6f9ad196d818a76b3f9d67d2e7459e7ffa07d942f48b279729e9fe4397543d0",
-    "CAST_V2_VISUAL_MANIFEST.csv": "ee7eb9241bcc26362ac352d4d409f24c2943aaa9381549be5ef3d73930e38ab2",
-    "GENRE_V2_DATA.json": "be90042cd483d4f6cc05fb5eedb67fbe23d9b935de84709252e50dd6918dcbbe",
-    "GENRE_V2_COMBOS.json": "9df9fefba3ee1097b46ce57a628613252f523b7599468afafabe71492482d2c0"
-  },
-  "sourceSha256": {
-    "GENRE_V3_SAMURAI_SHINOBI.json": "d0323eeff53f1f8e2f7e6f077875cf0c5218637fdd3cb57688de083cfb7e1150",
-    "GENRE_V3_NEW_PAIRS.csv": "6443adbab2809d8939fa0760f732197a373806c098756074a44607dbb5408b2a"
-  },
-  "base_commit": "2701f638f614eccce0e58a48f705918570b1f78c"
+  ]
 }
