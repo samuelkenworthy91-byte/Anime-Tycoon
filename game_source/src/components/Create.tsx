@@ -234,6 +234,7 @@ export default function Create({
   const [castStep, setCastStep] = useState(0);
   const [castFilterOpen, setCastFilterOpen] = useState(false);
   const [castFilters, setCastFilters] = useState<CastBrowseFilter[]>([]);
+  const [arcSearch, setArcSearch] = useState("");
   const [d, setD] = useState<Draft>(() => {
     const base = freshDraft(run, plan);
     return commission
@@ -317,6 +318,18 @@ export default function Create({
     const risks = out.filter((r) => r.rank === 0).slice(0, 2);
     return [...recs, ...risks];
   }, [d.genres, d.arcs, run, run.arcGenreKnowledge]);
+
+  const searchableArcs = useMemo(
+    () => ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)),
+    [run.ipMarket.studioArcs]
+  );
+  const visibleArcs = useMemo(() => {
+    const query = arcSearch.trim().toLowerCase();
+    if (!query) return searchableArcs;
+    return searchableArcs.filter((a) =>
+      a.name.toLowerCase().includes(query) || (a.desc ?? "").toLowerCase().includes(query)
+    );
+  }, [arcSearch, searchableArcs]);
 
   const stepValid =
     [
@@ -1086,8 +1099,33 @@ export default function Create({
                     </div>
                   </div>
                 )}
+                <div className="rounded-xl border border-line bg-panel2/60 p-2.5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="search"
+                      value={arcSearch}
+                      onChange={(e) => setArcSearch(e.target.value)}
+                      placeholder="Search arcs by name or plot…"
+                      aria-label="Search story arcs"
+                      className="ink-input min-w-0 flex-1 px-3 py-2 text-xs"
+                    />
+                    {arcSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setArcSearch("")}
+                        aria-label="Clear arc search"
+                        className="btn-press rounded-lg border border-line bg-panel3 p-2 text-paper/55 hover:border-neon/50 hover:text-paper"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-1 text-[9px] text-paper/40">
+                    Showing {visibleArcs.length} of {searchableArcs.length} arcs
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)).map((a) => {
+                  {visibleArcs.map((a) => {
                     const on = d.arcs.includes(a.id);
                     const reason = arcLockReason(a, run);
                     const baseLocked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
