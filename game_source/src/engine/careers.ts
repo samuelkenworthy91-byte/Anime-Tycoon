@@ -171,13 +171,31 @@ const LEGACY_SPEC_DEFS: SpecDef[] = [
   { id: "c_emote", role: "composer", name: "Emotional Scoring", genres: ["slice", "romance", "magical"] },
 ];
 
-/** Every role can now roll an equally-likely purple specialisation in every active genre. */
-const GENRE_SPEC_DEFS: SpecDef[] = GENRES.flatMap((genre) => ([
-  { id: `g_writer_${genre.id}`, role: "writer" as const, name: `${genre.label} Writing`, genres: [genre.id] },
-  { id: `g_animator_${genre.id}`, role: "animator" as const, name: `${genre.label} Animation`, genres: [genre.id] },
-  { id: `g_composer_${genre.id}`, role: "composer" as const, name: `${genre.label} Scoring`, genres: [genre.id] },
-]));
-export const SPEC_DEFS: SpecDef[] = [...LEGACY_SPEC_DEFS, ...GENRE_SPEC_DEFS];
+/** Purple specialisations stay broad/thematic rather than one genre each.
+ *  Ten equal-sized groups cover all 30 active genres exactly once for every role,
+ *  so rolling a group gives every genre identical opportunity overall. */
+export const GENRE_SPEC_GROUPS = [
+  { id: "action", name: "Action & Rivalry", genres: ["martial", "sports", "mecha"] },
+  { id: "warriors", name: "Warriors & Shadows", genres: ["samurai", "shinobi", "military"] },
+  { id: "wonder", name: "Wonder & Adventure", genres: ["fantasy", "isekai", "arabia"] },
+  { id: "mystic", name: "Mystic & Occult", genres: ["magical", "supernatural", "mythology"] },
+  { id: "dark", name: "Dark & Macabre", genres: ["horror", "vampire", "grimdark"] },
+  { id: "mind", name: "Mystery & Underworld", genres: ["mystery", "crime", "cyber"] },
+  { id: "heart", name: "Heart & Everyday Life", genres: ["romance", "slice", "comedy"] },
+  { id: "stage", name: "Stage & Sensation", genres: ["idol", "cooking", "monster_taming"] },
+  { id: "frontier", name: "Frontier & Survival", genres: ["pirate", "nordic", "survival"] },
+  { id: "scale", name: "Scale & Beyond", genres: ["space", "kaiju", "cosmic_horror"] },
+] as const satisfies readonly { id: string; name: string; genres: readonly GenreId[] }[];
+
+const GROUP_SPEC_DEFS: SpecDef[] = (["writer", "animator", "composer"] as const).flatMap((role) =>
+  GENRE_SPEC_GROUPS.map((group) => ({
+    id: `g_${role}_${group.id}`,
+    role,
+    name: `${group.name} ${role === "writer" ? "Writing" : role === "animator" ? "Animation" : "Scoring"}`,
+    genres: [...group.genres],
+  }))
+);
+export const SPEC_DEFS: SpecDef[] = [...LEGACY_SPEC_DEFS, ...GROUP_SPEC_DEFS];
 
 export const specDef = (id: string | undefined): SpecDef | null =>
   SPEC_DEFS.find((d) => d.id === id) ?? null;
@@ -318,7 +336,7 @@ export function uniformGenreForSeed(seed: number): GenreId {
   const n = ((Math.trunc(seed) % GENRE_IDS.length) + GENRE_IDS.length) % GENRE_IDS.length;
   return GENRE_IDS[n];
 }
-export const genreSpecialisationId = (role: StaffRole, genre: GenreId) => `g_${role}_${genre}`;
+export const genreSpecialisationId = (role: StaffRole, genre: GenreId) => { const group = GENRE_SPEC_GROUPS.find((g) => g.genres.includes(genre)); return `g_${role}_${group?.id ?? GENRE_SPEC_GROUPS[0].id}`; };
 
 function pickTraits(seedA: number, seedB: number): string[] {
   const count = 2 + (seedA % 3); // 2..4: candidates should feel meaningfully distinct

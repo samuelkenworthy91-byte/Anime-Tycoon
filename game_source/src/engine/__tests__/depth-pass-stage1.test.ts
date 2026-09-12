@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ARCS, ARC_RESEARCH_COMBOS, ARC_RESEARCH_GENRE_KEYS, GENRES, arcGenreFit } from "../data";
-import { growthForLevel, uniformGenreForSeed, specDef } from "../careers";
+import { GENRE_SPEC_GROUPS, growthForLevel, uniformGenreForSeed, specDef } from "../careers";
 import type { Staff } from "../data";
 
 describe("depth pass stage 1", () => {
@@ -23,10 +23,18 @@ describe("depth pass stage 1", () => {
   it("uniform genre seed maps every genre exactly once in a 30-seed cycle", () => {
     expect(new Set(Array.from({ length: GENRES.length }, (_, i) => uniformGenreForSeed(i))).size).toBe(GENRES.length);
   });
-  it("every role has a purple specialisation for every genre", () => {
-    for (const genre of GENRES) for (const role of ["writer", "animator", "composer"] as const) {
-      const spec = specDef(`g_${role}_${genre.id}`);
-      expect(spec?.genres).toEqual([genre.id]);
+  it("purple specialisations stay grouped while covering every genre equally", () => {
+    expect(GENRE_SPEC_GROUPS).toHaveLength(10);
+    expect(GENRE_SPEC_GROUPS.every((g) => g.genres.length === 3)).toBe(true);
+    const flat = GENRE_SPEC_GROUPS.flatMap((g) => [...g.genres]);
+    expect(flat).toHaveLength(GENRES.length);
+    expect(new Set(flat).size).toBe(GENRES.length);
+    for (const genre of GENRES) {
+      expect(flat.filter((g) => g === genre.id)).toHaveLength(1);
+      for (const role of ["writer", "animator", "composer"] as const) {
+        const group = GENRE_SPEC_GROUPS.find((g) => g.genres.includes(genre.id))!;
+        expect(specDef(`g_${role}_${group.id}`)?.genres).toContain(genre.id);
+      }
     }
   });
   it("elite Potential has a dramatically higher ceiling than weak Potential", () => {
