@@ -98,11 +98,14 @@ jobs:
         working-directory: game_source/android
         run: ./gradlew assembleDebug
 
+      - name: Rename playtest APK
+        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Casting-Catalog-V7-Playtest.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: anime-runner-casting-catalog-v7-test-apk
-          path: game_source/android/app/build/outputs/apk/debug/app-debug.apk
+          path: Anime-Runner-Casting-Catalog-V7-Playtest.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -112,11 +115,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG='casting-catalog-v7-playtest'
-          APK='game_source/android/app/build/outputs/apk/debug/app-debug.apk'
+          APK='Anime-Runner-Casting-Catalog-V7-Playtest.apk'
           BUILT_SHA="$(git rev-parse HEAD)"
           gh release delete "$TAG" --cleanup-tag -y || true
           gh release create "$TAG" \
-            "$APK#Anime-Runner-Casting-Catalog-V7-Playtest.apk" \
+            "$APK" \
             --target "$BUILT_SHA" \
             --title 'Anime Runner Casting Catalog V7 Playtest' \
             --notes 'Branch-only Android playtest build with hard portrait-signature preservation, exact 435-pair coverage, and auction-winner-only IP awards eligibility with canonical posters. Main is untouched.'
