@@ -1,0 +1,55 @@
+name: Implement playtest plan
+
+on:
+  push:
+    branches:
+      - work/casting-catalog-rebuild
+    paths:
+      - .github/workflows/implement-playtest-plan.yml
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out working branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/casting-catalog-rebuild
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply guarded implementation patch
+        working-directory: game_source
+        run: python3 scripts/implement-playtest-plan.py
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test -- --reporter=dot
+
+      - name: Build production web bundle
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit verified implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src
+          git commit -m "[playtest-plan] Implement IP progression narrative and awards overhaul"
+          git push origin HEAD:work/casting-catalog-rebuild
