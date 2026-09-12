@@ -1,0 +1,1 @@
+Do not merge this staging state. Final commit will contain permanent art, mechanics, tests, and remove this directory.
