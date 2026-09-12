@@ -125,24 +125,110 @@ export function buildCastingBlocks(genres: readonly GenreId[]): CatalogBlock[] {
   return blocks;
 }
 
+const VISUAL_SIGNATURE_GENRES = new Set<GenreId>([
+  "mecha", "sports", "cyber", "idol", "cooking", "military", "space", "magical",
+  "pirate", "martial", "nordic", "samurai", "shinobi", "vampire", "monster_taming",
+  "kaiju", "arabia",
+]);
+
+/**
+ * The source visible affinities are no longer mechanical wiring, but they ARE
+ * valuable art-direction metadata: those are the genres the portrait was
+ * actually designed to communicate. Score them far above legacy hidden
+ * affinity so visually literal portraits stay with a genre they look like.
+ *
+ * Score bands are deliberately lexicographic at whole-bucket scale:
+ *  - pinned chemistry cast must remain active
+ *  - preserve a visually distinctive source genre whenever possible
+ *  - preserve at least one source-visible genre on every active portrait
+ *  - then prefer both old visibles / exact old blocks / hidden affinity
+ */
 function scoreMemberForBlock(member: CastMember, block: CatalogBlock, pinned: ReadonlySet<string>) {
   const oldVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));
-  const oldAll = [...oldVisible, member.hiddenAff].filter((genre) => String(genre) !== String(NO_SECRET));
   const blockSet = new Set(block.genres);
-  const overlap = oldAll.filter((genre) => blockSet.has(genre)).length;
-  const visibleInside = oldVisible.every((genre) => blockSet.has(genre));
-  const exactPair = block.kind === "pair" && oldVisible.length === 2 &&
+  const visualOverlap = oldVisible.filter((genre) => blockSet.has(genre));
+  const signatureOverlap = visualOverlap.filter((genre) => VISUAL_SIGNATURE_GENRES.has(genre));
+  const visibleInside = oldVisible.length === 2 && oldVisible.every((genre) => blockSet.has(genre));
+  const exactPair = block.kind === "pair" && visibleInside &&
     castingPairKey(oldVisible[0], oldVisible[1]) === block.pairKeys[0];
+  const oldAll = [...oldVisible, member.hiddenAff].filter((genre) => String(genre) !== String(NO_SECRET));
   const exactTriple = block.kind === "triple" && oldAll.length === 3 &&
     new Set(oldAll).size === 3 && oldAll.every((genre) => blockSet.has(genre));
 
-  let score = overlap * 400;
-  if (visibleInside) score += 2_500;
-  if (blockSet.has(member.hiddenAff)) score += 700;
-  if (exactPair) score += 7_500;
-  if (exactTriple) score += 12_000;
-  if (pinned.has(member.id)) score += 1_000_000;
+  let score = 0;
+  if (pinned.has(member.id)) score += 100_000_000_000;
+  if (signatureOverlap.length) score += 1_000_000_000;
+  if (visualOverlap.length) score += 100_000_000;
+  score += signatureOverlap.length * 50_000;
+  score += visualOverlap.length * 20_000;
+  if (visibleInside) score += 30_000;
+  if (exactPair) score += 20_000;
+  if (exactTriple) score += 15_000;
+  // Old hidden affinity is retained only as a very weak semantic tie-breaker;
+  // it must never overpower what the portrait visibly depicts.
+  if (blockSet.has(member.hiddenAff)) score += 100;
   return score;
+}
+
+/** Rectangular Hungarian assignment (blocks <= portraits), maximizing weight. */
+function maximumWeightCatalogAssignment(
+  blocks: readonly CatalogBlock[],
+  members: readonly CastMember[],
+  pinned: ReadonlySet<string>,
+  role: CastRole,
+  type: AnimeType,
+): Map<string, CastMember> {
+  const n = blocks.length;
+  const m = members.length;
+  if (n > m) throw new Error(`${role}/${type}: ${m} portraits cannot cover ${n} blocks.`);
+
+  const weights = blocks.map((block) => members.map((member) =>
+    scoreMemberForBlock(member, block, pinned) + (hash32(`${role}|${type}|${block.id}|${member.id}`) % 97)
+  ));
+  const maxWeight = Math.max(...weights.flat());
+  const u = new Array<number>(n + 1).fill(0);
+  const v = new Array<number>(m + 1).fill(0);
+  const p = new Array<number>(m + 1).fill(0);
+  const way = new Array<number>(m + 1).fill(0);
+
+  for (let i = 1; i <= n; i += 1) {
+    p[0] = i;
+    let j0 = 0;
+    const minv = new Array<number>(m + 1).fill(Number.POSITIVE_INFINITY);
+    const used = new Array<boolean>(m + 1).fill(false);
+    do {
+      used[j0] = true;
+      const i0 = p[j0];
+      let delta = Number.POSITIVE_INFINITY;
+      let j1 = 0;
+      for (let j = 1; j <= m; j += 1) {
+        if (used[j]) continue;
+        const cost = maxWeight - weights[i0 - 1][j - 1];
+        const cur = cost - u[i0] - v[j];
+        if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+        if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+      }
+      for (let j = 0; j <= m; j += 1) {
+        if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
+        else minv[j] -= delta;
+      }
+      j0 = j1;
+    } while (p[j0] !== 0);
+
+    do {
+      const j1 = way[j0];
+      p[j0] = p[j1];
+      j0 = j1;
+    } while (j0 !== 0);
+  }
+
+  const out = new Map<string, CastMember>();
+  for (let j = 1; j <= m; j += 1) {
+    const blockIndex = p[j] - 1;
+    if (blockIndex >= 0) out.set(blocks[blockIndex].id, members[j - 1]);
+  }
+  if (out.size !== n) throw new Error(`${role}/${type}: global catalogue assignment produced ${out.size}/${n} owners.`);
+  return out;
 }
 
 function chooseTriplePresentation(member: CastMember, block: CatalogBlock, genreOrder: ReadonlyMap<GenreId, number>) {
@@ -196,32 +282,12 @@ export function rebuildCastingCatalog(
         throw new Error(`${role}/${type}: too many pinned active cast (${pinnedHere.length}).`);
       }
 
-      // Full bipartite candidate list, greedily consuming the strongest
-      // art/old-affinity match. There is no coverage heuristic here: every
-      // block already owns its pair cells exactly once before characters enter.
-      const candidates = blocks.flatMap((block) =>
-        bucket.map((member) => ({
-          block,
-          member,
-          score: scoreMemberForBlock(member, block, pinned),
-          tie: hash32(`${role}|${type}|${block.id}|${member.id}`),
-        })),
-      );
-      candidates.sort((a, b) => b.score - a.score || a.tie - b.tie || a.member.id.localeCompare(b.member.id));
-
-      const usedMembers = new Set<string>();
-      const usedBlocks = new Set<string>();
-      const ownerForBlock = new Map<string, CastMember>();
-      for (const candidate of candidates) {
-        if (usedMembers.has(candidate.member.id) || usedBlocks.has(candidate.block.id)) continue;
-        usedMembers.add(candidate.member.id);
-        usedBlocks.add(candidate.block.id);
-        ownerForBlock.set(candidate.block.id, candidate.member);
-        if (ownerForBlock.size === blocks.length) break;
-      }
-      if (ownerForBlock.size !== blocks.length) {
-        throw new Error(`${role}/${type}: failed to assign all ${blocks.length} catalogue blocks.`);
-      }
+      // Solve the whole bucket at once. Greedy assignment could consume a
+      // locally good match and strand an unmistakably themed portrait in an
+      // unrelated block. Maximum-weight matching preserves the exact 435-pair
+      // catalogue while globally maximizing visual-art alignment.
+      const ownerForBlock = maximumWeightCatalogAssignment(blocks, bucket, pinned, role, type);
+      const usedMembers = new Set([...ownerForBlock.values()].map((member) => member.id));
       for (const member of pinnedHere) {
         if (!usedMembers.has(member.id)) throw new Error(`${role}/${type}: pinned cast ${member.id} fell into reserve.`);
       }

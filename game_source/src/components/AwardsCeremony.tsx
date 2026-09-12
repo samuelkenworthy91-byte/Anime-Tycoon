@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { AwardCategory, AwardCeremony, AwardNominee } from "../engine/awards";
+import { licensedAwardPosterAsset, type AwardCategory, type AwardCeremony, type AwardNominee } from "../engine/awards";
 import { castById, type Draft } from "../engine/data";
 import { rivalPosterById } from "../engine/rivalPosters";
 import { cn } from "../utils/cn";
@@ -105,6 +105,16 @@ function GeneratedFallbackPoster({ nominee }: { nominee: AwardNominee }) {
 
 function WinnerPoster({ nominee }: { nominee: AwardNominee }) {
   if (nominee.player) {
+    const licensedPoster = licensedAwardPosterAsset(nominee);
+    if (licensedPoster) {
+      return (
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]">
+          <img src={licensedPoster} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+        </div>
+      );
+    }
+
     const draft = nominee.draft ?? fallbackDraft(nominee);
     const lead = castById(draft.protag);
     return (

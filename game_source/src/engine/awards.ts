@@ -18,6 +18,7 @@
  * ========================================================================== */
 import type { AnimeType, Draft, GenreId } from "./data";
 import type { RivalRelease } from "./rivals";
+import { ipById } from "./ip";
 
 /* ----------------------------------------------------------------- types */
 
@@ -179,6 +180,14 @@ export function rivalNominee(r: RivalRelease): AwardNominee {
     draft: null,
     protag: null,
   };
+}
+
+/** Canonical key art for a player release adapted from an auction IP. */
+export function licensedAwardPosterAsset(n: AwardNominee): string | null {
+  if (!n.player) return null;
+  const licensedIpId = n.draft?.licensedIpId;
+  if (!licensedIpId) return null;
+  return ipById(licensedIpId)?.posterAsset ?? null;
 }
 
 /* ----------------------------------------------------------- categories */
