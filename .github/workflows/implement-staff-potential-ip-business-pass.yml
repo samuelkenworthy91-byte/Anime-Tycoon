@@ -79,6 +79,13 @@ jobs:
           new = '''    expect((after.story-before.story)+(after.art-before.art)+(after.sound-before.sound)).toBeGreaterThanOrEqual(0);\n    expect(after.pendingLevelUps).toHaveLength(1);'''
           if old not in s: raise SystemExit('intensive fixed-growth assertion not found')
           p.write_text(s.replace(old, new))
+
+          p = Path('src/engine/__tests__/careers.test.ts')
+          s = p.read_text()
+          old = '''    expect(g.staff.story).toBe(52); // main stat +2\n    expect(g.staff.art).toBe(51);'''
+          new = '''    const gain = g.staff.pendingLevelUps![0].gains;\n    expect(g.staff.story).toBe(50 + gain.story);\n    expect(g.staff.art).toBe(50 + gain.art);\n    expect(g.staff.sound).toBe(50 + gain.sound);\n    expect(gain.story + gain.art + gain.sound).toBeGreaterThanOrEqual(0);\n    expect(g.staff.pendingLevelUps).toHaveLength(1);'''
+          if old not in s: raise SystemExit('careers fixed-growth assertion not found')
+          p.write_text(s.replace(old, new))
           PY
 
       - name: Run focused tests
