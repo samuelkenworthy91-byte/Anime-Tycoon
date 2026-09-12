@@ -1,0 +1,48 @@
+name: Validate Depth Pass Stage 1
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - .github/workflows/validate-depth-pass-stage1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Repair legacy assertions
+        working-directory: game_source
+        run: node scripts/fix-depth-stage1-tests.mjs
+      - name: Commit test migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src/engine/__tests__/careers.test.ts
+          git commit -m 'Update career tests for genre-wide specialisations' || true
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
+      - name: Install
+        working-directory: game_source
+        run: npm ci
+      - name: Targeted tests
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/depth-pass-stage1.test.ts src/engine/__tests__/arc-discovery.test.ts src/engine/__tests__/careers.test.ts src/engine/__tests__/staff-potential-business.test.ts
+      - name: Full tests
+        working-directory: game_source
+        run: npm test
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
