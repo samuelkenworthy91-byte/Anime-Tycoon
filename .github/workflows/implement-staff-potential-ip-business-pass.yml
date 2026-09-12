@@ -56,6 +56,19 @@ jobs:
         working-directory: game_source
         run: node scripts/implement-staff-potential-ip-business-pass.mjs
 
+      - name: Repair generated Crew footer
+        working-directory: game_source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/components/Crew.tsx')
+          s = p.read_text()
+          old = 'onClose={() => setCandidate(null)} />}\n'
+          if old not in s:
+              raise SystemExit('Generated CandidateSheet trailing brace not found')
+          p.write_text(s.replace(old, 'onClose={() => setCandidate(null)} />\n', 1))
+          PY
+
       - name: Update legacy fixed-growth assertions
         working-directory: game_source
         run: |
