@@ -1,0 +1,55 @@
+name: Rewrite arc plot summaries
+
+on:
+  push:
+    paths:
+      - ".github/workflows/rewrite-arc-descriptions.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Rewrite every arc description
+        working-directory: game_source
+        run: node scripts/rewrite-arc-descriptions.mjs
+
+      - name: Validate arc catalogue
+        working-directory: game_source
+        run: npm test -- src/engine/__tests__/content-v3.test.ts src/engine/__tests__/genre30-expansion.test.ts
+
+      - name: Commit rewritten catalogue
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/engine/data.ts \
+                  game_source/src/engine/ipHiddenArcs.ts \
+                  game_source/src/engine/generated/arcV3.json \
+                  game_source/docs/content-v3/ARC_V3_RUNTIME.json \
+                  game_source/docs/content-v5/VAMPIRE_GRIMDARK_ARCS.json \
+                  game_source/docs/content-v6/GENRE30_ARCS.json
+          git commit -m "Rewrite all arc descriptions as plot summaries"
+          git push origin HEAD:main
