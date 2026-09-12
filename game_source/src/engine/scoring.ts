@@ -337,12 +337,13 @@ export function computeResult(opts: {
   const castParts = castSlots.map(([role, member]) => licensed
     ? { role, member, totalQuality: 0, baseQuality: 0, salesBonus: 0, typeModifier: 1, tier: 1 as 0|1|2 }
     : { role, member, ...castContribution(member, role, draft) });
-  const casting = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
+  const castingBase = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
+  const casting = castingBase * (showrunner === "casting" ? 1.25 : 1);
   const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
   const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
   /* Bad casting now hurts the WHOLE production instead of merely missing a tiny bonus.
      Four completely unsuitable roles can cut raw quality by roughly a third. */
-  const castFitMult = clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
+  const castFitMult = clamp(1 - zeroAffinityRoles * (showrunner === "casting" ? 0.045 : 0.075) - wrongTypeRoles * (showrunner === "casting" ? 0.02 : 0.035), 0.62, 1.02);
   const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
   const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
     if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
@@ -426,9 +427,12 @@ export function computeResult(opts: {
     + arcQuality
     + slotFit * SLOT_QUALITY_POINTS;
   const actualComboMult = comboMult(draft.genres, true);
-  const comboFactor =
+  const comboFactorBase =
     1 + (actualComboMult - 1) * COMBO_QUALITY_WEIGHT
     + (comboLevelBonus(comboLevel) - 1) * COMBO_QUALITY_WEIGHT;
+  const comboFactor = showrunner === "genre"
+    ? 1 + (comboFactorBase - 1) * (comboFactorBase >= 1 ? 1.3 : 0.7)
+    : comboFactorBase;
   /* Direction, pairing and casting are hard gates. Great raw craft cannot
      completely rescue a production whose creative brief is badly wrong. */
   raw *= sliderFitMult;

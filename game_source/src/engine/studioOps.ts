@@ -1,4 +1,5 @@
 import { STAFF_EFFECTIVE_SKILL_CAP, staffPoint, type Contract, type PointType, type Staff } from "./data";
+import { SHOWRUNNER_BASE_CRAFT, type ShowrunnerCareer } from "./showrunnerCareer";
 
 export interface ContractAssignment {
   id: string;
@@ -62,22 +63,13 @@ export const weeklyWorkXpMult = (showrunner: string) => showrunner === "mentor" 
 export const staminaRecoveryMult = (showrunner: string) => showrunner === "mentor" ? 1.25 : 1;
 
 export interface ShowrunnerCraftStats { story: number; art: number; sound: number; }
-const SHOWRUNNER_BASE_CRAFT: Record<string, ShowrunnerCraftStats> = {
-  steady: { story: 62, art: 88, sound: 58 },
-  vision: { story: 90, art: 68, sound: 64 },
-  producer: { story: 70, art: 68, sound: 66 },
-  marketer: { story: 60, art: 64, sound: 82 },
-  operations: { story: 72, art: 80, sound: 68 },
-  franchise: { story: 82, art: 70, sound: 66 },
-  mentor: { story: 76, art: 74, sound: 72 },
-  research: { story: 84, art: 66, sound: 72 },
-};
 
-/** These are the actual craft numbers used whenever the founding showrunner
- * takes a contract/rush seat. They improve with the studio's shipped work. */
-export function showrunnerStats(showrunner: string, showsMade: number): ShowrunnerCraftStats {
+/** Runtime uses the saved visible career. Numeric input remains supported for
+ * title-screen previews and old unit tests, preserving the legacy +2.2/show curve. */
+export function showrunnerStats(showrunner: string, careerOrShows: number | ShowrunnerCareer): ShowrunnerCraftStats {
+  if (typeof careerOrShows !== "number") return { story: careerOrShows.story, art: careerOrShows.art, sound: careerOrShows.sound };
   const base = SHOWRUNNER_BASE_CRAFT[showrunner] ?? { story: 68, art: 68, sound: 68 };
-  const growth = Math.min(110, Math.round(Math.max(0, showsMade) * 2.2));
+  const growth = Math.min(110, Math.round(Math.max(0, careerOrShows) * 2.2));
   return {
     story: Math.min(STAFF_EFFECTIVE_SKILL_CAP, base.story + growth),
     art: Math.min(STAFF_EFFECTIVE_SKILL_CAP, base.art + growth),
@@ -85,8 +77,8 @@ export function showrunnerStats(showrunner: string, showsMade: number): Showrunn
   };
 }
 
-export function showrunnerContractSkill(showrunner: string, showsMade: number, type: PointType): number {
-  return showrunnerStats(showrunner, showsMade)[type];
+export function showrunnerContractSkill(showrunner: string, careerOrShows: number | ShowrunnerCareer, type: PointType): number {
+  return showrunnerStats(showrunner, careerOrShows)[type];
 }
 
 /** Showrunners are senior contributors, not another junior desk roll.

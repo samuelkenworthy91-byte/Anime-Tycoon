@@ -12,8 +12,8 @@ const draft: Draft = { title: "Test IP", medium: "fanweb", budget: "standard", s
 afterEach(() => vi.restoreAllMocks());
 
 describe("showrunner expansion", () => {
-  it("exposes eight unique playable identities with valid paired artwork and save IDs", () => {
-    expect(SHOWRUNNERS.map(s => s.id)).toEqual(["steady", "vision", "producer", "marketer", "operations", "franchise", "mentor", "research"]);
+  it("exposes twelve unique playable identities with valid temporary or final artwork and stable save IDs", () => {
+    expect(SHOWRUNNERS.map(s => s.id)).toEqual(["steady", "vision", "producer", "marketer", "operations", "franchise", "mentor", "research", "casting", "festival", "dealmaker", "genre"]);
     for (const s of SHOWRUNNERS) {
       for (const path of [s.sprite, s.portrait, s.img]) expect(existsSync(resolve("public", path)), path).toBe(true);
       const old = initialRun("Saved Studio", s.id);

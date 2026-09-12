@@ -191,7 +191,7 @@ export default function Office({
       {/* ---------------------------------------------------- office scene */}
       <OfficeScene
         level={run.officeLevel}
-        boss={{ id: "showrunner", name: runner.name.split(" ")[0], color: "#ffd166", sprite: runner.sprite, working: projActive.length > 0 || run.contractJobs.some((j) => j.showrunner), pulse: workPulses.find((x) => x.actorId === "showrunner") }}
+        boss={{ id: "showrunner", name: (run.showrunnerName || runner.name).split(" ")[0], color: "#ffd166", sprite: runner.sprite, working: projActive.length > 0 || run.contractJobs.some((j) => j.showrunner), pulse: workPulses.find((x) => x.actorId === "showrunner") }}
         staff={run.staff.map((s) => ({
           id: s.id,
           name: s.name.split(" ")[0],

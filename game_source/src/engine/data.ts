@@ -904,6 +904,9 @@ export const BOSS_LOOK: WorkerLook = {
   sprite: "img/sprite-worker-6.png",
   portrait: "img/portrait-worker-6.png",
 };
+/** Reserved model numbers for the four new worker paintings. They are deliberately
+ * not activated in WORKER_LOOKS until their sprite+portrait files exist. */
+export const PENDING_WORKER_ART_IDS = [28, 29, 30, 31] as const;
 /** stable model index for a staff member (old saves fall back to their
     legacy portrait index, so everyone keeps a consistent face) */
 export const workerLookIndex = (s: Staff) => (s.look ?? s.portrait) % WORKER_LOOKS.length;
@@ -960,7 +963,7 @@ export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
 /* ------------------------------------------------------------- showrunners */
 export interface Showrunner {
-  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research";
+  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research" | "casting" | "festival" | "dealmaker" | "genre";
   name: string;
   title: string;
   img: string;
@@ -969,6 +972,8 @@ export interface Showrunner {
   /** portrait crop of the very same model, used in menus */
   portrait: string;
   perk: string;
+  /** true only while this archetype is borrowing an existing portrait/sprite */
+  artPending?: boolean;
 }
 export const SHOWRUNNERS: Showrunner[] = [
   { id: "steady", name: "Genji Ashida", title: "The Master Animator", img: "img/showrunner-a.jpg", sprite: "img/sprite-showrunner-steady.png", portrait: "img/portrait-showrunner-steady.png", perk: "Steady Hand — all contribution checks are 50% stronger and pre-edit production creates 25% fewer editing notes." },
@@ -979,6 +984,10 @@ export const SHOWRUNNERS: Showrunner[] = [
   { id: "franchise", name: "Freja Lindholm", title: "The Franchise Architect", img: "img/portrait-showrunner-franchise.png", sprite: "img/sprite-showrunner-franchise.png", portrait: "img/portrait-showrunner-franchise.png", perk: "Long View — sequels and continuations add 25% less franchise fatigue." },
   { id: "mentor", name: "Amara Okafor", title: "The Talent Coach", img: "img/portrait-showrunner-mentor.png", sprite: "img/sprite-showrunner-mentor.png", portrait: "img/portrait-showrunner-mentor.png", perk: "Best Work — staff gain 25% more weekly work XP and recover 25% more stamina while resting." },
   { id: "research", name: "Ravi Shah", title: "The R&D Lead", img: "img/portrait-showrunner-research.png", sprite: "img/sprite-showrunner-research.png", portrait: "img/portrait-showrunner-research.png", perk: "Rapid Prototyping — research projects take 25% less time. Research data costs are unchanged." },
+  { id: "casting", name: "Keiko Arata", title: "The Casting Director", img: "img/portrait-showrunner-mentor.png", sprite: "img/sprite-showrunner-mentor.png", portrait: "img/portrait-showrunner-mentor.png", perk: "Ensemble Eye — casting contribution +25% and mismatched casting penalties are substantially softened.", artPending: true },
+  { id: "festival", name: "Mateo Voss", title: "The Festival Strategist", img: "img/portrait-showrunner-marketer.png", sprite: "img/sprite-showrunner-marketer.png", portrait: "img/portrait-showrunner-marketer.png", perk: "For Your Consideration — player award entries receive +8% craft strength and +10% judged audience reach.", artPending: true },
+  { id: "dealmaker", name: "Dalia Haddad", title: "The Rights Broker", img: "img/portrait-showrunner-producer.png", sprite: "img/sprite-showrunner-producer.png", portrait: "img/portrait-showrunner-producer.png", perk: "Deal Heat — completed-show buyers pay 15% more and bidders push harder when you auction a studio-owned IP.", artPending: true },
+  { id: "genre", name: "Minseo Park", title: "The Genre Savant", img: "img/portrait-showrunner-research.png", sprite: "img/sprite-showrunner-research.png", portrait: "img/portrait-showrunner-research.png", perk: "Pattern Breaker — good genre pairings hit 30% harder while bad pairings are softened by 30%.", artPending: true },
 ];
 
 /* --------------------------------------------------------------- reviewers */

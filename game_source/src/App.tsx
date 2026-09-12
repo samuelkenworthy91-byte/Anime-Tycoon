@@ -49,6 +49,7 @@ import AuctionCeremony from "./components/AuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
+import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -153,7 +154,8 @@ export default function App() {
     }
   }, [run?.ipMarket.pendingPromptId, screen]);
 
-  const pendingLevelUp = !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
+  const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
+  const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
   useEffect(() => { if (pendingLevelUp) setTimeSpeed(0); }, [pendingLevelUp]);
 
   /* ------------------------------------------------------- game clock */
@@ -712,7 +714,8 @@ export default function App() {
           />
         )}
 
-        {run && run.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0) && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <StaffLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
+        {run && (run.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <ShowrunnerLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
+        {run && !(run.showrunnerCareer?.pendingLevelUps?.length ?? 0) && run.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0) && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <StaffLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
 
         {paused && pauseMenu}
         {paused && savePicker && savePickerOverlay}

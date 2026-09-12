@@ -46,7 +46,7 @@ describe("staff depth", () => {
     expect(exactDirectionKnown([9,9],0)).toBe(true);
   });
   it("showrunner displayed stats are their actual contract/rush craft stats", () => {
-    for (const id of ["steady","vision","producer","marketer","operations","franchise","mentor","research"]) {
+    for (const id of ["steady","vision","producer","marketer","operations","franchise","mentor","research","casting","festival","dealmaker","genre"]) {
       const stats=showrunnerStats(id,12);
       expect(showrunnerContractSkill(id,12,"story")).toBe(stats.story);
       expect(showrunnerContractSkill(id,12,"art")).toBe(stats.art);

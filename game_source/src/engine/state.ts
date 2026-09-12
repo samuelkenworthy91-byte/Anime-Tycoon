@@ -203,6 +203,7 @@ import {
   type ResearchJob,
   type TrainingJob,
 } from "./studioOps";
+import { gainShowrunnerXp, initialShowrunnerCareer, migrateShowrunnerCareer, showrunnerDefaultName, SHOWRUNNER_RELEASE_XP, type ShowrunnerCareer } from "./showrunnerCareer";
 import { rollStudioEvent, type StudioEvent } from "./events";
 import { genreTargetFor } from "./genreTargets";
 import {
@@ -270,6 +271,10 @@ export interface RunState {
   castGenreV2: 2;
   studio: string;
   showrunner: string;
+  /** editable display name; archetype id above remains stable for perks/saves */
+  showrunnerName: string;
+  /** visible long-term founding-director career */
+  showrunnerCareer: ShowrunnerCareer;
   cash: number;
   fans: number;
   rd: number; // research data
@@ -450,6 +455,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     castGenreV2: 2,
     studio,
     showrunner,
+    showrunnerName: showrunnerDefaultName(showrunner),
+    showrunnerCareer: initialShowrunnerCareer(showrunner),
     cash: START_CASH,
     fans: 0,
     rd: 12,
@@ -559,6 +566,8 @@ export function migrateRun(raw: unknown): RunState {
   return {
     ...r,
     castGenreV2: 2,
+    showrunnerName: typeof (r as { showrunnerName?: unknown }).showrunnerName === "string" && (r as { showrunnerName: string }).showrunnerName.trim() ? (r as { showrunnerName: string }).showrunnerName.slice(0, 48) : showrunnerDefaultName(r.showrunner),
+    showrunnerCareer: migrateShowrunnerCareer(r.showrunner, (r as { showrunnerCareer?: unknown }).showrunnerCareer, r.showsMade ?? 0),
     genresUnlocked: unlocked,
     comboLevels: combos.active,
     legacyComboLevels: { ...(r.legacyComboLevels ?? {}), ...combos.legacy },
@@ -1875,7 +1884,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
 }
 
 function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
-  let skill = showrunnerContractSkill(r.showrunner, r.showsMade, type);
+  let skill = showrunnerContractSkill(r.showrunner, r.showrunnerCareer, type);
   skill *= facilityFX(r.facilities).pointMult[type];
   skill *= studioPointMult(r.heads ?? {}, r.staff, r.legends ?? [])[type];
   if (r.research.includes("pipeline")) skill *= 1.12;
@@ -2632,8 +2641,12 @@ export function releaseProject(
     licensedIpAward: licensedAwardProof,
   } : null;
 
+  const runnerCareerGain = gainShowrunnerXp(r.showrunner, r.showrunnerCareer, SHOWRUNNER_RELEASE_XP(result.total, result.tier === "hit" || result.hallOfFame));
+  if (runnerCareerGain.levelsGained > 0) notices.push(`${r.showrunnerName || showrunnerDefaultName(r.showrunner)} reaches Showrunner Lv${runnerCareerGain.career.level}!`);
+
   const run: RunState = {
     ...r,
+    showrunnerCareer: runnerCareerGain.career,
     cash: r.cash - extra.spent + bonusCash,
     partners,
     /* your release floods its own genres for a while */

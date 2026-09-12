@@ -53,7 +53,8 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
     villainName: project.draft.villainName ?? castById(project.draft.villain).name,
   }));
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
-  const runnerStats = showrunnerStats(run.showrunner, run.showsMade);
+  const runnerName = run.showrunnerName?.trim() || runner.name;
+  const runnerStats = showrunnerStats(run.showrunner, run.showrunnerCareer);
   const team = useMemo(() => run.staff.filter((s) => project.staffIds.includes(s.id)), [run.staff, project.staffIds]);
   const [crunch, setCrunch] = useState(false);
   const [shown, setShown] = useState(0);
@@ -200,7 +201,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
     const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === "steady" ? 0.75 : 1);
     const ideaPool = [
       ...team.map((st) => ({ name: st.name, skill: Math.round(staffPoint(st, phase!.type)) })),
-      { name: runner.name, skill: runnerStats[phase!.type] },
+      { name: runnerName, skill: runnerStats[phase!.type] },
     ];
     const idea = Math.random() < 0.32 && ideaPool.length ? ideaPool[Math.floor(Math.random() * ideaPool.length)] : null;
     shownRef.current = 0;
@@ -319,7 +320,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
               const img = WORKER_LOOKS[workerLookIndex(st)]?.sprite;
               return <button key={st.id} onClick={() => choose({ leadId: st.id, leadName: st.name, skill, type: phase!.type, cost: 0, slider }, img)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-cyanx/60"><img src={img} alt="" className="h-12 w-10 shrink-0 object-contain drop-shadow-lg"/><div className="min-w-0 flex-1"><div className="truncate text-sm font-bold">{st.name}</div><div className="text-[10px] text-paper/50">{POINT_LABEL[phase!.type]} {staffPoint(st, phase!.type)} · genre readiness ×{genreMult.toFixed(2)} · team support +{support}</div></div><div className="text-right"><div className="font-display text-lg font-extrabold" style={{color:POINT_COLOR[phase!.type]}}>SKILL {skill}</div><div className="text-[9px] font-bold text-paper/50">RANGE {range.min + support}–{range.max + support}</div></div></button>;
             })}
-            <button onClick={() => choose({ leadId: "showrunner", leadName: runner.name, skill: runnerStats[phase!.type], type: phase!.type, cost: 0, slider }, runner.sprite)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-gold/60"><Portrait img={runner.portrait} name={runner.name} className="h-10 w-10 rounded-lg"/><div className="flex-1"><div className="text-sm font-bold">{runner.name} (showrunner)</div><div className="text-[10px] text-paper/50">Actual {POINT_LABEL[phase!.type]} skill {runnerStats[phase!.type]} · Story {runnerStats.story} · Art {runnerStats.art} · Sound {runnerStats.sound}</div></div></button>
+            <button onClick={() => choose({ leadId: "showrunner", leadName: runnerName, skill: runnerStats[phase!.type], type: phase!.type, cost: 0, slider }, runner.sprite)} className="btn-press ink-card flex w-full items-center gap-3 p-3 text-left hover:border-gold/60"><Portrait img={runner.portrait} name={runnerName} className="h-10 w-10 rounded-lg"/><div className="flex-1"><div className="text-sm font-bold">{runnerName} (showrunner)</div><div className="text-[10px] text-paper/50">Actual {POINT_LABEL[phase!.type]} skill {runnerStats[phase!.type]} · Story {runnerStats.story} · Art {runnerStats.art} · Sound {runnerStats.sound}</div></div></button>
             <button disabled={run.cash < outsourceCost + (crunch ? crunchCost : 0)} onClick={() => choose({ leadId: `outsource:${milestone}`, leadName: "Famous Studio", skill: 78, type: phase!.type, cost: outsourceCost, slider }, null)} className={cn("btn-press ink-card flex w-full items-center gap-3 border-gold/40 p-3 text-left", run.cash < outsourceCost + (crunch ? crunchCost : 0) && "pointer-events-none opacity-40")}><span className="rounded-lg bg-panel3 p-2 text-gold"><Building2 size={17}/></span><div className="flex-1"><div className="text-sm font-bold text-gold">Outsource the rush</div><div className="text-[10px] text-paper/50">Reliable high skill without using an employee.</div></div><span className="font-display text-sm font-extrabold text-gold">{formatGBP(outsourceCost)}</span></button>
           </div>
           <Btn variant="ghost" className="mt-3" onClick={() => setMode("plan")}><ChevronLeft size={16}/> DIRECTION</Btn>

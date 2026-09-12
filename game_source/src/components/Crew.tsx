@@ -77,6 +77,7 @@ import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
 import { showrunnerStats } from "../engine/studioOps";
+import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -494,7 +495,8 @@ export default function CrewPanel({
   };
 
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
-  const runnerCraft = showrunnerStats(run.showrunner, run.showsMade);
+  const runnerName = run.showrunnerName?.trim() || runner.name;
+  const runnerCraft = showrunnerStats(run.showrunner, run.showrunnerCareer);
   const headSlots: HeadSlot[] = ["writer", "animator", "composer", "production"];
   const anyHeadUnlocked = run.officeLevel >= 2;
 
@@ -512,12 +514,12 @@ export default function CrewPanel({
 
       <div className="ink-card border-gold/45 p-3">
         <div className="flex items-center gap-3">
-          <Portrait img={runner.portrait} name={runner.name} alt={runner.name} className="h-14 w-14 rounded-xl border border-gold/40 object-cover" />
-          <div className="min-w-0 flex-1"><div className="text-[8px] font-extrabold tracking-[0.25em] text-gold">FOUNDING SHOWRUNNER · ACTUAL CURRENT STATS</div><div className="font-display text-base font-extrabold">{runner.name}</div><div className="text-[9px] text-paper/50">{runner.title}</div></div>
+          <Portrait img={runner.portrait} name={runnerName} alt={runnerName} className="h-14 w-14 rounded-xl border border-gold/40 object-cover" />
+          <div className="min-w-0 flex-1"><div className="text-[8px] font-extrabold tracking-[0.25em] text-gold">FOUNDING SHOWRUNNER · ACTUAL CURRENT STATS</div><input aria-label="Showrunner name" value={run.showrunnerName} maxLength={48} onChange={(e)=>setRun((r)=>({...r,showrunnerName:e.target.value.slice(0,48)}))} className="ink-input mt-1 w-full px-2 py-1 font-display text-sm font-extrabold"/><div className="mt-1 text-[9px] text-paper/50">{runner.title} · Lv{run.showrunnerCareer.level} {showrunnerLevelTitle(run.showrunnerCareer.level)} · {run.showrunnerCareer.level >= 100 ? "MAX" : `${run.showrunnerCareer.xp}/${SHOWRUNNER_XP_LEVELS[run.showrunnerCareer.level]} XP`}{runner.artPending ? " · NEW ART PENDING" : ""}</div></div>
           <div className="grid grid-cols-3 gap-1 text-center">{(["story","art","sound"] as PointType[]).map((t)=><div key={t} className="rounded-md bg-panel2 px-1.5 py-1"><div className="text-[7px] text-paper/35">{t.toUpperCase()}</div><div className="font-display text-sm font-extrabold" style={{color:POINT_COLOR[t]}}>{runnerCraft[t]}</div></div>)}</div>
         </div>
         <div className="mt-2 text-[10px] leading-relaxed text-paper/60"><b className="text-gold">PERK:</b> {runner.perk}</div>
-        <div className="mt-1 text-[8px] text-paper/35">These Story/Art/Sound values are the exact numbers used when the showrunner personally leads a rush or contract seat, and improve as the studio ships work.</div>
+        <div className="mt-1 text-[8px] text-paper/35">These Story/Art/Sound values are the exact numbers used when the showrunner personally leads a rush or contract seat. Releases now earn visible Showrunner XP and trigger a full level-up reveal.</div>
       </div>
 
       {/* ---------------------------------------------- department heads */}
