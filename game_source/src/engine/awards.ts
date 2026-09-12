@@ -44,6 +44,8 @@ export interface AwardNominee {
   studioId?: string | null;
   /** key art identity — rival poster manifest id for rivals */
   posterId?: string | null;
+  /** external auction IP for rival licensed adaptations */
+  licensedIpId?: string | null;
   /** frozen production identity used to reproduce the player show's exact official key visual */
   draft?: Draft | null;
   /** lead id retained for legacy saves / safe fallback poster rendering */
@@ -185,6 +187,7 @@ export function rivalNominee(r: RivalRelease): AwardNominee {
     sourceId: `${r.studioId}:${r.week}:${r.title}`,
     studioId: r.studioId,
     posterId: r.posterId ?? null,
+    licensedIpId: r.licensedIpId ?? null,
     draft: null,
     protag: null,
     licensedIpAward: null,
@@ -204,9 +207,11 @@ export function awardNomineeEligible(n: AwardNominee): boolean {
 
 /** Canonical key art for an award-eligible auction-IP adaptation. */
 export function licensedAwardPosterAsset(n: AwardNominee): string | null {
-  if (!awardNomineeEligible(n)) return null;
-  const licensedIpId = n.draft?.licensedIpId;
+  const licensedIpId = n.draft?.licensedIpId ?? n.licensedIpId ?? null;
   if (!licensedIpId) return null;
+  // Player adaptations keep the auction-provenance guard. Rival adaptations are
+  // created only from the persistent rivalOwned ledger and carry frozen IP id.
+  if (n.player && !awardNomineeEligible(n)) return null;
   return ipById(licensedIpId)?.posterAsset ?? null;
 }
 

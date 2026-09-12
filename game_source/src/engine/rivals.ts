@@ -45,7 +45,7 @@ export type RivalPersonaId =
 export type RivalStatus = "active" | "restructuring" | "acquired" | "collapsed" | "revived";
 
 /** the kind of release a rival greenlights (mirrors the player's IP timeline) */
-export type RivalEntryKind = "original" | "season" | "spinoff" | "movie" | "ova" | "reboot";
+export type RivalEntryKind = "original" | "season" | "spinoff" | "movie" | "ova" | "reboot" | "licensed";
 
 export interface RivalProduction {
   id: string;
@@ -67,6 +67,8 @@ export interface RivalProduction {
   /** permanent key-art identity from the rival poster pool; locked at
    *  greenlight so a release always shows the same poster */
   posterId: string | null;
+  /** external auction IP this production adapts; canonical key art comes from that IP */
+  licensedIpId?: string | null;
 }
 
 export interface RivalFranchise {
@@ -83,6 +85,8 @@ export interface RivalFranchise {
   /** current key art of this franchise (first entry's poster) — seasons
    *  prefer different artwork from the same visual family */
   posterId?: string | null;
+  /** external auction-IP lineage; continuations keep using its canonical poster */
+  licensedIpId?: string | null;
 }
 
 export interface RivalRelease {
@@ -103,6 +107,8 @@ export interface RivalRelease {
   posterId: string | null;
   /** the IP line this entry belongs to (for franchise visual families) */
   franchiseKey: string | null;
+  /** external auction IP, if this is an adaptation */
+  licensedIpId?: string | null;
 }
 
 /** a notable person at a rival studio the player can eventually poach back */
@@ -706,6 +712,7 @@ function planStudioYear(
     let genres: GenreId[];
     let franchiseKey: string | null;
     let animeType: AnimeType;
+    let licensedIpId: string | null;
     if (fr) {
       const roll = Math.random();
       if (roll < 0.58) kind = "season";
@@ -716,12 +723,14 @@ function planStudioYear(
       genres = [...fr.genres];
       animeType = fr.animeType;
       franchiseKey = fr.key;
+      licensedIpId = fr.licensedIpId ?? null;
     } else {
       kind = "original";
       genres = pickGenres(studio);
       animeType = studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : Math.random() < 0.5 ? "shonen" : "shojo";
       title = uniqueTitle(makeOriginalTitle(genres, animeType), usedTitles);
       franchiseKey = null;
+      licensedIpId = null;
     }
     title = uniqueTitle(title, usedTitles);
     usedTitles.add(title.toLowerCase());
@@ -732,7 +741,7 @@ function planStudioYear(
     const craft = craftForProduction(studio, { id, score });
     /* permanent key art: franchise continuations prefer the same visual
        family (Season 1 → Season 2 → Movie reads as one world) */
-    const art = assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey });
+    const art = licensedIpId ? { posterId: null as string | null, posterRecent } : assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey });
     posterRecent = art.posterRecent;
     if (franchiseKey && art.posterId) {
       franchises = franchises.map((f) => (f.key === franchiseKey ? { ...f, posterId: art.posterId } : f));
@@ -751,6 +760,7 @@ function planStudioYear(
       score,
       craft,
       posterId: art.posterId,
+      licensedIpId,
     });
   }
   return { productions, posterRecent, franchises };
@@ -791,6 +801,43 @@ function computeScore(studio: RivalStudio, prod: { genres: GenreId[]; franchiseK
   s += studio.momentum * 0.08;
   s += (Math.random() * 2 - 1) * p.variance;
   return clamp(Math.round(s), 4, 39);
+}
+
+export interface RivalLicensedIpSeed { id: string; title: string; genreTags: GenreId[]; animeType: AnimeType; sourceType: string; rightsBaseValue: number; }
+
+/** Ensure every external property won at auction becomes an actual rival production.
+ * One production per acquired property is scheduled; existing release/production
+ * identity prevents duplicate greenlights on later weekly syncs. */
+export function ensureRivalLicensedAdaptations(
+  world: RivalWorld,
+  ownership: Record<string,string>,
+  ips: readonly RivalLicensedIpSeed[],
+  week: number,
+): RivalWorld {
+  let studios = world.studios;
+  for (const [ipId, studioId] of Object.entries(ownership)) {
+    const ip = ips.find((x) => x.id === ipId);
+    if (!ip) continue;
+    studios = studios.map((studio) => {
+      if (studio.id !== studioId || studio.status === "collapsed") return studio;
+      const exists = studio.productions.some((p) => p.licensedIpId === ipId) || studio.releases.some((r) => r.licensedIpId === ipId) || studio.franchises.some((f) => f.licensedIpId === ipId);
+      if (exists) return studio;
+      const id = `licensed_${ipId}_${hashStr(studio.id).toString(36)}`;
+      const fit = studio.specialist.filter((g) => ip.genreTags.includes(g)).length * 2 + studio.preferred.filter((g) => ip.genreTags.includes(g)).length;
+      const jitter = ((hashStr(`${id}|score`) % 900) / 100) - 4.5;
+      const score = clamp(Math.round(13 + studio.tier * 2.4 + studio.reputation * .07 + PERSONAS[studio.persona].qualityBias + fit * 1.3 + jitter), 5, 39);
+      const medium: MediumId = ip.sourceType === "film" ? "movie" : ip.sourceType === "webcomic" ? "ona" : "tv";
+      const budget: BudgetId = ip.rightsBaseValue >= 2_500_000 ? "blockbuster" : ip.rightsBaseValue < 500_000 ? "indie" : "standard";
+      const releaseWeek = week + 8 + (hashStr(`${id}|week`) % 11);
+      const prod: RivalProduction = {
+        id, title: ip.title, genres: [...ip.genreTags].slice(0,2), animeType: ip.animeType, medium, budget,
+        week: releaseWeek, year: yearOfWeek(releaseWeek), franchiseKey: null, kind: "licensed", score,
+        craft: rivalCraftFor(studio.persona, score, id), posterId: null, licensedIpId: ipId,
+      };
+      return { ...studio, productions: [...studio.productions, prod] };
+    });
+  }
+  return { ...world, studios };
 }
 
 /** yearly status transitions: decline, restructure, acquisition, collapse, revival */
@@ -908,6 +955,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       const fr = maybeContinue(studio);
       const genres = fr ? [...fr.genres] : pickGenres(studio);
       const kind: RivalEntryKind = fr ? "season" : "original";
+      const licensedIpId = fr?.licensedIpId ?? null;
       const animeType = fr?.animeType ?? (studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : "shonen");
       const usedTitles = new Set(world.studios.flatMap((s) => [
         ...s.releases.map((release) => release.title.toLowerCase()),
@@ -918,7 +966,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       const id = `rp${++rivalProdSeq}_surp_${week}`;
       const responseBoost = world.playerRank === 1 ? Math.min(3, 1 + Math.max(0, world.year - 1) * 0.25) : 0;
       const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind }, responseBoost);
-      const art = assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
+      const art = licensedIpId ? { posterId: null as string | null, posterRecent: studio.posterRecent ?? [] } : assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
       studio.posterRecent = art.posterRecent;
       studio.productions.push({
         id,
@@ -934,6 +982,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
         score,
         craft: craftForProduction(studio, { id, score }),
         posterId: art.posterId,
+        licensedIpId,
       });
       notices.push(`📣 Surprise announcement: ${studio.name} greenlights “${title}” out of nowhere!`);
     }
@@ -981,6 +1030,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
         craft: prod.craft ?? craftForProduction(studio, prod),
         posterId: prod.posterId ?? null,
         franchiseKey: prod.franchiseKey ?? null,
+        licensedIpId: prod.licensedIpId ?? null,
       });
       releases = releases.slice(-60);
 
@@ -1022,6 +1072,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
             lastEntryWeek: week,
             entries: 1,
             posterId: prod.posterId ?? null,
+            licensedIpId: prod.licensedIpId ?? null,
           });
           if (isSpin && parent) {
             franchises = franchises.map((f) => (f.key === parent.key ? { ...f, entries: f.entries + 1, lastEntryWeek: week } : f));

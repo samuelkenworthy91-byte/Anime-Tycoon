@@ -53,6 +53,7 @@ import {
   creditPoach,
   finalizeYear,
   initRivalWorld,
+  ensureRivalLicensedAdaptations,
   migrateRivalWorld,
   pickPoacher,
   planRivalYear,
@@ -224,7 +225,7 @@ import {
   type AwardCeremony,
   type AwardNominee,
 } from "./awards";
-import { initIPMarket, migrateIPMarket, tickIPMarket, ipById, playerAuctionAwardProof, type IPMarketState } from "./ip";
+import { AUCTION_IPS, initIPMarket, migrateIPMarket, tickIPMarket, ipById, playerAuctionAwardProof, type IPMarketState } from "./ip";
 import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
@@ -609,6 +610,7 @@ export function migrateRun(raw: unknown): RunState {
             audience: typeof n.audience === "number" ? n.audience : n.score * 400,
             sourceId: typeof n.sourceId === "string" ? n.sourceId : null,
             posterId: n.posterId ?? null,
+            licensedIpId: (n as { licensedIpId?: string | null }).licensedIpId ?? null,
             draft: n.draft ? migrateDraftV2(n.draft) : null,
             protag: n.protag ?? null,
           };
@@ -1043,7 +1045,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const ipTick = tickIPMarket(ipMarket, { week: w, cash, fans, awards, bestScore: r.bestScore, showsMade: r.showsMade }, rivalWorld);
       ipMarket = ipTick.market;
       cash += ipTick.cashDelta;
-      rivalWorld = ipTick.world;
+      rivalWorld = ensureRivalLicensedAdaptations(ipTick.world, ipMarket.rivalOwned, AUCTION_IPS, w);
       notices.push(...ipTick.notices);
     }
 

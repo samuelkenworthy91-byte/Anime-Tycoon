@@ -46,6 +46,7 @@ import DecisionEventOverlay from "./components/DecisionEventOverlay";
 import LicensedCreate from "./components/LicensedCreate";
 import AuctionForecast from "./components/AuctionForecast";
 import AuctionCeremony from "./components/AuctionCeremony";
+import SellerAuctionCeremony from "./components/SellerAuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
@@ -157,6 +158,8 @@ export default function App() {
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
   const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
   useEffect(() => { if (pendingLevelUp) setTimeSpeed(0); }, [pendingLevelUp]);
+  const sellerAuctionOpen = !!run?.sellerAuction;
+  useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -702,6 +705,10 @@ export default function App() {
               <Pause size={15} />
             </button>
           </div>
+        )}
+
+        {run?.sellerAuction && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+          <SellerAuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
         )}
 
         {run && run.studioEvents.length > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (

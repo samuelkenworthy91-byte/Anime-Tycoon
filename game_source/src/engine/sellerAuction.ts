@@ -59,6 +59,9 @@ export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: nu
   const rng = rngFrom(`${franchiseKey}|${fr.entries.length}|${week}|seller-auction-v2`);
   const fair = franchiseFairAppraisal(fr);
   const dealHeat = showrunner === "dealmaker" ? 1.14 : 1;
+  const roomHeat = rng();
+  const coldRoom = roomHeat < 0.12;
+  const hotRoom = roomHeat > 0.82;
   const networks = [
     { id: "network:zenith", name: "Zenith Media Group", genreBias: 0.05 },
     { id: "network:kousei", name: "Kousei Broadcast Network", genreBias: 0.12 },
@@ -68,19 +71,31 @@ export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: nu
   const bidders: Bidder[] = [];
   for (const n of networks) {
     const interest = rng();
-    if (interest < 0.20) continue;
-    const ceiling = round25(fair * (0.22 + interest * 1.18 + n.genreBias) * dealHeat);
+    if (coldRoom) continue;
+    if (!hotRoom && interest < 0.20) continue;
+    const roomMult = hotRoom ? 1.34 : 1;
+    const ceiling = round25(fair * (0.22 + interest * 1.18 + n.genreBias) * dealHeat * roomMult);
     bidders.push({ bidderType: "network", bidderId: n.id, bidderName: n.name, ceiling });
   }
   for (const studio of world.studios.filter((s) => s.status !== "collapsed")) {
     const fit = studio.preferred.filter((g) => fr.genres.includes(g)).length + studio.specialist.filter((g) => fr.genres.includes(g)).length * 1.35;
     const appetite = rng();
-    // Studios with no fit are often simply not in the room.
-    if (appetite < Math.max(0.08, 0.40 - fit * 0.10)) continue;
+    // Studios with no fit are often simply not in the room. Cold rooms have no strategic rival bidders.
+    if (coldRoom) continue;
+    if (!hotRoom && appetite < Math.max(0.08, 0.40 - fit * 0.10)) continue;
     const stature = 0.48 + studio.reputation / 180 + studio.tier * 0.09;
     const rivalryMadness = fit > 0 ? rng() * 0.65 : rng() * 0.22;
-    const ceiling = round25(fair * (0.16 + appetite * 0.72 + stature * 0.42 + fit * 0.16 + rivalryMadness) * dealHeat);
+    const roomMult = hotRoom ? 1.28 : 1;
+    const ceiling = round25(fair * (0.16 + appetite * 0.72 + stature * 0.42 + fit * 0.16 + rivalryMadness) * dealHeat * roomMult);
     bidders.push({ bidderType: "rival", bidderId: studio.id, bidderName: studio.name, ceiling });
+  }
+
+  // In a genuinely hot room the two hungriest buyers stretch beyond their desk models.
+  // This is what lets a no-reserve sale occasionally turn into an irrational bidding war.
+  if (hotRoom && bidders.length >= 2) {
+    const hungry = [...bidders].sort((a, b) => b.ceiling - a.ceiling).slice(0, 2);
+    hungry[0].ceiling = Math.max(hungry[0].ceiling, round25(fair * 1.38));
+    hungry[1].ceiling = Math.max(hungry[1].ceiling, round25(fair * 1.20));
   }
 
   // No reserve means the player can get punished. A liquidation buyer always
@@ -99,8 +114,9 @@ export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: nu
   let round = 0;
   // Each pass gives another willing bidder a chance to top the room. Dynamic
   // increments make a real two-studio fight accelerate rather than crawl.
+  const openingStep = round25(Math.max(25_000, fair * (hotRoom ? 0.08 : 0.025)));
   while (round < 36) {
-    const increment = Math.max(25_000, round25(Math.max(25_000, current * (0.07 + rng() * 0.08))));
+    const increment = Math.max(openingStep, round25(Math.max(openingStep, current * (0.07 + rng() * 0.08))));
     const eligible = bidders.filter((b) => b.bidderId !== leader?.bidderId && b.ceiling >= current + increment);
     if (!eligible.length) break;
     const weighted = [...eligible].sort((a, b) => (b.ceiling + rng() * fair * 0.35) - (a.ceiling + rng() * fair * 0.35));

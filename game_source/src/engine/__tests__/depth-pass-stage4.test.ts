@@ -25,7 +25,7 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   medium: "fanweb",
   budget: "standard",
   scope: "standard",
-  slot: "anytime",
+  slot: "midnight",
   animeType: lead.type,
   genres: ["slice"],
   audience: "teens",
