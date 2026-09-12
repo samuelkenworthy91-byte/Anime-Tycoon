@@ -7,6 +7,8 @@ import {
   rivalCraftFor,
   rivalNominee,
   PRESENTATION_ORDER,
+  awardPayoutFor,
+  awardQualifies,
   type AwardNominee,
 } from "../awards";
 import { runCeremony, initialRun, advanceWeeks, releaseProject, startProject, type RunState } from "../state";
@@ -64,18 +66,26 @@ describe("the London Anime Awards — category set", () => {
   it("pays out exactly the tiered prizes — no flat £25k anywhere", () => {
     const by = Object.fromEntries(AWARD_CATEGORIES.map((c) => [c.id, c]));
     expect(by.aoty.cash).toBe(20_000);
-    expect(by.aoty.fans).toBe(1_500);
+    expect(by.aoty.fans).toBe(60_000);
     expect(by.shonen.cash).toBe(12_500);
-    expect(by.shonen.fans).toBe(750);
+    expect(by.shonen.fans).toBe(40_000);
     expect(by.shojo.cash).toBe(12_500);
-    expect(by.shojo.fans).toBe(750);
+    expect(by.shojo.fans).toBe(40_000);
     for (const id of ["writing", "animation", "score"] as const) {
       expect(by[id].cash).toBe(5_000);
-      expect(by[id].fans).toBe(250);
+      expect(by[id].fans).toBe(30_000);
     }
     expect(by.fanfav.cash).toBe(5_000);
-    expect(by.fanfav.fans).toBe(1_000);
+    expect(by.fanfav.fans).toBe(45_000);
     expect(AWARD_CATEGORIES.some((c) => c.cash === 25_000)).toBe(false);
+  });
+
+  it("uses transparent rising qualification standards and meaningful fan rewards", () => {
+    const aoty = AWARD_CATEGORIES.find((c) => c.id === "aoty")!;
+    expect(awardQualifies("aoty", 1, mk({ score: 27 }))).toBe(true);
+    expect(awardQualifies("aoty", 9, mk({ score: 29 }))).toBe(false);
+    expect(awardPayoutFor(aoty, 1)).toEqual({ cash: 20_000, fans: 60_000 });
+    expect(awardPayoutFor(aoty, 10).cash).toBeGreaterThan(20_000);
   });
 
   it("presents Anime of the Year LAST as the super-finale", () => {
@@ -162,12 +172,12 @@ describe("ceremony judging", () => {
   });
 
   it("AOTY jackpot lands exactly once for a player sweep", () => {
-    const c = buildCeremony(1, [mk({ title: "Mine", player: true, studio: "Player Co", score: 39, audience: 999_999 })]);
+    const c = buildCeremony(1, [mk({ title: "Mine", player: true, studio: "Player Co", score: 39, story: 40, art: 40, sound: 40, audience: 999_999 })]);
     expect(c.categories.find((x) => x.id === "aoty")!.winner.player).toBe(true);
     /* aoty + fanfav + 3 craft = 5 categories (no shojo field, shonen eligible) */
     const win = c.playerWins.find((w) => w.category === "aoty")!;
     expect(win.cash).toBe(20_000);
-    expect(win.fans).toBe(1_500);
+    expect(win.fans).toBe(60_000);
   });
 });
 
@@ -231,17 +241,17 @@ describe("ceremony integration", () => {
       staff: initialRun("T", "steady").staff.slice(0, 2),
     };
     const d = {
-      title: "Award Bait Zero", genres: ["sports" as GenreId], medium: "tv" as const, budget: "indie" as const,
+      title: "Award Bait Zero", genres: ["slice" as GenreId], medium: "tv" as const, budget: "blockbuster" as const,
       slot: "midnight" as const, animeType: "shonen" as const, audience: "teens" as const,
       protag: "hero", protagName: "Aki", secondary: "", pet: "", villain: "",
-      arcs: [], sliders: [60, 60, 50] as [number, number, number], season: 1,
+      arcs: ["hook", "finale"], sliders: [24, 32, 40] as [number, number, number], season: 1,
     };
     r = startProject(r, d)!;
     const id = r.projects[0].id;
     r = {
       ...r,
       projects: r.projects.map((p) => ({
-        ...p, stage: "ready" as const, points: { story: 80, art: 20, sound: 10 }, hype: 40,
+        ...p, stage: "ready" as const, points: { story: 420, art: 220, sound: 180 }, hype: 40,
       })) as never,
     };
     const out = releaseProject(r, id, { spent: 0, hype: 40 })!;
@@ -254,22 +264,21 @@ describe("ceremony integration", () => {
     expect(entry.story).toBeGreaterThan(entry.art);
     expect(entry.art).toBeGreaterThan(entry.sound);
     expect(entry.audience).toBe(out.result.fans);
-    /* judged at the week-48 boundary, then the slate resets */
+    /* judged at the week-48 boundary, then the slate resets. A real release
+       is not guaranteed a nomination anymore: it must clear the published
+       category qualification standards first. */
     const after = advanceWeeks({ ...out.run, week: 43, day: 43 * 7 }, 6);
     expect(after.awardsCeremony).toBeTruthy();
-    const mine = after.awardsCeremony!.categories.flatMap((c) => c.nominees).find((n) => n.player);
-    expect(mine).toBeTruthy();
-    expect(mine!.title).toBe("Award Bait Zero");
     expect(after.yearShows).toHaveLength(0);
   });
 
   it("the old flat £25k×N payout is gone: year-end applies the ceremony prize once", () => {
     const year = 1;
-    const shows = [mk({ title: "Sweep", player: true, score: 40, audience: 500_000 })];
+    const shows = [mk({ title: "Sweep", player: true, score: 40, story: 40, art: 40, sound: 40, audience: 500_000 })];
     const c = buildCeremony(year, shows);
     /* Sweep wins everything it can: aoty + shonen + 3 craft + fanfav */
     const expectedCash = 20_000 + 12_500 + 3 * 5_000 + 5_000;
-    const expectedFans = 1_500 + 750 + 3 * 250 + 1_000;
+    const expectedFans = 60_000 + 40_000 + 3 * 30_000 + 45_000;
     expect(c.playerCash).toBe(expectedCash);
     expect(c.playerFans).toBe(expectedFans);
     expect(expectedCash).not.toBe(25_000 * c.playerAwards);

@@ -10,6 +10,7 @@ import {
   arcGenreKey,
 } from "../data";
 import { initialRun, migrateRun } from "../state";
+import { arcClashesFor } from "../creativeDiscovery";
 
 describe("creative discovery", () => {
   it("expands the story board to a sixty-arc catalogue", () => {
@@ -19,14 +20,15 @@ describe("creative discovery", () => {
   it("ordered structures care about sequence", () => {
     expect(arcCombosFor(["montage", "tournament", "finale"]).some((c) => c.id === "earned_victory")).toBe(true);
     expect(arcCombosFor(["tournament", "montage", "finale"]).some((c) => c.id === "earned_victory")).toBe(false);
-    expect(arcCombosFor(["tournament", "montage"]).some((c) => c.id === "backwards_training")).toBe(true);
+    expect(arcClashesFor(["tournament", "montage"]).some((c) => c.id === "clash_backwards_training")).toBe(true);
   });
 
   it("learned structures classify as great, good or risky", () => {
     const great = ARC_COMBOS.find((c) => c.id === "earned_victory")!;
-    const risky = ARC_COMBOS.find((c) => c.id === "backwards_training")!;
+    const risky = arcClashesFor(["tournament", "montage"]).find((c) => c.id === "clash_backwards_training")!;
     expect(arcComboRating(great).label).toMatch(/GREAT/);
-    expect(arcComboRating(risky).label).toMatch(/RISKY/);
+    expect(risky.q).toBeLessThan(0);
+    expect(risky.name).toMatch(/Training After the Test/);
   });
 
   it("arc-to-genre fit can be positive, neutral or risky", () => {

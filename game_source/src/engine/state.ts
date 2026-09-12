@@ -220,7 +220,9 @@ import {
   type AwardCeremony,
   type AwardNominee,
 } from "./awards";
-import { initIPMarket, licensedRevenue, migrateIPMarket, tickIPMarket, ipById, playerAuctionAwardProof, type IPMarketState } from "./ip";
+import { initIPMarket, migrateIPMarket, tickIPMarket, ipById, playerAuctionAwardProof, type IPMarketState } from "./ip";
+import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
+import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 
 export type { Franchise, EntryKind } from "./franchise";
@@ -523,7 +525,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
 /** bring an older save up to the current shape (additive, non-destructive) */
 export function migrateRun(raw: unknown): RunState {
   const r = raw as RunState;
-  const unlocked = migrateUnlockedGenres(r.genresUnlocked);
+  const unlocked = migrateUnlockedGenres(r.genresUnlocked, r.castGenreV2 !== 2);
   const combos = migrateComboLevels(r.comboLevels);
   const marketBase = initMarket();
   const marketRaw = r.market && typeof r.market === "object" ? r.market : marketBase;
@@ -857,7 +859,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         wkFans += p.fans;
       }
     }
-    if (wkIncome > 0 || wkFans > 0) {
+    if (wkIncome !== 0 || wkFans !== 0) {
       cash += wkIncome;
       fans += wkFans;
       incomeThisWeek += wkIncome;
@@ -2390,26 +2392,21 @@ export function releaseProject(
   const breakthroughs = castBreakthroughsForRelease(draft, r.castAffinityDiscovered);
   result = { ...result, castBreakthroughs: breakthroughs };
 
-  /* Licensed adaptations carry fan expectations and royalties. Canonical
-     characters are not employees and therefore never create cast discoveries. */
+  /* Licensed adaptations share the exact genre-direction target with originals,
+     then add source-material difficulty, expectation pressure, built-in audience,
+     royalties and possible signed fan backlash on top. */
   const licensedIp = draft.licensedIpId ? ipById(draft.licensedIpId) : null;
   const licensedContract = draft.licensedIpId ? r.ipMarket.owned[draft.licensedIpId] : null;
   const licensedAwardProof = draft.licensedIpId ? playerAuctionAwardProof(r.ipMarket, draft.licensedIpId) : null;
   if (licensedIp && licensedContract) {
-    const { royalty, ownershipRevenue, net } = licensedRevenue(result.revenue, licensedContract);
-    const expectationGap = result.total - Math.round(14 + licensedIp.expectationLevel * 0.2);
-    const fanMult = expectationGap >= 4 ? 1.28 : expectationGap < -5 ? 0.55 : expectationGap < 0 ? 0.82 : 1.08;
-    result = {
-      ...result,
-      revenue: net,
-      fans: Math.round(result.fans * fanMult + licensedIp.fanbase * (expectationGap >= 0 ? 45 : 10)),
-      breakdown: [
-        ...result.breakdown,
-        { label: `${licensedIp.title} royalty (${Math.round(licensedContract.royaltyRate * 100)}%)`, pts: `−£${royalty.toLocaleString("en-GB")}` },
-        { label: `Production ownership (${Math.round(licensedContract.ownershipShare * 100)}%)`, pts: `+£${ownershipRevenue.toLocaleString("en-GB")}` },
-        { label: `Existing fan expectations`, pts: expectationGap >= 0 ? `met · fans ×${fanMult.toFixed(2)}` : `missed · backlash ×${fanMult.toFixed(2)}` },
-      ],
-    };
+    result = applyLicensedAdaptationOutcome({
+      ip: licensedIp,
+      contract: licensedContract,
+      draft,
+      result,
+      hype: extra.hype,
+      genreIdeal: genreTargetFor(draft.genres).ideal,
+    });
   }
 
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */
@@ -2579,7 +2576,7 @@ export function releaseProject(
   chunks[AIR_WEEKS - 1].amount += result.revenue - acc;
   chunks[AIR_WEEKS - 1].fans += result.fans - accF;
   chunks.forEach((c, i) => {
-    if (c.amount > 0 || c.fans > 0)
+    if (c.amount !== 0 || c.fans !== 0)
       payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: payoutLabelFor(draft.medium, draft.title) });
   });
 
@@ -2749,7 +2746,7 @@ export function buyFacility(r: RunState, id: FacilityId): RunState | null {
 /** move to the next office; every built room is packed up and moves too */
 export function relocateOffice(r: RunState): RunState | null {
   const next = OFFICES[r.officeLevel + 1];
-  if (!next || r.cash < next.cost) return null;
+  if (!next || officeRelocationBlockReason(r)) return null;
   return {
     ...r,
     cash: r.cash - next.cost,

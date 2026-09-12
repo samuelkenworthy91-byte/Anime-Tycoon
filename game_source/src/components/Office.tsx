@@ -106,6 +106,9 @@ import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
 import { scrapProject } from "../engine/projectActions";
 import { cn } from "../utils/cn";
+import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
+import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
+import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
 
 /* =================================================================== */
 export default function Office({
@@ -160,18 +163,14 @@ export default function Office({
     sfx.fanfare();
     setRun((r) => startResearchProject(r, id, rd) ?? r);
   };
-  const unlockGenre = (g: GenreId, rd: number) => {
-    if (run.rd < rd) return;
+  const unlockGenre = (g: GenreId) => {
+    const cost = genreUnlockCost(run, g);
+    if (!cost || run.rd < cost) return;
     sfx.fanfare();
-    setRun((r) => ({
-      ...r,
-      rd: r.rd - rd,
-      genresUnlocked: [...r.genresUnlocked, g],
-      notices: [...r.notices, `New genre licensed: ${GENRES.find((x) => x.id === g)?.label}!`],
-    }));
+    setRun((r) => unlockGenreLicense(r, g) ?? r);
   };
   const relocate = () => {
-    if (!nextOffice || run.cash < nextOffice.cost) return;
+    if (!nextOffice || officeRelocationBlockReason(run)) return;
     sfx.fanfare();
     setModal(null);
     setRun((r) => relocateOffice(r) ?? r);
@@ -687,16 +686,17 @@ export default function Office({
                     const owned = run.research.includes(u.id);
                     const pending = run.researchJobs.find((j) => j.researchId === u.id);
                     const block = researchBlockReason(run, u.id);
+                    const displayResearch = experimentalStudyPresentation(u, owned);
                     return (
                       <div key={u.id} className={cn("ink-card p-3", owned && !u.repeatable && "border-mint/50", block === "ALL CAST PROFILED — every hidden affinity is known" && "border-gold/50 bg-gold/5")}>
                         <div className="flex items-center gap-1.5">
                           <Sparkles size={13} className="text-viol" />
-                          <span className="font-display text-sm font-extrabold">{u.name}</span>
+                          <span className="font-display text-sm font-extrabold">{displayResearch.name}</span>
                           {u.repeatable && (
                             <span className="ml-auto rounded bg-panel3 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyanx">REPEATABLE</span>
                           )}
                         </div>
-                        <div className="mt-0.5 text-[11px] text-paper/55">{u.desc}</div>
+                        <div className="mt-0.5 text-[11px] text-paper/55">{displayResearch.desc}</div>
                         {u.requires && !run.research.includes(u.requires) && (
                           <div className="mt-1 text-[10px] font-bold text-gold">
                             🔒 Requires {RESEARCH.find((x) => x.id === u.requires)?.name}
@@ -728,19 +728,20 @@ export default function Office({
             {GENRES.filter((g) => g.rd > 0).map((g) => {
               const owned = run.genresUnlocked.includes(g.id);
               const Icon = g.icon;
+              const rdCost = genreUnlockCost(run, g.id);
               return (
                 <button
                   key={g.id}
-                  disabled={owned || run.rd < g.rd}
-                  onClick={() => unlockGenre(g.id, g.rd)}
+                  disabled={owned || run.rd < rdCost}
+                  onClick={() => unlockGenre(g.id)}
                   className={cn(
                     "btn-press flex items-center gap-1.5 rounded-xl border p-2 text-left",
-                    owned ? "border-mint/50 bg-mint/5" : run.rd >= g.rd ? "border-line bg-panel2 hover:border-gold" : "border-line/50 opacity-45"
+                    owned ? "border-mint/50 bg-mint/5" : run.rd >= rdCost ? "border-line bg-panel2 hover:border-gold" : "border-line/50 opacity-45"
                   )}
                 >
                   <Icon size={14} style={{ color: g.color }} />
                   <span className="text-xs font-bold">{g.label}</span>
-                  <span className="ml-auto text-[10px] font-bold text-viol">{owned ? "✓" : `${g.rd}`}</span>
+                  <span className="ml-auto text-[10px] font-bold text-viol">{owned ? "✓" : `${rdCost}`}</span>
                 </button>
               );
             })}
@@ -817,7 +818,14 @@ export default function Office({
                   <div className="text-[10px] text-paper/45">Your {roomsUsed} built room{roomsUsed > 1 ? "s" : ""} and all upgrades move with you — nothing is lost.</div>
                 )}
               </div>
-              <Btn variant="gold" className="mt-3 w-full" disabled={run.cash < nextOffice.cost} onClick={relocate}>
+              <div className="mt-3 space-y-1 rounded-lg border border-line bg-panel2 p-2">
+                {officeRelocationRequirements(run).map((req) => (
+                  <div key={req.id} className={cn("flex items-center justify-between gap-2 text-[10px]", req.met ? "text-mint" : "text-paper/55")}>
+                    <span>{req.met ? "✓" : "○"} {req.label}</span><b>{req.display}</b>
+                  </div>
+                ))}
+              </div>
+              <Btn variant="gold" className="mt-3 w-full" disabled={!!officeRelocationBlockReason(run)} onClick={relocate}>
                 MOVE IN — {formatGBP(nextOffice.cost)}
               </Btn>
             </div>
@@ -828,6 +836,16 @@ export default function Office({
       {/* ---------------------------------------------------------- AWARDS */}
       {modal === "awards" && (
         <Modal title="LONDON ANIME AWARDS" onClose={() => setModal(null)}>
+          <div className="mb-3 rounded-xl border border-line bg-panel2 p-3">
+            <div className="mb-2 text-[10px] font-black tracking-widest text-gold">CURRENT QUALIFICATION STANDARDS</div>
+            <div className="grid gap-1 sm:grid-cols-2">
+              {AWARD_CATEGORIES.map((award) => (
+                <div key={award.id} className="flex items-start justify-between gap-2 text-[9px] text-paper/60">
+                  <b className="text-paper/80">{award.name}</b><span className="text-right">{awardQualificationText(award.id, Math.floor(run.week / 48) + 1)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
           {run.awardsCeremony ? (
             <div className="space-y-3">
               <div className="rounded-xl border border-gold/50 bg-gold/10 p-3 text-center">

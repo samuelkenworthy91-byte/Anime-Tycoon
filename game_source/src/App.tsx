@@ -409,8 +409,18 @@ export default function App() {
       if (!run || !shipId) return;
       const p = projectById(run, shipId);
       if (!p) return;
-      const out = releaseProject(run, shipId, { spent, hype });
-      if (!out) return;
+      let out: ReturnType<typeof releaseProject>;
+      try {
+        out = releaseProject(run, shipId, { spent, hype });
+      } catch (error) {
+        console.error("Release failed", error);
+        window.alert("RELEASE FAILED — this production could not be finalised. Your save has not been altered.");
+        return;
+      }
+      if (!out) {
+        window.alert("RELEASE FAILED — this production is not in a valid state to air. Your save has not been altered.");
+        return;
+      }
       sfx.reveal();
       setRun(out.run);
       setReleased({ draft: p.draft, result: out.result });

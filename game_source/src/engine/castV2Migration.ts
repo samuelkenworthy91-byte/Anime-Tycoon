@@ -1,4 +1,4 @@
-import { GENRES, castById, type AnimeType, type Draft, type GenreId, type Staff } from "./data";
+import { ARCS, GENRES, castById, type AnimeType, type Draft, type GenreId, type Staff } from "./data";
 
 const ACTIVE = new Set<string>(GENRES.map((genre) => genre.id));
 const asStrings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
@@ -11,14 +11,15 @@ export function migrateActiveGenre(raw: unknown): GenreId | null {
 }
 
 /** Ownership migration intentionally follows the approved progression mapping. */
-export function migrateUnlockedGenres(raw: unknown): GenreId[] {
+export function migrateUnlockedGenres(raw: unknown, includeLegacyDefaults = true): GenreId[] {
   const migrated = asStrings(raw).flatMap((genre): GenreId[] => {
     if (genre === "racing") return ["pirate"];
     if (genre === "noir") return ["survival"];
     const active = migrateActiveGenre(genre);
     return active ? [active] : [];
   });
-  return [...new Set<GenreId>(["slice", "fantasy", ...migrated])];
+  const defaults: GenreId[] = includeLegacyDefaults ? ["slice", "fantasy"] : [];
+  return [...new Set<GenreId>([...defaults, ...migrated])];
 }
 
 export function inferAnimeType(raw: unknown, genres: unknown, leadId: unknown): AnimeType {
@@ -43,10 +44,24 @@ export function migrateGenreList(raw: unknown, leadId?: unknown, unlocked?: read
 export function migrateDraftV2(raw: Draft | Record<string, unknown>, unlocked?: readonly GenreId[]): Draft {
   const draft = raw as Draft;
   const oldGenres = (raw as { genres?: unknown }).genres;
+  const rawArcs = asStrings((raw as { arcs?: unknown }).arcs);
+  const licensedIpId = typeof draft.licensedIpId === "string" ? draft.licensedIpId : undefined;
+  let licensedArcId = typeof draft.licensedArcId === "string" ? draft.licensedArcId : undefined;
+
+  /* Old licensed drafts put property-route ids in the normal ARCS list. Recover
+     that route, then remove non-ARCS ids so release scoring can never dereference
+     an IP route as if it were a normal story beat. */
+  if (licensedIpId && !licensedArcId) {
+    licensedArcId = rawArcs.find((id) => id.startsWith(`${licensedIpId}_`) && !ARCS.some((a) => a.id === id));
+  }
+  const arcs = licensedIpId ? rawArcs.filter((id) => ARCS.some((a) => a.id === id)) : rawArcs;
+
   return {
     ...draft,
     animeType: inferAnimeType((raw as { animeType?: unknown }).animeType, oldGenres, draft.protag),
     genres: migrateGenreList(oldGenres, draft.protag, unlocked),
+    arcs,
+    ...(licensedArcId ? { licensedArcId } : {}),
   };
 }
 

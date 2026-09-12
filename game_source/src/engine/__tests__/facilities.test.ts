@@ -295,7 +295,7 @@ describe("facility bonuses", () => {
 /* ------------------------------------------------------------ relocation */
 describe("relocation", () => {
   it("keeps every facility and upgrade when moving office", () => {
-    let r = richRun({ officeLevel: 1, cash: 5_000_000 }); // 3 slots
+    let r = richRun({ officeLevel: 1, cash: 5_000_000, showsMade: 8, fans: 25_000, staff: [worker("a"), worker("b"), worker("c")] }); // 3 slots
     r = buyFacility(r, "writers")!;
     r = buyFacility(r, "writers")!;
     r = buyFacility(r, "canteen")!;

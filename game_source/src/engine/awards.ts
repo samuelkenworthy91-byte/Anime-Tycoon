@@ -212,6 +212,35 @@ export function licensedAwardPosterAsset(n: AwardNominee): string | null {
 
 const fansShort = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v >= 10_000 ? 0 : 1)}k` : `${Math.round(v)}`);
 
+const awardEra = (year: number) => year <= 2 ? 0 : year <= 5 ? 1 : year <= 8 ? 2 : 3;
+
+export function awardQualificationText(id: AwardCategoryId, year: number): string {
+  const era = awardEra(year);
+  if (id === "aoty") return `${27 + era}/40 minimum review`;
+  if (id === "shonen" || id === "shojo") return `${24 + era}/40 minimum review`;
+  if (id === "writing") return `${20 + era}/40 overall · Writing ${28 + era * 2}+`;
+  if (id === "animation") return `${20 + era}/40 overall · Animation ${28 + era * 2}+`;
+  if (id === "score") return `${20 + era}/40 overall · Score ${28 + era * 2}+`;
+  const audienceFloor = [3_000, 8_000, 20_000, 40_000][era];
+  return `${18 + era}/40 overall · ${fansShort(audienceFloor)} audience`;
+}
+
+export function awardQualifies(id: AwardCategoryId, year: number, n: AwardNominee): boolean {
+  const era = awardEra(year);
+  if (id === "aoty") return n.score >= 27 + era;
+  if (id === "shonen" || id === "shojo") return n.score >= 24 + era;
+  if (id === "writing") return n.score >= 20 + era && n.story >= 28 + era * 2;
+  if (id === "animation") return n.score >= 20 + era && n.art >= 28 + era * 2;
+  if (id === "score") return n.score >= 20 + era && n.sound >= 28 + era * 2;
+  return n.score >= 18 + era && n.audience >= [3_000, 8_000, 20_000, 40_000][era];
+}
+
+export function awardPayoutFor(def: AwardCategoryDef, year: number): { cash: number; fans: number } {
+  const cashMult = Math.min(6, 1 + Math.max(0, year - 1) * 0.45);
+  const fanMult = Math.min(1.35, 1 + Math.max(0, year - 1) * 0.03);
+  return { cash: Math.round(def.cash * cashMult), fans: Math.round(def.fans * fanMult) };
+}
+
 export const AWARD_CATEGORIES: AwardCategoryDef[] = [
   {
     id: "aoty",
@@ -219,7 +248,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The show that defined the year. The industry's highest honour.",
     tier: 3,
     cash: 20_000,
-    fans: 1_500,
+    fans: 60_000,
     eligible: () => true,
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -230,7 +259,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The finest shonen production of the year.",
     tier: 2,
     cash: 12_500,
-    fans: 750,
+    fans: 40_000,
     eligible: (n) => n.animeType === "shonen",
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -241,7 +270,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The finest shojo production of the year.",
     tier: 2,
     cash: 12_500,
-    fans: 750,
+    fans: 40_000,
     eligible: (n) => n.animeType === "shojo",
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -252,7 +281,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Story craft: structure, character, dialogue and pay-off.",
     tier: 1,
     cash: 5_000,
-    fans: 250,
+    fans: 30_000,
     eligible: () => true,
     metric: (n) => n.story,
     metricLabel: (n) => `Writing ${Math.round(n.story)}`,
@@ -263,7 +292,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Visual craft: art direction, sakuga, consistency and polish.",
     tier: 1,
     cash: 5_000,
-    fans: 250,
+    fans: 30_000,
     eligible: () => true,
     metric: (n) => n.art,
     metricLabel: (n) => `Animation ${Math.round(n.art)}`,
@@ -274,7 +303,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Music: composition, sound design, voice and theme.",
     tier: 1,
     cash: 5_000,
-    fans: 250,
+    fans: 30_000,
     eligible: () => true,
     metric: (n) => n.sound,
     metricLabel: (n) => `Score ${Math.round(n.sound)}`,
@@ -285,7 +314,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Audience, fandom and reach — the crowd's own award.",
     tier: 1,
     cash: 5_000,
-    fans: 1_000,
+    fans: 45_000,
     eligible: () => true,
     metric: (n) => n.audience,
     metricLabel: (n) => `${fansShort(n.audience)} fans`,
@@ -370,16 +399,17 @@ export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremon
   const uniqueShows = dedupeAwardSlate(shows);
   const categories: AwardCategory[] = [];
   for (const def of AWARD_CATEGORIES) {
-    const pool = uniqueShows.filter((n) => def.eligible(n));
+    const pool = uniqueShows.filter((n) => def.eligible(n) && awardQualifies(def.id, year, n));
     if (!pool.length) continue;
     const ranked = rankFor(def, pool, year);
     const nominees = ranked.slice(0, NOMINEES_PER_CATEGORY);
+    const payout = awardPayoutFor(def, year);
     categories.push({
       id: def.id,
       name: def.name,
-      blurb: def.blurb,
+      blurb: `${def.blurb} · Qualification: ${awardQualificationText(def.id, year)}`,
       tier: def.tier,
-      payout: { cash: def.cash, fans: def.fans },
+      payout,
       nominees,
       winner: nominees[0],
     });

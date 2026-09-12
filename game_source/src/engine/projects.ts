@@ -57,7 +57,8 @@ export function draftCost(d: Draft): number {
 export function draftWeeks(d: Draft): number {
   const scope = scopeOf(d);
   const budgetTime = d.budget === "blockbuster" ? 1.14 : d.budget === "indie" ? 0.94 : 1;
-  const base = 11 + MEDIUMS[d.medium].weeks + Math.max(0, d.arcs.length - 3);
+  const storyBeatCount = d.arcs.length + (d.licensedArcId ? 1 : 0);
+  const base = 11 + MEDIUMS[d.medium].weeks + Math.max(0, storyBeatCount - 3);
   return Math.max(7, Math.round(base * scope.weeksMult * budgetTime));
 }
 

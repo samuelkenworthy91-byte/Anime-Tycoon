@@ -1,4 +1,4 @@
-import { GENRES, RESEARCH, SECRET_COMBOS, comboKey, comboMult, type GenreId } from "./data";
+import { ARCS, ARC_COMBOS, GENRES, RESEARCH, SECRET_COMBOS, comboKey, comboMult, type GenreId } from "./data";
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
@@ -28,6 +28,7 @@ export const RESEARCHABLE_SECRET_COMBOS = Object.entries(SECRET_COMBOS)
       mult,
       id: secretComboResearchId(key),
       label,
+      order: index + 1,
       rd: 62 + index * 4,
     };
   });
@@ -39,11 +40,70 @@ for (const study of RESEARCHABLE_SECRET_COMBOS) {
   if (RESEARCH.some((item) => item.id === study.id)) continue;
   RESEARCH.push({
     id: study.id,
-    name: `Experimental Pair Study: ${study.label}`,
+    name: `Experimental Combination Study ${study.order}`,
     rd: study.rd,
     requires: "genre_studies",
-    desc: `R&D suspects this unlikely pairing may hide an unusual audience response. Complete the study to reveal whether the ${study.label} theory is real before risking a production.`,
+    desc: "Investigate an unusual relationship between two genres. Completing this study will identify the pairing and its effect.",
   });
+}
+
+export function experimentalStudyPresentation(item: { id: string; name: string; desc: string }, completed: boolean) {
+  const study = RESEARCHABLE_SECRET_COMBOS.find((candidate) => candidate.id === item.id);
+  if (!study || !completed) return { name: item.name, desc: item.desc };
+  const effect = study.mult >= 1.2 ? "an unusually strong relationship" : study.mult < 0.95 ? "a risky relationship" : "a measurable relationship";
+  return {
+    name: `Breakthrough: ${study.label}`,
+    desc: `Research confirms ${effect} between ${study.label}. The pairing is now known before production.`,
+  };
+}
+
+const LITERAL_ARC_DESCRIPTIONS: Record<string, string> = {
+  hook: "Open with an immediate problem, image or confrontation that gives the audience a clear reason to keep watching.",
+  montage: "A character trains repeatedly over time, showing visible improvement before the challenge that tests that training.",
+  tournament: "Characters enter an organised bracket or series of competitive matches, with advancement decided by performance.",
+  origin: "Reveal the antagonist's earlier life and the events that shaped their current motives before the audience is asked to reassess them.",
+  redemption: "An antagonist recognises the harm they caused and changes sides or takes meaningful action to repair it.",
+  finale: "Bring the major conflicts and character goals to their decisive confrontation and resolve the season's central promises.",
+  confession: "A character directly admits a hidden feeling, truth or relationship choice that has been building through earlier scenes.",
+  case: "Introduce a mystery with evidence, suspects and questions that characters actively investigate before a reveal.",
+  twist: "Reveal information that changes the audience's understanding of earlier events while still fitting the clues already shown.",
+  narr_betrayal: "A trusted ally turns against the group, abandons them at a critical moment or reveals divided loyalties.",
+  narr_revenge: "A character pursues the person or group responsible for an earlier loss, betrayal or defeat.",
+  narr_rescue: "The cast attempts to recover a captured, missing or defecting character from an enemy or dangerous location.",
+  narr_mentor: "An experienced figure trains or guides another character, establishing a relationship whose approval or loss can matter later.",
+  narr_sacrifice: "A character knowingly gives up their safety, future or life so that somebody else can survive or succeed.",
+  narr_foundfamily: "Characters who were not originally family choose mutual loyalty and belonging through shared experience.",
+  narr_secretid: "A character maintains a concealed identity or role whose discovery would materially change their relationships.",
+  narr_villainreveal: "Expose who the true antagonist is after earlier scenes have established the threat, suspects or false assumptions.",
+  narr_falsewin: "Let the characters believe they have won before revealing that the apparent victory hid a larger failure or trap.",
+};
+for (const arc of ARCS) {
+  const literal = LITERAL_ARC_DESCRIPTIONS[arc.id];
+  if (literal) arc.desc = literal;
+}
+
+/* Keep the structure model semantically clean: positive structures live in
+   ARC_COMBOS, negative structures in ARC_CLASHES. */
+for (const oldNegative of ["backwards_training", "spoiled_mystery"]) {
+  const at = ARC_COMBOS.findIndex((combo) => combo.id === oldNegative);
+  if (at >= 0) ARC_COMBOS.splice(at, 1);
+}
+const EXTRA_ARC_COMBOS = [
+  { id: "failed_retrieval", name: "Failed Retrieval", arcs: ["narr_rescue", "narr_betrayal"], q: 4, f: 0.03, ordered: true },
+  { id: "personal_vendetta", name: "Personal Vendetta", arcs: ["narr_betrayal", "narr_revenge"], q: 4, f: 0.03, ordered: true },
+  { id: "retrieval_crisis", name: "Retrieval Crisis", arcs: ["narr_rivalintro", "narr_rescue", "narr_betrayal"], q: 5, f: 0.04, ordered: true },
+  { id: "lie_becomes_personal", name: "The Lie Becomes Personal", arcs: ["narr_falsewin", "narr_betrayal", "narr_revenge"], q: 6, f: 0.04, ordered: true },
+  { id: "avenge_the_mentor", name: "Avenge the Mentor", arcs: ["narr_mentor", "narr_sacrifice", "narr_revenge"], q: 6, f: 0.03, ordered: true },
+  { id: "bring_them_home", name: "Bring Them Home", arcs: ["narr_foundfamily", "narr_betrayal", "narr_rescue"], q: 5, f: 0.05, ordered: true },
+  { id: "mask_was_threat", name: "The Mask Was the Threat", arcs: ["narr_secretid", "narr_villainreveal"], q: 4, f: 0.03, ordered: true },
+];
+for (const combo of EXTRA_ARC_COMBOS) {
+  if (!ARC_COMBOS.some((existing) => existing.id === combo.id)) ARC_COMBOS.push(combo);
+}
+const redemptionRoad = ARC_COMBOS.find((combo) => combo.id === "road");
+if (redemptionRoad) {
+  redemptionRoad.ordered = true;
+  redemptionRoad.q = Math.max(redemptionRoad.q, 4);
 }
 
 export interface GenreReleaseEffect {
@@ -101,6 +161,7 @@ export interface ArcDiscoveryEffect {
   q: number;
   f: number;
   ordered: boolean;
+  adjacent?: boolean;
   kind: "clash";
   explanation: string;
 }
@@ -112,6 +173,47 @@ export interface ArcDiscoveryEffect {
  * shopping list of beats.
  */
 export const ARC_CLASHES: ArcDiscoveryEffect[] = [
+  {
+    id: "clash_backwards_training",
+    name: "Training After the Test",
+    arcs: ["tournament", "montage"],
+    q: -7,
+    f: -0.05,
+    ordered: true,
+    kind: "clash",
+    explanation: "Training arrives after the decisive competition, so the preparation cannot earn the result the audience already watched.",
+  },
+  {
+    id: "clash_spoiled_mystery",
+    name: "Answer Before the Question",
+    arcs: ["narr_villainreveal", "case"],
+    q: -8,
+    f: -0.07,
+    ordered: true,
+    kind: "clash",
+    explanation: "The antagonist is exposed before the investigation gives the audience a mystery to solve.",
+  },
+  {
+    id: "clash_redemption_before_origin",
+    name: "Motive Too Late",
+    arcs: ["redemption", "origin"],
+    q: -7,
+    f: -0.05,
+    ordered: true,
+    kind: "clash",
+    explanation: "The story asks the audience to accept redemption before showing the history meant to make that change understandable.",
+  },
+  {
+    id: "clash_sacrifice_undone",
+    name: "Sacrifice Undone",
+    arcs: ["narr_sacrifice", "narr_rescue"],
+    q: -8,
+    f: -0.08,
+    ordered: true,
+    adjacent: true,
+    kind: "clash",
+    explanation: "The sacrifice is immediately reversed by a rescue beat, stripping the loss of the consequence the scene promised.",
+  },
   {
     id: "clash_finale_before_origin",
     name: "Climax Without Foundations",
@@ -183,10 +285,17 @@ function containsInOrder(haystack: string[], needles: string[]): boolean {
   return false;
 }
 
+function containsAdjacent(haystack: string[], needles: string[]): boolean {
+  if (!needles.length || needles.length > haystack.length) return false;
+  return haystack.some((_, start) => needles.every((needle, offset) => haystack[start + offset] === needle));
+}
+
 export function arcClashesFor(arcIds: string[]): ArcDiscoveryEffect[] {
-  return ARC_CLASHES.filter((clash) => clash.ordered
-    ? containsInOrder(arcIds, clash.arcs)
-    : clash.arcs.every((id) => arcIds.includes(id)));
+  return ARC_CLASHES.filter((clash) => clash.adjacent
+    ? containsAdjacent(arcIds, clash.arcs)
+    : clash.ordered
+      ? containsInOrder(arcIds, clash.arcs)
+      : clash.arcs.every((id) => arcIds.includes(id)));
 }
 
 export const arcClashById = (id: string) => ARC_CLASHES.find((clash) => clash.id === id) ?? null;
