@@ -91,6 +91,8 @@ export interface AwardCeremony {
   presentation: AwardCategoryId[];
   /** just the player's wins, for the summary board */
   playerWins: { category: AwardCategoryId; name: string; title: string; cash: number; fans: number }[];
+  /** categories withheld because no production cleared the published standard */
+  unawarded?: { id: AwardCategoryId; name: string; qualification: string }[];
 }
 
 /* ------------------------------------------------------- craft strengths */
@@ -398,9 +400,13 @@ export function dedupeAwardSlate(shows: AwardNominee[]): AwardNominee[] {
 export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremony {
   const uniqueShows = dedupeAwardSlate(shows);
   const categories: AwardCategory[] = [];
+  const unawarded: NonNullable<AwardCeremony["unawarded"]> = [];
   for (const def of AWARD_CATEGORIES) {
     const pool = uniqueShows.filter((n) => def.eligible(n) && awardQualifies(def.id, year, n));
-    if (!pool.length) continue;
+    if (!pool.length) {
+      unawarded.push({ id: def.id, name: def.name, qualification: awardQualificationText(def.id, year) });
+      continue;
+    }
     const ranked = rankFor(def, pool, year);
     const nominees = ranked.slice(0, NOMINEES_PER_CATEGORY);
     const payout = awardPayoutFor(def, year);
@@ -429,6 +435,7 @@ export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremon
     playerFans: playerWins.reduce((a, w) => a + w.fans, 0),
     presentation: PRESENTATION_ORDER.filter((id) => !!byId(id)),
     playerWins,
+    unawarded,
   };
 }
 

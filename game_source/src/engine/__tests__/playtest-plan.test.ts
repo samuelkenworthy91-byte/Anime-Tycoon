@@ -9,6 +9,7 @@ import { genreTargetFor } from "../genreTargets";
 import { RESEARCHABLE_SECRET_COMBOS, arcClashesFor, experimentalStudyPresentation } from "../creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements } from "../progression";
 import type { ShowResult } from "../scoring";
+import { buildCeremony } from "../awards";
 
 const contractFor = (ipId: string): IPContract => ({
   ipId, acquiredWeek: 0, expiresWeek: 999, purchasePrice: 100_000,
@@ -53,6 +54,7 @@ describe("licensed adaptation boundary", () => {
       expect(out, ip.title).not.toBeNull();
       expect(Number.isFinite(out!.result.revenue), ip.title).toBe(true);
       expect(Number.isFinite(out!.result.fans), ip.title).toBe(true);
+      expect(out!.result.breakdown.some((row) => row.label.includes("adaptation-weighted")), ip.title).toBe(true);
     }
   });
 
@@ -118,6 +120,8 @@ describe("research, arcs and progression", () => {
   });
 
   it("escalates genre licence costs while preserving an affordable first expansion", () => {
+    expect(genreUnlockCost({ genresUnlocked: ["kaiju", "romance"] }, "slice")).toBeGreaterThan(0);
+    expect(genreUnlockCost({ genresUnlocked: ["kaiju", "romance"] }, "fantasy")).toBeGreaterThan(0);
     const target = "cosmic_horror" as GenreId;
     const first = genreUnlockCost({ genresUnlocked: ["kaiju", "romance"] }, target);
     const mid = genreUnlockCost({ genresUnlocked: GENRE_IDS_FOR_TEST.slice(0, 12) }, target);
@@ -126,6 +130,17 @@ describe("research, arcs and progression", () => {
     expect(mid).toBeGreaterThan(first);
     expect(late).toBeGreaterThanOrEqual(60);
     expect(late).toBeLessThanOrEqual(95);
+  });
+
+  it("records categories as explicitly unawarded when nobody clears the standard", () => {
+    const ceremony = buildCeremony(1, [{
+      title: "Not Ready", studio: "Tiny Studio", player: true, animeType: "shonen",
+      genres: ["slice"], score: 10, story: 10, art: 10, sound: 10, audience: 100,
+      sourceId: "low-1", studioId: "player", draft: null, protag: null, licensedIpAward: null,
+    }]);
+    expect(ceremony.categories).toHaveLength(0);
+    expect(ceremony.unawarded).toHaveLength(7);
+    expect(ceremony.unawarded?.some((row) => row.id === "aoty")).toBe(true);
   });
 
   it("requires sustained studio growth for relocation, not cash alone", () => {

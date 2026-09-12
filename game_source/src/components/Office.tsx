@@ -725,7 +725,7 @@ export default function Office({
 
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">GENRE LICENCES</div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {GENRES.filter((g) => g.rd > 0).map((g) => {
+            {GENRES.map((g) => {
               const owned = run.genresUnlocked.includes(g.id);
               const Icon = g.icon;
               const rdCost = genreUnlockCost(run, g.id);

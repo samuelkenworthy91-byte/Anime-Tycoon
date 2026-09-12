@@ -390,15 +390,19 @@ export function computeResult(opts: {
     }
   });
 
+  const arcWeight = licensed ? 0.45 : 1;
+  arcQ *= arcWeight;
+  arcsF *= arcWeight;
+
   /* ---- hidden story structures: synergies are rewarding, clashes hurt */
   const arcCombosHit = arcCombosFor(draft.arcs);
   const baseArcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
   const baseArcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
-  const arcComboQ = baseArcComboQ > 0 ? baseArcComboQ * 1.6 : baseArcComboQ;
-  const arcComboF = baseArcComboF > 0 ? baseArcComboF * 1.5 : baseArcComboF;
+  const arcComboQ = (baseArcComboQ > 0 ? baseArcComboQ * 1.6 : baseArcComboQ) * arcWeight;
+  const arcComboF = (baseArcComboF > 0 ? baseArcComboF * 1.5 : baseArcComboF) * arcWeight;
   const arcClashesHit = arcClashesFor(draft.arcs);
-  const arcClashQ = arcClashesHit.reduce((a, c) => a + c.q, 0);
-  const arcClashF = arcClashesHit.reduce((a, c) => a + c.f, 0);
+  const arcClashQ = arcClashesHit.reduce((a, c) => a + c.q, 0) * arcWeight;
+  const arcClashF = arcClashesHit.reduce((a, c) => a + c.f, 0) * arcWeight;
   arcQ += arcComboQ + arcClashQ;
   arcsF += arcComboF + arcClashF;
   const arcCombosDiscovered = [
@@ -433,7 +437,7 @@ export function computeResult(opts: {
   raw *= comboFactor;
   /* One genuinely broken story structure should be visible in the reviews;
      multiple clashes can bottom out at a severe but recoverable 28% cut. */
-  const arcClashSeverity = arcClashesHit.reduce((sum, clash) => sum + Math.abs(clash.q), 0);
+  const arcClashSeverity = arcClashesHit.reduce((sum, clash) => sum + Math.abs(clash.q), 0) * arcWeight;
   const arcStructureMult = clamp(1 - arcClashSeverity * 0.018, 0.72, 1);
   raw *= arcStructureMult;
   raw -= issues * ISSUE_QUALITY_COST;
@@ -542,7 +546,7 @@ export function computeResult(opts: {
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
       : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
-    { label: "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
+    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
     { label: `Genre combo ×${actualComboMult.toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)} quality` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },

@@ -374,6 +374,15 @@ export default function AwardsCeremony({
                   </div>
                 );
               })}
+              {(ceremony.unawarded ?? []).map((row, index) => (
+                <div key={`unawarded-${row.id}`} className="aw-rise flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#0d0915aa] px-4 py-3" style={{ animationDelay: `${(ceremony.presentation.length + index) * 0.08}s` }}>
+                  <div>
+                    <div className="text-[8px] font-black tracking-[0.25em] text-paper/45">{row.name.toUpperCase()}</div>
+                    <div className="mt-0.5 font-extrabold text-paper/55">NO AWARD PRESENTED</div>
+                  </div>
+                  <div className="max-w-[48%] text-right text-[8px] font-bold text-paper/35">No production cleared {row.qualification}</div>
+                </div>
+              ))}
             </div>
 
             <div className="mt-6 rounded-2xl border border-gold/35 bg-gold/10 p-5 text-center">
