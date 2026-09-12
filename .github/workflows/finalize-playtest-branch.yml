@@ -1,0 +1,78 @@
+name: Finalize Playtest Branch
+
+on:
+  push:
+    branches:
+      - work/staff-potential-ip-business-pass
+    paths:
+      - game_source/scripts/finalize_playtest_cast.py
+      - .github/workflows/finalize-playtest-branch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/staff-potential-ip-business-pass
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Apply deterministic cast finalizer
+        working-directory: game_source
+        timeout-minutes: 2
+        run: python3 scripts/finalize_playtest_cast.py
+
+      - name: Prepare and verify generated content
+        working-directory: game_source
+        timeout-minutes: 4
+        run: npm run content:prepare
+
+      - name: Run cast and new-feature regression tests
+        working-directory: game_source
+        timeout-minutes: 4
+        run: npm test -- src/engine/__tests__/cast-visual-alignment.test.ts src/engine/__tests__/cast-catalog-v7.test.ts src/engine/__tests__/cast-v2.test.ts src/engine/__tests__/cast-display-filter.test.ts src/engine/__tests__/cast-coverage.test.ts src/engine/__tests__/genre30-expansion.test.ts src/engine/__tests__/staff-potential-business.test.ts src/engine/__tests__/careers.test.ts src/engine/__tests__/annual-auction-hidden-arcs.test.ts
+
+      - name: Run complete test suite
+        working-directory: game_source
+        timeout-minutes: 6
+        run: npm test
+
+      - name: Build production app
+        working-directory: game_source
+        timeout-minutes: 5
+        run: npm run build
+
+      - name: Clean one-off finalization harnesses
+        run: |
+          rm -f .github/workflows/refine-cast-visuals-and-names.yml
+          rm -f .github/workflows/finalize-playtest-branch.yml
+          rm -f game_source/scripts/refine-cast-visuals-and-names.mjs
+          rm -f game_source/scripts/finalize_playtest_cast.py
+
+      - name: Commit playtest-ready branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No playtest changes to commit"
+          else
+            git commit -m "Finalize staff IP and cast playtest branch"
+            git push origin HEAD:work/staff-potential-ip-business-pass
+          fi
