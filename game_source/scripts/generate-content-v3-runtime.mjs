@@ -130,6 +130,23 @@ for (const [name, ids] of byName) {
   assert.deepEqual(new Set(ids), allowed, `unexpected IDs for allow-listed duplicate ${name}`);
 }
 
+// Generated expansions must remain genuinely varied, not merely unique full
+// names built from the same tiny handful of first names.
+const generatedNamed = cast.cast.filter((c) => c.id.startsWith("vg_") || c.id.startsWith("g30_"));
+const humanGenerated = generatedNamed.filter((c) => c.role !== "pet" && c.name.includes(" "));
+const tokenCounts = (which) => humanGenerated.reduce((map, c) => {
+  const parts = c.name.split(/\s+/);
+  const token = which === "first" ? parts[0] : parts[parts.length - 1];
+  map.set(token, (map.get(token) ?? 0) + 1);
+  return map;
+}, new Map());
+const firstCounts = tokenCounts("first");
+const lastCounts = tokenCounts("last");
+assert(Math.max(...firstCounts.values()) <= 12, `generated cast given-name repetition too high: ${Math.max(...firstCounts.values())}`);
+assert(Math.max(...lastCounts.values()) <= 14, `generated cast surname repetition too high: ${Math.max(...lastCounts.values())}`);
+const generatedPets = generatedNamed.filter((c) => c.role === "pet");
+assert.equal(new Set(generatedPets.map((c) => c.name)).size, generatedPets.length, "generated mascot names must be unique");
+
 const v4ById = new Map(v4.cast.map((c) => [c.id, c]));
 for (const [id, expected] of v4ById) {
   const actual = baseCast.cast.find((c) => c.id === id);

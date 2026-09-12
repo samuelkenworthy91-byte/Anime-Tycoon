@@ -34,7 +34,7 @@ import {
   topCharacter,
   type EntryKind,
 } from "../engine/franchise";
-import { launchMerch, type RunState } from "../engine/state";
+import { franchiseSaleBlock, franchiseSaleOffer, launchMerch, sellFranchiseRights, type RunState } from "../engine/state";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
@@ -108,6 +108,7 @@ export default function LibraryPanel({
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [picking, setPicking] = useState<null | "crossover" | "spinoff">(null);
+  const [confirmSale, setConfirmSale] = useState(false);
 
   const list = Object.values(run.franchises).sort(
     (a, b) => b.popularity - a.popularity || b.totalRevenue - a.totalRevenue
@@ -244,6 +245,11 @@ export default function LibraryPanel({
             <div className="text-[10px] text-paper/45">Fans are tiring of this IP — resting it restores excitement.</div>
           )}
         </div>
+      </div>
+
+      <div className={cn("rounded-xl border p-3", fr.soldTo ? "border-neon/45 bg-neon/5" : "border-gold/35 bg-gold/5")}>
+        <div className="text-[10px] font-black tracking-widest text-gold">IP RIGHTS</div>
+        {fr.soldTo ? <div className="mt-1 text-xs text-neon"><b>SOLD TO {fr.soldTo.name.toUpperCase()}</b> · {formatGBPShort(fr.soldTo.price)} · week {fr.soldTo.week}. Historic credits stay here, but continuations and merchandise are no longer yours.</div> : (()=>{const block=franchiseSaleBlock(run,fr.key);const offer=franchiseSaleOffer(run,fr.key);return <><div className="mt-1 text-[10px] text-paper/50">Very successful original IP can be put on the market for an irreversible full-rights sale. The winning network or rival gets the future upside.</div>{offer?<div className="mt-2 flex flex-wrap items-center gap-2"><b className="text-sm text-mint">Likely winning bid: {formatGBPShort(offer.price)}</b><span className="text-[9px] text-paper/45">{offer.buyerName} · {offer.buyerType.toUpperCase()}</span>{!confirmSale?<Btn variant="gold" onClick={()=>setConfirmSale(true)}>AUCTION FULL IP RIGHTS</Btn>:<><Btn variant="gold" onClick={()=>{setRun(r=>sellFranchiseRights(r,fr.key)??r);setConfirmSale(false);}}>CONFIRM IRREVERSIBLE SALE</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(false)}>CANCEL</Btn></>}</div>:<div className="mt-2 text-[9px] text-paper/40">{block}</div>}</>;})()}
       </div>
 
       {/* ---------------------------------------------------------- cast */}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { BarChart3, Gavel, Handshake, Lock, Scale, ScrollText, Trophy } from "lucide-react";
 import { Btn } from "../fx/fx";
-import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, genreLabel, ipById, negotiateRights } from "../engine/ip";
+import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, commissionRightsAuction, commissionedAuctionBlock, commissionedAuctionFee, genreLabel, ipById, negotiateRights } from "../engine/ip";
 import { formatGBP, formatGBPShort } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
@@ -27,6 +27,9 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   const appraisalCost = Math.max(2, 5 - data);
   const sorted = useMemo(() => [...active].sort((a, b) => a.closesWeek - b.closesWeek), [active]);
   const coProdProjects = run.projects.filter((p) => ["concept", "preprod", "animation", "sound"].includes(p.stage));
+  const [confirmCommission, setConfirmCommission] = useState(false);
+  const manualFee = commissionedAuctionFee(run);
+  const manualBlock = commissionedAuctionBlock(run);
 
   const appraise = (id: string) => setRun((r) => {
     const cost = Math.max(2, 5 - (r.facilities.data ?? 0));
@@ -60,6 +63,13 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
         <span className={cn("rounded border px-2 py-1", data ? "border-cyanx/40 text-cyanx" : "border-line text-paper/40")}>DATA LAB T{data} · {data ? `${data} appraisal layer${data > 1 ? "s" : ""} pre-revealed` : "build to reduce uncertainty"}</span>
       </div>
     </div>
+
+    <section className="rounded-xl border border-gold/45 bg-gold/5 p-3">
+      <div className="flex items-center gap-2 text-xs font-black tracking-widest text-gold"><Gavel size={14}/> COMMISSION A RIGHTS AUCTION</div>
+      <div className="mt-1 text-[10px] text-paper/55">Pay brokers to bring a fresh property to market immediately. The fee is non-refundable: you still have to bid and a rival can beat you.</div>
+      <div className="mt-2 flex flex-wrap items-center gap-2"><b className="text-sm text-gold">{formatGBPShort(manualFee)} broker fee</b>{manualBlock && <span className="text-[9px] text-neon">{manualBlock}</span>}</div>
+      {!confirmCommission ? <Btn variant="gold" className="mt-2" disabled={!!manualBlock} onClick={()=>setConfirmCommission(true)}><Gavel size={12}/> TRIGGER AUCTION</Btn> : <div className="mt-2 flex gap-2"><Btn variant="gold" disabled={!!manualBlock} onClick={()=>{setRun((r)=>{const out=commissionRightsAuction(r);if(!out)return r;return {...r,cash:r.cash-out.fee,ipMarket:out.market,strategicSpend:[...r.strategicSpend,{id:`auction_broker_${r.week}`,label:"Commission rights auction",amount:out.fee,week:r.week}],notices:[...r.notices,`Rights brokers paid £${out.fee.toLocaleString("en-GB")}; a new auction is opening.`]};});setConfirmCommission(false);}}>CONFIRM · PAY {formatGBPShort(manualFee)}</Btn><Btn variant="ghost" onClick={()=>setConfirmCommission(false)}>CANCEL</Btn></div>}
+    </section>
 
     <section>
       <div className="mb-2 flex items-center gap-2 text-xs font-black tracking-widest text-gold"><Gavel size={14} /> LIVE AUCTIONS</div>

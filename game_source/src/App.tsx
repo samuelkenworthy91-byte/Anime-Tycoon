@@ -17,6 +17,7 @@ import {
   migrateRun,
   projectById,
   releaseProject,
+  sellReadyProject,
   startBlockReason,
   startContractAssignment,
   startProject,
@@ -47,6 +48,7 @@ import AuctionForecast from "./components/AuctionForecast";
 import AuctionCeremony from "./components/AuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
 import { cn } from "./utils/cn";
+import StaffLevelUpModal from "./components/StaffLevelUpModal";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -150,6 +152,9 @@ export default function App() {
       sfx.fanfare();
     }
   }, [run?.ipMarket.pendingPromptId, screen]);
+
+  const pendingLevelUp = !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
+  useEffect(() => { if (pendingLevelUp) setTimeSpeed(0); }, [pendingLevelUp]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -430,6 +435,16 @@ export default function App() {
     [run, shipId]
   );
 
+  const sellShow = useCallback((offerId: string) => {
+    if (!run || !shipId) return;
+    const out = sellReadyProject(run, shipId, offerId);
+    if (!out) return;
+    sfx.cash();
+    setRun(out.run);
+    setShipId(null);
+    setScreen("office");
+  }, [run, shipId]);
+
   const continueFromRelease = useCallback(() => {
     setReleased(null);
     setScreen("office");
@@ -608,6 +623,7 @@ export default function App() {
             run={run}
             project={projectById(run, shipId)!}
             onAir={airShow}
+            onSell={sellShow}
             onBack={() => {
               sfx.back();
               setShipId(null);
@@ -695,6 +711,8 @@ export default function App() {
             }}
           />
         )}
+
+        {run && run.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0) && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <StaffLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
 
         {paused && pauseMenu}
         {paused && savePicker && savePickerOverlay}

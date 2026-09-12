@@ -119,8 +119,12 @@ describe("xp & levels", () => {
     const g = gainXp(s, 20); // 110 ≥ 100 → level 2
     expect(g.levelsGained).toBe(1);
     expect(g.staff.level).toBe(2);
-    expect(g.staff.story).toBe(52); // main stat +2
-    expect(g.staff.art).toBe(51);
+    const gain = g.staff.pendingLevelUps![0].gains;
+    expect(g.staff.story).toBe(50 + gain.story);
+    expect(g.staff.art).toBe(50 + gain.art);
+    expect(g.staff.sound).toBe(50 + gain.sound);
+    expect(gain.story + gain.art + gain.sound).toBeGreaterThanOrEqual(0);
+    expect(g.staff.pendingLevelUps).toHaveLength(1);
   });
 
   it("shipping a show grants XP, history and morale to the team", () => {

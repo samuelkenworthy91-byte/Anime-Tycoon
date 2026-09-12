@@ -115,6 +115,7 @@ import {
   merchBlock,
   merchProductById,
   merchReturn,
+  merchValueOf,
   migrateFranchise,
   recordContinuation,
   tickFranchise,
@@ -2703,6 +2704,56 @@ export function releaseProject(
   };
 
   return { run, result };
+}
+
+export interface ShowSaleOffer {
+  id: string;
+  buyerType: "network" | "rival";
+  buyerId: string;
+  buyerName: string;
+  cash: number;
+  creatorFans: number;
+  awardRisk: boolean;
+}
+function stableDealNumber(key:string):number { let h=2166136261; for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619);} return (h>>>0)/4_294_967_295; }
+/** Deterministic buyout offers: reopening the release screen cannot reroll terms. */
+export function showSaleOffers(r:RunState,projectId:string):ShowSaleOffer[] {
+  const p=r.projects.find(x=>x.id===projectId); if(!p||p.stage!=="ready"||p.draft.licensedIpId)return [];
+  const points=p.points.story+p.points.art+p.points.sound;
+  const fr=p.draft.franchiseKey?r.franchises[p.draft.franchiseKey]:undefined;
+  const value=Math.max(draftCost(p.draft)*1.05,p.spent*.95+points*2_800+p.hype*2_300+(fr?.popularity??0)*4_000+r.bestScore*4_000);
+  const networks=[{id:"network:kousei",name:"Kousei Broadcast Network"},{id:"network:streamline",name:"Streamline Media"}];
+  const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.round(value*(.60+stableDealNumber(projectId+buyer.id)*.12)/5000)*5000,creatorFans:Math.max(100,Math.round((p.hype*9+points*2)*(i?0.13:0.10))),awardRisk:false}));
+  const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];
+  if(rival){const mult=.60+rival.fit*.07+stableDealNumber(projectId+rival.st.id)*.13;offers.push({id:`sale:${projectId}:rival:${rival.st.id}`,buyerType:"rival",buyerId:rival.st.id,buyerName:rival.st.name,cash:Math.round(value*mult/5000)*5000,creatorFans:Math.max(75,Math.round((p.hype*7+points*1.5)*.08)),awardRisk:true});}
+  return offers.sort((a,b)=>b.cash-a.cash);
+}
+
+/** Sell one completed production while retaining the underlying original IP.
+ * Canonical release logic still resolves reviews, staff XP and story knowledge;
+ * commercial payouts and awards ownership are then transferred to the buyer. */
+export function sellReadyProject(r:RunState,projectId:string,offerId:string):{run:RunState;result:ShowResult;offer:ShowSaleOffer}|null {
+  const p=r.projects.find(x=>x.id===projectId); const offer=showSaleOffers(r,projectId).find(x=>x.id===offerId); if(!p||!offer)return null;
+  const released=releaseProject(r,projectId,{spent:0,hype:p.hype}); if(!released)return null;
+  const key=p.draft.continuation==="spinoff"?p.draft.title:(p.draft.franchiseKey??p.draft.title);
+  let franchises=released.run.franchises;
+  const fr=franchises[key];
+  if(fr){const idx=[...fr.entries].map((e,i)=>({e,i})).reverse().find(x=>x.e.title===p.draft.title)?.i; if(idx!==undefined){const old=fr.entries[idx];const entries=fr.entries.map((e,i)=>i===idx?{...e,revenue:offer.cash,fans:offer.creatorFans}:e);const adjusted={...fr,entries,totalRevenue:Math.max(0,fr.totalRevenue-old.revenue+offer.cash),lifetimeFans:Math.max(0,fr.lifetimeFans-old.fans+offer.creatorFans)};adjusted.merchValue=merchValueOf(adjusted);franchises={...franchises,[key]:adjusted};}}
+  let rivalWorld=released.run.rivalWorld;
+  if(offer.buyerType==="rival"){
+    const craft=playerCraftFor(released.result.total,released.result.points); const year=Math.floor(r.week/48)+1;
+    rivalWorld={...rivalWorld,studios:rivalWorld.studios.map(st=>{if(st.id!==offer.buyerId)return st;const revenue=Math.max(offer.cash,Math.round(released.result.revenue*.85));const fans=Math.max(offer.creatorFans*4,Math.round(released.result.fans*.8));const release={title:p.draft.title,studioId:st.id,studio:st.name,score:released.result.total,week:r.week,year,genres:[...p.draft.genres],animeType:p.draft.animeType,revenue,fans,kind:"original" as const,hallOfFame:released.result.hallOfFame,craft,posterId:null,franchiseKey:null};return {...st,revenue:st.revenue+revenue,fans:st.fans+fans,releasesCount:st.releasesCount+1,hits:st.hits+(released.result.total>=27?1:0),masterpieces:st.masterpieces+(released.result.total>=32?1:0),avgScore:Math.round(((st.avgScore*Math.max(1,st.releasesCount))+released.result.total)/(Math.max(1,st.releasesCount)+1)*10)/10,releases:[...st.releases,release].slice(-120)};})};
+  }
+  const run={...released.run,cash:r.cash+offer.cash,fans:r.fans+offer.creatorFans,totalRevenue:r.totalRevenue+offer.cash,payouts:r.payouts,franchises,rivalWorld,yearShows:released.run.yearShows.filter(n=>n.sourceId!==projectId),notices:[...released.run.notices,`💼 ${offer.buyerName} buys the completed release of “${p.draft.title}” for £${offer.cash.toLocaleString("en-GB")}. Your studio keeps the underlying IP but receives only ${offer.creatorFans.toLocaleString("en-GB")} creator fans.${offer.awardRisk?" The rival now owns this release for awards.":""}`]};
+  return {run,result:released.result,offer};
+}
+
+export interface FranchiseSaleOffer { buyerType:"network"|"rival"; buyerId:string; buyerName:string; price:number; }
+export function franchiseSaleBlock(r:RunState,key:string):string|null {const fr=r.franchises[key];if(!fr)return "Unknown IP";if(fr.soldTo)return `Already sold to ${fr.soldTo.name}`;if(fr.bestScore<30&&fr.popularity<65&&fr.totalRevenue<1_000_000&&!fr.entries.some(e=>e.hallOfFame))return "Only successful IPs can attract a rights auction (30+/40, popularity 65+, £1m lifetime revenue or Hall of Fame)";return null;}
+export function franchiseSaleOffer(r:RunState,key:string):FranchiseSaleOffer|null {const fr=r.franchises[key];if(!fr||franchiseSaleBlock(r,key))return null;const rival=[...r.rivalWorld.studios].filter(s=>s.status!=="collapsed").sort((a,b)=>(b.preferred.filter(g=>fr.genres.includes(g)).length-a.preferred.filter(g=>fr.genres.includes(g)).length)||b.reputation-a.reputation)[0];const rivalWins=!!rival&&stableDealNumber(key+"buyer")>.30;const buyer=rivalWins?{buyerType:"rival" as const,buyerId:rival.id,buyerName:rival.name}:{buyerType:"network" as const,buyerId:"network:zenith",buyerName:"Zenith Media Group"};const base=Math.max(750_000,fr.totalRevenue*.85+fr.lifetimeFans*70+fr.bestScore*45_000+fr.popularity*20_000);const price=Math.round(base*(1.05+stableDealNumber(key+buyer.buyerId)*.55)/25_000)*25_000;return {...buyer,price};}
+export function sellFranchiseRights(r:RunState,key:string):RunState|null {const fr=r.franchises[key];const offer=franchiseSaleOffer(r,key);if(!fr||!offer)return null;let rivalWorld=r.rivalWorld;if(offer.buyerType==="rival"){rivalWorld={...rivalWorld,studios:rivalWorld.studios.map(st=>st.id===offer.buyerId?{...st,reputation:Math.min(100,st.reputation+5),franchises:[...st.franchises,{key:`acquired:${key}`,baseTitle:fr.baseTitle,genres:[...fr.genres],animeType:fr.animeType,season:fr.season,popularity:Math.max(45,fr.popularity),bestScore:fr.bestScore,lastScore:fr.lastScore,lastEntryWeek:r.week,entries:fr.entries.length,posterId:null}]}:st)}};
+  const sold={...fr,soldTo:{id:offer.buyerId,name:offer.buyerName,kind:offer.buyerType,week:r.week,price:offer.price}};
+  return {...r,cash:r.cash+offer.price,totalRevenue:r.totalRevenue+offer.price,franchises:{...r.franchises,[key]:sold},rivalWorld,pendingSequel:r.pendingSequel===key?null:r.pendingSequel,notices:[...r.notices,`🔨 ${fr.baseTitle} IP rights sold at auction to ${offer.buyerName} for £${offer.price.toLocaleString("en-GB")}. The sale is permanent; your historic entries remain in the library.`]};
 }
 
 /* =================================================================== */

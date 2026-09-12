@@ -3,7 +3,7 @@ import { AlertTriangle, Check, ChevronLeft, Megaphone, Rocket, Scissors, Target 
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, formatGBP, type PointType } from "../engine/data";
-import type { RunState } from "../engine/state";
+import { showSaleOffers, type RunState } from "../engine/state";
 import { facilityFX } from "../engine/facilities";
 import { lateRevenueMult, type Project } from "../engine/projects";
 import {
@@ -20,16 +20,20 @@ export default function Ship({
   run,
   project,
   onAir,
+  onSell,
   onBack,
 }: {
   run: RunState;
   project: Project;
   onAir: (spent: number, hype: number) => void;
+  onSell: (offerId: string) => void;
   onBack: () => void;
 }) {
   const [spent, setSpent] = useState(0);
   const [hype, setHype] = useState(project.hype);
   const [bought, setBought] = useState<string[]>([]);
+  const [confirmSale, setConfirmSale] = useState<string | null>(null);
+  const saleOffers = showSaleOffers(run, project.id);
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
@@ -137,6 +141,8 @@ export default function Ship({
           <div className="h-3 flex-1 overflow-hidden rounded-full bg-abyss"><div className="h-full rounded-full bg-gradient-to-r from-neon to-gold transition-all duration-500" style={{ width: `${hype}%` }} /></div>
           <span className="font-display text-sm font-extrabold text-gold">{hype}%</span>
         </div>
+
+        {saleOffers.length > 0 && <div className="mt-4 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3"><div className="font-display text-sm font-black text-cyanx">SELL THE COMPLETED SHOW</div><div className="mt-1 text-[9px] text-paper/50">Guaranteed cash now, but much lower creator fan growth and no self-release upside. Selling to a rival lets them claim this production in awards. You keep the underlying original IP.</div><div className="mt-2 space-y-2">{saleOffers.map((offer)=><div key={offer.id} className="rounded-lg border border-line bg-panel2/70 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><b className="text-xs">{offer.buyerName}</b><div className="text-[8px] text-paper/40">{offer.buyerType==="rival"?"RIVAL STUDIO":"NETWORK / DISTRIBUTOR"} · +{offer.creatorFans.toLocaleString("en-GB")} creator fans {offer.awardRisk?"· THEY OWN AWARD ENTRY":""}</div></div><b className="text-sm text-mint">{formatGBP(offer.cash)}</b></div>{confirmSale===offer.id?<div className="mt-2 flex gap-2"><Btn variant="cyan" onClick={()=>onSell(offer.id)}>CONFIRM SALE</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(null)}>CANCEL</Btn></div>:<Btn variant="ghost" className="mt-1 !px-2 !py-1 text-[9px]" onClick={()=>setConfirmSale(offer.id)}>SELL MASTER</Btn>}</div>)}</div></div>}
 
         <div className="mt-4 flex gap-2">
           <Btn variant="ghost" onClick={onBack}><ChevronLeft size={16} /> DELAY</Btn>

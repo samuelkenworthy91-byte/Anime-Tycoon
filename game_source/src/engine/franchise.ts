@@ -75,6 +75,8 @@ export interface Franchise {
   spunFrom?: string;
   /** legacy flag kept for older saves/UI */
   alive: boolean;
+  /** irreversible sale of the original IP to an outside buyer */
+  soldTo?: { id: string; name: string; kind: "network" | "rival"; week: number; price: number };
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -227,6 +229,7 @@ export function continuationBlock(
     projects?: Project[];
   }
 ): string | null {
+  if (fr.soldTo) return `IP sold to ${fr.soldTo.name} — your studio no longer controls new productions`;
   if (fr.lastScore < SEQUEL_SCORE_THRESHOLD && kind !== "spinoff" && kind !== "reboot") {
     return `Sequel rights require ${SEQUEL_SCORE_THRESHOLD}/40 on the latest entry (currently ${fr.lastScore}/40). Below that mark, only a spin-off or reboot can continue the IP.`;
   }
@@ -541,6 +544,7 @@ export const merchProductById = (id: string): MerchProduct | null =>
 
 /** why a product can't launch right now (null = allowed) */
 export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, research: readonly string[] = ["merch"]): string | null {
+  if (fr.soldTo) return `IP sold to ${fr.soldTo.name} — merchandising rights left with the buyer`;
   if (!research.includes(MERCH_CAPABILITY_RESEARCH)) return "Requires Merch Division research (R&D)";
   if (!research.includes(product.research)) return `Requires ${product.researchName} research (R&D)`;
   if (cash < product.cost) return "Not enough cash";

@@ -92,6 +92,16 @@ export interface Genre {
   rd: number;
 }
 
+export interface StaffLevelUpRecord {
+  id: string;
+  beforeLevel: number;
+  afterLevel: number;
+  title: string;
+  before: { story: number; art: number; sound: number };
+  after: { story: number; art: number; sound: number };
+  gains: { story: number; art: number; sound: number };
+}
+
 export interface Staff {
   id: string;
   name: string;
@@ -109,6 +119,10 @@ export interface Staff {
   /** index into WORKER_LOOKS — the painted model used for the office sprite,
       the desk sprite on the production floor AND the menu portrait */
   look?: number;
+  /** hidden 1..100 long-term development ceiling; never displayed numerically */
+  potential?: number;
+  /** durable level-up reveals waiting for the player to acknowledge */
+  pendingLevelUps?: StaffLevelUpRecord[];
   /* ---- career (engine/careers.ts fills + maintains these) ---- */
   /** lifetime career experience; level derives from it */
   xp?: number;
@@ -810,8 +824,32 @@ export const ARC_RESEARCH_GENRE_KEYS = [
 ] as const;
 
 /* ------------------------------------------------------------------ staff */
-const FIRST = ["Hana", "Yuto", "Mei", "Ren", "Sakura", "Daichi", "Aoi", "Kenji", "Mio", "Sota", "Rin", "Takeshi", "Nao", "Haru", "Yuki", "Kenta", "Asuka", "Shun", "Emi", "Taiga", "Kira", "Masa", "Noa", "Goro"];
-const LAST = ["Tanaka", "Sato", "Kurosawa", "Ishikawa", "Mori", "Abe", "Fujimoto", "Okabe", "Shinohara", "Wakamatsu", "Hirasawa", "Kobayashi", "Endo", "Miura", "Tsukishima", "Araki"];
+const STAFF_FIRST_NAMES = [
+  "Hana","Yuto","Mei","Ren","Sakura","Daichi","Aoi","Kenji","Mio","Sota","Rin","Takeshi","Nao","Haru","Yuki","Kenta","Asuka","Shun","Emi","Taiga","Kira","Masa","Noa","Goro",
+  "Akira","Ayame","Chika","Eiji","Fumi","Haruka","Itsuki","Jun","Kaede","Keiko","Koharu","Makoto","Minato","Rei","Riku","Satomi","Toma","Yuna",
+  "Minseo","Jiho","Sora","Haejin","Doyun","Yejun","Jiwon","Nari","Hyun","Ara","Seojun","Mina",
+  "Anika","Arjun","Dev","Isha","Kavya","Mira","Naveen","Priya","Ravi","Sana","Tara","Vikram","Zoya",
+  "Amina","Amir","Dalia","Farah","Idris","Ilyas","Layla","Nadia","Omar","Rami","Samira","Yara",
+  "Adaeze","Amara","Ayodele","Chidi","Eshe","Kofi","Lindiwe","Mandla","Nia","Sade","Tariq","Zuri",
+  "Alejandra","Camila","Diego","Elena","Javier","Lucia","Mateo","Rafa","Sofia","Valentina","Ximena",
+  "Astrid","Elias","Freja","Ingrid","Jonas","Leona","Luca","Mara","Niko","Petra","Soren","Talia","Theo","Vera",
+  "Ari","Casey","Drew","Eden","Ellis","Jamie","Jordan","Morgan","Quinn","Riley","Robin","Rowan","Sage","Taylor"
+];
+const STAFF_LAST_NAMES = [
+  "Tanaka","Sato","Kurosawa","Ishikawa","Mori","Abe","Fujimoto","Okabe","Shinohara","Wakamatsu","Hirasawa","Kobayashi","Endo","Miura","Tsukishima","Araki",
+  "Nakamura","Hayashi","Kondo","Maeda","Nakajima","Ogawa","Sasaki","Ueda","Yamada","Yamamoto",
+  "Kim","Park","Choi","Han","Kang","Lim","Seo","Yoon",
+  "Basu","Desai","Kapoor","Mehta","Nair","Patel","Rao","Shah","Singh",
+  "Aziz","Darzi","Haddad","Karim","Khalil","Mansour","Nassar","Rahman","Saleh",
+  "Adebayo","Diallo","Mensah","Ndlovu","Okafor","Osei","Tembo","Traore",
+  "Alvarez","Castillo","Cruz","Delgado","Garcia","Herrera","Morales","Navarro","Reyes","Santos",
+  "Andersen","Berg","Dubois","Fischer","Kovac","Lindholm","Mercer","Moreau","Novak","Rossi","Schmidt","Silva","Varga","Voss",
+  "Bell","Brooks","Chen","Cole","Finch","Grey","Hale","Morgan","Reed","Wren"
+];
+
+export function randomStaffName(rng: () => number = Math.random): string {
+  return `${STAFF_FIRST_NAMES[Math.floor(rng() * STAFF_FIRST_NAMES.length)]} ${STAFF_LAST_NAMES[Math.floor(rng() * STAFF_LAST_NAMES.length)]}`;
+}
 
 export const ROLE_LABEL: Record<StaffRole, string> = { writer: "Writer", animator: "Animator", composer: "Composer" };
 export const ROLE_POINT: Record<StaffRole, PointType> = { writer: "story", animator: "art", composer: "sound" };
@@ -875,7 +913,7 @@ export function rollCandidate(week: number): Staff {
   const id = `s${++staffId}_${Date.now()}${Math.floor(Math.random() * 999)}`;
   const s: Staff = {
     id,
-    name: `${FIRST[Math.floor(Math.random() * FIRST.length)]} ${LAST[Math.floor(Math.random() * LAST.length)]}`,
+    name: randomStaffName(),
     role,
     story: role === "writer" ? main : off(),
     art: role === "animator" ? main : off(),
@@ -893,19 +931,21 @@ export function rollCandidate(week: number): Staff {
 }
 export const STAFF_STAT_CAP = 999;
 /** Practical ceiling of a 999 raw craft stat after diminishing mastery returns. */
-export const STAFF_EFFECTIVE_SKILL_CAP = 240;
+export const STAFF_EFFECTIVE_SKILL_CAP = 300;
 
 export const staffRawPoint = (s: Staff, t: PointType) => (t === "story" ? s.story : t === "art" ? s.art : s.sound);
 
 /**
  * Preserve the original 0..99 balance exactly. Beyond 99, every raw point
- * still improves the employee, but with logarithmic mastery returns so a
- * 999-stat legend is roughly 2.4x the old maximum rather than 10x.
+ * still improves the employee, with diminishing mastery returns. The curve
+ * is intentionally stronger than the legacy one so long-term stat growth and
+ * hidden Potential remain strategically meaningful without changing the
+ * original 0..99 early-game balance.
  */
 export function effectiveStaffSkill(raw: number): number {
   const value = Math.max(0, Math.min(STAFF_STAT_CAP, raw));
   if (value <= 99) return value;
-  return Math.min(STAFF_EFFECTIVE_SKILL_CAP, 99 + 60 * Math.log1p((value - 99) / 100));
+  return Math.min(STAFF_EFFECTIVE_SKILL_CAP, 99 + 72 * Math.log1p((value - 99) / 90));
 }
 
 export const staffPoint = (s: Staff, t: PointType) => effectiveStaffSkill(staffRawPoint(s, t));

@@ -7,6 +7,7 @@ import {
   type GenreId,
   type PointType,
   type Staff,
+  type StaffLevelUpRecord,
   type StaffRole,
 } from "./data";
 import type { Project } from "./projects";
@@ -94,22 +95,42 @@ export function levelProgress(xp: number): number {
 }
 
 
-/** add XP; every level gained trains +2 main / +1 off stats */
-export function gainXp(s: Staff, amount: number): { staff: Staff; levelsGained: number } {
+/** Add XP and resolve every crossed level through the employee's stable hidden
+ * Potential. Growth is deterministic for staff-id + level so save/reload can
+ * never reroll a good or bad level. */
+export function gainXp(s: Staff, amount: number): { staff: Staff; levelsGained: number; levelUps: StaffLevelUpRecord[] } {
   const xp = (s.xp ?? 0) + Math.max(0, Math.round(amount));
   const before = levelFromXp(s.xp ?? 0);
   const after = levelFromXp(xp);
-  let out: Staff = { ...s, xp, level: after };
-  const main = ROLE_POINT[s.role];
-  for (let l = before; l < after; l++) {
-    out = {
-      ...out,
-      story: Math.min(STAFF_STAT_CAP, out.story + (main === "story" ? 2 : 1)),
-      art: Math.min(STAFF_STAT_CAP, out.art + (main === "art" ? 2 : 1)),
-      sound: Math.min(STAFF_STAT_CAP, out.sound + (main === "sound" ? 2 : 1)),
+  let out: Staff = { ...s, potential: potentialOf(s), xp, level: after };
+  const levelUps: StaffLevelUpRecord[] = [];
+  const queued = [...(s.pendingLevelUps ?? [])];
+  for (let level = before + 1; level <= after; level += 1) {
+    const oldStats = { story: out.story, art: out.art, sound: out.sound };
+    const gains = growthForLevel(out, level);
+    const nextStats = {
+      story: Math.min(STAFF_STAT_CAP, oldStats.story + gains.story),
+      art: Math.min(STAFF_STAT_CAP, oldStats.art + gains.art),
+      sound: Math.min(STAFF_STAT_CAP, oldStats.sound + gains.sound),
     };
+    const record: StaffLevelUpRecord = {
+      id: `${out.id}:lv${level}`,
+      beforeLevel: level - 1,
+      afterLevel: level,
+      title: levelTitle(level),
+      before: oldStats,
+      after: nextStats,
+      gains: {
+        story: nextStats.story - oldStats.story,
+        art: nextStats.art - oldStats.art,
+        sound: nextStats.sound - oldStats.sound,
+      },
+    };
+    levelUps.push(record);
+    queued.push(record);
+    out = { ...out, ...nextStats, pendingLevelUps: queued };
   }
-  return { staff: out, levelsGained: after - before };
+  return { staff: out, levelsGained: after - before, levelUps };
 }
 
 /* ---------------------------------------------------- specialisations */
@@ -220,6 +241,61 @@ function idHash(id: string): number {
   return Math.abs(h);
 }
 
+/** Hidden development ceiling. Distribution is deliberately broad: about
+ * 15% low, 30% limited/steady, 35% normal-high, 16% exceptional and 4% elite. */
+export function potentialForId(id: string): number {
+  const h = idHash(id + "|potential");
+  const roll = (h % 10_000) / 10_000;
+  const detail = idHash(id + "|potential-detail");
+  if (roll < 0.15) return 1 + (detail % 20);
+  if (roll < 0.45) return 21 + (detail % 25);
+  if (roll < 0.80) return 46 + (detail % 25);
+  if (roll < 0.96) return 71 + (detail % 20);
+  return 91 + (detail % 10);
+}
+
+export function potentialOf(s: Staff): number {
+  return Math.max(1, Math.min(100, Math.round(s.potential ?? potentialForId(s.id))));
+}
+
+function levelRng(id: string, level: number): () => number {
+  let x = (idHash(`${id}|growth|${level}`) || 0x6d2b79f5) >>> 0;
+  return () => {
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    return (x >>> 0) / 4_294_967_296;
+  };
+}
+
+/** Exact stat roll for one level. The total-point gap between weak and elite
+ * Potential is intentionally dramatic; role only biases WHERE the points land. */
+export function growthForLevel(s: Staff, newLevel: number): { story: number; art: number; sound: number } {
+  const potential = potentialOf(s);
+  const rng = levelRng(s.id, newLevel);
+  let lo = 0, hi = 2;
+  if (potential > 20 && potential <= 45) [lo, hi] = [2, 4];
+  else if (potential > 45 && potential <= 70) [lo, hi] = [4, 7];
+  else if (potential > 70 && potential <= 90) [lo, hi] = [6, 10];
+  else if (potential > 90) [lo, hi] = [9, 15];
+  let total = lo + Math.floor(rng() * (hi - lo + 1));
+  if (potential >= 91 && rng() < 0.12) total += 1 + Math.floor(rng() * 4);
+  else if (potential >= 71 && rng() < 0.08) total += 1 + Math.floor(rng() * 3);
+
+  const gains = { story: 0, art: 0, sound: 0 };
+  const main = ROLE_POINT[s.role];
+  const points: PointType[] = ["story", "art", "sound"];
+  for (let i = 0; i < total; i += 1) {
+    const weights = points.map((point) => point === main ? 5 : 1.5);
+    let pick = rng() * weights.reduce((a, b) => a + b, 0);
+    let chosen: PointType = main;
+    for (let j = 0; j < points.length; j += 1) {
+      pick -= weights[j];
+      if (pick <= 0) { chosen = points[j]; break; }
+    }
+    gains[chosen] += 1;
+  }
+  return gains;
+}
+
 const GENRE_IDS = GENRES.map((g) => g.id);
 
 function pickTraits(seedA: number, seedB: number): string[] {
@@ -245,18 +321,26 @@ export function ensureCareer(s: Staff, week: number): Staff {
   /* Old max-level saves continued banking XP even though Lv12 could not move.
      On first load, honour that earned XP and grant the missing level stat growth. */
   const retroLevels = Math.max(0, inferredLevel - savedLevel);
-  const main = ROLE_POINT[s.role];
-  const grow = (point: PointType) => Math.min(
-    STAFF_STAT_CAP,
-    Math.max(0, s[point]) + retroLevels * (main === point ? 2 : 1),
-  );
+  const potential = potentialOf(s);
+  let retro: Staff = { ...s, potential };
+  for (let level = savedLevel + 1; level <= inferredLevel; level += 1) {
+    const gain = growthForLevel(retro, level);
+    retro = {
+      ...retro,
+      story: Math.min(STAFF_STAT_CAP, retro.story + gain.story),
+      art: Math.min(STAFF_STAT_CAP, retro.art + gain.art),
+      sound: Math.min(STAFF_STAT_CAP, retro.sound + gain.sound),
+    };
+  }
   return {
-    ...s,
+    ...retro,
     level: inferredLevel,
     xp,
-    story: grow("story"),
-    art: grow("art"),
-    sound: grow("sound"),
+    potential,
+    pendingLevelUps: Array.isArray(s.pendingLevelUps) ? s.pendingLevelUps : [],
+    story: retro.story,
+    art: retro.art,
+    sound: retro.sound,
     morale: s.morale ?? 70,
     traits: s.traits ?? pickTraits(h, h >> 3),
     spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,
@@ -572,10 +656,9 @@ export function intensiveTargetXp(s: Staff): number | null {
   return XP_LEVELS[s.level] - xp;
 }
 
-/** the canonical stat growth gainXp applies to this person per level */
+/** Preview the exact stable roll the normal XP path will use next level. */
 export function intensiveGainFor(s: Staff): { story: number; art: number; sound: number } {
-  const main = ROLE_POINT[s.role];
-  return { story: main === "story" ? 2 : 1, art: main === "art" ? 2 : 1, sound: main === "sound" ? 2 : 1 };
+  return growthForLevel(s, Math.min(MAX_LEVEL, s.level + 1));
 }
 
 /* ------------------------------------------------------------ retirement */

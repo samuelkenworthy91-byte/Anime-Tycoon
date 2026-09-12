@@ -30,6 +30,8 @@ import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
 import {
   ARCS,
+  ARC_COMBOS,
+  ARC_RESEARCH_COMBOS,
   ANIME_TYPE_DESCRIPTION,
   ANIME_TYPE_LABEL,
   arcCombosFor,
@@ -318,6 +320,102 @@ export default function Create({
     const risks = out.filter((r) => r.rank === 0).slice(0, 2);
     return [...recs, ...risks];
   }, [d.genres, d.arcs, run, run.arcGenreKnowledge]);
+
+  /** One-tap story plan built strictly from knowledge the studio has earned.
+   *  Individual arcs must be known GOOD/STRONG for every selected genre.
+   *  Known positive structures can contribute their full ordered sequence as
+   *  long as none of their arcs has a revealed genre risk. Known clashes are
+   *  never introduced by the shortcut. */
+  const researchedArcPlan = useMemo(() => {
+    if (!d.genres.length) return [] as string[];
+
+    const knownGood = ARCS
+      .filter((arc) => !arcLockReason(arc, run))
+      .map((arc) => {
+        const scores = d.genres.map((genre) => {
+          const known = (run.arcGenreKnowledge[arcGenreKey(arc.id, genre)] ?? 0) > 0;
+          return known ? arcGenreFit(arc, genre).score : null;
+        });
+        if (scores.some((score) => score === null)) return null;
+        const clean = scores as number[];
+        const worst = Math.min(...clean);
+        if (worst < 1) return null;
+        return { arc, worst, total: clean.reduce((sum, score) => sum + score, 0) };
+      })
+      .filter((row): row is NonNullable<typeof row> => !!row)
+      .sort((a, b) => b.worst - a.worst || b.total - a.total || a.arc.name.localeCompare(b.arc.name));
+
+    const plan: string[] = [];
+    const createsKnownClash = (ids: string[]) =>
+      arcClashesFor(ids).some((clash) => run.arcCombos.includes(clash.id));
+    const hasKnownGenreRisk = (arcId: string) => {
+      const arc = ARCS.find((item) => item.id === arcId);
+      if (!arc || arcLockReason(arc, run)) return true;
+      return d.genres.some((genre) => {
+        const known = (run.arcGenreKnowledge[arcGenreKey(arc.id, genre)] ?? 0) > 0;
+        return known && arcGenreFit(arc, genre).score < 0;
+      });
+    };
+
+    const knownStructures = ARC_COMBOS
+      .filter((combo) => run.arcCombos.includes(combo.id) && (combo.q > 0 || combo.f > 0))
+      .filter((combo) => combo.arcs.every((id) => !hasKnownGenreRisk(id)))
+      .sort((a, b) => (b.q + b.f * 100) - (a.q + a.f * 100) || b.arcs.length - a.arcs.length);
+
+    for (const combo of knownStructures) {
+      const fresh = combo.arcs.filter((id) => !plan.includes(id));
+      if (!fresh.length || plan.length + fresh.length > arcLimit) continue;
+      const trial = [...plan, ...fresh];
+      if (createsKnownClash(trial)) continue;
+      if (!arcCombosFor(trial).some((known) => known.id === combo.id)) continue;
+      plan.push(...fresh);
+    }
+
+    for (const { arc } of knownGood) {
+      if (plan.length >= arcLimit || plan.includes(arc.id)) continue;
+      const trial = [...plan, arc.id];
+      if (createsKnownClash(trial)) continue;
+      plan.push(arc.id);
+    }
+
+    return plan.slice(0, arcLimit);
+  }, [d.genres, arcLimit, run]);
+
+  const researchedGoodArcShortcuts = useMemo(() => {
+    if (!d.genres.length) return [] as (typeof ARCS)[number][];
+    return ARCS
+      .filter((arc) => !arcLockReason(arc, run))
+      .map((arc) => {
+        const scores = d.genres.map((genre) => {
+          const known = (run.arcGenreKnowledge[arcGenreKey(arc.id, genre)] ?? 0) > 0;
+          return known ? arcGenreFit(arc, genre).score : null;
+        });
+        if (scores.some((score) => score === null)) return null;
+        const clean = scores as number[];
+        const worst = Math.min(...clean);
+        if (worst < 1) return null;
+        return { arc, worst, total: clean.reduce((sum, score) => sum + score, 0) };
+      })
+      .filter((row): row is NonNullable<typeof row> => !!row)
+      .sort((a, b) => b.worst - a.worst || b.total - a.total || a.arc.name.localeCompare(b.arc.name))
+      .map((row) => row.arc);
+  }, [d.genres, run, run.arcGenreKnowledge]);
+
+  const researchedComboShortcuts = useMemo(() => {
+    if (!d.genres.length) return [] as (typeof ARC_COMBOS)[number][];
+    const hasKnownGenreRisk = (arcId: string) => {
+      const arc = ARCS.find((item) => item.id === arcId);
+      if (!arc || arcLockReason(arc, run)) return true;
+      return d.genres.some((genre) => {
+        const known = (run.arcGenreKnowledge[arcGenreKey(arc.id, genre)] ?? 0) > 0;
+        return known && arcGenreFit(arc, genre).score < 0;
+      });
+    };
+    return ARC_COMBOS
+      .filter((combo) => run.arcCombos.includes(combo.id) && (combo.q > 0 || combo.f > 0))
+      .filter((combo) => combo.arcs.every((id) => !hasKnownGenreRisk(id)))
+      .sort((a, b) => (b.q + b.f * 100) - (a.q + a.f * 100) || b.arcs.length - a.arcs.length || a.name.localeCompare(b.name));
+  }, [d.genres, run]);
 
   const searchableArcs = useMemo(
     () => ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)),
@@ -1021,6 +1119,126 @@ export default function Create({
 
           {step === 5 && (
             <div className="space-y-4 anim-up">
+              <div className="rounded-2xl border-2 border-gold/50 bg-gradient-to-br from-gold/10 via-panel to-cyanx/5 p-3 shadow-xl">
+                <div className="flex flex-wrap items-center gap-2"><div className="font-display text-base font-black text-gold">STORY INTELLIGENCE</div><span className="rounded-full border border-gold/40 px-2 py-0.5 text-[8px] font-extrabold text-gold">RESEARCH + FIELD EXPERIENCE</span></div>
+                <div className="mt-1 text-[10px] text-paper/55">Everything your studio has already proven about story structure is surfaced before you choose an arc.</div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className={cn("rounded-lg border px-2 py-1 text-[9px] font-extrabold", run.research.includes("narrative_analytics") ? "border-gold/50 bg-gold/10 text-gold" : "border-line text-paper/35")}>{run.research.includes("narrative_analytics") ? "✓ NARRATIVE ANALYTICS" : "NARRATIVE ANALYTICS NOT RESEARCHED"}</span>
+                  <span className={cn("rounded-lg border px-2 py-1 text-[9px] font-extrabold", run.research.includes("genre_studies") ? "border-cyanx/50 bg-cyanx/10 text-cyanx" : "border-line text-paper/35")}>{run.research.includes("genre_studies") ? "✓ GENRE STUDIES" : "GENRE STUDIES NOT RESEARCHED"}</span>
+                  <span className="rounded-lg border border-line px-2 py-1 text-[9px] text-paper/55">{run.arcCombos.length} structures known</span>
+                  <span className="rounded-lg border border-line px-2 py-1 text-[9px] text-paper/55">{Object.keys(run.arcGenreKnowledge ?? {}).length} arc/genre relationships known</span>
+                </div>
+                {run.research.includes("narrative_analytics") && <div className="mt-2"><div className="text-[8px] font-black tracking-[0.18em] text-paper/40">RESEARCHED STRUCTURES</div><div className="mt-1 flex flex-wrap gap-1">{ARC_RESEARCH_COMBOS.map((id) => ARC_COMBOS.find((c)=>c.id===id)).filter((c): c is NonNullable<typeof c> => !!c && run.arcCombos.includes(c.id)).map((c)=>{const rating=arcComboRating(c);return <span key={c.id} className={cn("rounded-lg border border-line bg-panel2/70 px-2 py-1 text-[9px] font-extrabold",rating.cls)}>{rating.label} · {c.name}</span>;})}</div></div>}
+                {d.genres.length > 0 && <div className="mt-2 text-[9px] text-paper/50">Current genres: {d.genres.map((genre)=>{const label=GENRES.find((g)=>g.id===genre)?.label??genre;const known=Object.keys(run.arcGenreKnowledge??{}).filter((key)=>key.endsWith(`|${genre}`)).length;return `${label}: ${known} known fits`;}).join(" · ")}</div>}
+              </div>
+              {d.genres.length > 0 && (
+                <div className="rounded-2xl border border-cyanx/35 bg-cyanx/5 p-3 shadow-lg">
+                  <div className="text-[9px] font-black tracking-[0.18em] text-cyanx">USE WHAT WE KNOW</div>
+                  <div className="mt-0.5 text-[10px] text-paper/60">Tap an individual proven arc, or insert an ordered positive structure your studio has researched or discovered.</div>
+
+                  <div className="mt-2">
+                    <div className="text-[8px] font-black tracking-[0.16em] text-paper/45">GOOD FOR THESE GENRES</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {researchedGoodArcShortcuts.length > 0 ? researchedGoodArcShortcuts.map((arc) => {
+                        const alreadySelected = d.arcs.includes(arc.id);
+                        const atLimit = d.arcs.length >= arcLimit;
+                        const trial = alreadySelected ? d.arcs : [...d.arcs, arc.id];
+                        const createsKnownClash = arcClashesFor(trial).some((clash) => run.arcCombos.includes(clash.id));
+                        const disabled = alreadySelected || atLimit || createsKnownClash;
+                        return (
+                          <button
+                            key={arc.id}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => {
+                              sfx.select();
+                              set({ arcs: [...d.arcs, arc.id] });
+                            }}
+                            className={cn(
+                              "btn-press rounded-lg border px-2 py-1 text-[9px] font-extrabold",
+                              disabled ? "border-line bg-panel2/50 text-paper/30" : "border-cyanx/45 bg-cyanx/10 text-cyanx hover:border-cyanx"
+                            )}
+                            title={alreadySelected ? "Already on the episode board" : createsKnownClash ? "Would create a story clash your studio already knows about" : `Add ${arc.name}`}
+                          >
+                            {alreadySelected ? "✓ " : "+ "}{arc.name}
+                          </button>
+                        );
+                      }) : <span className="text-[9px] italic text-paper/35">No individual GOOD/STRONG arc fits have been learned for every selected genre yet.</span>}
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5">
+                    <div className="text-[8px] font-black tracking-[0.16em] text-paper/45">RESEARCHED / PROVEN COMBOS</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {researchedComboShortcuts.length > 0 ? researchedComboShortcuts.map((combo) => {
+                        const base = d.arcs.filter((id) => !combo.arcs.includes(id));
+                        const next = [...base, ...combo.arcs];
+                        const tooLong = next.length > arcLimit;
+                        const createsKnownClash = arcClashesFor(next).some((clash) => run.arcCombos.includes(clash.id));
+                        const alreadyActive = arcCombosFor(d.arcs).some((known) => known.id === combo.id);
+                        const disabled = tooLong || createsKnownClash || alreadyActive;
+                        const rating = arcComboRating(combo);
+                        return (
+                          <button
+                            key={combo.id}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => {
+                              sfx.select();
+                              set({ arcs: next });
+                            }}
+                            className={cn(
+                              "btn-press rounded-lg border px-2 py-1 text-left text-[9px] font-extrabold",
+                              disabled ? "border-line bg-panel2/50 text-paper/30" : "border-gold/45 bg-gold/10 text-gold hover:border-gold"
+                            )}
+                            title={alreadyActive ? "This structure is already active" : createsKnownClash ? "Would create a story clash your studio already knows about" : tooLong ? "Not enough arc slots in this production scope" : `Insert ${combo.name} in the correct order`}
+                          >
+                            <span className={rating.cls}>{alreadyActive ? "✓ " : "+ "}{combo.name}</span>
+                            <span className="ml-1 font-normal text-paper/45">· {combo.arcs.map((id) => ARCS.find((arc) => arc.id === id)?.name ?? id).join(" → ")}</span>
+                          </button>
+                        );
+                      }) : <span className="text-[9px] italic text-paper/35">No positive researched/proven story structures are available yet.</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {d.genres.length > 0 && (
+                <div className="rounded-2xl border border-mint/35 bg-mint/5 p-3 shadow-lg">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[9px] font-black tracking-[0.18em] text-mint">QUICK STORY PLAN</div>
+                      <div className="mt-0.5 text-[10px] text-paper/60">
+                        Fill the episode board with arcs proven GOOD/STRONG for every selected genre, plus positive story structures your studio has researched or proven. Known bad structures are avoided.
+                      </div>
+                      {researchedArcPlan.length > 0 && (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {researchedArcPlan.map((id, index) => {
+                            const arc = ARCS.find((item) => item.id === id);
+                            return arc ? <span key={id} className="rounded border border-line bg-panel2/70 px-1.5 py-0.5 text-[8px] font-bold text-paper/65">{index + 1}. {arc.name}</span> : null;
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    <Btn
+                      variant="primary"
+                      className="shrink-0"
+                      disabled={researchedArcPlan.length === 0}
+                      onClick={() => {
+                        sfx.select();
+                        set({ arcs: researchedArcPlan });
+                      }}
+                    >
+                      USE KNOWN GOOD PLAN
+                    </Btn>
+                  </div>
+                  {researchedArcPlan.length === 0 && (
+                    <div className="mt-1 text-[9px] italic text-paper/40">No safe researched plan yet — research or release more shows to build story knowledge.</div>
+                  )}
+                  {researchedArcPlan.length > 0 && researchedArcPlan.length < 3 && (
+                    <div className="mt-1 text-[9px] italic text-gold">Your studio only knows {researchedArcPlan.length} safe pick{researchedArcPlan.length === 1 ? "" : "s"} for this genre set. Use the shortcut, then choose the remaining arcs manually.</div>
+                  )}
+                </div>
+              )}
               <Section title={`PLAN THE SEASON — PICK 3–${arcLimit} ARCS (${d.arcs.length}/${arcLimit})`}>
                 {/* timeline */}
                 <div className="ink-card flex min-h-[4.5rem] flex-wrap items-center gap-1.5 p-2.5">
