@@ -32,6 +32,20 @@ jobs:
         working-directory: game_source
         run: npm ci
 
+      - name: Repair cast refinement harness
+        working-directory: game_source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/refine-cast-visuals-and-names.mjs')
+          s = p.read_text()
+          old = 'function encodeCsv(rows, headers){const field=(v)=>{const t=String(v??"");return /[",\\r\\n]/.test(t)?`"${"${t.replaceAll(\'"\',\'""\')}"}"`:t;};return [headers.join(","),...rows.map(row=>headers.map(h=>field(row[h])).join(","))].join("\\n")+"\\n";}'
+          new = 'function encodeCsv(rows, headers){const field=(v)=>{const t=String(v??"");return /[",\\r\\n]/.test(t)?"\\\""+t.replaceAll("\\\"","\\\"\\\"")+"\\\"":t;};return [headers.join(","),...rows.map(row=>headers.map(h=>field(row[h])).join(","))].join("\\n")+"\\n";}'
+          if old not in s:
+              raise SystemExit('Broken encodeCsv harness line not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+
       - name: Apply cast refinement
         working-directory: game_source
         run: node scripts/refine-cast-visuals-and-names.mjs
