@@ -126,9 +126,9 @@ export function buildCastingBlocks(genres: readonly GenreId[]): CatalogBlock[] {
 }
 
 const VISUAL_SIGNATURE_GENRES = new Set<GenreId>([
-  "mecha", "sports", "cyber", "idol", "cooking", "military", "space", "magical",
-  "pirate", "martial", "nordic", "samurai", "shinobi", "vampire", "monster_taming",
-  "kaiju", "arabia",
+  "mecha", "sports", "cyber", "horror", "idol", "cooking", "military", "space", "magical",
+  "pirate", "martial", "nordic", "samurai", "shinobi", "vampire", "grimdark", "monster_taming",
+  "crime", "kaiju", "cosmic_horror", "arabia",
 ]);
 
 // HARD_VISUAL_SIGNATURE_INVARIANT_V1
@@ -162,13 +162,16 @@ function scoreMemberForBlock(member: CastMember, block: CatalogBlock, pinned: Re
 
   let score = 0;
   if (pinned.has(member.id)) score += 100_000_000_000;
-  if (signatureOverlap.length) score += 1_000_000_000;
-  if (visualOverlap.length) score += 100_000_000;
-  score += signatureOverlap.length * 50_000;
-  score += visualOverlap.length * 20_000;
-  if (visibleInside) score += 30_000;
-  if (exactPair) score += 20_000;
-  if (exactTriple) score += 15_000;
+  // Preserve the exact two source-visible genres whenever the catalogue block
+  // can carry them. The portrait was authored for that pair, so this outranks
+  // preserving only one visually literal genre in a different block.
+  if (visibleInside) score += 20_000_000_000;
+  if (exactPair) score += 4_000_000_000;
+  if (exactTriple) score += 2_000_000_000;
+  if (signatureOverlap.length) score += 700_000_000;
+  if (visualOverlap.length) score += 120_000_000;
+  score += signatureOverlap.length * 80_000;
+  score += visualOverlap.length * 30_000;
   // Old hidden affinity is retained only as a very weak semantic tie-breaker;
   // it must never overpower what the portrait visibly depicts.
   if (blockSet.has(member.hiddenAff)) score += 100;
@@ -189,7 +192,13 @@ function maximumWeightCatalogAssignment(
 
   const weights = blocks.map((block) => members.map((member) => {
     const signatures = visualSignatureGenres(member);
-    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));
+    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));
+    // Literal art signatures take priority. For portraits without a literal
+    // signature, still require at least one of the two source-visible genres
+    // so a selectable card is never completely unrelated to its artwork.
+    const hardVisualMismatch = signatures.length > 0
+      ? !signatures.some((genre) => block.genres.includes(genre))
+      : sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));
     const tie = hash32(`${role}|${type}|${block.id}|${member.id}`) % 97;
     // An unmistakably themed active portrait may never be relabelled into an
     // unrelated catalogue block. Rectangular assignment can leave surplus

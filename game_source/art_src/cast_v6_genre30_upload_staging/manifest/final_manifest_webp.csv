@@ -1,521 +1,521 @@
 sequence,batch_code,sheet_code,sheet_position,character_id,filename_png,name,epithet,role,anime_type,visible_genre_1,visible_genre_2,hidden_genre,staging_filename_webp
-1,B01,S01,R1C1,g30_protag_shonen_001,g30_protag_shonen_001.png,Kael Alvarez,The Beast Underworld Titan Vanguard,protag,shonen,monster_taming,crime,kaiju,g30_protag_shonen_001.webp
-2,B01,S01,R1C2,g30_protag_shonen_002,g30_protag_shonen_002.png,Kira Alvarez,The Beast Abyss Dune Vanguard,protag,shonen,monster_taming,cosmic_horror,arabia,g30_protag_shonen_002.webp
-3,B01,S01,R1C3,g30_protag_shonen_003,g30_protag_shonen_003.png,Leila Alvarez,The Underworld Abyss Gear Vanguard,protag,shonen,crime,cosmic_horror,mecha,g30_protag_shonen_003.webp
-4,B01,S01,R1C4,g30_protag_shonen_004,g30_protag_shonen_004.png,Lina Alvarez,The Titan Dune Gear Vanguard,protag,shonen,kaiju,arabia,mecha,g30_protag_shonen_004.webp
-5,B01,S01,R1C5,g30_protag_shonen_005,g30_protag_shonen_005.png,Lucan Alvarez,The Underworld Dune Portal Vanguard,protag,shonen,crime,arabia,isekai,g30_protag_shonen_005.webp
-6,B01,S01,R2C1,g30_protag_shonen_006,g30_protag_shonen_006.png,Mara Alvarez,The Titan Abyss Portal Vanguard,protag,shonen,kaiju,cosmic_horror,isekai,g30_protag_shonen_006.webp
-7,B01,S01,R2C2,g30_protag_shonen_007,g30_protag_shonen_007.png,Mika Alvarez,The Beast Underworld Hearth Vanguard,protag,shonen,monster_taming,crime,slice,g30_protag_shonen_007.webp
-8,B01,S01,R2C3,g30_protag_shonen_008,g30_protag_shonen_008.png,Mina Alvarez,The Titan Abyss Hearth Vanguard,protag,shonen,kaiju,cosmic_horror,slice,g30_protag_shonen_008.webp
-9,B01,S01,R2C4,g30_protag_shonen_009,g30_protag_shonen_009.png,Nadia Alvarez,The Beast Underworld Terror Vanguard,protag,shonen,monster_taming,crime,horror,g30_protag_shonen_009.webp
-10,B01,S01,R2C5,g30_protag_shonen_010,g30_protag_shonen_010.png,Nao Alvarez,The Titan Abyss Terror Vanguard,protag,shonen,kaiju,cosmic_horror,horror,g30_protag_shonen_010.webp
-11,B01,S02,R1C1,g30_protag_shonen_011,g30_protag_shonen_011.png,Niko Alvarez,The Beast Underworld Heart Vanguard,protag,shonen,monster_taming,crime,romance,g30_protag_shonen_011.webp
-12,B01,S02,R1C2,g30_protag_shonen_012,g30_protag_shonen_012.png,Noor Alvarez,The Titan Abyss Heart Vanguard,protag,shonen,kaiju,cosmic_horror,romance,g30_protag_shonen_012.webp
-13,B01,S02,R1C3,g30_protag_shonen_013,g30_protag_shonen_013.png,Rhea Alvarez,The Beast Underworld Arena Vanguard,protag,shonen,monster_taming,crime,sports,g30_protag_shonen_013.webp
-14,B01,S02,R1C4,g30_protag_shonen_014,g30_protag_shonen_014.png,Ren Alvarez,The Titan Abyss Arena Vanguard,protag,shonen,kaiju,cosmic_horror,sports,g30_protag_shonen_014.webp
-15,B01,S02,R1C5,g30_protag_shonen_015,g30_protag_shonen_015.png,Rin Alvarez,The Beast Underworld Neon Vanguard,protag,shonen,monster_taming,crime,cyber,g30_protag_shonen_015.webp
-16,B01,S02,R2C1,g30_protag_shonen_016,g30_protag_shonen_016.png,Samira Alvarez,The Titan Abyss Neon Vanguard,protag,shonen,kaiju,cosmic_horror,cyber,g30_protag_shonen_016.webp
-17,B01,S02,R2C2,g30_protag_shonen_017,g30_protag_shonen_017.png,Sana Alvarez,The Beast Underworld Realm Vanguard,protag,shonen,monster_taming,crime,fantasy,g30_protag_shonen_017.webp
-18,B01,S02,R2C3,g30_protag_shonen_018,g30_protag_shonen_018.png,Sora Alvarez,The Titan Abyss Realm Vanguard,protag,shonen,kaiju,cosmic_horror,fantasy,g30_protag_shonen_018.webp
-19,B01,S02,R2C4,g30_protag_shonen_019,g30_protag_shonen_019.png,Tala Alvarez,The Beast Underworld Stage Vanguard,protag,shonen,monster_taming,crime,idol,g30_protag_shonen_019.webp
-20,B01,S02,R2C5,g30_protag_shonen_020,g30_protag_shonen_020.png,Yara Alvarez,The Titan Abyss Stage Vanguard,protag,shonen,kaiju,cosmic_horror,idol,g30_protag_shonen_020.webp
-21,B01,S03,R1C1,g30_protag_shonen_021,g30_protag_shonen_021.png,Aiko Amari,The Beast Underworld Cipher Vanguard,protag,shonen,monster_taming,crime,mystery,g30_protag_shonen_021.webp
-22,B01,S03,R1C2,g30_protag_shonen_022,g30_protag_shonen_022.png,Amara Amari,The Titan Abyss Cipher Vanguard,protag,shonen,kaiju,cosmic_horror,mystery,g30_protag_shonen_022.webp
-23,B01,S03,R1C3,g30_protag_shonen_023,g30_protag_shonen_023.png,Ansel Amari,The Beast Underworld Mirth Vanguard,protag,shonen,monster_taming,crime,comedy,g30_protag_shonen_023.webp
-24,B01,S03,R1C4,g30_protag_shonen_024,g30_protag_shonen_024.png,Arden Amari,The Titan Abyss Mirth Vanguard,protag,shonen,kaiju,cosmic_horror,comedy,g30_protag_shonen_024.webp
-25,B01,S03,R1C5,g30_protag_shonen_025,g30_protag_shonen_025.png,Ari Amari,The Beast Underworld Kitchen Vanguard,protag,shonen,monster_taming,crime,cooking,g30_protag_shonen_025.webp
-26,B01,S03,R2C1,g30_protag_shonen_026,g30_protag_shonen_026.png,Asa Amari,The Titan Abyss Kitchen Vanguard,protag,shonen,kaiju,cosmic_horror,cooking,g30_protag_shonen_026.webp
-27,B01,S03,R2C2,g30_protag_shonen_027,g30_protag_shonen_027.png,Asha Amari,The Beast Underworld Command Vanguard,protag,shonen,monster_taming,crime,military,g30_protag_shonen_027.webp
-28,B01,S03,R2C3,g30_protag_shonen_028,g30_protag_shonen_028.png,Cass Amari,The Titan Abyss Command Vanguard,protag,shonen,kaiju,cosmic_horror,military,g30_protag_shonen_028.webp
-29,B01,S03,R2C4,g30_protag_shonen_029,g30_protag_shonen_029.png,Cassia Amari,The Beast Underworld Spirit Vanguard,protag,shonen,monster_taming,crime,supernatural,g30_protag_shonen_029.webp
-30,B01,S03,R2C5,g30_protag_shonen_030,g30_protag_shonen_030.png,Dara Amari,The Titan Abyss Spirit Vanguard,protag,shonen,kaiju,cosmic_horror,supernatural,g30_protag_shonen_030.webp
-31,B01,S04,R1C1,g30_protag_shonen_031,g30_protag_shonen_031.png,Eira Amari,The Beast Underworld Void Vanguard,protag,shonen,monster_taming,crime,space,g30_protag_shonen_031.webp
-32,B01,S04,R1C2,g30_protag_shonen_032,g30_protag_shonen_032.png,Elian Amari,The Titan Abyss Void Vanguard,protag,shonen,kaiju,cosmic_horror,space,g30_protag_shonen_032.webp
-33,B01,S04,R1C3,g30_protag_shonen_033,g30_protag_shonen_033.png,Emi Amari,The Beast Underworld Charm Vanguard,protag,shonen,monster_taming,crime,magical,g30_protag_shonen_033.webp
-34,B01,S04,R1C4,g30_protag_shonen_034,g30_protag_shonen_034.png,Farah Amari,The Titan Abyss Charm Vanguard,protag,shonen,kaiju,cosmic_horror,magical,g30_protag_shonen_034.webp
-35,B01,S04,R1C5,g30_protag_shonen_035,g30_protag_shonen_035.png,Hana Amari,The Beast Underworld Wild Vanguard,protag,shonen,monster_taming,crime,survival,g30_protag_shonen_035.webp
-36,B01,S04,R2C1,g30_protag_shonen_036,g30_protag_shonen_036.png,Haru Amari,The Titan Abyss Wild Vanguard,protag,shonen,kaiju,cosmic_horror,survival,g30_protag_shonen_036.webp
-37,B01,S04,R2C2,g30_protag_shonen_037,g30_protag_shonen_037.png,Idris Amari,The Beast Underworld Corsair Vanguard,protag,shonen,monster_taming,crime,pirate,g30_protag_shonen_037.webp
-38,B01,S04,R2C3,g30_protag_shonen_038,g30_protag_shonen_038.png,Imani Amari,The Titan Abyss Corsair Vanguard,protag,shonen,kaiju,cosmic_horror,pirate,g30_protag_shonen_038.webp
-39,B01,S04,R2C4,g30_protag_shonen_039,g30_protag_shonen_039.png,Jae Amari,The Beast Underworld Fist Vanguard,protag,shonen,monster_taming,crime,martial,g30_protag_shonen_039.webp
-40,B01,S04,R2C5,g30_protag_shonen_040,g30_protag_shonen_040.png,Jin Amari,The Titan Abyss Fist Vanguard,protag,shonen,kaiju,cosmic_horror,martial,g30_protag_shonen_040.webp
-41,B01,S05,R1C1,g30_protag_shonen_041,g30_protag_shonen_041.png,Kael Amari,The Beast Underworld Myth Vanguard,protag,shonen,monster_taming,crime,mythology,g30_protag_shonen_041.webp
-42,B01,S05,R1C2,g30_protag_shonen_042,g30_protag_shonen_042.png,Kira Amari,The Titan Abyss Myth Vanguard,protag,shonen,kaiju,cosmic_horror,mythology,g30_protag_shonen_042.webp
-43,B01,S05,R1C3,g30_protag_shonen_043,g30_protag_shonen_043.png,Leila Amari,The Beast Underworld North Vanguard,protag,shonen,monster_taming,crime,nordic,g30_protag_shonen_043.webp
-44,B01,S05,R1C4,g30_protag_shonen_044,g30_protag_shonen_044.png,Lina Amari,The Titan Abyss North Vanguard,protag,shonen,kaiju,cosmic_horror,nordic,g30_protag_shonen_044.webp
-45,B01,S05,R1C5,g30_protag_shonen_045,g30_protag_shonen_045.png,Lucan Amari,The Beast Underworld Blade Vanguard,protag,shonen,monster_taming,crime,samurai,g30_protag_shonen_045.webp
-46,B01,S05,R2C1,g30_protag_shonen_046,g30_protag_shonen_046.png,Mara Amari,The Titan Abyss Blade Vanguard,protag,shonen,kaiju,cosmic_horror,samurai,g30_protag_shonen_046.webp
-47,B01,S05,R2C2,g30_protag_shonen_047,g30_protag_shonen_047.png,Mika Amari,The Beast Underworld Shadow Vanguard,protag,shonen,monster_taming,crime,shinobi,g30_protag_shonen_047.webp
-48,B01,S05,R2C3,g30_protag_shonen_048,g30_protag_shonen_048.png,Mina Amari,The Titan Abyss Shadow Vanguard,protag,shonen,kaiju,cosmic_horror,shinobi,g30_protag_shonen_048.webp
-49,B01,S05,R2C4,g30_protag_shonen_049,g30_protag_shonen_049.png,Nadia Amari,The Beast Underworld Blood Vanguard,protag,shonen,monster_taming,crime,vampire,g30_protag_shonen_049.webp
-50,B01,S05,R2C5,g30_protag_shonen_050,g30_protag_shonen_050.png,Nao Amari,The Titan Abyss Blood Vanguard,protag,shonen,kaiju,cosmic_horror,vampire,g30_protag_shonen_050.webp
-51,B01,S06,R1C1,g30_protag_shonen_051,g30_protag_shonen_051.png,Niko Amari,The Beast Underworld Ruin Vanguard,protag,shonen,monster_taming,crime,grimdark,g30_protag_shonen_051.webp
-52,B01,S06,R1C2,g30_protag_shonen_052,g30_protag_shonen_052.png,Noor Amari,The Titan Abyss Ruin Vanguard,protag,shonen,kaiju,cosmic_horror,grimdark,g30_protag_shonen_052.webp
-53,B01,S06,R1C3,g30_protag_shonen_053,g30_protag_shonen_053.png,Rhea Amari,The Gear Portal Beast Vanguard,protag,shonen,mecha,isekai,monster_taming,g30_protag_shonen_053.webp
-54,B01,S06,R1C4,g30_protag_shonen_054,g30_protag_shonen_054.png,Ren Amari,The Hearth Terror Dune Vanguard,protag,shonen,slice,horror,arabia,g30_protag_shonen_054.webp
-55,B01,S06,R1C5,g30_protag_shonen_055,g30_protag_shonen_055.png,Rin Amari,The Heart Arena Dune Vanguard,protag,shonen,romance,sports,arabia,g30_protag_shonen_055.webp
-56,B01,S06,R2C1,g30_protag_shonen_056,g30_protag_shonen_056.png,Samira Amari,The Neon Realm Dune Vanguard,protag,shonen,cyber,fantasy,arabia,g30_protag_shonen_056.webp
-57,B01,S06,R2C2,g30_protag_shonen_057,g30_protag_shonen_057.png,Sana Amari,The Stage Cipher Dune Vanguard,protag,shonen,idol,mystery,arabia,g30_protag_shonen_057.webp
-58,B01,S06,R2C3,g30_protag_shonen_058,g30_protag_shonen_058.png,Sora Amari,The Mirth Kitchen Dune Vanguard,protag,shonen,comedy,cooking,arabia,g30_protag_shonen_058.webp
-59,B01,S06,R2C4,g30_protag_shonen_059,g30_protag_shonen_059.png,Tala Amari,The Command Spirit Dune Vanguard,protag,shonen,military,supernatural,arabia,g30_protag_shonen_059.webp
-60,B01,S06,R2C5,g30_protag_shonen_060,g30_protag_shonen_060.png,Yara Amari,The Void Charm Dune Vanguard,protag,shonen,space,magical,arabia,g30_protag_shonen_060.webp
-61,B01,S07,R1C1,g30_protag_shonen_061,g30_protag_shonen_061.png,Aiko Azhar,The Wild Corsair Dune Vanguard,protag,shonen,survival,pirate,arabia,g30_protag_shonen_061.webp
-62,B01,S07,R1C2,g30_protag_shonen_062,g30_protag_shonen_062.png,Amara Azhar,The Fist Myth Dune Vanguard,protag,shonen,martial,mythology,arabia,g30_protag_shonen_062.webp
-63,B01,S07,R1C3,g30_protag_shonen_063,g30_protag_shonen_063.png,Ansel Azhar,The North Blade Dune Vanguard,protag,shonen,nordic,samurai,arabia,g30_protag_shonen_063.webp
-64,B01,S07,R1C4,g30_protag_shonen_064,g30_protag_shonen_064.png,Arden Azhar,The Shadow Blood Dune Vanguard,protag,shonen,shinobi,vampire,arabia,g30_protag_shonen_064.webp
-65,B01,S07,R1C5,g30_protag_shonen_065,g30_protag_shonen_065.png,Ari Azhar,The Beast Dune Ruin Vanguard,protag,shonen,monster_taming,arabia,grimdark,g30_protag_shonen_065.webp
-66,B01,S07,R2C1,g30_protag_shojo_001,g30_protag_shojo_001.png,Asa Azhar,The Beast Underworld Titan Luminary,protag,shojo,monster_taming,crime,kaiju,g30_protag_shojo_001.webp
-67,B01,S07,R2C2,g30_protag_shojo_002,g30_protag_shojo_002.png,Asha Azhar,The Beast Abyss Dune Luminary,protag,shojo,monster_taming,cosmic_horror,arabia,g30_protag_shojo_002.webp
-68,B01,S07,R2C3,g30_protag_shojo_003,g30_protag_shojo_003.png,Cass Azhar,The Underworld Abyss Gear Luminary,protag,shojo,crime,cosmic_horror,mecha,g30_protag_shojo_003.webp
-69,B01,S07,R2C4,g30_protag_shojo_004,g30_protag_shojo_004.png,Cassia Azhar,The Titan Dune Gear Luminary,protag,shojo,kaiju,arabia,mecha,g30_protag_shojo_004.webp
-70,B01,S07,R2C5,g30_protag_shojo_005,g30_protag_shojo_005.png,Dara Azhar,The Underworld Dune Portal Luminary,protag,shojo,crime,arabia,isekai,g30_protag_shojo_005.webp
-71,B01,S08,R1C1,g30_protag_shojo_006,g30_protag_shojo_006.png,Eira Azhar,The Titan Abyss Portal Luminary,protag,shojo,kaiju,cosmic_horror,isekai,g30_protag_shojo_006.webp
-72,B01,S08,R1C2,g30_protag_shojo_007,g30_protag_shojo_007.png,Elian Azhar,The Beast Underworld Hearth Luminary,protag,shojo,monster_taming,crime,slice,g30_protag_shojo_007.webp
-73,B01,S08,R1C3,g30_protag_shojo_008,g30_protag_shojo_008.png,Emi Azhar,The Titan Abyss Hearth Luminary,protag,shojo,kaiju,cosmic_horror,slice,g30_protag_shojo_008.webp
-74,B01,S08,R1C4,g30_protag_shojo_009,g30_protag_shojo_009.png,Farah Azhar,The Beast Underworld Terror Luminary,protag,shojo,monster_taming,crime,horror,g30_protag_shojo_009.webp
-75,B01,S08,R1C5,g30_protag_shojo_010,g30_protag_shojo_010.png,Hana Azhar,The Titan Abyss Terror Luminary,protag,shojo,kaiju,cosmic_horror,horror,g30_protag_shojo_010.webp
-76,B01,S08,R2C1,g30_protag_shojo_011,g30_protag_shojo_011.png,Haru Azhar,The Beast Underworld Heart Luminary,protag,shojo,monster_taming,crime,romance,g30_protag_shojo_011.webp
-77,B01,S08,R2C2,g30_protag_shojo_012,g30_protag_shojo_012.png,Idris Azhar,The Titan Abyss Heart Luminary,protag,shojo,kaiju,cosmic_horror,romance,g30_protag_shojo_012.webp
-78,B01,S08,R2C3,g30_protag_shojo_013,g30_protag_shojo_013.png,Imani Azhar,The Beast Underworld Arena Luminary,protag,shojo,monster_taming,crime,sports,g30_protag_shojo_013.webp
-79,B01,S08,R2C4,g30_protag_shojo_014,g30_protag_shojo_014.png,Jae Azhar,The Titan Abyss Arena Luminary,protag,shojo,kaiju,cosmic_horror,sports,g30_protag_shojo_014.webp
-80,B01,S08,R2C5,g30_protag_shojo_015,g30_protag_shojo_015.png,Jin Azhar,The Beast Underworld Neon Luminary,protag,shojo,monster_taming,crime,cyber,g30_protag_shojo_015.webp
-81,B01,S09,R1C1,g30_protag_shojo_016,g30_protag_shojo_016.png,Kael Azhar,The Titan Abyss Neon Luminary,protag,shojo,kaiju,cosmic_horror,cyber,g30_protag_shojo_016.webp
-82,B01,S09,R1C2,g30_protag_shojo_017,g30_protag_shojo_017.png,Kira Azhar,The Beast Underworld Realm Luminary,protag,shojo,monster_taming,crime,fantasy,g30_protag_shojo_017.webp
-83,B01,S09,R1C3,g30_protag_shojo_018,g30_protag_shojo_018.png,Leila Azhar,The Titan Abyss Realm Luminary,protag,shojo,kaiju,cosmic_horror,fantasy,g30_protag_shojo_018.webp
-84,B01,S09,R1C4,g30_protag_shojo_019,g30_protag_shojo_019.png,Lina Azhar,The Beast Underworld Stage Luminary,protag,shojo,monster_taming,crime,idol,g30_protag_shojo_019.webp
-85,B01,S09,R1C5,g30_protag_shojo_020,g30_protag_shojo_020.png,Lucan Azhar,The Titan Abyss Stage Luminary,protag,shojo,kaiju,cosmic_horror,idol,g30_protag_shojo_020.webp
-86,B01,S09,R2C1,g30_protag_shojo_021,g30_protag_shojo_021.png,Mara Azhar,The Beast Underworld Cipher Luminary,protag,shojo,monster_taming,crime,mystery,g30_protag_shojo_021.webp
-87,B01,S09,R2C2,g30_protag_shojo_022,g30_protag_shojo_022.png,Mika Azhar,The Titan Abyss Cipher Luminary,protag,shojo,kaiju,cosmic_horror,mystery,g30_protag_shojo_022.webp
-88,B01,S09,R2C3,g30_protag_shojo_023,g30_protag_shojo_023.png,Mina Azhar,The Beast Underworld Mirth Luminary,protag,shojo,monster_taming,crime,comedy,g30_protag_shojo_023.webp
-89,B01,S09,R2C4,g30_protag_shojo_024,g30_protag_shojo_024.png,Nadia Azhar,The Titan Abyss Mirth Luminary,protag,shojo,kaiju,cosmic_horror,comedy,g30_protag_shojo_024.webp
-90,B01,S09,R2C5,g30_protag_shojo_025,g30_protag_shojo_025.png,Nao Azhar,The Beast Underworld Kitchen Luminary,protag,shojo,monster_taming,crime,cooking,g30_protag_shojo_025.webp
-91,B01,S10,R1C1,g30_protag_shojo_026,g30_protag_shojo_026.png,Niko Azhar,The Titan Abyss Kitchen Luminary,protag,shojo,kaiju,cosmic_horror,cooking,g30_protag_shojo_026.webp
-92,B01,S10,R1C2,g30_protag_shojo_027,g30_protag_shojo_027.png,Noor Azhar,The Beast Underworld Command Luminary,protag,shojo,monster_taming,crime,military,g30_protag_shojo_027.webp
-93,B01,S10,R1C3,g30_protag_shojo_028,g30_protag_shojo_028.png,Rhea Azhar,The Titan Abyss Command Luminary,protag,shojo,kaiju,cosmic_horror,military,g30_protag_shojo_028.webp
-94,B01,S10,R1C4,g30_protag_shojo_029,g30_protag_shojo_029.png,Ren Azhar,The Beast Underworld Spirit Luminary,protag,shojo,monster_taming,crime,supernatural,g30_protag_shojo_029.webp
-95,B01,S10,R1C5,g30_protag_shojo_030,g30_protag_shojo_030.png,Rin Azhar,The Titan Abyss Spirit Luminary,protag,shojo,kaiju,cosmic_horror,supernatural,g30_protag_shojo_030.webp
-96,B01,S10,R2C1,g30_protag_shojo_031,g30_protag_shojo_031.png,Samira Azhar,The Beast Underworld Void Luminary,protag,shojo,monster_taming,crime,space,g30_protag_shojo_031.webp
-97,B01,S10,R2C2,g30_protag_shojo_032,g30_protag_shojo_032.png,Sana Azhar,The Titan Abyss Void Luminary,protag,shojo,kaiju,cosmic_horror,space,g30_protag_shojo_032.webp
-98,B01,S10,R2C3,g30_protag_shojo_033,g30_protag_shojo_033.png,Sora Azhar,The Beast Underworld Charm Luminary,protag,shojo,monster_taming,crime,magical,g30_protag_shojo_033.webp
-99,B01,S10,R2C4,g30_protag_shojo_034,g30_protag_shojo_034.png,Tala Azhar,The Titan Abyss Charm Luminary,protag,shojo,kaiju,cosmic_horror,magical,g30_protag_shojo_034.webp
-100,B01,S10,R2C5,g30_protag_shojo_035,g30_protag_shojo_035.png,Yara Azhar,The Beast Underworld Wild Luminary,protag,shojo,monster_taming,crime,survival,g30_protag_shojo_035.webp
-101,B02,S11,R1C1,g30_protag_shojo_036,g30_protag_shojo_036.png,Aiko Bako,The Titan Abyss Wild Luminary,protag,shojo,kaiju,cosmic_horror,survival,g30_protag_shojo_036.webp
-102,B02,S11,R1C2,g30_protag_shojo_037,g30_protag_shojo_037.png,Amara Bako,The Beast Underworld Corsair Luminary,protag,shojo,monster_taming,crime,pirate,g30_protag_shojo_037.webp
-103,B02,S11,R1C3,g30_protag_shojo_038,g30_protag_shojo_038.png,Ansel Bako,The Titan Abyss Corsair Luminary,protag,shojo,kaiju,cosmic_horror,pirate,g30_protag_shojo_038.webp
-104,B02,S11,R1C4,g30_protag_shojo_039,g30_protag_shojo_039.png,Arden Bako,The Beast Underworld Fist Luminary,protag,shojo,monster_taming,crime,martial,g30_protag_shojo_039.webp
-105,B02,S11,R1C5,g30_protag_shojo_040,g30_protag_shojo_040.png,Ari Bako,The Titan Abyss Fist Luminary,protag,shojo,kaiju,cosmic_horror,martial,g30_protag_shojo_040.webp
-106,B02,S11,R2C1,g30_protag_shojo_041,g30_protag_shojo_041.png,Asa Bako,The Beast Underworld Myth Luminary,protag,shojo,monster_taming,crime,mythology,g30_protag_shojo_041.webp
-107,B02,S11,R2C2,g30_protag_shojo_042,g30_protag_shojo_042.png,Asha Bako,The Titan Abyss Myth Luminary,protag,shojo,kaiju,cosmic_horror,mythology,g30_protag_shojo_042.webp
-108,B02,S11,R2C3,g30_protag_shojo_043,g30_protag_shojo_043.png,Cass Bako,The Beast Underworld North Luminary,protag,shojo,monster_taming,crime,nordic,g30_protag_shojo_043.webp
-109,B02,S11,R2C4,g30_protag_shojo_044,g30_protag_shojo_044.png,Cassia Bako,The Titan Abyss North Luminary,protag,shojo,kaiju,cosmic_horror,nordic,g30_protag_shojo_044.webp
-110,B02,S11,R2C5,g30_protag_shojo_045,g30_protag_shojo_045.png,Dara Bako,The Beast Underworld Blade Luminary,protag,shojo,monster_taming,crime,samurai,g30_protag_shojo_045.webp
-111,B02,S12,R1C1,g30_protag_shojo_046,g30_protag_shojo_046.png,Eira Bako,The Titan Abyss Blade Luminary,protag,shojo,kaiju,cosmic_horror,samurai,g30_protag_shojo_046.webp
-112,B02,S12,R1C2,g30_protag_shojo_047,g30_protag_shojo_047.png,Elian Bako,The Beast Underworld Shadow Luminary,protag,shojo,monster_taming,crime,shinobi,g30_protag_shojo_047.webp
-113,B02,S12,R1C3,g30_protag_shojo_048,g30_protag_shojo_048.png,Emi Bako,The Titan Abyss Shadow Luminary,protag,shojo,kaiju,cosmic_horror,shinobi,g30_protag_shojo_048.webp
-114,B02,S12,R1C4,g30_protag_shojo_049,g30_protag_shojo_049.png,Farah Bako,The Beast Underworld Blood Luminary,protag,shojo,monster_taming,crime,vampire,g30_protag_shojo_049.webp
-115,B02,S12,R1C5,g30_protag_shojo_050,g30_protag_shojo_050.png,Hana Bako,The Titan Abyss Blood Luminary,protag,shojo,kaiju,cosmic_horror,vampire,g30_protag_shojo_050.webp
-116,B02,S12,R2C1,g30_protag_shojo_051,g30_protag_shojo_051.png,Haru Bako,The Beast Underworld Ruin Luminary,protag,shojo,monster_taming,crime,grimdark,g30_protag_shojo_051.webp
-117,B02,S12,R2C2,g30_protag_shojo_052,g30_protag_shojo_052.png,Idris Bako,The Titan Abyss Ruin Luminary,protag,shojo,kaiju,cosmic_horror,grimdark,g30_protag_shojo_052.webp
-118,B02,S12,R2C3,g30_protag_shojo_053,g30_protag_shojo_053.png,Imani Bako,The Gear Portal Beast Luminary,protag,shojo,mecha,isekai,monster_taming,g30_protag_shojo_053.webp
-119,B02,S12,R2C4,g30_protag_shojo_054,g30_protag_shojo_054.png,Jae Bako,The Hearth Terror Dune Luminary,protag,shojo,slice,horror,arabia,g30_protag_shojo_054.webp
-120,B02,S12,R2C5,g30_protag_shojo_055,g30_protag_shojo_055.png,Jin Bako,The Heart Arena Dune Luminary,protag,shojo,romance,sports,arabia,g30_protag_shojo_055.webp
-121,B02,S13,R1C1,g30_protag_shojo_056,g30_protag_shojo_056.png,Kael Bako,The Neon Realm Dune Luminary,protag,shojo,cyber,fantasy,arabia,g30_protag_shojo_056.webp
-122,B02,S13,R1C2,g30_protag_shojo_057,g30_protag_shojo_057.png,Kira Bako,The Stage Cipher Dune Luminary,protag,shojo,idol,mystery,arabia,g30_protag_shojo_057.webp
-123,B02,S13,R1C3,g30_protag_shojo_058,g30_protag_shojo_058.png,Leila Bako,The Mirth Kitchen Dune Luminary,protag,shojo,comedy,cooking,arabia,g30_protag_shojo_058.webp
-124,B02,S13,R1C4,g30_protag_shojo_059,g30_protag_shojo_059.png,Lina Bako,The Command Spirit Dune Luminary,protag,shojo,military,supernatural,arabia,g30_protag_shojo_059.webp
-125,B02,S13,R1C5,g30_protag_shojo_060,g30_protag_shojo_060.png,Lucan Bako,The Void Charm Dune Luminary,protag,shojo,space,magical,arabia,g30_protag_shojo_060.webp
-126,B02,S13,R2C1,g30_protag_shojo_061,g30_protag_shojo_061.png,Mara Bako,The Wild Corsair Dune Luminary,protag,shojo,survival,pirate,arabia,g30_protag_shojo_061.webp
-127,B02,S13,R2C2,g30_protag_shojo_062,g30_protag_shojo_062.png,Mika Bako,The Fist Myth Dune Luminary,protag,shojo,martial,mythology,arabia,g30_protag_shojo_062.webp
-128,B02,S13,R2C3,g30_protag_shojo_063,g30_protag_shojo_063.png,Mina Bako,The North Blade Dune Luminary,protag,shojo,nordic,samurai,arabia,g30_protag_shojo_063.webp
-129,B02,S13,R2C4,g30_protag_shojo_064,g30_protag_shojo_064.png,Nadia Bako,The Shadow Blood Dune Luminary,protag,shojo,shinobi,vampire,arabia,g30_protag_shojo_064.webp
-130,B02,S13,R2C5,g30_protag_shojo_065,g30_protag_shojo_065.png,Nao Bako,The Beast Dune Ruin Luminary,protag,shojo,monster_taming,arabia,grimdark,g30_protag_shojo_065.webp
-131,B02,S14,R1C1,g30_secondary_shonen_001,g30_secondary_shonen_001.png,Niko Bako,The Beast Underworld Titan Wing,secondary,shonen,monster_taming,crime,kaiju,g30_secondary_shonen_001.webp
-132,B02,S14,R1C2,g30_secondary_shonen_002,g30_secondary_shonen_002.png,Noor Bako,The Beast Abyss Dune Wing,secondary,shonen,monster_taming,cosmic_horror,arabia,g30_secondary_shonen_002.webp
-133,B02,S14,R1C3,g30_secondary_shonen_003,g30_secondary_shonen_003.png,Rhea Bako,The Underworld Abyss Gear Wing,secondary,shonen,crime,cosmic_horror,mecha,g30_secondary_shonen_003.webp
-134,B02,S14,R1C4,g30_secondary_shonen_004,g30_secondary_shonen_004.png,Ren Bako,The Titan Dune Gear Wing,secondary,shonen,kaiju,arabia,mecha,g30_secondary_shonen_004.webp
-135,B02,S14,R1C5,g30_secondary_shonen_005,g30_secondary_shonen_005.png,Rin Bako,The Underworld Dune Portal Wing,secondary,shonen,crime,arabia,isekai,g30_secondary_shonen_005.webp
-136,B02,S14,R2C1,g30_secondary_shonen_006,g30_secondary_shonen_006.png,Samira Bako,The Titan Abyss Portal Wing,secondary,shonen,kaiju,cosmic_horror,isekai,g30_secondary_shonen_006.webp
-137,B02,S14,R2C2,g30_secondary_shonen_007,g30_secondary_shonen_007.png,Sana Bako,The Beast Underworld Hearth Wing,secondary,shonen,monster_taming,crime,slice,g30_secondary_shonen_007.webp
-138,B02,S14,R2C3,g30_secondary_shonen_008,g30_secondary_shonen_008.png,Sora Bako,The Titan Abyss Hearth Wing,secondary,shonen,kaiju,cosmic_horror,slice,g30_secondary_shonen_008.webp
-139,B02,S14,R2C4,g30_secondary_shonen_009,g30_secondary_shonen_009.png,Tala Bako,The Beast Underworld Terror Wing,secondary,shonen,monster_taming,crime,horror,g30_secondary_shonen_009.webp
-140,B02,S14,R2C5,g30_secondary_shonen_010,g30_secondary_shonen_010.png,Yara Bako,The Titan Abyss Terror Wing,secondary,shonen,kaiju,cosmic_horror,horror,g30_secondary_shonen_010.webp
-141,B02,S15,R1C1,g30_secondary_shonen_011,g30_secondary_shonen_011.png,Aiko Bennett,The Beast Underworld Heart Wing,secondary,shonen,monster_taming,crime,romance,g30_secondary_shonen_011.webp
-142,B02,S15,R1C2,g30_secondary_shonen_012,g30_secondary_shonen_012.png,Amara Bennett,The Titan Abyss Heart Wing,secondary,shonen,kaiju,cosmic_horror,romance,g30_secondary_shonen_012.webp
-143,B02,S15,R1C3,g30_secondary_shonen_013,g30_secondary_shonen_013.png,Ansel Bennett,The Beast Underworld Arena Wing,secondary,shonen,monster_taming,crime,sports,g30_secondary_shonen_013.webp
-144,B02,S15,R1C4,g30_secondary_shonen_014,g30_secondary_shonen_014.png,Arden Bennett,The Titan Abyss Arena Wing,secondary,shonen,kaiju,cosmic_horror,sports,g30_secondary_shonen_014.webp
-145,B02,S15,R1C5,g30_secondary_shonen_015,g30_secondary_shonen_015.png,Ari Bennett,The Beast Underworld Neon Wing,secondary,shonen,monster_taming,crime,cyber,g30_secondary_shonen_015.webp
-146,B02,S15,R2C1,g30_secondary_shonen_016,g30_secondary_shonen_016.png,Asa Bennett,The Titan Abyss Neon Wing,secondary,shonen,kaiju,cosmic_horror,cyber,g30_secondary_shonen_016.webp
-147,B02,S15,R2C2,g30_secondary_shonen_017,g30_secondary_shonen_017.png,Asha Bennett,The Beast Underworld Realm Wing,secondary,shonen,monster_taming,crime,fantasy,g30_secondary_shonen_017.webp
-148,B02,S15,R2C3,g30_secondary_shonen_018,g30_secondary_shonen_018.png,Cass Bennett,The Titan Abyss Realm Wing,secondary,shonen,kaiju,cosmic_horror,fantasy,g30_secondary_shonen_018.webp
-149,B02,S15,R2C4,g30_secondary_shonen_019,g30_secondary_shonen_019.png,Cassia Bennett,The Beast Underworld Stage Wing,secondary,shonen,monster_taming,crime,idol,g30_secondary_shonen_019.webp
-150,B02,S15,R2C5,g30_secondary_shonen_020,g30_secondary_shonen_020.png,Dara Bennett,The Titan Abyss Stage Wing,secondary,shonen,kaiju,cosmic_horror,idol,g30_secondary_shonen_020.webp
-151,B02,S16,R1C1,g30_secondary_shonen_021,g30_secondary_shonen_021.png,Eira Bennett,The Beast Underworld Cipher Wing,secondary,shonen,monster_taming,crime,mystery,g30_secondary_shonen_021.webp
-152,B02,S16,R1C2,g30_secondary_shonen_022,g30_secondary_shonen_022.png,Elian Bennett,The Titan Abyss Cipher Wing,secondary,shonen,kaiju,cosmic_horror,mystery,g30_secondary_shonen_022.webp
-153,B02,S16,R1C3,g30_secondary_shonen_023,g30_secondary_shonen_023.png,Emi Bennett,The Beast Underworld Mirth Wing,secondary,shonen,monster_taming,crime,comedy,g30_secondary_shonen_023.webp
-154,B02,S16,R1C4,g30_secondary_shonen_024,g30_secondary_shonen_024.png,Farah Bennett,The Titan Abyss Mirth Wing,secondary,shonen,kaiju,cosmic_horror,comedy,g30_secondary_shonen_024.webp
-155,B02,S16,R1C5,g30_secondary_shonen_025,g30_secondary_shonen_025.png,Hana Bennett,The Beast Underworld Kitchen Wing,secondary,shonen,monster_taming,crime,cooking,g30_secondary_shonen_025.webp
-156,B02,S16,R2C1,g30_secondary_shonen_026,g30_secondary_shonen_026.png,Haru Bennett,The Titan Abyss Kitchen Wing,secondary,shonen,kaiju,cosmic_horror,cooking,g30_secondary_shonen_026.webp
-157,B02,S16,R2C2,g30_secondary_shonen_027,g30_secondary_shonen_027.png,Idris Bennett,The Beast Underworld Command Wing,secondary,shonen,monster_taming,crime,military,g30_secondary_shonen_027.webp
-158,B02,S16,R2C3,g30_secondary_shonen_028,g30_secondary_shonen_028.png,Imani Bennett,The Titan Abyss Command Wing,secondary,shonen,kaiju,cosmic_horror,military,g30_secondary_shonen_028.webp
-159,B02,S16,R2C4,g30_secondary_shonen_029,g30_secondary_shonen_029.png,Jae Bennett,The Beast Underworld Spirit Wing,secondary,shonen,monster_taming,crime,supernatural,g30_secondary_shonen_029.webp
-160,B02,S16,R2C5,g30_secondary_shonen_030,g30_secondary_shonen_030.png,Jin Bennett,The Titan Abyss Spirit Wing,secondary,shonen,kaiju,cosmic_horror,supernatural,g30_secondary_shonen_030.webp
-161,B02,S17,R1C1,g30_secondary_shonen_031,g30_secondary_shonen_031.png,Kael Bennett,The Beast Underworld Void Wing,secondary,shonen,monster_taming,crime,space,g30_secondary_shonen_031.webp
-162,B02,S17,R1C2,g30_secondary_shonen_032,g30_secondary_shonen_032.png,Kira Bennett,The Titan Abyss Void Wing,secondary,shonen,kaiju,cosmic_horror,space,g30_secondary_shonen_032.webp
-163,B02,S17,R1C3,g30_secondary_shonen_033,g30_secondary_shonen_033.png,Leila Bennett,The Beast Underworld Charm Wing,secondary,shonen,monster_taming,crime,magical,g30_secondary_shonen_033.webp
-164,B02,S17,R1C4,g30_secondary_shonen_034,g30_secondary_shonen_034.png,Lina Bennett,The Titan Abyss Charm Wing,secondary,shonen,kaiju,cosmic_horror,magical,g30_secondary_shonen_034.webp
-165,B02,S17,R1C5,g30_secondary_shonen_035,g30_secondary_shonen_035.png,Lucan Bennett,The Beast Underworld Wild Wing,secondary,shonen,monster_taming,crime,survival,g30_secondary_shonen_035.webp
-166,B02,S17,R2C1,g30_secondary_shonen_036,g30_secondary_shonen_036.png,Mara Bennett,The Titan Abyss Wild Wing,secondary,shonen,kaiju,cosmic_horror,survival,g30_secondary_shonen_036.webp
-167,B02,S17,R2C2,g30_secondary_shonen_037,g30_secondary_shonen_037.png,Mika Bennett,The Beast Underworld Corsair Wing,secondary,shonen,monster_taming,crime,pirate,g30_secondary_shonen_037.webp
-168,B02,S17,R2C3,g30_secondary_shonen_038,g30_secondary_shonen_038.png,Mina Bennett,The Titan Abyss Corsair Wing,secondary,shonen,kaiju,cosmic_horror,pirate,g30_secondary_shonen_038.webp
-169,B02,S17,R2C4,g30_secondary_shonen_039,g30_secondary_shonen_039.png,Nadia Bennett,The Beast Underworld Fist Wing,secondary,shonen,monster_taming,crime,martial,g30_secondary_shonen_039.webp
-170,B02,S17,R2C5,g30_secondary_shonen_040,g30_secondary_shonen_040.png,Nao Bennett,The Titan Abyss Fist Wing,secondary,shonen,kaiju,cosmic_horror,martial,g30_secondary_shonen_040.webp
-171,B02,S18,R1C1,g30_secondary_shonen_041,g30_secondary_shonen_041.png,Niko Bennett,The Beast Underworld Myth Wing,secondary,shonen,monster_taming,crime,mythology,g30_secondary_shonen_041.webp
-172,B02,S18,R1C2,g30_secondary_shonen_042,g30_secondary_shonen_042.png,Noor Bennett,The Titan Abyss Myth Wing,secondary,shonen,kaiju,cosmic_horror,mythology,g30_secondary_shonen_042.webp
-173,B02,S18,R1C3,g30_secondary_shonen_043,g30_secondary_shonen_043.png,Rhea Bennett,The Beast Underworld North Wing,secondary,shonen,monster_taming,crime,nordic,g30_secondary_shonen_043.webp
-174,B02,S18,R1C4,g30_secondary_shonen_044,g30_secondary_shonen_044.png,Ren Bennett,The Titan Abyss North Wing,secondary,shonen,kaiju,cosmic_horror,nordic,g30_secondary_shonen_044.webp
-175,B02,S18,R1C5,g30_secondary_shonen_045,g30_secondary_shonen_045.png,Rin Bennett,The Beast Underworld Blade Wing,secondary,shonen,monster_taming,crime,samurai,g30_secondary_shonen_045.webp
-176,B02,S18,R2C1,g30_secondary_shonen_046,g30_secondary_shonen_046.png,Samira Bennett,The Titan Abyss Blade Wing,secondary,shonen,kaiju,cosmic_horror,samurai,g30_secondary_shonen_046.webp
-177,B02,S18,R2C2,g30_secondary_shonen_047,g30_secondary_shonen_047.png,Sana Bennett,The Beast Underworld Shadow Wing,secondary,shonen,monster_taming,crime,shinobi,g30_secondary_shonen_047.webp
-178,B02,S18,R2C3,g30_secondary_shonen_048,g30_secondary_shonen_048.png,Sora Bennett,The Titan Abyss Shadow Wing,secondary,shonen,kaiju,cosmic_horror,shinobi,g30_secondary_shonen_048.webp
-179,B02,S18,R2C4,g30_secondary_shonen_049,g30_secondary_shonen_049.png,Tala Bennett,The Beast Underworld Blood Wing,secondary,shonen,monster_taming,crime,vampire,g30_secondary_shonen_049.webp
-180,B02,S18,R2C5,g30_secondary_shonen_050,g30_secondary_shonen_050.png,Yara Bennett,The Titan Abyss Blood Wing,secondary,shonen,kaiju,cosmic_horror,vampire,g30_secondary_shonen_050.webp
-181,B02,S19,R1C1,g30_secondary_shonen_051,g30_secondary_shonen_051.png,Aiko Chen,The Beast Underworld Ruin Wing,secondary,shonen,monster_taming,crime,grimdark,g30_secondary_shonen_051.webp
-182,B02,S19,R1C2,g30_secondary_shonen_052,g30_secondary_shonen_052.png,Amara Chen,The Titan Abyss Ruin Wing,secondary,shonen,kaiju,cosmic_horror,grimdark,g30_secondary_shonen_052.webp
-183,B02,S19,R1C3,g30_secondary_shonen_053,g30_secondary_shonen_053.png,Ansel Chen,The Gear Portal Beast Wing,secondary,shonen,mecha,isekai,monster_taming,g30_secondary_shonen_053.webp
-184,B02,S19,R1C4,g30_secondary_shonen_054,g30_secondary_shonen_054.png,Arden Chen,The Hearth Terror Dune Wing,secondary,shonen,slice,horror,arabia,g30_secondary_shonen_054.webp
-185,B02,S19,R1C5,g30_secondary_shonen_055,g30_secondary_shonen_055.png,Ari Chen,The Heart Arena Dune Wing,secondary,shonen,romance,sports,arabia,g30_secondary_shonen_055.webp
-186,B02,S19,R2C1,g30_secondary_shonen_056,g30_secondary_shonen_056.png,Asa Chen,The Neon Realm Dune Wing,secondary,shonen,cyber,fantasy,arabia,g30_secondary_shonen_056.webp
-187,B02,S19,R2C2,g30_secondary_shonen_057,g30_secondary_shonen_057.png,Asha Chen,The Stage Cipher Dune Wing,secondary,shonen,idol,mystery,arabia,g30_secondary_shonen_057.webp
-188,B02,S19,R2C3,g30_secondary_shonen_058,g30_secondary_shonen_058.png,Cass Chen,The Mirth Kitchen Dune Wing,secondary,shonen,comedy,cooking,arabia,g30_secondary_shonen_058.webp
-189,B02,S19,R2C4,g30_secondary_shonen_059,g30_secondary_shonen_059.png,Cassia Chen,The Command Spirit Dune Wing,secondary,shonen,military,supernatural,arabia,g30_secondary_shonen_059.webp
-190,B02,S19,R2C5,g30_secondary_shonen_060,g30_secondary_shonen_060.png,Dara Chen,The Void Charm Dune Wing,secondary,shonen,space,magical,arabia,g30_secondary_shonen_060.webp
-191,B02,S20,R1C1,g30_secondary_shonen_061,g30_secondary_shonen_061.png,Eira Chen,The Wild Corsair Dune Wing,secondary,shonen,survival,pirate,arabia,g30_secondary_shonen_061.webp
-192,B02,S20,R1C2,g30_secondary_shonen_062,g30_secondary_shonen_062.png,Elian Chen,The Fist Myth Dune Wing,secondary,shonen,martial,mythology,arabia,g30_secondary_shonen_062.webp
-193,B02,S20,R1C3,g30_secondary_shonen_063,g30_secondary_shonen_063.png,Emi Chen,The North Blade Dune Wing,secondary,shonen,nordic,samurai,arabia,g30_secondary_shonen_063.webp
-194,B02,S20,R1C4,g30_secondary_shonen_064,g30_secondary_shonen_064.png,Farah Chen,The Shadow Blood Dune Wing,secondary,shonen,shinobi,vampire,arabia,g30_secondary_shonen_064.webp
-195,B02,S20,R1C5,g30_secondary_shonen_065,g30_secondary_shonen_065.png,Hana Chen,The Beast Dune Ruin Wing,secondary,shonen,monster_taming,arabia,grimdark,g30_secondary_shonen_065.webp
-196,B02,S20,R2C1,g30_secondary_shojo_001,g30_secondary_shojo_001.png,Haru Chen,The Beast Underworld Titan Confidant,secondary,shojo,monster_taming,crime,kaiju,g30_secondary_shojo_001.webp
-197,B02,S20,R2C2,g30_secondary_shojo_002,g30_secondary_shojo_002.png,Idris Chen,The Beast Abyss Dune Confidant,secondary,shojo,monster_taming,cosmic_horror,arabia,g30_secondary_shojo_002.webp
-198,B02,S20,R2C3,g30_secondary_shojo_003,g30_secondary_shojo_003.png,Imani Chen,The Underworld Abyss Gear Confidant,secondary,shojo,crime,cosmic_horror,mecha,g30_secondary_shojo_003.webp
-199,B02,S20,R2C4,g30_secondary_shojo_004,g30_secondary_shojo_004.png,Jae Chen,The Titan Dune Gear Confidant,secondary,shojo,kaiju,arabia,mecha,g30_secondary_shojo_004.webp
-200,B02,S20,R2C5,g30_secondary_shojo_005,g30_secondary_shojo_005.png,Jin Chen,The Underworld Dune Portal Confidant,secondary,shojo,crime,arabia,isekai,g30_secondary_shojo_005.webp
-201,B03,S21,R1C1,g30_secondary_shojo_006,g30_secondary_shojo_006.png,Kael Chen,The Titan Abyss Portal Confidant,secondary,shojo,kaiju,cosmic_horror,isekai,g30_secondary_shojo_006.webp
-202,B03,S21,R1C2,g30_secondary_shojo_007,g30_secondary_shojo_007.png,Kira Chen,The Beast Underworld Hearth Confidant,secondary,shojo,monster_taming,crime,slice,g30_secondary_shojo_007.webp
-203,B03,S21,R1C3,g30_secondary_shojo_008,g30_secondary_shojo_008.png,Leila Chen,The Titan Abyss Hearth Confidant,secondary,shojo,kaiju,cosmic_horror,slice,g30_secondary_shojo_008.webp
-204,B03,S21,R1C4,g30_secondary_shojo_009,g30_secondary_shojo_009.png,Lina Chen,The Beast Underworld Terror Confidant,secondary,shojo,monster_taming,crime,horror,g30_secondary_shojo_009.webp
-205,B03,S21,R1C5,g30_secondary_shojo_010,g30_secondary_shojo_010.png,Lucan Chen,The Titan Abyss Terror Confidant,secondary,shojo,kaiju,cosmic_horror,horror,g30_secondary_shojo_010.webp
-206,B03,S21,R2C1,g30_secondary_shojo_011,g30_secondary_shojo_011.png,Mara Chen,The Beast Underworld Heart Confidant,secondary,shojo,monster_taming,crime,romance,g30_secondary_shojo_011.webp
-207,B03,S21,R2C2,g30_secondary_shojo_012,g30_secondary_shojo_012.png,Mika Chen,The Titan Abyss Heart Confidant,secondary,shojo,kaiju,cosmic_horror,romance,g30_secondary_shojo_012.webp
-208,B03,S21,R2C3,g30_secondary_shojo_013,g30_secondary_shojo_013.png,Mina Chen,The Beast Underworld Arena Confidant,secondary,shojo,monster_taming,crime,sports,g30_secondary_shojo_013.webp
-209,B03,S21,R2C4,g30_secondary_shojo_014,g30_secondary_shojo_014.png,Nadia Chen,The Titan Abyss Arena Confidant,secondary,shojo,kaiju,cosmic_horror,sports,g30_secondary_shojo_014.webp
-210,B03,S21,R2C5,g30_secondary_shojo_015,g30_secondary_shojo_015.png,Nao Chen,The Beast Underworld Neon Confidant,secondary,shojo,monster_taming,crime,cyber,g30_secondary_shojo_015.webp
-211,B03,S22,R1C1,g30_secondary_shojo_016,g30_secondary_shojo_016.png,Niko Chen,The Titan Abyss Neon Confidant,secondary,shojo,kaiju,cosmic_horror,cyber,g30_secondary_shojo_016.webp
-212,B03,S22,R1C2,g30_secondary_shojo_017,g30_secondary_shojo_017.png,Noor Chen,The Beast Underworld Realm Confidant,secondary,shojo,monster_taming,crime,fantasy,g30_secondary_shojo_017.webp
-213,B03,S22,R1C3,g30_secondary_shojo_018,g30_secondary_shojo_018.png,Rhea Chen,The Titan Abyss Realm Confidant,secondary,shojo,kaiju,cosmic_horror,fantasy,g30_secondary_shojo_018.webp
-214,B03,S22,R1C4,g30_secondary_shojo_019,g30_secondary_shojo_019.png,Ren Chen,The Beast Underworld Stage Confidant,secondary,shojo,monster_taming,crime,idol,g30_secondary_shojo_019.webp
-215,B03,S22,R1C5,g30_secondary_shojo_020,g30_secondary_shojo_020.png,Rin Chen,The Titan Abyss Stage Confidant,secondary,shojo,kaiju,cosmic_horror,idol,g30_secondary_shojo_020.webp
-216,B03,S22,R2C1,g30_secondary_shojo_021,g30_secondary_shojo_021.png,Samira Chen,The Beast Underworld Cipher Confidant,secondary,shojo,monster_taming,crime,mystery,g30_secondary_shojo_021.webp
-217,B03,S22,R2C2,g30_secondary_shojo_022,g30_secondary_shojo_022.png,Sana Chen,The Titan Abyss Cipher Confidant,secondary,shojo,kaiju,cosmic_horror,mystery,g30_secondary_shojo_022.webp
-218,B03,S22,R2C3,g30_secondary_shojo_023,g30_secondary_shojo_023.png,Sora Chen,The Beast Underworld Mirth Confidant,secondary,shojo,monster_taming,crime,comedy,g30_secondary_shojo_023.webp
-219,B03,S22,R2C4,g30_secondary_shojo_024,g30_secondary_shojo_024.png,Tala Chen,The Titan Abyss Mirth Confidant,secondary,shojo,kaiju,cosmic_horror,comedy,g30_secondary_shojo_024.webp
-220,B03,S22,R2C5,g30_secondary_shojo_025,g30_secondary_shojo_025.png,Yara Chen,The Beast Underworld Kitchen Confidant,secondary,shojo,monster_taming,crime,cooking,g30_secondary_shojo_025.webp
-221,B03,S23,R1C1,g30_secondary_shojo_026,g30_secondary_shojo_026.png,Aiko Cho,The Titan Abyss Kitchen Confidant,secondary,shojo,kaiju,cosmic_horror,cooking,g30_secondary_shojo_026.webp
-222,B03,S23,R1C2,g30_secondary_shojo_027,g30_secondary_shojo_027.png,Amara Cho,The Beast Underworld Command Confidant,secondary,shojo,monster_taming,crime,military,g30_secondary_shojo_027.webp
-223,B03,S23,R1C3,g30_secondary_shojo_028,g30_secondary_shojo_028.png,Ansel Cho,The Titan Abyss Command Confidant,secondary,shojo,kaiju,cosmic_horror,military,g30_secondary_shojo_028.webp
-224,B03,S23,R1C4,g30_secondary_shojo_029,g30_secondary_shojo_029.png,Arden Cho,The Beast Underworld Spirit Confidant,secondary,shojo,monster_taming,crime,supernatural,g30_secondary_shojo_029.webp
-225,B03,S23,R1C5,g30_secondary_shojo_030,g30_secondary_shojo_030.png,Ari Cho,The Titan Abyss Spirit Confidant,secondary,shojo,kaiju,cosmic_horror,supernatural,g30_secondary_shojo_030.webp
-226,B03,S23,R2C1,g30_secondary_shojo_031,g30_secondary_shojo_031.png,Asa Cho,The Beast Underworld Void Confidant,secondary,shojo,monster_taming,crime,space,g30_secondary_shojo_031.webp
-227,B03,S23,R2C2,g30_secondary_shojo_032,g30_secondary_shojo_032.png,Asha Cho,The Titan Abyss Void Confidant,secondary,shojo,kaiju,cosmic_horror,space,g30_secondary_shojo_032.webp
-228,B03,S23,R2C3,g30_secondary_shojo_033,g30_secondary_shojo_033.png,Cass Cho,The Beast Underworld Charm Confidant,secondary,shojo,monster_taming,crime,magical,g30_secondary_shojo_033.webp
-229,B03,S23,R2C4,g30_secondary_shojo_034,g30_secondary_shojo_034.png,Cassia Cho,The Titan Abyss Charm Confidant,secondary,shojo,kaiju,cosmic_horror,magical,g30_secondary_shojo_034.webp
-230,B03,S23,R2C5,g30_secondary_shojo_035,g30_secondary_shojo_035.png,Dara Cho,The Beast Underworld Wild Confidant,secondary,shojo,monster_taming,crime,survival,g30_secondary_shojo_035.webp
-231,B03,S24,R1C1,g30_secondary_shojo_036,g30_secondary_shojo_036.png,Eira Cho,The Titan Abyss Wild Confidant,secondary,shojo,kaiju,cosmic_horror,survival,g30_secondary_shojo_036.webp
-232,B03,S24,R1C2,g30_secondary_shojo_037,g30_secondary_shojo_037.png,Elian Cho,The Beast Underworld Corsair Confidant,secondary,shojo,monster_taming,crime,pirate,g30_secondary_shojo_037.webp
-233,B03,S24,R1C3,g30_secondary_shojo_038,g30_secondary_shojo_038.png,Emi Cho,The Titan Abyss Corsair Confidant,secondary,shojo,kaiju,cosmic_horror,pirate,g30_secondary_shojo_038.webp
-234,B03,S24,R1C4,g30_secondary_shojo_039,g30_secondary_shojo_039.png,Farah Cho,The Beast Underworld Fist Confidant,secondary,shojo,monster_taming,crime,martial,g30_secondary_shojo_039.webp
-235,B03,S24,R1C5,g30_secondary_shojo_040,g30_secondary_shojo_040.png,Hana Cho,The Titan Abyss Fist Confidant,secondary,shojo,kaiju,cosmic_horror,martial,g30_secondary_shojo_040.webp
-236,B03,S24,R2C1,g30_secondary_shojo_041,g30_secondary_shojo_041.png,Haru Cho,The Beast Underworld Myth Confidant,secondary,shojo,monster_taming,crime,mythology,g30_secondary_shojo_041.webp
-237,B03,S24,R2C2,g30_secondary_shojo_042,g30_secondary_shojo_042.png,Idris Cho,The Titan Abyss Myth Confidant,secondary,shojo,kaiju,cosmic_horror,mythology,g30_secondary_shojo_042.webp
-238,B03,S24,R2C3,g30_secondary_shojo_043,g30_secondary_shojo_043.png,Imani Cho,The Beast Underworld North Confidant,secondary,shojo,monster_taming,crime,nordic,g30_secondary_shojo_043.webp
-239,B03,S24,R2C4,g30_secondary_shojo_044,g30_secondary_shojo_044.png,Jae Cho,The Titan Abyss North Confidant,secondary,shojo,kaiju,cosmic_horror,nordic,g30_secondary_shojo_044.webp
-240,B03,S24,R2C5,g30_secondary_shojo_045,g30_secondary_shojo_045.png,Jin Cho,The Beast Underworld Blade Confidant,secondary,shojo,monster_taming,crime,samurai,g30_secondary_shojo_045.webp
-241,B03,S25,R1C1,g30_secondary_shojo_046,g30_secondary_shojo_046.png,Kael Cho,The Titan Abyss Blade Confidant,secondary,shojo,kaiju,cosmic_horror,samurai,g30_secondary_shojo_046.webp
-242,B03,S25,R1C2,g30_secondary_shojo_047,g30_secondary_shojo_047.png,Kira Cho,The Beast Underworld Shadow Confidant,secondary,shojo,monster_taming,crime,shinobi,g30_secondary_shojo_047.webp
-243,B03,S25,R1C3,g30_secondary_shojo_048,g30_secondary_shojo_048.png,Leila Cho,The Titan Abyss Shadow Confidant,secondary,shojo,kaiju,cosmic_horror,shinobi,g30_secondary_shojo_048.webp
-244,B03,S25,R1C4,g30_secondary_shojo_049,g30_secondary_shojo_049.png,Lina Cho,The Beast Underworld Blood Confidant,secondary,shojo,monster_taming,crime,vampire,g30_secondary_shojo_049.webp
-245,B03,S25,R1C5,g30_secondary_shojo_050,g30_secondary_shojo_050.png,Lucan Cho,The Titan Abyss Blood Confidant,secondary,shojo,kaiju,cosmic_horror,vampire,g30_secondary_shojo_050.webp
-246,B03,S25,R2C1,g30_secondary_shojo_051,g30_secondary_shojo_051.png,Mara Cho,The Beast Underworld Ruin Confidant,secondary,shojo,monster_taming,crime,grimdark,g30_secondary_shojo_051.webp
-247,B03,S25,R2C2,g30_secondary_shojo_052,g30_secondary_shojo_052.png,Mika Cho,The Titan Abyss Ruin Confidant,secondary,shojo,kaiju,cosmic_horror,grimdark,g30_secondary_shojo_052.webp
-248,B03,S25,R2C3,g30_secondary_shojo_053,g30_secondary_shojo_053.png,Mina Cho,The Gear Portal Beast Confidant,secondary,shojo,mecha,isekai,monster_taming,g30_secondary_shojo_053.webp
-249,B03,S25,R2C4,g30_secondary_shojo_054,g30_secondary_shojo_054.png,Nadia Cho,The Hearth Terror Dune Confidant,secondary,shojo,slice,horror,arabia,g30_secondary_shojo_054.webp
-250,B03,S25,R2C5,g30_secondary_shojo_055,g30_secondary_shojo_055.png,Nao Cho,The Heart Arena Dune Confidant,secondary,shojo,romance,sports,arabia,g30_secondary_shojo_055.webp
-251,B03,S26,R1C1,g30_secondary_shojo_056,g30_secondary_shojo_056.png,Niko Cho,The Neon Realm Dune Confidant,secondary,shojo,cyber,fantasy,arabia,g30_secondary_shojo_056.webp
-252,B03,S26,R1C2,g30_secondary_shojo_057,g30_secondary_shojo_057.png,Noor Cho,The Stage Cipher Dune Confidant,secondary,shojo,idol,mystery,arabia,g30_secondary_shojo_057.webp
-253,B03,S26,R1C3,g30_secondary_shojo_058,g30_secondary_shojo_058.png,Ren Cho,The Mirth Kitchen Dune Confidant,secondary,shojo,comedy,cooking,arabia,g30_secondary_shojo_058.webp
-254,B03,S26,R1C4,g30_secondary_shojo_059,g30_secondary_shojo_059.png,Rin Cho,The Command Spirit Dune Confidant,secondary,shojo,military,supernatural,arabia,g30_secondary_shojo_059.webp
-255,B03,S26,R1C5,g30_secondary_shojo_060,g30_secondary_shojo_060.png,Samira Cho,The Void Charm Dune Confidant,secondary,shojo,space,magical,arabia,g30_secondary_shojo_060.webp
-256,B03,S26,R2C1,g30_secondary_shojo_061,g30_secondary_shojo_061.png,Sana Cho,The Wild Corsair Dune Confidant,secondary,shojo,survival,pirate,arabia,g30_secondary_shojo_061.webp
-257,B03,S26,R2C2,g30_secondary_shojo_062,g30_secondary_shojo_062.png,Sora Cho,The Fist Myth Dune Confidant,secondary,shojo,martial,mythology,arabia,g30_secondary_shojo_062.webp
-258,B03,S26,R2C3,g30_secondary_shojo_063,g30_secondary_shojo_063.png,Tala Cho,The North Blade Dune Confidant,secondary,shojo,nordic,samurai,arabia,g30_secondary_shojo_063.webp
-259,B03,S26,R2C4,g30_secondary_shojo_064,g30_secondary_shojo_064.png,Yara Cho,The Shadow Blood Dune Confidant,secondary,shojo,shinobi,vampire,arabia,g30_secondary_shojo_064.webp
-260,B03,S26,R2C5,g30_secondary_shojo_065,g30_secondary_shojo_065.png,Aiko Costa,The Beast Dune Ruin Confidant,secondary,shojo,monster_taming,arabia,grimdark,g30_secondary_shojo_065.webp
-261,B03,S27,R1C1,g30_pet_shonen_001,g30_pet_shonen_001.png,Azusnap,The Beast Underworld Titan Familiar,pet,shonen,monster_taming,crime,kaiju,g30_pet_shonen_001.webp
-262,B03,S27,R1C2,g30_pet_shonen_002,g30_pet_shonen_002.png,Bramsnap,The Beast Abyss Dune Familiar,pet,shonen,monster_taming,cosmic_horror,arabia,g30_pet_shonen_002.webp
-263,B03,S27,R1C3,g30_pet_shonen_003,g30_pet_shonen_003.png,Chaisnap,The Underworld Abyss Gear Familiar,pet,shonen,crime,cosmic_horror,mecha,g30_pet_shonen_003.webp
-264,B03,S27,R1C4,g30_pet_shonen_004,g30_pet_shonen_004.png,Cindersnap,The Titan Dune Gear Familiar,pet,shonen,kaiju,arabia,mecha,g30_pet_shonen_004.webp
-265,B03,S27,R1C5,g30_pet_shonen_005,g30_pet_shonen_005.png,Clinksnap,The Underworld Dune Portal Familiar,pet,shonen,crime,arabia,isekai,g30_pet_shonen_005.webp
-266,B03,S27,R2C1,g30_pet_shonen_006,g30_pet_shonen_006.png,Djinnisnap,The Titan Abyss Portal Familiar,pet,shonen,kaiju,cosmic_horror,isekai,g30_pet_shonen_006.webp
-267,B03,S27,R2C2,g30_pet_shonen_007,g30_pet_shonen_007.png,Embersnap,The Beast Underworld Hearth Familiar,pet,shonen,monster_taming,crime,slice,g30_pet_shonen_007.webp
-268,B03,S27,R2C3,g30_pet_shonen_008,g30_pet_shonen_008.png,Fangsnap,The Titan Abyss Hearth Familiar,pet,shonen,kaiju,cosmic_horror,slice,g30_pet_shonen_008.webp
-269,B03,S27,R2C4,g30_pet_shonen_009,g30_pet_shonen_009.png,Glimsnap,The Beast Underworld Terror Familiar,pet,shonen,monster_taming,crime,horror,g30_pet_shonen_009.webp
-270,B03,S27,R2C5,g30_pet_shonen_010,g30_pet_shonen_010.png,Kikisnap,The Titan Abyss Terror Familiar,pet,shonen,kaiju,cosmic_horror,horror,g30_pet_shonen_010.webp
-271,B03,S28,R1C1,g30_pet_shonen_011,g30_pet_shonen_011.png,Lumensnap,The Beast Underworld Heart Familiar,pet,shonen,monster_taming,crime,romance,g30_pet_shonen_011.webp
-272,B03,S28,R1C2,g30_pet_shonen_012,g30_pet_shonen_012.png,Mirisnap,The Titan Abyss Heart Familiar,pet,shonen,kaiju,cosmic_horror,romance,g30_pet_shonen_012.webp
-273,B03,S28,R1C3,g30_pet_shonen_013,g30_pet_shonen_013.png,Misosnap,The Beast Underworld Arena Familiar,pet,shonen,monster_taming,crime,sports,g30_pet_shonen_013.webp
-274,B03,S28,R1C4,g30_pet_shonen_014,g30_pet_shonen_014.png,Mokusnap,The Titan Abyss Arena Familiar,pet,shonen,kaiju,cosmic_horror,sports,g30_pet_shonen_014.webp
-275,B03,S28,R1C5,g30_pet_shonen_015,g30_pet_shonen_015.png,Nibsnap,The Beast Underworld Neon Familiar,pet,shonen,monster_taming,crime,cyber,g30_pet_shonen_015.webp
-276,B03,S28,R2C1,g30_pet_shonen_016,g30_pet_shonen_016.png,Norisnap,The Titan Abyss Neon Familiar,pet,shonen,kaiju,cosmic_horror,cyber,g30_pet_shonen_016.webp
-277,B03,S28,R2C2,g30_pet_shonen_017,g30_pet_shonen_017.png,Orbitsnap,The Beast Underworld Realm Familiar,pet,shonen,monster_taming,crime,fantasy,g30_pet_shonen_017.webp
-278,B03,S28,R2C3,g30_pet_shonen_018,g30_pet_shonen_018.png,Pebblesnap,The Titan Abyss Realm Familiar,pet,shonen,kaiju,cosmic_horror,fantasy,g30_pet_shonen_018.webp
-279,B03,S28,R2C4,g30_pet_shonen_019,g30_pet_shonen_019.png,Pipsnap,The Beast Underworld Stage Familiar,pet,shonen,monster_taming,crime,idol,g30_pet_shonen_019.webp
-280,B03,S28,R2C5,g30_pet_shonen_020,g30_pet_shonen_020.png,Pucksnap,The Titan Abyss Stage Familiar,pet,shonen,kaiju,cosmic_horror,idol,g30_pet_shonen_020.webp
-281,B03,S29,R1C1,g30_pet_shonen_021,g30_pet_shonen_021.png,Riffsnap,The Beast Underworld Cipher Familiar,pet,shonen,monster_taming,crime,mystery,g30_pet_shonen_021.webp
-282,B03,S29,R1C2,g30_pet_shonen_022,g30_pet_shonen_022.png,Runesnap,The Titan Abyss Cipher Familiar,pet,shonen,kaiju,cosmic_horror,mystery,g30_pet_shonen_022.webp
-283,B03,S29,R1C3,g30_pet_shonen_023,g30_pet_shonen_023.png,Sablesnap,The Beast Underworld Mirth Familiar,pet,shonen,monster_taming,crime,comedy,g30_pet_shonen_023.webp
-284,B03,S29,R1C4,g30_pet_shonen_024,g30_pet_shonen_024.png,Skiffsnap,The Titan Abyss Mirth Familiar,pet,shonen,kaiju,cosmic_horror,comedy,g30_pet_shonen_024.webp
-285,B03,S29,R1C5,g30_pet_shonen_025,g30_pet_shonen_025.png,Sootsnap,The Beast Underworld Kitchen Familiar,pet,shonen,monster_taming,crime,cooking,g30_pet_shonen_025.webp
-286,B03,S29,R2C1,g30_pet_shonen_026,g30_pet_shonen_026.png,Talonsnap,The Titan Abyss Kitchen Familiar,pet,shonen,kaiju,cosmic_horror,cooking,g30_pet_shonen_026.webp
-287,B03,S29,R2C2,g30_pet_shonen_027,g30_pet_shonen_027.png,Tikasnap,The Beast Underworld Command Familiar,pet,shonen,monster_taming,crime,military,g30_pet_shonen_027.webp
-288,B03,S29,R2C3,g30_pet_shonen_028,g30_pet_shonen_028.png,Totosnap,The Titan Abyss Command Familiar,pet,shonen,kaiju,cosmic_horror,military,g30_pet_shonen_028.webp
-289,B03,S29,R2C4,g30_pet_shonen_029,g30_pet_shonen_029.png,Vantasnap,The Beast Underworld Spirit Familiar,pet,shonen,monster_taming,crime,supernatural,g30_pet_shonen_029.webp
-290,B03,S29,R2C5,g30_pet_shonen_030,g30_pet_shonen_030.png,Whispsnap,The Titan Abyss Spirit Familiar,pet,shonen,kaiju,cosmic_horror,supernatural,g30_pet_shonen_030.webp
-291,B03,S30,R1C1,g30_pet_shonen_031,g30_pet_shonen_031.png,Azuspark,The Beast Underworld Void Familiar,pet,shonen,monster_taming,crime,space,g30_pet_shonen_031.webp
-292,B03,S30,R1C2,g30_pet_shonen_032,g30_pet_shonen_032.png,Bramspark,The Titan Abyss Void Familiar,pet,shonen,kaiju,cosmic_horror,space,g30_pet_shonen_032.webp
-293,B03,S30,R1C3,g30_pet_shonen_033,g30_pet_shonen_033.png,Chaispark,The Beast Underworld Charm Familiar,pet,shonen,monster_taming,crime,magical,g30_pet_shonen_033.webp
-294,B03,S30,R1C4,g30_pet_shonen_034,g30_pet_shonen_034.png,Cinderspark,The Titan Abyss Charm Familiar,pet,shonen,kaiju,cosmic_horror,magical,g30_pet_shonen_034.webp
-295,B03,S30,R1C5,g30_pet_shonen_035,g30_pet_shonen_035.png,Clinkspark,The Beast Underworld Wild Familiar,pet,shonen,monster_taming,crime,survival,g30_pet_shonen_035.webp
-296,B03,S30,R2C1,g30_pet_shonen_036,g30_pet_shonen_036.png,Djinnispark,The Titan Abyss Wild Familiar,pet,shonen,kaiju,cosmic_horror,survival,g30_pet_shonen_036.webp
-297,B03,S30,R2C2,g30_pet_shonen_037,g30_pet_shonen_037.png,Emberspark,The Beast Underworld Corsair Familiar,pet,shonen,monster_taming,crime,pirate,g30_pet_shonen_037.webp
-298,B03,S30,R2C3,g30_pet_shonen_038,g30_pet_shonen_038.png,Fangspark,The Titan Abyss Corsair Familiar,pet,shonen,kaiju,cosmic_horror,pirate,g30_pet_shonen_038.webp
-299,B03,S30,R2C4,g30_pet_shonen_039,g30_pet_shonen_039.png,Glimspark,The Beast Underworld Fist Familiar,pet,shonen,monster_taming,crime,martial,g30_pet_shonen_039.webp
-300,B03,S30,R2C5,g30_pet_shonen_040,g30_pet_shonen_040.png,Kikispark,The Titan Abyss Fist Familiar,pet,shonen,kaiju,cosmic_horror,martial,g30_pet_shonen_040.webp
-301,B04,S31,R1C1,g30_pet_shonen_041,g30_pet_shonen_041.png,Lumenspark,The Beast Underworld Myth Familiar,pet,shonen,monster_taming,crime,mythology,g30_pet_shonen_041.webp
-302,B04,S31,R1C2,g30_pet_shonen_042,g30_pet_shonen_042.png,Mirispark,The Titan Abyss Myth Familiar,pet,shonen,kaiju,cosmic_horror,mythology,g30_pet_shonen_042.webp
-303,B04,S31,R1C3,g30_pet_shonen_043,g30_pet_shonen_043.png,Misospark,The Beast Underworld North Familiar,pet,shonen,monster_taming,crime,nordic,g30_pet_shonen_043.webp
-304,B04,S31,R1C4,g30_pet_shonen_044,g30_pet_shonen_044.png,Mokuspark,The Titan Abyss North Familiar,pet,shonen,kaiju,cosmic_horror,nordic,g30_pet_shonen_044.webp
-305,B04,S31,R1C5,g30_pet_shonen_045,g30_pet_shonen_045.png,Nibspark,The Beast Underworld Blade Familiar,pet,shonen,monster_taming,crime,samurai,g30_pet_shonen_045.webp
-306,B04,S31,R2C1,g30_pet_shonen_046,g30_pet_shonen_046.png,Norispark,The Titan Abyss Blade Familiar,pet,shonen,kaiju,cosmic_horror,samurai,g30_pet_shonen_046.webp
-307,B04,S31,R2C2,g30_pet_shonen_047,g30_pet_shonen_047.png,Orbitspark,The Beast Underworld Shadow Familiar,pet,shonen,monster_taming,crime,shinobi,g30_pet_shonen_047.webp
-308,B04,S31,R2C3,g30_pet_shonen_048,g30_pet_shonen_048.png,Pebblespark,The Titan Abyss Shadow Familiar,pet,shonen,kaiju,cosmic_horror,shinobi,g30_pet_shonen_048.webp
-309,B04,S31,R2C4,g30_pet_shonen_049,g30_pet_shonen_049.png,Pipspark,The Beast Underworld Blood Familiar,pet,shonen,monster_taming,crime,vampire,g30_pet_shonen_049.webp
-310,B04,S31,R2C5,g30_pet_shonen_050,g30_pet_shonen_050.png,Puckspark,The Titan Abyss Blood Familiar,pet,shonen,kaiju,cosmic_horror,vampire,g30_pet_shonen_050.webp
-311,B04,S32,R1C1,g30_pet_shonen_051,g30_pet_shonen_051.png,Riffspark,The Beast Underworld Ruin Familiar,pet,shonen,monster_taming,crime,grimdark,g30_pet_shonen_051.webp
-312,B04,S32,R1C2,g30_pet_shonen_052,g30_pet_shonen_052.png,Runespark,The Titan Abyss Ruin Familiar,pet,shonen,kaiju,cosmic_horror,grimdark,g30_pet_shonen_052.webp
-313,B04,S32,R1C3,g30_pet_shonen_053,g30_pet_shonen_053.png,Sablespark,The Gear Portal Beast Familiar,pet,shonen,mecha,isekai,monster_taming,g30_pet_shonen_053.webp
-314,B04,S32,R1C4,g30_pet_shonen_054,g30_pet_shonen_054.png,Skiffspark,The Hearth Terror Dune Familiar,pet,shonen,slice,horror,arabia,g30_pet_shonen_054.webp
-315,B04,S32,R1C5,g30_pet_shonen_055,g30_pet_shonen_055.png,Sootspark,The Heart Arena Dune Familiar,pet,shonen,romance,sports,arabia,g30_pet_shonen_055.webp
-316,B04,S32,R2C1,g30_pet_shonen_056,g30_pet_shonen_056.png,Talonspark,The Neon Realm Dune Familiar,pet,shonen,cyber,fantasy,arabia,g30_pet_shonen_056.webp
-317,B04,S32,R2C2,g30_pet_shonen_057,g30_pet_shonen_057.png,Tikaspark,The Stage Cipher Dune Familiar,pet,shonen,idol,mystery,arabia,g30_pet_shonen_057.webp
-318,B04,S32,R2C3,g30_pet_shonen_058,g30_pet_shonen_058.png,Totospark,The Mirth Kitchen Dune Familiar,pet,shonen,comedy,cooking,arabia,g30_pet_shonen_058.webp
-319,B04,S32,R2C4,g30_pet_shonen_059,g30_pet_shonen_059.png,Vantaspark,The Command Spirit Dune Familiar,pet,shonen,military,supernatural,arabia,g30_pet_shonen_059.webp
-320,B04,S32,R2C5,g30_pet_shonen_060,g30_pet_shonen_060.png,Whispspark,The Void Charm Dune Familiar,pet,shonen,space,magical,arabia,g30_pet_shonen_060.webp
-321,B04,S33,R1C1,g30_pet_shonen_061,g30_pet_shonen_061.png,Azusprite,The Wild Corsair Dune Familiar,pet,shonen,survival,pirate,arabia,g30_pet_shonen_061.webp
-322,B04,S33,R1C2,g30_pet_shonen_062,g30_pet_shonen_062.png,Bramsprite,The Fist Myth Dune Familiar,pet,shonen,martial,mythology,arabia,g30_pet_shonen_062.webp
-323,B04,S33,R1C3,g30_pet_shonen_063,g30_pet_shonen_063.png,Chaisprite,The North Blade Dune Familiar,pet,shonen,nordic,samurai,arabia,g30_pet_shonen_063.webp
-324,B04,S33,R1C4,g30_pet_shonen_064,g30_pet_shonen_064.png,Cindersprite,The Shadow Blood Dune Familiar,pet,shonen,shinobi,vampire,arabia,g30_pet_shonen_064.webp
-325,B04,S33,R1C5,g30_pet_shonen_065,g30_pet_shonen_065.png,Clinksprite,The Beast Dune Ruin Familiar,pet,shonen,monster_taming,arabia,grimdark,g30_pet_shonen_065.webp
-326,B04,S33,R2C1,g30_pet_shojo_001,g30_pet_shojo_001.png,Djinnisprite,The Beast Underworld Titan Sprite,pet,shojo,monster_taming,crime,kaiju,g30_pet_shojo_001.webp
-327,B04,S33,R2C2,g30_pet_shojo_002,g30_pet_shojo_002.png,Embersprite,The Beast Abyss Dune Sprite,pet,shojo,monster_taming,cosmic_horror,arabia,g30_pet_shojo_002.webp
-328,B04,S33,R2C3,g30_pet_shojo_003,g30_pet_shojo_003.png,Fangsprite,The Underworld Abyss Gear Sprite,pet,shojo,crime,cosmic_horror,mecha,g30_pet_shojo_003.webp
-329,B04,S33,R2C4,g30_pet_shojo_004,g30_pet_shojo_004.png,Glimsprite,The Titan Dune Gear Sprite,pet,shojo,kaiju,arabia,mecha,g30_pet_shojo_004.webp
-330,B04,S33,R2C5,g30_pet_shojo_005,g30_pet_shojo_005.png,Kikisprite,The Underworld Dune Portal Sprite,pet,shojo,crime,arabia,isekai,g30_pet_shojo_005.webp
-331,B04,S34,R1C1,g30_pet_shojo_006,g30_pet_shojo_006.png,Lumensprite,The Titan Abyss Portal Sprite,pet,shojo,kaiju,cosmic_horror,isekai,g30_pet_shojo_006.webp
-332,B04,S34,R1C2,g30_pet_shojo_007,g30_pet_shojo_007.png,Mirisprite,The Beast Underworld Hearth Sprite,pet,shojo,monster_taming,crime,slice,g30_pet_shojo_007.webp
-333,B04,S34,R1C3,g30_pet_shojo_008,g30_pet_shojo_008.png,Misosprite,The Titan Abyss Hearth Sprite,pet,shojo,kaiju,cosmic_horror,slice,g30_pet_shojo_008.webp
-334,B04,S34,R1C4,g30_pet_shojo_009,g30_pet_shojo_009.png,Mokusprite,The Beast Underworld Terror Sprite,pet,shojo,monster_taming,crime,horror,g30_pet_shojo_009.webp
-335,B04,S34,R1C5,g30_pet_shojo_010,g30_pet_shojo_010.png,Nibsprite,The Titan Abyss Terror Sprite,pet,shojo,kaiju,cosmic_horror,horror,g30_pet_shojo_010.webp
-336,B04,S34,R2C1,g30_pet_shojo_011,g30_pet_shojo_011.png,Norisprite,The Beast Underworld Heart Sprite,pet,shojo,monster_taming,crime,romance,g30_pet_shojo_011.webp
-337,B04,S34,R2C2,g30_pet_shojo_012,g30_pet_shojo_012.png,Orbitsprite,The Titan Abyss Heart Sprite,pet,shojo,kaiju,cosmic_horror,romance,g30_pet_shojo_012.webp
-338,B04,S34,R2C3,g30_pet_shojo_013,g30_pet_shojo_013.png,Pebblesprite,The Beast Underworld Arena Sprite,pet,shojo,monster_taming,crime,sports,g30_pet_shojo_013.webp
-339,B04,S34,R2C4,g30_pet_shojo_014,g30_pet_shojo_014.png,Pipsprite,The Titan Abyss Arena Sprite,pet,shojo,kaiju,cosmic_horror,sports,g30_pet_shojo_014.webp
-340,B04,S34,R2C5,g30_pet_shojo_015,g30_pet_shojo_015.png,Pucksprite,The Beast Underworld Neon Sprite,pet,shojo,monster_taming,crime,cyber,g30_pet_shojo_015.webp
-341,B04,S35,R1C1,g30_pet_shojo_016,g30_pet_shojo_016.png,Riffsprite,The Titan Abyss Neon Sprite,pet,shojo,kaiju,cosmic_horror,cyber,g30_pet_shojo_016.webp
-342,B04,S35,R1C2,g30_pet_shojo_017,g30_pet_shojo_017.png,Runesprite,The Beast Underworld Realm Sprite,pet,shojo,monster_taming,crime,fantasy,g30_pet_shojo_017.webp
-343,B04,S35,R1C3,g30_pet_shojo_018,g30_pet_shojo_018.png,Sablesprite,The Titan Abyss Realm Sprite,pet,shojo,kaiju,cosmic_horror,fantasy,g30_pet_shojo_018.webp
-344,B04,S35,R1C4,g30_pet_shojo_019,g30_pet_shojo_019.png,Skiffsprite,The Beast Underworld Stage Sprite,pet,shojo,monster_taming,crime,idol,g30_pet_shojo_019.webp
-345,B04,S35,R1C5,g30_pet_shojo_020,g30_pet_shojo_020.png,Sootsprite,The Titan Abyss Stage Sprite,pet,shojo,kaiju,cosmic_horror,idol,g30_pet_shojo_020.webp
-346,B04,S35,R2C1,g30_pet_shojo_021,g30_pet_shojo_021.png,Talonsprite,The Beast Underworld Cipher Sprite,pet,shojo,monster_taming,crime,mystery,g30_pet_shojo_021.webp
-347,B04,S35,R2C2,g30_pet_shojo_022,g30_pet_shojo_022.png,Tikasprite,The Titan Abyss Cipher Sprite,pet,shojo,kaiju,cosmic_horror,mystery,g30_pet_shojo_022.webp
-348,B04,S35,R2C3,g30_pet_shojo_023,g30_pet_shojo_023.png,Totosprite,The Beast Underworld Mirth Sprite,pet,shojo,monster_taming,crime,comedy,g30_pet_shojo_023.webp
-349,B04,S35,R2C4,g30_pet_shojo_024,g30_pet_shojo_024.png,Vantasprite,The Titan Abyss Mirth Sprite,pet,shojo,kaiju,cosmic_horror,comedy,g30_pet_shojo_024.webp
-350,B04,S35,R2C5,g30_pet_shojo_025,g30_pet_shojo_025.png,Whispsprite,The Beast Underworld Kitchen Sprite,pet,shojo,monster_taming,crime,cooking,g30_pet_shojo_025.webp
-351,B04,S36,R1C1,g30_pet_shojo_026,g30_pet_shojo_026.png,Azutail,The Titan Abyss Kitchen Sprite,pet,shojo,kaiju,cosmic_horror,cooking,g30_pet_shojo_026.webp
-352,B04,S36,R1C2,g30_pet_shojo_027,g30_pet_shojo_027.png,Bramtail,The Beast Underworld Command Sprite,pet,shojo,monster_taming,crime,military,g30_pet_shojo_027.webp
-353,B04,S36,R1C3,g30_pet_shojo_028,g30_pet_shojo_028.png,Chaitail,The Titan Abyss Command Sprite,pet,shojo,kaiju,cosmic_horror,military,g30_pet_shojo_028.webp
-354,B04,S36,R1C4,g30_pet_shojo_029,g30_pet_shojo_029.png,Cindertail,The Beast Underworld Spirit Sprite,pet,shojo,monster_taming,crime,supernatural,g30_pet_shojo_029.webp
-355,B04,S36,R1C5,g30_pet_shojo_030,g30_pet_shojo_030.png,Clinktail,The Titan Abyss Spirit Sprite,pet,shojo,kaiju,cosmic_horror,supernatural,g30_pet_shojo_030.webp
-356,B04,S36,R2C1,g30_pet_shojo_031,g30_pet_shojo_031.png,Djinnitail,The Beast Underworld Void Sprite,pet,shojo,monster_taming,crime,space,g30_pet_shojo_031.webp
-357,B04,S36,R2C2,g30_pet_shojo_032,g30_pet_shojo_032.png,Embertail,The Titan Abyss Void Sprite,pet,shojo,kaiju,cosmic_horror,space,g30_pet_shojo_032.webp
-358,B04,S36,R2C3,g30_pet_shojo_033,g30_pet_shojo_033.png,Fangtail,The Beast Underworld Charm Sprite,pet,shojo,monster_taming,crime,magical,g30_pet_shojo_033.webp
-359,B04,S36,R2C4,g30_pet_shojo_034,g30_pet_shojo_034.png,Glimtail,The Titan Abyss Charm Sprite,pet,shojo,kaiju,cosmic_horror,magical,g30_pet_shojo_034.webp
-360,B04,S36,R2C5,g30_pet_shojo_035,g30_pet_shojo_035.png,Kikitail,The Beast Underworld Wild Sprite,pet,shojo,monster_taming,crime,survival,g30_pet_shojo_035.webp
-361,B04,S37,R1C1,g30_pet_shojo_036,g30_pet_shojo_036.png,Lumentail,The Titan Abyss Wild Sprite,pet,shojo,kaiju,cosmic_horror,survival,g30_pet_shojo_036.webp
-362,B04,S37,R1C2,g30_pet_shojo_037,g30_pet_shojo_037.png,Miritail,The Beast Underworld Corsair Sprite,pet,shojo,monster_taming,crime,pirate,g30_pet_shojo_037.webp
-363,B04,S37,R1C3,g30_pet_shojo_038,g30_pet_shojo_038.png,Misotail,The Titan Abyss Corsair Sprite,pet,shojo,kaiju,cosmic_horror,pirate,g30_pet_shojo_038.webp
-364,B04,S37,R1C4,g30_pet_shojo_039,g30_pet_shojo_039.png,Mokutail,The Beast Underworld Fist Sprite,pet,shojo,monster_taming,crime,martial,g30_pet_shojo_039.webp
-365,B04,S37,R1C5,g30_pet_shojo_040,g30_pet_shojo_040.png,Nibtail,The Titan Abyss Fist Sprite,pet,shojo,kaiju,cosmic_horror,martial,g30_pet_shojo_040.webp
-366,B04,S37,R2C1,g30_pet_shojo_041,g30_pet_shojo_041.png,Noritail,The Beast Underworld Myth Sprite,pet,shojo,monster_taming,crime,mythology,g30_pet_shojo_041.webp
-367,B04,S37,R2C2,g30_pet_shojo_042,g30_pet_shojo_042.png,Orbittail,The Titan Abyss Myth Sprite,pet,shojo,kaiju,cosmic_horror,mythology,g30_pet_shojo_042.webp
-368,B04,S37,R2C3,g30_pet_shojo_043,g30_pet_shojo_043.png,Pebbletail,The Beast Underworld North Sprite,pet,shojo,monster_taming,crime,nordic,g30_pet_shojo_043.webp
-369,B04,S37,R2C4,g30_pet_shojo_044,g30_pet_shojo_044.png,Piptail,The Titan Abyss North Sprite,pet,shojo,kaiju,cosmic_horror,nordic,g30_pet_shojo_044.webp
-370,B04,S37,R2C5,g30_pet_shojo_045,g30_pet_shojo_045.png,Pucktail,The Beast Underworld Blade Sprite,pet,shojo,monster_taming,crime,samurai,g30_pet_shojo_045.webp
-371,B04,S38,R1C1,g30_pet_shojo_046,g30_pet_shojo_046.png,Rifftail,The Titan Abyss Blade Sprite,pet,shojo,kaiju,cosmic_horror,samurai,g30_pet_shojo_046.webp
-372,B04,S38,R1C2,g30_pet_shojo_047,g30_pet_shojo_047.png,Runetail,The Beast Underworld Shadow Sprite,pet,shojo,monster_taming,crime,shinobi,g30_pet_shojo_047.webp
-373,B04,S38,R1C3,g30_pet_shojo_048,g30_pet_shojo_048.png,Sabletail,The Titan Abyss Shadow Sprite,pet,shojo,kaiju,cosmic_horror,shinobi,g30_pet_shojo_048.webp
-374,B04,S38,R1C4,g30_pet_shojo_049,g30_pet_shojo_049.png,Skifftail,The Beast Underworld Blood Sprite,pet,shojo,monster_taming,crime,vampire,g30_pet_shojo_049.webp
-375,B04,S38,R1C5,g30_pet_shojo_050,g30_pet_shojo_050.png,Soottail,The Titan Abyss Blood Sprite,pet,shojo,kaiju,cosmic_horror,vampire,g30_pet_shojo_050.webp
-376,B04,S38,R2C1,g30_pet_shojo_051,g30_pet_shojo_051.png,Talontail,The Beast Underworld Ruin Sprite,pet,shojo,monster_taming,crime,grimdark,g30_pet_shojo_051.webp
-377,B04,S38,R2C2,g30_pet_shojo_052,g30_pet_shojo_052.png,Tikatail,The Titan Abyss Ruin Sprite,pet,shojo,kaiju,cosmic_horror,grimdark,g30_pet_shojo_052.webp
-378,B04,S38,R2C3,g30_pet_shojo_053,g30_pet_shojo_053.png,Tototail,The Gear Portal Beast Sprite,pet,shojo,mecha,isekai,monster_taming,g30_pet_shojo_053.webp
-379,B04,S38,R2C4,g30_pet_shojo_054,g30_pet_shojo_054.png,Vantatail,The Hearth Terror Dune Sprite,pet,shojo,slice,horror,arabia,g30_pet_shojo_054.webp
-380,B04,S38,R2C5,g30_pet_shojo_055,g30_pet_shojo_055.png,Whisptail,The Heart Arena Dune Sprite,pet,shojo,romance,sports,arabia,g30_pet_shojo_055.webp
-381,B04,S39,R1C1,g30_pet_shojo_056,g30_pet_shojo_056.png,Azutooth,The Neon Realm Dune Sprite,pet,shojo,cyber,fantasy,arabia,g30_pet_shojo_056.webp
-382,B04,S39,R1C2,g30_pet_shojo_057,g30_pet_shojo_057.png,Bramtooth,The Stage Cipher Dune Sprite,pet,shojo,idol,mystery,arabia,g30_pet_shojo_057.webp
-383,B04,S39,R1C3,g30_pet_shojo_058,g30_pet_shojo_058.png,Chaitooth,The Mirth Kitchen Dune Sprite,pet,shojo,comedy,cooking,arabia,g30_pet_shojo_058.webp
-384,B04,S39,R1C4,g30_pet_shojo_059,g30_pet_shojo_059.png,Cindertooth,The Command Spirit Dune Sprite,pet,shojo,military,supernatural,arabia,g30_pet_shojo_059.webp
-385,B04,S39,R1C5,g30_pet_shojo_060,g30_pet_shojo_060.png,Clinktooth,The Void Charm Dune Sprite,pet,shojo,space,magical,arabia,g30_pet_shojo_060.webp
-386,B04,S39,R2C1,g30_pet_shojo_061,g30_pet_shojo_061.png,Djinnitooth,The Wild Corsair Dune Sprite,pet,shojo,survival,pirate,arabia,g30_pet_shojo_061.webp
-387,B04,S39,R2C2,g30_pet_shojo_062,g30_pet_shojo_062.png,Embertooth,The Fist Myth Dune Sprite,pet,shojo,martial,mythology,arabia,g30_pet_shojo_062.webp
-388,B04,S39,R2C3,g30_pet_shojo_063,g30_pet_shojo_063.png,Fangtooth,The North Blade Dune Sprite,pet,shojo,nordic,samurai,arabia,g30_pet_shojo_063.webp
-389,B04,S39,R2C4,g30_pet_shojo_064,g30_pet_shojo_064.png,Glimtooth,The Shadow Blood Dune Sprite,pet,shojo,shinobi,vampire,arabia,g30_pet_shojo_064.webp
-390,B04,S39,R2C5,g30_pet_shojo_065,g30_pet_shojo_065.png,Kikitooth,The Beast Dune Ruin Sprite,pet,shojo,monster_taming,arabia,grimdark,g30_pet_shojo_065.webp
-391,B04,S40,R1C1,g30_villain_shonen_001,g30_villain_shonen_001.png,Eira Darzi,The Beast Underworld Titan Nemesis,villain,shonen,monster_taming,crime,kaiju,g30_villain_shonen_001.webp
-392,B04,S40,R1C2,g30_villain_shonen_002,g30_villain_shonen_002.png,Elian Darzi,The Beast Abyss Dune Nemesis,villain,shonen,monster_taming,cosmic_horror,arabia,g30_villain_shonen_002.webp
-393,B04,S40,R1C3,g30_villain_shonen_003,g30_villain_shonen_003.png,Emi Darzi,The Underworld Abyss Gear Nemesis,villain,shonen,crime,cosmic_horror,mecha,g30_villain_shonen_003.webp
-394,B04,S40,R1C4,g30_villain_shonen_004,g30_villain_shonen_004.png,Farah Darzi,The Titan Dune Gear Nemesis,villain,shonen,kaiju,arabia,mecha,g30_villain_shonen_004.webp
-395,B04,S40,R1C5,g30_villain_shonen_005,g30_villain_shonen_005.png,Hana Darzi,The Underworld Dune Portal Nemesis,villain,shonen,crime,arabia,isekai,g30_villain_shonen_005.webp
-396,B04,S40,R2C1,g30_villain_shonen_006,g30_villain_shonen_006.png,Haru Darzi,The Titan Abyss Portal Nemesis,villain,shonen,kaiju,cosmic_horror,isekai,g30_villain_shonen_006.webp
-397,B04,S40,R2C2,g30_villain_shonen_007,g30_villain_shonen_007.png,Idris Darzi,The Beast Underworld Hearth Nemesis,villain,shonen,monster_taming,crime,slice,g30_villain_shonen_007.webp
-398,B04,S40,R2C3,g30_villain_shonen_008,g30_villain_shonen_008.png,Imani Darzi,The Titan Abyss Hearth Nemesis,villain,shonen,kaiju,cosmic_horror,slice,g30_villain_shonen_008.webp
-399,B04,S40,R2C4,g30_villain_shonen_009,g30_villain_shonen_009.png,Jae Darzi,The Beast Underworld Terror Nemesis,villain,shonen,monster_taming,crime,horror,g30_villain_shonen_009.webp
-400,B04,S40,R2C5,g30_villain_shonen_010,g30_villain_shonen_010.png,Jin Darzi,The Titan Abyss Terror Nemesis,villain,shonen,kaiju,cosmic_horror,horror,g30_villain_shonen_010.webp
-401,B05,S41,R1C1,g30_villain_shonen_011,g30_villain_shonen_011.png,Kael Darzi,The Beast Underworld Heart Nemesis,villain,shonen,monster_taming,crime,romance,g30_villain_shonen_011.webp
-402,B05,S41,R1C2,g30_villain_shonen_012,g30_villain_shonen_012.png,Kira Darzi,The Titan Abyss Heart Nemesis,villain,shonen,kaiju,cosmic_horror,romance,g30_villain_shonen_012.webp
-403,B05,S41,R1C3,g30_villain_shonen_013,g30_villain_shonen_013.png,Leila Darzi,The Beast Underworld Arena Nemesis,villain,shonen,monster_taming,crime,sports,g30_villain_shonen_013.webp
-404,B05,S41,R1C4,g30_villain_shonen_014,g30_villain_shonen_014.png,Lina Darzi,The Titan Abyss Arena Nemesis,villain,shonen,kaiju,cosmic_horror,sports,g30_villain_shonen_014.webp
-405,B05,S41,R1C5,g30_villain_shonen_015,g30_villain_shonen_015.png,Lucan Darzi,The Beast Underworld Neon Nemesis,villain,shonen,monster_taming,crime,cyber,g30_villain_shonen_015.webp
-406,B05,S41,R2C1,g30_villain_shonen_016,g30_villain_shonen_016.png,Mara Darzi,The Titan Abyss Neon Nemesis,villain,shonen,kaiju,cosmic_horror,cyber,g30_villain_shonen_016.webp
-407,B05,S41,R2C2,g30_villain_shonen_017,g30_villain_shonen_017.png,Mika Darzi,The Beast Underworld Realm Nemesis,villain,shonen,monster_taming,crime,fantasy,g30_villain_shonen_017.webp
-408,B05,S41,R2C3,g30_villain_shonen_018,g30_villain_shonen_018.png,Mina Darzi,The Titan Abyss Realm Nemesis,villain,shonen,kaiju,cosmic_horror,fantasy,g30_villain_shonen_018.webp
-409,B05,S41,R2C4,g30_villain_shonen_019,g30_villain_shonen_019.png,Nadia Darzi,The Beast Underworld Stage Nemesis,villain,shonen,monster_taming,crime,idol,g30_villain_shonen_019.webp
-410,B05,S41,R2C5,g30_villain_shonen_020,g30_villain_shonen_020.png,Nao Darzi,The Titan Abyss Stage Nemesis,villain,shonen,kaiju,cosmic_horror,idol,g30_villain_shonen_020.webp
-411,B05,S42,R1C1,g30_villain_shonen_021,g30_villain_shonen_021.png,Niko Darzi,The Beast Underworld Cipher Nemesis,villain,shonen,monster_taming,crime,mystery,g30_villain_shonen_021.webp
-412,B05,S42,R1C2,g30_villain_shonen_022,g30_villain_shonen_022.png,Noor Darzi,The Titan Abyss Cipher Nemesis,villain,shonen,kaiju,cosmic_horror,mystery,g30_villain_shonen_022.webp
-413,B05,S42,R1C3,g30_villain_shonen_023,g30_villain_shonen_023.png,Rhea Darzi,The Beast Underworld Mirth Nemesis,villain,shonen,monster_taming,crime,comedy,g30_villain_shonen_023.webp
-414,B05,S42,R1C4,g30_villain_shonen_024,g30_villain_shonen_024.png,Ren Darzi,The Titan Abyss Mirth Nemesis,villain,shonen,kaiju,cosmic_horror,comedy,g30_villain_shonen_024.webp
-415,B05,S42,R1C5,g30_villain_shonen_025,g30_villain_shonen_025.png,Rin Darzi,The Beast Underworld Kitchen Nemesis,villain,shonen,monster_taming,crime,cooking,g30_villain_shonen_025.webp
-416,B05,S42,R2C1,g30_villain_shonen_026,g30_villain_shonen_026.png,Samira Darzi,The Titan Abyss Kitchen Nemesis,villain,shonen,kaiju,cosmic_horror,cooking,g30_villain_shonen_026.webp
-417,B05,S42,R2C2,g30_villain_shonen_027,g30_villain_shonen_027.png,Sana Darzi,The Beast Underworld Command Nemesis,villain,shonen,monster_taming,crime,military,g30_villain_shonen_027.webp
-418,B05,S42,R2C3,g30_villain_shonen_028,g30_villain_shonen_028.png,Sora Darzi,The Titan Abyss Command Nemesis,villain,shonen,kaiju,cosmic_horror,military,g30_villain_shonen_028.webp
-419,B05,S42,R2C4,g30_villain_shonen_029,g30_villain_shonen_029.png,Tala Darzi,The Beast Underworld Spirit Nemesis,villain,shonen,monster_taming,crime,supernatural,g30_villain_shonen_029.webp
-420,B05,S42,R2C5,g30_villain_shonen_030,g30_villain_shonen_030.png,Yara Darzi,The Titan Abyss Spirit Nemesis,villain,shonen,kaiju,cosmic_horror,supernatural,g30_villain_shonen_030.webp
-421,B05,S43,R1C1,g30_villain_shonen_031,g30_villain_shonen_031.png,Aiko Diallo,The Beast Underworld Void Nemesis,villain,shonen,monster_taming,crime,space,g30_villain_shonen_031.webp
-422,B05,S43,R1C2,g30_villain_shonen_032,g30_villain_shonen_032.png,Amara Diallo,The Titan Abyss Void Nemesis,villain,shonen,kaiju,cosmic_horror,space,g30_villain_shonen_032.webp
-423,B05,S43,R1C3,g30_villain_shonen_033,g30_villain_shonen_033.png,Ansel Diallo,The Beast Underworld Charm Nemesis,villain,shonen,monster_taming,crime,magical,g30_villain_shonen_033.webp
-424,B05,S43,R1C4,g30_villain_shonen_034,g30_villain_shonen_034.png,Arden Diallo,The Titan Abyss Charm Nemesis,villain,shonen,kaiju,cosmic_horror,magical,g30_villain_shonen_034.webp
-425,B05,S43,R1C5,g30_villain_shonen_035,g30_villain_shonen_035.png,Ari Diallo,The Beast Underworld Wild Nemesis,villain,shonen,monster_taming,crime,survival,g30_villain_shonen_035.webp
-426,B05,S43,R2C1,g30_villain_shonen_036,g30_villain_shonen_036.png,Asa Diallo,The Titan Abyss Wild Nemesis,villain,shonen,kaiju,cosmic_horror,survival,g30_villain_shonen_036.webp
-427,B05,S43,R2C2,g30_villain_shonen_037,g30_villain_shonen_037.png,Asha Diallo,The Beast Underworld Corsair Nemesis,villain,shonen,monster_taming,crime,pirate,g30_villain_shonen_037.webp
-428,B05,S43,R2C3,g30_villain_shonen_038,g30_villain_shonen_038.png,Cass Diallo,The Titan Abyss Corsair Nemesis,villain,shonen,kaiju,cosmic_horror,pirate,g30_villain_shonen_038.webp
-429,B05,S43,R2C4,g30_villain_shonen_039,g30_villain_shonen_039.png,Cassia Diallo,The Beast Underworld Fist Nemesis,villain,shonen,monster_taming,crime,martial,g30_villain_shonen_039.webp
-430,B05,S43,R2C5,g30_villain_shonen_040,g30_villain_shonen_040.png,Dara Diallo,The Titan Abyss Fist Nemesis,villain,shonen,kaiju,cosmic_horror,martial,g30_villain_shonen_040.webp
-431,B05,S44,R1C1,g30_villain_shonen_041,g30_villain_shonen_041.png,Eira Diallo,The Beast Underworld Myth Nemesis,villain,shonen,monster_taming,crime,mythology,g30_villain_shonen_041.webp
-432,B05,S44,R1C2,g30_villain_shonen_042,g30_villain_shonen_042.png,Elian Diallo,The Titan Abyss Myth Nemesis,villain,shonen,kaiju,cosmic_horror,mythology,g30_villain_shonen_042.webp
-433,B05,S44,R1C3,g30_villain_shonen_043,g30_villain_shonen_043.png,Emi Diallo,The Beast Underworld North Nemesis,villain,shonen,monster_taming,crime,nordic,g30_villain_shonen_043.webp
-434,B05,S44,R1C4,g30_villain_shonen_044,g30_villain_shonen_044.png,Farah Diallo,The Titan Abyss North Nemesis,villain,shonen,kaiju,cosmic_horror,nordic,g30_villain_shonen_044.webp
-435,B05,S44,R1C5,g30_villain_shonen_045,g30_villain_shonen_045.png,Hana Diallo,The Beast Underworld Blade Nemesis,villain,shonen,monster_taming,crime,samurai,g30_villain_shonen_045.webp
-436,B05,S44,R2C1,g30_villain_shonen_046,g30_villain_shonen_046.png,Haru Diallo,The Titan Abyss Blade Nemesis,villain,shonen,kaiju,cosmic_horror,samurai,g30_villain_shonen_046.webp
-437,B05,S44,R2C2,g30_villain_shonen_047,g30_villain_shonen_047.png,Idris Diallo,The Beast Underworld Shadow Nemesis,villain,shonen,monster_taming,crime,shinobi,g30_villain_shonen_047.webp
-438,B05,S44,R2C3,g30_villain_shonen_048,g30_villain_shonen_048.png,Imani Diallo,The Titan Abyss Shadow Nemesis,villain,shonen,kaiju,cosmic_horror,shinobi,g30_villain_shonen_048.webp
-439,B05,S44,R2C4,g30_villain_shonen_049,g30_villain_shonen_049.png,Jae Diallo,The Beast Underworld Blood Nemesis,villain,shonen,monster_taming,crime,vampire,g30_villain_shonen_049.webp
-440,B05,S44,R2C5,g30_villain_shonen_050,g30_villain_shonen_050.png,Jin Diallo,The Titan Abyss Blood Nemesis,villain,shonen,kaiju,cosmic_horror,vampire,g30_villain_shonen_050.webp
-441,B05,S45,R1C1,g30_villain_shonen_051,g30_villain_shonen_051.png,Kael Diallo,The Beast Underworld Ruin Nemesis,villain,shonen,monster_taming,crime,grimdark,g30_villain_shonen_051.webp
-442,B05,S45,R1C2,g30_villain_shonen_052,g30_villain_shonen_052.png,Kira Diallo,The Titan Abyss Ruin Nemesis,villain,shonen,kaiju,cosmic_horror,grimdark,g30_villain_shonen_052.webp
-443,B05,S45,R1C3,g30_villain_shonen_053,g30_villain_shonen_053.png,Leila Diallo,The Gear Portal Beast Nemesis,villain,shonen,mecha,isekai,monster_taming,g30_villain_shonen_053.webp
-444,B05,S45,R1C4,g30_villain_shonen_054,g30_villain_shonen_054.png,Lina Diallo,The Hearth Terror Dune Nemesis,villain,shonen,slice,horror,arabia,g30_villain_shonen_054.webp
-445,B05,S45,R1C5,g30_villain_shonen_055,g30_villain_shonen_055.png,Lucan Diallo,The Heart Arena Dune Nemesis,villain,shonen,romance,sports,arabia,g30_villain_shonen_055.webp
-446,B05,S45,R2C1,g30_villain_shonen_056,g30_villain_shonen_056.png,Mara Diallo,The Neon Realm Dune Nemesis,villain,shonen,cyber,fantasy,arabia,g30_villain_shonen_056.webp
-447,B05,S45,R2C2,g30_villain_shonen_057,g30_villain_shonen_057.png,Mika Diallo,The Stage Cipher Dune Nemesis,villain,shonen,idol,mystery,arabia,g30_villain_shonen_057.webp
-448,B05,S45,R2C3,g30_villain_shonen_058,g30_villain_shonen_058.png,Mina Diallo,The Mirth Kitchen Dune Nemesis,villain,shonen,comedy,cooking,arabia,g30_villain_shonen_058.webp
-449,B05,S45,R2C4,g30_villain_shonen_059,g30_villain_shonen_059.png,Nadia Diallo,The Command Spirit Dune Nemesis,villain,shonen,military,supernatural,arabia,g30_villain_shonen_059.webp
-450,B05,S45,R2C5,g30_villain_shonen_060,g30_villain_shonen_060.png,Nao Diallo,The Void Charm Dune Nemesis,villain,shonen,space,magical,arabia,g30_villain_shonen_060.webp
-451,B05,S46,R1C1,g30_villain_shonen_061,g30_villain_shonen_061.png,Niko Diallo,The Wild Corsair Dune Nemesis,villain,shonen,survival,pirate,arabia,g30_villain_shonen_061.webp
-452,B05,S46,R1C2,g30_villain_shonen_062,g30_villain_shonen_062.png,Noor Diallo,The Fist Myth Dune Nemesis,villain,shonen,martial,mythology,arabia,g30_villain_shonen_062.webp
-453,B05,S46,R1C3,g30_villain_shonen_063,g30_villain_shonen_063.png,Rhea Diallo,The North Blade Dune Nemesis,villain,shonen,nordic,samurai,arabia,g30_villain_shonen_063.webp
-454,B05,S46,R1C4,g30_villain_shonen_064,g30_villain_shonen_064.png,Ren Diallo,The Shadow Blood Dune Nemesis,villain,shonen,shinobi,vampire,arabia,g30_villain_shonen_064.webp
-455,B05,S46,R1C5,g30_villain_shonen_065,g30_villain_shonen_065.png,Rin Diallo,The Beast Dune Ruin Nemesis,villain,shonen,monster_taming,arabia,grimdark,g30_villain_shonen_065.webp
-456,B05,S46,R2C1,g30_villain_shojo_001,g30_villain_shojo_001.png,Samira Diallo,The Beast Underworld Titan Sovereign,villain,shojo,monster_taming,crime,kaiju,g30_villain_shojo_001.webp
-457,B05,S46,R2C2,g30_villain_shojo_002,g30_villain_shojo_002.png,Sana Diallo,The Beast Abyss Dune Sovereign,villain,shojo,monster_taming,cosmic_horror,arabia,g30_villain_shojo_002.webp
-458,B05,S46,R2C3,g30_villain_shojo_003,g30_villain_shojo_003.png,Sora Diallo,The Underworld Abyss Gear Sovereign,villain,shojo,crime,cosmic_horror,mecha,g30_villain_shojo_003.webp
-459,B05,S46,R2C4,g30_villain_shojo_004,g30_villain_shojo_004.png,Tala Diallo,The Titan Dune Gear Sovereign,villain,shojo,kaiju,arabia,mecha,g30_villain_shojo_004.webp
-460,B05,S46,R2C5,g30_villain_shojo_005,g30_villain_shojo_005.png,Yara Diallo,The Underworld Dune Portal Sovereign,villain,shojo,crime,arabia,isekai,g30_villain_shojo_005.webp
-461,B05,S47,R1C1,g30_villain_shojo_006,g30_villain_shojo_006.png,Aiko Duval,The Titan Abyss Portal Sovereign,villain,shojo,kaiju,cosmic_horror,isekai,g30_villain_shojo_006.webp
-462,B05,S47,R1C2,g30_villain_shojo_007,g30_villain_shojo_007.png,Amara Duval,The Beast Underworld Hearth Sovereign,villain,shojo,monster_taming,crime,slice,g30_villain_shojo_007.webp
-463,B05,S47,R1C3,g30_villain_shojo_008,g30_villain_shojo_008.png,Ansel Duval,The Titan Abyss Hearth Sovereign,villain,shojo,kaiju,cosmic_horror,slice,g30_villain_shojo_008.webp
-464,B05,S47,R1C4,g30_villain_shojo_009,g30_villain_shojo_009.png,Arden Duval,The Beast Underworld Terror Sovereign,villain,shojo,monster_taming,crime,horror,g30_villain_shojo_009.webp
-465,B05,S47,R1C5,g30_villain_shojo_010,g30_villain_shojo_010.png,Ari Duval,The Titan Abyss Terror Sovereign,villain,shojo,kaiju,cosmic_horror,horror,g30_villain_shojo_010.webp
-466,B05,S47,R2C1,g30_villain_shojo_011,g30_villain_shojo_011.png,Asa Duval,The Beast Underworld Heart Sovereign,villain,shojo,monster_taming,crime,romance,g30_villain_shojo_011.webp
-467,B05,S47,R2C2,g30_villain_shojo_012,g30_villain_shojo_012.png,Asha Duval,The Titan Abyss Heart Sovereign,villain,shojo,kaiju,cosmic_horror,romance,g30_villain_shojo_012.webp
-468,B05,S47,R2C3,g30_villain_shojo_013,g30_villain_shojo_013.png,Cass Duval,The Beast Underworld Arena Sovereign,villain,shojo,monster_taming,crime,sports,g30_villain_shojo_013.webp
-469,B05,S47,R2C4,g30_villain_shojo_014,g30_villain_shojo_014.png,Cassia Duval,The Titan Abyss Arena Sovereign,villain,shojo,kaiju,cosmic_horror,sports,g30_villain_shojo_014.webp
-470,B05,S47,R2C5,g30_villain_shojo_015,g30_villain_shojo_015.png,Dara Duval,The Beast Underworld Neon Sovereign,villain,shojo,monster_taming,crime,cyber,g30_villain_shojo_015.webp
-471,B05,S48,R1C1,g30_villain_shojo_016,g30_villain_shojo_016.png,Eira Duval,The Titan Abyss Neon Sovereign,villain,shojo,kaiju,cosmic_horror,cyber,g30_villain_shojo_016.webp
-472,B05,S48,R1C2,g30_villain_shojo_017,g30_villain_shojo_017.png,Elian Duval,The Beast Underworld Realm Sovereign,villain,shojo,monster_taming,crime,fantasy,g30_villain_shojo_017.webp
-473,B05,S48,R1C3,g30_villain_shojo_018,g30_villain_shojo_018.png,Emi Duval,The Titan Abyss Realm Sovereign,villain,shojo,kaiju,cosmic_horror,fantasy,g30_villain_shojo_018.webp
-474,B05,S48,R1C4,g30_villain_shojo_019,g30_villain_shojo_019.png,Farah Duval,The Beast Underworld Stage Sovereign,villain,shojo,monster_taming,crime,idol,g30_villain_shojo_019.webp
-475,B05,S48,R1C5,g30_villain_shojo_020,g30_villain_shojo_020.png,Hana Duval,The Titan Abyss Stage Sovereign,villain,shojo,kaiju,cosmic_horror,idol,g30_villain_shojo_020.webp
-476,B05,S48,R2C1,g30_villain_shojo_021,g30_villain_shojo_021.png,Haru Duval,The Beast Underworld Cipher Sovereign,villain,shojo,monster_taming,crime,mystery,g30_villain_shojo_021.webp
-477,B05,S48,R2C2,g30_villain_shojo_022,g30_villain_shojo_022.png,Idris Duval,The Titan Abyss Cipher Sovereign,villain,shojo,kaiju,cosmic_horror,mystery,g30_villain_shojo_022.webp
-478,B05,S48,R2C3,g30_villain_shojo_023,g30_villain_shojo_023.png,Imani Duval,The Beast Underworld Mirth Sovereign,villain,shojo,monster_taming,crime,comedy,g30_villain_shojo_023.webp
-479,B05,S48,R2C4,g30_villain_shojo_024,g30_villain_shojo_024.png,Jae Duval,The Titan Abyss Mirth Sovereign,villain,shojo,kaiju,cosmic_horror,comedy,g30_villain_shojo_024.webp
-480,B05,S48,R2C5,g30_villain_shojo_025,g30_villain_shojo_025.png,Jin Duval,The Beast Underworld Kitchen Sovereign,villain,shojo,monster_taming,crime,cooking,g30_villain_shojo_025.webp
-481,B05,S49,R1C1,g30_villain_shojo_026,g30_villain_shojo_026.png,Kael Duval,The Titan Abyss Kitchen Sovereign,villain,shojo,kaiju,cosmic_horror,cooking,g30_villain_shojo_026.webp
-482,B05,S49,R1C2,g30_villain_shojo_027,g30_villain_shojo_027.png,Kira Duval,The Beast Underworld Command Sovereign,villain,shojo,monster_taming,crime,military,g30_villain_shojo_027.webp
-483,B05,S49,R1C3,g30_villain_shojo_028,g30_villain_shojo_028.png,Leila Duval,The Titan Abyss Command Sovereign,villain,shojo,kaiju,cosmic_horror,military,g30_villain_shojo_028.webp
-484,B05,S49,R1C4,g30_villain_shojo_029,g30_villain_shojo_029.png,Lina Duval,The Beast Underworld Spirit Sovereign,villain,shojo,monster_taming,crime,supernatural,g30_villain_shojo_029.webp
-485,B05,S49,R1C5,g30_villain_shojo_030,g30_villain_shojo_030.png,Lucan Duval,The Titan Abyss Spirit Sovereign,villain,shojo,kaiju,cosmic_horror,supernatural,g30_villain_shojo_030.webp
-486,B05,S49,R2C1,g30_villain_shojo_031,g30_villain_shojo_031.png,Mara Duval,The Beast Underworld Void Sovereign,villain,shojo,monster_taming,crime,space,g30_villain_shojo_031.webp
-487,B05,S49,R2C2,g30_villain_shojo_032,g30_villain_shojo_032.png,Mika Duval,The Titan Abyss Void Sovereign,villain,shojo,kaiju,cosmic_horror,space,g30_villain_shojo_032.webp
-488,B05,S49,R2C3,g30_villain_shojo_033,g30_villain_shojo_033.png,Mina Duval,The Beast Underworld Charm Sovereign,villain,shojo,monster_taming,crime,magical,g30_villain_shojo_033.webp
-489,B05,S49,R2C4,g30_villain_shojo_034,g30_villain_shojo_034.png,Nadia Duval,The Titan Abyss Charm Sovereign,villain,shojo,kaiju,cosmic_horror,magical,g30_villain_shojo_034.webp
-490,B05,S49,R2C5,g30_villain_shojo_035,g30_villain_shojo_035.png,Nao Duval,The Beast Underworld Wild Sovereign,villain,shojo,monster_taming,crime,survival,g30_villain_shojo_035.webp
-491,B05,S50,R1C1,g30_villain_shojo_036,g30_villain_shojo_036.png,Niko Duval,The Titan Abyss Wild Sovereign,villain,shojo,kaiju,cosmic_horror,survival,g30_villain_shojo_036.webp
-492,B05,S50,R1C2,g30_villain_shojo_037,g30_villain_shojo_037.png,Noor Duval,The Beast Underworld Corsair Sovereign,villain,shojo,monster_taming,crime,pirate,g30_villain_shojo_037.webp
-493,B05,S50,R1C3,g30_villain_shojo_038,g30_villain_shojo_038.png,Rhea Duval,The Titan Abyss Corsair Sovereign,villain,shojo,kaiju,cosmic_horror,pirate,g30_villain_shojo_038.webp
-494,B05,S50,R1C4,g30_villain_shojo_039,g30_villain_shojo_039.png,Ren Duval,The Beast Underworld Fist Sovereign,villain,shojo,monster_taming,crime,martial,g30_villain_shojo_039.webp
-495,B05,S50,R1C5,g30_villain_shojo_040,g30_villain_shojo_040.png,Rin Duval,The Titan Abyss Fist Sovereign,villain,shojo,kaiju,cosmic_horror,martial,g30_villain_shojo_040.webp
-496,B05,S50,R2C1,g30_villain_shojo_041,g30_villain_shojo_041.png,Samira Duval,The Beast Underworld Myth Sovereign,villain,shojo,monster_taming,crime,mythology,g30_villain_shojo_041.webp
-497,B05,S50,R2C2,g30_villain_shojo_042,g30_villain_shojo_042.png,Sana Duval,The Titan Abyss Myth Sovereign,villain,shojo,kaiju,cosmic_horror,mythology,g30_villain_shojo_042.webp
-498,B05,S50,R2C3,g30_villain_shojo_043,g30_villain_shojo_043.png,Sora Duval,The Beast Underworld North Sovereign,villain,shojo,monster_taming,crime,nordic,g30_villain_shojo_043.webp
-499,B05,S50,R2C4,g30_villain_shojo_044,g30_villain_shojo_044.png,Tala Duval,The Titan Abyss North Sovereign,villain,shojo,kaiju,cosmic_horror,nordic,g30_villain_shojo_044.webp
-500,B05,S50,R2C5,g30_villain_shojo_045,g30_villain_shojo_045.png,Yara Duval,The Beast Underworld Blade Sovereign,villain,shojo,monster_taming,crime,samurai,g30_villain_shojo_045.webp
-501,B06,S51,R1C1,g30_villain_shojo_046,g30_villain_shojo_046.png,Aiko Farouk,The Titan Abyss Blade Sovereign,villain,shojo,kaiju,cosmic_horror,samurai,g30_villain_shojo_046.webp
-502,B06,S51,R1C2,g30_villain_shojo_047,g30_villain_shojo_047.png,Amara Farouk,The Beast Underworld Shadow Sovereign,villain,shojo,monster_taming,crime,shinobi,g30_villain_shojo_047.webp
-503,B06,S51,R1C3,g30_villain_shojo_048,g30_villain_shojo_048.png,Ansel Farouk,The Titan Abyss Shadow Sovereign,villain,shojo,kaiju,cosmic_horror,shinobi,g30_villain_shojo_048.webp
-504,B06,S51,R1C4,g30_villain_shojo_049,g30_villain_shojo_049.png,Arden Farouk,The Beast Underworld Blood Sovereign,villain,shojo,monster_taming,crime,vampire,g30_villain_shojo_049.webp
-505,B06,S51,R1C5,g30_villain_shojo_050,g30_villain_shojo_050.png,Ari Farouk,The Titan Abyss Blood Sovereign,villain,shojo,kaiju,cosmic_horror,vampire,g30_villain_shojo_050.webp
-506,B06,S51,R2C1,g30_villain_shojo_051,g30_villain_shojo_051.png,Asa Farouk,The Beast Underworld Ruin Sovereign,villain,shojo,monster_taming,crime,grimdark,g30_villain_shojo_051.webp
-507,B06,S51,R2C2,g30_villain_shojo_052,g30_villain_shojo_052.png,Asha Farouk,The Titan Abyss Ruin Sovereign,villain,shojo,kaiju,cosmic_horror,grimdark,g30_villain_shojo_052.webp
-508,B06,S51,R2C3,g30_villain_shojo_053,g30_villain_shojo_053.png,Cass Farouk,The Gear Portal Beast Sovereign,villain,shojo,mecha,isekai,monster_taming,g30_villain_shojo_053.webp
-509,B06,S51,R2C4,g30_villain_shojo_054,g30_villain_shojo_054.png,Cassia Farouk,The Hearth Terror Dune Sovereign,villain,shojo,slice,horror,arabia,g30_villain_shojo_054.webp
-510,B06,S51,R2C5,g30_villain_shojo_055,g30_villain_shojo_055.png,Dara Farouk,The Heart Arena Dune Sovereign,villain,shojo,romance,sports,arabia,g30_villain_shojo_055.webp
-511,B06,S52,R1C1,g30_villain_shojo_056,g30_villain_shojo_056.png,Eira Farouk,The Neon Realm Dune Sovereign,villain,shojo,cyber,fantasy,arabia,g30_villain_shojo_056.webp
-512,B06,S52,R1C2,g30_villain_shojo_057,g30_villain_shojo_057.png,Elian Farouk,The Stage Cipher Dune Sovereign,villain,shojo,idol,mystery,arabia,g30_villain_shojo_057.webp
-513,B06,S52,R1C3,g30_villain_shojo_058,g30_villain_shojo_058.png,Emi Farouk,The Mirth Kitchen Dune Sovereign,villain,shojo,comedy,cooking,arabia,g30_villain_shojo_058.webp
-514,B06,S52,R1C4,g30_villain_shojo_059,g30_villain_shojo_059.png,Farah Farouk,The Command Spirit Dune Sovereign,villain,shojo,military,supernatural,arabia,g30_villain_shojo_059.webp
-515,B06,S52,R1C5,g30_villain_shojo_060,g30_villain_shojo_060.png,Hana Farouk,The Void Charm Dune Sovereign,villain,shojo,space,magical,arabia,g30_villain_shojo_060.webp
-516,B06,S52,R2C1,g30_villain_shojo_061,g30_villain_shojo_061.png,Haru Farouk,The Wild Corsair Dune Sovereign,villain,shojo,survival,pirate,arabia,g30_villain_shojo_061.webp
-517,B06,S52,R2C2,g30_villain_shojo_062,g30_villain_shojo_062.png,Idris Farouk,The Fist Myth Dune Sovereign,villain,shojo,martial,mythology,arabia,g30_villain_shojo_062.webp
-518,B06,S52,R2C3,g30_villain_shojo_063,g30_villain_shojo_063.png,Imani Farouk,The North Blade Dune Sovereign,villain,shojo,nordic,samurai,arabia,g30_villain_shojo_063.webp
-519,B06,S52,R2C4,g30_villain_shojo_064,g30_villain_shojo_064.png,Jae Farouk,The Shadow Blood Dune Sovereign,villain,shojo,shinobi,vampire,arabia,g30_villain_shojo_064.webp
-520,B06,S52,R2C5,g30_villain_shojo_065,g30_villain_shojo_065.png,Jin Farouk,The Beast Dune Ruin Sovereign,villain,shojo,monster_taming,arabia,grimdark,g30_villain_shojo_065.webp
+1,B01,S01,R1C1,g30_protag_shonen_001,g30_protag_shonen_001.png,Akari Abe,The Beast Underworld Titan Vanguard,protag,shonen,monster_taming,crime,kaiju,g30_protag_shonen_001.webp
+2,B01,S01,R1C2,g30_protag_shonen_002,g30_protag_shonen_002.png,Amina Aziz,The Beast Abyss Dune Vanguard,protag,shonen,monster_taming,cosmic_horror,arabia,g30_protag_shonen_002.webp
+3,B01,S01,R1C3,g30_protag_shonen_003,g30_protag_shonen_003.png,Astrid Andersen,The Underworld Abyss Gear Vanguard,protag,shonen,crime,cosmic_horror,mecha,g30_protag_shonen_003.webp
+4,B01,S01,R1C4,g30_protag_shonen_004,g30_protag_shonen_004.png,Amir Khatib,The Titan Dune Gear Vanguard,protag,shonen,kaiju,arabia,mecha,g30_protag_shonen_004.webp
+5,B01,S01,R1C5,g30_protag_shonen_005,g30_protag_shonen_005.png,Dalia Osman,The Underworld Dune Portal Vanguard,protag,shonen,crime,arabia,isekai,g30_protag_shonen_005.webp
+6,B01,S01,R2C1,g30_protag_shonen_006,g30_protag_shonen_006.png,Darya Saleh,The Titan Abyss Portal Vanguard,protag,shonen,kaiju,cosmic_horror,isekai,g30_protag_shonen_006.webp
+7,B01,S01,R2C2,g30_protag_shonen_007,g30_protag_shonen_007.png,Elias Aasen,The Beast Underworld Hearth Vanguard,protag,shonen,monster_taming,crime,slice,g30_protag_shonen_007.webp
+8,B01,S01,R2C3,g30_protag_shonen_008,g30_protag_shonen_008.png,Adaeze Adebayo,The Titan Abyss Hearth Vanguard,protag,shonen,kaiju,cosmic_horror,slice,g30_protag_shonen_008.webp
+9,B01,S01,R2C4,g30_protag_shonen_009,g30_protag_shonen_009.png,Aoi Sasaki,The Beast Underworld Terror Vanguard,protag,shonen,monster_taming,crime,horror,g30_protag_shonen_009.webp
+10,B01,S01,R2C5,g30_protag_shonen_010,g30_protag_shonen_010.png,Freja Holt,The Titan Abyss Terror Vanguard,protag,shonen,kaiju,cosmic_horror,horror,g30_protag_shonen_010.webp
+11,B01,S02,R1C1,g30_protag_shonen_011,g30_protag_shonen_011.png,Farah Erdem,The Beast Underworld Heart Vanguard,protag,shonen,monster_taming,crime,romance,g30_protag_shonen_011.webp
+12,B01,S02,R1C2,g30_protag_shonen_012,g30_protag_shonen_012.png,Asuka Shimada,The Titan Abyss Heart Vanguard,protag,shonen,kaiju,cosmic_horror,romance,g30_protag_shonen_012.webp
+13,B01,S02,R1C3,g30_protag_shonen_013,g30_protag_shonen_013.png,Adisa Garcia,The Beast Underworld Arena Vanguard,protag,shonen,monster_taming,crime,sports,g30_protag_shonen_013.webp
+14,B01,S02,R1C4,g30_protag_shonen_014,g30_protag_shonen_014.png,Ingrid Nygaard,The Titan Abyss Arena Vanguard,protag,shonen,kaiju,cosmic_horror,sports,g30_protag_shonen_014.webp
+15,B01,S02,R1C5,g30_protag_shonen_015,g30_protag_shonen_015.png,Hadi Khalil,The Beast Underworld Neon Vanguard,protag,shonen,monster_taming,crime,cyber,g30_protag_shonen_015.webp
+16,B01,S02,R2C1,g30_protag_shonen_016,g30_protag_shonen_016.png,Chihiro Miura,The Titan Abyss Neon Vanguard,protag,shonen,kaiju,cosmic_horror,cyber,g30_protag_shonen_016.webp
+17,B01,S02,R2C2,g30_protag_shonen_017,g30_protag_shonen_017.png,Alejandra Mensah,The Beast Underworld Realm Vanguard,protag,shonen,monster_taming,crime,fantasy,g30_protag_shonen_017.webp
+18,B01,S02,R2C3,g30_protag_shonen_018,g30_protag_shonen_018.png,Jonas Voss,The Titan Abyss Realm Vanguard,protag,shonen,kaiju,cosmic_horror,fantasy,g30_protag_shonen_018.webp
+19,B01,S02,R2C4,g30_protag_shonen_019,g30_protag_shonen_019.png,Idris Sabbagh,The Beast Underworld Stage Vanguard,protag,shonen,monster_taming,crime,idol,g30_protag_shonen_019.webp
+20,B01,S02,R2C5,g30_protag_shonen_020,g30_protag_shonen_020.png,Ilyas Barakat,The Titan Abyss Stage Vanguard,protag,shonen,kaiju,cosmic_horror,idol,g30_protag_shonen_020.webp
+21,B01,S03,R1C1,g30_protag_shonen_021,g30_protag_shonen_021.png,Leif Hagen,The Beast Underworld Cipher Vanguard,protag,shonen,monster_taming,crime,mystery,g30_protag_shonen_021.webp
+22,B01,S03,R1C2,g30_protag_shonen_022,g30_protag_shonen_022.png,Amara Reyes,The Titan Abyss Cipher Vanguard,protag,shonen,kaiju,cosmic_horror,mystery,g30_protag_shonen_022.webp
+23,B01,S03,R1C3,g30_protag_shonen_023,g30_protag_shonen_023.png,Daichi Kawahara,The Beast Underworld Mirth Vanguard,protag,shonen,monster_taming,crime,comedy,g30_protag_shonen_023.webp
+24,B01,S03,R1C4,g30_protag_shonen_024,g30_protag_shonen_024.png,Laleh Jafari,The Titan Abyss Mirth Vanguard,protag,shonen,kaiju,cosmic_horror,comedy,g30_protag_shonen_024.webp
+25,B01,S03,R1C5,g30_protag_shonen_025,g30_protag_shonen_025.png,Liv Lund,The Beast Underworld Kitchen Vanguard,protag,shonen,monster_taming,crime,cooking,g30_protag_shonen_025.webp
+26,B01,S03,R2C1,g30_protag_shonen_026,g30_protag_shonen_026.png,Anika Bako,The Titan Abyss Kitchen Vanguard,protag,shonen,kaiju,cosmic_horror,cooking,g30_protag_shonen_026.webp
+27,B01,S03,R2C2,g30_protag_shonen_027,g30_protag_shonen_027.png,Eiji Hirasawa,The Beast Underworld Command Vanguard,protag,shonen,monster_taming,crime,military,g30_protag_shonen_027.webp
+28,B01,S03,R2C3,g30_protag_shonen_028,g30_protag_shonen_028.png,Layla Najjar,The Titan Abyss Command Vanguard,protag,shonen,kaiju,cosmic_horror,military,g30_protag_shonen_028.webp
+29,B01,S03,R2C4,g30_protag_shonen_029,g30_protag_shonen_029.png,Niko Wold,The Beast Underworld Spirit Vanguard,protag,shonen,monster_taming,crime,supernatural,g30_protag_shonen_029.webp
+30,B01,S03,R2C5,g30_protag_shonen_030,g30_protag_shonen_030.png,Emi Ueda,The Titan Abyss Spirit Vanguard,protag,shonen,kaiju,cosmic_horror,supernatural,g30_protag_shonen_030.webp
+31,B01,S04,R1C1,g30_protag_shonen_031,g30_protag_shonen_031.png,Arjun Castillo,The Beast Underworld Void Vanguard,protag,shonen,monster_taming,crime,space,g30_protag_shonen_031.webp
+32,B01,S04,R1C2,g30_protag_shonen_032,g30_protag_shonen_032.png,Runa Vik,The Titan Abyss Void Vanguard,protag,shonen,kaiju,cosmic_horror,space,g30_protag_shonen_032.webp
+33,B01,S04,R1C3,g30_protag_shonen_033,g30_protag_shonen_033.png,Nadia Saad,The Beast Underworld Charm Vanguard,protag,shonen,monster_taming,crime,magical,g30_protag_shonen_033.webp
+34,B01,S04,R1C4,g30_protag_shonen_034,g30_protag_shonen_034.png,Fumiko Uchida,The Titan Abyss Charm Vanguard,protag,shonen,kaiju,cosmic_horror,magical,g30_protag_shonen_034.webp
+35,B01,S04,R1C5,g30_protag_shonen_035,g30_protag_shonen_035.png,Ayodele Ibarra,The Beast Underworld Wild Vanguard,protag,shonen,monster_taming,crime,survival,g30_protag_shonen_035.webp
+36,B01,S04,R2C1,g30_protag_shonen_036,g30_protag_shonen_036.png,Soren Gran,The Titan Abyss Wild Vanguard,protag,shonen,kaiju,cosmic_horror,survival,g30_protag_shonen_036.webp
+37,B01,S04,R2C2,g30_protag_shonen_037,g30_protag_shonen_037.png,Omar Demir,The Beast Underworld Corsair Vanguard,protag,shonen,monster_taming,crime,pirate,g30_protag_shonen_037.webp
+38,B01,S04,R2C3,g30_protag_shonen_038,g30_protag_shonen_038.png,Hana Ogawa,The Titan Abyss Corsair Vanguard,protag,shonen,kaiju,cosmic_horror,pirate,g30_protag_shonen_038.webp
+39,B01,S04,R2C4,g30_protag_shonen_039,g30_protag_shonen_039.png,Bruna Navarro,The Beast Underworld Fist Vanguard,protag,shonen,monster_taming,crime,martial,g30_protag_shonen_039.webp
+40,B01,S04,R2C5,g30_protag_shonen_040,g30_protag_shonen_040.png,Caio Singh,The Titan Abyss Fist Vanguard,protag,shonen,kaiju,cosmic_horror,martial,g30_protag_shonen_040.webp
+41,B01,S05,R1C1,g30_protag_shonen_041,g30_protag_shonen_041.png,Haruka Morita,The Beast Underworld Myth Vanguard,protag,shonen,monster_taming,crime,mythology,g30_protag_shonen_041.webp
+42,B01,S05,R1C2,g30_protag_shonen_042,g30_protag_shonen_042.png,Rafi Karim,The Titan Abyss Myth Vanguard,protag,shonen,kaiju,cosmic_horror,mythology,g30_protag_shonen_042.webp
+43,B01,S05,R1C3,g30_protag_shonen_043,g30_protag_shonen_043.png,Tove Nielsen,The Beast Underworld North Vanguard,protag,shonen,monster_taming,crime,nordic,g30_protag_shonen_043.webp
+44,B01,S05,R1C4,g30_protag_shonen_044,g30_protag_shonen_044.png,Viggo Storm,The Titan Abyss North Vanguard,protag,shonen,kaiju,cosmic_horror,nordic,g30_protag_shonen_044.webp
+45,B01,S05,R1C5,g30_protag_shonen_045,g30_protag_shonen_045.png,Hikari Maeda,The Beast Underworld Blade Vanguard,protag,shonen,monster_taming,crime,samurai,g30_protag_shonen_045.webp
+46,B01,S05,R2C1,g30_protag_shonen_046,g30_protag_shonen_046.png,Itsuki Matsuda,The Titan Abyss Blade Vanguard,protag,shonen,kaiju,cosmic_horror,samurai,g30_protag_shonen_046.webp
+47,B01,S05,R2C2,g30_protag_shonen_047,g30_protag_shonen_047.png,Jun Hayashi,The Beast Underworld Shadow Vanguard,protag,shonen,monster_taming,crime,shinobi,g30_protag_shonen_047.webp
+48,B01,S05,R2C3,g30_protag_shonen_048,g30_protag_shonen_048.png,Kaede Tsukishima,The Titan Abyss Shadow Vanguard,protag,shonen,kaiju,cosmic_horror,shinobi,g30_protag_shonen_048.webp
+49,B01,S05,R2C4,g30_protag_shonen_049,g30_protag_shonen_049.png,Kaori Sakurai,The Beast Underworld Blood Vanguard,protag,shonen,monster_taming,crime,vampire,g30_protag_shonen_049.webp
+50,B01,S05,R2C5,g30_protag_shonen_050,g30_protag_shonen_050.png,Alva Falk,The Titan Abyss Blood Vanguard,protag,shonen,kaiju,cosmic_horror,vampire,g30_protag_shonen_050.webp
+51,B01,S06,R1C1,g30_protag_shonen_051,g30_protag_shonen_051.png,Rami Rashid,The Beast Underworld Ruin Vanguard,protag,shonen,monster_taming,crime,grimdark,g30_protag_shonen_051.webp
+52,B01,S06,R1C2,g30_protag_shonen_052,g30_protag_shonen_052.png,Kenta Okabe,The Titan Abyss Ruin Vanguard,protag,shonen,kaiju,cosmic_horror,grimdark,g30_protag_shonen_052.webp
+53,B01,S06,R1C3,g30_protag_shonen_053,g30_protag_shonen_053.png,Camila Nakamura,The Gear Portal Beast Vanguard,protag,shonen,mecha,isekai,monster_taming,g30_protag_shonen_053.webp
+54,B01,S06,R1C4,g30_protag_shonen_054,g30_protag_shonen_054.png,Sana Zahir,The Hearth Terror Dune Vanguard,protag,shonen,slice,horror,arabia,g30_protag_shonen_054.webp
+55,B01,S06,R1C5,g30_protag_shonen_055,g30_protag_shonen_055.png,Samira Farouq,The Heart Arena Dune Vanguard,protag,shonen,romance,sports,arabia,g30_protag_shonen_055.webp
+56,B01,S06,R2C1,g30_protag_shonen_056,g30_protag_shonen_056.png,Tariq Masri,The Neon Realm Dune Vanguard,protag,shonen,cyber,fantasy,arabia,g30_protag_shonen_056.webp
+57,B01,S06,R2C2,g30_protag_shonen_057,g30_protag_shonen_057.png,Yara Rahman,The Stage Cipher Dune Vanguard,protag,shonen,idol,mystery,arabia,g30_protag_shonen_057.webp
+58,B01,S06,R2C3,g30_protag_shonen_058,g30_protag_shonen_058.png,Zoya Abbasi,The Mirth Kitchen Dune Vanguard,protag,shonen,comedy,cooking,arabia,g30_protag_shonen_058.webp
+59,B01,S06,R2C4,g30_protag_shonen_059,g30_protag_shonen_059.png,Azra Hassan,The Command Spirit Dune Vanguard,protag,shonen,military,supernatural,arabia,g30_protag_shonen_059.webp
+60,B01,S06,R2C5,g30_protag_shonen_060,g30_protag_shonen_060.png,Basil Qadir,The Void Charm Dune Vanguard,protag,shonen,space,magical,arabia,g30_protag_shonen_060.webp
+61,B01,S07,R1C1,g30_protag_shonen_061,g30_protag_shonen_061.png,Cem Touma,The Wild Corsair Dune Vanguard,protag,shonen,survival,pirate,arabia,g30_protag_shonen_061.webp
+62,B01,S07,R1C2,g30_protag_shonen_062,g30_protag_shonen_062.png,Elif Amani,The Fist Myth Dune Vanguard,protag,shonen,martial,mythology,arabia,g30_protag_shonen_062.webp
+63,B01,S07,R1C3,g30_protag_shonen_063,g30_protag_shonen_063.png,Iman Kader,The North Blade Dune Vanguard,protag,shonen,nordic,samurai,arabia,g30_protag_shonen_063.webp
+64,B01,S07,R1C4,g30_protag_shonen_064,g30_protag_shonen_064.png,Karim Nassar,The Shadow Blood Dune Vanguard,protag,shonen,shinobi,vampire,arabia,g30_protag_shonen_064.webp
+65,B01,S07,R1C5,g30_protag_shonen_065,g30_protag_shonen_065.png,Leila Zaman,The Beast Dune Ruin Vanguard,protag,shonen,monster_taming,arabia,grimdark,g30_protag_shonen_065.webp
+66,B01,S07,R2C1,g30_protag_shojo_001,g30_protag_shojo_001.png,Eira Haugen,The Beast Underworld Titan Luminary,protag,shojo,monster_taming,crime,kaiju,g30_protag_shojo_001.webp
+67,B01,S07,R2C2,g30_protag_shojo_002,g30_protag_shojo_002.png,Mina Haddad,The Beast Abyss Dune Luminary,protag,shojo,monster_taming,cosmic_horror,arabia,g30_protag_shojo_002.webp
+68,B01,S07,R2C3,g30_protag_shojo_003,g30_protag_shojo_003.png,Makoto Kuroda,The Underworld Abyss Gear Luminary,protag,shojo,crime,cosmic_horror,mecha,g30_protag_shojo_003.webp
+69,B01,S07,R2C4,g30_protag_shojo_004,g30_protag_shojo_004.png,Naveed Nasri,The Titan Dune Gear Luminary,protag,shojo,kaiju,arabia,mecha,g30_protag_shojo_004.webp
+70,B01,S07,R2C5,g30_protag_shojo_005,g30_protag_shojo_005.png,Noor Shakir,The Underworld Dune Portal Luminary,protag,shojo,crime,arabia,isekai,g30_protag_shojo_005.webp
+71,B01,S08,R1C1,g30_protag_shojo_006,g30_protag_shojo_006.png,Casey Diallo,The Titan Abyss Portal Luminary,protag,shojo,kaiju,cosmic_horror,isekai,g30_protag_shojo_006.webp
+72,B01,S08,R1C2,g30_protag_shojo_007,g30_protag_shojo_007.png,Mio Kondo,The Beast Underworld Hearth Luminary,protag,shojo,monster_taming,crime,slice,g30_protag_shojo_007.webp
+73,B01,S08,R1C3,g30_protag_shojo_008,g30_protag_shojo_008.png,Rana Arslan,The Titan Abyss Hearth Luminary,protag,shojo,kaiju,cosmic_horror,slice,g30_protag_shojo_008.webp
+74,B01,S08,R1C4,g30_protag_shojo_009,g30_protag_shojo_009.png,Emil Torp,The Beast Underworld Terror Luminary,protag,shojo,monster_taming,crime,horror,g30_protag_shojo_009.webp
+75,B01,S08,R1C5,g30_protag_shojo_010,g30_protag_shojo_010.png,Minato Fujita,The Titan Abyss Terror Luminary,protag,shojo,kaiju,cosmic_horror,horror,g30_protag_shojo_010.webp
+76,B01,S08,R2C1,g30_protag_shojo_011,g30_protag_shojo_011.png,Chidi Kowalski,The Beast Underworld Heart Luminary,protag,shojo,monster_taming,crime,romance,g30_protag_shojo_011.webp
+77,B01,S08,R2C2,g30_protag_shojo_012,g30_protag_shojo_012.png,Frida Sund,The Titan Abyss Heart Luminary,protag,shojo,kaiju,cosmic_horror,romance,g30_protag_shojo_012.webp
+78,B01,S08,R2C3,g30_protag_shojo_013,g30_protag_shojo_013.png,Sahir Habib,The Beast Underworld Arena Luminary,protag,shojo,monster_taming,crime,sports,g30_protag_shojo_013.webp
+79,B01,S08,R2C4,g30_protag_shojo_014,g30_protag_shojo_014.png,Nao Fujimoto,The Titan Abyss Arena Luminary,protag,shojo,kaiju,cosmic_horror,sports,g30_protag_shojo_014.webp
+80,B01,S08,R2C5,g30_protag_shojo_015,g30_protag_shojo_015.png,Dev Okoye,The Beast Underworld Neon Luminary,protag,shojo,monster_taming,crime,cyber,g30_protag_shojo_015.webp
+81,B01,S09,R1C1,g30_protag_shojo_016,g30_protag_shojo_016.png,Gunnar Bjerke,The Titan Abyss Neon Luminary,protag,shojo,kaiju,cosmic_horror,cyber,g30_protag_shojo_016.webp
+82,B01,S09,R1C2,g30_protag_shojo_017,g30_protag_shojo_017.png,Soraya Mansour,The Beast Underworld Realm Luminary,protag,shojo,monster_taming,crime,fantasy,g30_protag_shojo_017.webp
+83,B01,S09,R1C3,g30_protag_shojo_018,g30_protag_shojo_018.png,Rei Tanaka,The Titan Abyss Realm Luminary,protag,shojo,kaiju,cosmic_horror,fantasy,g30_protag_shojo_018.webp
+84,B01,S09,R1C4,g30_protag_shojo_019,g30_protag_shojo_019.png,Diego Vega,The Beast Underworld Stage Luminary,protag,shojo,monster_taming,crime,idol,g30_protag_shojo_019.webp
+85,B01,S09,R1C5,g30_protag_shojo_020,g30_protag_shojo_020.png,Drew Alvarez,The Titan Abyss Stage Luminary,protag,shojo,kaiju,cosmic_horror,idol,g30_protag_shojo_020.webp
+86,B01,S09,R2C1,g30_protag_shojo_021,g30_protag_shojo_021.png,Ren Oshima,The Beast Underworld Cipher Luminary,protag,shojo,monster_taming,crime,mystery,g30_protag_shojo_021.webp
+87,B01,S09,R2C2,g30_protag_shojo_022,g30_protag_shojo_022.png,Zain Wahid,The Titan Abyss Cipher Luminary,protag,shojo,kaiju,cosmic_horror,mystery,g30_protag_shojo_022.webp
+88,B01,S09,R2C3,g30_protag_shojo_023,g30_protag_shojo_023.png,Kari Lindholm,The Beast Underworld Mirth Luminary,protag,shojo,monster_taming,crime,comedy,g30_protag_shojo_023.webp
+89,B01,S09,R2C4,g30_protag_shojo_024,g30_protag_shojo_024.png,Eden Gomez,The Titan Abyss Mirth Luminary,protag,shojo,kaiju,cosmic_horror,comedy,g30_protag_shojo_024.webp
+90,B01,S09,R2C5,g30_protag_shojo_025,g30_protag_shojo_025.png,Riku Nakamura,The Beast Underworld Kitchen Luminary,protag,shojo,monster_taming,crime,cooking,g30_protag_shojo_025.webp
+91,B01,S10,R1C1,g30_protag_shojo_026,g30_protag_shojo_026.png,Mariam Darzi,The Titan Abyss Kitchen Luminary,protag,shojo,kaiju,cosmic_horror,cooking,g30_protag_shojo_026.webp
+92,B01,S10,R1C2,g30_protag_shojo_027,g30_protag_shojo_027.png,Lars Skov,The Beast Underworld Command Luminary,protag,shojo,monster_taming,crime,military,g30_protag_shojo_027.webp
+93,B01,S10,R1C3,g30_protag_shojo_028,g30_protag_shojo_028.png,Elena Mercer,The Titan Abyss Command Luminary,protag,shojo,kaiju,cosmic_horror,military,g30_protag_shojo_028.webp
+94,B01,S10,R1C4,g30_protag_shojo_029,g30_protag_shojo_029.png,Rin Hoshino,The Beast Underworld Spirit Luminary,protag,shojo,monster_taming,crime,supernatural,g30_protag_shojo_029.webp
+95,B01,S10,R1C5,g30_protag_shojo_030,g30_protag_shojo_030.png,Maja Eklund,The Titan Abyss Spirit Luminary,protag,shojo,kaiju,cosmic_horror,supernatural,g30_protag_shojo_030.webp
+96,B01,S10,R2C1,g30_protag_shojo_031,g30_protag_shojo_031.png,Adil Mahmoud,The Beast Underworld Void Luminary,protag,shojo,monster_taming,crime,space,g30_protag_shojo_031.webp
+97,B01,S10,R2C2,g30_protag_shojo_032,g30_protag_shojo_032.png,Sakura Kobayashi,The Titan Abyss Void Luminary,protag,shojo,kaiju,cosmic_horror,space,g30_protag_shojo_032.webp
+98,B01,S10,R2C3,g30_protag_shojo_033,g30_protag_shojo_033.png,Ellis Rossi,The Beast Underworld Charm Luminary,protag,shojo,monster_taming,crime,magical,g30_protag_shojo_033.webp
+99,B01,S10,R2C4,g30_protag_shojo_034,g30_protag_shojo_034.png,Oskar Fjell,The Titan Abyss Charm Luminary,protag,shojo,kaiju,cosmic_horror,magical,g30_protag_shojo_034.webp
+100,B01,S10,R2C5,g30_protag_shojo_035,g30_protag_shojo_035.png,Noura Sayegh,The Beast Underworld Wild Luminary,protag,shojo,monster_taming,crime,survival,g30_protag_shojo_035.webp
+101,B02,S11,R1C1,g30_protag_shojo_036,g30_protag_shojo_036.png,Satomi Yamamoto,The Titan Abyss Wild Luminary,protag,shojo,kaiju,cosmic_horror,survival,g30_protag_shojo_036.webp
+102,B02,S11,R1C2,g30_protag_shojo_037,g30_protag_shojo_037.png,Eshe Morrow,The Beast Underworld Corsair Luminary,protag,shojo,monster_taming,crime,pirate,g30_protag_shojo_037.webp
+103,B02,S11,R1C3,g30_protag_shojo_038,g30_protag_shojo_038.png,Saga Ravn,The Titan Abyss Corsair Luminary,protag,shojo,kaiju,cosmic_horror,pirate,g30_protag_shojo_038.webp
+104,B02,S11,R1C4,g30_protag_shojo_039,g30_protag_shojo_039.png,Kamran Yilmaz,The Beast Underworld Fist Luminary,protag,shojo,monster_taming,crime,martial,g30_protag_shojo_039.webp
+105,B02,S11,R1C5,g30_protag_shojo_040,g30_protag_shojo_040.png,Roya Fahmi,The Titan Abyss Fist Luminary,protag,shojo,kaiju,cosmic_horror,martial,g30_protag_shojo_040.webp
+106,B02,S11,R2C1,g30_protag_shojo_041,g30_protag_shojo_041.png,Signe Strand,The Beast Underworld Myth Luminary,protag,shojo,monster_taming,crime,mythology,g30_protag_shojo_041.webp
+107,B02,S11,R2C2,g30_protag_shojo_042,g30_protag_shojo_042.png,Giulia Chen,The Titan Abyss Myth Luminary,protag,shojo,kaiju,cosmic_horror,mythology,g30_protag_shojo_042.webp
+108,B02,S11,R2C3,g30_protag_shojo_043,g30_protag_shojo_043.png,Stellan Sundberg,The Beast Underworld North Luminary,protag,shojo,monster_taming,crime,nordic,g30_protag_shojo_043.webp
+109,B02,S11,R2C4,g30_protag_shojo_044,g30_protag_shojo_044.png,Thea Lind,The Titan Abyss North Luminary,protag,shojo,kaiju,cosmic_horror,nordic,g30_protag_shojo_044.webp
+110,B02,S11,R2C5,g30_protag_shojo_045,g30_protag_shojo_045.png,Shun Endo,The Beast Underworld Blade Luminary,protag,shojo,monster_taming,crime,samurai,g30_protag_shojo_045.webp
+111,B02,S12,R1C1,g30_protag_shojo_046,g30_protag_shojo_046.png,Sora Shinohara,The Titan Abyss Blade Luminary,protag,shojo,kaiju,cosmic_horror,samurai,g30_protag_shojo_046.webp
+112,B02,S12,R1C2,g30_protag_shojo_047,g30_protag_shojo_047.png,Taiga Miyazaki,The Beast Underworld Shadow Luminary,protag,shojo,monster_taming,crime,shinobi,g30_protag_shojo_047.webp
+113,B02,S12,R1C3,g30_protag_shojo_048,g30_protag_shojo_048.png,Toma Nakajima,The Titan Abyss Shadow Luminary,protag,shojo,kaiju,cosmic_horror,shinobi,g30_protag_shojo_048.webp
+114,B02,S12,R1C4,g30_protag_shojo_049,g30_protag_shojo_049.png,Tor Roed,The Beast Underworld Blood Luminary,protag,shojo,monster_taming,crime,vampire,g30_protag_shojo_049.webp
+115,B02,S12,R1C5,g30_protag_shojo_050,g30_protag_shojo_050.png,Yuki Nomura,The Titan Abyss Blood Luminary,protag,shojo,kaiju,cosmic_horror,vampire,g30_protag_shojo_050.webp
+116,B02,S12,R2C1,g30_protag_shojo_051,g30_protag_shojo_051.png,Haejin Ivanov,The Beast Underworld Ruin Luminary,protag,shojo,monster_taming,crime,grimdark,g30_protag_shojo_051.webp
+117,B02,S12,R2C2,g30_protag_shojo_052,g30_protag_shojo_052.png,Yrsa Dahl-Petrov,The Titan Abyss Ruin Luminary,protag,shojo,kaiju,cosmic_horror,grimdark,g30_protag_shojo_052.webp
+118,B02,S12,R2C3,g30_protag_shojo_053,g30_protag_shojo_053.png,Salma Khan,The Gear Portal Beast Luminary,protag,shojo,mecha,isekai,monster_taming,g30_protag_shojo_053.webp
+119,B02,S12,R2C4,g30_protag_shojo_054,g30_protag_shojo_054.png,Yusuf Taheri,The Hearth Terror Dune Luminary,protag,shojo,slice,horror,arabia,g30_protag_shojo_054.webp
+120,B02,S12,R2C5,g30_protag_shojo_055,g30_protag_shojo_055.png,Amina Darzi,The Heart Arena Dune Luminary,protag,shojo,romance,sports,arabia,g30_protag_shojo_055.webp
+121,B02,S13,R1C1,g30_protag_shojo_056,g30_protag_shojo_056.png,Amir Mahmoud,The Neon Realm Dune Luminary,protag,shojo,cyber,fantasy,arabia,g30_protag_shojo_056.webp
+122,B02,S13,R1C2,g30_protag_shojo_057,g30_protag_shojo_057.png,Dalia Sayegh,The Stage Cipher Dune Luminary,protag,shojo,idol,mystery,arabia,g30_protag_shojo_057.webp
+123,B02,S13,R1C3,g30_protag_shojo_058,g30_protag_shojo_058.png,Darya Yilmaz,The Mirth Kitchen Dune Luminary,protag,shojo,comedy,cooking,arabia,g30_protag_shojo_058.webp
+124,B02,S13,R1C4,g30_protag_shojo_059,g30_protag_shojo_059.png,Farah Fahmi,The Command Spirit Dune Luminary,protag,shojo,military,supernatural,arabia,g30_protag_shojo_059.webp
+125,B02,S13,R1C5,g30_protag_shojo_060,g30_protag_shojo_060.png,Hadi Khan,The Void Charm Dune Luminary,protag,shojo,space,magical,arabia,g30_protag_shojo_060.webp
+126,B02,S13,R2C1,g30_protag_shojo_061,g30_protag_shojo_061.png,Idris Taheri,The Wild Corsair Dune Luminary,protag,shojo,survival,pirate,arabia,g30_protag_shojo_061.webp
+127,B02,S13,R2C2,g30_protag_shojo_062,g30_protag_shojo_062.png,Ilyas Aziz,The Fist Myth Dune Luminary,protag,shojo,martial,mythology,arabia,g30_protag_shojo_062.webp
+128,B02,S13,R2C3,g30_protag_shojo_063,g30_protag_shojo_063.png,Laleh Khatib,The North Blade Dune Luminary,protag,shojo,nordic,samurai,arabia,g30_protag_shojo_063.webp
+129,B02,S13,R2C4,g30_protag_shojo_064,g30_protag_shojo_064.png,Layla Osman,The Shadow Blood Dune Luminary,protag,shojo,shinobi,vampire,arabia,g30_protag_shojo_064.webp
+130,B02,S13,R2C5,g30_protag_shojo_065,g30_protag_shojo_065.png,Nadia Saleh,The Beast Dune Ruin Luminary,protag,shojo,monster_taming,arabia,grimdark,g30_protag_shojo_065.webp
+131,B02,S14,R1C1,g30_secondary_shonen_001,g30_secondary_shonen_001.png,Omar Erdem,The Beast Underworld Titan Wing,secondary,shonen,monster_taming,crime,kaiju,g30_secondary_shonen_001.webp
+132,B02,S14,R1C2,g30_secondary_shonen_002,g30_secondary_shonen_002.png,Rafi Khalil,The Beast Abyss Dune Wing,secondary,shonen,monster_taming,cosmic_horror,arabia,g30_secondary_shonen_002.webp
+133,B02,S14,R1C3,g30_secondary_shonen_003,g30_secondary_shonen_003.png,Imani Nguyen,The Underworld Abyss Gear Wing,secondary,shonen,crime,cosmic_horror,mecha,g30_secondary_shonen_003.webp
+134,B02,S14,R1C4,g30_secondary_shonen_004,g30_secondary_shonen_004.png,Rami Sabbagh,The Titan Dune Gear Wing,secondary,shonen,kaiju,arabia,mecha,g30_secondary_shonen_004.webp
+135,B02,S14,R1C5,g30_secondary_shonen_005,g30_secondary_shonen_005.png,Sana Barakat,The Underworld Dune Portal Wing,secondary,shonen,crime,arabia,isekai,g30_secondary_shonen_005.webp
+136,B02,S14,R2C1,g30_secondary_shonen_006,g30_secondary_shonen_006.png,Yuna Ito,The Titan Abyss Portal Wing,secondary,shonen,kaiju,cosmic_horror,isekai,g30_secondary_shonen_006.webp
+137,B02,S14,R2C2,g30_secondary_shonen_007,g30_secondary_shonen_007.png,Ines Tan,The Beast Underworld Hearth Wing,secondary,shonen,monster_taming,crime,slice,g30_secondary_shonen_007.webp
+138,B02,S14,R2C3,g30_secondary_shonen_008,g30_secondary_shonen_008.png,Anders Engen,The Titan Abyss Hearth Wing,secondary,shonen,kaiju,cosmic_horror,slice,g30_secondary_shonen_008.webp
+139,B02,S14,R2C4,g30_secondary_shonen_009,g30_secondary_shonen_009.png,Samira Jafari,The Beast Underworld Terror Wing,secondary,shonen,monster_taming,crime,horror,g30_secondary_shonen_009.webp
+140,B02,S14,R2C5,g30_secondary_shonen_010,g30_secondary_shonen_010.png,Isha Okada,The Titan Abyss Terror Wing,secondary,shonen,kaiju,cosmic_horror,horror,g30_secondary_shonen_010.webp
+141,B02,S15,R1C1,g30_secondary_shonen_011,g30_secondary_shonen_011.png,Ayame Yamada,The Beast Underworld Heart Wing,secondary,shonen,monster_taming,crime,romance,g30_secondary_shonen_011.webp
+142,B02,S15,R1C2,g30_secondary_shonen_012,g30_secondary_shonen_012.png,Tariq Najjar,The Titan Abyss Heart Wing,secondary,shonen,kaiju,cosmic_horror,romance,g30_secondary_shonen_012.webp
+143,B02,S15,R1C3,g30_secondary_shonen_013,g30_secondary_shonen_013.png,Elin Moen,The Beast Underworld Arena Wing,secondary,shonen,monster_taming,crime,sports,g30_secondary_shonen_013.webp
+144,B02,S15,R1C4,g30_secondary_shonen_014,g30_secondary_shonen_014.png,Jae Dlamini,The Titan Abyss Arena Wing,secondary,shonen,kaiju,cosmic_horror,sports,g30_secondary_shonen_014.webp
+145,B02,S15,R1C5,g30_secondary_shonen_015,g30_secondary_shonen_015.png,Keiko Araki,The Beast Underworld Neon Wing,secondary,shonen,monster_taming,crime,cyber,g30_secondary_shonen_015.webp
+146,B02,S15,R2C1,g30_secondary_shonen_016,g30_secondary_shonen_016.png,Yara Saad,The Titan Abyss Neon Wing,secondary,shonen,kaiju,cosmic_horror,cyber,g30_secondary_shonen_016.webp
+147,B02,S15,R2C2,g30_secondary_shonen_017,g30_secondary_shonen_017.png,Kjell Solberg,The Beast Underworld Realm Wing,secondary,shonen,monster_taming,crime,fantasy,g30_secondary_shonen_017.webp
+148,B02,S15,R2C3,g30_secondary_shonen_018,g30_secondary_shonen_018.png,Javier Lavigne,The Titan Abyss Realm Wing,secondary,shonen,kaiju,cosmic_horror,fantasy,g30_secondary_shonen_018.webp
+149,B02,S15,R2C4,g30_secondary_shonen_019,g30_secondary_shonen_019.png,Koharu Sato,The Beast Underworld Stage Wing,secondary,shonen,monster_taming,crime,idol,g30_secondary_shonen_019.webp
+150,B02,S15,R2C5,g30_secondary_shonen_020,g30_secondary_shonen_020.png,Natsuki Tachibana,The Titan Abyss Stage Wing,secondary,shonen,kaiju,cosmic_horror,idol,g30_secondary_shonen_020.webp
+151,B02,S16,R1C1,g30_secondary_shonen_021,g30_secondary_shonen_021.png,Jiho Ortega,The Beast Underworld Cipher Wing,secondary,shonen,monster_taming,crime,mystery,g30_secondary_shonen_021.webp
+152,B02,S16,R1C2,g30_secondary_shonen_022,g30_secondary_shonen_022.png,Nils Ostberg,The Titan Abyss Cipher Wing,secondary,shonen,kaiju,cosmic_horror,mystery,g30_secondary_shonen_022.webp
+153,B02,S16,R1C3,g30_secondary_shonen_023,g30_secondary_shonen_023.png,Zoya Demir,The Beast Underworld Mirth Wing,secondary,shonen,monster_taming,crime,comedy,g30_secondary_shonen_023.webp
+154,B02,S16,R1C4,g30_secondary_shonen_024,g30_secondary_shonen_024.png,Ryo Mori,The Titan Abyss Mirth Wing,secondary,shonen,kaiju,cosmic_horror,comedy,g30_secondary_shonen_024.webp
+155,B02,S16,R1C5,g30_secondary_shonen_025,g30_secondary_shonen_025.png,Jordan Velasco,The Beast Underworld Kitchen Wing,secondary,shonen,monster_taming,crime,cooking,g30_secondary_shonen_025.webp
+156,B02,S16,R2C1,g30_secondary_shonen_026,g30_secondary_shonen_026.png,Solveig Jensen,The Titan Abyss Kitchen Wing,secondary,shonen,kaiju,cosmic_horror,cooking,g30_secondary_shonen_026.webp
+157,B02,S16,R2C2,g30_secondary_shonen_027,g30_secondary_shonen_027.png,Azra Karim,The Beast Underworld Command Wing,secondary,shonen,monster_taming,crime,military,g30_secondary_shonen_027.webp
+158,B02,S16,R2C3,g30_secondary_shonen_028,g30_secondary_shonen_028.png,Takara Akiyama,The Titan Abyss Command Wing,secondary,shonen,kaiju,cosmic_horror,military,g30_secondary_shonen_028.webp
+159,B02,S16,R2C4,g30_secondary_shonen_029,g30_secondary_shonen_029.png,Kavya Bae,The Beast Underworld Spirit Wing,secondary,shonen,monster_taming,crime,supernatural,g30_secondary_shonen_029.webp
+160,B02,S16,R2C5,g30_secondary_shonen_030,g30_secondary_shonen_030.png,Basil Rashid,The Titan Abyss Spirit Wing,secondary,shonen,kaiju,cosmic_horror,supernatural,g30_secondary_shonen_030.webp
+161,B02,S17,R1C1,g30_secondary_shonen_031,g30_secondary_shonen_031.png,Aksel Nordby,The Beast Underworld Void Wing,secondary,shonen,monster_taming,crime,space,g30_secondary_shonen_031.webp
+162,B02,S17,R1C2,g30_secondary_shonen_032,g30_secondary_shonen_032.png,Kofi Grey,The Titan Abyss Void Wing,secondary,shonen,kaiju,cosmic_horror,space,g30_secondary_shonen_032.webp
+163,B02,S17,R1C3,g30_secondary_shonen_033,g30_secondary_shonen_033.png,Yori Ishikawa,The Beast Underworld Charm Wing,secondary,shonen,monster_taming,crime,magical,g30_secondary_shonen_033.webp
+164,B02,S17,R1C4,g30_secondary_shonen_034,g30_secondary_shonen_034.png,Cem Zahir,The Titan Abyss Charm Wing,secondary,shonen,kaiju,cosmic_horror,magical,g30_secondary_shonen_034.webp
+165,B02,S17,R1C5,g30_secondary_shonen_035,g30_secondary_shonen_035.png,Ebba Berg,The Beast Underworld Wild Wing,secondary,shonen,monster_taming,crime,survival,g30_secondary_shonen_035.webp
+166,B02,S17,R2C1,g30_secondary_shonen_036,g30_secondary_shonen_036.png,Leona Mendoza,The Titan Abyss Wild Wing,secondary,shonen,kaiju,cosmic_horror,survival,g30_secondary_shonen_036.webp
+167,B02,S17,R2C2,g30_secondary_shonen_037,g30_secondary_shonen_037.png,Maki Wakamatsu,The Beast Underworld Corsair Wing,secondary,shonen,monster_taming,crime,pirate,g30_secondary_shonen_037.webp
+168,B02,S17,R2C3,g30_secondary_shonen_038,g30_secondary_shonen_038.png,Elif Farouq,The Titan Abyss Corsair Wing,secondary,shonen,kaiju,cosmic_horror,pirate,g30_secondary_shonen_038.webp
+169,B02,S17,R2C4,g30_secondary_shonen_039,g30_secondary_shonen_039.png,Hanne Bakke,The Beast Underworld Fist Wing,secondary,shonen,monster_taming,crime,martial,g30_secondary_shonen_039.webp
+170,B02,S17,R2C5,g30_secondary_shonen_040,g30_secondary_shonen_040.png,Ivar Krogh,The Titan Abyss Fist Wing,secondary,shonen,kaiju,cosmic_horror,martial,g30_secondary_shonen_040.webp
+171,B02,S18,R1C1,g30_secondary_shonen_041,g30_secondary_shonen_041.png,Iman Masri,The Beast Underworld Myth Wing,secondary,shonen,monster_taming,crime,mythology,g30_secondary_shonen_041.webp
+172,B02,S18,R1C2,g30_secondary_shonen_042,g30_secondary_shonen_042.png,Akari Araki,The Titan Abyss Myth Wing,secondary,shonen,kaiju,cosmic_horror,mythology,g30_secondary_shonen_042.webp
+173,B02,S18,R1C3,g30_secondary_shonen_043,g30_secondary_shonen_043.png,Malin Olsen,The Beast Underworld North Wing,secondary,shonen,monster_taming,crime,nordic,g30_secondary_shonen_043.webp
+174,B02,S18,R1C4,g30_secondary_shonen_044,g30_secondary_shonen_044.png,Sven Winther,The Titan Abyss North Wing,secondary,shonen,kaiju,cosmic_horror,nordic,g30_secondary_shonen_044.webp
+175,B02,S18,R1C5,g30_secondary_shonen_045,g30_secondary_shonen_045.png,Aoi Sato,The Beast Underworld Blade Wing,secondary,shonen,monster_taming,crime,samurai,g30_secondary_shonen_045.webp
+176,B02,S18,R2C1,g30_secondary_shonen_046,g30_secondary_shonen_046.png,Asuka Tachibana,The Titan Abyss Blade Wing,secondary,shonen,kaiju,cosmic_horror,samurai,g30_secondary_shonen_046.webp
+177,B02,S18,R2C2,g30_secondary_shonen_047,g30_secondary_shonen_047.png,Chihiro Mori,The Beast Underworld Shadow Wing,secondary,shonen,monster_taming,crime,shinobi,g30_secondary_shonen_047.webp
+178,B02,S18,R2C3,g30_secondary_shonen_048,g30_secondary_shonen_048.png,Daichi Akiyama,The Titan Abyss Shadow Wing,secondary,shonen,kaiju,cosmic_horror,shinobi,g30_secondary_shonen_048.webp
+179,B02,S18,R2C4,g30_secondary_shonen_049,g30_secondary_shonen_049.png,Karim Rahman,The Beast Underworld Blood Wing,secondary,shonen,monster_taming,crime,vampire,g30_secondary_shonen_049.webp
+180,B02,S18,R2C5,g30_secondary_shonen_050,g30_secondary_shonen_050.png,Lindiwe Roux,The Titan Abyss Blood Wing,secondary,shonen,kaiju,cosmic_horror,vampire,g30_secondary_shonen_050.webp
+181,B02,S19,R1C1,g30_secondary_shonen_051,g30_secondary_shonen_051.png,Eiji Ishikawa,The Beast Underworld Ruin Wing,secondary,shonen,monster_taming,crime,grimdark,g30_secondary_shonen_051.webp
+182,B02,S19,R1C2,g30_secondary_shonen_052,g30_secondary_shonen_052.png,Leila Abbasi,The Titan Abyss Ruin Wing,secondary,shonen,kaiju,cosmic_horror,grimdark,g30_secondary_shonen_052.webp
+183,B02,S19,R1C3,g30_secondary_shonen_053,g30_secondary_shonen_053.png,Tuva Holm,The Gear Portal Beast Wing,secondary,shonen,mecha,isekai,monster_taming,g30_secondary_shonen_053.webp
+184,B02,S19,R1C4,g30_secondary_shonen_054,g30_secondary_shonen_054.png,Mina Hassan,The Hearth Terror Dune Wing,secondary,shonen,slice,horror,arabia,g30_secondary_shonen_054.webp
+185,B02,S19,R1C5,g30_secondary_shonen_055,g30_secondary_shonen_055.png,Naveed Qadir,The Heart Arena Dune Wing,secondary,shonen,romance,sports,arabia,g30_secondary_shonen_055.webp
+186,B02,S19,R2C1,g30_secondary_shonen_056,g30_secondary_shonen_056.png,Noor Touma,The Neon Realm Dune Wing,secondary,shonen,cyber,fantasy,arabia,g30_secondary_shonen_056.webp
+187,B02,S19,R2C2,g30_secondary_shonen_057,g30_secondary_shonen_057.png,Rana Amani,The Stage Cipher Dune Wing,secondary,shonen,idol,mystery,arabia,g30_secondary_shonen_057.webp
+188,B02,S19,R2C3,g30_secondary_shonen_058,g30_secondary_shonen_058.png,Sahir Kader,The Mirth Kitchen Dune Wing,secondary,shonen,comedy,cooking,arabia,g30_secondary_shonen_058.webp
+189,B02,S19,R2C4,g30_secondary_shonen_059,g30_secondary_shonen_059.png,Soraya Nassar,The Command Spirit Dune Wing,secondary,shonen,military,supernatural,arabia,g30_secondary_shonen_059.webp
+190,B02,S19,R2C5,g30_secondary_shonen_060,g30_secondary_shonen_060.png,Zain Zaman,The Void Charm Dune Wing,secondary,shonen,space,magical,arabia,g30_secondary_shonen_060.webp
+191,B02,S20,R1C1,g30_secondary_shonen_061,g30_secondary_shonen_061.png,Mariam Haddad,The Wild Corsair Dune Wing,secondary,shonen,survival,pirate,arabia,g30_secondary_shonen_061.webp
+192,B02,S20,R1C2,g30_secondary_shonen_062,g30_secondary_shonen_062.png,Adil Nasri,The Fist Myth Dune Wing,secondary,shonen,martial,mythology,arabia,g30_secondary_shonen_062.webp
+193,B02,S20,R1C3,g30_secondary_shonen_063,g30_secondary_shonen_063.png,Noura Shakir,The North Blade Dune Wing,secondary,shonen,nordic,samurai,arabia,g30_secondary_shonen_063.webp
+194,B02,S20,R1C4,g30_secondary_shonen_064,g30_secondary_shonen_064.png,Kamran Arslan,The Shadow Blood Dune Wing,secondary,shonen,shinobi,vampire,arabia,g30_secondary_shonen_064.webp
+195,B02,S20,R1C5,g30_secondary_shonen_065,g30_secondary_shonen_065.png,Roya Habib,The Beast Dune Ruin Wing,secondary,shonen,monster_taming,arabia,grimdark,g30_secondary_shonen_065.webp
+196,B02,S20,R2C1,g30_secondary_shojo_001,g30_secondary_shojo_001.png,Salma Mansour,The Beast Underworld Titan Confidant,secondary,shojo,monster_taming,crime,kaiju,g30_secondary_shojo_001.webp
+197,B02,S20,R2C2,g30_secondary_shojo_002,g30_secondary_shojo_002.png,Yusuf Wahid,The Beast Abyss Dune Confidant,secondary,shojo,monster_taming,cosmic_horror,arabia,g30_secondary_shojo_002.webp
+198,B02,S20,R2C3,g30_secondary_shojo_003,g30_secondary_shojo_003.png,Luca Vale,The Underworld Abyss Gear Confidant,secondary,shojo,crime,cosmic_horror,mecha,g30_secondary_shojo_003.webp
+199,B02,S20,R2C4,g30_secondary_shojo_004,g30_secondary_shojo_004.png,Amina Haddad,The Titan Dune Gear Confidant,secondary,shojo,kaiju,arabia,mecha,g30_secondary_shojo_004.webp
+200,B02,S20,R2C5,g30_secondary_shojo_005,g30_secondary_shojo_005.png,Amir Nasri,The Underworld Dune Portal Confidant,secondary,shojo,crime,arabia,isekai,g30_secondary_shojo_005.webp
+201,B03,S21,R1C1,g30_secondary_shojo_006,g30_secondary_shojo_006.png,Emi Wakamatsu,The Titan Abyss Portal Confidant,secondary,shojo,kaiju,cosmic_horror,isekai,g30_secondary_shojo_006.webp
+202,B03,S21,R1C2,g30_secondary_shojo_007,g30_secondary_shojo_007.png,Lucia Choi,The Beast Underworld Hearth Confidant,secondary,shojo,monster_taming,crime,slice,g30_secondary_shojo_007.webp
+203,B03,S21,R1C3,g30_secondary_shojo_008,g30_secondary_shojo_008.png,Vidar Mikkelsen,The Titan Abyss Hearth Confidant,secondary,shojo,kaiju,cosmic_horror,slice,g30_secondary_shojo_008.webp
+204,B03,S21,R1C4,g30_secondary_shojo_009,g30_secondary_shojo_009.png,Dalia Shakir,The Beast Underworld Terror Confidant,secondary,shojo,monster_taming,crime,horror,g30_secondary_shojo_009.webp
+205,B03,S21,R1C5,g30_secondary_shojo_010,g30_secondary_shojo_010.png,Maia Kaur,The Titan Abyss Terror Confidant,secondary,shojo,kaiju,cosmic_horror,horror,g30_secondary_shojo_010.webp
+206,B03,S21,R2C1,g30_secondary_shojo_011,g30_secondary_shojo_011.png,Fumiko Abe,The Beast Underworld Heart Confidant,secondary,shojo,monster_taming,crime,romance,g30_secondary_shojo_011.webp
+207,B03,S21,R2C2,g30_secondary_shojo_012,g30_secondary_shojo_012.png,Darya Arslan,The Titan Abyss Heart Confidant,secondary,shojo,kaiju,cosmic_horror,romance,g30_secondary_shojo_012.webp
+208,B03,S21,R2C3,g30_secondary_shojo_013,g30_secondary_shojo_013.png,Astrid Berg,The Beast Underworld Arena Confidant,secondary,shojo,monster_taming,crime,sports,g30_secondary_shojo_013.webp
+209,B03,S21,R2C4,g30_secondary_shojo_014,g30_secondary_shojo_014.png,Mandla Njeri,The Titan Abyss Arena Confidant,secondary,shojo,kaiju,cosmic_horror,sports,g30_secondary_shojo_014.webp
+210,B03,S21,R2C5,g30_secondary_shojo_015,g30_secondary_shojo_015.png,Hana Sasaki,The Beast Underworld Neon Confidant,secondary,shojo,monster_taming,crime,cyber,g30_secondary_shojo_015.webp
+211,B03,S22,R1C1,g30_secondary_shojo_016,g30_secondary_shojo_016.png,Farah Habib,The Titan Abyss Neon Confidant,secondary,shojo,kaiju,cosmic_horror,cyber,g30_secondary_shojo_016.webp
+212,B03,S22,R1C2,g30_secondary_shojo_017,g30_secondary_shojo_017.png,Elias Bakke,The Beast Underworld Realm Confidant,secondary,shojo,monster_taming,crime,fantasy,g30_secondary_shojo_017.webp
+213,B03,S22,R1C3,g30_secondary_shojo_018,g30_secondary_shojo_018.png,Mateo Te-Rangi-Ravn,The Titan Abyss Realm Confidant,secondary,shojo,kaiju,cosmic_horror,fantasy,g30_secondary_shojo_018.webp
+214,B03,S22,R1C4,g30_secondary_shojo_019,g30_secondary_shojo_019.png,Haruka Shimada,The Beast Underworld Stage Confidant,secondary,shojo,monster_taming,crime,idol,g30_secondary_shojo_019.webp
+215,B03,S22,R1C5,g30_secondary_shojo_020,g30_secondary_shojo_020.png,Hikari Miura,The Titan Abyss Stage Confidant,secondary,shojo,kaiju,cosmic_horror,idol,g30_secondary_shojo_020.webp
+216,B03,S22,R2C1,g30_secondary_shojo_021,g30_secondary_shojo_021.png,Mira Pereira,The Beast Underworld Cipher Confidant,secondary,shojo,monster_taming,crime,mystery,g30_secondary_shojo_021.webp
+217,B03,S22,R2C2,g30_secondary_shojo_022,g30_secondary_shojo_022.png,Freja Krogh,The Titan Abyss Cipher Confidant,secondary,shojo,kaiju,cosmic_horror,mystery,g30_secondary_shojo_022.webp
+218,B03,S22,R2C3,g30_secondary_shojo_023,g30_secondary_shojo_023.png,Hadi Mansour,The Beast Underworld Mirth Confidant,secondary,shojo,monster_taming,crime,comedy,g30_secondary_shojo_023.webp
+219,B03,S22,R2C4,g30_secondary_shojo_024,g30_secondary_shojo_024.png,Itsuki Kawahara,The Titan Abyss Mirth Confidant,secondary,shojo,kaiju,cosmic_horror,comedy,g30_secondary_shojo_024.webp
+220,B03,S22,R2C5,g30_secondary_shojo_025,g30_secondary_shojo_025.png,Morgan Dubois,The Beast Underworld Kitchen Confidant,secondary,shojo,monster_taming,crime,cooking,g30_secondary_shojo_025.webp
+221,B03,S23,R1C1,g30_secondary_shojo_026,g30_secondary_shojo_026.png,Ingrid Olsen,The Titan Abyss Kitchen Confidant,secondary,shojo,kaiju,cosmic_horror,cooking,g30_secondary_shojo_026.webp
+222,B03,S23,R1C2,g30_secondary_shojo_027,g30_secondary_shojo_027.png,Idris Wahid,The Beast Underworld Command Confidant,secondary,shojo,monster_taming,crime,military,g30_secondary_shojo_027.webp
+223,B03,S23,R1C3,g30_secondary_shojo_028,g30_secondary_shojo_028.png,Jun Hirasawa,The Titan Abyss Command Confidant,secondary,shojo,kaiju,cosmic_horror,military,g30_secondary_shojo_028.webp
+224,B03,S23,R1C4,g30_secondary_shojo_029,g30_secondary_shojo_029.png,Nari Laurent,The Beast Underworld Spirit Confidant,secondary,shojo,monster_taming,crime,supernatural,g30_secondary_shojo_029.webp
+225,B03,S23,R1C5,g30_secondary_shojo_030,g30_secondary_shojo_030.png,Ilyas Darzi,The Titan Abyss Spirit Confidant,secondary,shojo,kaiju,cosmic_horror,supernatural,g30_secondary_shojo_030.webp
+226,B03,S23,R2C1,g30_secondary_shojo_031,g30_secondary_shojo_031.png,Jonas Winther,The Beast Underworld Void Confidant,secondary,shojo,monster_taming,crime,space,g30_secondary_shojo_031.webp
+227,B03,S23,R2C2,g30_secondary_shojo_032,g30_secondary_shojo_032.png,Nia Park,The Titan Abyss Void Confidant,secondary,shojo,kaiju,cosmic_horror,space,g30_secondary_shojo_032.webp
+228,B03,S23,R2C3,g30_secondary_shojo_033,g30_secondary_shojo_033.png,Kaede Ueda,The Beast Underworld Charm Confidant,secondary,shojo,monster_taming,crime,magical,g30_secondary_shojo_033.webp
+229,B03,S23,R2C4,g30_secondary_shojo_034,g30_secondary_shojo_034.png,Laleh Mahmoud,The Titan Abyss Charm Confidant,secondary,shojo,kaiju,cosmic_horror,magical,g30_secondary_shojo_034.webp
+230,B03,S23,R2C5,g30_secondary_shojo_035,g30_secondary_shojo_035.png,Leif Holm,The Beast Underworld Wild Confidant,secondary,shojo,monster_taming,crime,survival,g30_secondary_shojo_035.webp
+231,B03,S24,R1C1,g30_secondary_shojo_036,g30_secondary_shojo_036.png,Osei Volkov,The Titan Abyss Wild Confidant,secondary,shojo,kaiju,cosmic_horror,survival,g30_secondary_shojo_036.webp
+232,B03,S24,R1C2,g30_secondary_shojo_037,g30_secondary_shojo_037.png,Kaori Uchida,The Beast Underworld Corsair Confidant,secondary,shojo,monster_taming,crime,pirate,g30_secondary_shojo_037.webp
+233,B03,S24,R1C3,g30_secondary_shojo_038,g30_secondary_shojo_038.png,Layla Sayegh,The Titan Abyss Corsair Confidant,secondary,shojo,kaiju,cosmic_horror,pirate,g30_secondary_shojo_038.webp
+234,B03,S24,R1C4,g30_secondary_shojo_039,g30_secondary_shojo_039.png,Liv Mikkelsen,The Beast Underworld Fist Confidant,secondary,shojo,monster_taming,crime,martial,g30_secondary_shojo_039.webp
+235,B03,S24,R1C5,g30_secondary_shojo_040,g30_secondary_shojo_040.png,Niko Andersen,The Titan Abyss Fist Confidant,secondary,shojo,kaiju,cosmic_horror,martial,g30_secondary_shojo_040.webp
+236,B03,S24,R2C1,g30_secondary_shojo_041,g30_secondary_shojo_041.png,Nadia Yilmaz,The Beast Underworld Myth Confidant,secondary,shojo,monster_taming,crime,mythology,g30_secondary_shojo_041.webp
+237,B03,S24,R2C2,g30_secondary_shojo_042,g30_secondary_shojo_042.png,Kenta Ogawa,The Titan Abyss Myth Confidant,secondary,shojo,kaiju,cosmic_horror,mythology,g30_secondary_shojo_042.webp
+238,B03,S24,R2C3,g30_secondary_shojo_043,g30_secondary_shojo_043.png,Runa Aasen,The Beast Underworld North Confidant,secondary,shojo,monster_taming,crime,nordic,g30_secondary_shojo_043.webp
+239,B03,S24,R2C4,g30_secondary_shojo_044,g30_secondary_shojo_044.png,Soren Holt,The Titan Abyss North Confidant,secondary,shojo,kaiju,cosmic_horror,nordic,g30_secondary_shojo_044.webp
+240,B03,S24,R2C5,g30_secondary_shojo_045,g30_secondary_shojo_045.png,Makoto Morita,The Beast Underworld Blade Confidant,secondary,shojo,monster_taming,crime,samurai,g30_secondary_shojo_045.webp
+241,B03,S25,R1C1,g30_secondary_shojo_046,g30_secondary_shojo_046.png,Mio Maeda,The Titan Abyss Blade Confidant,secondary,shojo,kaiju,cosmic_horror,samurai,g30_secondary_shojo_046.webp
+242,B03,S25,R1C2,g30_secondary_shojo_047,g30_secondary_shojo_047.png,Minato Matsuda,The Beast Underworld Shadow Confidant,secondary,shojo,monster_taming,crime,shinobi,g30_secondary_shojo_047.webp
+243,B03,S25,R1C3,g30_secondary_shojo_048,g30_secondary_shojo_048.png,Nao Hayashi,The Titan Abyss Shadow Confidant,secondary,shojo,kaiju,cosmic_horror,shinobi,g30_secondary_shojo_048.webp
+244,B03,S25,R1C4,g30_secondary_shojo_049,g30_secondary_shojo_049.png,Omar Fahmi,The Beast Underworld Blood Confidant,secondary,shojo,monster_taming,crime,vampire,g30_secondary_shojo_049.webp
+245,B03,S25,R1C5,g30_secondary_shojo_050,g30_secondary_shojo_050.png,Petra Bekele,The Titan Abyss Blood Confidant,secondary,shojo,kaiju,cosmic_horror,vampire,g30_secondary_shojo_050.webp
+246,B03,S25,R2C1,g30_secondary_shojo_051,g30_secondary_shojo_051.png,Rei Tsukishima,The Beast Underworld Ruin Confidant,secondary,shojo,monster_taming,crime,grimdark,g30_secondary_shojo_051.webp
+247,B03,S25,R2C2,g30_secondary_shojo_052,g30_secondary_shojo_052.png,Rafi Khan,The Titan Abyss Ruin Confidant,secondary,shojo,kaiju,cosmic_horror,grimdark,g30_secondary_shojo_052.webp
+248,B03,S25,R2C3,g30_secondary_shojo_053,g30_secondary_shojo_053.png,Tove Nygaard,The Gear Portal Beast Confidant,secondary,shojo,mecha,isekai,monster_taming,g30_secondary_shojo_053.webp
+249,B03,S25,R2C4,g30_secondary_shojo_054,g30_secondary_shojo_054.png,Rami Taheri,The Hearth Terror Dune Confidant,secondary,shojo,slice,horror,arabia,g30_secondary_shojo_054.webp
+250,B03,S25,R2C5,g30_secondary_shojo_055,g30_secondary_shojo_055.png,Sana Aziz,The Heart Arena Dune Confidant,secondary,shojo,romance,sports,arabia,g30_secondary_shojo_055.webp
+251,B03,S26,R1C1,g30_secondary_shojo_056,g30_secondary_shojo_056.png,Samira Khatib,The Neon Realm Dune Confidant,secondary,shojo,cyber,fantasy,arabia,g30_secondary_shojo_056.webp
+252,B03,S26,R1C2,g30_secondary_shojo_057,g30_secondary_shojo_057.png,Tariq Osman,The Stage Cipher Dune Confidant,secondary,shojo,idol,mystery,arabia,g30_secondary_shojo_057.webp
+253,B03,S26,R1C3,g30_secondary_shojo_058,g30_secondary_shojo_058.png,Yara Saleh,The Mirth Kitchen Dune Confidant,secondary,shojo,comedy,cooking,arabia,g30_secondary_shojo_058.webp
+254,B03,S26,R1C4,g30_secondary_shojo_059,g30_secondary_shojo_059.png,Zoya Erdem,The Command Spirit Dune Confidant,secondary,shojo,military,supernatural,arabia,g30_secondary_shojo_059.webp
+255,B03,S26,R1C5,g30_secondary_shojo_060,g30_secondary_shojo_060.png,Azra Khalil,The Void Charm Dune Confidant,secondary,shojo,space,magical,arabia,g30_secondary_shojo_060.webp
+256,B03,S26,R2C1,g30_secondary_shojo_061,g30_secondary_shojo_061.png,Basil Sabbagh,The Wild Corsair Dune Confidant,secondary,shojo,survival,pirate,arabia,g30_secondary_shojo_061.webp
+257,B03,S26,R2C2,g30_secondary_shojo_062,g30_secondary_shojo_062.png,Cem Barakat,The Fist Myth Dune Confidant,secondary,shojo,martial,mythology,arabia,g30_secondary_shojo_062.webp
+258,B03,S26,R2C3,g30_secondary_shojo_063,g30_secondary_shojo_063.png,Elif Jafari,The North Blade Dune Confidant,secondary,shojo,nordic,samurai,arabia,g30_secondary_shojo_063.webp
+259,B03,S26,R2C4,g30_secondary_shojo_064,g30_secondary_shojo_064.png,Iman Najjar,The Shadow Blood Dune Confidant,secondary,shojo,shinobi,vampire,arabia,g30_secondary_shojo_064.webp
+260,B03,S26,R2C5,g30_secondary_shojo_065,g30_secondary_shojo_065.png,Karim Saad,The Beast Dune Ruin Confidant,secondary,shojo,monster_taming,arabia,grimdark,g30_secondary_shojo_065.webp
+261,B03,S27,R1C1,g30_pet_shonen_001,g30_pet_shonen_001.png,Bibibit,The Beast Underworld Titan Familiar,pet,shonen,monster_taming,crime,kaiju,g30_pet_shonen_001.webp
+262,B03,S27,R1C2,g30_pet_shonen_002,g30_pet_shonen_002.png,Bramblemew,The Beast Abyss Dune Familiar,pet,shonen,monster_taming,cosmic_horror,arabia,g30_pet_shonen_002.webp
+263,B03,S27,R1C3,g30_pet_shonen_003,g30_pet_shonen_003.png,CloverfangCho,The Underworld Abyss Gear Familiar,pet,shonen,crime,cosmic_horror,mecha,g30_pet_shonen_003.webp
+264,B03,S27,R1C4,g30_pet_shonen_004,g30_pet_shonen_004.png,Cometpop,The Titan Dune Gear Familiar,pet,shonen,kaiju,arabia,mecha,g30_pet_shonen_004.webp
+265,B03,S27,R1C5,g30_pet_shonen_005,g30_pet_shonen_005.png,Cricketfin,The Underworld Dune Portal Familiar,pet,shonen,crime,arabia,isekai,g30_pet_shonen_005.webp
+266,B03,S27,R2C1,g30_pet_shonen_006,g30_pet_shonen_006.png,Dangotail,The Titan Abyss Portal Familiar,pet,shonen,kaiju,cosmic_horror,isekai,g30_pet_shonen_006.webp
+267,B03,S27,R2C2,g30_pet_shonen_007,g30_pet_shonen_007.png,Doodlehop,The Beast Underworld Hearth Familiar,pet,shonen,monster_taming,crime,slice,g30_pet_shonen_007.webp
+268,B03,S27,R2C3,g30_pet_shonen_008,g30_pet_shonen_008.png,Echobun,The Titan Abyss Hearth Familiar,pet,shonen,kaiju,cosmic_horror,slice,g30_pet_shonen_008.webp
+269,B03,S27,R2C4,g30_pet_shonen_009,g30_pet_shonen_009.png,Fablepuff,The Beast Underworld Terror Familiar,pet,shonen,monster_taming,crime,horror,g30_pet_shonen_009.webp
+270,B03,S27,R2C5,g30_pet_shonen_010,g30_pet_shonen_010.png,Flickbloom,The Titan Abyss Terror Familiar,pet,shonen,kaiju,cosmic_horror,horror,g30_pet_shonen_010.webp
+271,B03,S28,R1C1,g30_pet_shonen_011,g30_pet_shonen_011.png,Gizmoroo,The Beast Underworld Heart Familiar,pet,shonen,monster_taming,crime,romance,g30_pet_shonen_011.webp
+272,B03,S28,R1C2,g30_pet_shonen_012,g30_pet_shonen_012.png,Glimfox,The Titan Abyss Heart Familiar,pet,shonen,kaiju,cosmic_horror,romance,g30_pet_shonen_012.webp
+273,B03,S28,R1C3,g30_pet_shonen_013,g30_pet_shonen_013.png,Hachiwing,The Beast Underworld Arena Familiar,pet,shonen,monster_taming,crime,sports,g30_pet_shonen_013.webp
+274,B03,S28,R1C4,g30_pet_shonen_014,g30_pet_shonen_014.png,Hushkip,The Titan Abyss Arena Familiar,pet,shonen,kaiju,cosmic_horror,sports,g30_pet_shonen_014.webp
+275,B03,S28,R1C5,g30_pet_shonen_015,g30_pet_shonen_015.png,Jinxcub,The Beast Underworld Neon Familiar,pet,shonen,monster_taming,crime,cyber,g30_pet_shonen_015.webp
+276,B03,S28,R2C1,g30_pet_shonen_016,g30_pet_shonen_016.png,Kikospark,The Titan Abyss Neon Familiar,pet,shonen,kaiju,cosmic_horror,cyber,g30_pet_shonen_016.webp
+277,B03,S28,R2C2,g30_pet_shonen_017,g30_pet_shonen_017.png,Lumabell,The Beast Underworld Realm Familiar,pet,shonen,monster_taming,crime,fantasy,g30_pet_shonen_017.webp
+278,B03,S28,R2C3,g30_pet_shonen_018,g30_pet_shonen_018.png,Mallowzip,The Titan Abyss Realm Familiar,pet,shonen,kaiju,cosmic_horror,fantasy,g30_pet_shonen_018.webp
+279,B03,S28,R2C4,g30_pet_shonen_019,g30_pet_shonen_019.png,Misoling,The Beast Underworld Stage Familiar,pet,shonen,monster_taming,crime,idol,g30_pet_shonen_019.webp
+280,B03,S28,R2C5,g30_pet_shonen_020,g30_pet_shonen_020.png,Mochiwhisk,The Titan Abyss Stage Familiar,pet,shonen,kaiju,cosmic_horror,idol,g30_pet_shonen_020.webp
+281,B03,S29,R1C1,g30_pet_shonen_021,g30_pet_shonen_021.png,Momonib,The Beast Underworld Cipher Familiar,pet,shonen,monster_taming,crime,mystery,g30_pet_shonen_021.webp
+282,B03,S29,R1C2,g30_pet_shonen_022,g30_pet_shonen_022.png,Nibidot,The Titan Abyss Cipher Familiar,pet,shonen,kaiju,cosmic_horror,mystery,g30_pet_shonen_022.webp
+283,B03,S29,R1C3,g30_pet_shonen_023,g30_pet_shonen_023.png,Norisprig,The Beast Underworld Mirth Familiar,pet,shonen,monster_taming,crime,comedy,g30_pet_shonen_023.webp
+284,B03,S29,R1C4,g30_pet_shonen_024,g30_pet_shonen_024.png,Novabean,The Titan Abyss Mirth Familiar,pet,shonen,kaiju,cosmic_horror,comedy,g30_pet_shonen_024.webp
+285,B03,S29,R1C5,g30_pet_shonen_025,g30_pet_shonen_025.png,Orbitbit,The Beast Underworld Kitchen Familiar,pet,shonen,monster_taming,crime,cooking,g30_pet_shonen_025.webp
+286,B03,S29,R2C1,g30_pet_shonen_026,g30_pet_shonen_026.png,Pebblemew,The Titan Abyss Kitchen Familiar,pet,shonen,kaiju,cosmic_horror,cooking,g30_pet_shonen_026.webp
+287,B03,S29,R2C2,g30_pet_shonen_027,g30_pet_shonen_027.png,Pikofang,The Beast Underworld Command Familiar,pet,shonen,monster_taming,crime,military,g30_pet_shonen_027.webp
+288,B03,S29,R2C3,g30_pet_shonen_028,g30_pet_shonen_028.png,Pippop,The Titan Abyss Command Familiar,pet,shonen,kaiju,cosmic_horror,military,g30_pet_shonen_028.webp
+289,B03,S29,R2C4,g30_pet_shonen_029,g30_pet_shonen_029.png,Pockyfin,The Beast Underworld Spirit Familiar,pet,shonen,monster_taming,crime,supernatural,g30_pet_shonen_029.webp
+290,B03,S29,R2C5,g30_pet_shonen_030,g30_pet_shonen_030.png,Pookatail,The Titan Abyss Spirit Familiar,pet,shonen,kaiju,cosmic_horror,supernatural,g30_pet_shonen_030.webp
+291,B03,S30,R1C1,g30_pet_shonen_031,g30_pet_shonen_031.png,Puffhop,The Beast Underworld Void Familiar,pet,shonen,monster_taming,crime,space,g30_pet_shonen_031.webp
+292,B03,S30,R1C2,g30_pet_shonen_032,g30_pet_shonen_032.png,Quirkbun,The Titan Abyss Void Familiar,pet,shonen,kaiju,cosmic_horror,space,g30_pet_shonen_032.webp
+293,B03,S30,R1C3,g30_pet_shonen_033,g30_pet_shonen_033.png,Rakupuff,The Beast Underworld Charm Familiar,pet,shonen,monster_taming,crime,magical,g30_pet_shonen_033.webp
+294,B03,S30,R1C4,g30_pet_shonen_034,g30_pet_shonen_034.png,Runebloom,The Titan Abyss Charm Familiar,pet,shonen,kaiju,cosmic_horror,magical,g30_pet_shonen_034.webp
+295,B03,S30,R1C5,g30_pet_shonen_035,g30_pet_shonen_035.png,Sableroo,The Beast Underworld Wild Familiar,pet,shonen,monster_taming,crime,survival,g30_pet_shonen_035.webp
+296,B03,S30,R2C1,g30_pet_shonen_036,g30_pet_shonen_036.png,Sumifox,The Titan Abyss Wild Familiar,pet,shonen,kaiju,cosmic_horror,survival,g30_pet_shonen_036.webp
+297,B03,S30,R2C2,g30_pet_shonen_037,g30_pet_shonen_037.png,Tamawing,The Beast Underworld Corsair Familiar,pet,shonen,monster_taming,crime,pirate,g30_pet_shonen_037.webp
+298,B03,S30,R2C3,g30_pet_shonen_038,g30_pet_shonen_038.png,Tarokip,The Titan Abyss Corsair Familiar,pet,shonen,kaiju,cosmic_horror,pirate,g30_pet_shonen_038.webp
+299,B03,S30,R2C4,g30_pet_shonen_039,g30_pet_shonen_039.png,Thimblecub,The Beast Underworld Fist Familiar,pet,shonen,monster_taming,crime,martial,g30_pet_shonen_039.webp
+300,B03,S30,R2C5,g30_pet_shonen_040,g30_pet_shonen_040.png,Tikispark,The Titan Abyss Fist Familiar,pet,shonen,kaiju,cosmic_horror,martial,g30_pet_shonen_040.webp
+301,B04,S31,R1C1,g30_pet_shonen_041,g30_pet_shonen_041.png,Totobell,The Beast Underworld Myth Familiar,pet,shonen,monster_taming,crime,mythology,g30_pet_shonen_041.webp
+302,B04,S31,R1C2,g30_pet_shonen_042,g30_pet_shonen_042.png,Vantazip,The Titan Abyss Myth Familiar,pet,shonen,kaiju,cosmic_horror,mythology,g30_pet_shonen_042.webp
+303,B04,S31,R1C3,g30_pet_shonen_043,g30_pet_shonen_043.png,Wispling,The Beast Underworld North Familiar,pet,shonen,monster_taming,crime,nordic,g30_pet_shonen_043.webp
+304,B04,S31,R1C4,g30_pet_shonen_044,g30_pet_shonen_044.png,Yuzuwhisk,The Titan Abyss North Familiar,pet,shonen,kaiju,cosmic_horror,nordic,g30_pet_shonen_044.webp
+305,B04,S31,R1C5,g30_pet_shonen_045,g30_pet_shonen_045.png,Zignib,The Beast Underworld Blade Familiar,pet,shonen,monster_taming,crime,samurai,g30_pet_shonen_045.webp
+306,B04,S31,R2C1,g30_pet_shonen_046,g30_pet_shonen_046.png,Biscuitdot,The Titan Abyss Blade Familiar,pet,shonen,kaiju,cosmic_horror,samurai,g30_pet_shonen_046.webp
+307,B04,S31,R2C2,g30_pet_shonen_047,g30_pet_shonen_047.png,Bumblesprig,The Beast Underworld Shadow Familiar,pet,shonen,monster_taming,crime,shinobi,g30_pet_shonen_047.webp
+308,B04,S31,R2C3,g30_pet_shonen_048,g30_pet_shonen_048.png,Cinderbean,The Titan Abyss Shadow Familiar,pet,shonen,kaiju,cosmic_horror,shinobi,g30_pet_shonen_048.webp
+309,B04,S31,R2C4,g30_pet_shonen_049,g30_pet_shonen_049.png,Duskbit,The Beast Underworld Blood Familiar,pet,shonen,monster_taming,crime,vampire,g30_pet_shonen_049.webp
+310,B04,S31,R2C5,g30_pet_shonen_050,g30_pet_shonen_050.png,Embermew,The Titan Abyss Blood Familiar,pet,shonen,kaiju,cosmic_horror,vampire,g30_pet_shonen_050.webp
+311,B04,S32,R1C1,g30_pet_shonen_051,g30_pet_shonen_051.png,Fuwafang,The Beast Underworld Ruin Familiar,pet,shonen,monster_taming,crime,grimdark,g30_pet_shonen_051.webp
+312,B04,S32,R1C2,g30_pet_shonen_052,g30_pet_shonen_052.png,Kettlepop,The Titan Abyss Ruin Familiar,pet,shonen,kaiju,cosmic_horror,grimdark,g30_pet_shonen_052.webp
+313,B04,S32,R1C3,g30_pet_shonen_053,g30_pet_shonen_053.png,Lumenfin,The Gear Portal Beast Familiar,pet,shonen,mecha,isekai,monster_taming,g30_pet_shonen_053.webp
+314,B04,S32,R1C4,g30_pet_shonen_054,g30_pet_shonen_054.png,Mottletail,The Hearth Terror Dune Familiar,pet,shonen,slice,horror,arabia,g30_pet_shonen_054.webp
+315,B04,S32,R1C5,g30_pet_shonen_055,g30_pet_shonen_055.png,Nyxhop,The Heart Arena Dune Familiar,pet,shonen,romance,sports,arabia,g30_pet_shonen_055.webp
+316,B04,S32,R2C1,g30_pet_shonen_056,g30_pet_shonen_056.png,Omenbun,The Neon Realm Dune Familiar,pet,shonen,cyber,fantasy,arabia,g30_pet_shonen_056.webp
+317,B04,S32,R2C2,g30_pet_shonen_057,g30_pet_shonen_057.png,Rookletpuff,The Stage Cipher Dune Familiar,pet,shonen,idol,mystery,arabia,g30_pet_shonen_057.webp
+318,B04,S32,R2C3,g30_pet_shonen_058,g30_pet_shonen_058.png,Skeinbloom,The Mirth Kitchen Dune Familiar,pet,shonen,comedy,cooking,arabia,g30_pet_shonen_058.webp
+319,B04,S32,R2C4,g30_pet_shonen_059,g30_pet_shonen_059.png,Sootroo,The Command Spirit Dune Familiar,pet,shonen,military,supernatural,arabia,g30_pet_shonen_059.webp
+320,B04,S32,R2C5,g30_pet_shonen_060,g30_pet_shonen_060.png,Tallowfox,The Void Charm Dune Familiar,pet,shonen,space,magical,arabia,g30_pet_shonen_060.webp
+321,B04,S33,R1C1,g30_pet_shonen_061,g30_pet_shonen_061.png,VelvetwingTor,The Wild Corsair Dune Familiar,pet,shonen,survival,pirate,arabia,g30_pet_shonen_061.webp
+322,B04,S33,R1C2,g30_pet_shonen_062,g30_pet_shonen_062.png,Whispkip,The Fist Myth Dune Familiar,pet,shonen,martial,mythology,arabia,g30_pet_shonen_062.webp
+323,B04,S33,R1C3,g30_pet_shonen_063,g30_pet_shonen_063.png,Yarrowcub,The North Blade Dune Familiar,pet,shonen,nordic,samurai,arabia,g30_pet_shonen_063.webp
+324,B04,S33,R1C4,g30_pet_shonen_064,g30_pet_shonen_064.png,Bunbunspark,The Shadow Blood Dune Familiar,pet,shonen,shinobi,vampire,arabia,g30_pet_shonen_064.webp
+325,B04,S33,R1C5,g30_pet_shonen_065,g30_pet_shonen_065.png,Kumobell,The Beast Dune Ruin Familiar,pet,shonen,monster_taming,arabia,grimdark,g30_pet_shonen_065.webp
+326,B04,S33,R2C1,g30_pet_shojo_001,g30_pet_shojo_001.png,Mimizip,The Beast Underworld Titan Sprite,pet,shojo,monster_taming,crime,kaiju,g30_pet_shojo_001.webp
+327,B04,S33,R2C2,g30_pet_shojo_002,g30_pet_shojo_002.png,Pekoling,The Beast Abyss Dune Sprite,pet,shojo,monster_taming,cosmic_horror,arabia,g30_pet_shojo_002.webp
+328,B04,S33,R2C3,g30_pet_shojo_003,g30_pet_shojo_003.png,Rinriwhisk,The Underworld Abyss Gear Sprite,pet,shojo,crime,cosmic_horror,mecha,g30_pet_shojo_003.webp
+329,B04,S33,R2C4,g30_pet_shojo_004,g30_pet_shojo_004.png,Churunib,The Titan Dune Gear Sprite,pet,shojo,kaiju,arabia,mecha,g30_pet_shojo_004.webp
+330,B04,S33,R2C5,g30_pet_shojo_005,g30_pet_shojo_005.png,Mogudot,The Underworld Dune Portal Sprite,pet,shojo,crime,arabia,isekai,g30_pet_shojo_005.webp
+331,B04,S34,R1C1,g30_pet_shojo_006,g30_pet_shojo_006.png,Bibitail,The Titan Abyss Portal Sprite,pet,shojo,kaiju,cosmic_horror,isekai,g30_pet_shojo_006.webp
+332,B04,S34,R1C2,g30_pet_shojo_007,g30_pet_shojo_007.png,Bramblehop,The Beast Underworld Hearth Sprite,pet,shojo,monster_taming,crime,slice,g30_pet_shojo_007.webp
+333,B04,S34,R1C3,g30_pet_shojo_008,g30_pet_shojo_008.png,Cloverbun,The Titan Abyss Hearth Sprite,pet,shojo,kaiju,cosmic_horror,slice,g30_pet_shojo_008.webp
+334,B04,S34,R1C4,g30_pet_shojo_009,g30_pet_shojo_009.png,Cometpuff,The Beast Underworld Terror Sprite,pet,shojo,monster_taming,crime,horror,g30_pet_shojo_009.webp
+335,B04,S34,R1C5,g30_pet_shojo_010,g30_pet_shojo_010.png,Cricketbloom,The Titan Abyss Terror Sprite,pet,shojo,kaiju,cosmic_horror,horror,g30_pet_shojo_010.webp
+336,B04,S34,R2C1,g30_pet_shojo_011,g30_pet_shojo_011.png,Dangoroo,The Beast Underworld Heart Sprite,pet,shojo,monster_taming,crime,romance,g30_pet_shojo_011.webp
+337,B04,S34,R2C2,g30_pet_shojo_012,g30_pet_shojo_012.png,Doodlefox,The Titan Abyss Heart Sprite,pet,shojo,kaiju,cosmic_horror,romance,g30_pet_shojo_012.webp
+338,B04,S34,R2C3,g30_pet_shojo_013,g30_pet_shojo_013.png,EchowingTeR,The Beast Underworld Arena Sprite,pet,shojo,monster_taming,crime,sports,g30_pet_shojo_013.webp
+339,B04,S34,R2C4,g30_pet_shojo_014,g30_pet_shojo_014.png,Fablekip,The Titan Abyss Arena Sprite,pet,shojo,kaiju,cosmic_horror,sports,g30_pet_shojo_014.webp
+340,B04,S34,R2C5,g30_pet_shojo_015,g30_pet_shojo_015.png,Flickcub,The Beast Underworld Neon Sprite,pet,shojo,monster_taming,crime,cyber,g30_pet_shojo_015.webp
+341,B04,S35,R1C1,g30_pet_shojo_016,g30_pet_shojo_016.png,Gizmospark,The Titan Abyss Neon Sprite,pet,shojo,kaiju,cosmic_horror,cyber,g30_pet_shojo_016.webp
+342,B04,S35,R1C2,g30_pet_shojo_017,g30_pet_shojo_017.png,Glimbell,The Beast Underworld Realm Sprite,pet,shojo,monster_taming,crime,fantasy,g30_pet_shojo_017.webp
+343,B04,S35,R1C3,g30_pet_shojo_018,g30_pet_shojo_018.png,Hachizip,The Titan Abyss Realm Sprite,pet,shojo,kaiju,cosmic_horror,fantasy,g30_pet_shojo_018.webp
+344,B04,S35,R1C4,g30_pet_shojo_019,g30_pet_shojo_019.png,Hushling,The Beast Underworld Stage Sprite,pet,shojo,monster_taming,crime,idol,g30_pet_shojo_019.webp
+345,B04,S35,R1C5,g30_pet_shojo_020,g30_pet_shojo_020.png,Jinxwhisk,The Titan Abyss Stage Sprite,pet,shojo,kaiju,cosmic_horror,idol,g30_pet_shojo_020.webp
+346,B04,S35,R2C1,g30_pet_shojo_021,g30_pet_shojo_021.png,Kikonib,The Beast Underworld Cipher Sprite,pet,shojo,monster_taming,crime,mystery,g30_pet_shojo_021.webp
+347,B04,S35,R2C2,g30_pet_shojo_022,g30_pet_shojo_022.png,Lumadot,The Titan Abyss Cipher Sprite,pet,shojo,kaiju,cosmic_horror,mystery,g30_pet_shojo_022.webp
+348,B04,S35,R2C3,g30_pet_shojo_023,g30_pet_shojo_023.png,Mallowsprig,The Beast Underworld Mirth Sprite,pet,shojo,monster_taming,crime,comedy,g30_pet_shojo_023.webp
+349,B04,S35,R2C4,g30_pet_shojo_024,g30_pet_shojo_024.png,Misobean,The Titan Abyss Mirth Sprite,pet,shojo,kaiju,cosmic_horror,comedy,g30_pet_shojo_024.webp
+350,B04,S35,R2C5,g30_pet_shojo_025,g30_pet_shojo_025.png,Mochibit,The Beast Underworld Kitchen Sprite,pet,shojo,monster_taming,crime,cooking,g30_pet_shojo_025.webp
+351,B04,S36,R1C1,g30_pet_shojo_026,g30_pet_shojo_026.png,Momomew,The Titan Abyss Kitchen Sprite,pet,shojo,kaiju,cosmic_horror,cooking,g30_pet_shojo_026.webp
+352,B04,S36,R1C2,g30_pet_shojo_027,g30_pet_shojo_027.png,Nibifang,The Beast Underworld Command Sprite,pet,shojo,monster_taming,crime,military,g30_pet_shojo_027.webp
+353,B04,S36,R1C3,g30_pet_shojo_028,g30_pet_shojo_028.png,Noripop,The Titan Abyss Command Sprite,pet,shojo,kaiju,cosmic_horror,military,g30_pet_shojo_028.webp
+354,B04,S36,R1C4,g30_pet_shojo_029,g30_pet_shojo_029.png,Novafin,The Beast Underworld Spirit Sprite,pet,shojo,monster_taming,crime,supernatural,g30_pet_shojo_029.webp
+355,B04,S36,R1C5,g30_pet_shojo_030,g30_pet_shojo_030.png,Orbittail,The Titan Abyss Spirit Sprite,pet,shojo,kaiju,cosmic_horror,supernatural,g30_pet_shojo_030.webp
+356,B04,S36,R2C1,g30_pet_shojo_031,g30_pet_shojo_031.png,Pebblehop,The Beast Underworld Void Sprite,pet,shojo,monster_taming,crime,space,g30_pet_shojo_031.webp
+357,B04,S36,R2C2,g30_pet_shojo_032,g30_pet_shojo_032.png,Pikobun,The Titan Abyss Void Sprite,pet,shojo,kaiju,cosmic_horror,space,g30_pet_shojo_032.webp
+358,B04,S36,R2C3,g30_pet_shojo_033,g30_pet_shojo_033.png,Pippuff,The Beast Underworld Charm Sprite,pet,shojo,monster_taming,crime,magical,g30_pet_shojo_033.webp
+359,B04,S36,R2C4,g30_pet_shojo_034,g30_pet_shojo_034.png,Pockybloom,The Titan Abyss Charm Sprite,pet,shojo,kaiju,cosmic_horror,magical,g30_pet_shojo_034.webp
+360,B04,S36,R2C5,g30_pet_shojo_035,g30_pet_shojo_035.png,Pookaroo,The Beast Underworld Wild Sprite,pet,shojo,monster_taming,crime,survival,g30_pet_shojo_035.webp
+361,B04,S37,R1C1,g30_pet_shojo_036,g30_pet_shojo_036.png,Pufffox,The Titan Abyss Wild Sprite,pet,shojo,kaiju,cosmic_horror,survival,g30_pet_shojo_036.webp
+362,B04,S37,R1C2,g30_pet_shojo_037,g30_pet_shojo_037.png,Quirkwing,The Beast Underworld Corsair Sprite,pet,shojo,monster_taming,crime,pirate,g30_pet_shojo_037.webp
+363,B04,S37,R1C3,g30_pet_shojo_038,g30_pet_shojo_038.png,Rakukip,The Titan Abyss Corsair Sprite,pet,shojo,kaiju,cosmic_horror,pirate,g30_pet_shojo_038.webp
+364,B04,S37,R1C4,g30_pet_shojo_039,g30_pet_shojo_039.png,Runecub,The Beast Underworld Fist Sprite,pet,shojo,monster_taming,crime,martial,g30_pet_shojo_039.webp
+365,B04,S37,R1C5,g30_pet_shojo_040,g30_pet_shojo_040.png,Sablespark,The Titan Abyss Fist Sprite,pet,shojo,kaiju,cosmic_horror,martial,g30_pet_shojo_040.webp
+366,B04,S37,R2C1,g30_pet_shojo_041,g30_pet_shojo_041.png,Sumibell,The Beast Underworld Myth Sprite,pet,shojo,monster_taming,crime,mythology,g30_pet_shojo_041.webp
+367,B04,S37,R2C2,g30_pet_shojo_042,g30_pet_shojo_042.png,Tamazip,The Titan Abyss Myth Sprite,pet,shojo,kaiju,cosmic_horror,mythology,g30_pet_shojo_042.webp
+368,B04,S37,R2C3,g30_pet_shojo_043,g30_pet_shojo_043.png,Taroling,The Beast Underworld North Sprite,pet,shojo,monster_taming,crime,nordic,g30_pet_shojo_043.webp
+369,B04,S37,R2C4,g30_pet_shojo_044,g30_pet_shojo_044.png,Thimblewhisk,The Titan Abyss North Sprite,pet,shojo,kaiju,cosmic_horror,nordic,g30_pet_shojo_044.webp
+370,B04,S37,R2C5,g30_pet_shojo_045,g30_pet_shojo_045.png,Tikinib,The Beast Underworld Blade Sprite,pet,shojo,monster_taming,crime,samurai,g30_pet_shojo_045.webp
+371,B04,S38,R1C1,g30_pet_shojo_046,g30_pet_shojo_046.png,Totodot,The Titan Abyss Blade Sprite,pet,shojo,kaiju,cosmic_horror,samurai,g30_pet_shojo_046.webp
+372,B04,S38,R1C2,g30_pet_shojo_047,g30_pet_shojo_047.png,Vantasprig,The Beast Underworld Shadow Sprite,pet,shojo,monster_taming,crime,shinobi,g30_pet_shojo_047.webp
+373,B04,S38,R1C3,g30_pet_shojo_048,g30_pet_shojo_048.png,Wispbean,The Titan Abyss Shadow Sprite,pet,shojo,kaiju,cosmic_horror,shinobi,g30_pet_shojo_048.webp
+374,B04,S38,R1C4,g30_pet_shojo_049,g30_pet_shojo_049.png,Yuzubit,The Beast Underworld Blood Sprite,pet,shojo,monster_taming,crime,vampire,g30_pet_shojo_049.webp
+375,B04,S38,R1C5,g30_pet_shojo_050,g30_pet_shojo_050.png,Zigmew,The Titan Abyss Blood Sprite,pet,shojo,kaiju,cosmic_horror,vampire,g30_pet_shojo_050.webp
+376,B04,S38,R2C1,g30_pet_shojo_051,g30_pet_shojo_051.png,BiscuitfangSil,The Beast Underworld Ruin Sprite,pet,shojo,monster_taming,crime,grimdark,g30_pet_shojo_051.webp
+377,B04,S38,R2C2,g30_pet_shojo_052,g30_pet_shojo_052.png,Bumblepop,The Titan Abyss Ruin Sprite,pet,shojo,kaiju,cosmic_horror,grimdark,g30_pet_shojo_052.webp
+378,B04,S38,R2C3,g30_pet_shojo_053,g30_pet_shojo_053.png,Cinderfin,The Gear Portal Beast Sprite,pet,shojo,mecha,isekai,monster_taming,g30_pet_shojo_053.webp
+379,B04,S38,R2C4,g30_pet_shojo_054,g30_pet_shojo_054.png,Dusktail,The Hearth Terror Dune Sprite,pet,shojo,slice,horror,arabia,g30_pet_shojo_054.webp
+380,B04,S38,R2C5,g30_pet_shojo_055,g30_pet_shojo_055.png,Emberhop,The Heart Arena Dune Sprite,pet,shojo,romance,sports,arabia,g30_pet_shojo_055.webp
+381,B04,S39,R1C1,g30_pet_shojo_056,g30_pet_shojo_056.png,Fuwabun,The Neon Realm Dune Sprite,pet,shojo,cyber,fantasy,arabia,g30_pet_shojo_056.webp
+382,B04,S39,R1C2,g30_pet_shojo_057,g30_pet_shojo_057.png,Kettlepuff,The Stage Cipher Dune Sprite,pet,shojo,idol,mystery,arabia,g30_pet_shojo_057.webp
+383,B04,S39,R1C3,g30_pet_shojo_058,g30_pet_shojo_058.png,Lumenbloom,The Mirth Kitchen Dune Sprite,pet,shojo,comedy,cooking,arabia,g30_pet_shojo_058.webp
+384,B04,S39,R1C4,g30_pet_shojo_059,g30_pet_shojo_059.png,Mottleroo,The Command Spirit Dune Sprite,pet,shojo,military,supernatural,arabia,g30_pet_shojo_059.webp
+385,B04,S39,R1C5,g30_pet_shojo_060,g30_pet_shojo_060.png,Nyxfox,The Void Charm Dune Sprite,pet,shojo,space,magical,arabia,g30_pet_shojo_060.webp
+386,B04,S39,R2C1,g30_pet_shojo_061,g30_pet_shojo_061.png,Omenwing,The Wild Corsair Dune Sprite,pet,shojo,survival,pirate,arabia,g30_pet_shojo_061.webp
+387,B04,S39,R2C2,g30_pet_shojo_062,g30_pet_shojo_062.png,Rookletkip,The Fist Myth Dune Sprite,pet,shojo,martial,mythology,arabia,g30_pet_shojo_062.webp
+388,B04,S39,R2C3,g30_pet_shojo_063,g30_pet_shojo_063.png,Skeincub,The North Blade Dune Sprite,pet,shojo,nordic,samurai,arabia,g30_pet_shojo_063.webp
+389,B04,S39,R2C4,g30_pet_shojo_064,g30_pet_shojo_064.png,Sootspark,The Shadow Blood Dune Sprite,pet,shojo,shinobi,vampire,arabia,g30_pet_shojo_064.webp
+390,B04,S39,R2C5,g30_pet_shojo_065,g30_pet_shojo_065.png,Tallowbell,The Beast Dune Ruin Sprite,pet,shojo,monster_taming,arabia,grimdark,g30_pet_shojo_065.webp
+391,B04,S40,R1C1,g30_villain_shonen_001,g30_villain_shonen_001.png,Viggo Voss,The Beast Underworld Titan Nemesis,villain,shonen,monster_taming,crime,kaiju,g30_villain_shonen_001.webp
+392,B04,S40,R1C2,g30_villain_shonen_002,g30_villain_shonen_002.png,Leila Demir,The Beast Abyss Dune Nemesis,villain,shonen,monster_taming,cosmic_horror,arabia,g30_villain_shonen_002.webp
+393,B04,S40,R1C3,g30_villain_shonen_003,g30_villain_shonen_003.png,Ren Sakurai,The Underworld Abyss Gear Nemesis,villain,shonen,crime,cosmic_horror,mecha,g30_villain_shonen_003.webp
+394,B04,S40,R1C4,g30_villain_shonen_004,g30_villain_shonen_004.png,Mina Karim,The Titan Dune Gear Nemesis,villain,shonen,kaiju,arabia,mecha,g30_villain_shonen_004.webp
+395,B04,S40,R1C5,g30_villain_shonen_005,g30_villain_shonen_005.png,Naveed Rashid,The Underworld Dune Portal Nemesis,villain,shonen,crime,arabia,isekai,g30_villain_shonen_005.webp
+396,B04,S40,R2C1,g30_villain_shonen_006,g30_villain_shonen_006.png,Priya Hale,The Titan Abyss Portal Nemesis,villain,shonen,kaiju,cosmic_horror,isekai,g30_villain_shonen_006.webp
+397,B04,S40,R2C2,g30_villain_shonen_007,g30_villain_shonen_007.png,Riku Okabe,The Beast Underworld Hearth Nemesis,villain,shonen,monster_taming,crime,slice,g30_villain_shonen_007.webp
+398,B04,S40,R2C3,g30_villain_shonen_008,g30_villain_shonen_008.png,Noor Zahir,The Titan Abyss Hearth Nemesis,villain,shonen,kaiju,cosmic_horror,slice,g30_villain_shonen_008.webp
+399,B04,S40,R2C4,g30_villain_shonen_009,g30_villain_shonen_009.png,Alva Hagen,The Beast Underworld Terror Nemesis,villain,shonen,monster_taming,crime,horror,g30_villain_shonen_009.webp
+400,B04,S40,R2C5,g30_villain_shonen_010,g30_villain_shonen_010.png,Rin Kuroda,The Titan Abyss Terror Nemesis,villain,shonen,kaiju,cosmic_horror,horror,g30_villain_shonen_010.webp
+401,B05,S41,R1C1,g30_villain_shonen_011,g30_villain_shonen_011.png,Quinn Moreau,The Beast Underworld Heart Nemesis,villain,shonen,monster_taming,crime,romance,g30_villain_shonen_011.webp
+402,B05,S41,R1C2,g30_villain_shonen_012,g30_villain_shonen_012.png,Eira Lund,The Titan Abyss Heart Nemesis,villain,shonen,kaiju,cosmic_horror,romance,g30_villain_shonen_012.webp
+403,B05,S41,R1C3,g30_villain_shonen_013,g30_villain_shonen_013.png,Rana Farouq,The Beast Underworld Arena Nemesis,villain,shonen,monster_taming,crime,sports,g30_villain_shonen_013.webp
+404,B05,S41,R1C4,g30_villain_shonen_014,g30_villain_shonen_014.png,Sakura Kondo,The Titan Abyss Arena Nemesis,villain,shonen,kaiju,cosmic_horror,sports,g30_villain_shonen_014.webp
+405,B05,S41,R1C5,g30_villain_shonen_015,g30_villain_shonen_015.png,Ravi Santos,The Beast Underworld Neon Nemesis,villain,shonen,monster_taming,crime,cyber,g30_villain_shonen_015.webp
+406,B05,S41,R2C1,g30_villain_shonen_016,g30_villain_shonen_016.png,Emil Wold,The Titan Abyss Neon Nemesis,villain,shonen,kaiju,cosmic_horror,cyber,g30_villain_shonen_016.webp
+407,B05,S41,R2C2,g30_villain_shonen_017,g30_villain_shonen_017.png,Sahir Masri,The Beast Underworld Realm Nemesis,villain,shonen,monster_taming,crime,fantasy,g30_villain_shonen_017.webp
+408,B05,S41,R2C3,g30_villain_shonen_018,g30_villain_shonen_018.png,Satomi Fujita,The Titan Abyss Realm Nemesis,villain,shonen,kaiju,cosmic_horror,fantasy,g30_villain_shonen_018.webp
+409,B05,S41,R2C4,g30_villain_shonen_019,g30_villain_shonen_019.png,Riley Marlow,The Beast Underworld Stage Nemesis,villain,shonen,monster_taming,crime,idol,g30_villain_shonen_019.webp
+410,B05,S41,R2C5,g30_villain_shonen_020,g30_villain_shonen_020.png,Robin Costa,The Titan Abyss Stage Nemesis,villain,shonen,kaiju,cosmic_horror,idol,g30_villain_shonen_020.webp
+411,B05,S42,R1C1,g30_villain_shonen_021,g30_villain_shonen_021.png,Shun Fujimoto,The Beast Underworld Cipher Nemesis,villain,shonen,monster_taming,crime,mystery,g30_villain_shonen_021.webp
+412,B05,S42,R1C2,g30_villain_shonen_022,g30_villain_shonen_022.png,Soraya Rahman,The Titan Abyss Cipher Nemesis,villain,shonen,kaiju,cosmic_horror,mystery,g30_villain_shonen_022.webp
+413,B05,S42,R1C3,g30_villain_shonen_023,g30_villain_shonen_023.png,Frida Vik,The Beast Underworld Mirth Nemesis,villain,shonen,monster_taming,crime,comedy,g30_villain_shonen_023.webp
+414,B05,S42,R1C4,g30_villain_shonen_024,g30_villain_shonen_024.png,Rowan Kim,The Titan Abyss Mirth Nemesis,villain,shonen,kaiju,cosmic_horror,comedy,g30_villain_shonen_024.webp
+415,B05,S42,R1C5,g30_villain_shonen_025,g30_villain_shonen_025.png,Sora Tanaka,The Beast Underworld Kitchen Nemesis,villain,shonen,monster_taming,crime,cooking,g30_villain_shonen_025.webp
+416,B05,S42,R2C1,g30_villain_shonen_026,g30_villain_shonen_026.png,Zain Abbasi,The Titan Abyss Kitchen Nemesis,villain,shonen,kaiju,cosmic_horror,cooking,g30_villain_shonen_026.webp
+417,B05,S42,R2C2,g30_villain_shonen_027,g30_villain_shonen_027.png,Gunnar Gran,The Beast Underworld Command Nemesis,villain,shonen,monster_taming,crime,military,g30_villain_shonen_027.webp
+418,B05,S42,R2C3,g30_villain_shonen_028,g30_villain_shonen_028.png,Sade Novak,The Titan Abyss Command Nemesis,villain,shonen,kaiju,cosmic_horror,military,g30_villain_shonen_028.webp
+419,B05,S42,R2C4,g30_villain_shonen_029,g30_villain_shonen_029.png,Taiga Oshima,The Beast Underworld Spirit Nemesis,villain,shonen,monster_taming,crime,supernatural,g30_villain_shonen_029.webp
+420,B05,S42,R2C5,g30_villain_shonen_030,g30_villain_shonen_030.png,Kari Nielsen,The Titan Abyss Spirit Nemesis,villain,shonen,kaiju,cosmic_horror,supernatural,g30_villain_shonen_030.webp
+421,B05,S43,R1C1,g30_villain_shonen_031,g30_villain_shonen_031.png,Mariam Hassan,The Beast Underworld Void Nemesis,villain,shonen,monster_taming,crime,space,g30_villain_shonen_031.webp
+422,B05,S43,R1C2,g30_villain_shonen_032,g30_villain_shonen_032.png,Toma Nakamura,The Titan Abyss Void Nemesis,villain,shonen,kaiju,cosmic_horror,space,g30_villain_shonen_032.webp
+423,B05,S43,R1C3,g30_villain_shonen_033,g30_villain_shonen_033.png,Sage Torres,The Beast Underworld Charm Nemesis,villain,shonen,monster_taming,crime,magical,g30_villain_shonen_033.webp
+424,B05,S43,R1C4,g30_villain_shonen_034,g30_villain_shonen_034.png,Lars Storm,The Titan Abyss Charm Nemesis,villain,shonen,kaiju,cosmic_horror,magical,g30_villain_shonen_034.webp
+425,B05,S43,R1C5,g30_villain_shonen_035,g30_villain_shonen_035.png,Adil Qadir,The Beast Underworld Wild Nemesis,villain,shonen,monster_taming,crime,survival,g30_villain_shonen_035.webp
+426,B05,S43,R2C1,g30_villain_shonen_036,g30_villain_shonen_036.png,Yuki Hoshino,The Titan Abyss Wild Nemesis,villain,shonen,kaiju,cosmic_horror,survival,g30_villain_shonen_036.webp
+427,B05,S43,R2C2,g30_villain_shonen_037,g30_villain_shonen_037.png,Seojun Sato,The Beast Underworld Corsair Nemesis,villain,shonen,monster_taming,crime,pirate,g30_villain_shonen_037.webp
+428,B05,S43,R2C3,g30_villain_shonen_038,g30_villain_shonen_038.png,Maja Falk,The Titan Abyss Corsair Nemesis,villain,shonen,kaiju,cosmic_horror,pirate,g30_villain_shonen_038.webp
+429,B05,S43,R2C4,g30_villain_shonen_039,g30_villain_shonen_039.png,Noura Touma,The Beast Underworld Fist Nemesis,villain,shonen,monster_taming,crime,martial,g30_villain_shonen_039.webp
+430,B05,S43,R2C5,g30_villain_shonen_040,g30_villain_shonen_040.png,Kamran Amani,The Titan Abyss Fist Nemesis,villain,shonen,kaiju,cosmic_horror,martial,g30_villain_shonen_040.webp
+431,B05,S44,R1C1,g30_villain_shonen_041,g30_villain_shonen_041.png,Oskar Haugen,The Beast Underworld Myth Nemesis,villain,shonen,monster_taming,crime,mythology,g30_villain_shonen_041.webp
+432,B05,S44,R1C2,g30_villain_shonen_042,g30_villain_shonen_042.png,Sofia Ferreira,The Titan Abyss Myth Nemesis,villain,shonen,kaiju,cosmic_horror,mythology,g30_villain_shonen_042.webp
+433,B05,S44,R1C3,g30_villain_shonen_043,g30_villain_shonen_043.png,Saga Torp,The Beast Underworld North Nemesis,villain,shonen,monster_taming,crime,nordic,g30_villain_shonen_043.webp
+434,B05,S44,R1C4,g30_villain_shonen_044,g30_villain_shonen_044.png,Signe Sund,The Titan Abyss North Nemesis,villain,shonen,kaiju,cosmic_horror,nordic,g30_villain_shonen_044.webp
+435,B05,S44,R1C5,g30_villain_shonen_045,g30_villain_shonen_045.png,Yuna Kobayashi,The Beast Underworld Blade Nemesis,villain,shonen,monster_taming,crime,samurai,g30_villain_shonen_045.webp
+436,B05,S44,R2C1,g30_villain_shonen_046,g30_villain_shonen_046.png,Ayame Yamamoto,The Titan Abyss Blade Nemesis,villain,shonen,kaiju,cosmic_horror,samurai,g30_villain_shonen_046.webp
+437,B05,S44,R2C2,g30_villain_shonen_047,g30_villain_shonen_047.png,Keiko Endo,The Beast Underworld Shadow Nemesis,villain,shonen,monster_taming,crime,shinobi,g30_villain_shonen_047.webp
+438,B05,S44,R2C3,g30_villain_shonen_048,g30_villain_shonen_048.png,Koharu Shinohara,The Titan Abyss Shadow Nemesis,villain,shonen,kaiju,cosmic_horror,shinobi,g30_villain_shonen_048.webp
+439,B05,S44,R2C4,g30_villain_shonen_049,g30_villain_shonen_049.png,Stellan Bjerke,The Beast Underworld Blood Nemesis,villain,shonen,monster_taming,crime,vampire,g30_villain_shonen_049.webp
+440,B05,S44,R2C5,g30_villain_shonen_050,g30_villain_shonen_050.png,Natsuki Miyazaki,The Titan Abyss Blood Nemesis,villain,shonen,kaiju,cosmic_horror,vampire,g30_villain_shonen_050.webp
+441,B05,S45,R1C1,g30_villain_shonen_051,g30_villain_shonen_051.png,Talia Marin,The Beast Underworld Ruin Nemesis,villain,shonen,monster_taming,crime,grimdark,g30_villain_shonen_051.webp
+442,B05,S45,R1C2,g30_villain_shonen_052,g30_villain_shonen_052.png,Thea Lindholm,The Titan Abyss Ruin Nemesis,villain,shonen,kaiju,cosmic_horror,grimdark,g30_villain_shonen_052.webp
+443,B05,S45,R1C3,g30_villain_shonen_053,g30_villain_shonen_053.png,Roya Kader,The Gear Portal Beast Nemesis,villain,shonen,mecha,isekai,monster_taming,g30_villain_shonen_053.webp
+444,B05,S45,R1C4,g30_villain_shonen_054,g30_villain_shonen_054.png,Salma Nassar,The Hearth Terror Dune Nemesis,villain,shonen,slice,horror,arabia,g30_villain_shonen_054.webp
+445,B05,S45,R1C5,g30_villain_shonen_055,g30_villain_shonen_055.png,Yusuf Zaman,The Heart Arena Dune Nemesis,villain,shonen,romance,sports,arabia,g30_villain_shonen_055.webp
+446,B05,S45,R2C1,g30_villain_shonen_056,g30_villain_shonen_056.png,Amina Hassan,The Neon Realm Dune Nemesis,villain,shonen,cyber,fantasy,arabia,g30_villain_shonen_056.webp
+447,B05,S45,R2C2,g30_villain_shonen_057,g30_villain_shonen_057.png,Amir Qadir,The Stage Cipher Dune Nemesis,villain,shonen,idol,mystery,arabia,g30_villain_shonen_057.webp
+448,B05,S45,R2C3,g30_villain_shonen_058,g30_villain_shonen_058.png,Dalia Touma,The Mirth Kitchen Dune Nemesis,villain,shonen,comedy,cooking,arabia,g30_villain_shonen_058.webp
+449,B05,S45,R2C4,g30_villain_shonen_059,g30_villain_shonen_059.png,Darya Amani,The Command Spirit Dune Nemesis,villain,shonen,military,supernatural,arabia,g30_villain_shonen_059.webp
+450,B05,S45,R2C5,g30_villain_shonen_060,g30_villain_shonen_060.png,Farah Kader,The Void Charm Dune Nemesis,villain,shonen,space,magical,arabia,g30_villain_shonen_060.webp
+451,B05,S46,R1C1,g30_villain_shonen_061,g30_villain_shonen_061.png,Hadi Nassar,The Wild Corsair Dune Nemesis,villain,shonen,survival,pirate,arabia,g30_villain_shonen_061.webp
+452,B05,S46,R1C2,g30_villain_shonen_062,g30_villain_shonen_062.png,Idris Zaman,The Fist Myth Dune Nemesis,villain,shonen,martial,mythology,arabia,g30_villain_shonen_062.webp
+453,B05,S46,R1C3,g30_villain_shonen_063,g30_villain_shonen_063.png,Ilyas Haddad-Petrov,The North Blade Dune Nemesis,villain,shonen,nordic,samurai,arabia,g30_villain_shonen_063.webp
+454,B05,S46,R1C4,g30_villain_shonen_064,g30_villain_shonen_064.png,Laleh Nasri,The Shadow Blood Dune Nemesis,villain,shonen,shinobi,vampire,arabia,g30_villain_shonen_064.webp
+455,B05,S46,R1C5,g30_villain_shonen_065,g30_villain_shonen_065.png,Layla Shakir,The Beast Dune Ruin Nemesis,villain,shonen,monster_taming,arabia,grimdark,g30_villain_shonen_065.webp
+456,B05,S46,R2C1,g30_villain_shojo_001,g30_villain_shojo_001.png,Ryo Nakajima,The Beast Underworld Titan Sovereign,villain,shojo,monster_taming,crime,kaiju,g30_villain_shojo_001.webp
+457,B05,S46,R2C2,g30_villain_shojo_002,g30_villain_shojo_002.png,Nadia Arslan,The Beast Abyss Dune Sovereign,villain,shojo,monster_taming,cosmic_horror,arabia,g30_villain_shojo_002.webp
+458,B05,S46,R2C3,g30_villain_shojo_003,g30_villain_shojo_003.png,Tor Skov,The Underworld Abyss Gear Sovereign,villain,shojo,crime,cosmic_horror,mecha,g30_villain_shojo_003.webp
+459,B05,S46,R2C4,g30_villain_shojo_004,g30_villain_shojo_004.png,Omar Habib,The Titan Dune Gear Sovereign,villain,shojo,kaiju,arabia,mecha,g30_villain_shojo_004.webp
+460,B05,S46,R2C5,g30_villain_shojo_005,g30_villain_shojo_005.png,Rafi Mansour,The Underworld Dune Portal Sovereign,villain,shojo,crime,arabia,isekai,g30_villain_shojo_005.webp
+461,B05,S47,R1C1,g30_villain_shojo_006,g30_villain_shojo_006.png,Rami Wahid,The Titan Abyss Portal Sovereign,villain,shojo,kaiju,cosmic_horror,isekai,g30_villain_shojo_006.webp
+462,B05,S47,R1C2,g30_villain_shojo_007,g30_villain_shojo_007.png,Yrsa Eklund,The Beast Underworld Hearth Sovereign,villain,shojo,monster_taming,crime,slice,g30_villain_shojo_007.webp
+463,B05,S47,R1C3,g30_villain_shojo_008,g30_villain_shojo_008.png,Taylor Patel,The Titan Abyss Hearth Sovereign,villain,shojo,kaiju,cosmic_horror,slice,g30_villain_shojo_008.webp
+464,B05,S47,R1C4,g30_villain_shojo_009,g30_villain_shojo_009.png,Takara Nomura,The Beast Underworld Terror Sovereign,villain,shojo,monster_taming,crime,horror,g30_villain_shojo_009.webp
+465,B05,S47,R1C5,g30_villain_shojo_010,g30_villain_shojo_010.png,Anders Fjell,The Titan Abyss Terror Sovereign,villain,shojo,kaiju,cosmic_horror,horror,g30_villain_shojo_010.webp
+466,B05,S47,R2C1,g30_villain_shojo_011,g30_villain_shojo_011.png,Sana Darzi,The Beast Underworld Heart Sovereign,villain,shojo,monster_taming,crime,romance,g30_villain_shojo_011.webp
+467,B05,S47,R2C2,g30_villain_shojo_012,g30_villain_shojo_012.png,Yori Ito,The Titan Abyss Heart Sovereign,villain,shojo,kaiju,cosmic_horror,romance,g30_villain_shojo_012.webp
+468,B05,S47,R2C3,g30_villain_shojo_013,g30_villain_shojo_013.png,Theo Voss,The Beast Underworld Arena Sovereign,villain,shojo,monster_taming,crime,sports,g30_villain_shojo_013.webp
+469,B05,S47,R2C4,g30_villain_shojo_014,g30_villain_shojo_014.png,Elin Ravn,The Titan Abyss Arena Sovereign,villain,shojo,kaiju,cosmic_horror,sports,g30_villain_shojo_014.webp
+470,B05,S47,R2C5,g30_villain_shojo_015,g30_villain_shojo_015.png,Samira Mahmoud,The Beast Underworld Neon Sovereign,villain,shojo,monster_taming,crime,cyber,g30_villain_shojo_015.webp
+471,B05,S48,R1C1,g30_villain_shojo_016,g30_villain_shojo_016.png,Maki Yamada,The Titan Abyss Neon Sovereign,villain,shojo,kaiju,cosmic_horror,cyber,g30_villain_shojo_016.webp
+472,B05,S48,R1C2,g30_villain_shojo_017,g30_villain_shojo_017.png,Thiago Bellamy,The Beast Underworld Realm Sovereign,villain,shojo,monster_taming,crime,fantasy,g30_villain_shojo_017.webp
+473,B05,S48,R1C3,g30_villain_shojo_018,g30_villain_shojo_018.png,Kjell Strand,The Titan Abyss Realm Sovereign,villain,shojo,kaiju,cosmic_horror,fantasy,g30_villain_shojo_018.webp
+474,B05,S48,R1C4,g30_villain_shojo_019,g30_villain_shojo_019.png,Tariq Sayegh,The Beast Underworld Stage Sovereign,villain,shojo,monster_taming,crime,idol,g30_villain_shojo_019.webp
+475,B05,S48,R1C5,g30_villain_shojo_020,g30_villain_shojo_020.png,Yara Yilmaz,The Titan Abyss Stage Sovereign,villain,shojo,kaiju,cosmic_horror,idol,g30_villain_shojo_020.webp
+476,B05,S48,R2C1,g30_villain_shojo_021,g30_villain_shojo_021.png,Nils Sundberg,The Beast Underworld Cipher Sovereign,villain,shojo,monster_taming,crime,mystery,g30_villain_shojo_021.webp
+477,B05,S48,R2C2,g30_villain_shojo_022,g30_villain_shojo_022.png,Valentina Hart,The Titan Abyss Cipher Sovereign,villain,shojo,kaiju,cosmic_horror,mystery,g30_villain_shojo_022.webp
+478,B05,S48,R2C3,g30_villain_shojo_023,g30_villain_shojo_023.png,Akari Endo,The Beast Underworld Mirth Sovereign,villain,shojo,monster_taming,crime,comedy,g30_villain_shojo_023.webp
+479,B05,S48,R2C4,g30_villain_shojo_024,g30_villain_shojo_024.png,Zoya Fahmi,The Titan Abyss Mirth Sovereign,villain,shojo,kaiju,cosmic_horror,comedy,g30_villain_shojo_024.webp
+480,B05,S48,R2C5,g30_villain_shojo_025,g30_villain_shojo_025.png,Solveig Lind,The Beast Underworld Kitchen Sovereign,villain,shojo,monster_taming,crime,cooking,g30_villain_shojo_025.webp
+481,B05,S49,R1C1,g30_villain_shojo_026,g30_villain_shojo_026.png,Vera Morales,The Titan Abyss Kitchen Sovereign,villain,shojo,kaiju,cosmic_horror,cooking,g30_villain_shojo_026.webp
+482,B05,S49,R1C2,g30_villain_shojo_027,g30_villain_shojo_027.png,Aoi Shinohara,The Beast Underworld Command Sovereign,villain,shojo,monster_taming,crime,military,g30_villain_shojo_027.webp
+483,B05,S49,R1C3,g30_villain_shojo_028,g30_villain_shojo_028.png,Azra Khan,The Titan Abyss Command Sovereign,villain,shojo,kaiju,cosmic_horror,military,g30_villain_shojo_028.webp
+484,B05,S49,R1C4,g30_villain_shojo_029,g30_villain_shojo_029.png,Aksel Roed,The Beast Underworld Spirit Sovereign,villain,shojo,monster_taming,crime,supernatural,g30_villain_shojo_029.webp
+485,B05,S49,R1C5,g30_villain_shojo_030,g30_villain_shojo_030.png,Asuka Miyazaki,The Titan Abyss Spirit Sovereign,villain,shojo,kaiju,cosmic_horror,supernatural,g30_villain_shojo_030.webp
+486,B05,S49,R2C1,g30_villain_shojo_031,g30_villain_shojo_031.png,Vikram Serrano,The Beast Underworld Void Sovereign,villain,shojo,monster_taming,crime,space,g30_villain_shojo_031.webp
+487,B05,S49,R2C2,g30_villain_shojo_032,g30_villain_shojo_032.png,Ebba Dahl,The Titan Abyss Void Sovereign,villain,shojo,kaiju,cosmic_horror,space,g30_villain_shojo_032.webp
+488,B05,S49,R2C3,g30_villain_shojo_033,g30_villain_shojo_033.png,Basil Taheri,The Beast Underworld Charm Sovereign,villain,shojo,monster_taming,crime,magical,g30_villain_shojo_033.webp
+489,B05,S49,R2C4,g30_villain_shojo_034,g30_villain_shojo_034.png,Chihiro Nakajima,The Titan Abyss Charm Sovereign,villain,shojo,kaiju,cosmic_horror,magical,g30_villain_shojo_034.webp
+490,B05,S49,R2C5,g30_villain_shojo_035,g30_villain_shojo_035.png,Ximena Serrat,The Beast Underworld Wild Sovereign,villain,shojo,monster_taming,crime,survival,g30_villain_shojo_035.webp
+491,B05,S50,R1C1,g30_villain_shojo_036,g30_villain_shojo_036.png,Hanne Engen,The Titan Abyss Wild Sovereign,villain,shojo,kaiju,cosmic_horror,survival,g30_villain_shojo_036.webp
+492,B05,S50,R1C2,g30_villain_shojo_037,g30_villain_shojo_037.png,Cem Aziz,The Beast Underworld Corsair Sovereign,villain,shojo,monster_taming,crime,pirate,g30_villain_shojo_037.webp
+493,B05,S50,R1C3,g30_villain_shojo_038,g30_villain_shojo_038.png,Daichi Nomura,The Titan Abyss Corsair Sovereign,villain,shojo,kaiju,cosmic_horror,pirate,g30_villain_shojo_038.webp
+494,B05,S50,R1C4,g30_villain_shojo_039,g30_villain_shojo_039.png,Zuri Cruz,The Beast Underworld Fist Sovereign,villain,shojo,monster_taming,crime,martial,g30_villain_shojo_039.webp
+495,B05,S50,R1C5,g30_villain_shojo_040,g30_villain_shojo_040.png,Minseo Kovac,The Titan Abyss Fist Sovereign,villain,shojo,kaiju,cosmic_horror,martial,g30_villain_shojo_040.webp
+496,B05,S50,R2C1,g30_villain_shojo_041,g30_villain_shojo_041.png,Eiji Ito,The Beast Underworld Myth Sovereign,villain,shojo,monster_taming,crime,mythology,g30_villain_shojo_041.webp
+497,B05,S50,R2C2,g30_villain_shojo_042,g30_villain_shojo_042.png,Elif Khatib,The Titan Abyss Myth Sovereign,villain,shojo,kaiju,cosmic_horror,mythology,g30_villain_shojo_042.webp
+498,B05,S50,R2C3,g30_villain_shojo_043,g30_villain_shojo_043.png,Ivar Moen,The Beast Underworld North Sovereign,villain,shojo,monster_taming,crime,nordic,g30_villain_shojo_043.webp
+499,B05,S50,R2C4,g30_villain_shojo_044,g30_villain_shojo_044.png,Malin Solberg,The Titan Abyss North Sovereign,villain,shojo,kaiju,cosmic_horror,nordic,g30_villain_shojo_044.webp
+500,B05,S50,R2C5,g30_villain_shojo_045,g30_villain_shojo_045.png,Emi Yamada,The Beast Underworld Blade Sovereign,villain,shojo,monster_taming,crime,samurai,g30_villain_shojo_045.webp
+501,B06,S51,R1C1,g30_villain_shojo_046,g30_villain_shojo_046.png,Fumiko Araki,The Titan Abyss Blade Sovereign,villain,shojo,kaiju,cosmic_horror,samurai,g30_villain_shojo_046.webp
+502,B06,S51,R1C2,g30_villain_shojo_047,g30_villain_shojo_047.png,Hana Sato,The Beast Underworld Shadow Sovereign,villain,shojo,monster_taming,crime,shinobi,g30_villain_shojo_047.webp
+503,B06,S51,R1C3,g30_villain_shojo_048,g30_villain_shojo_048.png,Haruka Tachibana,The Titan Abyss Shadow Sovereign,villain,shojo,kaiju,cosmic_horror,shinobi,g30_villain_shojo_048.webp
+504,B06,S51,R1C4,g30_villain_shojo_049,g30_villain_shojo_049.png,Hikari Mori,The Beast Underworld Blood Sovereign,villain,shojo,monster_taming,crime,vampire,g30_villain_shojo_049.webp
+505,B06,S51,R1C5,g30_villain_shojo_050,g30_villain_shojo_050.png,Sven Ostberg,The Titan Abyss Blood Sovereign,villain,shojo,kaiju,cosmic_horror,vampire,g30_villain_shojo_050.webp
+506,B06,S51,R2C1,g30_villain_shojo_051,g30_villain_shojo_051.png,Iman Osman,The Beast Underworld Ruin Sovereign,villain,shojo,monster_taming,crime,grimdark,g30_villain_shojo_051.webp
+507,B06,S51,R2C2,g30_villain_shojo_052,g30_villain_shojo_052.png,Itsuki Akiyama,The Titan Abyss Ruin Sovereign,villain,shojo,kaiju,cosmic_horror,grimdark,g30_villain_shojo_052.webp
+508,B06,S51,R2C3,g30_villain_shojo_053,g30_villain_shojo_053.png,Doyun Nowak,The Gear Portal Beast Sovereign,villain,shojo,mecha,isekai,monster_taming,g30_villain_shojo_053.webp
+509,B06,S51,R2C4,g30_villain_shojo_054,g30_villain_shojo_054.png,Karim Saleh,The Hearth Terror Dune Sovereign,villain,shojo,slice,horror,arabia,g30_villain_shojo_054.webp
+510,B06,S51,R2C5,g30_villain_shojo_055,g30_villain_shojo_055.png,Leila Erdem,The Heart Arena Dune Sovereign,villain,shojo,romance,sports,arabia,g30_villain_shojo_055.webp
+511,B06,S52,R1C1,g30_villain_shojo_056,g30_villain_shojo_056.png,Mina Khalil,The Neon Realm Dune Sovereign,villain,shojo,cyber,fantasy,arabia,g30_villain_shojo_056.webp
+512,B06,S52,R1C2,g30_villain_shojo_057,g30_villain_shojo_057.png,Naveed Sabbagh,The Stage Cipher Dune Sovereign,villain,shojo,idol,mystery,arabia,g30_villain_shojo_057.webp
+513,B06,S52,R1C3,g30_villain_shojo_058,g30_villain_shojo_058.png,Noor Barakat,The Mirth Kitchen Dune Sovereign,villain,shojo,comedy,cooking,arabia,g30_villain_shojo_058.webp
+514,B06,S52,R1C4,g30_villain_shojo_059,g30_villain_shojo_059.png,Rana Jafari,The Command Spirit Dune Sovereign,villain,shojo,military,supernatural,arabia,g30_villain_shojo_059.webp
+515,B06,S52,R1C5,g30_villain_shojo_060,g30_villain_shojo_060.png,Sahir Najjar,The Void Charm Dune Sovereign,villain,shojo,space,magical,arabia,g30_villain_shojo_060.webp
+516,B06,S52,R2C1,g30_villain_shojo_061,g30_villain_shojo_061.png,Soraya Saad,The Wild Corsair Dune Sovereign,villain,shojo,survival,pirate,arabia,g30_villain_shojo_061.webp
+517,B06,S52,R2C2,g30_villain_shojo_062,g30_villain_shojo_062.png,Zain Demir,The Fist Myth Dune Sovereign,villain,shojo,martial,mythology,arabia,g30_villain_shojo_062.webp
+518,B06,S52,R2C3,g30_villain_shojo_063,g30_villain_shojo_063.png,Mariam Karim,The North Blade Dune Sovereign,villain,shojo,nordic,samurai,arabia,g30_villain_shojo_063.webp
+519,B06,S52,R2C4,g30_villain_shojo_064,g30_villain_shojo_064.png,Adil Rashid,The Shadow Blood Dune Sovereign,villain,shojo,shinobi,vampire,arabia,g30_villain_shojo_064.webp
+520,B06,S52,R2C5,g30_villain_shojo_065,g30_villain_shojo_065.png,Noura Zahir,The Beast Dune Ruin Sovereign,villain,shojo,monster_taming,arabia,grimdark,g30_villain_shojo_065.webp
