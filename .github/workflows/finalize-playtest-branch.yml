@@ -46,7 +46,7 @@ jobs:
           p = Path('src/engine/castCatalog.ts')
           s = p.read_text()
           old = '    const signatures = visualSignatureGenres(member);\n    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));'
-          new = '    const signatures = visualSignatureGenres(member);\n    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));\n    // Never make a selectable card claim a pair that has no connection to the\n    // portrait\'s two source-art genres. Surplus portraits can remain reserve.\n    const hardVisualMismatch = sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));'
+          new = '    const signatures = visualSignatureGenres(member);\n    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));\n    // Literal art signatures take priority. For portraits without a literal\n    // signature, still require at least one of the two source-visible genres\n    // so a selectable card is never completely unrelated to its artwork.\n    const hardVisualMismatch = signatures.length > 0\n      ? !signatures.some((genre) => block.genres.includes(genre))\n      : sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));'
           if old not in s:
               raise SystemExit('catalog hard-mismatch anchor not found')
           p.write_text(s.replace(old, new, 1))
