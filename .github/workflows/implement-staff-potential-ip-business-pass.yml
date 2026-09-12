@@ -32,6 +32,20 @@ jobs:
         working-directory: game_source
         run: npm ci
 
+      - name: Repair generated TSX literal in harness
+        working-directory: game_source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/implement-staff-potential-ip-business-pass.mjs')
+          s = p.read_text()
+          old = '<span className={`min-w-12 text-right font-display text-xl font-black ${record.gains[point] > 0 ? "text-mint" : "text-paper/30"}`}>+{record.gains[point]}</span>'
+          new = '<span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{record.gains[point]}</span>'
+          if old not in s:
+              raise SystemExit('Expected nested TSX template literal not found')
+          p.write_text(s.replace(old, new))
+          PY
+
       - name: Apply implementation pass
         working-directory: game_source
         run: node scripts/implement-staff-potential-ip-business-pass.mjs
