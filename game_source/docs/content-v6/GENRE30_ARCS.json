@@ -568,7 +568,7 @@
       "cost": 18000,
       "q": 4,
       "f": 0.02,
-      "desc": "The characters face a conflict built around cult in plain sight, and their choices determine how the situation is resolved.",
+      "desc": "The characters discover that an apparently ordinary group is secretly serving a hidden power and must expose it without alerting its members.",
       "syn": [
         "cosmic_horror",
         "crime",
@@ -741,7 +741,7 @@
       "cost": 23000,
       "q": 4,
       "f": 0.03,
-      "desc": "The characters face a conflict built around palace coup, and their choices determine how the situation is resolved.",
+      "desc": "Conspirators attempt to remove the ruler from power, forcing the characters to decide whether to defend, join or stop the takeover.",
       "syn": [
         "arabia",
         "crime",
