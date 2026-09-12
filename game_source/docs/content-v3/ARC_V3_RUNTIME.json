@@ -6,7 +6,7 @@
       "cost": 9000,
       "q": 3,
       "f": 0.02,
-      "desc": "A promise protects someone today and creates a debt for tomorrow.",
+      "desc": "A character makes a promise that protects someone now but creates an obligation they must honour later.",
       "syn": [
         "samurai",
         "military"
@@ -29,7 +29,7 @@
       "cost": 17000,
       "q": 3,
       "f": 0.05,
-      "desc": "Two blades meet; the companion decides what winning should cost.",
+      "desc": "Two characters settle a conflict in a direct duel, forcing the winner to decide what victory is worth.",
       "syn": [
         "samurai",
         "martial"
@@ -53,7 +53,7 @@
       "cost": 19000,
       "q": 4,
       "f": 0.02,
-      "desc": "A public accusation turns family duty into a question of evidence.",
+      "desc": "A public accusation forces a family or clan to examine evidence, loyalties and responsibility.",
       "syn": [
         "samurai",
         "mystery",
@@ -77,7 +77,7 @@
       "cost": 29000,
       "q": 5,
       "f": 0.05,
-      "desc": "The banner falls; the leader chooses people over inherited orders.",
+      "desc": "A leader rejects inherited orders and chooses the people they are responsible for instead.",
       "syn": [
         "samurai",
         "military",
@@ -101,7 +101,7 @@
       "cost": 9000,
       "q": 3,
       "f": 0.02,
-      "desc": "A small companion brings a message its intended recipient never received.",
+      "desc": "A delayed or undelivered message reveals information that should have reached someone earlier.",
       "syn": [
         "shinobi",
         "mystery"
@@ -124,7 +124,7 @@
       "cost": 17000,
       "q": 3,
       "f": 0.04,
-      "desc": "A route, a timing window and a partner who must be trusted.",
+      "desc": "The group infiltrates a guarded location using timing, stealth and trust between team members.",
       "syn": [
         "shinobi",
         "cyber"
@@ -148,7 +148,7 @@
       "cost": 21000,
       "q": 4,
       "f": 0.04,
-      "desc": "The enemy offers reliable information for an unacceptable price.",
+      "desc": "A character works between opposing sides, passing information while hiding divided loyalties and a private agenda.",
       "syn": [
         "shinobi",
         "mystery",
@@ -172,7 +172,7 @@
       "cost": 30000,
       "q": 5,
       "f": 0.04,
-      "desc": "Every safe house is exposed; saving the network means losing its secrets.",
+      "desc": "The characters' safe contacts and hideouts are exposed, forcing them to choose which people and secrets they can still save.",
       "syn": [
         "shinobi",
         "survival",
@@ -192,11 +192,11 @@
     },
     {
       "id": "v3_retainersday",
-      "name": "A Retainer\u2019s Day Off",
+      "name": "A Retainer’s Day Off",
       "cost": 10000,
       "q": 3,
       "f": 0.04,
-      "desc": "The person beneath the uniform tries to have one ordinary afternoon.",
+      "desc": "A duty-bound character gets a rare ordinary day away from their role, allowing their personal life and relationships to take focus.",
       "syn": [
         "samurai",
         "slice",
@@ -220,7 +220,7 @@
       "cost": 12000,
       "q": 2,
       "f": 0.06,
-      "desc": "The smallest team member carries the only copy across a closing city.",
+      "desc": "A vulnerable team member must carry an important message or object across a dangerous city before the route closes.",
       "syn": [
         "shinobi",
         "pirate",
@@ -244,7 +244,7 @@
       "cost": 16000,
       "q": 4,
       "f": 0.03,
-      "desc": "An enemy must answer a question that strength cannot settle.",
+      "desc": "Two enemies confront one another through argument, negotiation or a moral choice instead of physical combat.",
       "syn": [
         "samurai",
         "romance",
@@ -268,7 +268,7 @@
       "cost": 22000,
       "q": 4,
       "f": 0.05,
-      "desc": "A former operative returns to someone who knew only the cover story.",
+      "desc": "A former operative returns to someone who knew only their cover identity and must reveal who they really are.",
       "syn": [
         "shinobi",
         "romance",
@@ -292,7 +292,7 @@
       "cost": 23000,
       "q": 4,
       "f": 0.05,
-      "desc": "An old companion keeps a promise after the clan that demanded it is gone.",
+      "desc": "A loyal companion continues an old promise after the organisation or leader that created it is gone.",
       "syn": [
         "samurai",
         "nordic",
@@ -316,7 +316,7 @@
       "cost": 14000,
       "q": 3,
       "f": 0.04,
-      "desc": "A storm closes the port; a small guide finds the last safe crossing.",
+      "desc": "A storm traps the characters at a closed port and forces them to find the last safe route out.",
       "syn": [
         "nordic",
         "survival",
@@ -340,7 +340,7 @@
       "cost": 17000,
       "q": 3,
       "f": 0.04,
-      "desc": "The visitor learns which local custom keeps everyone alive.",
+      "desc": "A visitor must learn the customs and rules of an unfamiliar society in order to survive and earn local trust.",
       "syn": [
         "isekai",
         "fantasy",
@@ -364,7 +364,7 @@
       "cost": 11000,
       "q": 3,
       "f": 0.04,
-      "desc": "A meal creates enough trust for a difficult truth.",
+      "desc": "Characters share a meal that creates enough trust for an important truth or conflict to be discussed openly.",
       "syn": [
         "cooking",
         "slice",
@@ -385,7 +385,7 @@
       "cost": 21000,
       "q": 4,
       "f": 0.04,
-      "desc": "A voice crosses an impossible distance and reaches someone who had stopped listening.",
+      "desc": "A character sends a final message across a dangerous distance in the hope that one specific person will hear it.",
       "syn": [
         "space",
         "idol",
@@ -410,7 +410,7 @@
       "cost": 18000,
       "q": 3,
       "f": 0.05,
-      "desc": "A perfect result hides the rule that made honest victory impossible.",
+      "desc": "A seemingly perfect result is exposed as unfair because a hidden rule or manipulation made honest victory impossible.",
       "syn": [
         "sports",
         "mecha",
@@ -435,7 +435,7 @@
       "cost": 18000,
       "q": 4,
       "f": 0.03,
-      "desc": "A familiar role passes to someone who refuses its old ending.",
+      "desc": "A character takes over a familiar role or identity but chooses to change the expectations and ending attached to it.",
       "syn": [
         "magical",
         "mythology",
@@ -459,7 +459,7 @@
       "cost": 15000,
       "q": 4,
       "f": 0.02,
-      "desc": "The companion refuses to cross a threshold everyone else calls harmless.",
+      "desc": "A character refuses to enter an apparently harmless place, leading the group to discover why the location is dangerous.",
       "syn": [
         "horror",
         "mystery"
@@ -484,7 +484,7 @@
       "cost": 18000,
       "q": 3,
       "f": 0.05,
-      "desc": "The students must decide which lessons deserve to survive the teacher.",
+      "desc": "Students must decide which lessons and traditions to keep after the teachers or leaders who guided them are gone.",
       "syn": [
         "martial",
         "sports"
@@ -508,7 +508,7 @@
       "cost": 24000,
       "q": 4,
       "f": 0.04,
-      "desc": "The old ruler is gone; their rival has inherited a problem instead of a prize.",
+      "desc": "A ruler disappears or dies, and the characters compete with rivals over the power, duties and problems left behind.",
       "syn": [
         "fantasy",
         "isekai",
@@ -533,7 +533,7 @@
       "cost": 17000,
       "q": 3,
       "f": 0.05,
-      "desc": "A public celebration hides a private operation; the mascot notices the wrong rehearsal.",
+      "desc": "Characters prepare for a public performance or broadcast where pressure, rivalry and personal relationships affect whether they can complete it successfully.",
       "syn": [
         "comedy",
         "idol",
@@ -558,7 +558,7 @@
       "cost": 21000,
       "q": 4,
       "f": 0.04,
-      "desc": "The map is accurate, but following it would abandon someone.",
+      "desc": "Characters trapped by an enemy or location must coordinate an escape before they are caught or conditions become impossible.",
       "syn": [
         "pirate",
         "space",

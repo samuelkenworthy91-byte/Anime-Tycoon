@@ -1,39 +1,627 @@
 {
   "pack_id": "vampire-grimdark-25",
   "add_arcs": [
-    {"id":"vg_blooddebt","name":"Blood Debt","cost":12000,"q":3,"f":0.04,"desc":"A life was saved years ago; the price is finally called in.","syn":["vampire","romance","supernatural"],"synQ":3,"anti":["comedy"],"antiQ":-2,"cast":"protag","castQ":2,"unlock":{"kind":"genre","genre":"vampire"}},
-    {"id":"vg_hunterswarrant","name":"The Hunter's Warrant","cost":18000,"q":4,"f":0.03,"desc":"An authorised monster hunt becomes an investigation into who wrote the order.","syn":["vampire","military","mystery"],"synQ":3,"anti":["slice"],"antiQ":-2,"cast":"secondary","castQ":2,"unlock":{"kind":"shows","n":2}},
-    {"id":"vg_lastinvitation","name":"The Last Invitation","cost":15000,"q":3,"f":0.05,"desc":"A formal invitation offers safety for one night and allegiance for much longer.","syn":["vampire","romance","slice"],"synQ":3,"anti":["military"],"antiQ":-2,"cast":"villain","castQ":2,"unlock":{"kind":"rd","cost":16}},
-    {"id":"vg_daybreaksiege","name":"Daybreak Siege","cost":27000,"q":5,"f":0.04,"desc":"Hunters and the hunted race the sunrise while a safe house collapses around them.","syn":["vampire","military","survival"],"synQ":4,"anti":["comedy","cooking"],"antiQ":-2,"cast":"protag","castQ":2,"unlock":{"kind":"hits","n":1}},
-    {"id":"vg_coffinprotocol","name":"Coffin Protocol","cost":30000,"q":5,"f":0.03,"desc":"A sealed sleeper wakes aboard a system that has forgotten why the lock existed.","syn":["vampire","space","cyber"],"synQ":4,"anti":["slice"],"antiQ":-2,"cast":"secondary","castQ":2,"unlock":{"kind":"score","n":28}},
-    {"id":"vg_falseheartbeat","name":"The False Heartbeat","cost":19000,"q":4,"f":0.03,"desc":"Evidence says the victim is dead; every witness remembers speaking to them afterward.","syn":["vampire","mystery","horror"],"synQ":4,"anti":["sports"],"antiQ":-2,"cast":"villain","castQ":2,"unlock":{"kind":"genre","genre":"vampire"}},
-    {"id":"vg_midnightencore","name":"Midnight Encore","cost":18000,"q":3,"f":0.06,"desc":"A performer with an impossible career must decide whether the audience deserves the truth.","syn":["vampire","idol","romance"],"synQ":3,"anti":["grimdark"],"antiQ":-2,"cast":"protag","castQ":2,"unlock":{"kind":"shows","n":3}},
-    {"id":"vg_familiarchoice","name":"The Familiar Chooses","cost":14000,"q":3,"f":0.03,"desc":"The smallest member of the group refuses its master and follows someone else.","syn":["vampire","supernatural","magical"],"synQ":3,"anti":["military"],"antiQ":-2,"cast":"pet","castQ":3,"unlock":{"kind":"genre","genre":"vampire"}},
-    {"id":"vg_crimsontruce","name":"Crimson Truce","cost":32000,"q":5,"f":0.05,"desc":"Two ancient enemies agree to one night of peace because something worse has arrived.","syn":["vampire","grimdark","military"],"synQ":4,"anti":["comedy"],"antiQ":-3,"cast":"villain","castQ":3,"unlock":{"kind":"hits","n":2}},
-    {"id":"vg_blackmarch","name":"The Black March","cost":13000,"q":4,"f":0.02,"desc":"The army knows the road is lost and marches anyway because civilians are still behind it.","syn":["grimdark","military","survival"],"synQ":4,"anti":["idol"],"antiQ":-3,"cast":"protag","castQ":2,"unlock":{"kind":"genre","genre":"grimdark"}},
-    {"id":"vg_priceofvictory","name":"The Price of Victory","cost":20000,"q":4,"f":0.04,"desc":"Winning solves the immediate battle and destroys something the heroes meant to protect.","syn":["grimdark","military","romance"],"synQ":3,"anti":["comedy"],"antiQ":-2,"cast":"secondary","castQ":2,"unlock":{"kind":"shows","n":2}},
-    {"id":"vg_demonatthegate","name":"Demon at the Gate","cost":22000,"q":4,"f":0.03,"desc":"The monster outside the walls knows the defenders by name and claims it was invited.","syn":["grimdark","fantasy","horror"],"synQ":4,"anti":["slice"],"antiQ":-3,"cast":"villain","castQ":3,"unlock":{"kind":"genre","genre":"grimdark"}},
-    {"id":"vg_ashkingdom","name":"Kingdom of Ash","cost":29000,"q":5,"f":0.04,"desc":"A ruined kingdom still has laws, heirs and citizens who refuse to call it dead.","syn":["grimdark","fantasy","mythology"],"synQ":4,"anti":["idol"],"antiQ":-2,"cast":"protag","castQ":2,"unlock":{"kind":"hits","n":1}},
-    {"id":"vg_chaosstars","name":"Chaos Beyond the Stars","cost":34000,"q":5,"f":0.05,"desc":"The expedition finds a force in deep space that behaves like a curse rather than a phenomenon.","syn":["grimdark","space","supernatural"],"synQ":4,"anti":["slice","comedy"],"antiQ":-3,"cast":"villain","castQ":3,"unlock":{"kind":"score","n":30}},
-    {"id":"vg_brokensaint","name":"The Broken Saint","cost":21000,"q":4,"f":0.03,"desc":"A revered protector admits their miracle has always demanded a hidden sacrifice.","syn":["grimdark","supernatural","mythology"],"synQ":4,"anti":["idol"],"antiQ":-2,"cast":"secondary","castQ":2,"unlock":{"kind":"rd","cost":20}},
-    {"id":"vg_lastgoodmeal","name":"The Last Good Meal","cost":16000,"q":3,"f":0.05,"desc":"In the middle of catastrophe, the group spends scarce ingredients on one unnecessary feast.","syn":["grimdark","cooking","slice"],"synQ":3,"anti":["vampire"],"antiQ":-2,"cast":"secondary","castQ":2,"unlock":{"kind":"shows","n":3}},
-    {"id":"vg_pitwithoutcheers","name":"The Pit Without Cheers","cost":19000,"q":4,"f":0.03,"desc":"A celebrated contest continues after the crowd realises the competitors cannot safely leave.","syn":["grimdark","sports","martial"],"synQ":3,"anti":["idol"],"antiQ":-2,"cast":"protag","castQ":2,"unlock":{"kind":"shows","n":3}},
-    {"id":"vg_ironwitness","name":"The Iron Witness","cost":24000,"q":4,"f":0.03,"desc":"A damaged machine remembers the atrocity differently from every surviving human.","syn":["grimdark","mecha","mystery"],"synQ":4,"anti":["comedy"],"antiQ":-2,"cast":"pet","castQ":3,"unlock":{"kind":"rd","cost":22}},
-    {"id":"vg_twomonsters","name":"Night of Two Monsters","cost":33000,"q":5,"f":0.04,"desc":"Predator and demon recognise each other first, forcing everyone else to choose which terror to trust.","syn":["vampire","grimdark","horror"],"synQ":4,"anti":["slice"],"antiQ":-3,"cast":"villain","castQ":3,"unlock":{"kind":"hits","n":2}},
-    {"id":"vg_nocleanhands","name":"No Clean Hands","cost":36000,"q":6,"f":0.03,"desc":"Every faction has committed something unforgivable; the final alliance begins with admitting it.","syn":["vampire","grimdark","mystery"],"synQ":4,"anti":["comedy","idol"],"antiQ":-3,"cast":"protag","castQ":3,"unlock":{"kind":"franchise"},"franchiseOnly":true}
+    {
+      "id": "vg_blooddebt",
+      "name": "Blood Debt",
+      "cost": 12000,
+      "q": 3,
+      "f": 0.04,
+      "desc": "The characters face a conflict built around blood debt, and their choices determine how the situation is resolved.",
+      "syn": [
+        "vampire",
+        "romance",
+        "supernatural"
+      ],
+      "synQ": 3,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "vampire"
+      }
+    },
+    {
+      "id": "vg_hunterswarrant",
+      "name": "The Hunter's Warrant",
+      "cost": 18000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "The characters track a dangerous target while the target tries to stay ahead, turning new clues and encounters into an escalating pursuit.",
+      "syn": [
+        "vampire",
+        "military",
+        "mystery"
+      ],
+      "synQ": 3,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "vg_lastinvitation",
+      "name": "The Last Invitation",
+      "cost": 15000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "A formal invitation offers safety for one night and allegiance for much longer.",
+      "syn": [
+        "vampire",
+        "romance",
+        "slice"
+      ],
+      "synQ": 3,
+      "anti": [
+        "military"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "rd",
+        "cost": 16
+      }
+    },
+    {
+      "id": "vg_daybreaksiege",
+      "name": "Daybreak Siege",
+      "cost": 27000,
+      "q": 5,
+      "f": 0.04,
+      "desc": "An enemy surrounds and attacks a defended location, forcing the characters to hold out, break through or find another way to end the siege.",
+      "syn": [
+        "vampire",
+        "military",
+        "survival"
+      ],
+      "synQ": 4,
+      "anti": [
+        "comedy",
+        "cooking"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "hits",
+        "n": 1
+      }
+    },
+    {
+      "id": "vg_coffinprotocol",
+      "name": "Coffin Protocol",
+      "cost": 30000,
+      "q": 5,
+      "f": 0.03,
+      "desc": "A sealed sleeper wakes aboard a system that has forgotten why the lock existed.",
+      "syn": [
+        "vampire",
+        "space",
+        "cyber"
+      ],
+      "synQ": 4,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "score",
+        "n": 28
+      }
+    },
+    {
+      "id": "vg_falseheartbeat",
+      "name": "The False Heartbeat",
+      "cost": 19000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "Evidence says the victim is dead.",
+      "syn": [
+        "vampire",
+        "mystery",
+        "horror"
+      ],
+      "synQ": 4,
+      "anti": [
+        "sports"
+      ],
+      "antiQ": -2,
+      "cast": "villain",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "vampire"
+      }
+    },
+    {
+      "id": "vg_midnightencore",
+      "name": "Midnight Encore",
+      "cost": 18000,
+      "q": 3,
+      "f": 0.06,
+      "desc": "A performer with an impossible career must decide whether the audience deserves the truth.",
+      "syn": [
+        "vampire",
+        "idol",
+        "romance"
+      ],
+      "synQ": 3,
+      "anti": [
+        "grimdark"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    },
+    {
+      "id": "vg_familiarchoice",
+      "name": "The Familiar Chooses",
+      "cost": 14000,
+      "q": 3,
+      "f": 0.03,
+      "desc": "The smallest member of the group refuses its master and follows someone else.",
+      "syn": [
+        "vampire",
+        "supernatural",
+        "magical"
+      ],
+      "synQ": 3,
+      "anti": [
+        "military"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 3,
+      "unlock": {
+        "kind": "genre",
+        "genre": "vampire"
+      }
+    },
+    {
+      "id": "vg_crimsontruce",
+      "name": "Crimson Truce",
+      "cost": 32000,
+      "q": 5,
+      "f": 0.05,
+      "desc": "Two ancient enemies agree to one night of peace because something worse has arrived.",
+      "syn": [
+        "vampire",
+        "grimdark",
+        "military"
+      ],
+      "synQ": 4,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -3,
+      "cast": "villain",
+      "castQ": 3,
+      "unlock": {
+        "kind": "hits",
+        "n": 2
+      }
+    },
+    {
+      "id": "vg_blackmarch",
+      "name": "The Black March",
+      "cost": 13000,
+      "q": 4,
+      "f": 0.02,
+      "desc": "The army knows the road is lost and marches anyway because civilians are still behind it.",
+      "syn": [
+        "grimdark",
+        "military",
+        "survival"
+      ],
+      "synQ": 4,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -3,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "genre",
+        "genre": "grimdark"
+      }
+    },
+    {
+      "id": "vg_priceofvictory",
+      "name": "The Price of Victory",
+      "cost": 20000,
+      "q": 4,
+      "f": 0.04,
+      "desc": "Winning solves the immediate battle and destroys something the heroes meant to protect.",
+      "syn": [
+        "grimdark",
+        "military",
+        "romance"
+      ],
+      "synQ": 3,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 2
+      }
+    },
+    {
+      "id": "vg_demonatthegate",
+      "name": "Demon at the Gate",
+      "cost": 22000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "The monster outside the walls knows the defenders by name and claims it was invited.",
+      "syn": [
+        "grimdark",
+        "fantasy",
+        "horror"
+      ],
+      "synQ": 4,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -3,
+      "cast": "villain",
+      "castQ": 3,
+      "unlock": {
+        "kind": "genre",
+        "genre": "grimdark"
+      }
+    },
+    {
+      "id": "vg_ashkingdom",
+      "name": "Kingdom of Ash",
+      "cost": 29000,
+      "q": 5,
+      "f": 0.04,
+      "desc": "A ruined kingdom still has laws, heirs and citizens who refuse to call it dead.",
+      "syn": [
+        "grimdark",
+        "fantasy",
+        "mythology"
+      ],
+      "synQ": 4,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "hits",
+        "n": 1
+      }
+    },
+    {
+      "id": "vg_chaosstars",
+      "name": "Chaos Beyond the Stars",
+      "cost": 34000,
+      "q": 5,
+      "f": 0.05,
+      "desc": "The expedition finds a force in deep space that behaves like a curse rather than a phenomenon.",
+      "syn": [
+        "grimdark",
+        "space",
+        "supernatural"
+      ],
+      "synQ": 4,
+      "anti": [
+        "slice",
+        "comedy"
+      ],
+      "antiQ": -3,
+      "cast": "villain",
+      "castQ": 3,
+      "unlock": {
+        "kind": "score",
+        "n": 30
+      }
+    },
+    {
+      "id": "vg_brokensaint",
+      "name": "The Broken Saint",
+      "cost": 21000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "A revered protector admits their miracle has always demanded a hidden sacrifice.",
+      "syn": [
+        "grimdark",
+        "supernatural",
+        "mythology"
+      ],
+      "synQ": 4,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "rd",
+        "cost": 20
+      }
+    },
+    {
+      "id": "vg_lastgoodmeal",
+      "name": "The Last Good Meal",
+      "cost": 16000,
+      "q": 3,
+      "f": 0.05,
+      "desc": "In the middle of catastrophe, the group spends scarce ingredients on one unnecessary feast.",
+      "syn": [
+        "grimdark",
+        "cooking",
+        "slice"
+      ],
+      "synQ": 3,
+      "anti": [
+        "vampire"
+      ],
+      "antiQ": -2,
+      "cast": "secondary",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    },
+    {
+      "id": "vg_pitwithoutcheers",
+      "name": "The Pit Without Cheers",
+      "cost": 19000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "A celebrated contest continues after the crowd realises the competitors cannot safely leave.",
+      "syn": [
+        "grimdark",
+        "sports",
+        "martial"
+      ],
+      "synQ": 3,
+      "anti": [
+        "idol"
+      ],
+      "antiQ": -2,
+      "cast": "protag",
+      "castQ": 2,
+      "unlock": {
+        "kind": "shows",
+        "n": 3
+      }
+    },
+    {
+      "id": "vg_ironwitness",
+      "name": "The Iron Witness",
+      "cost": 24000,
+      "q": 4,
+      "f": 0.03,
+      "desc": "A damaged machine remembers the atrocity differently from every surviving human.",
+      "syn": [
+        "grimdark",
+        "mecha",
+        "mystery"
+      ],
+      "synQ": 4,
+      "anti": [
+        "comedy"
+      ],
+      "antiQ": -2,
+      "cast": "pet",
+      "castQ": 3,
+      "unlock": {
+        "kind": "rd",
+        "cost": 22
+      }
+    },
+    {
+      "id": "vg_twomonsters",
+      "name": "Night of Two Monsters",
+      "cost": 33000,
+      "q": 5,
+      "f": 0.04,
+      "desc": "Characters encounter powerful creatures and must capture, befriend or overcome them while learning the rules that govern them.",
+      "syn": [
+        "vampire",
+        "grimdark",
+        "horror"
+      ],
+      "synQ": 4,
+      "anti": [
+        "slice"
+      ],
+      "antiQ": -3,
+      "cast": "villain",
+      "castQ": 3,
+      "unlock": {
+        "kind": "hits",
+        "n": 2
+      }
+    },
+    {
+      "id": "vg_nocleanhands",
+      "name": "No Clean Hands",
+      "cost": 36000,
+      "q": 6,
+      "f": 0.03,
+      "desc": "Every faction has committed something unforgivable.",
+      "syn": [
+        "vampire",
+        "grimdark",
+        "mystery"
+      ],
+      "synQ": 4,
+      "anti": [
+        "comedy",
+        "idol"
+      ],
+      "antiQ": -3,
+      "cast": "protag",
+      "castQ": 3,
+      "unlock": {
+        "kind": "franchise"
+      },
+      "franchiseOnly": true
+    }
   ],
   "add_combos": [
-    {"id":"vg_bloodline_reckoning","name":"The Bloodline Reckoning","arcs":["vg_blooddebt","vg_falseheartbeat","vg_crimsontruce"],"q":4,"f":0.03,"ordered":true},
-    {"id":"vg_hunter_daybreak","name":"Until Daybreak","arcs":["vg_hunterswarrant","vg_daybreaksiege","finale"],"q":4,"f":0.03,"ordered":true},
-    {"id":"vg_invitation_confession","name":"Accept the Invitation","arcs":["vg_lastinvitation","confession"],"q":3,"f":0.03,"ordered":true},
-    {"id":"vg_coffin_void","name":"Wake What Was Buried","arcs":["vg_coffinprotocol","vg_chaosstars"],"q":4,"f":0.02,"ordered":true},
-    {"id":"vg_midnight_mask","name":"The Audience Learns","arcs":["vg_midnightencore","vg_falseheartbeat"],"q":3,"f":0.03,"ordered":false},
-    {"id":"vg_familiar_truth","name":"Trust the Familiar","arcs":["vg_familiarchoice","case"],"q":3,"f":0.02,"ordered":true},
-    {"id":"vg_blackmarch_ash","name":"Ash After Victory","arcs":["vg_blackmarch","vg_priceofvictory","vg_ashkingdom"],"q":5,"f":0.02,"ordered":true},
-    {"id":"vg_demon_saint","name":"Faith After the Gate","arcs":["vg_demonatthegate","vg_brokensaint","redemption"],"q":4,"f":0.02,"ordered":true},
-    {"id":"vg_pit_price","name":"Nobody Wins Cleanly","arcs":["vg_pitwithoutcheers","vg_priceofvictory"],"q":3,"f":0.02,"ordered":false},
-    {"id":"vg_lastmeal_rescue","name":"One Meal Before Dawn","arcs":["vg_lastgoodmeal","narr_rescue"],"q":3,"f":0.03,"ordered":true},
-    {"id":"vg_iron_gate","name":"The Witness at the Gate","arcs":["vg_ironwitness","vg_demonatthegate"],"q":4,"f":0.02,"ordered":true},
-    {"id":"vg_two_monsters_finale","name":"Choose the Lesser Monster","arcs":["vg_twomonsters","vg_nocleanhands","finale"],"q":5,"f":0.03,"ordered":true}
+    {
+      "id": "vg_bloodline_reckoning",
+      "name": "The Bloodline Reckoning",
+      "arcs": [
+        "vg_blooddebt",
+        "vg_falseheartbeat",
+        "vg_crimsontruce"
+      ],
+      "q": 4,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "vg_hunter_daybreak",
+      "name": "Until Daybreak",
+      "arcs": [
+        "vg_hunterswarrant",
+        "vg_daybreaksiege",
+        "finale"
+      ],
+      "q": 4,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "vg_invitation_confession",
+      "name": "Accept the Invitation",
+      "arcs": [
+        "vg_lastinvitation",
+        "confession"
+      ],
+      "q": 3,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "vg_coffin_void",
+      "name": "Wake What Was Buried",
+      "arcs": [
+        "vg_coffinprotocol",
+        "vg_chaosstars"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "vg_midnight_mask",
+      "name": "The Audience Learns",
+      "arcs": [
+        "vg_midnightencore",
+        "vg_falseheartbeat"
+      ],
+      "q": 3,
+      "f": 0.03,
+      "ordered": false
+    },
+    {
+      "id": "vg_familiar_truth",
+      "name": "Trust the Familiar",
+      "arcs": [
+        "vg_familiarchoice",
+        "case"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "vg_blackmarch_ash",
+      "name": "Ash After Victory",
+      "arcs": [
+        "vg_blackmarch",
+        "vg_priceofvictory",
+        "vg_ashkingdom"
+      ],
+      "q": 5,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "vg_demon_saint",
+      "name": "Faith After the Gate",
+      "arcs": [
+        "vg_demonatthegate",
+        "vg_brokensaint",
+        "redemption"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "vg_pit_price",
+      "name": "Nobody Wins Cleanly",
+      "arcs": [
+        "vg_pitwithoutcheers",
+        "vg_priceofvictory"
+      ],
+      "q": 3,
+      "f": 0.02,
+      "ordered": false
+    },
+    {
+      "id": "vg_lastmeal_rescue",
+      "name": "One Meal Before Dawn",
+      "arcs": [
+        "vg_lastgoodmeal",
+        "narr_rescue"
+      ],
+      "q": 3,
+      "f": 0.03,
+      "ordered": true
+    },
+    {
+      "id": "vg_iron_gate",
+      "name": "The Witness at the Gate",
+      "arcs": [
+        "vg_ironwitness",
+        "vg_demonatthegate"
+      ],
+      "q": 4,
+      "f": 0.02,
+      "ordered": true
+    },
+    {
+      "id": "vg_two_monsters_finale",
+      "name": "Choose the Lesser Monster",
+      "arcs": [
+        "vg_twomonsters",
+        "vg_nocleanhands",
+        "finale"
+      ],
+      "q": 5,
+      "f": 0.03,
+      "ordered": true
+    }
   ]
 }
