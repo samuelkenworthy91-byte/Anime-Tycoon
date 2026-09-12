@@ -23,7 +23,9 @@ jobs:
           cache-dependency-path: game_source/package-lock.json
       - name: Apply final mechanics
         working-directory: game_source
-        run: node scripts/finalize-depth-pass.mjs
+        run: |
+          node scripts/apply-depth-pass-stage5-hotfix.mjs
+          node scripts/finalize-depth-pass.mjs
       - name: Install
         working-directory: game_source
         run: npm ci
