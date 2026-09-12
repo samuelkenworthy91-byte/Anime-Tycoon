@@ -38,6 +38,67 @@ jobs:
         timeout-minutes: 2
         run: python3 scripts/finalize_playtest_cast.py
 
+      - name: Resolve generated-name collisions with existing cast
+        working-directory: game_source
+        run: |
+          node --input-type=module - <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { buildVampireGrimdarkCast } from './scripts/content-packs/vampire-grimdark-pack.mjs';
+          const base = JSON.parse(readFileSync('./docs/content-v3/GENRE_V3_RUNTIME.json','utf8')).genres.map(g => g.id);
+          const current = JSON.parse(readFileSync('./src/engine/generated/castV3.json','utf8')).cast
+            .filter(c => !c.id.startsWith('g30_')).map(c => c.name);
+          const vg = buildVampireGrimdarkCast(base).map(c => c.name);
+          writeFileSync('/tmp/reserved_names.json', JSON.stringify([...new Set([...current, ...vg])]));
+          NODE
+          python3 - <<'PY'
+          from pathlib import Path
+          import csv, io, json, hashlib
+          root = Path('.')
+          reserved = set(json.loads(Path('/tmp/reserved_names.json').read_text()))
+          paths = [
+              root/'docs/content-v6/GENRE30_CAST_ROSTER.csv',
+              root/'art_src/cast_v6_genre30_upload_staging/manifest/final_manifest.csv',
+              root/'art_src/cast_v6_genre30_upload_staging/manifest/final_manifest_webp.csv',
+          ]
+          def read_rows(path):
+              return list(csv.DictReader(io.StringIO(path.read_text())))
+          def write_rows(path, rows):
+              out = io.StringIO(newline='')
+              writer = csv.DictWriter(out, fieldnames=list(rows[0].keys()), lineterminator='\n')
+              writer.writeheader(); writer.writerows(rows); path.write_text(out.getvalue())
+          roster = read_rows(paths[0])
+          alts = ['Ravn','Okoye','Mori','Aziz','Vale','Serrat','Kaur','Mensah','Varga','Sato','Njeri','Laurent','Berg','Navarro','Rahman','TeRangi','Kovacs','Diallo','Fujita','Moreau','Adebayo','Petrov','Silva','Hale','Yilmaz','Choi','Mendes','Dahl','Ibarra','Chen','Volkov','Torres']
+          used = set()
+          mapping = {}
+          changed = 0
+          for row in roster:
+              base = row['name']
+              name = base
+              attempt = 0
+              while name in reserved or name in used:
+                  alt = alts[(int(hashlib.sha256((row['character_id']+str(attempt)).encode()).hexdigest()[:8],16)) % len(alts)]
+                  if row['role'] == 'pet':
+                      name = f"{base}{alt[:3]}"
+                  else:
+                      parts = base.split()
+                      given = parts[0]
+                      family = '-'.join(parts[1:]) if len(parts) > 1 else 'Vale'
+                      name = f"{given} {family}-{alt}"
+                  attempt += 1
+                  if attempt > 128:
+                      raise RuntimeError(f"Could not resolve name collision for {row['character_id']}")
+              if name != base: changed += 1
+              used.add(name); mapping[row['character_id']] = name; row['name'] = name
+          if len(used) != 520:
+              raise RuntimeError('Genre-30 names are not unique after collision resolution')
+          write_rows(paths[0], roster)
+          for path in paths[1:]:
+              rows = read_rows(path)
+              for row in rows: row['name'] = mapping[row['character_id']]
+              write_rows(path, rows)
+          print(f'Resolved {changed} Genre-30 names that collided with existing/VG cast.')
+          PY
+
       - name: Prepare and verify generated content
         working-directory: game_source
         timeout-minutes: 4
