@@ -2,6 +2,7 @@ import fs from "node:fs";
 
 function read(path) { return fs.readFileSync(path, "utf8"); }
 function write(path, text) { fs.writeFileSync(path, text); }
+function decode(base64) { return Buffer.from(base64, "base64").toString("utf8"); }
 function replaceRange(text, startMarker, endMarker, replacement, label) {
   const start = text.indexOf(startMarker);
   if (start < 0) throw new Error(`${label}: start marker not found`);
@@ -16,145 +17,25 @@ function replaceOnce(text, from, to, label) {
   return text.slice(0, first) + to + text.slice(first + from.length);
 }
 
-// ---------------------------------------------------------------- cast catalogue
+const CAST_SCORING = decode("Y29uc3QgVklTVUFMX1NJR05BVFVSRV9HRU5SRVMgPSBuZXcgU2V0PEdlbnJlSWQ+KFsKICAibWVjaGEiLCAic3BvcnRzIiwgImN5YmVyIiwgImlkb2wiLCAiY29va2luZyIsICJtaWxpdGFyeSIsICJzcGFjZSIsICJtYWdpY2FsIiwKICAicGlyYXRlIiwgIm1hcnRpYWwiLCAibm9yZGljIiwgInNhbXVyYWkiLCAic2hpbm9iaSIsICJ2YW1waXJlIiwgIm1vbnN0ZXJfdGFtaW5nIiwKICAia2FpanUiLCAiYXJhYmlhIiwKXSk7CgovKioKICogVGhlIHNvdXJjZSB2aXNpYmxlIGFmZmluaXRpZXMgYXJlIG5vIGxvbmdlciBtZWNoYW5pY2FsIHdpcmluZywgYnV0IHRoZXkgQVJFCiAqIHZhbHVhYmxlIGFydC1kaXJlY3Rpb24gbWV0YWRhdGE6IHRob3NlIGFyZSB0aGUgZ2VucmVzIHRoZSBwb3J0cmFpdCB3YXMKICogYWN0dWFsbHkgZGVzaWduZWQgdG8gY29tbXVuaWNhdGUuIFNjb3JlIHRoZW0gZmFyIGFib3ZlIGxlZ2FjeSBoaWRkZW4KICogYWZmaW5pdHkgc28gdmlzdWFsbHkgbGl0ZXJhbCBwb3J0cmFpdHMgc3RheSB3aXRoIGEgZ2VucmUgdGhleSBsb29rIGxpa2UuCiAqCiAqIFNjb3JlIGJhbmRzIGFyZSBkZWxpYmVyYXRlbHkgbGV4aWNvZ3JhcGhpYyBhdCB3aG9sZS1idWNrZXQgc2NhbGU6CiAqICAtIHBpbm5lZCBjaGVtaXN0cnkgY2FzdCBtdXN0IHJlbWFpbiBhY3RpdmUKICogIC0gcHJlc2VydmUgYSB2aXN1YWxseSBkaXN0aW5jdGl2ZSBzb3VyY2UgZ2VucmUgd2hlbmV2ZXIgcG9zc2libGUKICogIC0gcHJlc2VydmUgYXQgbGVhc3Qgb25lIHNvdXJjZS12aXNpYmxlIGdlbnJlIG9uIGV2ZXJ5IGFjdGl2ZSBwb3J0cmFpdAogKiAgLSB0aGVuIHByZWZlciBib3RoIG9sZCB2aXNpYmxlcyAvIGV4YWN0IG9sZCBibG9ja3MgLyBoaWRkZW4gYWZmaW5pdHkKICovCmZ1bmN0aW9uIHNjb3JlTWVtYmVyRm9yQmxvY2sobWVtYmVyOiBDYXN0TWVtYmVyLCBibG9jazogQ2F0YWxvZ0Jsb2NrLCBwaW5uZWQ6IFJlYWRvbmx5U2V0PHN0cmluZz4pIHsKICBjb25zdCBvbGRWaXNpYmxlID0gbWVtYmVyLnZpc2libGVBZmYuZmlsdGVyKChnZW5yZSkgPT4gU3RyaW5nKGdlbnJlKSAhPT0gU3RyaW5nKE5PX1NFQ1JFVCkpOwogIGNvbnN0IGJsb2NrU2V0ID0gbmV3IFNldChibG9jay5nZW5yZXMpOwogIGNvbnN0IHZpc3VhbE92ZXJsYXAgPSBvbGRWaXNpYmxlLmZpbHRlcigoZ2VucmUpID0+IGJsb2NrU2V0LmhhcyhnZW5yZSkpOwogIGNvbnN0IHNpZ25hdHVyZU92ZXJsYXAgPSB2aXN1YWxPdmVybGFwLmZpbHRlcigoZ2VucmUpID0+IFZJU1VBTF9TSUdOQVRVUkVfR0VOUkVTLmhhcyhnZW5yZSkpOwogIGNvbnN0IHZpc2libGVJbnNpZGUgPSBvbGRWaXNpYmxlLmxlbmd0aCA9PT0gMiAmJiBvbGRWaXNpYmxlLmV2ZXJ5KChnZW5yZSkgPT4gYmxvY2tTZXQuaGFzKGdlbnJlKSk7CiAgY29uc3QgZXhhY3RQYWlyID0gYmxvY2sua2luZCA9PT0gInBhaXIiICYmIHZpc2libGVJbnNpZGUgJiYKICAgIGNhc3RpbmdQYWlyS2V5KG9sZFZpc2libGVbMF0sIG9sZFZpc2libGVbMV0pID09PSBibG9jay5wYWlyS2V5c1swXTsKICBjb25zdCBvbGRBbGwgPSBbLi4ub2xkVmlzaWJsZSwgbWVtYmVyLmhpZGRlbkFmZl0uZmlsdGVyKChnZW5yZSkgPT4gU3RyaW5nKGdlbnJlKSAhPT0gU3RyaW5nKE5PX1NFQ1JFVCkpOwogIGNvbnN0IGV4YWN0VHJpcGxlID0gYmxvY2sua2luZCA9PT0gInRyaXBsZSIgJiYgb2xkQWxsLmxlbmd0aCA9PT0gMyAmJgogICAgbmV3IFNldChvbGRBbGwpLnNpemUgPT09IDMgJiYgb2xkQWxsLmV2ZXJ5KChnZW5yZSkgPT4gYmxvY2tTZXQuaGFzKGdlbnJlKSk7CgogIGxldCBzY29yZSA9IDA7CiAgaWYgKHBpbm5lZC5oYXMobWVtYmVyLmlkKSkgc2NvcmUgKz0gMTAwXzAwMF8wMDBfMDAwOwogIGlmIChzaWduYXR1cmVPdmVybGFwLmxlbmd0aCkgc2NvcmUgKz0gMV8wMDBfMDAwXzAwMDsKICBpZiAodmlzdWFsT3ZlcmxhcC5sZW5ndGgpIHNjb3JlICs9IDEwMF8wMDBfMDAwOwogIHNjb3JlICs9IHNpZ25hdHVyZU92ZXJsYXAubGVuZ3RoICogNTBfMDAwOwogIHNjb3JlICs9IHZpc3VhbE92ZXJsYXAubGVuZ3RoICogMjBfMDAwOwogIGlmICh2aXNpYmxlSW5zaWRlKSBzY29yZSArPSAzMF8wMDA7CiAgaWYgKGV4YWN0UGFpcikgc2NvcmUgKz0gMjBfMDAwOwogIGlmIChleGFjdFRyaXBsZSkgc2NvcmUgKz0gMTVfMDAwOwogIC8vIE9sZCBoaWRkZW4gYWZmaW5pdHkgaXMgcmV0YWluZWQgb25seSBhcyBhIHZlcnkgd2VhayBzZW1hbnRpYyB0aWUtYnJlYWtlcjsKICAvLyBpdCBtdXN0IG5ldmVyIG92ZXJwb3dlciB3aGF0IHRoZSBwb3J0cmFpdCB2aXNpYmx5IGRlcGljdHMuCiAgaWYgKGJsb2NrU2V0LmhhcyhtZW1iZXIuaGlkZGVuQWZmKSkgc2NvcmUgKz0gMTAwOwogIHJldHVybiBzY29yZTsKfQoKLyoqIFJlY3Rhbmd1bGFyIEh1bmdhcmlhbiBhc3NpZ25tZW50IChibG9ja3MgPD0gcG9ydHJhaXRzKSwgbWF4aW1pemluZyB3ZWlnaHQuICovCmZ1bmN0aW9uIG1heGltdW1XZWlnaHRDYXRhbG9nQXNzaWdubWVudCgKICBibG9ja3M6IHJlYWRvbmx5IENhdGFsb2dCbG9ja1tdLAogIG1lbWJlcnM6IHJlYWRvbmx5IENhc3RNZW1iZXJbXSwKICBwaW5uZWQ6IFJlYWRvbmx5U2V0PHN0cmluZz4sCiAgcm9sZTogQ2FzdFJvbGUsCiAgdHlwZTogQW5pbWVUeXBlLAopOiBNYXA8c3RyaW5nLCBDYXN0TWVtYmVyPiB7CiAgY29uc3QgbiA9IGJsb2Nrcy5sZW5ndGg7CiAgY29uc3QgbSA9IG1lbWJlcnMubGVuZ3RoOwogIGlmIChuID4gbSkgdGhyb3cgbmV3IEVycm9yKGAke3JvbGV9LyR7dHlwZX06ICR7bX0gcG9ydHJhaXRzIGNhbm5vdCBjb3ZlciAke259IGJsb2Nrcy5gKTsKCiAgY29uc3Qgd2VpZ2h0cyA9IGJsb2Nrcy5tYXAoKGJsb2NrKSA9PiBtZW1iZXJzLm1hcCgobWVtYmVyKSA9PgogICAgc2NvcmVNZW1iZXJGb3JCbG9jayhtZW1iZXIsIGJsb2NrLCBwaW5uZWQpICsgKGhhc2gzMihgJHtyb2xlfXwke3R5cGV9fCR7YmxvY2suaWR9fCR7bWVtYmVyLmlkfWApICUgOTcpCiAgKSk7CiAgY29uc3QgbWF4V2VpZ2h0ID0gTWF0aC5tYXgoLi4ud2VpZ2h0cy5mbGF0KCkpOwogIGNvbnN0IHUgPSBuZXcgQXJyYXk8bnVtYmVyPihuICsgMSkuZmlsbCgwKTsKICBjb25zdCB2ID0gbmV3IEFycmF5PG51bWJlcj4obSArIDEpLmZpbGwoMCk7CiAgY29uc3QgcCA9IG5ldyBBcnJheTxudW1iZXI+KG0gKyAxKS5maWxsKDApOwogIGNvbnN0IHdheSA9IG5ldyBBcnJheTxudW1iZXI+KG0gKyAxKS5maWxsKDApOwoKICBmb3IgKGxldCBpID0gMTsgaSA8PSBuOyBpICs9IDEpIHsKICAgIHBbMF0gPSBpOwogICAgbGV0IGowID0gMDsKICAgIGNvbnN0IG1pbnYgPSBuZXcgQXJyYXk8bnVtYmVyPihtICsgMSkuZmlsbChOdW1iZXIuUE9TSVRJVkVfSU5GSU5JVFkpOwogICAgY29uc3QgdXNlZCA9IG5ldyBBcnJheTxib29sZWFuPihtICsgMSkuZmlsbChmYWxzZSk7CiAgICBkbyB7CiAgICAgIHVzZWRbajBdID0gdHJ1ZTsKICAgICAgY29uc3QgaTAgPSBwW2owXTsKICAgICAgbGV0IGRlbHRhID0gTnVtYmVyLlBPU0lUSVZFX0lORklOSVRZOwogICAgICBsZXQgajEgPSAwOwogICAgICBmb3IgKGxldCBqID0gMTsgaiA8PSBtOyBqICs9IDEpIHsKICAgICAgICBpZiAodXNlZFtqXSkgY29udGludWU7CiAgICAgICAgY29uc3QgY29zdCA9IG1heFdlaWdodCAtIHdlaWdodHNbaTAgLSAxXVtqIC0gMV07CiAgICAgICAgY29uc3QgY3VyID0gY29zdCAtIHVbaTBdIC0gdltqXTsKICAgICAgICBpZiAoY3VyIDwgbWludltqXSkgeyBtaW52W2pdID0gY3VyOyB3YXlbal0gPSBqMDsgfQogICAgICAgIGlmIChtaW52W2pdIDwgZGVsdGEpIHsgZGVsdGEgPSBtaW52W2pdOyBqMSA9IGo7IH0KICAgICAgfQogICAgICBmb3IgKGxldCBqID0gMDsgaiA8PSBtOyBqICs9IDEpIHsKICAgICAgICBpZiAodXNlZFtqXSkgeyB1W3Bbal1dICs9IGRlbHRhOyB2W2pdIC09IGRlbHRhOyB9CiAgICAgICAgZWxzZSBtaW52W2pdIC09IGRlbHRhOwogICAgICB9CiAgICAgIGowID0gajE7CiAgICB9IHdoaWxlIChwW2owXSAhPT0gMCk7CgogICAgZG8gewogICAgICBjb25zdCBqMSA9IHdheVtqMF07CiAgICAgIHBbajBdID0gcFtqMV07CiAgICAgIGowID0gajE7CiAgICB9IHdoaWxlIChqMCAhPT0gMCk7CiAgfQoKICBjb25zdCBvdXQgPSBuZXcgTWFwPHN0cmluZywgQ2FzdE1lbWJlcj4oKTsKICBmb3IgKGxldCBqID0gMTsgaiA8PSBtOyBqICs9IDEpIHsKICAgIGNvbnN0IGJsb2NrSW5kZXggPSBwW2pdIC0gMTsKICAgIGlmIChibG9ja0luZGV4ID49IDApIG91dC5zZXQoYmxvY2tzW2Jsb2NrSW5kZXhdLmlkLCBtZW1iZXJzW2ogLSAxXSk7CiAgfQogIGlmIChvdXQuc2l6ZSAhPT0gbikgdGhyb3cgbmV3IEVycm9yKGAke3JvbGV9LyR7dHlwZX06IGdsb2JhbCBjYXRhbG9ndWUgYXNzaWdubWVudCBwcm9kdWNlZCAke291dC5zaXplfS8ke259IG93bmVycy5gKTsKICByZXR1cm4gb3V0Owp9Cgo=");
+const CAST_ASSIGNMENT = decode("ICAgICAgLy8gU29sdmUgdGhlIHdob2xlIGJ1Y2tldCBhdCBvbmNlLiBHcmVlZHkgYXNzaWdubWVudCBjb3VsZCBjb25zdW1lIGEKICAgICAgLy8gbG9jYWxseSBnb29kIG1hdGNoIGFuZCBzdHJhbmQgYW4gdW5taXN0YWthYmx5IHRoZW1lZCBwb3J0cmFpdCBpbiBhbgogICAgICAvLyB1bnJlbGF0ZWQgYmxvY2suIE1heGltdW0td2VpZ2h0IG1hdGNoaW5nIHByZXNlcnZlcyB0aGUgZXhhY3QgNDM1LXBhaXIKICAgICAgLy8gY2F0YWxvZ3VlIHdoaWxlIGdsb2JhbGx5IG1heGltaXppbmcgdmlzdWFsLWFydCBhbGlnbm1lbnQuCiAgICAgIGNvbnN0IG93bmVyRm9yQmxvY2sgPSBtYXhpbXVtV2VpZ2h0Q2F0YWxvZ0Fzc2lnbm1lbnQoYmxvY2tzLCBidWNrZXQsIHBpbm5lZCwgcm9sZSwgdHlwZSk7CiAgICAgIGNvbnN0IHVzZWRNZW1iZXJzID0gbmV3IFNldChbLi4ub3duZXJGb3JCbG9jay52YWx1ZXMoKV0ubWFwKChtZW1iZXIpID0+IG1lbWJlci5pZCkpOwogICAgICBmb3IgKGNvbnN0IG1lbWJlciBvZiBwaW5uZWRIZXJlKSB7CiAgICAgICAgaWYgKCF1c2VkTWVtYmVycy5oYXMobWVtYmVyLmlkKSkgdGhyb3cgbmV3IEVycm9yKGAke3JvbGV9LyR7dHlwZX06IHBpbm5lZCBjYXN0ICR7bWVtYmVyLmlkfSBmZWxsIGludG8gcmVzZXJ2ZS5gKTsKICAgICAgfQoK");
+const WINNER_POSTER = decode("ZnVuY3Rpb24gV2lubmVyUG9zdGVyKHsgbm9taW5lZSB9OiB7IG5vbWluZWU6IEF3YXJkTm9taW5lZSB9KSB7CiAgaWYgKG5vbWluZWUucGxheWVyKSB7CiAgICBjb25zdCBsaWNlbnNlZFBvc3RlciA9IGxpY2Vuc2VkQXdhcmRQb3N0ZXJBc3NldChub21pbmVlKTsKICAgIGlmIChsaWNlbnNlZFBvc3RlcikgewogICAgICByZXR1cm4gKAogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJyZWxhdGl2ZSBhc3BlY3QtWzQvNV0gdy1mdWxsIG92ZXJmbG93LWhpZGRlbiByb3VuZGVkLXhsIGJvcmRlciBib3JkZXItZ29sZC81NSBiZy1bIzBkMGExN10gc2hhZG93LVswXzI0cHhfOTBweF9yZ2JhKDAsMCwwLC43NSldIj4KICAgICAgICAgIDxpbWcgc3JjPXtsaWNlbnNlZFBvc3Rlcn0gYWx0PXtgJHtub21pbmVlLnRpdGxlfSBwb3N0ZXJgfSBjbGFzc05hbWU9ImFic29sdXRlIGluc2V0LTAgaC1mdWxsIHctZnVsbCBvYmplY3QtY292ZXIiIC8+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0icG9pbnRlci1ldmVudHMtbm9uZSBhYnNvbHV0ZSBpbnNldC0wIHJpbmctMSByaW5nLWluc2V0IHJpbmctd2hpdGUvMTAiIC8+CiAgICAgICAgPC9kaXY+CiAgICAgICk7CiAgICB9CgogICAgY29uc3QgZHJhZnQgPSBub21pbmVlLmRyYWZ0ID8/IGZhbGxiYWNrRHJhZnQobm9taW5lZSk7CiAgICBjb25zdCBsZWFkID0gY2FzdEJ5SWQoZHJhZnQucHJvdGFnKTsKICAgIHJldHVybiAoCiAgICAgIDxQb3N0ZXIKICAgICAgICBkcmFmdD17ZHJhZnR9CiAgICAgICAgc3R1ZGlvPXtub21pbmVlLnN0dWRpb30KICAgICAgICBzY29yZT17bm9taW5lZS5zY29yZX0KICAgICAgICBwb3J0cmFpdD17eyBpbWc6IGxlYWQuaW1nLCBuYW1lOiBkcmFmdC5wcm90YWdOYW1lIHx8IGxlYWQubmFtZSB9fQogICAgICAgIGNsYXNzTmFtZT0idy1mdWxsIHNoYWRvdy1bMF8yNHB4XzkwcHhfcmdiYSgwLDAsMCwuNzUpXSIKICAgICAgLz4KICAgICk7CiAgfQoKICBjb25zdCByaXZhbCA9IG5vbWluZWUucG9zdGVySWQgPyByaXZhbFBvc3RlckJ5SWQobm9taW5lZS5wb3N0ZXJJZCkgOiBudWxsOwogIGlmICghcml2YWwpIHJldHVybiA8R2VuZXJhdGVkRmFsbGJhY2tQb3N0ZXIgbm9taW5lZT17bm9taW5lZX0gLz47CgogIHJldHVybiAoCiAgICA8ZGl2IGNsYXNzTmFtZT0icmVsYXRpdmUgYXNwZWN0LVs0LzVdIHctZnVsbCBvdmVyZmxvdy1oaWRkZW4gcm91bmRlZC14bCBib3JkZXIgYm9yZGVyLWdvbGQvNTUgYmctWyMwZDBhMTddIHNoYWRvdy1bMF8yNHB4XzkwcHhfcmdiYSgwLDAsMCwuNzUpXSI+CiAgICAgIDxpbWcgc3JjPXtyaXZhbC5pbWd9IGFsdD17YCR7bm9taW5lZS50aXRsZX0gcG9zdGVyYH0gY2xhc3NOYW1lPSJhYnNvbHV0ZSBpbnNldC0wIGgtZnVsbCB3LWZ1bGwgb2JqZWN0LWNvdmVyIiAvPgogICAgICA8ZGl2IGNsYXNzTmFtZT0icG9pbnRlci1ldmVudHMtbm9uZSBhYnNvbHV0ZSBpbnNldC0wIHJpbmctMSByaW5nLWluc2V0IHJpbmctd2hpdGUvMTAiIC8+CiAgICA8L2Rpdj4KICApOwp9Cgo=");
+const AWARD_HELPER = decode("LyoqIENhbm9uaWNhbCBrZXkgYXJ0IGZvciBhIHBsYXllciByZWxlYXNlIGFkYXB0ZWQgZnJvbSBhbiBhdWN0aW9uIElQLiAqLwpleHBvcnQgZnVuY3Rpb24gbGljZW5zZWRBd2FyZFBvc3RlckFzc2V0KG46IEF3YXJkTm9taW5lZSk6IHN0cmluZyB8IG51bGwgewogIGlmICghbi5wbGF5ZXIpIHJldHVybiBudWxsOwogIGNvbnN0IGxpY2Vuc2VkSXBJZCA9IG4uZHJhZnQ/LmxpY2Vuc2VkSXBJZDsKICBpZiAoIWxpY2Vuc2VkSXBJZCkgcmV0dXJuIG51bGw7CiAgcmV0dXJuIGlwQnlJZChsaWNlbnNlZElwSWQpPy5wb3N0ZXJBc3NldCA/PyBudWxsOwp9Cgo=");
+
 const castPath = "src/engine/castCatalog.ts";
 let cast = read(castPath);
 if (!cast.includes("maximumWeightCatalogAssignment")) {
-  cast = replaceRange(
-    cast,
-    "function scoreMemberForBlock",
-    "function chooseTriplePresentation",
-`const VISUAL_SIGNATURE_GENRES = new Set<GenreId>([
-  "mecha", "sports", "cyber", "idol", "cooking", "military", "space", "magical",
-  "pirate", "martial", "nordic", "samurai", "shinobi", "vampire", "monster_taming",
-  "kaiju", "arabia",
-]);
-
-/**
- * The source visible affinities are no longer mechanical wiring, but they ARE
- * valuable art-direction metadata: those are the genres the portrait was
- * actually designed to communicate. Score them far above legacy hidden
- * affinity so visually literal portraits stay with a genre they look like.
- *
- * Score bands are deliberately lexicographic at whole-bucket scale:
- *  - pinned chemistry cast must remain active
- *  - preserve a visually distinctive source genre whenever possible
- *  - preserve at least one source-visible genre on every active portrait
- *  - then prefer both old visibles / exact old blocks / hidden affinity
- */
-function scoreMemberForBlock(member: CastMember, block: CatalogBlock, pinned: ReadonlySet<string>) {
-  const oldVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));
-  const blockSet = new Set(block.genres);
-  const visualOverlap = oldVisible.filter((genre) => blockSet.has(genre));
-  const signatureOverlap = visualOverlap.filter((genre) => VISUAL_SIGNATURE_GENRES.has(genre));
-  const visibleInside = oldVisible.length === 2 && oldVisible.every((genre) => blockSet.has(genre));
-  const exactPair = block.kind === "pair" && visibleInside &&
-    castingPairKey(oldVisible[0], oldVisible[1]) === block.pairKeys[0];
-  const oldAll = [...oldVisible, member.hiddenAff].filter((genre) => String(genre) !== String(NO_SECRET));
-  const exactTriple = block.kind === "triple" && oldAll.length === 3 &&
-    new Set(oldAll).size === 3 && oldAll.every((genre) => blockSet.has(genre));
-
-  let score = 0;
-  if (pinned.has(member.id)) score += 100_000_000_000;
-  if (signatureOverlap.length) score += 1_000_000_000;
-  if (visualOverlap.length) score += 100_000_000;
-  score += signatureOverlap.length * 50_000;
-  score += visualOverlap.length * 20_000;
-  if (visibleInside) score += 30_000;
-  if (exactPair) score += 20_000;
-  if (exactTriple) score += 15_000;
-  // Old hidden affinity is retained only as a very weak semantic tie-breaker;
-  // it must never overpower what the portrait visibly depicts.
-  if (blockSet.has(member.hiddenAff)) score += 100;
-  return score;
-}
-
-/** Rectangular Hungarian assignment (blocks <= portraits), maximizing weight. */
-function maximumWeightCatalogAssignment(
-  blocks: readonly CatalogBlock[],
-  members: readonly CastMember[],
-  pinned: ReadonlySet<string>,
-  role: CastRole,
-  type: AnimeType,
-): Map<string, CastMember> {
-  const n = blocks.length;
-  const m = members.length;
-  if (n > m) throw new Error(`${role}/${type}: ${m} portraits cannot cover ${n} blocks.`);
-
-  const weights = blocks.map((block) => members.map((member) =>
-    scoreMemberForBlock(member, block, pinned) + (hash32(`${role}|${type}|${block.id}|${member.id}`) % 97)
-  ));
-  const maxWeight = Math.max(...weights.flat());
-  const u = new Array<number>(n + 1).fill(0);
-  const v = new Array<number>(m + 1).fill(0);
-  const p = new Array<number>(m + 1).fill(0);
-  const way = new Array<number>(m + 1).fill(0);
-
-  for (let i = 1; i <= n; i += 1) {
-    p[0] = i;
-    let j0 = 0;
-    const minv = new Array<number>(m + 1).fill(Number.POSITIVE_INFINITY);
-    const used = new Array<boolean>(m + 1).fill(false);
-    do {
-      used[j0] = true;
-      const i0 = p[j0];
-      let delta = Number.POSITIVE_INFINITY;
-      let j1 = 0;
-      for (let j = 1; j <= m; j += 1) {
-        if (used[j]) continue;
-        const cost = maxWeight - weights[i0 - 1][j - 1];
-        const cur = cost - u[i0] - v[j];
-        if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
-        if (minv[j] < delta) { delta = minv[j]; j1 = j; }
-      }
-      for (let j = 0; j <= m; j += 1) {
-        if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
-        else minv[j] -= delta;
-      }
-      j0 = j1;
-    } while (p[j0] !== 0);
-
-    do {
-      const j1 = way[j0];
-      p[j0] = p[j1];
-      j0 = j1;
-    } while (j0 !== 0);
-  }
-
-  const out = new Map<string, CastMember>();
-  for (let j = 1; j <= m; j += 1) {
-    const blockIndex = p[j] - 1;
-    if (blockIndex >= 0) out.set(blocks[blockIndex].id, members[j - 1]);
-  }
-  if (out.size !== n) throw new Error(`${role}/${type}: global catalogue assignment produced ${out.size}/${n} owners.`);
-  return out;
-}
-
-`,
-    "cast scoring"
-  );
-
+  cast = replaceRange(cast, "function scoreMemberForBlock", "function chooseTriplePresentation", CAST_SCORING, "cast scoring");
   cast = replaceRange(
     cast,
     "      // Full bipartite candidate list, greedily consuming the strongest",
     "      for (const block of blocks) {",
-`      // Solve the whole bucket at once. Greedy assignment could consume a
-      // locally good match and strand an unmistakably themed portrait in an
-      // unrelated block. Maximum-weight matching preserves the exact 435-pair
-      // catalogue while globally maximizing visual-art alignment.
-      const ownerForBlock = maximumWeightCatalogAssignment(blocks, bucket, pinned, role, type);
-      const usedMembers = new Set([...ownerForBlock.values()].map((member) => member.id));
-      for (const member of pinnedHere) {
-        if (!usedMembers.has(member.id)) throw new Error(`${role}/${type}: pinned cast ${member.id} fell into reserve.`);
-      }
-
-`,
-    "cast assignment"
+    CAST_ASSIGNMENT,
+    "cast assignment",
   );
   write(castPath, cast);
 }
 
-// ---------------------------------------------------------------- awards engine
 const awardsPath = "src/engine/awards.ts";
 let awards = read(awardsPath);
 if (!awards.includes("licensedAwardPosterAsset")) {
@@ -162,15 +43,13 @@ if (!awards.includes("licensedAwardPosterAsset")) {
     awards,
     'import type { RivalRelease } from "./rivals";\n',
     'import type { RivalRelease } from "./rivals";\nimport { ipById } from "./ip";\n',
-    "awards IP import"
+    "awards IP import",
   );
   const marker = "/* ----------------------------------------------------------- categories */";
-  const helper = `/** Canonical key art for a player release adapted from an auction IP. */\nexport function licensedAwardPosterAsset(n: AwardNominee): string | null {\n  if (!n.player) return null;\n  const licensedIpId = n.draft?.licensedIpId;\n  if (!licensedIpId) return null;\n  return ipById(licensedIpId)?.posterAsset ?? null;\n}\n\n`;
-  awards = replaceOnce(awards, marker, helper + marker, "awards poster helper");
+  awards = replaceOnce(awards, marker, AWARD_HELPER + marker, "awards poster helper");
   write(awardsPath, awards);
 }
 
-// ---------------------------------------------------------------- ceremony UI
 const ceremonyPath = "src/components/AwardsCeremony.tsx";
 let ceremony = read(ceremonyPath);
 if (!ceremony.includes("licensedAwardPosterAsset")) {
@@ -178,50 +57,14 @@ if (!ceremony.includes("licensedAwardPosterAsset")) {
     ceremony,
     'import type { AwardCategory, AwardCeremony, AwardNominee } from "../engine/awards";',
     'import { licensedAwardPosterAsset, type AwardCategory, type AwardCeremony, type AwardNominee } from "../engine/awards";',
-    "ceremony awards import"
+    "ceremony awards import",
   );
   ceremony = replaceRange(
     ceremony,
     "function WinnerPoster({ nominee }: { nominee: AwardNominee }) {",
     "function NomineeList",
-`function WinnerPoster({ nominee }: { nominee: AwardNominee }) {
-  if (nominee.player) {
-    const licensedPoster = licensedAwardPosterAsset(nominee);
-    if (licensedPoster) {
-      return (
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]">
-          <img src={licensedPoster} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
-          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-        </div>
-      );
-    }
-
-    const draft = nominee.draft ?? fallbackDraft(nominee);
-    const lead = castById(draft.protag);
-    return (
-      <Poster
-        draft={draft}
-        studio={nominee.studio}
-        score={nominee.score}
-        portrait={{ img: lead.img, name: draft.protagName || lead.name }}
-        className="w-full shadow-[0_24px_90px_rgba(0,0,0,.75)]"
-      />
-    );
-  }
-
-  const rival = nominee.posterId ? rivalPosterById(nominee.posterId) : null;
-  if (!rival) return <GeneratedFallbackPoster nominee={nominee} />;
-
-  return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]">
-      <img src={rival.img} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
-      <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-    </div>
-  );
-}
-
-`,
-    "ceremony winner poster"
+    WINNER_POSTER,
+    "ceremony winner poster",
   );
   write(ceremonyPath, ceremony);
 }
