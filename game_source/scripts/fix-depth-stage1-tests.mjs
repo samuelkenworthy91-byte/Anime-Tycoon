@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const p='src/engine/__tests__/careers.test.ts';
+let s=fs.readFileSync(p,'utf8');
+const a='  it("every role has six specialisations", () => {\n    (["writer", "animator", "composer"] as const).forEach((role) =>\n      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(6)\n    );\n  });';
+const b='  it("every role retains six legacy specialisations plus one for every active genre", () => {\n    (["writer", "animator", "composer"] as const).forEach((role) =>\n      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(6 + GENRES.length)\n    );\n  });';
+if(!s.includes(a)) throw new Error('old role spec assertion missing');
+s=s.replace(a,b);
+if(!s.includes('expect(SPEC_DEFS).toHaveLength(18);')) throw new Error('old total spec assertion missing');
+s=s.replace('expect(SPEC_DEFS).toHaveLength(18);','expect(SPEC_DEFS).toHaveLength(18 + GENRES.length * 3);');
+fs.writeFileSync(p,s);
