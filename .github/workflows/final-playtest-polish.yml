@@ -1,0 +1,46 @@
+name: Final playtest polish
+
+on:
+  push:
+    branches:
+      - work/casting-catalog-rebuild
+    paths:
+      - .github/workflows/final-playtest-polish.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/casting-catalog-rebuild
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply final polish
+        working-directory: game_source
+        run: python3 scripts/final-playtest-polish.py
+      - name: Check whitespace
+        run: git diff --check
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run full tests
+        working-directory: game_source
+        run: npm test -- --reporter=dot
+      - name: Build production web bundle
+        working-directory: game_source
+        run: npm run build
+      - name: Commit verified polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src
+          git commit -m "[playtest-plan] Finalize adaptation and awards progression polish"
+          git push origin HEAD:work/casting-catalog-rebuild
