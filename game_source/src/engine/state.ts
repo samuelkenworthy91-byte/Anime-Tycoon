@@ -220,7 +220,7 @@ import {
   type AwardCeremony,
   type AwardNominee,
 } from "./awards";
-import { initIPMarket, licensedRevenue, migrateIPMarket, tickIPMarket, ipById, type IPMarketState } from "./ip";
+import { initIPMarket, licensedRevenue, migrateIPMarket, tickIPMarket, ipById, playerAuctionAwardProof, type IPMarketState } from "./ip";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 
 export type { Franchise, EntryKind } from "./franchise";
@@ -2394,6 +2394,7 @@ export function releaseProject(
      characters are not employees and therefore never create cast discoveries. */
   const licensedIp = draft.licensedIpId ? ipById(draft.licensedIpId) : null;
   const licensedContract = draft.licensedIpId ? r.ipMarket.owned[draft.licensedIpId] : null;
+  const licensedAwardProof = draft.licensedIpId ? playerAuctionAwardProof(r.ipMarket, draft.licensedIpId) : null;
   if (licensedIp && licensedContract) {
     const { royalty, ownershipRevenue, net } = licensedRevenue(result.revenue, licensedContract);
     const expectationGap = result.total - Math.round(14 + licensedIp.expectationLevel * 0.2);
@@ -2599,6 +2600,28 @@ export function releaseProject(
   } : r.ipMarket;
   if (blueprintDiscovered) notices.push(`🧠 Hidden story blueprint discovered: ${hiddenBlueprint!.replace(/_/g, " ").toUpperCase()} — now available to original productions.`);
 
+  const awardEntry: AwardNominee | null = (!draft.licensedIpId || licensedAwardProof) ? {
+    title: draft.title,
+    studio: r.studio,
+    studioId: "player",
+    player: true,
+    animeType: draft.animeType,
+    genres: [...draft.genres],
+    score: result.total,
+    ...playerCraftFor(result.total, result.points),
+    audience: result.fans,
+    sourceId: projectId,
+    posterId: null,
+    draft: {
+      ...draft,
+      genres: [...draft.genres],
+      arcs: [...draft.arcs],
+      sliders: [...draft.sliders] as [number, number, number],
+    },
+    protag: draft.protag,
+    licensedIpAward: licensedAwardProof,
+  } : null;
+
   const run: RunState = {
     ...r,
     cash: r.cash - extra.spent + bonusCash,
@@ -2667,30 +2690,10 @@ export function releaseProject(
         return g.staff;
       });
     })(),
-    /* the awards slate keeps REAL production data: critic total, discipline
-       point mix (→ craft strengths), audience, genres — never invented values */
-    yearShows: [
-      ...r.yearShows,
-      {
-        title: draft.title,
-        studio: r.studio,
-        player: true,
-        animeType: draft.animeType,
-        genres: [...draft.genres],
-        score: result.total,
-        ...playerCraftFor(result.total, result.points),
-        audience: result.fans,
-        sourceId: projectId,
-        posterId: null,
-        draft: {
-          ...draft,
-          genres: [...draft.genres],
-          arcs: [...draft.arcs],
-          sliders: [...draft.sliders] as [number, number, number],
-        },
-        protag: draft.protag,
-      },
-    ],
+    /* the awards slate keeps REAL production data. Licensed adaptations enter
+       only when their frozen auction-winner provenance proves this studio owns
+       the rights; originals remain normally eligible. */
+    yearShows: awardEntry ? [...r.yearShows, awardEntry] : r.yearShows,
     lastResult: result,
     lastDraft: draft,
     notices,

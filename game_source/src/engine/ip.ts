@@ -61,7 +61,7 @@ export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
   };
 });
 
-export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; }
+export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; /** AUCTION_AWARD_PROVENANCE_V1 */ acquisition?: "auction"; auctionId?: string; ownerStudioId?: string; }
 export interface AuctionBid { studioId:"player"|string; amount:number; week:number; }
 export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; playerSkipped?:boolean; }
 export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; }
@@ -81,8 +81,27 @@ export function scheduleNextAuctionWeek(fromWeek:number,rng=Math.random){
 
 export function licensedRevenue(gross:number,contract:Pick<IPContract,"royaltyRate"|"ownershipShare">){const royalty=Math.round(gross*contract.royaltyRate);const ownershipRevenue=Math.round((gross-royalty)*contract.ownershipShare);return {royalty,ownershipRevenue,net:Math.max(0,gross-royalty+ownershipRevenue)};}
 export const initIPMarket = (week=0,rng=Math.random):IPMarketState => ({nextAuctionWeek:scheduleNextAuctionWeek(week,rng),auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0,pendingPromptId:null,annualAuctionVersion:1});
-export function migrateIPMarket(raw:unknown,week:number):IPMarketState { const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>; const fresh=initIPMarket(week); const annual=r.annualAuctionVersion===1; return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions:Array.isArray(r.auctions)?r.auctions:[],owned:r.owned&&typeof r.owned==="object"?r.owned:{},rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1}; }
+export function migrateIPMarket(raw:unknown,week:number):IPMarketState {
+  const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>;
+  const fresh=initIPMarket(week);
+  const annual=r.annualAuctionVersion===1;
+  const auctions=Array.isArray(r.auctions)?r.auctions:[];
+  const rawOwned=(r.owned&&typeof r.owned==="object"?r.owned:{}) as Record<string,IPContract>;
+  // Backfill proof only when an old save still contains a resolved player-win
+  // auction. Unproven/manual contracts deliberately remain award-ineligible.
+  const owned=Object.fromEntries(Object.entries(rawOwned).map(([ipId,contract])=>{
+    if(contract.acquisition==="auction"&&contract.ownerStudioId==="player"&&contract.auctionId)return [ipId,contract];
+    const proof=[...auctions].reverse().find(a=>a.resolved&&a.winnerId==="player"&&a.ipId===ipId);
+    return [ipId,proof?{...contract,acquisition:"auction" as const,auctionId:proof.id,ownerStudioId:"player"}:contract];
+  }));
+  return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions,owned,rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1};
+}
 export const ipById=(id:string)=>AUCTION_IPS.find(x=>x.id===id)??null;
+export function playerAuctionAwardProof(m:IPMarketState,ipId:string):{ipId:string;auctionId:string;ownerStudioId:"player"}|null {
+  const contract=m.owned[ipId];
+  if(!contract||contract.acquisition!=="auction"||contract.ownerStudioId!=="player"||!contract.auctionId)return null;
+  return {ipId,auctionId:contract.auctionId,ownerStudioId:"player"};
+}
 export function studioPrestige(run:{fans:number;awards:number;bestScore:number;showsMade:number}) { return Math.min(100,Math.round(run.fans/15000+run.awards*4+run.bestScore+run.showsMade/4)); }
 export function generateAuction(run:{week:number;fans:number;awards:number;bestScore:number;showsMade:number;ipMarket:IPMarketState},rng=Math.random):IPAuction|null {
   const prestige=studioPrestige(run); const unavailable=new Set([...Object.keys(run.ipMarket.owned),...Object.keys(run.ipMarket.rivalOwned),...run.ipMarket.auctions.filter(a=>!a.resolved).map(a=>a.ipId)]);
@@ -96,7 +115,7 @@ const candidateFor=(ip:AuctionIP,world:RivalWorld,current:number,rng=Math.random
     const fit=s.preferred.some(g=>ip.genreTags.includes(g))?18:0; const appetite=(s.reputation+s.tier*12+fit+rng()*18)/120; const ceiling=Math.round(ip.rightsBaseValue*(.72+appetite)/5000)*5000; return {s,ceiling,score:s.reputation+s.tier*8+fit};
   }).filter(x=>x.ceiling>=current).sort((a,b)=>b.score-a.score||b.ceiling-a.ceiling); return candidates[0]??null;
 };
-const makeContract=(ip:AuctionIP,week:number,price:number):IPContract=>({ipId:ip.id,acquiredWeek:week,expiresWeek:week+ip.licenseLength,purchasePrice:price,royaltyRate:ip.royaltyRate,ownershipShare:.3,sequelRights:false,merchRights:false,internationalRights:false,adaptations:0,bestScore:0,discoveredArcs:[]});
+const makeContract=(ip:AuctionIP,week:number,price:number,auctionId:string):IPContract=>({ipId:ip.id,acquiredWeek:week,expiresWeek:week+ip.licenseLength,purchasePrice:price,royaltyRate:ip.royaltyRate,ownershipShare:.3,sequelRights:false,merchRights:false,internationalRights:false,adaptations:0,bestScore:0,discoveredArcs:[],acquisition:"auction",auctionId,ownerStudioId:"player"});
 const resolveForAI=(m:IPMarketState,a:IPAuction,world:RivalWorld,rng=Math.random)=>{const ip=ipById(a.ipId)!;const c=candidateFor(ip,world,a.currentBid,rng);const resolved={...a,resolved:true,winnerId:c?.s.id??null,winningBid:c?Math.max(a.currentBid,ip.minimumBid):0,leadingStudioId:c?.s.id??null,bids:c?[...a.bids,{studioId:c.s.id,amount:Math.max(a.currentBid,ip.minimumBid),week:a.closesWeek}]:a.bids};return {...m,auctions:m.auctions.map(x=>x.id===a.id?resolved:x),rivalOwned:c?{...m.rivalOwned,[ip.id]:c.s.id}:m.rivalOwned,history:[...m.history,c?`${c.s.name} wins ${ip.title}.`:`${ip.title} leaves the room unsold.`].slice(-100),pendingPromptId:m.pendingPromptId===a.id?null:m.pendingPromptId};};
 export function dismissAuctionPrompt(m:IPMarketState,auctionId:string):IPMarketState{return {...m,pendingPromptId:m.pendingPromptId===auctionId?null:m.pendingPromptId};}
 export function skipAuctionOpportunity(m:IPMarketState,auctionId:string,world:RivalWorld,rng=Math.random):IPMarketState {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved)return dismissAuctionPrompt(m,auctionId);const tagged={...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,playerSkipped:true}:x),pendingPromptId:null};return resolveForAI(tagged,{...a,playerSkipped:true},world,rng);}
@@ -106,7 +125,7 @@ export function placeLivePlayerBid(m:IPMarketState,auctionId:string,amount:numbe
   const a=m.auctions.find(x=>x.id===auctionId),ip=a&&ipById(a.ipId); if(!a||!ip||a.resolved||a.playerSkipped||amount<=a.currentBid||amount>cash)return null;
   let next:IPAuction={...a,currentBid:amount,leadingStudioId:"player",playerMaxBid:Math.max(a.playerMaxBid,amount),bids:[...a.bids,{studioId:"player",amount,week}]}; const c=candidateFor(ip,world,amount+10_000,rng);
   if(c){let counter=Math.round(Math.max(amount+10_000,amount*1.06)/5000)*5000;if(counter<=c.ceiling){next={...next,currentBid:counter,leadingStudioId:c.s.id,bids:[...next.bids,{studioId:c.s.id,amount:counter,week}]};return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),history:[...m.history,`${c.s.name} counters at £${counter.toLocaleString("en-GB")}.`].slice(-100)},cashDelta:0,notice:`${c.s.name} counters your bid.`};}}
-  next={...next,resolved:true,winnerId:"player",winningBid:amount}; return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),owned:{...m.owned,[ip.id]:makeContract(ip,week,amount)},history:[...m.history,`Rights won: ${ip.title} for £${amount.toLocaleString("en-GB")}.`].slice(-100),pendingPromptId:null},cashDelta:-amount,notice:`🏆 Rights won: ${ip.title}.`};
+  next={...next,resolved:true,winnerId:"player",winningBid:amount}; return {market:{...m,auctions:m.auctions.map(x=>x.id===a.id?next:x),owned:{...m.owned,[ip.id]:makeContract(ip,week,amount,a.id)},history:[...m.history,`Rights won: ${ip.title} for £${amount.toLocaleString("en-GB")}.`].slice(-100),pendingPromptId:null},cashDelta:-amount,notice:`🏆 Rights won: ${ip.title}.`};
 }
 export function placePlayerBid(m:IPMarketState,auctionId:string,amount:number,cash:number):IPMarketState|null {const a=m.auctions.find(x=>x.id===auctionId);if(!a||a.resolved||amount<=a.currentBid||amount>cash)return null;return {...m,auctions:m.auctions.map(x=>x.id===auctionId?{...x,currentBid:amount,leadingStudioId:"player",playerMaxBid:amount,bids:[...x.bids,{studioId:"player",amount,week:x.opensWeek}]}:x),history:[...m.history,`Bid placed: £${amount.toLocaleString("en-GB")}`]};}
 export function appraiseAuction(m:IPMarketState,auctionId:string):IPMarketState { return {...m,auctions:m.auctions.map(a=>a.id===auctionId?{...a,appraisalLevel:Math.min(3,a.appraisalLevel+1) as 0|1|2|3}:a)}; }
@@ -116,7 +135,7 @@ export function tickIPMarket(m:IPMarketState,run:{week:number;cash:number;fans:n
     const ip=ipById(a.ipId)!;
     if(a.leadingStudioId==="player" && run.cash+cashDelta>=a.currentBid){
       const resolved={...a,resolved:true,winnerId:"player",winningBid:a.currentBid};
-      market={...market,auctions:market.auctions.map(x=>x.id===a.id?resolved:x),owned:{...market.owned,[ip.id]:makeContract(ip,run.week,a.currentBid)},pendingPromptId:market.pendingPromptId===a.id?null:market.pendingPromptId,history:[...market.history,`Rights won: ${ip.title} for £${a.currentBid.toLocaleString("en-GB")}.`].slice(-100)};
+      market={...market,auctions:market.auctions.map(x=>x.id===a.id?resolved:x),owned:{...market.owned,[ip.id]:makeContract(ip,run.week,a.currentBid,a.id)},pendingPromptId:market.pendingPromptId===a.id?null:market.pendingPromptId,history:[...market.history,`Rights won: ${ip.title} for £${a.currentBid.toLocaleString("en-GB")}.`].slice(-100)};
       cashDelta-=a.currentBid; notices.push(`🏆 Rights won: ${ip.title}.`);
     }else{
       market=resolveForAI(market,a,world,rng); notices.push(`${ip.title} auction closed.`);

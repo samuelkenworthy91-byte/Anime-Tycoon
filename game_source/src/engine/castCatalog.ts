@@ -131,6 +131,11 @@ const VISUAL_SIGNATURE_GENRES = new Set<GenreId>([
   "kaiju", "arabia",
 ]);
 
+// HARD_VISUAL_SIGNATURE_INVARIANT_V1
+function visualSignatureGenres(member: CastMember): GenreId[] {
+  return member.visibleAff.filter((genre) => VISUAL_SIGNATURE_GENRES.has(genre));
+}
+
 /**
  * The source visible affinities are no longer mechanical wiring, but they ARE
  * valuable art-direction metadata: those are the genres the portrait was
@@ -182,9 +187,16 @@ function maximumWeightCatalogAssignment(
   const m = members.length;
   if (n > m) throw new Error(`${role}/${type}: ${m} portraits cannot cover ${n} blocks.`);
 
-  const weights = blocks.map((block) => members.map((member) =>
-    scoreMemberForBlock(member, block, pinned) + (hash32(`${role}|${type}|${block.id}|${member.id}`) % 97)
-  ));
+  const weights = blocks.map((block) => members.map((member) => {
+    const signatures = visualSignatureGenres(member);
+    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));
+    const tie = hash32(`${role}|${type}|${block.id}|${member.id}`) % 97;
+    // An unmistakably themed active portrait may never be relabelled into an
+    // unrelated catalogue block. Rectangular assignment can leave surplus
+    // themed portraits in reserve instead of lying about what the art depicts.
+    if (hardVisualMismatch) return -1_000_000_000_000_000 + tie;
+    return scoreMemberForBlock(member, block, pinned) + tie;
+  }));
   const maxWeight = Math.max(...weights.flat());
   const u = new Array<number>(n + 1).fill(0);
   const v = new Array<number>(m + 1).fill(0);
@@ -270,6 +282,7 @@ export function rebuildCastingCatalog(
   const pinned = options.pinnedActiveIds ?? new Set<string>();
   const genreOrder = new Map(genres.map((genre, index) => [genre, index]));
   const rebuiltById = new Map<string, CastMember>();
+  const originalById = new Map(rawMembers.map((member) => [member.id, member] as const));
 
   for (const role of ROLES) {
     for (const type of TYPES) {
@@ -376,6 +389,17 @@ export function rebuildCastingCatalog(
       if (ownerCount.size !== 435) throw new Error(`${role}/${type}: expected 435 owned pairs, got ${ownerCount.size}.`);
       for (const [key, count] of ownerCount) {
         if (count !== 1) throw new Error(`${role}/${type}/${key}: expected one owner, got ${count}.`);
+      }
+      for (const member of bucket) {
+        const original = originalById.get(member.id);
+        if (!original) throw new Error(`${role}/${type}/${member.id}: original portrait metadata missing.`);
+        const signatures = visualSignatureGenres(original);
+        if (signatures.length > 0) {
+          const assigned = castingCatalogMeta(member)?.genres ?? [];
+          if (!signatures.some((genre) => assigned.includes(genre))) {
+            throw new Error(`${role}/${type}/${member.id}: visual signature ${signatures.join(",")} was lost in active catalogue assignment.`);
+          }
+        }
       }
     }
   }

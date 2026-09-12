@@ -40,12 +40,17 @@ export interface AwardNominee {
   audience: number;
   /** stable production identity — prevents one release appearing twice in the same category */
   sourceId?: string | null;
+  /** stable studio identity used for licensed-IP ownership checks */
+  studioId?: string | null;
   /** key art identity — rival poster manifest id for rivals */
   posterId?: string | null;
   /** frozen production identity used to reproduce the player show's exact official key visual */
   draft?: Draft | null;
   /** lead id retained for legacy saves / safe fallback poster rendering */
   protag?: string | null;
+  /** LICENSED_AWARD_OWNER_GUARD_V1 — frozen proof that this adaptation belongs
+   *  to the studio that actually won the source auction. */
+  licensedIpAward?: { ipId: string; auctionId: string; ownerStudioId: string } | null;
 }
 
 export type AwardCategoryId = "aoty" | "shonen" | "shojo" | "writing" | "animation" | "score" | "fanfav";
@@ -176,15 +181,28 @@ export function rivalNominee(r: RivalRelease): AwardNominee {
     sound: r.craft.sound,
     audience: r.fans,
     sourceId: `${r.studioId}:${r.week}:${r.title}`,
+    studioId: r.studioId,
     posterId: r.posterId ?? null,
     draft: null,
     protag: null,
+    licensedIpAward: null,
   };
 }
 
-/** Canonical key art for a player release adapted from an auction IP. */
+/** Only a verified auction winner may enter a licensed adaptation. Originals
+ * remain normally eligible. This is deliberately frozen into the nominee so
+ * later contract expiry or auction pruning cannot rewrite awards history. */
+export function awardNomineeEligible(n: AwardNominee): boolean {
+  const licensedIpId = n.draft?.licensedIpId;
+  if (!licensedIpId) return true;
+  const proof = n.licensedIpAward;
+  const studioId = n.player ? "player" : n.studioId;
+  return !!proof && !!studioId && proof.ipId === licensedIpId && proof.ownerStudioId === studioId && proof.auctionId.length > 0;
+}
+
+/** Canonical key art for an award-eligible auction-IP adaptation. */
 export function licensedAwardPosterAsset(n: AwardNominee): string | null {
-  if (!n.player) return null;
+  if (!awardNomineeEligible(n)) return null;
   const licensedIpId = n.draft?.licensedIpId;
   if (!licensedIpId) return null;
   return ipById(licensedIpId)?.posterAsset ?? null;
@@ -340,6 +358,7 @@ export function awardNomineeKey(n: AwardNominee): string {
 export function dedupeAwardSlate(shows: AwardNominee[]): AwardNominee[] {
   const seen = new Set<string>();
   return shows.filter((show) => {
+    if (!awardNomineeEligible(show)) return false;
     const key = awardNomineeKey(show);
     if (seen.has(key)) return false;
     seen.add(key);
