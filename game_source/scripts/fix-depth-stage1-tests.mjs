@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 const p='src/engine/__tests__/careers.test.ts';
 let s=fs.readFileSync(p,'utf8');
+if(!s.includes('import type { Draft, Staff } from "../data";')) throw new Error('data import missing');
+s=s.replace('import type { Draft, Staff } from "../data";','import { GENRES, type Draft, type Staff } from "../data";');
 const a='  it("every role has six specialisations", () => {\n    (["writer", "animator", "composer"] as const).forEach((role) =>\n      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(6)\n    );\n  });';
 const b='  it("every role retains six legacy specialisations plus one for every active genre", () => {\n    (["writer", "animator", "composer"] as const).forEach((role) =>\n      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(6 + GENRES.length)\n    );\n  });';
 if(!s.includes(a)) throw new Error('old role spec assertion missing');
