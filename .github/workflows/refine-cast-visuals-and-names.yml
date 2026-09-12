@@ -1,0 +1,65 @@
+name: Refine Cast Visuals and Names
+
+on:
+  push:
+    branches:
+      - work/staff-potential-ip-business-pass
+    paths:
+      - game_source/scripts/refine-cast-visuals-and-names.mjs
+      - .github/workflows/refine-cast-visuals-and-names.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refine-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/staff-potential-ip-business-pass
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Apply cast refinement
+        working-directory: game_source
+        run: node scripts/refine-cast-visuals-and-names.mjs
+
+      - name: Prepare generated content
+        working-directory: game_source
+        run: npm run content:prepare
+
+      - name: Run cast alignment and catalogue tests
+        working-directory: game_source
+        run: npm test -- src/engine/__tests__/cast-visual-alignment.test.ts src/engine/__tests__/cast-catalog-v7.test.ts src/engine/__tests__/cast-v2.test.ts src/engine/__tests__/genre30-expansion.test.ts
+
+      - name: Run full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit refinement
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src game_source/scripts game_source/docs/content-v6 game_source/art_src/cast_v6_genre30_upload_staging/manifest
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Refine cast visual alignment and name diversity"
+            git push origin HEAD:work/staff-potential-ip-business-pass
+          fi
