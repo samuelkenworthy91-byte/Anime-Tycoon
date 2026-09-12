@@ -1,0 +1,1 @@
+Binary showrunner art is being staged for finalization on this branch. Temporary files under .tmp_showrunner_art are removed by the final integration workflow.
