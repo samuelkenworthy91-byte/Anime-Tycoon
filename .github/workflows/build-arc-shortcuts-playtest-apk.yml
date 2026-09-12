@@ -1,0 +1,81 @@
+name: Build Arc Shortcuts Playtest APK
+
+on:
+  push:
+    branches:
+      - work/staff-potential-ip-business-pass
+    paths:
+      - .github/workflows/build-arc-shortcuts-playtest-apk.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout locked playtest source
+        uses: actions/checkout@v4
+        with:
+          ref: d6f04a1c80d4f50c0fbe9e0a14934eaba799b764
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run complete test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app and sync Capacitor
+        working-directory: game_source
+        run: npm run apk:sync
+
+      - name: Make Gradle wrapper executable
+        working-directory: game_source
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: game_source/android
+        run: ./gradlew assembleDebug
+
+      - name: Prepare named APK
+        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Arc-Shortcuts-Playtest.apk
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-runner-arc-shortcuts-playtest-apk
+          path: Anime-Runner-Arc-Shortcuts-Playtest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish public GitHub release APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='staff-ip-business-playtest-d6f04a1'
+          APK='Anime-Runner-Arc-Shortcuts-Playtest.apk'
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target d6f04a1c80d4f50c0fbe9e0a14934eaba799b764 \
+            --title 'Anime Runner Arc Shortcuts Playtest' \
+            --notes 'Android debug APK built from locked playtest commit d6f04a1c80d4f50c0fbe9e0a14934eaba799b764 on work/staff-potential-ip-business-pass. Includes direct researched arc and researched/proven combo shortcuts. Full automated test suite runs before packaging.'
