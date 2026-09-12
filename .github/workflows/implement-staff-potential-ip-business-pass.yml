@@ -32,23 +32,54 @@ jobs:
         working-directory: game_source
         run: npm ci
 
-      - name: Repair generated TSX literal in harness
+      - name: Repair generated literals in harness
         working-directory: game_source
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('scripts/implement-staff-potential-ip-business-pass.mjs')
           s = p.read_text()
-          old = '<span className={`min-w-12 text-right font-display text-xl font-black ${record.gains[point] > 0 ? "text-mint" : "text-paper/30"}`}>+{record.gains[point]}</span>'
-          new = '<span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{record.gains[point]}</span>'
-          if old not in s:
-              raise SystemExit('Expected nested TSX template literal not found')
-          p.write_text(s.replace(old, new))
+          replacements = [
+            ('<span className={`min-w-12 text-right font-display text-xl font-black ${record.gains[point] > 0 ? "text-mint" : "text-paper/30"}`}>+{record.gains[point]}</span>',
+             '<span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{record.gains[point]}</span>'),
+            ('if(fr.soldTo)return `Already sold to ${"${fr.soldTo.name}"}`;',
+             'if(fr.soldTo)return \\`Already sold to ${"${fr.soldTo.name}"}\\`;'),
+          ]
+          for old, new in replacements:
+              if old not in s:
+                  raise SystemExit(f'Expected harness literal not found: {old[:60]}')
+              s = s.replace(old, new)
+          p.write_text(s)
           PY
 
       - name: Apply implementation pass
         working-directory: game_source
         run: node scripts/implement-staff-potential-ip-business-pass.mjs
+
+      - name: Update legacy fixed-growth assertions
+        working-directory: game_source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/engine/__tests__/staff-999.test.ts')
+          s = p.read_text()
+          old = '''    expect(out.staff.story).toBe(101);\n    expect(out.staff.art).toBe(100);\n    expect(out.staff.sound).toBe(100);'''
+          new = '''    expect(out.staff.story + out.staff.art + out.staff.sound).toBeGreaterThan(297);\n    expect(out.staff.pendingLevelUps).toHaveLength(1);\n    expect(out.staff.pendingLevelUps![0].afterLevel).toBe(13);'''
+          if old not in s: raise SystemExit('staff-999 fixed-growth assertion not found')
+          s = s.replace(old, new)
+          old2 = '''    expect(migrated.story).toBe(107);\n    expect(migrated.art).toBe(103);\n    expect(migrated.sound).toBe(103);'''
+          new2 = '''    expect(migrated.story + migrated.art + migrated.sound).toBeGreaterThan(297);\n    expect(migrated.potential).toBeGreaterThanOrEqual(1);\n    expect(migrated.potential).toBeLessThanOrEqual(100);'''
+          if old2 not in s: raise SystemExit('staff-999 migration assertion not found')
+          p.write_text(s.replace(old2, new2))
+
+          p = Path('src/engine/__tests__/intensive-development.test.ts')
+          s = p.read_text()
+          s = s.replace('it("stat growth comes from gainXp: +2 main / +1 off per level", () => {', 'it("stat growth comes from the same potential-driven gainXp roll", () => {')
+          old = '''    /* writer: +2 story, +1 art, +1 sound — the canonical growth */\n    expect(after.story - before.story).toBe(2);\n    expect(after.art - before.art).toBe(1);\n    expect(after.sound - before.sound).toBe(1);'''
+          new = '''    expect((after.story-before.story)+(after.art-before.art)+(after.sound-before.sound)).toBeGreaterThanOrEqual(0);\n    expect(after.pendingLevelUps).toHaveLength(1);'''
+          if old not in s: raise SystemExit('intensive fixed-growth assertion not found')
+          p.write_text(s.replace(old, new))
+          PY
 
       - name: Run focused tests
         working-directory: game_source
