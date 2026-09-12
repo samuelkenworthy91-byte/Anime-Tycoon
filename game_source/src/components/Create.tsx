@@ -647,7 +647,7 @@ export default function Create({
                 <div className="flex gap-2">
                   <input
                     value={d.title}
-                    onChange={(e) => set({ title: e.target.value.slice(0, 32) })}
+                    onChange={(e) => set({ title: e.target.value.slice(0, 64) })}
                     className="ink-input flex-1 px-4 py-3 font-display text-lg font-extrabold"
                   />
                   <Btn variant="ghost" onClick={() => set({ title: randomTitle() })} aria-label="Random title">

@@ -44,6 +44,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
   const phase = isEdit ? null : PHASES[milestone];
   const [mode, setMode] = useState<"plan" | "assign" | "reveal">("plan");
   const [slider, setSlider] = useState(phase ? project.draft.sliders[phase.idx] : 50);
+  const [confirmDirtyLock, setConfirmDirtyLock] = useState(false);
   const [finalNames, setFinalNames] = useState(() => ({
     title: project.draft.title,
     protagName: project.draft.protagName || castById(project.draft.protag).name,
@@ -127,8 +128,8 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
             <div className="text-center text-[10px] font-extrabold tracking-[0.2em] text-cyanx">FINAL BILLING</div>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {([
-                ["title", "SHOW TITLE", 32], ["protagName", "LEAD", 18], ["secondaryName", "SUPPORT", 18],
-                ["petName", "MASCOT", 18], ["villainName", "VILLAIN", 18],
+                ["title", "SHOW TITLE", 64], ["protagName", "LEAD", 48], ["secondaryName", "SUPPORT", 48],
+                ["petName", "MASCOT", 48], ["villainName", "VILLAIN", 48],
               ] as const).map(([key, label, max]) => (
                 <label key={key} className={key === "title" ? "sm:col-span-2" : ""}>
                   <span className="mb-1 block text-[9px] font-bold text-paper/45">{label}</span>
@@ -140,6 +141,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
           <div className="mt-4 flex gap-2">
             <Btn variant="ghost" onClick={onBack}><ChevronLeft size={16} /> LATER</Btn>
             <Btn big variant={remaining === 0 ? "primary" : "gold"} className="flex-1" onClick={() => {
+              if (remaining > 0) { sfx.click(); setConfirmDirtyLock(true); return; }
               sfx.whoosh();
               onDone({ points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 0, rdGained: 0, squashed: 0,
                 rename: {
@@ -152,6 +154,27 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
             }}>{remaining === 0 ? "LOCK CLEAN MASTER" : `LOCK WITH ${remaining} NOTE${remaining === 1 ? "" : "S"}`}</Btn>
           </div>
         </div>
+        {confirmDirtyLock && remaining > 0 && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-abyss/80 p-4 backdrop-blur-sm" onClick={() => setConfirmDirtyLock(false)}>
+            <div className="anim-pop w-full max-w-md rounded-2xl border border-gold/55 bg-panel p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="text-[10px] font-extrabold tracking-[0.3em] text-gold">UNRESOLVED EDITOR NOTES</div>
+              <h3 className="mt-1 font-display text-2xl font-extrabold">ARE YOU SURE?</h3>
+              <p className="mt-2 text-sm leading-relaxed text-paper/65">This master still has <b className="text-gold">{remaining} editor note{remaining === 1 ? "" : "s"}</b>. Locking now makes those problems permanent and they will reduce the final review quality.</p>
+              <p className="mt-2 text-xs text-paper/45">You can cancel and keep the calendar running to let the edit team clear them.</p>
+              <div className="mt-4 flex gap-2">
+                <Btn variant="ghost" className="flex-1" onClick={() => setConfirmDirtyLock(false)}>KEEP EDITING</Btn>
+                <Btn variant="gold" className="flex-1" onClick={() => {
+                  sfx.whoosh(); setConfirmDirtyLock(false);
+                  onDone({ points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 0, rdGained: 0, squashed: 0, rename: {
+                    title: finalNames.title.trim() || project.draft.title, protagName: finalNames.protagName.trim() || castById(project.draft.protag).name,
+                    secondaryName: finalNames.secondaryName.trim() || castById(project.draft.secondary).name, petName: finalNames.petName.trim() || (project.draft.pet === "none" ? "" : castById(project.draft.pet).name),
+                    villainName: finalNames.villainName.trim() || castById(project.draft.villain).name,
+                  } });
+                }}>LOCK ANYWAY</Btn>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

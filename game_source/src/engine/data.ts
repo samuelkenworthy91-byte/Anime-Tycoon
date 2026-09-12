@@ -808,20 +808,26 @@ export const arcComboRating = (combo: ArcCombo) => {
   return { label: "WORKABLE", cls: "text-cyanx" };
 };
 
-/** Creative research can reveal a starter library without forcing blind releases. */
-export const ARC_RESEARCH_COMBOS = ["rivalry", "suspense", "deep", "earned_victory", "heart"] as const;
-export const ARC_RESEARCH_GENRE_KEYS = [
-  arcGenreKey("hook", "martial"),
-  arcGenreKey("lore", "fantasy"),
-  arcGenreKey("montage", "martial"),
-  arcGenreKey("tournament", "sports"),
-  arcGenreKey("festival", "romance"),
-  arcGenreKey("case", "mystery"),
-  arcGenreKey("narr_slowburn", "slice"),
-  arcGenreKey("narr_rivalintro", "sports"),
-  arcGenreKey("narr_politics", "mystery"),
-  arcGenreKey("narr_quiet", "slice"),
+/** Creative research now gives enough actionable intelligence to justify its cost. */
+export const ARC_RESEARCH_COMBOS = [
+  "rivalry", "suspense", "deep", "earned_victory", "heart", "spectacle",
+  "music", "road", "rival_payoff", "mentor_legacy", "mystery_reveal", "survival_rescue",
 ] as const;
+
+/** Pick exactly two genuinely positive, non-secret story beats for every active genre.
+ *  Sorting is stable and favours the strongest synergy, then broadly useful arcs. */
+export const ARC_RESEARCH_GENRE_KEYS: string[] = GENRES.flatMap((genre) =>
+  ARCS
+    .filter((arc) => arc.syn?.includes(genre.id) && !arc.franchiseOnly && arc.unlock?.kind !== "studioArc")
+    .sort((a, b) => ((b.synQ ?? 0) + (b.synF ?? 0) * 100) - ((a.synQ ?? 0) + (a.synF ?? 0) * 100) || b.q - a.q || a.id.localeCompare(b.id))
+    .slice(0, 2)
+    .map((arc) => arcGenreKey(arc.id, genre.id))
+);
+
+/** Genre Studies also pays for any ordinary RD blueprint among its 60 recommendations.
+ *  It never bypasses franchise, achievement, genre, or licensed-IP secret locks. */
+export const ARC_RESEARCH_UNLOCK_IDS: string[] = [...new Set(ARC_RESEARCH_GENRE_KEYS.map((key) => key.slice(0, key.lastIndexOf("|"))))]
+  .filter((id) => ARCS.find((arc) => arc.id === id)?.unlock?.kind === "rd");
 
 /* ------------------------------------------------------------------ staff */
 const STAFF_FIRST_NAMES = [

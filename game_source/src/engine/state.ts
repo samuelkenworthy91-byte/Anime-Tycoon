@@ -4,6 +4,7 @@ import {
   ARC_COMBOS,
   ARC_RESEARCH_COMBOS,
   ARC_RESEARCH_GENRE_KEYS,
+  ARC_RESEARCH_UNLOCK_IDS,
   MEDIUMS,
   OFFICES,
   PRODUCTION_SCOPES,
@@ -547,6 +548,14 @@ export function migrateRun(raw: unknown): RunState {
     return next;
   };
   const wasV2 = r.castGenreV2 === 2;
+  const hasNarrativeResearch = (r.research ?? []).includes("narrative_analytics");
+  const hasGenreResearch = (r.research ?? []).includes("genre_studies");
+  const migratedResearchArcCombos = [...new Set([...(Array.isArray(r.arcCombos) ? r.arcCombos : []), ...(hasNarrativeResearch ? ARC_RESEARCH_COMBOS : [])])];
+  const migratedResearchArcUnlocked = [...new Set([...(Array.isArray(r.arcUnlocked) ? r.arcUnlocked : []), ...(hasGenreResearch ? ARC_RESEARCH_UNLOCK_IDS : [])])];
+  const migratedResearchArcKnowledge = { ...(r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {}) };
+  if (hasNarrativeResearch) for (const id of ARC_RESEARCH_COMBOS) { const combo = ARC_COMBOS.find((c) => c.id === id); for (const arcId of combo?.arcs ?? []) migratedResearchArcKnowledge[arcId] = Math.max(1, migratedResearchArcKnowledge[arcId] ?? 0); }
+  const migratedResearchArcGenreKnowledge = migrateArcGenreKnowledge(r.arcGenreKnowledge);
+  if (hasGenreResearch) for (const key of ARC_RESEARCH_GENRE_KEYS) migratedResearchArcGenreKnowledge[key] = Math.max(1, migratedResearchArcGenreKnowledge[key] ?? 0);
   return {
     ...r,
     castGenreV2: 2,
@@ -626,10 +635,10 @@ export function migrateRun(raw: unknown): RunState {
     day: typeof r.day === "number" ? r.day : (r.week ?? 0) * 7,
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
     genreKnowledge: migrateGenreRecord(r.genreKnowledge),
-    arcCombos: Array.isArray(r.arcCombos) ? r.arcCombos : [],
-    arcUnlocked: Array.isArray(r.arcUnlocked) ? r.arcUnlocked : [],
-    arcKnowledge: r.arcKnowledge && typeof r.arcKnowledge === "object" ? r.arcKnowledge : {},
-    arcGenreKnowledge: migrateArcGenreKnowledge(r.arcGenreKnowledge),
+    arcCombos: migratedResearchArcCombos,
+    arcUnlocked: migratedResearchArcUnlocked,
+    arcKnowledge: migratedResearchArcKnowledge,
+    arcGenreKnowledge: migratedResearchArcGenreKnowledge,
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     ipMarket: migrateIPMarket((r as { ipMarket?: unknown }).ipMarket, r.week ?? 0),
     strategicSpend: Array.isArray(r.strategicSpend) ? r.strategicSpend : [],
@@ -1659,6 +1668,7 @@ export function startTestAudience(r: RunState): RunState | null {
 interface ResearchCarrier {
   research: string[];
   arcCombos: string[];
+  arcUnlocked: string[];
   arcKnowledge: Record<string, number>;
   arcGenreKnowledge: Record<string, number>;
   castAffinityDiscovered: string[];
@@ -1680,6 +1690,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
       ? carrier.research
       : [...carrier.research, researchId];
   let arcCombos = carrier.arcCombos;
+  let arcUnlocked = carrier.arcUnlocked;
   let arcKnowledge = carrier.arcKnowledge;
   let arcGenreKnowledge = carrier.arcGenreKnowledge;
   let castAffinityDiscovered = carrier.castAffinityDiscovered;
@@ -1697,7 +1708,8 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   if (researchId === "genre_studies") {
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
     for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
-    notices.push("📚 Genre Studies reveals a starter set of arc-to-genre relationships.");
+    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...ARC_RESEARCH_UNLOCK_IDS])];
+    notices.push(`📚 Genre Studies reveals two proven story beats for every genre (${ARC_RESEARCH_GENRE_KEYS.length} relationships).`);
   }
   if (researchId === TALENT_ANALYSIS_ID) {
     /* collect every valid, non-legacy cast id the studio has NOT yet
@@ -1715,7 +1727,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
     } else {
       notices.push(`🔬 Research complete: ${name}! ALL CAST PROFILED — the programme winds down.`);
     }
-    return { ...carrier, research, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
+    return { ...carrier, research, arcCombos, arcUnlocked, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
   }
 
   notices.push(`🔬 Research complete: ${name}!`);

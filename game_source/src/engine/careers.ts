@@ -147,7 +147,7 @@ export interface SpecDef {
 export const SPEC_OUTPUT_BONUS = 0.35; // +35% on matching projects
 export const SPEC_SPEED_BONUS = 0.15; // production-speed spec: +15% pace, always
 
-export const SPEC_DEFS: SpecDef[] = [
+const LEGACY_SPEC_DEFS: SpecDef[] = [
   /* writers */
   { id: "w_comedy", role: "writer", name: "Comedy", genres: ["comedy", "slice", "cooking"] },
   { id: "w_drama", role: "writer", name: "Drama", genres: ["survival", "supernatural", "military", "nordic", "samurai"] },
@@ -170,6 +170,14 @@ export const SPEC_DEFS: SpecDef[] = [
   { id: "c_battle", role: "composer", name: "Battle Themes", genres: ["martial", "mecha", "sports", "military", "samurai"] },
   { id: "c_emote", role: "composer", name: "Emotional Scoring", genres: ["slice", "romance", "magical"] },
 ];
+
+/** Every role can now roll an equally-likely purple specialisation in every active genre. */
+const GENRE_SPEC_DEFS: SpecDef[] = GENRES.flatMap((genre) => ([
+  { id: `g_writer_${genre.id}`, role: "writer" as const, name: `${genre.label} Writing`, genres: [genre.id] },
+  { id: `g_animator_${genre.id}`, role: "animator" as const, name: `${genre.label} Animation`, genres: [genre.id] },
+  { id: `g_composer_${genre.id}`, role: "composer" as const, name: `${genre.label} Scoring`, genres: [genre.id] },
+]));
+export const SPEC_DEFS: SpecDef[] = [...LEGACY_SPEC_DEFS, ...GENRE_SPEC_DEFS];
 
 export const specDef = (id: string | undefined): SpecDef | null =>
   SPEC_DEFS.find((d) => d.id === id) ?? null;
@@ -225,6 +233,20 @@ export const TRAIT_DEFS: TraitDef[] = [
   { id: "starter", name: "Concept Ace", desc: "+25% output during Concept and Pre-production", good: true },
   { id: "lorekeeper", name: "Lore Keeper", desc: "+30% output on licensed IP and franchise productions", good: true },
   { id: "networker", name: "Industry Networker", desc: "contracts they work on pay +15% each · team cap +45%", good: true },
+  { id: "blockbuster", name: "Big Budget Operator", desc: "+25% output on Blockbuster-budget productions", good: true },
+  { id: "indie", name: "Indie Alchemist", desc: "+25% output on Indie-budget productions", good: true },
+  { id: "broadcast", name: "Broadcast Veteran", desc: "+20% output on TV productions", good: true },
+  { id: "digital", name: "Digital Native", desc: "+20% output on Fan Web and ONA productions", good: true },
+  { id: "dualgenre", name: "Genre Blender", desc: "+20% output on two-genre productions", good: true },
+  { id: "singlefocus", name: "Purist", desc: "+20% output on single-genre productions", good: true },
+  { id: "originalist", name: "Original Voice", desc: "+20% output on brand-new original IP · −10% on continuations", good: false },
+  { id: "nightowl", name: "Midnight Auteur", desc: "+25% output in the Midnight broadcast slot", good: true },
+  { id: "primetime", name: "Prime-Time Instinct", desc: "+20% output in the Prime-Time slot", good: true },
+  { id: "family", name: "Four-Quadrant Touch", desc: "+20% output for Family audiences", good: true },
+  { id: "adult", name: "Mature Storyteller", desc: "+20% output for Adult audiences", good: true },
+  { id: "prestigecraft", name: "Prestige Obsessive", desc: "+25% output on Prestige-scope productions · −8% pace", good: true },
+  { id: "shortform", name: "Short-Form Specialist", desc: "+20% output on Short-scope productions", good: true },
+  { id: "comeback", name: "Comeback Artist", desc: "+25% output on reboots and prequels", good: true },
 ];
 
 export const traitDef = (id: string): TraitDef | null => TRAIT_DEFS.find((t) => t.id === id) ?? null;
@@ -272,31 +294,31 @@ export function growthForLevel(s: Staff, newLevel: number): { story: number; art
   const potential = potentialOf(s);
   const rng = levelRng(s.id, newLevel);
   let lo = 0, hi = 2;
-  if (potential > 20 && potential <= 45) [lo, hi] = [2, 4];
-  else if (potential > 45 && potential <= 70) [lo, hi] = [4, 7];
-  else if (potential > 70 && potential <= 90) [lo, hi] = [6, 10];
-  else if (potential > 90) [lo, hi] = [9, 15];
+  if (potential > 20 && potential <= 45) [lo, hi] = [1, 5];
+  else if (potential > 45 && potential <= 70) [lo, hi] = [3, 9];
+  else if (potential > 70 && potential <= 90) [lo, hi] = [6, 14];
+  else if (potential > 90) [lo, hi] = [10, 20];
   let total = lo + Math.floor(rng() * (hi - lo + 1));
-  if (potential >= 91 && rng() < 0.12) total += 1 + Math.floor(rng() * 4);
-  else if (potential >= 71 && rng() < 0.08) total += 1 + Math.floor(rng() * 3);
-
+  // Rare breakthrough levels make elite prospects visibly special without reload-reroll exploits.
+  if (potential >= 91 && rng() < 0.18) total += 4 + Math.floor(rng() * 7);
+  else if (potential >= 71 && rng() < 0.10) total += 2 + Math.floor(rng() * 5);
   const gains = { story: 0, art: 0, sound: 0 };
   const main = ROLE_POINT[s.role];
-  const points: PointType[] = ["story", "art", "sound"];
-  for (let i = 0; i < total; i += 1) {
-    const weights = points.map((point) => point === main ? 5 : 1.5);
-    let pick = rng() * weights.reduce((a, b) => a + b, 0);
-    let chosen: PointType = main;
-    for (let j = 0; j < points.length; j += 1) {
-      pick -= weights[j];
-      if (pick <= 0) { chosen = points[j]; break; }
-    }
+  const types: PointType[] = ["story", "art", "sound"];
+  for (let i = 0; i < total; i++) {
+    const r = rng();
+    const chosen = r < 0.58 ? main : types.filter((t) => t !== main)[Math.floor(rng() * 2)];
     gains[chosen] += 1;
   }
   return gains;
 }
 
 const GENRE_IDS = GENRES.map((g) => g.id);
+export function uniformGenreForSeed(seed: number): GenreId {
+  const n = ((Math.trunc(seed) % GENRE_IDS.length) + GENRE_IDS.length) % GENRE_IDS.length;
+  return GENRE_IDS[n];
+}
+export const genreSpecialisationId = (role: StaffRole, genre: GenreId) => `g_${role}_${genre}`;
 
 function pickTraits(seedA: number, seedB: number): string[] {
   const count = 2 + (seedA % 3); // 2..4: candidates should feel meaningfully distinct
@@ -314,7 +336,8 @@ function pickTraits(seedA: number, seedB: number): string[] {
     old save always produces the same person */
 export function ensureCareer(s: Staff, week: number): Staff {
   const h = idHash(s.id);
-  const roleSpecs = SPEC_DEFS.filter((d) => d.role === s.role);
+  const favGenre = s.favGenre ?? uniformGenreForSeed(idHash(s.id + "|fav-genre"));
+  const specGenre = uniformGenreForSeed(idHash(s.id + "|spec-genre"));
   const savedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(s.level || 1)));
   const xp = Math.max(0, s.xp ?? XP_LEVELS[savedLevel - 1]);
   const inferredLevel = levelFromXp(xp);
@@ -343,8 +366,8 @@ export function ensureCareer(s: Staff, week: number): Staff {
     sound: retro.sound,
     morale: s.morale ?? 70,
     traits: s.traits ?? pickTraits(h, h >> 3),
-    spec: s.spec ?? roleSpecs[h % roleSpecs.length].id,
-    favGenre: s.favGenre ?? GENRE_IDS[(h >> 5) % GENRE_IDS.length],
+    spec: s.spec ?? genreSpecialisationId(s.role, specGenre),
+    favGenre,
     genreExperience: s.genreExperience && typeof s.genreExperience === "object" ? { ...s.genreExperience } : {},
     joinedWeek: s.joinedWeek ?? week,
     shows: s.shows ?? [],
@@ -517,6 +540,21 @@ export function personMod(s: Staff, p: Project, team: Staff[], ctx: CareerCtx): 
   if (hasTrait(s, "closer") && ["sound", "post", "marketing"].includes(p.stage)) out *= 1.25;
   if (hasTrait(s, "starter") && ["concept", "preprod"].includes(p.stage)) out *= 1.25;
   if (hasTrait(s, "lorekeeper") && (!!p.draft.licensedIpId || !!p.draft.franchiseKey)) out *= 1.30;
+
+  if (hasTrait(s, "blockbuster") && p.draft.budget === "blockbuster") out *= 1.25;
+  if (hasTrait(s, "indie") && p.draft.budget === "indie") out *= 1.25;
+  if (hasTrait(s, "broadcast") && p.draft.medium === "tv") out *= 1.20;
+  if (hasTrait(s, "digital") && (p.draft.medium === "fanweb" || p.draft.medium === "ona")) out *= 1.20;
+  if (hasTrait(s, "dualgenre") && p.draft.genres.length === 2) out *= 1.20;
+  if (hasTrait(s, "singlefocus") && p.draft.genres.length === 1) out *= 1.20;
+  if (hasTrait(s, "originalist")) out *= p.draft.franchiseKey || p.draft.licensedIpId ? 0.90 : 1.20;
+  if (hasTrait(s, "nightowl") && p.draft.slot === "midnight") out *= 1.25;
+  if (hasTrait(s, "primetime") && p.draft.slot === "prime") out *= 1.20;
+  if (hasTrait(s, "family") && p.draft.audience === "family") out *= 1.20;
+  if (hasTrait(s, "adult") && p.draft.audience === "adults") out *= 1.20;
+  if (hasTrait(s, "prestigecraft") && (p.draft.scope ?? "standard") === "prestige") { out *= 1.25; pace *= 0.92; }
+  if (hasTrait(s, "shortform") && (p.draft.scope ?? "standard") === "short") out *= 1.20;
+  if (hasTrait(s, "comeback") && (p.draft.continuation === "reboot" || p.draft.continuation === "prequel")) out *= 1.25;
 
   /* specialisation */
   const d = specDef(s.spec);

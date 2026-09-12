@@ -4,6 +4,7 @@ import type { Draft } from "../engine/data";
 import { castById } from "../engine/data";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
+import { ipById } from "../engine/ip";
 
 /*
  * <Poster/> — key-visual card for a show.
@@ -259,6 +260,7 @@ export function PosterDecorationLayer({ design }: { design: PosterDesign }) {
 }
 
 export default function Poster(props: PosterProps) {
+  const licensedPoster = props.variant !== "mini" && props.draft?.licensedIpId ? ipById(props.draft.licensedIpId)?.posterAsset ?? null : null;
   const design = useMemo(
     () =>
       props.draft
@@ -268,6 +270,14 @@ export default function Poster(props: PosterProps) {
   );
 
   if (props.variant === "mini") return <PosterMini design={design} hof={props.hof!} className={props.className} />;
+  if (licensedPoster) return (
+    <div className={cn("anim-pop ink-card overflow-hidden", props.className)}>
+      <div className="relative aspect-[4/5] overflow-hidden bg-abyss">
+        <img src={licensedPoster} alt={props.draft?.title ?? "Licensed IP poster"} className="absolute inset-0 h-full w-full object-cover" />
+        {props.stamp && <div className="absolute left-1/2 top-6 z-10 -translate-x-1/2 -rotate-6 rounded-xl border-4 bg-ink/80 px-3 py-1.5 text-center font-display text-xl font-extrabold tracking-widest" style={{ borderColor: props.stamp.color, color: props.stamp.color }}>{props.stamp.label}</div>}
+      </div>
+    </div>
+  );
   return <PosterFull {...props} design={design} />;
 }
 
