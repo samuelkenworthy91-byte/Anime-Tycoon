@@ -32,7 +32,7 @@ describe("depth pass stage 1", () => {
   it("elite Potential has a dramatically higher ceiling than weak Potential", () => {
     const base = (id:string,potential:number):Staff => ({ id, name:id, role:"animator", story:20, art:40, sound:20, level:1, salary:1, cost:1, stamina:100, portrait:0, potential });
     const low = Array.from({length:100},(_,i)=>growthForLevel(base(`low-${i}`,10),10)).map(g=>g.story+g.art+g.sound);
-    const elite = Array.from({length:100},(_,i)=>growthForLevel(base(`elite-${i}`,10),10)).map(g=>g.story+g.art+g.sound);
+    const elite = Array.from({length:100},(_,i)=>growthForLevel(base(`elite-${i}`,100),10)).map(g=>g.story+g.art+g.sound);
     expect(Math.min(...low)).toBe(0);
     expect(Math.max(...elite)).toBeGreaterThanOrEqual(20);
     expect(elite.reduce((a,b)=>a+b,0)/elite.length).toBeGreaterThan((low.reduce((a,b)=>a+b,0)/low.length)*5);
