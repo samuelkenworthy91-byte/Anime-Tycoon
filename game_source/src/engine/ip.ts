@@ -64,7 +64,7 @@ export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
 export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; /** AUCTION_AWARD_PROVENANCE_V1 */ acquisition?: "auction"; auctionId?: string; ownerStudioId?: string; }
 export interface AuctionBid { studioId:"player"|string; amount:number; week:number; }
 export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; playerSkipped?:boolean; }
-export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; }
+export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; lastCommissionedAuctionYear:number; }
 
 export const WEEKS_PER_YEAR=48;
 export const AUCTION_YEAR_CHANCE=.68;
@@ -80,7 +80,7 @@ export function scheduleNextAuctionWeek(fromWeek:number,rng=Math.random){
 }
 
 export function licensedRevenue(gross:number,contract:Pick<IPContract,"royaltyRate"|"ownershipShare">){const royalty=Math.round(gross*contract.royaltyRate);const ownershipRevenue=Math.round((gross-royalty)*contract.ownershipShare);return {royalty,ownershipRevenue,net:Math.max(0,gross-royalty+ownershipRevenue)};}
-export const initIPMarket = (week=0,rng=Math.random):IPMarketState => ({nextAuctionWeek:scheduleNextAuctionWeek(week,rng),auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0,pendingPromptId:null,annualAuctionVersion:1});
+export const initIPMarket = (week=0,rng=Math.random):IPMarketState => ({nextAuctionWeek:scheduleNextAuctionWeek(week,rng),auctions:[],owned:{},rivalOwned:{},history:[],studioArcs:[],legalReputation:0,pendingPromptId:null,annualAuctionVersion:1,lastCommissionedAuctionYear:-1});
 export function migrateIPMarket(raw:unknown,week:number):IPMarketState {
   const r=(raw&&typeof raw==="object"?raw:{}) as Partial<IPMarketState>;
   const fresh=initIPMarket(week);
@@ -94,7 +94,7 @@ export function migrateIPMarket(raw:unknown,week:number):IPMarketState {
     const proof=[...auctions].reverse().find(a=>a.resolved&&a.winnerId==="player"&&a.ipId===ipId);
     return [ipId,proof?{...contract,acquisition:"auction" as const,auctionId:proof.id,ownerStudioId:"player"}:contract];
   }));
-  return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions,owned,rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1};
+  return {...fresh,...r,nextAuctionWeek:annual&&typeof r.nextAuctionWeek==="number"?r.nextAuctionWeek:fresh.nextAuctionWeek,auctions,owned,rivalOwned:r.rivalOwned&&typeof r.rivalOwned==="object"?r.rivalOwned:{},history:Array.isArray(r.history)?r.history:[],studioArcs:Array.isArray(r.studioArcs)?r.studioArcs:[],pendingPromptId:typeof r.pendingPromptId==="string"?r.pendingPromptId:null,annualAuctionVersion:1,lastCommissionedAuctionYear:typeof r.lastCommissionedAuctionYear==="number"?r.lastCommissionedAuctionYear:-1};
 }
 export const ipById=(id:string)=>AUCTION_IPS.find(x=>x.id===id)??null;
 export function playerAuctionAwardProof(m:IPMarketState,ipId:string):{ipId:string;auctionId:string;ownerStudioId:"player"}|null {
@@ -109,6 +109,28 @@ export function generateAuction(run:{week:number;fans:number;awards:number;bestS
   const band=Math.min(5,1+Math.floor(run.week/96)); const weighted=eligible.filter(ip=>rarityValue[ip.rarity]<=band+1); const pool=weighted.length?weighted:eligible; const ip=pool[Math.floor(rng()*pool.length)];
   const types:AuctionType[]=prestige>=65?["open","sealed","invite","distressed"]:["open","open","sealed","distressed"]; const type=types[Math.floor(rng()*types.length)];
   const min=type==="distressed"?Math.round(ip.minimumBid*.72/5000)*5000:ip.minimumBid; return {id:`auc_${run.week}_${ip.id}`,ipId:ip.id,type,opensWeek:run.week,closesWeek:run.week+1,currentBid:min,leadingStudioId:null,playerMaxBid:0,bids:[],appraisalLevel:0,resolved:false,winnerId:null,winningBid:0,playerSkipped:false};
+}
+
+export function commissionedAuctionFee(run:{officeLevel:number;showsMade:number;awards:number}):number {
+  const base=[750_000,1_500_000,2_500_000,4_000_000,6_000_000][Math.max(0,Math.min(4,run.officeLevel))]??6_000_000;
+  const prestige=Math.min(2_000_000,run.showsMade*35_000+run.awards*90_000);
+  return Math.round((base+prestige)/50_000)*50_000;
+}
+export function commissionedAuctionBlock(run:{week:number;cash:number;officeLevel:number;showsMade:number;awards:number;ipMarket:IPMarketState}):string|null {
+  if(run.ipMarket.pendingPromptId)return "Resolve the current rights opportunity first";
+  if(run.ipMarket.auctions.some(a=>!a.resolved))return "Another rights auction is already live";
+  const year=Math.floor(run.week/WEEKS_PER_YEAR);
+  if(run.ipMarket.lastCommissionedAuctionYear===year)return "You already commissioned an auction this industry year";
+  const fee=commissionedAuctionFee(run);
+  if(run.cash<fee)return `Needs £${fee.toLocaleString("en-GB")}`;
+  return null;
+}
+export function commissionRightsAuction(run:{week:number;cash:number;fans:number;awards:number;bestScore:number;showsMade:number;officeLevel:number;ipMarket:IPMarketState},rng=Math.random):{market:IPMarketState;fee:number;auction:IPAuction}|null {
+  if(commissionedAuctionBlock(run))return null;
+  const auction=generateAuction(run,rng); if(!auction)return null;
+  const fee=commissionedAuctionFee(run); const year=Math.floor(run.week/WEEKS_PER_YEAR);
+  const nextYear=(year+1)*WEEKS_PER_YEAR;
+  return {fee,auction,market:{...run.ipMarket,auctions:[...run.ipMarket.auctions,auction],pendingPromptId:auction.id,lastCommissionedAuctionYear:year,nextAuctionWeek:Math.max(run.ipMarket.nextAuctionWeek,scheduleNextAuctionWeek(nextYear,rng)),history:[...run.ipMarket.history,`Commissioned rights auction: ${ipById(auction.ipId)?.title??auction.ipId}.`].slice(-100)}};
 }
 const candidateFor=(ip:AuctionIP,world:RivalWorld,current:number,rng=Math.random)=>{
   const candidates=world.studios.filter(s=>s.status!=="collapsed"&&s.reputation>=ip.minimumStudioPrestige*.7).map(s=>{

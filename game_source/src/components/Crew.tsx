@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Crown,
+  Dices,
   Flower2,
   GraduationCap,
   Handshake,
@@ -29,6 +30,7 @@ import {
   dateLabel,
   formatGBP,
   staffMain,
+  randomStaffName,
   workerLook,
   type PointType,
   type Staff,
@@ -41,7 +43,6 @@ import {
   XP_LEVELS,
   MAX_LEVEL,
   bondBetween,
-  intensiveGainFor,
   genreExperienceLabel,
   genreExperienceMultiplier,
   genreFamiliarity,
@@ -114,62 +115,6 @@ const traitAbilities = (s: Staff): AbilityInfo[] =>
     return { title: t.name, body };
   });
 
-/* ------------------------------------------- intensive development reveal
- * A short sequential reveal: old level -> new level, new career title, then
- * the canonical stat gains. SKIP (top-right) jumps instantly to the last
- * line. Everything comes from gainXp() — no manual stat bumps. */
-function IntensiveReveal({
-  before,
-  after,
-  onClose,
-}: {
-  before: Staff;
-  after: Staff;
-  onClose: () => void;
-}) {
-  const gain = intensiveGainFor(before);
-  const lines = [
-    <>Lv {before.level} → Lv {after.level}</>,
-    <>{levelTitle(after.level)}</>,
-    <>Story +{gain.story}</>,
-    <>Art +{gain.art}</>,
-    <>Sound +{gain.sound}</>,
-  ];
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    const t = window.setTimeout(() => setStep((s) => Math.min(lines.length, s + 1)), 700);
-    return () => window.clearTimeout(t);
-  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
-  return (
-    <div className="fixed inset-0 z-[97] flex items-center justify-center bg-abyss/85 p-4 backdrop-blur-md">
-      <button
-        onClick={() => setStep(lines.length)}
-        className="btn-press absolute right-4 top-4 rounded-lg border border-line bg-panel px-3 py-1.5 text-[10px] font-extrabold tracking-widest text-paper/70"
-      >
-        SKIP ⏭
-      </button>
-      <div className="anim-pop ink-card w-full max-w-sm p-5 text-center">
-        <Brain size={22} className="mx-auto text-viol" />
-        <div className="mt-2 text-[10px] font-extrabold tracking-[0.3em] text-viol">INTENSIVE DEVELOPMENT</div>
-        <div className="mt-1 text-sm font-bold text-paper/60">{before.name}</div>
-        <div className="mt-4 min-h-32 space-y-1.5">
-          {lines.slice(0, step).map((line, i) => (
-            <div
-              key={i}
-              className={`anim-pop flex items-center justify-center gap-2 font-display text-lg font-extrabold ${i === 0 ? "text-gold" : i === 2 || i === 3 || i === 4 ? "text-mint" : "text-paper"}`}
-            >
-              <Check size={13} className="text-mint" />
-              {line}
-            </div>
-          ))}
-          {step < lines.length && <div className="pt-2 text-[9px] tracking-widest text-paper/35">REVEALING…</div>}
-        </div>
-        <Btn big variant="primary" className="mt-4 w-full" onClick={onClose}>CONTINUE</Btn>
-      </div>
-    </div>
-  );
-}
-
 function AbilitySheet({ info, onClose }: { info: AbilityInfo | null; onClose: () => void }) {
   if (!info) return null;
   return (
@@ -188,6 +133,8 @@ function AbilitySheet({ info, onClose }: { info: AbilityInfo | null; onClose: ()
 }
 
 function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: Staff | null; canHire: boolean; onHire: (s: Staff) => void; onClose: () => void }) {
+  const [hireName, setHireName] = useState(candidate?.name ?? "");
+  useEffect(() => { setHireName(candidate?.name ?? ""); }, [candidate?.id]);
   if (!candidate) return null;
   const spec = specDef(candidate.spec);
   const rows = GENRES.map((g) => {
@@ -197,52 +144,27 @@ function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: St
     const preferred = candidate.favGenre === g.id ? "FAVOURITE" : spec?.genres?.includes(g.id) ? "SPECIALISM" : "";
     return { g, familiarity, shipped, mult, preferred };
   }).sort((a, b) => b.mult - a.mult || a.g.label.localeCompare(b.g.label));
+  const cleanName = hireName.trim().slice(0, 40);
   return (
     <div className="fixed inset-0 z-[97] flex items-end justify-center bg-abyss/80 p-3 backdrop-blur-md sm:items-center" onClick={onClose}>
       <div className="nice-scroll anim-pop max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-cyanx/40 bg-panel p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start gap-3">
           <Portrait img={workerLook(candidate).portrait} name={candidate.name} alt={candidate.name} className="h-20 w-20 shrink-0 rounded-xl border border-line object-cover" />
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] font-extrabold tracking-[0.25em] text-cyanx">CANDIDATE DOSSIER</div>
-            <div className="font-display text-xl font-extrabold">{candidate.name}</div>
-            <div className="text-[10px] text-paper/55">{ROLE_LABEL[candidate.role]} · Lv{candidate.level} {levelTitle(candidate.level)}</div>
-            <div className="mt-1 text-[10px] text-gold">Sign {formatGBP(candidate.cost)} · {formatGBP(candidate.salary)}/wk</div>
-          </div>
+          <div className="min-w-0 flex-1"><div className="text-[9px] font-extrabold tracking-[0.25em] text-cyanx">CANDIDATE DOSSIER</div><div className="font-display text-xl font-extrabold">{candidate.name}</div><div className="text-[10px] text-paper/55">{ROLE_LABEL[candidate.role]} · Lv{candidate.level} {levelTitle(candidate.level)}</div><div className="mt-1 text-[10px] text-gold">Sign {formatGBP(candidate.cost)} · {formatGBP(candidate.salary)}/wk</div></div>
           <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={17}/></button>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{candidate[t]}</div></div>)}
-        </div>
-        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3">
-          <div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>
-          {spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}
-          {(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}
-        </div>
-        <div className="mt-3">
-          <div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div>
-          <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
-            {rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}
-          </div>
-          <div className="mt-1.5 text-[9px] text-paper/45">Unfamiliar non-preferred genres start at ×0.60. Three shipped productions reaches neutral ×1.00. Specialisms/favourites provide a starting familiarity floor.</div>
-        </div>
-        <Btn big variant="cyan" className="mt-4 w-full" disabled={!canHire} onClick={() => onHire(candidate)}>{canHire ? `HIRE · ${formatGBP(candidate.cost)}` : "CANNOT HIRE"}</Btn>
+        <div className="mt-3 grid grid-cols-3 gap-2">{(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{candidate[t]}</div></div>)}</div>
+        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}<div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Development rolls reveal who has the highest ceiling.</div></div>
+        <div className="mt-3"><div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div><div className="mt-1 grid gap-1.5 sm:grid-cols-2">{rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}</div></div>
+        <div className="mt-3 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3"><div className="text-[9px] font-extrabold tracking-widest text-cyanx">SIGNING NAME</div><div className="mt-1 flex gap-2"><input value={hireName} onChange={(e)=>setHireName(e.target.value.slice(0,40))} className="ink-input min-w-0 flex-1 px-3 py-2 text-sm font-bold" aria-label="Staff name"/><Btn variant="ghost" onClick={()=>setHireName(randomStaffName())} aria-label="Randomise staff name"><Dices size={15}/></Btn></div><div className="mt-1 text-[8px] text-paper/40">Rename them now or keep the generated name. This does not change their abilities, portrait or hidden Potential.</div></div>
+        <Btn big variant="cyan" className="mt-4 w-full" disabled={!canHire || !cleanName} onClick={() => onHire({ ...candidate, name: cleanName })}>{canHire ? `SIGN ${cleanName || candidate.name} · ${formatGBP(candidate.cost)}` : "CANNOT HIRE"}</Btn>
       </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------- staff card */
-function StaffCard({
-  s,
-  run,
-  setRun,
-  onIntense,
-}: {
-  s: Staff;
-  run: RunState;
-  setRun: (fn: (r: RunState) => RunState) => void;
-  onIntense: (before: Staff, after: Staff) => void;
-}) {
+function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (r: RunState) => RunState) => void }) {
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const proj = projectOfStaff(run.projects, s.id);
@@ -452,7 +374,7 @@ function StaffCard({
                 <div className="mt-1 text-[8px] text-paper/45">
                   {atMax
                     ? "Already at the top of the career ladder."
-                    : "Escalating RD cost · +2 main / +1 off stats via the normal XP path. Timed Training stays separate."}
+                    : "Escalating RD cost · reaches exactly the next level, then rolls hidden-Potential growth through the normal XP path."}
                 </div>
                 <Btn
                   variant="ghost"
@@ -465,7 +387,6 @@ function StaffCard({
                     const after = nx.staff.find((x) => x.id === s.id)!;
                     sfx.fanfare();
                     setRun(() => nx);
-                    onIntense(s, after);
                   }}
                 >
                   {atMax ? "MAX LEVEL" : run.rd < rdCost ? `NEEDS ${rdCost} RD (${run.rd})` : `DEVELOP — ${rdCost} RD`}
@@ -555,7 +476,6 @@ export default function CrewPanel({
 }) {
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const [candidate, setCandidate] = useState<Staff | null>(null);
-  const [intense, setIntense] = useState<null | { before: Staff; after: Staff }>(null);
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= maxStaff) return;
     sfx.coin();
@@ -661,7 +581,7 @@ export default function CrewPanel({
           {run.staff.length === 0 && <div className="text-sm text-paper/40">Nobody here but you.</div>}
           <div className="space-y-2">
             {run.staff.map((s) => (
-              <StaffCard key={s.id} s={s} run={run} setRun={setRun} onIntense={(before, after) => setIntense({ before, after })} />
+              <StaffCard key={s.id} s={s} run={run} setRun={setRun} />
             ))}
           </div>
 
@@ -710,7 +630,7 @@ export default function CrewPanel({
                     <Btn
                       variant="cyan"
                       className="!px-3 !py-1.5 text-xs"
-                      onClick={(e) => { e.stopPropagation(); hire(c); }}
+                      onClick={(e) => { e.stopPropagation(); setCandidate(c); }}
                       disabled={run.cash < c.cost || run.staff.length >= maxStaff}
                     >
                       HIRE
@@ -749,7 +669,6 @@ export default function CrewPanel({
       </div>
       <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
       <CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />
-      {intense && <IntensiveReveal before={intense.before} after={intense.after} onClose={() => setIntense(null)} />}
     </div>
   );
 }

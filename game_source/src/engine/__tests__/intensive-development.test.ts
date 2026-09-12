@@ -38,7 +38,7 @@ describe("intensive development", () => {
     expect(levelTitle(after.level)).toBe("Key Staff");
   });
 
-  it("stat growth comes from gainXp: +2 main / +1 off per level", () => {
+  it("stat growth comes from the same potential-driven gainXp roll", () => {
     const r = { ...initialRun("Intense", "steady"), rd: 500, staff: [staff("a", "writer")] };
     const before = r.staff[0];
     const after = intensiveDevelop(r, "a")!.staff[0];
@@ -47,10 +47,8 @@ describe("intensive development", () => {
     expect(after.story - before.story).toBe(gain.story);
     expect(after.art - before.art).toBe(gain.art);
     expect(after.sound - before.sound).toBe(gain.sound);
-    /* writer: +2 story, +1 art, +1 sound — the canonical growth */
-    expect(after.story - before.story).toBe(2);
-    expect(after.art - before.art).toBe(1);
-    expect(after.sound - before.sound).toBe(1);
+    expect((after.story-before.story)+(after.art-before.art)+(after.sound-before.sound)).toBeGreaterThanOrEqual(0);
+    expect(after.pendingLevelUps).toHaveLength(1);
   });
 
   it("cost escalates with level and RD is spent", () => {

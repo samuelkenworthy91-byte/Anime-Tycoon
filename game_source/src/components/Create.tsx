@@ -30,6 +30,8 @@ import { sfx } from "../engine/audio";
 import Portrait from "./Portrait";
 import {
   ARCS,
+  ARC_COMBOS,
+  ARC_RESEARCH_COMBOS,
   ANIME_TYPE_DESCRIPTION,
   ANIME_TYPE_LABEL,
   arcCombosFor,
@@ -1021,6 +1023,18 @@ export default function Create({
 
           {step === 5 && (
             <div className="space-y-4 anim-up">
+              <div className="rounded-2xl border-2 border-gold/50 bg-gradient-to-br from-gold/10 via-panel to-cyanx/5 p-3 shadow-xl">
+                <div className="flex flex-wrap items-center gap-2"><div className="font-display text-base font-black text-gold">STORY INTELLIGENCE</div><span className="rounded-full border border-gold/40 px-2 py-0.5 text-[8px] font-extrabold text-gold">RESEARCH + FIELD EXPERIENCE</span></div>
+                <div className="mt-1 text-[10px] text-paper/55">Everything your studio has already proven about story structure is surfaced before you choose an arc.</div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className={cn("rounded-lg border px-2 py-1 text-[9px] font-extrabold", run.research.includes("narrative_analytics") ? "border-gold/50 bg-gold/10 text-gold" : "border-line text-paper/35")}>{run.research.includes("narrative_analytics") ? "✓ NARRATIVE ANALYTICS" : "NARRATIVE ANALYTICS NOT RESEARCHED"}</span>
+                  <span className={cn("rounded-lg border px-2 py-1 text-[9px] font-extrabold", run.research.includes("genre_studies") ? "border-cyanx/50 bg-cyanx/10 text-cyanx" : "border-line text-paper/35")}>{run.research.includes("genre_studies") ? "✓ GENRE STUDIES" : "GENRE STUDIES NOT RESEARCHED"}</span>
+                  <span className="rounded-lg border border-line px-2 py-1 text-[9px] text-paper/55">{run.arcCombos.length} structures known</span>
+                  <span className="rounded-lg border border-line px-2 py-1 text-[9px] text-paper/55">{Object.keys(run.arcGenreKnowledge ?? {}).length} arc/genre relationships known</span>
+                </div>
+                {run.research.includes("narrative_analytics") && <div className="mt-2"><div className="text-[8px] font-black tracking-[0.18em] text-paper/40">RESEARCHED STRUCTURES</div><div className="mt-1 flex flex-wrap gap-1">{ARC_RESEARCH_COMBOS.map((id) => ARC_COMBOS.find((c)=>c.id===id)).filter((c): c is NonNullable<typeof c> => !!c && run.arcCombos.includes(c.id)).map((c)=>{const rating=arcComboRating(c);return <span key={c.id} className={cn("rounded-lg border border-line bg-panel2/70 px-2 py-1 text-[9px] font-extrabold",rating.cls)}>{rating.label} · {c.name}</span>;})}</div></div>}
+                {d.genres.length > 0 && <div className="mt-2 text-[9px] text-paper/50">Current genres: {d.genres.map((genre)=>{const label=GENRES.find((g)=>g.id===genre)?.label??genre;const known=Object.keys(run.arcGenreKnowledge??{}).filter((key)=>key.endsWith(`|${genre}`)).length;return `${label}: ${known} known fits`;}).join(" · ")}</div>}
+              </div>
               <Section title={`PLAN THE SEASON — PICK 3–${arcLimit} ARCS (${d.arcs.length}/${arcLimit})`}>
                 {/* timeline */}
                 <div className="ink-card flex min-h-[4.5rem] flex-wrap items-center gap-1.5 p-2.5">

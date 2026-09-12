@@ -22,17 +22,17 @@ describe("999-level staff progression", () => {
     const nextXp = XP_LEVELS[12] - XP_LEVELS[11];
     const out = gainXp(staff(), nextXp);
     expect(out.staff.level).toBe(13);
-    expect(out.staff.story).toBe(101);
-    expect(out.staff.art).toBe(100);
-    expect(out.staff.sound).toBe(100);
+    expect(out.staff.story + out.staff.art + out.staff.sound).toBeGreaterThan(297);
+    expect(out.staff.pendingLevelUps).toHaveLength(1);
+    expect(out.staff.pendingLevelUps![0].afterLevel).toBe(13);
   });
 
   it("honours XP banked by an old max-level save", () => {
     const migrated = ensureCareer(staff({ xp: XP_LEVELS[15] }), 400);
     expect(migrated.level).toBe(16);
-    expect(migrated.story).toBe(107);
-    expect(migrated.art).toBe(103);
-    expect(migrated.sound).toBe(103);
+    expect(migrated.story + migrated.art + migrated.sound).toBeGreaterThan(297);
+    expect(migrated.potential).toBeGreaterThanOrEqual(1);
+    expect(migrated.potential).toBeLessThanOrEqual(100);
   });
 
   it("preserves old balance through 99, then gives diminishing but real mastery returns", () => {
