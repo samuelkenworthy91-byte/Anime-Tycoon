@@ -218,9 +218,9 @@ describe("traits", () => {
 
 /* ----------------------------------------------------- specialisations */
 describe("specialisations", () => {
-  it("every role retains six legacy specialisations plus one for every active genre", () => {
+  it("every role retains six legacy specialisations plus ten complete genre groups", () => {
     (["writer", "animator", "composer"] as const).forEach((role) =>
-      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(6 + GENRES.length)
+      expect(SPEC_DEFS.filter((d) => d.role === role)).toHaveLength(16)
     );
   });
 
@@ -518,6 +518,6 @@ describe("saving & loading careers", () => {
   it("trait and spec catalogues are complete", () => {
     expect(TRAIT_DEFS.length).toBeGreaterThanOrEqual(12);
     TRAIT_DEFS.forEach((t) => expect(t.desc).toMatch(/[%×+−\d]/)); // numeric effect shown
-    expect(SPEC_DEFS).toHaveLength(18 + GENRES.length * 3);
+    expect(SPEC_DEFS).toHaveLength(18 + 10 * 3);
   });
 });
