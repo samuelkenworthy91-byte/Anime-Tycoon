@@ -31,7 +31,7 @@ jobs:
 
       - name: Refine every remaining generic arc summary
         working-directory: game_source
-        run: node scripts/refine-arc-plot-summaries.mjs
+        run: node scripts/refine-arc-plot-summaries-v2.mjs
 
       - name: Validate content
         working-directory: game_source
