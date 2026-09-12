@@ -1,0 +1,54 @@
+name: Refine arc plot summaries
+
+on:
+  push:
+    paths:
+      - ".github/workflows/refine-arc-plot-summaries.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Refine every remaining generic arc summary
+        working-directory: game_source
+        run: node scripts/refine-arc-plot-summaries.mjs
+
+      - name: Validate content
+        working-directory: game_source
+        run: npm test -- src/engine/__tests__/content-v3.test.ts src/engine/__tests__/genre30-expansion.test.ts
+
+      - name: Commit refined summaries
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/engine/ipHiddenArcs.ts \
+                  game_source/src/engine/generated/arcV3.json \
+                  game_source/docs/content-v3/ARC_V3_RUNTIME.json \
+                  game_source/docs/content-v5/VAMPIRE_GRIMDARK_ARCS.json \
+                  game_source/docs/content-v6/GENRE30_ARCS.json
+          git commit -m "Refine all remaining arc plot summaries"
+          git push origin HEAD:main
