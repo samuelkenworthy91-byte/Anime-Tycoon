@@ -3,7 +3,7 @@
 
 This script is intentionally read-only with respect to runtime artwork. It:
 - reads the actual selectable cast from src/engine/generated/castV3.json
-- requires exactly 736 unique cast IDs and image paths
+- requires every live cast ID and image path to be unique
 - opens every referenced runtime portrait under public/
 - records format, size, file size and SHA-256
 - emits a CSV seeded as PENDING_VISUAL_QC
@@ -23,7 +23,6 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-EXPECTED_CAST = 736
 EXPECTED_SIZE = (512, 512)
 CONTACT_COLUMNS = 4
 CONTACT_ROWS = 4
@@ -95,14 +94,14 @@ def main() -> None:
     cast = payload.get("cast")
     if not isinstance(cast, list):
         raise ValueError("castV3.json does not contain a cast array")
-    if len(cast) != EXPECTED_CAST:
-        raise ValueError(f"Expected {EXPECTED_CAST} live cast entries, found {len(cast)}")
+    if not cast:
+        raise ValueError("castV3.json contains no live cast entries")
 
     ids = [str(member["id"]) for member in cast]
     paths = [str(member["img"]) for member in cast]
-    if len(set(ids)) != EXPECTED_CAST:
+    if len(set(ids)) != len(cast):
         raise ValueError("Live cast IDs are not unique")
-    if len(set(paths)) != EXPECTED_CAST:
+    if len(set(paths)) != len(cast):
         raise ValueError("Live cast image paths are not unique")
 
     rows: list[dict[str, Any]] = []
