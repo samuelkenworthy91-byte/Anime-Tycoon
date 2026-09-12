@@ -38,6 +38,25 @@ jobs:
         timeout-minutes: 2
         run: python3 scripts/finalize_playtest_cast.py
 
+      - name: Enforce source-art genre overlap
+        working-directory: game_source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/engine/castCatalog.ts')
+          s = p.read_text()
+          old = '''    const signatures = visualSignatureGenres(member);
+    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));'''
+          new = '''    const signatures = visualSignatureGenres(member);
+    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));
+    // Never make a selectable card claim a pair that has no connection to the
+    // portrait's two source-art genres. Surplus portraits can remain reserve.
+    const hardVisualMismatch = sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));'''
+          if old not in s:
+              raise SystemExit('catalog hard-mismatch anchor not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+
       - name: Resolve generated-name collisions with existing cast
         working-directory: game_source
         run: |
