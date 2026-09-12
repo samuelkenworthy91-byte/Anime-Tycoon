@@ -33,21 +33,6 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
 
-      - name: Apply Casting Catalog V7 source migration
-        if: github.ref == 'refs/heads/work/casting-catalog-rebuild'
-        working-directory: game_source
-        run: node scripts/migrate-casting-catalog-v7.mjs
-
-      - name: Align portrait genres and auction-IP awards posters
-        if: github.ref == 'refs/heads/work/casting-catalog-rebuild'
-        working-directory: game_source
-        run: node scripts/migrate-casting-visual-awards.mjs
-
-      - name: Enforce portrait signatures and auction award ownership
-        if: github.ref == 'refs/heads/work/casting-catalog-rebuild'
-        working-directory: game_source
-        run: node scripts/migrate-casting-awards-hardening.mjs
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -62,29 +47,6 @@ jobs:
       - name: Run test suite
         working-directory: game_source
         run: npm test
-
-      - name: Commit clean catalog source migration
-        if: github.ref == 'refs/heads/work/casting-catalog-rebuild'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add \
-            game_source/src/engine/state.ts \
-            game_source/src/engine/data.ts \
-            game_source/src/engine/castCatalog.ts \
-            game_source/src/engine/awards.ts \
-            game_source/src/engine/ip.ts \
-            game_source/src/engine/__tests__/casting-awards-hardening.test.ts \
-            game_source/src/components/AwardsCeremony.tsx \
-            game_source/scripts/content-packs/genre30-pack.mjs \
-            game_source/scripts/verify-cast-wiring.mjs \
-            game_source/scripts/verify-built-cast.mjs
-          if git diff --cached --quiet; then
-            echo 'Casting Catalog V7 source already migrated and hardened'
-          else
-            git commit -m 'Harden casting signatures and auction award ownership'
-            git push origin HEAD:work/casting-catalog-rebuild
-          fi
 
       - name: Build web app and sync Capacitor
         working-directory: game_source
