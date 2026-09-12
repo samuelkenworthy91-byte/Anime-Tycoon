@@ -1,0 +1,51 @@
+name: Apply Depth Pass Stage 4 Final
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - .github/workflows/apply-depth-pass-stage4-final.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply state and economy implementation
+        working-directory: game_source
+        run: node scripts/apply-depth-pass-stage4.mjs || true
+      - name: Apply corrected UI integration
+        working-directory: game_source
+        run: node scripts/apply-depth-pass-stage4c.mjs
+      - name: Commit implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game_source/src
+          git commit -m 'Add no-reserve IP sales and transfer cast rights' || true
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
+      - name: Install
+        working-directory: game_source
+        run: npm ci
+      - name: Targeted tests
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/depth-pass-stage4.test.ts src/engine/__tests__/staff-potential-business.test.ts src/engine/__tests__/showrunner-expansion.test.ts src/engine/__tests__/staff-depth.test.ts
+      - name: Full tests
+        working-directory: game_source
+        run: npm test
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
