@@ -27,6 +27,7 @@ const nomineeFor = (ipIndex = 0): AwardNominee => {
   return {
     title: ip.title,
     studio: "Player Studio",
+    studioId: "player",
     player: true,
     animeType: ip.animeType,
     genres: [...draft.genres],
@@ -39,11 +40,16 @@ const nomineeFor = (ipIndex = 0): AwardNominee => {
     posterId: null,
     draft,
     protag: draft.protag,
+    licensedIpAward: {
+      ipId: ip.id,
+      auctionId: `auction-test:${ip.id}`,
+      ownerStudioId: "player",
+    },
   };
 };
 
 describe("auction IP awards integration", () => {
-  it("puts a licensed auction production into every awards category its anime type allows", () => {
+  it("puts an auction-won licensed production into every awards category its anime type allows", () => {
     const nominee = nomineeFor();
     const ceremony = buildCeremony(3, [nominee]);
     const categoryIds = ceremony.categories.map((category) => category.id);
@@ -58,10 +64,13 @@ describe("auction IP awards integration", () => {
     }
   });
 
-  it("uses the auction property's canonical poster in the awards ceremony", () => {
+  it("uses the auction property's canonical poster only for the verified winner", () => {
     const nominee = nomineeFor(1);
     const ip = AUCTION_IPS[1];
     expect(licensedAwardPosterAsset(nominee)).toBe(ip.posterAsset);
+
+    nominee.licensedIpAward = { ...nominee.licensedIpAward!, ownerStudioId: "wrong-studio" };
+    expect(licensedAwardPosterAsset(nominee)).toBeNull();
   });
 
   it("does not replace original-production posters with an auction asset", () => {
