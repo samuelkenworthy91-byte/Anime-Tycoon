@@ -34,9 +34,10 @@ import {
   topCharacter,
   type EntryKind,
 } from "../engine/franchise";
-import { franchiseSaleBlock, franchiseSaleOffer, launchMerch, sellFranchiseRights, type RunState } from "../engine/state";
+import { franchiseSaleBlock, launchMerch, startFranchiseAuction, type RunState } from "../engine/state";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
+import SellerAuctionCeremony from "./SellerAuctionCeremony";
 
 /* ------------------------------------------------------------------ plan */
 export interface ContinuationPlan {
@@ -114,6 +115,8 @@ export default function LibraryPanel({
     (a, b) => b.popularity - a.popularity || b.totalRevenue - a.totalRevenue
   );
   const open = openKey ? run.franchises[openKey] : null;
+
+  if (run.sellerAuction) return <SellerAuctionCeremony run={run} setRun={setRun} />;
 
   /* ----------------------------------------------------------- list view */
   if (!open) {
@@ -249,7 +252,7 @@ export default function LibraryPanel({
 
       <div className={cn("rounded-xl border p-3", fr.soldTo ? "border-neon/45 bg-neon/5" : "border-gold/35 bg-gold/5")}>
         <div className="text-[10px] font-black tracking-widest text-gold">IP RIGHTS</div>
-        {fr.soldTo ? <div className="mt-1 text-xs text-neon"><b>SOLD TO {fr.soldTo.name.toUpperCase()}</b> · {formatGBPShort(fr.soldTo.price)} · week {fr.soldTo.week}. Historic credits stay here, but continuations and merchandise are no longer yours.</div> : (()=>{const block=franchiseSaleBlock(run,fr.key);const offer=franchiseSaleOffer(run,fr.key);return <><div className="mt-1 text-[10px] text-paper/50">Very successful original IP can be put on the market for an irreversible full-rights sale. The winning network or rival gets the future upside.</div>{offer?<div className="mt-2 flex flex-wrap items-center gap-2"><b className="text-sm text-mint">Likely winning bid: {formatGBPShort(offer.price)}</b><span className="text-[9px] text-paper/45">{offer.buyerName} · {offer.buyerType.toUpperCase()}</span>{!confirmSale?<Btn variant="gold" onClick={()=>setConfirmSale(true)}>AUCTION FULL IP RIGHTS</Btn>:<><Btn variant="gold" onClick={()=>{setRun(r=>sellFranchiseRights(r,fr.key)??r);setConfirmSale(false);}}>CONFIRM IRREVERSIBLE SALE</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(false)}>CANCEL</Btn></>}</div>:<div className="mt-2 text-[9px] text-paper/40">{block}</div>}</>;})()}
+        {fr.soldTo ? <div className="mt-1 text-xs text-neon"><b>SOLD TO {fr.soldTo.name.toUpperCase()}</b> · {formatGBPShort(fr.soldTo.price)} · week {fr.soldTo.week}. Historic credits stay here, but continuations, merchandise and every cast member tied to this IP are no longer yours to use.</div> : (()=>{const block=franchiseSaleBlock(run,fr.key);return <><div className="mt-1 text-[10px] text-paper/50">Successful original IP can enter a live no-reserve rights auction. Networks and rival studios bid according to appetite and genre fit: the room may explode into a bidding war, or your property may sell for a painful lowball. The cast rights go with it.</div>{!block?<div className="mt-2 flex flex-wrap gap-2">{!confirmSale?<Btn variant="gold" onClick={()=>setConfirmSale(true)}>LIST IP FOR NO-RESERVE AUCTION</Btn>:<><div className="w-full rounded-lg border border-neon/45 bg-neon/5 p-2 text-[10px] text-neon"><b>FINAL WARNING:</b> once listed, you cannot withdraw it. Whatever the room bids becomes the sale price, and this IP’s cast becomes unavailable to your studio.</div><Btn variant="gold" onClick={()=>{setRun(r=>startFranchiseAuction(r,fr.key)??r);setConfirmSale(false);}}>COMMIT TO AUCTION</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(false)}>CANCEL</Btn></>}</div>:<div className="mt-2 text-[9px] text-paper/40">{block}</div>}</>;})()}
       </div>
 
       {/* ---------------------------------------------------------- cast */}

@@ -141,6 +141,7 @@ import {
   negotiationChance,
   partnerById,
   pruneReleases,
+  saturationOf,
   rollCommission,
   rollMarketEvent,
   type Commission,
@@ -227,6 +228,7 @@ import { initIPMarket, migrateIPMarket, tickIPMarket, ipById, playerAuctionAward
 import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
+import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -314,6 +316,8 @@ export interface RunState {
   /** slow rolling expectation (EMA of past quality) — mild review nudge only */
   reviewExpectation: number;
   franchises: Record<string, Franchise>;
+  /** active no-reserve auction of a studio-owned franchise; transcript is frozen on listing */
+  sellerAuction: SellerAuction | null;
   pendingSequel: string | null;
   contracts: Contract[];
   hallOfFame: HofEntry[];
@@ -486,6 +490,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     studioTop: 0,
     reviewExpectation: REVIEW_EXPECTATION_SEED,
     franchises: {},
+    sellerAuction: null,
     pendingSequel: null,
     contracts: [rollContract(0), rollContract(0), rollContract(0)].map((c) => contractForShowrunner(showrunner, c)),
     hallOfFame: [],
@@ -665,6 +670,7 @@ export function migrateRun(raw: unknown): RunState {
     franchises: Object.fromEntries(
       Object.entries(r.franchises ?? {}).map(([k, v]) => [k, migrateFranchise(k, v, r.week ?? 0)])
     ),
+    sellerAuction: (r as { sellerAuction?: SellerAuction | null }).sellerAuction ?? null,
     hallOfFame: Array.isArray(r.hallOfFame) ? r.hallOfFame.map((entry) => {
       const legacyGenres = Array.isArray(entry.genres) ? entry.genres as unknown as string[] : [];
       return {
@@ -1366,6 +1372,19 @@ export const projectCapacity = (r: RunState) =>
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
 
+export interface SoldCastRight { franchiseKey: string; title: string; buyer: string; }
+
+/** Cast attached to a sold studio-owned IP leaves with the property. The map is
+ * derived from the canonical franchise ledger, keeping old saves additive. */
+export function soldCastRights(r: Pick<RunState, "franchises">): Record<string, SoldCastRight> {
+  const out: Record<string, SoldCastRight> = {};
+  for (const [key, fr] of Object.entries(r.franchises ?? {})) {
+    if (!fr.soldTo) continue;
+    for (const member of fr.cast ?? []) out[member.id] ??= { franchiseKey: key, title: fr.baseTitle, buyer: fr.soldTo.name };
+  }
+  return out;
+}
+
 /** null = a new project can be greenlit; otherwise the blocking reason.
     Covers capacity, cash, and every continuation rule so the UI can say
     WHY a show can't start instead of silently swallowing the click. */
@@ -1375,6 +1394,14 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
   if (active >= cap)
     return `${OFFICES[r.officeLevel].name} can only run ${cap} production${cap > 1 ? "s" : ""} at once`;
   if (d) {
+    if (!d.licensedIpId) {
+      const sold = soldCastRights(r);
+      for (const castId of [d.protag, d.secondary, d.pet, d.villain]) {
+        if (!castId || castId === "none") continue;
+        const right = sold[castId];
+        if (right) return `Cast rights for ${castById(castId).name} were sold with ${right.title} to ${right.buyer}`;
+      }
+    }
     if (d.animeType !== "shonen" && d.animeType !== "shojo") return "Choose an Anime Type";
     if (d.genres.length < 1 || d.genres.length > 2 || d.genres.some((genre) => !isActiveGenre(genre)))
       return "Choose one or two active genres";
@@ -2619,6 +2646,8 @@ export function releaseProject(
   } : r.ipMarket;
   if (blueprintDiscovered) notices.push(`🧠 Hidden story blueprint discovered: ${hiddenBlueprint!.replace(/_/g, " ").toUpperCase()} — now available to original productions.`);
 
+  const baseAwardCraft = playerCraftFor(result.total, result.points);
+  const awardCraft = r.showrunner === "festival" ? { story: Math.round(baseAwardCraft.story * 1.08 * 10) / 10, art: Math.round(baseAwardCraft.art * 1.08 * 10) / 10, sound: Math.round(baseAwardCraft.sound * 1.08 * 10) / 10 } : baseAwardCraft;
   const awardEntry: AwardNominee | null = (!draft.licensedIpId || licensedAwardProof) ? {
     title: draft.title,
     studio: r.studio,
@@ -2627,8 +2656,8 @@ export function releaseProject(
     animeType: draft.animeType,
     genres: [...draft.genres],
     score: result.total,
-    ...playerCraftFor(result.total, result.points),
-    audience: result.fans,
+    ...awardCraft,
+    audience: Math.round(result.fans * (r.showrunner === "festival" ? 1.10 : 1)),
     sourceId: projectId,
     posterId: null,
     draft: {
@@ -2746,11 +2775,18 @@ export function showSaleOffers(r:RunState,projectId:string):ShowSaleOffer[] {
   const p=r.projects.find(x=>x.id===projectId); if(!p||p.stage!=="ready"||p.draft.licensedIpId)return [];
   const points=p.points.story+p.points.art+p.points.sound;
   const fr=p.draft.franchiseKey?r.franchises[p.draft.franchiseKey]:undefined;
-  const value=Math.max(draftCost(p.draft)*1.05,p.spent*.95+points*2_800+p.hype*2_300+(fr?.popularity??0)*4_000+r.bestScore*4_000);
+  const mediumFactor:Record<string,number>={fanweb:.20,ona:.45,tv:.85,ova:.65,special:.75,movie:1.15};
+  const heat=p.draft.genres.length?p.draft.genres.reduce((sum,g)=>sum+(r.market.genres[g]??0),0)/p.draft.genres.length:0;
+  const saturation=p.draft.genres.length?p.draft.genres.reduce((sum,g)=>sum+saturationOf(r.recentReleases,g,r.week),0)/p.draft.genres.length:0;
+  const marketFactor=Math.max(.58,Math.min(1.25,1+heat*.09-saturation*.035));
+  const trackRecord=Math.max(.28,Math.min(1.25,.28+r.showsMade*.055+r.bestScore/58+Math.min(.28,r.fans/180_000)));
+  const assetValue=p.spent*.28+points*720+p.hype*1_050+(fr?.popularity??0)*1_550+Math.max(0,r.bestScore-20)*5_000;
+  const value=Math.max(20_000,assetValue*(mediumFactor[p.draft.medium]??.7)*marketFactor*trackRecord);
+  const dealmaker=r.showrunner==="dealmaker"?1.15:1;
   const networks=[{id:"network:kousei",name:"Kousei Broadcast Network"},{id:"network:streamline",name:"Streamline Media"}];
-  const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.round(value*(.60+stableDealNumber(projectId+buyer.id)*.12)/5000)*5000,creatorFans:Math.max(100,Math.round((p.hype*9+points*2)*(i?0.13:0.10))),awardRisk:false}));
-  const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];
-  if(rival){const mult=.60+rival.fit*.07+stableDealNumber(projectId+rival.st.id)*.13;offers.push({id:`sale:${projectId}:rival:${rival.st.id}`,buyerType:"rival",buyerId:rival.st.id,buyerName:rival.st.name,cash:Math.round(value*mult/5000)*5000,creatorFans:Math.max(75,Math.round((p.hype*7+points*1.5)*.08)),awardRisk:true});}
+  const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.max(10_000,Math.round(value*(.72+stableDealNumber(projectId+buyer.id)*.28)*dealmaker/5000)*5000),creatorFans:Math.max(50,Math.round((p.hype*7+points*1.2)*(i?0.09:0.07))),awardRisk:false}));
+  const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length+st.specialist.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];
+  if(rival){const mult=.72+rival.fit*.08+rival.st.reputation*.002+stableDealNumber(projectId+rival.st.id)*.22;offers.push({id:`sale:${projectId}:rival:${rival.st.id}`,buyerType:"rival",buyerId:rival.st.id,buyerName:rival.st.name,cash:Math.max(10_000,Math.round(value*mult*dealmaker/5000)*5000),creatorFans:Math.max(40,Math.round((p.hype*6+points)*.06)),awardRisk:true});}
   return offers.sort((a,b)=>b.cash-a.cash);
 }
 
@@ -2774,11 +2810,42 @@ export function sellReadyProject(r:RunState,projectId:string,offerId:string):{ru
 }
 
 export interface FranchiseSaleOffer { buyerType:"network"|"rival"; buyerId:string; buyerName:string; price:number; }
-export function franchiseSaleBlock(r:RunState,key:string):string|null {const fr=r.franchises[key];if(!fr)return "Unknown IP";if(fr.soldTo)return `Already sold to ${fr.soldTo.name}`;if(fr.bestScore<30&&fr.popularity<65&&fr.totalRevenue<1_000_000&&!fr.entries.some(e=>e.hallOfFame))return "Only successful IPs can attract a rights auction (30+/40, popularity 65+, £1m lifetime revenue or Hall of Fame)";return null;}
-export function franchiseSaleOffer(r:RunState,key:string):FranchiseSaleOffer|null {const fr=r.franchises[key];if(!fr||franchiseSaleBlock(r,key))return null;const rival=[...r.rivalWorld.studios].filter(s=>s.status!=="collapsed").sort((a,b)=>(b.preferred.filter(g=>fr.genres.includes(g)).length-a.preferred.filter(g=>fr.genres.includes(g)).length)||b.reputation-a.reputation)[0];const rivalWins=!!rival&&stableDealNumber(key+"buyer")>.30;const buyer=rivalWins?{buyerType:"rival" as const,buyerId:rival.id,buyerName:rival.name}:{buyerType:"network" as const,buyerId:"network:zenith",buyerName:"Zenith Media Group"};const base=Math.max(750_000,fr.totalRevenue*.85+fr.lifetimeFans*70+fr.bestScore*45_000+fr.popularity*20_000);const price=Math.round(base*(1.05+stableDealNumber(key+buyer.buyerId)*.55)/25_000)*25_000;return {...buyer,price};}
-export function sellFranchiseRights(r:RunState,key:string):RunState|null {const fr=r.franchises[key];const offer=franchiseSaleOffer(r,key);if(!fr||!offer)return null;let rivalWorld=r.rivalWorld;if(offer.buyerType==="rival"){rivalWorld={...rivalWorld,studios:rivalWorld.studios.map(st=>st.id===offer.buyerId?{...st,reputation:Math.min(100,st.reputation+5),franchises:[...st.franchises,{key:`acquired:${key}`,baseTitle:fr.baseTitle,genres:[...fr.genres],animeType:fr.animeType,season:fr.season,popularity:Math.max(45,fr.popularity),bestScore:fr.bestScore,lastScore:fr.lastScore,lastEntryWeek:r.week,entries:fr.entries.length,posterId:null}]}:st)}};
-  const sold={...fr,soldTo:{id:offer.buyerId,name:offer.buyerName,kind:offer.buyerType,week:r.week,price:offer.price}};
-  return {...r,cash:r.cash+offer.price,totalRevenue:r.totalRevenue+offer.price,franchises:{...r.franchises,[key]:sold},rivalWorld,pendingSequel:r.pendingSequel===key?null:r.pendingSequel,notices:[...r.notices,`🔨 ${fr.baseTitle} IP rights sold at auction to ${offer.buyerName} for £${offer.price.toLocaleString("en-GB")}. The sale is permanent; your historic entries remain in the library.`]};
+export function franchiseSaleBlock(r:RunState,key:string):string|null {
+  const fr=r.franchises[key];
+  if(!fr)return "Unknown IP";
+  if(fr.soldTo)return `Already sold to ${fr.soldTo.name}`;
+  if(r.sellerAuction)return `Finish the live auction for ${r.sellerAuction.title} first`;
+  if(fr.bestScore<30&&fr.popularity<65&&fr.totalRevenue<1_000_000&&!fr.entries.some(e=>e.hallOfFame))return "Only successful IPs can attract a rights auction (30+/40, popularity 65+, £1m lifetime revenue or Hall of Fame)";
+  return null;
+}
+
+/** Commit the property to a no-reserve auction. The entire bidding transcript is
+ * frozen now, so reopening/reloading cannot shop for a better room. */
+export function startFranchiseAuction(r:RunState,key:string):RunState|null {
+  const fr=r.franchises[key]; if(!fr||franchiseSaleBlock(r,key))return null;
+  const sellerAuction=buildSellerAuction(key,fr,r.week,r.rivalWorld,r.showrunner);
+  return {...r,sellerAuction,notices:[...r.notices,`🔨 ${fr.baseTitle} is committed to a NO-RESERVE rights auction. The hammer price will be final.`]};
+}
+
+export function finalizeFranchiseAuction(r:RunState):RunState|null {
+  const auction=r.sellerAuction; if(!auction)return null;
+  const fr=r.franchises[auction.franchiseKey]; if(!fr||fr.soldTo)return {...r,sellerAuction:null};
+  const sold={...fr,soldTo:{id:auction.winnerId,name:auction.winnerName,kind:auction.winnerType,week:r.week,price:auction.winningBid}};
+  let rivalWorld=r.rivalWorld;
+  if(auction.winnerType==="rival") rivalWorld={...rivalWorld,studios:rivalWorld.studios.map(st=>st.id===auction.winnerId?{...st,reputation:Math.min(100,st.reputation+5),franchises:[...st.franchises,{key:`acquired:${auction.franchiseKey}`,baseTitle:fr.baseTitle,genres:[...fr.genres],animeType:fr.animeType,season:fr.season,popularity:Math.max(45,fr.popularity),bestScore:fr.bestScore,lastScore:fr.lastScore,lastEntryWeek:r.week,entries:fr.entries.length,posterId:null}]}:st)};
+  const mood=auction.biddingWar?" after a bidding war":auction.winningBid<auction.fairAppraisal*.45?" after a brutally cold room":"";
+  return {...r,cash:r.cash+auction.winningBid,totalRevenue:r.totalRevenue+auction.winningBid,franchises:{...r.franchises,[auction.franchiseKey]:sold},rivalWorld,sellerAuction:null,pendingSequel:r.pendingSequel===auction.franchiseKey?null:r.pendingSequel,notices:[...r.notices,`🔨 ${fr.baseTitle} sells to ${auction.winnerName} for £${auction.winningBid.toLocaleString("en-GB")}${mood}. The IP and its cast rights are gone permanently.`]};
+}
+
+/** Compatibility helpers for simulations/headless callers. UI never previews this
+ * result: it goes through startFranchiseAuction + the live ceremony. */
+export function franchiseSaleOffer(r:RunState,key:string):FranchiseSaleOffer|null {
+  const fr=r.franchises[key]; if(!fr||fr.soldTo)return null;
+  const a=buildSellerAuction(key,fr,r.week,r.rivalWorld,r.showrunner);
+  return {buyerType:a.winnerType,buyerId:a.winnerId,buyerName:a.winnerName,price:a.winningBid};
+}
+export function sellFranchiseRights(r:RunState,key:string):RunState|null {
+  const started=startFranchiseAuction(r,key); return started?finalizeFranchiseAuction(started):null;
 }
 
 /* =================================================================== */

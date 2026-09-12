@@ -69,7 +69,7 @@ import {
   type SlotId,
 } from "../engine/data";
 import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
-import { arcLockReason, formatLockReason, startBlockReason } from "../engine/state";
+import { arcLockReason, formatLockReason, soldCastRights, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -178,17 +178,21 @@ function CastPick({
   m,
   on,
   onPick,
+  blocked,
 }: {
   m: CastMember;
   on: boolean;
   onPick: () => void;
+  blocked?: string;
 }) {
   return (
     <button
+      disabled={!!blocked}
       onClick={onPick}
       className={cn(
         "btn-press group relative overflow-hidden rounded-2xl border text-left",
         on ? "border-neon shadow-[0_0_26px_rgba(255,77,141,.4)]" : "border-line hover:border-neon/40",
+        blocked && "opacity-40 grayscale",
         "aspect-square"
       )}
     >
@@ -203,6 +207,7 @@ function CastPick({
         <div className="font-display text-sm font-extrabold leading-tight">{m.name}</div>
         <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {(m.epithet ?? m.archetype)}</div>
       </div>
+      {blocked && <div className="absolute inset-x-1 top-1 z-20 rounded-md border border-neon/60 bg-ink/90 px-1.5 py-1 text-center text-[7px] font-black tracking-wider text-neon">RIGHTS SOLD · {blocked}</div>}
       {on && (
         <div className="absolute left-1.5 top-1.5 rounded-full bg-neon p-1 text-white">
           <Check size={12} />
@@ -255,6 +260,7 @@ export default function Create({
   const planDef = plan ? continuationDef(plan.kind) : null;
   const expectation = planFr && plan ? expectedScore(planFr, plan.kind) : null;
   const marketBrief = (run.decisionModifiers ?? []).find((m) => m.kind === "marketBrief" && m.expiresWeek >= run.week && m.uses > 0);
+  const unavailableCast = useMemo(() => soldCastRights(run), [run.franchises]);
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
   const protag = PROTAGONISTS.find((p) => p.id === d.protag) ?? PROTAGONISTS[0];
@@ -543,7 +549,7 @@ export default function Create({
   const CAST_SCREENS = castRows.length;
   const castRow = castRows[Math.min(castStep, CAST_SCREENS - 1)];
   const castPicked = castRow.list.find((m) => m.id === d[castRow.role]) ?? castRow.list[0];
-  const filteredCastList = filterCastByFilters(castRow.list, castFilters, run.castAffinityDiscovered);
+  const filteredCastList = filterCastByFilters(castRow.list, castFilters, run.castAffinityDiscovered).filter((member) => !unavailableCast[member.id]);
   const castFilterAtLimit = castFilters.length >= 3;
   const isCastFilterActive = (kind: CastBrowseFilter["kind"], value: AnimeType | GenreId) =>
     castFilters.some((filter) => filter.kind === kind && filter.value === value);
@@ -1082,6 +1088,7 @@ export default function Create({
                     key={m.id}
                     m={m}
                     on={d[castRow.role] === m.id}
+                    blocked={unavailableCast[m.id]?.title}
                     onPick={() => {
                       sfx.select();
                       if (castRow.role === "protag") set({ protag: m.id, protagName: m.name });
