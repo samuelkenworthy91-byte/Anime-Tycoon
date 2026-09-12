@@ -45,13 +45,8 @@ jobs:
           from pathlib import Path
           p = Path('src/engine/castCatalog.ts')
           s = p.read_text()
-          old = '''    const signatures = visualSignatureGenres(member);
-    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));'''
-          new = '''    const signatures = visualSignatureGenres(member);
-    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));
-    // Never make a selectable card claim a pair that has no connection to the
-    // portrait's two source-art genres. Surplus portraits can remain reserve.
-    const hardVisualMismatch = sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));'''
+          old = '    const signatures = visualSignatureGenres(member);\n    const hardVisualMismatch = signatures.length > 0 && !signatures.some((genre) => block.genres.includes(genre));'
+          new = '    const signatures = visualSignatureGenres(member);\n    const sourceVisible = member.visibleAff.filter((genre) => String(genre) !== String(NO_SECRET));\n    // Never make a selectable card claim a pair that has no connection to the\n    // portrait\'s two source-art genres. Surplus portraits can remain reserve.\n    const hardVisualMismatch = sourceVisible.length > 0 && !sourceVisible.some((genre) => block.genres.includes(genre));'
           if old not in s:
               raise SystemExit('catalog hard-mismatch anchor not found')
           p.write_text(s.replace(old, new, 1))
