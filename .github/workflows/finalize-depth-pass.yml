@@ -1,0 +1,67 @@
+name: Finalize Depth Pass
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply final mechanics
+        working-directory: game_source
+        run: node scripts/finalize-depth-pass.mjs
+      - name: Install
+        working-directory: game_source
+        run: npm ci
+      - name: Validate content wiring
+        working-directory: game_source
+        run: |
+          npm run content:prepare
+          npm run auction-ip:validate-posters
+          npm run cast:coverage
+      - name: Targeted depth tests
+        working-directory: game_source
+        run: >-
+          npx vitest run
+          src/engine/__tests__/depth-pass-stage4.test.ts
+          src/engine/__tests__/depth-pass-stage5.test.ts
+          src/engine/__tests__/showrunner-expansion.test.ts
+          src/engine/__tests__/staff-potential-business.test.ts
+          src/engine/__tests__/staff-depth.test.ts
+          src/engine/__tests__/annual-auction-hidden-arcs.test.ts
+          src/engine/__tests__/auction-awards.test.ts
+      - name: Full tests
+        working-directory: game_source
+        run: npm test
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
+      - name: Remove temporary implementation harnesses
+        run: |
+          rm -f .github/workflows/apply-depth-pass-stage*.yml
+          rm -f .github/workflows/fix-depth-stage2-tests.yml
+          rm -f .github/workflows/finalize-depth-pass.yml
+          rm -f game_source/scripts/apply-depth-pass-stage*.mjs
+          rm -f game_source/scripts/fix-depth-stage2-tests.mjs
+          rm -f game_source/scripts/finalize-depth-pass.mjs
+      - name: Commit validated implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Finalize research showrunner auction depth pass' || true
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
