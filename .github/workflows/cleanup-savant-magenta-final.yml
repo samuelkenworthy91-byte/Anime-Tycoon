@@ -32,7 +32,7 @@ jobs:
 
           files = [
               (Path('game_source/public/img/portrait-showrunner-savant.webp'), (128, 128)),
-              (Path('game_source/public/img/sprite-showrunner-savant.webp'), (256, 384)),
+              (Path('game_source/public/img/sprite-showrunner-savant.webp'), (224, 320)),
           ]
 
           def residual_magenta(px):
