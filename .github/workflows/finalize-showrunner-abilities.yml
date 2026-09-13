@@ -1,0 +1,100 @@
+name: Finalize Showrunner Art and Abilities
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - .github/workflows/finalize-showrunner-abilities.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+
+      - name: Reconstruct staged showrunner art
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat game_source/.tmp_showrunner_art/00.txt \
+              game_source/.tmp_showrunner_art/01.txt \
+              game_source/.tmp_showrunner_art/02.txt \
+              game_source/.tmp_showrunner_art/03.txt \
+              game_source/.tmp_showrunner_art/04.txt \
+              game_source/.tmp_showrunner_art/05.txt \
+              game_source/.tmp_showrunner_art/06.txt > /tmp/showrunner_art.b64
+          base64 -d /tmp/showrunner_art.b64 > /tmp/showrunner_art.zip
+          unzip -t /tmp/showrunner_art.zip
+          mkdir -p /tmp/showrunner_art
+          unzip -q /tmp/showrunner_art.zip -d /tmp/showrunner_art
+          find /tmp/showrunner_art -type f -maxdepth 5 -print
+
+      - name: Patch art and agreed abilities
+        run: python3 game_source/scripts/finalize-showrunner-abilities.py /tmp/showrunner_art
+
+      - name: Validate final showrunner assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in hype contrarian savant trailblazer; do
+            test -s "game_source/public/img/portrait-showrunner-${id}.webp"
+            test -s "game_source/public/img/sprite-showrunner-${id}.webp"
+            file "game_source/public/img/portrait-showrunner-${id}.webp" | grep -qi webp
+            file "game_source/public/img/sprite-showrunner-${id}.webp" | grep -qi webp
+          done
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Focused showrunner tests
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/showrunner-abilities.test.ts --reporter=verbose
+
+      - name: Full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Reject stale placeholder mechanics
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R 'showrunner === "casting" ? 1.25' game_source/src
+          ! grep -R 'showrunner === "festival" ?' game_source/src
+          ! grep -R 'showrunner === "dealmaker" ? 1.14' game_source/src
+          ! grep -R 'showrunner === "genre".*comboFactor' game_source/src
+          ! grep -R 'artPending: true' game_source/src/engine/data.ts
+
+      - name: Commit validated final state and remove staging machinery
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf game_source/.tmp_showrunner_art
+          rm -f game_source/scripts/finalize-showrunner-abilities.py
+          rm -f .github/workflows/finalize-showrunner-abilities.yml
+          git add -A
+          git diff --cached --stat
+          git commit -m "Finalize four new showrunners and abilities [skip ci]"
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
