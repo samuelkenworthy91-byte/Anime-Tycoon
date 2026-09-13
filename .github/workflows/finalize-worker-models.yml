@@ -1,0 +1,74 @@
+name: Finalize New Worker Models
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - .github/workflows/finalize-worker-models.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+
+      - name: Install worker art and easter egg logic
+        run: python3 game_source/scripts/finalize-worker-models.py
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Focused worker tests
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/worker-easter-egg.test.ts --reporter=verbose
+
+      - name: Full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Verify new assets are committed-ready
+        run: |
+          set -euo pipefail
+          for id in 28 29 30 31 32; do
+            test -s "game_source/public/img/sprite-worker-${id}.webp"
+            test -s "game_source/public/img/portrait-worker-${id}.webp"
+            file "game_source/public/img/sprite-worker-${id}.webp" | grep -qi webp
+            file "game_source/public/img/portrait-worker-${id}.webp" | grep -qi webp
+          done
+          grep -q 'DANTE_HIRE_CHANCE = 0.01' game_source/src/engine/careers.ts
+          grep -q 'potential: 100' game_source/src/engine/careers.ts
+          grep -q '"team", "organizer", "prodigy", "ensemble"' game_source/src/engine/careers.ts
+
+      - name: Commit validated worker integration and remove staging machinery
+        run: |
+          set -euo pipefail
+          rm -rf .tmp_worker_art
+          rm -f game_source/scripts/finalize-worker-models.py
+          rm -f .github/workflows/finalize-worker-models.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Add five new worker models and Dante easter egg [skip ci]"
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
