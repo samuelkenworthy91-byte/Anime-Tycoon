@@ -1,11 +1,23 @@
 name: Finalize New Worker Models
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - work/research-showrunner-auction-depth-pass
     paths:
       - .github/workflows/finalize-worker-models.yml
+      - game_source/scripts/finalize-worker-models.py
+      - game_source/public/img/sprite-worker-28.webp
+      - game_source/public/img/portrait-worker-28.webp
+      - game_source/public/img/sprite-worker-29.webp
+      - game_source/public/img/portrait-worker-29.webp
+      - game_source/public/img/sprite-worker-30.webp
+      - game_source/public/img/portrait-worker-30.webp
+      - game_source/public/img/sprite-worker-31.webp
+      - game_source/public/img/portrait-worker-31.webp
+      - game_source/public/img/sprite-worker-32.webp
+      - game_source/public/img/portrait-worker-32.webp
 
 permissions:
   contents: write
@@ -16,12 +28,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: work/research-showrunner-auction-depth-pass
           fetch-depth: 0
 
-      - name: Install worker art and easter egg logic
+      - name: Wire committed worker art and Dante easter egg
         run: python3 game_source/scripts/finalize-worker-models.py
 
       - name: Set up Node
@@ -47,7 +59,7 @@ jobs:
         working-directory: game_source
         run: npm run build
 
-      - name: Verify new assets are committed-ready
+      - name: Verify final worker integration
         run: |
           set -euo pipefail
           for id in 28 29 30 31 32; do
@@ -57,8 +69,11 @@ jobs:
             file "game_source/public/img/portrait-worker-${id}.webp" | grep -qi webp
           done
           grep -q 'DANTE_HIRE_CHANCE = 0.01' game_source/src/engine/careers.ts
+          grep -q 'name: "Dante Vale"' game_source/src/engine/careers.ts
           grep -q 'potential: 100' game_source/src/engine/careers.ts
-          grep -q '"team", "organizer", "prodigy", "ensemble"' game_source/src/engine/careers.ts
+          grep -q '"team", "reliable", "prodigy", "fanatic"' game_source/src/engine/careers.ts
+          grep -q 'favGenre: "martial"' game_source/src/engine/careers.ts
+          grep -q 'STANDARD_WORKER_LOOK_COUNT' game_source/src/engine/data.ts
 
       - name: Commit validated worker integration and remove staging machinery
         run: |
