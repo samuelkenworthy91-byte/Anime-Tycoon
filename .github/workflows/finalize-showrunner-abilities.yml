@@ -25,18 +25,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat game_source/.tmp_showrunner_art/00.txt \
-              game_source/.tmp_showrunner_art/01.txt \
-              game_source/.tmp_showrunner_art/02.txt \
-              game_source/.tmp_showrunner_art/03.txt \
-              game_source/.tmp_showrunner_art/04.txt \
-              game_source/.tmp_showrunner_art/05.txt \
-              game_source/.tmp_showrunner_art/06.txt > /tmp/showrunner_art.b64
-          base64 -d /tmp/showrunner_art.b64 > /tmp/showrunner_art.zip
+          : > /tmp/showrunner_art.zip
+          for part in 00 01 02 03 04 05 06; do
+            base64 -d "game_source/.tmp_showrunner_art/${part}.txt" >> /tmp/showrunner_art.zip
+          done
           unzip -t /tmp/showrunner_art.zip
           mkdir -p /tmp/showrunner_art
           unzip -q /tmp/showrunner_art.zip -d /tmp/showrunner_art
-          find /tmp/showrunner_art -type f -maxdepth 5 -print
+          find /tmp/showrunner_art -maxdepth 5 -type f -print
 
       - name: Patch art and agreed abilities
         run: python3 game_source/scripts/finalize-showrunner-abilities.py /tmp/showrunner_art
