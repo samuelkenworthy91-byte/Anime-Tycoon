@@ -67,12 +67,13 @@ import {
   intensiveDevelop,
   respondPoach,
   respondSalary,
+  recruitmentAdCost,
+  refreshRecruitmentAds,
   trainBlockReason,
   trainStaff,
   type RunState,
 } from "../engine/state";
 import { projectOfStaff } from "../engine/projects";
-import { rollHire } from "../engine/careers";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
@@ -477,6 +478,7 @@ export default function CrewPanel({
 }) {
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const [candidate, setCandidate] = useState<Staff | null>(null);
+  const scoutCost = recruitmentAdCost(run);
   const hire = (cand: Staff) => {
     if (run.cash < cand.cost || run.staff.length >= maxStaff) return;
     sfx.coin();
@@ -489,9 +491,9 @@ export default function CrewPanel({
     }));
   };
   const scout = () => {
-    if (run.cash < 8_000) return;
+    if (run.cash < scoutCost) return;
     sfx.click();
-    setRun((r) => ({ ...r, cash: r.cash - 8_000, candidates: [rollHire(r.week), rollHire(r.week), rollHire(r.week)] }));
+    setRun((r) => refreshRecruitmentAds(r) ?? r);
   };
 
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
@@ -611,8 +613,8 @@ export default function CrewPanel({
         <div>
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-bold tracking-widest text-paper/50">RECRUITMENT AD</span>
-            <Btn variant="ghost" className="!px-2.5 !py-1 text-[10px]" onClick={scout} disabled={run.cash < 8_000}>
-              NEW ADS {formatGBP(8_000)}
+            <Btn variant="ghost" className="!px-2.5 !py-1 text-[10px]" onClick={scout} disabled={run.cash < scoutCost}>
+              NEW ADS {formatGBP(scoutCost)}
             </Btn>
           </div>
           <div className="space-y-2">

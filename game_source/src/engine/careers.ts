@@ -3,6 +3,7 @@ import {
   DANTE_WORKER_LOOK_INDEX,
   GENRES,
   ROLE_POINT,
+  STANDARD_WORKER_LOOK_INDICES,
   STAFF_STAT_CAP,
   rollCandidate,
   staffPoint,
@@ -449,15 +450,33 @@ export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
 }
 
 /** roll a fresh candidate with a full personality */
-export function rollHire(week: number, rng: () => number = Math.random): Staff {
+export function rollHire(
+  week: number,
+  rng: () => number = Math.random,
+  excludedLooks: ReadonlySet<number> = new Set(),
+): Staff {
   const base = rollCandidate(week);
   const specialRoll = rng();
-  const candidate = specialRoll < DANTE_HIRE_CHANCE
+  let candidate = specialRoll < DANTE_HIRE_CHANCE && !excludedLooks.has(DANTE_WORKER_LOOK_INDEX)
     ? applyDanteEasterEgg(base, week)
-    : specialRoll < DANTE_HIRE_CHANCE + AVRIL_HIRE_CHANCE
+    : specialRoll < DANTE_HIRE_CHANCE + AVRIL_HIRE_CHANCE && !excludedLooks.has(AVRIL_WORKER_LOOK_INDEX)
       ? applyAvrilEasterEgg(base, week)
       : base;
+  if (candidate.look !== undefined && excludedLooks.has(candidate.look)) {
+    const availableLook = STANDARD_WORKER_LOOK_INDICES.find((look) => !excludedLooks.has(look));
+    if (availableLook !== undefined) candidate = { ...candidate, look: availableLook };
+  }
   return ensureCareer(candidate, week);
+}
+
+/** A recruitment advert never shows the same worker appearance twice. */
+export function rollHirePool(week: number, count = 3, rng: () => number = Math.random): Staff[] {
+  const usedLooks = new Set<number>();
+  return Array.from({ length: count }, () => {
+    const candidate = rollHire(week, rng, usedLooks);
+    if (candidate.look !== undefined) usedLooks.add(candidate.look);
+    return candidate;
+  });
 }
 
 /* -------------------------------------------------------------- morale */
