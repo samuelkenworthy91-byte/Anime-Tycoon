@@ -4,6 +4,12 @@
 
 /* ---------- phone portrait shell ---------- */
 @media (max-width: 600px) and (orientation: portrait) {
+  /* Pixel-class portrait screens benefit from slightly denser rem-based
+     spacing while retaining the explicit small-text sizes used by the UI. */
+  html {
+    font-size: 15px;
+  }
+
   /* Two-row portrait HUD: studio/cash on top, date · R&D · forecast below. */
   .office-hud {
     min-height: 70px !important;
@@ -63,6 +69,61 @@
   .office-hud-cash {
     padding: 3px 7px !important;
     font-size: 10px !important;
+  }
+
+  /* Keep only one unobtrusive control button visible. Opening it reveals the
+     speed, sound and pause controls below the top-right corner. Modal close
+     buttons remain above this z-40 toolbar and are always tappable. */
+  .game-controls {
+    top: 5px !important;
+    right: 5px !important;
+  }
+
+  .game-controls-toggle {
+    display: flex !important;
+    min-height: 30px !important;
+    min-width: 30px !important;
+    align-items: center;
+    justify-content: center;
+    padding: 6px !important;
+  }
+
+  .game-controls-panel {
+    display: none !important;
+    position: absolute;
+    top: 34px;
+    right: 0;
+    width: max-content;
+    max-width: calc(100vw - 10px);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 3px !important;
+    padding: 4px;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: rgba(21, 16, 34, .97);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  }
+
+  .game-controls-open .game-controls-panel {
+    display: flex !important;
+  }
+
+  .game-controls-panel button {
+    min-height: 27px !important;
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+    font-size: 9px !important;
+  }
+
+  .nice-scroll {
+    scrollbar-width: thin;
+  }
+}
+
+@media (min-width: 601px), (orientation: landscape) {
+  .game-controls-toggle {
+    display: none;
   }
 }
 

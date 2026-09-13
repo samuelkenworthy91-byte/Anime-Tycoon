@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, HardDriveDownload, ChevronLeft, Check } from "lucide-react";
+import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, HardDriveDownload, ChevronLeft, Check, SlidersHorizontal, X } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
 import { ARCS, type Contract, type Draft } from "./engine/data";
@@ -74,6 +74,7 @@ export default function App() {
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
+  const [controlsOpen, setControlsOpen] = useState(false);
   /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
@@ -679,7 +680,17 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
-          <div className="game-controls absolute right-3 top-2.5 z-[60] flex gap-1.5">
+          <div className={cn("game-controls absolute right-3 top-2.5 z-40", controlsOpen && "game-controls-open")}>
+            <button
+              type="button"
+              aria-label={controlsOpen ? "Close sound and speed controls" : "Open sound and speed controls"}
+              aria-expanded={controlsOpen}
+              onClick={() => setControlsOpen((open) => !open)}
+              className="game-controls-toggle btn-press rounded-xl border border-line bg-panel2/95 p-2 text-paper/70"
+            >
+              {controlsOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}
+            </button>
+            <div className="game-controls-panel flex gap-1.5">
             {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
@@ -704,6 +715,7 @@ export default function App() {
             >
               <Pause size={15} />
             </button>
+            </div>
           </div>
         )}
 

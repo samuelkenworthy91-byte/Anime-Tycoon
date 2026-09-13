@@ -302,27 +302,28 @@ export default function Create({
       });
   }, [d.genres, run.comboLevels, run.genresUnlocked]);
 
-  /** arcs whose fit against EVERY picked genre the studio already knows
-   *  (arcGenreKnowledge row revealed). Sorted strong→neutral; KNOWN RISK
-   *  arcs surface as an advisory, never a recommendation. */
+  /** Arcs with at least one revealed fit for the picked genres. A second genre
+   *  may still be untested, but a known risk is never presented as a positive
+   *  recommendation. This keeps Genre Studies useful for mixed-genre shows
+   *  without leaking any hidden fit rows. */
   const recommendedArcs = useMemo(() => {
     if (!d.genres.length) return [];
-    const out: { arc: (typeof ARCS)[number]; chips: { genre: string; fit: { label: string; cls: string; score: number } }[]; rank: 0 | 1 | 2 | 3 }[] = [];
+    const out: { arc: (typeof ARCS)[number]; chips: { genre: string; fit: { label: string; cls: string; score: number } | null }[]; rank: 0 | 1 | 2 | 3 }[] = [];
     for (const a of ARCS) {
       if (d.arcs.includes(a.id) || arcLockReason(a, run)) continue;
       const chips = d.genres.map((genre) => {
         const known = (run.arcGenreKnowledge[arcGenreKey(a.id, genre)] ?? 0) > 0;
-        if (!known) return null;
         const g = GENRES.find((x) => x.id === genre)!;
-        return { genre: g.label, fit: arcGenreFit(a, genre) };
+        return { genre: g.label, fit: known ? arcGenreFit(a, genre) : null };
       });
-      if (chips.some((c) => c === null)) continue; /* an unknown fit row stays private */
-      const clean = chips as { genre: string; fit: { label: string; cls: string; score: number } }[];
-      const worst = Math.min(...clean.map((c) => c.fit.score));
-      const rank = (worst >= 4 ? 3 : worst >= 1 ? 2 : worst >= 0 ? 1 : 0) as 0 | 1 | 2 | 3;
-      out.push({ arc: a, chips: clean, rank });
+      const knownFits = chips.flatMap((chip) => chip.fit ? [chip.fit] : []);
+      if (!knownFits.length) continue;
+      const worst = Math.min(...knownFits.map((fit) => fit.score));
+      const best = Math.max(...knownFits.map((fit) => fit.score));
+      const rank = (worst < 0 ? 0 : best >= 4 ? 3 : best >= 1 ? 2 : 1) as 0 | 1 | 2 | 3;
+      out.push({ arc: a, chips, rank });
     }
-    const recs = out.filter((r) => r.rank > 0).sort((a, b) => b.rank - a.rank).slice(0, 4);
+    const recs = out.filter((r) => r.rank > 0).sort((a, b) => b.rank - a.rank).slice(0, 6);
     const risks = out.filter((r) => r.rank === 0).slice(0, 2);
     return [...recs, ...risks];
   }, [d.genres, d.arcs, run, run.arcGenreKnowledge]);
@@ -338,15 +339,14 @@ export default function Create({
     const knownGood = ARCS
       .filter((arc) => !arcLockReason(arc, run))
       .map((arc) => {
-        const scores = d.genres.map((genre) => {
+        const scores = d.genres.flatMap((genre) => {
           const known = (run.arcGenreKnowledge[arcGenreKey(arc.id, genre)] ?? 0) > 0;
-          return known ? arcGenreFit(arc, genre).score : null;
+          return known ? [arcGenreFit(arc, genre).score] : [];
         });
-        if (scores.some((score) => score === null)) return null;
-        const clean = scores as number[];
-        const worst = Math.min(...clean);
+        if (!scores.length) return null;
+        const worst = Math.min(...scores);
         if (worst < 1) return null;
-        return { arc, worst, total: clean.reduce((sum, score) => sum + score, 0) };
+        return { arc, worst, total: scores.reduce((sum, score) => sum + score, 0) };
       })
       .filter((row): row is NonNullable<typeof row> => !!row)
       .sort((a, b) => b.worst - a.worst || b.total - a.total || a.arc.name.localeCompare(b.arc.name));
@@ -1308,7 +1308,7 @@ export default function Create({
                         const label = rank === 3 ? "STRONG" : rank === 2 ? "GOOD" : rank === 1 ? "NEUTRAL" : "KNOWN RISK";
                         const cls = rank === 3 ? "text-gold" : rank === 2 ? "text-mint" : rank === 1 ? "text-paper/70" : "text-neon";
                         const border = rank === 3 ? "border-gold/60 hover:border-gold" : rank === 2 ? "border-mint/40 hover:border-mint" : rank === 1 ? "border-line hover:border-paper/50" : "border-neon/50 hover:border-neon/80";
-                        const tip = chips.map((c) => `${c.genre}: ${c.fit.label}`).join(" · ");
+                        const tip = chips.map((c) => `${c.genre}: ${c.fit?.label ?? "UNTESTED"}`).join(" · ");
                         return (
                           <button
                             key={arc.id}

@@ -572,7 +572,7 @@ export const RESEARCH: ResearchItem[] = [
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%. Also unlocks Mobile Game licences.", requires: "merch", section: "merch" },
-  { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches a starter set of arc-to-genre fits so the Story Arc screen can label them before you risk a production." },
+  { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches at least two usable, positive story-arc fits for every genre (usually three) and adds them to the Story Arc quick picks." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },
   /* ---- timed merch product research (Part D): each product line needs
      Merch Division plus its own dedicated project before launch ---- */
@@ -814,20 +814,25 @@ export const ARC_RESEARCH_COMBOS = [
   "music", "road", "rival_payoff", "mentor_legacy", "mystery_reveal", "survival_rescue",
 ] as const;
 
-/** Pick exactly two genuinely positive, non-secret story beats for every active genre.
+/** Pick at least two (normally three) genuinely positive, usable story beats for every active genre.
+ *  A recommendation must be available as soon as that genre and Genre Studies are
+ *  available: Genre Studies unlocks any selected non-franchise blueprint instead
+ *  of recommending something the player still cannot put on the episode board.
  *  Sorting is stable and favours the strongest synergy, then broadly useful arcs. */
 export const ARC_RESEARCH_GENRE_KEYS: string[] = GENRES.flatMap((genre) =>
   ARCS
-    .filter((arc) => arc.syn?.includes(genre.id) && !arc.franchiseOnly && arc.unlock?.kind !== "studioArc")
+    .filter((arc) => {
+      return !!arc.syn?.includes(genre.id) && !arc.franchiseOnly && arc.unlock?.kind !== "studioArc";
+    })
     .sort((a, b) => ((b.synQ ?? 0) + (b.synF ?? 0) * 100) - ((a.synQ ?? 0) + (a.synF ?? 0) * 100) || b.q - a.q || a.id.localeCompare(b.id))
-    .slice(0, 2)
+    .slice(0, 3)
     .map((arc) => arcGenreKey(arc.id, genre.id))
 );
 
-/** Genre Studies also pays for any ordinary RD blueprint among its 60 recommendations.
- *  It never bypasses franchise, achievement, genre, or licensed-IP secret locks. */
+/** Genre Studies pays for every locked blueprint among its curated recommendations.
+ *  Franchise-only and licensed-IP secret arcs never enter the recommendation set. */
 export const ARC_RESEARCH_UNLOCK_IDS: string[] = [...new Set(ARC_RESEARCH_GENRE_KEYS.map((key) => key.slice(0, key.lastIndexOf("|"))))]
-  .filter((id) => ARCS.find((arc) => arc.id === id)?.unlock?.kind === "rd");
+  .filter((id) => !!ARCS.find((arc) => arc.id === id)?.unlock);
 
 /* ------------------------------------------------------------------ staff */
 const STAFF_FIRST_NAMES = [

@@ -401,6 +401,9 @@ export interface RunState {
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
 export const arcLockReason = (a: Arc, r: RunState): string | null => {
   if (!a.unlock) return null;
+  /* An explicit blueprint unlock is authoritative. Genre Studies writes its
+     curated recommendations here, while one-off RD studies use the same path. */
+  if (r.arcUnlocked.includes(a.id)) return null;
   const u = a.unlock;
   switch (u.kind) {
     case "rd":
@@ -1780,7 +1783,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
     for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
     arcUnlocked = [...new Set([...carrier.arcUnlocked, ...ARC_RESEARCH_UNLOCK_IDS])];
-    notices.push(`📚 Genre Studies reveals two proven story beats for every genre (${ARC_RESEARCH_GENRE_KEYS.length} relationships).`);
+    notices.push(`📚 Genre Studies adds at least two usable story beats for every genre to Quick Picks (${ARC_RESEARCH_GENRE_KEYS.length} relationships).`);
   }
   if (researchId === TALENT_ANALYSIS_ID) {
     /* collect every valid, non-legacy cast id the studio has NOT yet
@@ -1802,7 +1805,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   }
 
   notices.push(`🔬 Research complete: ${name}!`);
-  return { ...carrier, research, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
+  return { ...carrier, research, arcCombos, arcUnlocked, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices };
 }
 
 function finishResearchJob(r: RunState, job: ResearchJob): RunState {

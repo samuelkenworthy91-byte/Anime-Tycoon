@@ -1,19 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { ARCS, ARC_RESEARCH_COMBOS, ARC_RESEARCH_GENRE_KEYS, GENRES, arcGenreFit } from "../data";
+import { ARCS, ARC_RESEARCH_COMBOS, ARC_RESEARCH_GENRE_KEYS, ARC_RESEARCH_UNLOCK_IDS, GENRES, arcGenreFit } from "../data";
 import { GENRE_SPEC_GROUPS, growthForLevel, uniformGenreForSeed, specDef } from "../careers";
 import type { Staff } from "../data";
 
 describe("depth pass stage 1", () => {
-  it("Genre Studies supplies exactly two genuine positive arc fits for all 30 genres", () => {
+  it("Genre Studies supplies at least two immediately usable positive arc fits for all 30 genres", () => {
     expect(GENRES).toHaveLength(30);
-    expect(ARC_RESEARCH_GENRE_KEYS).toHaveLength(60);
+    expect(ARC_RESEARCH_GENRE_KEYS.length).toBeGreaterThanOrEqual(60);
     for (const genre of GENRES) {
       const keys = ARC_RESEARCH_GENRE_KEYS.filter((k) => k.endsWith(`|${genre.id}`));
-      expect(keys).toHaveLength(2);
+      expect(keys.length, genre.id).toBeGreaterThanOrEqual(2);
       for (const key of keys) {
         const id = key.slice(0, key.lastIndexOf("|"));
         const arc = ARCS.find((a) => a.id === id)!;
         expect(arcGenreFit(arc, genre.id).score).toBeGreaterThan(0);
+        expect(!arc.unlock || ARC_RESEARCH_UNLOCK_IDS.includes(arc.id), `${genre.id}: ${arc.id}`).toBe(true);
       }
     }
   });

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   ARCS,
   ARC_COMBOS,
+  ARC_RESEARCH_GENRE_KEYS,
+  ARC_RESEARCH_UNLOCK_IDS,
   PRODUCTION_SCOPES,
   RESEARCH,
   arcComboRating,
@@ -9,7 +11,7 @@ import {
   arcGenreFit,
   arcGenreKey,
 } from "../data";
-import { initialRun, migrateRun } from "../state";
+import { applyResearchCompletion, arcLockReason, initialRun, migrateRun } from "../state";
 import { arcClashesFor } from "../creativeDiscovery";
 
 describe("creative discovery", () => {
@@ -56,5 +58,22 @@ describe("creative discovery", () => {
     delete raw.arcGenreKnowledge;
     const migrated = migrateRun(raw);
     expect(migrated.arcGenreKnowledge).toEqual({});
+  });
+
+  it("upgrades current Genre Studies saves with the expanded usable quick picks", () => {
+    const raw = initialRun("Existing Save", "steady");
+    raw.research = ["genre_studies"];
+    raw.arcGenreKnowledge = {};
+    raw.arcUnlocked = [];
+    const migrated = migrateRun(raw);
+    expect(Object.keys(migrated.arcGenreKnowledge)).toEqual(expect.arrayContaining(ARC_RESEARCH_GENRE_KEYS));
+    expect(migrated.arcUnlocked).toEqual(expect.arrayContaining(ARC_RESEARCH_UNLOCK_IDS));
+    for (const id of ARC_RESEARCH_UNLOCK_IDS) expect(arcLockReason(ARCS.find((arc) => arc.id === id)!, migrated)).toBeNull();
+  });
+
+  it("keeps Genre Studies blueprint unlocks when research finishes live", () => {
+    const run = initialRun("Live Research", "steady");
+    const completed = applyResearchCompletion(run, "genre_studies", "Genre Studies");
+    expect(completed.arcUnlocked).toEqual(expect.arrayContaining(ARC_RESEARCH_UNLOCK_IDS));
   });
 });
