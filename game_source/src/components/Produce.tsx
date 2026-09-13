@@ -21,6 +21,7 @@ import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../
 import { exactDirectionKnown, rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, showrunnerStats, studioKnowledgeEmphasis } from "../engine/studioOps";
 import { personMod, staffGenreMultiplier } from "../engine/careers";
 import { genreTargetFor } from "../engine/genreTargets";
+import { engineerEyeRange, trailblazerProductionMult } from "../engine/showrunnerPerks";
 import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
@@ -198,6 +199,12 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
       min = Math.round(min * 1.25);
       max = Math.round(max * 1.25);
     }
+    const discoveryMult = trailblazerProductionMult(run.showrunner, project.draft.genres, run.comboLevels ?? {});
+    if (discoveryMult > 1) {
+      base = Math.round(base * discoveryMult);
+      min = Math.round(min * discoveryMult);
+      max = Math.round(max * discoveryMult);
+    }
     const issueChance = Math.max(0.012, 0.105 - a.skill * 0.00088) * (crunch ? 1.8 : 1) * (run.showrunner === "steady" ? 0.75 : 1);
     const ideaPool = [
       ...team.map((st) => ({ name: st.name, skill: Math.round(staffPoint(st, phase!.type)) })),
@@ -273,11 +280,17 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
               const exactTarget = genreTargetFor(genres).ideal[phase!.idx];
               const testedSeries = run.audienceComboSeries?.[comboKey(genres)]?.length ?? 0;
               const exactKnown = exactDirectionKnown(known, genres.length === 2 ? testedSeries : 0);
+              const engineerHint = engineerEyeRange(run.showrunner, exactTarget, exactKnown);
               const exactSingles = defs.map((g) => ({ id: g!.id, label: g!.label, target: genreTargetFor([g!.id]).ideal[phase!.idx] }));
               const emphasis = studioKnowledgeEmphasis(exactTarget, phase!.a, phase!.b);
               return (
                 <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 px-3 py-2">
                   <div className="text-[9px] font-extrabold tracking-[0.2em] text-cyanx">STUDIO KNOWLEDGE</div>
+                  {engineerHint && (
+                    <div className="mb-2 rounded-lg border border-gold/45 bg-gold/10 px-2 py-1.5 text-[10px] font-bold text-gold">
+                      ENGINEER’S EYE · LIKELY SWEET SPOT <span className="text-neon2">{engineerHint.low}–{engineerHint.high}% {phase!.a}</span> · works even on unseen blends and licensed IP.
+                    </div>
+                  )}
                   {exactKnown ? (
                     <div className="mt-1 space-y-1 text-[10px] font-bold text-mint">
                       <div>EXACT SCORING TARGET · <span className="text-neon2">{phase!.a} {exactTarget}%</span> · {phase!.b} {100 - exactTarget}%</div>

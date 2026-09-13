@@ -230,6 +230,7 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
+import { trailblazerProductionMult } from "./showrunnerPerks";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -2092,7 +2093,11 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
   }
 
   const studio = { ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
-  const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds: nx.bonds ?? {} });
+  const mods: StaffModFn = (st, p, team) => {
+    const base = personMod(st, p, team, { bonds: nx.bonds ?? {} });
+    const discovery = trailblazerProductionMult(nx.showrunner, p.draft.genres, nx.comboLevels ?? {});
+    return { ...base, out: base.out * discovery, pace: base.pace * discovery };
+  };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
   const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
   nx = { ...nx, projects: dayTick.projects, cash: nx.cash + dayTick.cashDelta, notices: [...nx.notices, ...dayTick.notices].slice(-40) };
@@ -2649,7 +2654,7 @@ export function releaseProject(
   if (blueprintDiscovered) notices.push(`🧠 Hidden story blueprint discovered: ${hiddenBlueprint!.replace(/_/g, " ").toUpperCase()} — now available to original productions.`);
 
   const baseAwardCraft = playerCraftFor(result.total, result.points);
-  const awardCraft = r.showrunner === "festival" ? { story: Math.round(baseAwardCraft.story * 1.08 * 10) / 10, art: Math.round(baseAwardCraft.art * 1.08 * 10) / 10, sound: Math.round(baseAwardCraft.sound * 1.08 * 10) / 10 } : baseAwardCraft;
+  const awardCraft = baseAwardCraft;
   const awardEntry: AwardNominee | null = (!draft.licensedIpId || licensedAwardProof) ? {
     title: draft.title,
     studio: r.studio,
@@ -2659,7 +2664,7 @@ export function releaseProject(
     genres: [...draft.genres],
     score: result.total,
     ...awardCraft,
-    audience: Math.round(result.fans * (r.showrunner === "festival" ? 1.10 : 1)),
+    audience: Math.round(result.fans),
     sourceId: projectId,
     posterId: null,
     draft: {
@@ -2784,7 +2789,7 @@ export function showSaleOffers(r:RunState,projectId:string):ShowSaleOffer[] {
   const trackRecord=Math.max(.28,Math.min(1.25,.28+r.showsMade*.055+r.bestScore/58+Math.min(.28,r.fans/180_000)));
   const assetValue=p.spent*.28+points*720+p.hype*1_050+(fr?.popularity??0)*1_550+Math.max(0,r.bestScore-20)*5_000;
   const value=Math.max(20_000,assetValue*(mediumFactor[p.draft.medium]??.7)*marketFactor*trackRecord);
-  const dealmaker=r.showrunner==="dealmaker"?1.15:1;
+  const dealmaker=1;
   const networks=[{id:"network:kousei",name:"Kousei Broadcast Network"},{id:"network:streamline",name:"Streamline Media"}];
   const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.max(10_000,Math.round(value*(.72+stableDealNumber(projectId+buyer.id)*.28)*dealmaker/5000)*5000),creatorFans:Math.max(50,Math.round((p.hype*7+points*1.2)*(i?0.09:0.07))),awardRisk:false}));
   const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length+st.specialist.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];

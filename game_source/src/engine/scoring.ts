@@ -31,6 +31,7 @@ import {
 import { genreTargetFor } from "./genreTargets";
 import { fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
+import { contrarianComboMult, narrativeMomentumFanMult, storyStructureMult } from "./showrunnerPerks";
 
 export interface Points {
   story: number;
@@ -338,12 +339,12 @@ export function computeResult(opts: {
     ? { role, member, totalQuality: 0, baseQuality: 0, salesBonus: 0, typeModifier: 1, tier: 1 as 0|1|2 }
     : { role, member, ...castContribution(member, role, draft) });
   const castingBase = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
-  const casting = castingBase * (showrunner === "casting" ? 1.25 : 1);
+  const casting = castingBase;
   const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
   const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
   /* Bad casting now hurts the WHOLE production instead of merely missing a tiny bonus.
      Four completely unsuitable roles can cut raw quality by roughly a third. */
-  const castFitMult = clamp(1 - zeroAffinityRoles * (showrunner === "casting" ? 0.045 : 0.075) - wrongTypeRoles * (showrunner === "casting" ? 0.02 : 0.035), 0.62, 1.02);
+  const castFitMult = clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
   const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
   const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
     if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
@@ -392,15 +393,15 @@ export function computeResult(opts: {
   });
 
   const arcWeight = licensed ? 0.45 : 1;
-  arcQ *= arcWeight;
-  arcsF *= arcWeight;
+  arcQ = storyStructureMult(showrunner, arcQ) * arcWeight;
+  arcsF = storyStructureMult(showrunner, arcsF) * arcWeight;
 
   /* ---- hidden story structures: synergies are rewarding, clashes hurt */
   const arcCombosHit = arcCombosFor(draft.arcs);
   const baseArcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
   const baseArcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
-  const arcComboQ = (baseArcComboQ > 0 ? baseArcComboQ * 1.6 : baseArcComboQ) * arcWeight;
-  const arcComboF = (baseArcComboF > 0 ? baseArcComboF * 1.5 : baseArcComboF) * arcWeight;
+  const arcComboQ = (baseArcComboQ > 0 ? storyStructureMult(showrunner, baseArcComboQ * 1.6) : baseArcComboQ) * arcWeight;
+  const arcComboF = (baseArcComboF > 0 ? storyStructureMult(showrunner, baseArcComboF * 1.5) : baseArcComboF) * arcWeight;
   const arcClashesHit = arcClashesFor(draft.arcs);
   const arcClashQ = arcClashesHit.reduce((a, c) => a + c.q, 0) * arcWeight;
   const arcClashF = arcClashesHit.reduce((a, c) => a + c.f, 0) * arcWeight;
@@ -426,13 +427,11 @@ export function computeResult(opts: {
     + casting
     + arcQuality
     + slotFit * SLOT_QUALITY_POINTS;
-  const actualComboMult = comboMult(draft.genres, true);
+  const actualComboMult = contrarianComboMult(showrunner, draft.genres);
   const comboFactorBase =
     1 + (actualComboMult - 1) * COMBO_QUALITY_WEIGHT
     + (comboLevelBonus(comboLevel) - 1) * COMBO_QUALITY_WEIGHT;
-  const comboFactor = showrunner === "genre"
-    ? 1 + (comboFactorBase - 1) * (comboFactorBase >= 1 ? 1.3 : 0.7)
-    : comboFactorBase;
+  const comboFactor = comboFactorBase;
   /* Direction, pairing and casting are hard gates. Great raw craft cannot
      completely rescue a production whose creative brief is badly wrong. */
   raw *= sliderFitMult;
@@ -539,7 +538,7 @@ export function computeResult(opts: {
     : Math.round(units * 2.6);
 
   const tierFan = { masterpiece: 1.5, hit: 1.2, solid: 1, mixed: 0.62, flop: 0.3 }[tier];
-  const fans = Math.round(units * (web ? web.fanPerView : 0.09) * tierFan);
+  const fans = Math.round(units * (web ? web.fanPerView : 0.09) * tierFan * narrativeMomentumFanMult(showrunner, draft, points));
   const rd = Math.max(2, Math.round(total * 0.55 + issues * 0.4));
   const commercial = commercialTierOf(draft.medium, revenue);
 

@@ -55,10 +55,10 @@ interface Bidder { bidderType: "network" | "rival"; bidderId: string; bidderName
  * the ceremony can never reroll the outcome. Appetite is intentionally broad:
  * a great IP can still meet a cold room, while two genre-hungry rivals can
  * irrationally chase one another far above the desk appraisal. */
-export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: number, world: RivalWorld, showrunner: string): SellerAuction {
+export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: number, world: RivalWorld, _showrunner: string): SellerAuction {
   const rng = rngFrom(`${franchiseKey}|${fr.entries.length}|${week}|seller-auction-v2`);
   const fair = franchiseFairAppraisal(fr);
-  const dealHeat = showrunner === "dealmaker" ? 1.14 : 1;
+  const dealHeat = 1;
   const roomHeat = rng();
   const coldRoom = roomHeat < 0.12;
   const hotRoom = roomHeat > 0.82;
@@ -104,7 +104,7 @@ export function buildSellerAuction(franchiseKey: string, fr: Franchise, week: nu
     bidderType: "network",
     bidderId: "network:liquidation",
     bidderName: "Mizuho Content Liquidation",
-    ceiling: round25(fair * (0.07 + rng() * 0.16) * (showrunner === "dealmaker" ? 1.08 : 1)),
+    ceiling: round25(fair * (0.07 + rng() * 0.16)),
   });
 
   const maxCeiling = Math.max(...bidders.map((b) => b.ceiling));
