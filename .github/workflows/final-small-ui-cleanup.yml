@@ -39,9 +39,6 @@ jobs:
 
           root = Path('game_source')
 
-          # Re-crop the already-cleaned Winry-inspired Production Savant portrait
-          # to the actual non-transparent subject, then refit it to the canonical
-          # 128x128 portrait slot with a small transparent safety margin.
           portrait = root / 'public/img/portrait-showrunner-savant.webp'
           im = Image.open(portrait).convert('RGBA')
           assert im.size == (128, 128), f'unexpected Savant portrait size: {im.size}'
@@ -63,8 +60,6 @@ jobs:
                           removed += 1
               return removed
 
-          # Clean once before cropping, then again after Lanczos resizing because
-          # interpolation can recreate a few pink fringe colours at alpha edges.
           clear_magenta(im)
 
           alpha_mask = im.getchannel('A').point(lambda a: 255 if a >= 12 else 0)
@@ -183,17 +178,8 @@ jobs:
           rm -f .github/workflows/final-small-ui-cleanup.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add game_source/public/img/portrait-showrunner-savant.webp \
-                  game_source/src/engine/careers.ts \
-                  game_source/src/engine/__tests__/worker-easter-egg.test.ts \
-                  game_source/src/components/Crew.tsx \
-                  game_source/src/components/Projects.tsx \
-                  game_source/src/components/ContractJob.tsx \
-                  game_source/src/components/Produce.tsx \
-                  game_source/src/components/ShowrunnerLevelUpModal.tsx \
-                  game_source/src/components/Title.tsx \
-                  game_source/dist/index.html \
-                  .github/workflows/final-small-ui-cleanup.yml
+          git status --short
+          git add -A
           git diff --cached --check
           git diff --cached --quiet && exit 0
           git commit -m "Polish Savant portrait and round player-facing stats [skip ci]"
