@@ -1,0 +1,81 @@
+name: Build Research Depth Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - ".github/workflows/apk-research-depth.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app and sync Capacitor
+        working-directory: game_source
+        run: npm run apk:sync
+
+      - name: Make Gradle wrapper executable
+        working-directory: game_source
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: game_source/android
+        run: ./gradlew assembleDebug
+
+      - name: Rename playtest APK
+        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Research-Depth-Playtest.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-runner-research-depth-test-apk
+          path: Anime-Runner-Research-Depth-Playtest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish direct GitHub playtest APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='research-showrunner-auction-depth-playtest'
+          APK='Anime-Runner-Research-Depth-Playtest.apk'
+          BUILT_SHA="$(git rev-parse HEAD)"
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target "$BUILT_SHA" \
+            --title 'Anime Runner Research Depth Playtest' \
+            --notes "Android debug APK built from work/research-showrunner-auction-depth-pass at ${BUILT_SHA}. Main is untouched."
