@@ -1,0 +1,194 @@
+name: Final Portrait And Player-Facing Cleanup
+
+on:
+  push:
+    branches:
+      - work/research-showrunner-auction-depth-pass
+    paths:
+      - .github/workflows/final-small-ui-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/research-showrunner-auction-depth-pass
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install Pillow
+        run: python3 -m pip install --quiet pillow
+
+      - name: Recrop Savant portrait and apply display cleanup
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path('game_source')
+
+          # Re-crop the already-cleaned Winry-inspired Production Savant portrait
+          # to the actual non-transparent subject, then refit it to the canonical
+          # 128x128 portrait slot with a small transparent safety margin.
+          portrait = root / 'public/img/portrait-showrunner-savant.webp'
+          im = Image.open(portrait).convert('RGBA')
+          assert im.size == (128, 128), f'unexpected Savant portrait size: {im.size}'
+
+          def residual_magenta(px):
+              r, g, b, a = px
+              return (
+                  a > 0 and r >= 115 and b >= 105 and g <= 205
+                  and (r - g) >= 18 and (b - g) >= 18 and abs(r - b) <= 155
+              )
+
+          # Defensive second key pass before cropping. The prior cleanup should
+          # already have zero matches; this prevents a reintroduced fringe.
+          px = im.load()
+          for y in range(im.height):
+              for x in range(im.width):
+                  if residual_magenta(px[x, y]):
+                      px[x, y] = (0, 0, 0, 0)
+
+          alpha_mask = im.getchannel('A').point(lambda a: 255 if a >= 12 else 0)
+          bbox = alpha_mask.getbbox()
+          assert bbox, 'Savant portrait became empty'
+          left, top, right, bottom = bbox
+          # Add a tiny source-space safety margin so hair/tool edges are not clipped.
+          left = max(0, left - 2)
+          top = max(0, top - 2)
+          right = min(im.width, right + 2)
+          bottom = min(im.height, bottom + 2)
+          crop = im.crop((left, top, right, bottom))
+          max_content = 118
+          scale = min(max_content / crop.width, max_content / crop.height)
+          size = (max(1, round(crop.width * scale)), max(1, round(crop.height * scale)))
+          crop = crop.resize(size, Image.Resampling.LANCZOS)
+          canvas = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
+          pos = ((128 - size[0]) // 2, (128 - size[1]) // 2)
+          canvas.alpha_composite(crop, pos)
+          canvas.save(portrait, 'WEBP', lossless=True, method=6, exact=True)
+
+          check = Image.open(portrait).convert('RGBA')
+          assert check.size == (128, 128)
+          assert check.getbbox()
+          assert sum(1 for p in check.getdata() if residual_magenta(p)) == 0
+          print(f'Savant portrait recropped from bbox={bbox} to content={size} on 128x128; residual magenta=0')
+
+          def edit(rel, replacements):
+              path = root / rel
+              text = path.read_text()
+              original = text
+              for old, new, expected in replacements:
+                  count = text.count(old)
+                  assert count == expected, f'{rel}: expected {expected} occurrence(s) of {old!r}, got {count}'
+                  text = text.replace(old, new)
+              assert text != original, f'{rel}: no change made'
+              path.write_text(text)
+              print(f'updated {rel}')
+
+          edit('src/engine/careers.ts', [
+              ('export function ensureCareer(s: Staff, week: number): Staff {\n',
+               'export function ensureCareer(s: Staff, week: number): Staff {\n  // Save-compatible display-name migration: preserve Dante\'s stable id/look, only remove the retired surname.\n  if (s.name === "Dante Vale" && s.look === DANTE_WORKER_LOOK_INDEX) s = { ...s, name: "Dante" };\n', 1),
+              ('name: "Dante Vale",', 'name: "Dante",', 1),
+          ])
+
+          edit('src/engine/__tests__/worker-easter-egg.test.ts', [
+              ('applyDanteEasterEgg, DANTE_HIRE_CHANCE, DANTE_TRAITS, rollHire, specDef',
+               'applyDanteEasterEgg, DANTE_HIRE_CHANCE, DANTE_TRAITS, ensureCareer, rollHire, specDef', 1),
+              ('toBe("Dante Vale")', 'toBe("Dante")', 2),
+              ('  it.each(["writer", "animator", "composer"] as const)("makes a %s Dante roll elite and internally synergistic", (role) => {',
+               '  it("migrates the legacy Dante Vale display name without changing the Dante worker identity", () => {\n    const legacy = { ...applyDanteEasterEgg(staff("writer"), 0), name: "Dante Vale" };\n    const migrated = ensureCareer(legacy, 0);\n    expect(migrated.name).toBe("Dante");\n    expect(migrated.look).toBe(DANTE_WORKER_LOOK_INDEX);\n  });\n\n  it.each(["writer", "animator", "composer"] as const)("makes a %s Dante roll elite and internally synergistic", (role) => {', 1),
+          ])
+
+          edit('src/components/Crew.tsx', [
+              ('>{candidate[t]}</div>', '>{Math.round(candidate[t])}</div>', 1),
+              ('<span>{s[t]}</span>', '<span>{Math.round(s[t])}</span>', 1),
+              ('>{runnerCraft[t]}</div>', '>{Math.round(runnerCraft[t])}</div>', 1),
+              ('>{staffMain(c)}</b>', '>{Math.round(staffMain(c))}</b>', 1),
+          ])
+
+          edit('src/components/Projects.tsx', [
+              ('{ROLE_LABEL[s.role]} · {staffMain(s)} <span', '{ROLE_LABEL[s.role]} · {Math.round(staffMain(s))} <span', 1),
+          ])
+
+          edit('src/components/ContractJob.tsx', [
+              ('const dailyRateLabel = dailyRate >= 10 ? Math.round(dailyRate).toString() : dailyRate.toFixed(1);',
+               'const dailyRateLabel = Math.round(dailyRate).toString();', 1),
+              ('{runnerSkill}', '{Math.round(runnerSkill)}', 2),
+              ('{skill}', '{Math.round(skill)}', 2),
+          ])
+
+          edit('src/components/Produce.tsx', [
+              ('{POINT_LABEL[phase!.type]} {staffPoint(st, phase!.type)} ·',
+               '{POINT_LABEL[phase!.type]} {Math.round(staffPoint(st, phase!.type))} ·', 1),
+              ('Actual {POINT_LABEL[phase!.type]} skill {runnerStats[phase!.type]} · Story {runnerStats.story} · Art {runnerStats.art} · Sound {runnerStats.sound}',
+               'Actual {POINT_LABEL[phase!.type]} skill {Math.round(runnerStats[phase!.type])} · Story {Math.round(runnerStats.story)} · Art {Math.round(runnerStats.art)} · Sound {Math.round(runnerStats.sound)}', 1),
+          ])
+
+          edit('src/components/ShowrunnerLevelUpModal.tsx', [
+              ('{record.before[point]} → {record.after[point]}', '{Math.round(record.before[point])} → {Math.round(record.after[point])}', 1),
+              ('>+{record.gains[point]}</span>', '>+{Math.round(record.gains[point])}</span>', 1),
+              ('Total growth +{total}', 'Total growth +{Math.round(total)}', 1),
+          ])
+
+          edit('src/components/Title.tsx', [
+              ('STORY {showrunnerStats(s.id, 0).story} · ART {showrunnerStats(s.id, 0).art} · SOUND {showrunnerStats(s.id, 0).sound}',
+               'STORY {Math.round(showrunnerStats(s.id, 0).story)} · ART {Math.round(showrunnerStats(s.id, 0).art)} · SOUND {Math.round(showrunnerStats(s.id, 0).sound)}', 1),
+          ])
+
+          # Existing wiring should remain on the canonical asset path after recrop.
+          data = (root / 'src/engine/data.ts').read_text()
+          assert data.count('img/portrait-showrunner-savant.webp') >= 2
+          assert 'name: "Dante Vale"' not in (root / 'src/engine/careers.ts').read_text()
+          print('Savant portrait wiring verified; Dante default display name is now Dante')
+          PY
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Focused Dante and showrunner tests
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/worker-easter-egg.test.ts src/engine/__tests__/showrunner-abilities.test.ts src/engine/__tests__/showrunner-expansion.test.ts
+
+      - name: Full test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit cleanup and remove temporary workflow
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/final-small-ui-cleanup.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/public/img/portrait-showrunner-savant.webp \
+                  game_source/src/engine/careers.ts \
+                  game_source/src/engine/__tests__/worker-easter-egg.test.ts \
+                  game_source/src/components/Crew.tsx \
+                  game_source/src/components/Projects.tsx \
+                  game_source/src/components/ContractJob.tsx \
+                  game_source/src/components/Produce.tsx \
+                  game_source/src/components/ShowrunnerLevelUpModal.tsx \
+                  game_source/src/components/Title.tsx \
+                  game_source/dist/index.html \
+                  .github/workflows/final-small-ui-cleanup.yml
+          git diff --cached --check
+          git diff --cached --quiet && exit 0
+          git commit -m "Polish Savant portrait and round player-facing stats [skip ci]"
+          git push origin HEAD:work/research-showrunner-auction-depth-pass
