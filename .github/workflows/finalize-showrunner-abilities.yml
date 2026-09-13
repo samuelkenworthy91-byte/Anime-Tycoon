@@ -14,6 +14,7 @@ jobs:
   finalize:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Final pass runs only after the eight approved WebP assets are committed.
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
