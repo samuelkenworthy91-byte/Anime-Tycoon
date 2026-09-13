@@ -42,13 +42,16 @@ describe("V3/V5 content integration after catalog rebuild", () => {
     expect(CAST_V2.filter(isCastingActive).every((member) => member.epithet && member.epithet.split(/\s+/).length >= 2)).toBe(true);
   });
 
-  it("adds eleven worker looks after the original fifteen", () => {
-    expect(WORKER_LOOKS).toHaveLength(26);
+  it("adds sixteen worker looks after the original fifteen", () => {
+    expect(WORKER_LOOKS).toHaveLength(31);
     expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
     expect(WORKER_LOOKS[15].sprite).toContain("sprite-worker-17.png");
     expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
     expect(WORKER_LOOKS[22].sprite).toContain("sprite-worker-24.png");
     expect(WORKER_LOOKS[25].sprite).toContain("sprite-worker-27.png");
+    expect(WORKER_LOOKS[26].sprite).toContain("sprite-worker-28.webp");
+    expect(WORKER_LOOKS[29].sprite).toContain("sprite-worker-31.webp");
+    expect(WORKER_LOOKS[30].sprite).toContain("sprite-worker-32.webp");
   });
 
   it("loads unique arcs and valid combo references", () => {

@@ -896,17 +896,26 @@ export interface WorkerLook {
 /* Looks must only reference art that actually shipped in public/img — a
    missing file renders as a broken image in menus (6 is the showrunner's
    dedicated model, reserved; art batch 2 added workers 14-16). */
-export const WORKER_LOOKS: WorkerLook[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27].map((n) => ({
-  sprite: `img/sprite-worker-${n}.png`,
-  portrait: `img/portrait-worker-${n}.png`,
-}));
+const BASE_WORKER_LOOK_IDS = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27] as const;
+const NEW_WORKER_LOOK_IDS = [28, 29, 30, 31] as const;
+export const WORKER_LOOKS: WorkerLook[] = [
+  ...BASE_WORKER_LOOK_IDS.map((n) => ({
+    sprite: `img/sprite-worker-${n}.png`,
+    portrait: `img/portrait-worker-${n}.png`,
+  })),
+  ...NEW_WORKER_LOOK_IDS.map((n) => ({
+    sprite: `img/sprite-worker-${n}.webp`,
+    portrait: `img/portrait-worker-${n}.webp`,
+  })),
+  { sprite: "img/sprite-worker-32.webp", portrait: "img/portrait-worker-32.webp" },
+];
+/** Dante-inspired veteran is deliberately excluded from ordinary appearance rolls. */
+export const DANTE_WORKER_LOOK_INDEX = WORKER_LOOKS.length - 1;
+export const STANDARD_WORKER_LOOK_COUNT = DANTE_WORKER_LOOK_INDEX;
 export const BOSS_LOOK: WorkerLook = {
   sprite: "img/sprite-worker-6.png",
   portrait: "img/portrait-worker-6.png",
 };
-/** Reserved model numbers for the four new worker paintings. They are deliberately
- * not activated in WORKER_LOOKS until their sprite+portrait files exist. */
-export const PENDING_WORKER_ART_IDS = [28, 29, 30, 31] as const;
 /** stable model index for a staff member (old saves fall back to their
     legacy portrait index, so everyone keeps a consistent face) */
 export const workerLookIndex = (s: Staff) => (s.look ?? s.portrait) % WORKER_LOOKS.length;
@@ -932,7 +941,7 @@ export function rollCandidate(week: number): Staff {
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,
-    look: (staffId + Math.floor(Math.random() * 3)) % WORKER_LOOKS.length,
+    look: (staffId + Math.floor(Math.random() * 3)) % STANDARD_WORKER_LOOK_COUNT,
   };
   s.salary = Math.round((320 + main * 12) / 10) * 10;
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;

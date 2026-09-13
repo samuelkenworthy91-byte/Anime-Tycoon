@@ -1,4 +1,5 @@
 import {
+  DANTE_WORKER_LOOK_INDEX,
   GENRES,
   ROLE_POINT,
   STAFF_STAT_CAP,
@@ -394,9 +395,36 @@ export function ensureCareer(s: Staff, week: number): Staff {
   };
 }
 
+/** Hidden veteran worker: a true 1-in-100 easter egg, never part of the normal look pool. */
+export const DANTE_HIRE_CHANCE = 0.01;
+export const DANTE_TRAITS = ["team", "reliable", "prodigy", "fanatic"] as const;
+
+const danteSpecForRole = (role: StaffRole) =>
+  role === "writer" ? "w_action" : role === "animator" ? "a_sakuga" : "c_battle";
+
+export function applyDanteEasterEgg(s: Staff, week: number): Staff {
+  const tier = Math.min(45, Math.max(0, week) * 0.16);
+  const eliteMain = Math.min(STAFF_STAT_CAP, Math.round(140 + tier * 0.8));
+  const eliteOff = Math.min(STAFF_STAT_CAP, Math.round(95 + tier * 0.55));
+  return {
+    ...s,
+    name: "Dante Vale",
+    look: DANTE_WORKER_LOOK_INDEX,
+    potential: 100,
+    traits: [...DANTE_TRAITS],
+    favGenre: "martial",
+    spec: danteSpecForRole(s.role),
+    story: Math.max(s.story, s.role === "writer" ? eliteMain : eliteOff),
+    art: Math.max(s.art, s.role === "animator" ? eliteMain : eliteOff),
+    sound: Math.max(s.sound, s.role === "composer" ? eliteMain : eliteOff),
+  };
+}
+
 /** roll a fresh candidate with a full personality */
-export function rollHire(week: number): Staff {
-  return ensureCareer(rollCandidate(week), week);
+export function rollHire(week: number, rng: () => number = Math.random): Staff {
+  const base = rollCandidate(week);
+  const candidate = rng() < DANTE_HIRE_CHANCE ? applyDanteEasterEgg(base, week) : base;
+  return ensureCareer(candidate, week);
 }
 
 /* -------------------------------------------------------------- morale */
