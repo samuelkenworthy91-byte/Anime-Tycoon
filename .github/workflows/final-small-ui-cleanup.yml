@@ -53,19 +53,24 @@ jobs:
                   and (r - g) >= 18 and (b - g) >= 18 and abs(r - b) <= 155
               )
 
-          # Defensive second key pass before cropping. The prior cleanup should
-          # already have zero matches; this prevents a reintroduced fringe.
-          px = im.load()
-          for y in range(im.height):
-              for x in range(im.width):
-                  if residual_magenta(px[x, y]):
-                      px[x, y] = (0, 0, 0, 0)
+          def clear_magenta(image):
+              px = image.load()
+              removed = 0
+              for y in range(image.height):
+                  for x in range(image.width):
+                      if residual_magenta(px[x, y]):
+                          px[x, y] = (0, 0, 0, 0)
+                          removed += 1
+              return removed
+
+          # Clean once before cropping, then again after Lanczos resizing because
+          # interpolation can recreate a few pink fringe colours at alpha edges.
+          clear_magenta(im)
 
           alpha_mask = im.getchannel('A').point(lambda a: 255 if a >= 12 else 0)
           bbox = alpha_mask.getbbox()
           assert bbox, 'Savant portrait became empty'
           left, top, right, bottom = bbox
-          # Add a tiny source-space safety margin so hair/tool edges are not clipped.
           left = max(0, left - 2)
           top = max(0, top - 2)
           right = min(im.width, right + 2)
@@ -78,13 +83,15 @@ jobs:
           canvas = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
           pos = ((128 - size[0]) // 2, (128 - size[1]) // 2)
           canvas.alpha_composite(crop, pos)
+          post_resize_removed = clear_magenta(canvas)
           canvas.save(portrait, 'WEBP', lossless=True, method=6, exact=True)
 
           check = Image.open(portrait).convert('RGBA')
           assert check.size == (128, 128)
           assert check.getbbox()
-          assert sum(1 for p in check.getdata() if residual_magenta(p)) == 0
-          print(f'Savant portrait recropped from bbox={bbox} to content={size} on 128x128; residual magenta=0')
+          remaining = sum(1 for p in check.getdata() if residual_magenta(p))
+          assert remaining == 0, f'residual magenta after final save: {remaining}'
+          print(f'Savant portrait recropped from bbox={bbox} to content={size} on 128x128; post-resize magenta removed={post_resize_removed}; remaining=0')
 
           def edit(rel, replacements):
               path = root / rel
@@ -148,7 +155,6 @@ jobs:
                'STORY {Math.round(showrunnerStats(s.id, 0).story)} · ART {Math.round(showrunnerStats(s.id, 0).art)} · SOUND {Math.round(showrunnerStats(s.id, 0).sound)}', 1),
           ])
 
-          # Existing wiring should remain on the canonical asset path after recrop.
           data = (root / 'src/engine/data.ts').read_text()
           assert data.count('img/portrait-showrunner-savant.webp') >= 2
           assert 'name: "Dante Vale"' not in (root / 'src/engine/careers.ts').read_text()
