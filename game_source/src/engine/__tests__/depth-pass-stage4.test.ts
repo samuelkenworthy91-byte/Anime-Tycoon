@@ -77,14 +77,14 @@ describe("completed-show sale appraisal", () => {
     expect(Math.max(...offers.map((o) => o.cash))).toBeLessThan(draftCost(p.draft));
   });
 
-  it("rewards a proven studio and the Rights Broker without making offer rerolls possible", () => {
+  it("rewards a proven studio without rerolls or a legacy Rights Broker sale bonus", () => {
     const p = { ...makeProject(draft({ medium: "tv" }), 120), stage: "ready" as const, spent: 180_000, points: { story: 150, art: 145, sound: 120 }, hype: 80 };
     const base = { ...initialRun("Proven", "steady"), week: 120, showsMade: 12, bestScore: 33, fans: 120_000, projects: [p], mediumsUnlocked: ["fanweb", "tv"] };
     const normal = showSaleOffers(base, p.id);
     const repeat = showSaleOffers(base, p.id);
-    const broker = showSaleOffers({ ...base, showrunner: "dealmaker" }, p.id);
+    const savant = showSaleOffers({ ...base, showrunner: "dealmaker" }, p.id);
     expect(repeat).toEqual(normal);
-    expect(broker[0].cash).toBeGreaterThan(normal[0].cash);
+    expect(savant).toEqual(normal);
   });
 });
 
