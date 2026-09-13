@@ -22,7 +22,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
   const runnerSkill = showrunnerContractSkill(run.showrunner, run.showrunnerCareer, contract.type);
   const seats = selected.length + (showrunnerSelected ? 1 : 0);
   const dailyRate = seats > 0 ? contractSelectionDailyOutputEstimate(run, contract, selected, showrunnerSelected) : 0;
-  const dailyRateLabel = dailyRate >= 10 ? Math.round(dailyRate).toString() : dailyRate.toFixed(1);
+  const dailyRateLabel = Math.round(dailyRate).toString();
   const projected = Math.round(dailyRate * contract.weeks * 7);
   const eta = seats > 0 ? Math.max(1, Math.ceil(contract.target / Math.max(0.1, dailyRate))) : 0;
   const likely = projected >= contract.target;
@@ -73,8 +73,8 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
               <button disabled={runnerBusy && !showrunnerSelected} onClick={toggleRunner} className={cn("btn-press flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left", showrunnerSelected ? "border-gold/70 bg-gold/10" : runnerBusy ? "border-line/40 bg-panel2/30 opacity-50" : "border-gold/35 bg-panel2/50 hover:border-gold/70")}>
                 <span className={cn("flex h-5 w-5 items-center justify-center rounded border", showrunnerSelected ? "border-gold bg-gold text-ink" : "border-line")}>{showrunnerSelected && <Check size={13} />}</span>
                 <UserRound size={17} className="text-gold" />
-                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{runnerName} · SHOWRUNNER</span><span className="text-[10px] text-paper/45">{runner.title} · {POINT_LABEL[contract.type]} {runnerSkill}{run.showrunner === "steady" ? " · Steady Hand ×1.5 live" : ""}{runnerBusy ? " · already on a contract" : ""}</span></span>
-                <span className="font-display text-sm font-extrabold text-gold">{runnerSkill}</span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{runnerName} · SHOWRUNNER</span><span className="text-[10px] text-paper/45">{runner.title} · {POINT_LABEL[contract.type]} {Math.round(runnerSkill)}{run.showrunner === "steady" ? " · Steady Hand ×1.5 live" : ""}{runnerBusy ? " · already on a contract" : ""}</span></span>
+                <span className="font-display text-sm font-extrabold text-gold">{Math.round(runnerSkill)}</span>
               </button>
 
               {run.staff.map((s) => {
@@ -84,8 +84,8 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
                 return (
                   <button key={s.id} disabled={!!busy && !on} onClick={() => toggle(s.id)} className={cn("btn-press flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left", on ? "border-mint/60 bg-mint/10" : busy ? "border-line/40 bg-panel2/30 opacity-50" : "border-line bg-panel2/50 hover:border-cyanx/60")}>
                     <span className={cn("flex h-5 w-5 items-center justify-center rounded border", on ? "border-mint bg-mint text-ink" : "border-line")}>{on && <Check size={13} />}</span>
-                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{s.name}</span><span className="text-[10px] text-paper/45">{ROLE_LABEL[s.role]} · {POINT_LABEL[contract.type]} {skill}{busy ? ` · ${busy}` : ""}</span></span>
-                    <span className="font-display text-sm font-extrabold" style={{ color: POINT_COLOR[contract.type] }}>{skill}</span>
+                    <span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{s.name}</span><span className="text-[10px] text-paper/45">{ROLE_LABEL[s.role]} · {POINT_LABEL[contract.type]} {Math.round(skill)}{busy ? ` · ${busy}` : ""}</span></span>
+                    <span className="font-display text-sm font-extrabold" style={{ color: POINT_COLOR[contract.type] }}>{Math.round(skill)}</span>
                   </button>
                 );
               })}

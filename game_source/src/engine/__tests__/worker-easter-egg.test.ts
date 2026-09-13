@@ -8,7 +8,7 @@ import {
   rollCandidate,
   type Staff,
 } from "../data";
-import { applyDanteEasterEgg, DANTE_HIRE_CHANCE, DANTE_TRAITS, rollHire, specDef } from "../careers";
+import { applyDanteEasterEgg, DANTE_HIRE_CHANCE, DANTE_TRAITS, ensureCareer, rollHire, specDef } from "../careers";
 
 const staff = (role: Staff["role"]): Staff => ({
   id: `test-${role}`,
@@ -55,13 +55,20 @@ describe("new worker models and Dante easter egg", () => {
 
   it("uses an exact one-percent Dante candidate chance", () => {
     expect(DANTE_HIRE_CHANCE).toBe(0.01);
-    expect(rollHire(0, () => 0).name).toBe("Dante Vale");
+    expect(rollHire(0, () => 0).name).toBe("Dante");
     expect(rollHire(0, () => 0.01).look).not.toBe(DANTE_WORKER_LOOK_INDEX);
+  });
+
+  it("migrates the legacy Dante Vale display name without changing the Dante worker identity", () => {
+    const legacy = { ...applyDanteEasterEgg(staff("writer"), 0), name: "Dante Vale" };
+    const migrated = ensureCareer(legacy, 0);
+    expect(migrated.name).toBe("Dante");
+    expect(migrated.look).toBe(DANTE_WORKER_LOOK_INDEX);
   });
 
   it.each(["writer", "animator", "composer"] as const)("makes a %s Dante roll elite and internally synergistic", (role) => {
     const dante = applyDanteEasterEgg(staff(role), 0);
-    expect(dante.name).toBe("Dante Vale");
+    expect(dante.name).toBe("Dante");
     expect(dante.look).toBe(DANTE_WORKER_LOOK_INDEX);
     expect(dante.potential).toBe(100);
     expect(dante.traits).toEqual([...DANTE_TRAITS]);

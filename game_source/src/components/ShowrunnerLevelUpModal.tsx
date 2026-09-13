@@ -37,10 +37,10 @@ export default function ShowrunnerLevelUpModal({ run, setRun }: { run: RunState;
         {step >= 2 && <div className="anim-pop text-sm font-extrabold tracking-wider text-paper">{record.title.toUpperCase()}</div>}
         {points.map((point, index) => step >= index + 3 ? <div key={point} className="anim-pop grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl border border-line bg-panel2/70 px-3 py-2 text-left">
           <b className="text-xs tracking-wider" style={{ color: POINT_COLOR[point] }}>{point.toUpperCase()}</b>
-          <span className="font-display text-lg font-extrabold text-paper/70">{record.before[point]} → {record.after[point]}</span>
-          <span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{record.gains[point]}</span>
+          <span className="font-display text-lg font-extrabold text-paper/70">{Math.round(record.before[point])} → {Math.round(record.after[point])}</span>
+          <span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{Math.round(record.gains[point])}</span>
         </div> : null)}
-        {step >= 5 && <div className="anim-pop mt-2 rounded-xl border border-mint/30 bg-mint/5 p-2 text-xs text-mint"><Check size={13} className="mr-1 inline" /> Total growth +{total}</div>}
+        {step >= 5 && <div className="anim-pop mt-2 rounded-xl border border-mint/30 bg-mint/5 p-2 text-xs text-mint"><Check size={13} className="mr-1 inline" /> Total growth +{Math.round(total)}</div>}
       </div>
       <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
         <Btn big variant="primary" disabled={step < 5} onClick={clearOne}>CONTINUE</Btn>

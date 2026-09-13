@@ -154,7 +154,7 @@ function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: St
           <div className="min-w-0 flex-1"><div className="text-[9px] font-extrabold tracking-[0.25em] text-cyanx">CANDIDATE DOSSIER</div><div className="font-display text-xl font-extrabold">{candidate.name}</div><div className="text-[10px] text-paper/55">{ROLE_LABEL[candidate.role]} · Lv{candidate.level} {levelTitle(candidate.level)}</div><div className="mt-1 text-[10px] text-gold">Sign {formatGBP(candidate.cost)} · {formatGBP(candidate.salary)}/wk</div></div>
           <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={17}/></button>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">{(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{candidate[t]}</div></div>)}</div>
+        <div className="mt-3 grid grid-cols-3 gap-2">{(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{Math.round(candidate[t])}</div></div>)}</div>
         <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}<div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Development rolls reveal who has the highest ceiling.</div></div>
         <div className="mt-3"><div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div><div className="mt-1 grid gap-1.5 sm:grid-cols-2">{rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}</div></div>
         <div className="mt-3 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3"><div className="text-[9px] font-extrabold tracking-widest text-cyanx">SIGNING NAME</div><div className="mt-1 flex gap-2"><input value={hireName} onChange={(e)=>setHireName(e.target.value.slice(0,48))} className="ink-input min-w-0 flex-1 px-3 py-2 text-sm font-bold" aria-label="Staff name"/><Btn variant="ghost" onClick={()=>setHireName(randomStaffName())} aria-label="Randomise staff name"><Dices size={15}/></Btn></div><div className="mt-1 text-[8px] text-paper/40">Rename them now or keep the generated name. This does not change their abilities, portrait or hidden Potential.</div></div>
@@ -250,7 +250,7 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
           <div key={t}>
             <div className="flex justify-between text-[8px] font-bold text-paper/50">
               <span>{t.toUpperCase()}</span>
-              <span>{s[t]}</span>
+              <span>{Math.round(s[t])}</span>
             </div>
             <div className="h-1.5 rounded bg-abyss">
               <div className="h-full rounded" style={{ width: `${Math.round((Math.log1p(Math.max(0, Math.min(STAFF_STAT_CAP, s[t]))) / Math.log1p(STAFF_STAT_CAP)) * 100)}%`, background: POINT_COLOR[t] }} />
@@ -516,7 +516,7 @@ export default function CrewPanel({
         <div className="flex items-center gap-3">
           <Portrait img={runner.portrait} name={runnerName} alt={runnerName} className="h-14 w-14 rounded-xl border border-gold/40 object-cover" />
           <div className="min-w-0 flex-1"><div className="text-[8px] font-extrabold tracking-[0.25em] text-gold">FOUNDING SHOWRUNNER · ACTUAL CURRENT STATS</div><input aria-label="Showrunner name" value={run.showrunnerName} maxLength={48} onChange={(e)=>setRun((r)=>({...r,showrunnerName:e.target.value.slice(0,48)}))} className="ink-input mt-1 w-full px-2 py-1 font-display text-sm font-extrabold"/><div className="mt-1 text-[9px] text-paper/50">{runner.title} · Lv{run.showrunnerCareer.level} {showrunnerLevelTitle(run.showrunnerCareer.level)} · {run.showrunnerCareer.level >= 100 ? "MAX" : `${run.showrunnerCareer.xp}/${SHOWRUNNER_XP_LEVELS[run.showrunnerCareer.level]} XP`}{runner.artPending ? " · NEW ART PENDING" : ""}</div></div>
-          <div className="grid grid-cols-3 gap-1 text-center">{(["story","art","sound"] as PointType[]).map((t)=><div key={t} className="rounded-md bg-panel2 px-1.5 py-1"><div className="text-[7px] text-paper/35">{t.toUpperCase()}</div><div className="font-display text-sm font-extrabold" style={{color:POINT_COLOR[t]}}>{runnerCraft[t]}</div></div>)}</div>
+          <div className="grid grid-cols-3 gap-1 text-center">{(["story","art","sound"] as PointType[]).map((t)=><div key={t} className="rounded-md bg-panel2 px-1.5 py-1"><div className="text-[7px] text-paper/35">{t.toUpperCase()}</div><div className="font-display text-sm font-extrabold" style={{color:POINT_COLOR[t]}}>{Math.round(runnerCraft[t])}</div></div>)}</div>
         </div>
         <div className="mt-2 text-[10px] leading-relaxed text-paper/60"><b className="text-gold">PERK:</b> {runner.perk}</div>
         <div className="mt-1 text-[8px] text-paper/35">These Story/Art/Sound values are the exact numbers used when the showrunner personally leads a rush or contract seat. Releases now earn visible Showrunner XP and trigger a full level-up reveal.</div>
@@ -625,7 +625,7 @@ export default function CrewPanel({
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-bold">{c.name}</div>
                       <div className="text-[10px] text-paper/55">
-                        {ROLE_LABEL[c.role]} · main <b className="text-mint">{staffMain(c)}</b> · {formatGBP(c.salary)}/wk
+                        {ROLE_LABEL[c.role]} · main <b className="text-mint">{Math.round(staffMain(c))}</b> · {formatGBP(c.salary)}/wk
                       </div>
                       <div className="text-[10px] text-gold">sign {formatGBP(c.cost)}</div>
                     </div>

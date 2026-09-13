@@ -292,7 +292,7 @@ function ProjectCard({
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[11px] font-bold">{s.name}</div>
                       <div className="text-[9px] text-paper/50">
-                        {ROLE_LABEL[s.role]} · {staffMain(s)} <span style={{ color: POINT_COLOR[ROLE_POINT[s.role]] }}>●</span>
+                        {ROLE_LABEL[s.role]} · {Math.round(staffMain(s))} <span style={{ color: POINT_COLOR[ROLE_POINT[s.role]] }}>●</span>
                         {other && <span className="ml-1 text-gold">on “{other.draft.title}”</span>}
                         {opBusy && <span className="ml-1 text-viol">{opBusy}</span>}
                         {s.stamina < 45 && <span className="ml-1 text-neon">tired</span>}

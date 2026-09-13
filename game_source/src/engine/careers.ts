@@ -354,6 +354,8 @@ function pickTraits(seedA: number, seedB: number): string[] {
 /** fill in career fields — deterministic from the staff id, so loading an
     old save always produces the same person */
 export function ensureCareer(s: Staff, week: number): Staff {
+  // Save-compatible display-name migration: preserve Dante's stable id/look, only remove the retired surname.
+  if (s.name === "Dante Vale" && s.look === DANTE_WORKER_LOOK_INDEX) s = { ...s, name: "Dante" };
   const h = idHash(s.id);
   const favGenre = s.favGenre ?? uniformGenreForSeed(idHash(s.id + "|fav-genre"));
   const specGenre = uniformGenreForSeed(idHash(s.id + "|spec-genre"));
@@ -408,7 +410,7 @@ export function applyDanteEasterEgg(s: Staff, week: number): Staff {
   const eliteOff = Math.min(STAFF_STAT_CAP, Math.round(95 + tier * 0.55));
   return {
     ...s,
-    name: "Dante Vale",
+    name: "Dante",
     look: DANTE_WORKER_LOOK_INDEX,
     potential: 100,
     traits: [...DANTE_TRAITS],
