@@ -21,41 +21,7 @@ jobs:
           ref: work/research-showrunner-auction-depth-pass
           fetch-depth: 0
 
-      - name: Reconstruct staged showrunner art
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import base64, re
-          from pathlib import Path
-          root = Path('game_source/.tmp_showrunner_art')
-          parts = []
-          for part in ['00','01','02','03','04','05','06']:
-              raw = (root / f'{part}.txt').read_text(encoding='utf-8')
-              clean = re.sub(r'[^A-Za-z0-9+/=]', '', raw)
-              print(part, 'raw', len(raw), 'clean', len(clean), 'padding', clean.count('='), 'tail', clean[-12:])
-              parts.append(clean)
-          if any('=' in p for p in parts[:-1]):
-              print('decoding independently padded binary chunks')
-              payload = b''.join(base64.b64decode(p + '=' * (-len(p) % 4), validate=False) for p in parts)
-          else:
-              print('decoding contiguous base64 chunks')
-              joined = ''.join(parts).rstrip('=')
-              joined += '=' * (-len(joined) % 4)
-              payload = base64.b64decode(joined, validate=False)
-          Path('/tmp/showrunner_art.zip').write_bytes(payload)
-          print('decoded bytes', len(payload), 'header', payload[:8])
-          PY
-          file /tmp/showrunner_art.zip
-          unzip -t /tmp/showrunner_art.zip
-          mkdir -p /tmp/showrunner_art
-          unzip -q /tmp/showrunner_art.zip -d /tmp/showrunner_art
-          find /tmp/showrunner_art -maxdepth 5 -type f -print
-
-      - name: Patch art and agreed abilities
-        run: python3 game_source/scripts/finalize-showrunner-abilities.py /tmp/showrunner_art
-
-      - name: Validate final showrunner assets
+      - name: Validate committed showrunner assets
         shell: bash
         run: |
           set -euo pipefail
@@ -65,6 +31,9 @@ jobs:
             file "game_source/public/img/portrait-showrunner-${id}.webp" | grep -qi webp
             file "game_source/public/img/sprite-showrunner-${id}.webp" | grep -qi webp
           done
+
+      - name: Patch agreed abilities
+        run: python3 game_source/scripts/finalize-showrunner-abilities.py
 
       - name: Set up Node
         uses: actions/setup-node@v4
