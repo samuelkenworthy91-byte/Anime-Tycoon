@@ -34,7 +34,10 @@ jobs:
           done
 
       - name: Patch agreed abilities
-        run: python3 game_source/scripts/finalize-showrunner-abilities.py
+        run: |
+          python3 game_source/scripts/finalize-showrunner-abilities.py
+          # These four archetypes now have dedicated art; remove any old placeholder flag left on the row.
+          sed -i 's/, artPending: true//g' game_source/src/engine/data.ts
 
       - name: Set up Node
         uses: actions/setup-node@v4
