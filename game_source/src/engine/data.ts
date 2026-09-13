@@ -885,7 +885,7 @@ export const STAFF_PORTRAITS: { img: string; pos: number }[] = [
 ];
 
 /* --------------------------------------------------------- worker looks
- * The ten painted chibi staff models. Each look pairs the full-body office
+ * Each painted staff model pairs the full-body office
  * sprite with a portrait cropped from the very same painting, so the person
  * you hire from a menu is exactly the person who walks around the office.
  * Sprite 6 is reserved for the showrunner. */
@@ -898,6 +898,7 @@ export interface WorkerLook {
    dedicated model, reserved; art batch 2 added workers 14-16). */
 const BASE_WORKER_LOOK_IDS = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27] as const;
 const NEW_WORKER_LOOK_IDS = [28, 29, 30, 31] as const;
+const WORKER_EXPANSION_LOOK_IDS = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42] as const;
 export const WORKER_LOOKS: WorkerLook[] = [
   ...BASE_WORKER_LOOK_IDS.map((n) => ({
     sprite: `img/sprite-worker-${n}.png`,
@@ -907,11 +908,20 @@ export const WORKER_LOOKS: WorkerLook[] = [
     sprite: `img/sprite-worker-${n}.webp`,
     portrait: `img/portrait-worker-${n}.webp`,
   })),
+  // Index 30 is save data, not merely array position: never move Dante.
   { sprite: "img/sprite-worker-32.webp", portrait: "img/portrait-worker-32.webp" },
+  ...WORKER_EXPANSION_LOOK_IDS.map((n) => ({
+    sprite: `img/sprite-worker-${n}.webp`,
+    portrait: `img/portrait-worker-${n}.webp`,
+  })),
 ];
-/** Dante-inspired veteran is deliberately excluded from ordinary appearance rolls. */
-export const DANTE_WORKER_LOOK_INDEX = WORKER_LOOKS.length - 1;
-export const STANDARD_WORKER_LOOK_COUNT = DANTE_WORKER_LOOK_INDEX;
+/** Special hires use stable, dedicated indices and never enter ordinary appearance rolls. */
+export const DANTE_WORKER_LOOK_INDEX = 30;
+export const AVRIL_WORKER_LOOK_INDEX = 33;
+export const STANDARD_WORKER_LOOK_INDICES = WORKER_LOOKS
+  .map((_, index) => index)
+  .filter((index) => index !== DANTE_WORKER_LOOK_INDEX && index !== AVRIL_WORKER_LOOK_INDEX);
+export const STANDARD_WORKER_LOOK_COUNT = STANDARD_WORKER_LOOK_INDICES.length;
 export const BOSS_LOOK: WorkerLook = {
   sprite: "img/sprite-worker-6.png",
   portrait: "img/portrait-worker-6.png",
@@ -941,7 +951,7 @@ export function rollCandidate(week: number): Staff {
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,
-    look: (staffId + Math.floor(Math.random() * 3)) % STANDARD_WORKER_LOOK_COUNT,
+    look: STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(Math.random() * 3)) % STANDARD_WORKER_LOOK_COUNT],
   };
   s.salary = Math.round((320 + main * 12) / 10) * 10;
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;

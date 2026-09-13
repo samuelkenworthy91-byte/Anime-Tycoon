@@ -1,4 +1,5 @@
 import {
+  AVRIL_WORKER_LOOK_INDEX,
   DANTE_WORKER_LOOK_INDEX,
   GENRES,
   ROLE_POINT,
@@ -356,6 +357,8 @@ function pickTraits(seedA: number, seedB: number): string[] {
 export function ensureCareer(s: Staff, week: number): Staff {
   // Save-compatible display-name migration: preserve Dante's stable id/look, only remove the retired surname.
   if (s.name === "Dante Vale" && s.look === DANTE_WORKER_LOOK_INDEX) s = { ...s, name: "Dante" };
+  // Avril's unique name is reserved for her easter-egg identity and dedicated art.
+  if (s.name === "Avril" && s.look !== AVRIL_WORKER_LOOK_INDEX) s = { ...s, look: AVRIL_WORKER_LOOK_INDEX };
   const h = idHash(s.id);
   const favGenre = s.favGenre ?? uniformGenreForSeed(idHash(s.id + "|fav-genre"));
   const specGenre = uniformGenreForSeed(idHash(s.id + "|spec-genre"));
@@ -400,6 +403,8 @@ export function ensureCareer(s: Staff, week: number): Staff {
 /** Hidden veteran worker: a true 1-in-100 easter egg, never part of the normal look pool. */
 export const DANTE_HIRE_CHANCE = 0.01;
 export const DANTE_TRAITS = ["team", "reliable", "prodigy", "fanatic"] as const;
+export const AVRIL_HIRE_CHANCE = 0.01;
+export const AVRIL_TRAITS = ["team", "publicist", "prodigy", "fanatic"] as const;
 
 const danteSpecForRole = (role: StaffRole) =>
   role === "writer" ? "w_action" : role === "animator" ? "a_sakuga" : "c_battle";
@@ -422,10 +427,36 @@ export function applyDanteEasterEgg(s: Staff, week: number): Staff {
   };
 }
 
+const avrilSpecForRole = (role: StaffRole) =>
+  role === "writer" ? "w_romance" : role === "animator" ? "a_char" : "c_idol";
+
+export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
+  const tier = Math.min(45, Math.max(0, week) * 0.16);
+  const eliteMain = Math.min(STAFF_STAT_CAP, Math.round(140 + tier * 0.8));
+  const eliteOff = Math.min(STAFF_STAT_CAP, Math.round(95 + tier * 0.55));
+  return {
+    ...s,
+    name: "Avril",
+    look: AVRIL_WORKER_LOOK_INDEX,
+    potential: 100,
+    traits: [...AVRIL_TRAITS],
+    favGenre: s.role === "composer" ? "idol" : "romance",
+    spec: avrilSpecForRole(s.role),
+    story: Math.max(s.story, s.role === "writer" ? eliteMain : eliteOff),
+    art: Math.max(s.art, s.role === "animator" ? eliteMain : eliteOff),
+    sound: Math.max(s.sound, s.role === "composer" ? eliteMain : eliteOff),
+  };
+}
+
 /** roll a fresh candidate with a full personality */
 export function rollHire(week: number, rng: () => number = Math.random): Staff {
   const base = rollCandidate(week);
-  const candidate = rng() < DANTE_HIRE_CHANCE ? applyDanteEasterEgg(base, week) : base;
+  const specialRoll = rng();
+  const candidate = specialRoll < DANTE_HIRE_CHANCE
+    ? applyDanteEasterEgg(base, week)
+    : specialRoll < DANTE_HIRE_CHANCE + AVRIL_HIRE_CHANCE
+      ? applyAvrilEasterEgg(base, week)
+      : base;
   return ensureCareer(candidate, week);
 }
 
