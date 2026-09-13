@@ -122,6 +122,34 @@ elif "export const DANTE_HIRE_CHANCE = 0.01;" not in career:
 
 career_path.write_text(career, encoding="utf-8")
 
+# ---- update the existing content integration regression for the expanded pool ----
+content_test_path = GAME / "src" / "engine" / "__tests__" / "content-v3.test.ts"
+content_test = content_test_path.read_text(encoding="utf-8")
+old_content_test = '''  it("adds eleven worker looks after the original fifteen", () => {
+    expect(WORKER_LOOKS).toHaveLength(26);
+    expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
+    expect(WORKER_LOOKS[15].sprite).toContain("sprite-worker-17.png");
+    expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
+    expect(WORKER_LOOKS[22].sprite).toContain("sprite-worker-24.png");
+    expect(WORKER_LOOKS[25].sprite).toContain("sprite-worker-27.png");
+  });'''
+new_content_test = '''  it("adds sixteen worker looks after the original fifteen", () => {
+    expect(WORKER_LOOKS).toHaveLength(31);
+    expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
+    expect(WORKER_LOOKS[15].sprite).toContain("sprite-worker-17.png");
+    expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
+    expect(WORKER_LOOKS[22].sprite).toContain("sprite-worker-24.png");
+    expect(WORKER_LOOKS[25].sprite).toContain("sprite-worker-27.png");
+    expect(WORKER_LOOKS[26].sprite).toContain("sprite-worker-28.webp");
+    expect(WORKER_LOOKS[29].sprite).toContain("sprite-worker-31.webp");
+    expect(WORKER_LOOKS[30].sprite).toContain("sprite-worker-32.webp");
+  });'''
+if old_content_test in content_test:
+    content_test = content_test.replace(old_content_test, new_content_test, 1)
+elif 'expect(WORKER_LOOKS).toHaveLength(31);' not in content_test:
+    raise SystemExit("Could not update content-v3 worker-count regression")
+content_test_path.write_text(content_test, encoding="utf-8")
+
 # ---- focused regression tests ----
 test_path = GAME / "src" / "engine" / "__tests__" / "worker-easter-egg.test.ts"
 test_path.write_text('''import { describe, expect, it } from "vitest";
