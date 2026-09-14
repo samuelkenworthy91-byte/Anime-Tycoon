@@ -49,6 +49,12 @@ describe("independent IP renewals", () => {
     expect(ipRenewalCost(m, ip.id, 3)!).toBeLessThan(ipRenewalCost(m, ip.id, 0)!);
   });
 
+  it("does not allow manual renewal years before the renewal window", () => {
+    const m = market(contract({ expiresWeek: 100 }));
+    expect(ipRenewalQuote(m, ip.id, 40, 1)!.available).toBe(false);
+    expect(renewIPContract(m, ip.id, 40, 1)).toBeNull();
+  });
+
   it("opens a renewal window, renews manually, and preserves negotiated rights terms", () => {
     const m = market(contract({ expiresWeek: 60, royaltyRate: 0.06, ownershipShare: 0.55, sequelRights: true, merchRights: true }));
     const q = ipRenewalQuote(m, ip.id, 40, 2)!;
