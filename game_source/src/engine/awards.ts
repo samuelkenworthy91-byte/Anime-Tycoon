@@ -53,6 +53,17 @@ export interface AwardNominee {
   /** LICENSED_AWARD_OWNER_GUARD_V1 — frozen proof that this adaptation belongs
    *  to the studio that actually won the source auction. */
   licensedIpAward?: { ipId: string; auctionId: string; ownerStudioId: string } | null;
+  /** Stage-2 nomination metadata. These optional fields deliberately live on
+   *  the existing saved award-entry shape, so old saves need no envelope or
+   *  RunState migration. `nominationCategories` is the authoritative frozen
+   *  November slate used by the later ceremony. */
+  nominationYear?: number;
+  nominationCategories?: AwardCategoryId[];
+  nominationAnnouncementSeen?: boolean;
+  /** Player entries already present when the November cutoff was frozen. Any
+   *  unmarked player release at year end happened after the cutoff and can be
+   *  carried into the following nomination cycle by the UI wrapper. */
+  nominationConsideredYear?: number;
 }
 
 export type AwardCategoryId = "aoty" | "shonen" | "shojo" | "writing" | "animation" | "score" | "fanfav";
@@ -95,6 +106,18 @@ export interface AwardCeremony {
   playerWins: { category: AwardCategoryId; name: string; title: string; cash: number; fans: number }[];
   /** categories withheld because no production cleared the published standard */
   unawarded?: { id: AwardCategoryId; name: string; qualification: string }[];
+}
+
+export interface AwardNominationCategory {
+  id: AwardCategoryId;
+  name: string;
+  nominees: AwardNominee[];
+}
+
+export interface AwardNominationSlate {
+  year: number;
+  categories: AwardNominationCategory[];
+  unawarded: { id: AwardCategoryId; name: string; qualification: string }[];
 }
 
 /* ------------------------------------------------------- craft strengths */
@@ -375,6 +398,59 @@ function rankFor(def: AwardCategoryDef, pool: AwardNominee[], year: number): Awa
 }
 
 const NOMINEES_PER_CATEGORY = 4;
+const NORMAL_STUDIO_NOMINEE_CAP = 2;
+const TARGET_DISTINCT_STUDIOS = 3;
+
+/** Studio identity for diversity rules. Player entries always share one key;
+ * rivals prefer their stable studio id and safely fall back to display name. */
+function nomineeStudioKey(n: AwardNominee): string {
+  return n.player ? "player" : (n.studioId?.trim() || n.studio.trim().toLowerCase());
+}
+
+/** Pick four from the already-ranked qualified pool while preventing a single
+ * prolific studio from swallowing the entire category. We first secure up to
+ * three distinct studios, then fill in rank order with a normal cap of two per
+ * studio. The cap relaxes only when the qualifying field cannot otherwise fill
+ * the category. */
+export function diverseNominees(ranked: AwardNominee[], limit = NOMINEES_PER_CATEGORY): AwardNominee[] {
+  if (ranked.length <= 1 || limit <= 1) return ranked.slice(0, limit);
+  const picked: AwardNominee[] = [];
+  const pickedKeys = new Set<string>();
+  const studioCounts = new Map<string, number>();
+  const distinctAvailable = new Set(ranked.map(nomineeStudioKey)).size;
+  const distinctTarget = Math.min(TARGET_DISTINCT_STUDIOS, distinctAvailable, limit);
+
+  for (const nominee of ranked) {
+    if (picked.length >= distinctTarget) break;
+    const studio = nomineeStudioKey(nominee);
+    if (studioCounts.has(studio)) continue;
+    picked.push(nominee);
+    pickedKeys.add(awardNomineeKey(nominee));
+    studioCounts.set(studio, 1);
+  }
+
+  for (const nominee of ranked) {
+    if (picked.length >= limit) break;
+    const key = awardNomineeKey(nominee);
+    if (pickedKeys.has(key)) continue;
+    const studio = nomineeStudioKey(nominee);
+    if ((studioCounts.get(studio) ?? 0) >= NORMAL_STUDIO_NOMINEE_CAP) continue;
+    picked.push(nominee);
+    pickedKeys.add(key);
+    studioCounts.set(studio, (studioCounts.get(studio) ?? 0) + 1);
+  }
+
+  /* Only relax when the real qualifying pool cannot satisfy the normal cap. */
+  for (const nominee of ranked) {
+    if (picked.length >= limit) break;
+    const key = awardNomineeKey(nominee);
+    if (pickedKeys.has(key)) continue;
+    picked.push(nominee);
+    pickedKeys.add(key);
+  }
+
+  return picked;
+}
 
 /**
  * Judge a full awards year. `shows` = the year's eligible slate (player
@@ -402,18 +478,88 @@ export function dedupeAwardSlate(shows: AwardNominee[]): AwardNominee[] {
   });
 }
 
-export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremony {
+function selectNomineesFor(def: AwardCategoryDef, year: number, uniqueShows: AwardNominee[]): AwardNominee[] {
+  const pool = uniqueShows.filter((n) => def.eligible(n) && awardQualifies(def.id, year, n));
+  return diverseNominees(rankFor(def, pool, year));
+}
+
+/** November nomination check. Qualification is unchanged; diversity only
+ * chooses among productions that genuinely cleared the published standard. */
+export function buildNominationSlate(year: number, shows: AwardNominee[]): AwardNominationSlate {
   const uniqueShows = dedupeAwardSlate(shows);
-  const categories: AwardCategory[] = [];
-  const unawarded: NonNullable<AwardCeremony["unawarded"]> = [];
+  const categories: AwardNominationCategory[] = [];
+  const unawarded: AwardNominationSlate["unawarded"] = [];
   for (const def of AWARD_CATEGORIES) {
-    const pool = uniqueShows.filter((n) => def.eligible(n) && awardQualifies(def.id, year, n));
-    if (!pool.length) {
+    const nominees = selectNomineesFor(def, year, uniqueShows);
+    if (!nominees.length) {
       unawarded.push({ id: def.id, name: def.name, qualification: awardQualificationText(def.id, year) });
       continue;
     }
-    const ranked = rankFor(def, pool, year);
-    const nominees = ranked.slice(0, NOMINEES_PER_CATEGORY);
+    categories.push({ id: def.id, name: def.name, nominees });
+  }
+  return { year, categories, unawarded };
+}
+
+/** Collapse the category slate into save-friendly award entries. One show may
+ * carry several category ids. If absolutely nobody qualifies, retain one
+ * harmless marker entry (with an empty category list) so the November check is
+ * still persisted and cannot replay every week. */
+export function freezeNominationEntries(year: number, shows: AwardNominee[]): AwardNominee[] {
+  const slate = buildNominationSlate(year, shows);
+  const byKey = new Map<string, { nominee: AwardNominee; categories: AwardCategoryId[] }>();
+  for (const category of slate.categories) {
+    for (const nominee of category.nominees) {
+      const key = awardNomineeKey(nominee);
+      const row = byKey.get(key) ?? { nominee, categories: [] };
+      if (!row.categories.includes(category.id)) row.categories.push(category.id);
+      byKey.set(key, row);
+    }
+  }
+  const frozen = [...byKey.values()].map(({ nominee, categories }) => ({
+    ...nominee,
+    nominationYear: year,
+    nominationCategories: categories,
+    nominationAnnouncementSeen: false,
+  }));
+  if (frozen.length || shows.length === 0) return frozen;
+  return [{
+    ...shows[0],
+    nominationYear: year,
+    nominationCategories: [],
+    nominationAnnouncementSeen: false,
+  }];
+}
+
+export function frozenNominationEntries(shows: AwardNominee[], year: number): AwardNominee[] {
+  return shows.filter((n) => n.nominationYear === year && Array.isArray(n.nominationCategories));
+}
+
+export function nominationSlateFromFrozen(shows: AwardNominee[], year: number): AwardNominationSlate | null {
+  const frozen = frozenNominationEntries(shows, year);
+  if (!frozen.length) return null;
+  const categories: AwardNominationCategory[] = [];
+  const unawarded: AwardNominationSlate["unawarded"] = [];
+  for (const def of AWARD_CATEGORIES) {
+    const nominees = rankFor(def, frozen.filter((n) => n.nominationCategories?.includes(def.id)), year);
+    if (!nominees.length) unawarded.push({ id: def.id, name: def.name, qualification: awardQualificationText(def.id, year) });
+    else categories.push({ id: def.id, name: def.name, nominees });
+  }
+  return { year, categories, unawarded };
+}
+
+export function buildCeremony(year: number, shows: AwardNominee[]): AwardCeremony {
+  const frozen = frozenNominationEntries(shows, year);
+  const uniqueShows = frozen.length ? dedupeAwardSlate(frozen) : dedupeAwardSlate(shows);
+  const categories: AwardCategory[] = [];
+  const unawarded: NonNullable<AwardCeremony["unawarded"]> = [];
+  for (const def of AWARD_CATEGORIES) {
+    const nominees = frozen.length
+      ? rankFor(def, uniqueShows.filter((n) => n.nominationCategories?.includes(def.id)), year)
+      : selectNomineesFor(def, year, uniqueShows);
+    if (!nominees.length) {
+      unawarded.push({ id: def.id, name: def.name, qualification: awardQualificationText(def.id, year) });
+      continue;
+    }
     const payout = awardPayoutFor(def, year);
     categories.push({
       id: def.id,
