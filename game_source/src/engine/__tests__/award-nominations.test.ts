@@ -113,14 +113,49 @@ describe("annual nomination cycle integration", () => {
     expect(pendingNominationAnnouncement(frozen)?.slate.categories).toHaveLength(0);
   });
 
-  it("restores frozen nomination metadata stripped by the legacy defensive save migration", () => {
+  it("restores only the exact frozen rows after legacy migration, without duplicating a player nomination", () => {
     const mine = mk("Reload Me", "Player Studio", { player: true, studioId: "player", score: 39, art: 68, story: 68, sound: 68, audience: 350_000 });
     const raw = freezeNominationsIfDue({ ...initialRun("Player Studio", "steady"), week: 44, day: 44 * 7, yearShows: [mine] });
-    const migrated = migrateRun(raw);
+    const migrated = migrateRun(JSON.parse(JSON.stringify(raw)));
     expect(migrated.yearShows.some((entry) => entry.nominationYear === 1)).toBe(false);
     const restored = restoreAwardNominationMetadata(migrated, raw.yearShows);
-    expect(restored.yearShows.some((entry) => entry.nominationYear === 1)).toBe(true);
+    expect(restored.yearShows.filter((entry) => entry.nominationYear === 1)).toHaveLength(1);
+    expect(restored.yearShows.filter((entry) => entry.sourceId === mine.sourceId && entry.nominationYear === 1)).toHaveLength(1);
     expect(pendingNominationAnnouncement(restored)?.year).toBe(1);
+    for (const category of pendingNominationAnnouncement(restored)!.slate.categories) {
+      const ids = category.nominees.map((nominee) => nominee.sourceId);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+  });
+
+  it("restores licensed-IP award ownership proof that the defensive migration omits", () => {
+    const proof = { ipId: "ip_demo", auctionId: "auction_demo", ownerStudioId: "player" };
+    const licensed = mk("Licensed Contender", "Player Studio", {
+      player: true,
+      studioId: "player",
+      draft: {
+        title: "Licensed Contender",
+        animeType: "shonen",
+        genres: ["action" as GenreId],
+        medium: "tv",
+        budget: "standard",
+        episodes: 12,
+        protag: "v2_lead_shonen_001",
+        sidekick: "v2_sidekick_shonen_001",
+        pet: "v2_pet_shonen_001",
+        villain: "v2_villain_shonen_001",
+        arcs: [],
+        sliders: [50, 50, 50],
+        licensedIpId: proof.ipId,
+      } as AwardNominee["draft"],
+      licensedIpAward: proof,
+    });
+    const raw = { ...initialRun("Player Studio", "steady"), yearShows: [licensed] };
+    const migrated = migrateRun(JSON.parse(JSON.stringify(raw)));
+    expect(migrated.yearShows[0].licensedIpAward).toBeUndefined();
+    const restored = restoreAwardNominationMetadata(migrated, raw.yearShows);
+    expect(restored.yearShows[0].licensedIpAward).toEqual(proof);
+    expect(restored.yearShows[0].studioId).toBe("player");
   });
 
   it("carries a post-cutoff player release into the next award cycle without changing the frozen ceremony", () => {
