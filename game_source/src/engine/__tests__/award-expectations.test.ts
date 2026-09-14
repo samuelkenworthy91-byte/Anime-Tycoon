@@ -56,8 +56,8 @@ describe("sim-calibrated annual awards craft expectations", () => {
 
   it("projects rivals and legacy rows onto the current-year raw scale", () => {
     const run = initialRun("Test Studio", "steady");
-    const rival = nominee({ player: false, studioId: "rival", sourceId: "rival-row", story: 30, art: 30, sound: 30 });
-    // Year 6 craft-quality minimum is 30, so a rival exactly on that
+    const rival = nominee({ player: false, studioId: "rival", sourceId: "rival-row", story: 32, art: 32, sound: 32 });
+    // Year 6 craft-quality minimum is 32, so a rival exactly on that
     // compressed metric floor maps exactly to each simulated raw floor.
     expect(awardDisciplineOutput(run, rival, "writing", 6)).toBe(1200);
     expect(awardDisciplineOutput(run, rival, "animation", 6)).toBe(1500);
