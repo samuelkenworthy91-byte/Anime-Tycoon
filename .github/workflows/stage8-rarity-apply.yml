@@ -43,5 +43,7 @@ jobs:
           git config user.name "samuelkenworthy91-byte"
           git config user.email "samuel.kenworthy91@gmail.com"
           git add game_source/src/engine/bigThree.ts game_source/src/engine/__tests__/big-three.test.ts game_source/scripts/stage8-progression-audit.test.ts
-          git commit -m "Pace Big Three cultural recognition"
+          git commit -m "Repair Big Three player craft recognition"
           git push origin HEAD:work/midgame-endgame-systems-pass
+
+# Stage 8 rerun: includes the playerCraftFor(score, points) integration repair.
