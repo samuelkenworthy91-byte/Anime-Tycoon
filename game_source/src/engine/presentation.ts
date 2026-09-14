@@ -33,6 +33,7 @@ export interface DeferredLevelUpContext {
   sellerAuctionOpen: boolean;
   decisionEventOpen: boolean;
   auctionForecastOpen: boolean;
+  productionRevealOpen: boolean;
 }
 
 /**
@@ -47,6 +48,7 @@ export function canPresentDeferredLevelUp(context: DeferredLevelUpContext): bool
     !context.paused &&
     !context.sellerAuctionOpen &&
     !context.decisionEventOpen &&
-    !context.auctionForecastOpen
+    !context.auctionForecastOpen &&
+    !context.productionRevealOpen
   );
 }

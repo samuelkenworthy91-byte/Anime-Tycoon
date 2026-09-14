@@ -75,8 +75,9 @@
      speed, sound and pause controls below the top-right corner. Modal close
      buttons remain above this z-40 toolbar and are always tappable. */
   .game-controls {
-    top: 5px !important;
+    top: calc(env(safe-area-inset-top, 0px) + 48px) !important;
     right: 5px !important;
+    z-index: 60 !important;
   }
 
   .game-controls-toggle {
@@ -126,12 +127,12 @@
      the system/HUD controls and keep its header — including close — pinned. */
   [class~="z-[97]"] {
     align-items: flex-start !important;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 44px) !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 52px) !important;
     padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
   }
 
   [class~="z-[97]"] > .nice-scroll {
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 60px) !important;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 68px) !important;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
@@ -153,7 +154,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -3px;
+    margin-top: 5px;
   }
 }
 

@@ -364,6 +364,7 @@ export function computeResult(opts: {
   /* ---- arcs (greater impact: cast synergy + bigger finale payoff) */
   let arcQ = 0;
   let arcsF = 0;
+  let visionArcBonus = 0;
   const castOf = (role: CastRole) => castById(draft[role]);
   draft.arcs.forEach((id, idx) => {
     const arc = ARCS.find((a) => a.id === id)!;
@@ -372,7 +373,7 @@ export function computeResult(opts: {
     if (arc.syn?.some((s) => draft.genres.includes(s))) {
       arcQ += arc.synQ ?? 0;
       arcsF += arc.synF ?? 0;
-      if (showrunner === "vision" && (arc.id === "twist" || arc.id === "lore")) arcQ += 2;
+      if (showrunner === "vision" && (arc.id === "twist" || arc.id === "lore")) { arcQ += 2; visionArcBonus += 2; }
     }
     if (arc.anti?.some((s) => draft.genres.includes(s))) {
       arcQ += arc.antiQ ?? -2;
@@ -427,6 +428,7 @@ export function computeResult(opts: {
     + casting
     + arcQuality
     + slotFit * SLOT_QUALITY_POINTS;
+  const baseComboMult = comboMult(draft.genres, true);
   const actualComboMult = contrarianComboMult(showrunner, draft.genres);
   const comboFactorBase =
     1 + (actualComboMult - 1) * COMBO_QUALITY_WEIGHT
@@ -538,7 +540,8 @@ export function computeResult(opts: {
     : Math.round(units * 2.6);
 
   const tierFan = { masterpiece: 1.5, hit: 1.2, solid: 1, mixed: 0.62, flop: 0.3 }[tier];
-  const fans = Math.round(units * (web ? web.fanPerView : 0.09) * tierFan * narrativeMomentumFanMult(showrunner, draft, points));
+  const showrunnerFanMult = narrativeMomentumFanMult(showrunner, draft, points);
+  const fans = Math.round(units * (web ? web.fanPerView : 0.09) * tierFan * showrunnerFanMult);
   const rd = Math.max(2, Math.round(total * 0.55 + issues * 0.4));
   const commercial = commercialTierOf(draft.medium, revenue);
 
@@ -577,6 +580,25 @@ export function computeResult(opts: {
   if (publicSalesMultiplier > 1)
     breakdown.push({ label: "Known Correct Cast commercial lift", pts: `×${publicSalesMultiplier.toFixed(3)} sales` });
   if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
+
+  /* Make founder perks legible as actual advantages rather than flavour text. */
+  if (showrunner === "casting") {
+    const withoutFounder = Math.round(fans / showrunnerFanMult);
+    breakdown.push({
+      label: "Ren Mercer · Narrative Momentum",
+      pts: `×${showrunnerFanMult.toFixed(2)} fans · +${Math.max(0, fans - withoutFounder).toLocaleString("en-GB")} fans this release`,
+    });
+  }
+  if (showrunner === "festival" && actualComboMult !== baseComboMult)
+    breakdown.push({ label: "Soren Berg · Against the Grain", pts: `genre synergy ×${baseComboMult.toFixed(2)} → ×${actualComboMult.toFixed(2)}` });
+  if (showrunner === "vision" && visionArcBonus > 0)
+    breakdown.push({ label: "Akari Natsume · Vision", pts: `+${(visionArcBonus * arcWeight).toFixed(1)} story quality from Twist/Lore synergy` });
+  if (showrunner === "genre" && newCombo)
+    breakdown.push({ label: "Roxie Kade · No Blueprint", pts: "×1.35 production output & pace on this first-time genre pairing" });
+  if (showrunner === "marketer")
+    breakdown.push({ label: "Sana Kobayashi · Buzz Engine", pts: `+10 opening hype · final hype ${Math.round(hype)} · marketing gains ×1.50` });
+  if (showrunner === "steady")
+    breakdown.push({ label: "Genji Ashida · Steady Hand", pts: `staff contribution ×1.50 · note chance ×0.75 · ${issues} unresolved note${issues === 1 ? "" : "s"}` });
 
   return {
     reviews,

@@ -455,17 +455,18 @@ export function rollHire(
   rng: () => number = Math.random,
   excludedLooks: ReadonlySet<number> = new Set(),
 ): Staff {
-  const base = rollCandidate(week);
+  const rolled = rollCandidate(week);
+  const availableStandard = STANDARD_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
+  const standardLook = availableStandard.length
+    ? availableStandard[Math.min(availableStandard.length - 1, Math.floor(rng() * availableStandard.length))]
+    : rolled.look;
+  const base = { ...rolled, look: standardLook };
   const specialRoll = rng();
-  let candidate = specialRoll < DANTE_HIRE_CHANCE && !excludedLooks.has(DANTE_WORKER_LOOK_INDEX)
+  const candidate = specialRoll < DANTE_HIRE_CHANCE && !excludedLooks.has(DANTE_WORKER_LOOK_INDEX)
     ? applyDanteEasterEgg(base, week)
     : specialRoll < DANTE_HIRE_CHANCE + AVRIL_HIRE_CHANCE && !excludedLooks.has(AVRIL_WORKER_LOOK_INDEX)
       ? applyAvrilEasterEgg(base, week)
       : base;
-  if (candidate.look !== undefined && excludedLooks.has(candidate.look)) {
-    const availableLook = STANDARD_WORKER_LOOK_INDICES.find((look) => !excludedLooks.has(look));
-    if (availableLook !== undefined) candidate = { ...candidate, look: availableLook };
-  }
   return ensureCareer(candidate, week);
 }
 

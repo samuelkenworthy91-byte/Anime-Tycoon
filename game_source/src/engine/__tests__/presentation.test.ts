@@ -7,6 +7,7 @@ const base: DeferredLevelUpContext = {
   sellerAuctionOpen: false,
   decisionEventOpen: false,
   auctionForecastOpen: false,
+  productionRevealOpen: false,
 };
 
 describe("deferred presentation priority", () => {
@@ -24,6 +25,7 @@ describe("deferred presentation priority", () => {
     expect(canPresentDeferredLevelUp({ ...base, sellerAuctionOpen: true })).toBe(false);
     expect(canPresentDeferredLevelUp({ ...base, decisionEventOpen: true })).toBe(false);
     expect(canPresentDeferredLevelUp({ ...base, auctionForecastOpen: true })).toBe(false);
+    expect(canPresentDeferredLevelUp({ ...base, productionRevealOpen: true })).toBe(false);
   });
 
   it("keeps level-ups below all reveal/decision priority bands", () => {

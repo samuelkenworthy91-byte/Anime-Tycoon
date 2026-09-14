@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { rollHirePool } from "../careers";
+import { DANTE_HIRE_CHANCE, AVRIL_HIRE_CHANCE, rollHire, rollHirePool } from "../careers";
+import { DANTE_WORKER_LOOK_INDEX, AVRIL_WORKER_LOOK_INDEX, STANDARD_WORKER_LOOK_INDICES } from "../data";
 import {
   RECRUITMENT_AD_BASE_COST,
   RECRUITMENT_AD_COST_STEP,
@@ -21,6 +22,19 @@ describe("recruitment adverts", () => {
     const pool = rollHirePool(0, 3, () => 0);
     expect(new Set(pool.map((candidate) => candidate.look)).size).toBe(3);
     expect(pool.filter((candidate) => candidate.name === "Dante")).toHaveLength(1);
+  });
+
+  it("gives every ordinary look the same selectable interval while reserving Dante and Avril", () => {
+    expect(DANTE_HIRE_CHANCE).toBe(0.01);
+    expect(AVRIL_HIRE_CHANCE).toBe(0.01);
+    expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(DANTE_WORKER_LOOK_INDEX);
+    expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(AVRIL_WORKER_LOOK_INDEX);
+    for (let index = 0; index < STANDARD_WORKER_LOOK_INDICES.length; index += 1) {
+      const normalRoll = (index + 0.5) / STANDARD_WORKER_LOOK_INDICES.length;
+      const values = [normalRoll, 0.5];
+      const candidate = rollHire(0, () => values.shift() ?? 0.5);
+      expect(candidate.look).toBe(STANDARD_WORKER_LOOK_INDICES[index]);
+    }
   });
 
   it("increases the price for each refresh during the same month", () => {

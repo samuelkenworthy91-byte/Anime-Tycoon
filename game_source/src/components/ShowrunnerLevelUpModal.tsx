@@ -3,6 +3,7 @@ import { Check, FastForward, Sparkles } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { POINT_COLOR, SHOWRUNNERS, type PointType } from "../engine/data";
 import { showrunnerLevelTitle } from "../engine/showrunnerCareer";
+import { showrunnerImpactSummary } from "../engine/showrunnerImpact";
 import type { RunState } from "../engine/state";
 import Portrait from "./Portrait";
 
@@ -23,6 +24,7 @@ export default function ShowrunnerLevelUpModal({ run, setRun }: { run: RunState;
   const clearOne = () => setRun((r) => ({ ...r, showrunnerCareer: { ...r.showrunnerCareer, pendingLevelUps: r.showrunnerCareer.pendingLevelUps.filter((x) => x.id !== record.id) } }));
   const clearAll = () => setRun((r) => ({ ...r, showrunnerCareer: { ...r.showrunnerCareer, pendingLevelUps: [] } }));
   const total = record.gains.story + record.gains.art + record.gains.sound;
+  const founderImpact = showrunnerImpactSummary(run.showrunner);
 
   return <div className="fixed inset-0 z-[111] flex items-center justify-center bg-abyss/90 p-4 backdrop-blur-lg">
     <button onClick={() => setStep(5)} className="btn-press absolute right-4 top-4 rounded-lg border border-line bg-panel px-3 py-1.5 text-[10px] font-extrabold tracking-widest text-paper/70"><FastForward size={12} className="inline" /> SKIP ANIMATION</button>
@@ -41,6 +43,7 @@ export default function ShowrunnerLevelUpModal({ run, setRun }: { run: RunState;
           <span className={record.gains[point] > 0 ? "min-w-12 text-right font-display text-xl font-black text-mint" : "min-w-12 text-right font-display text-xl font-black text-paper/30"}>+{Math.round(record.gains[point])}</span>
         </div> : null)}
         {step >= 5 && <div className="anim-pop mt-2 rounded-xl border border-mint/30 bg-mint/5 p-2 text-xs text-mint"><Check size={13} className="mr-1 inline" /> Total growth +{Math.round(total)}</div>}
+        {step >= 5 && <div className="anim-pop rounded-xl border border-gold/35 bg-gold/5 p-3 text-left"><div className="text-[8px] font-black tracking-[0.2em] text-gold">FOUNDER ADVANTAGE · LIVE NUMBERS</div><div className="mt-1 text-[11px] font-bold text-paper/85">{founderImpact.name} · {founderImpact.title}</div><div className="mt-1 text-[10px] leading-relaxed text-paper/60">{founderImpact.numbers}</div></div>}
       </div>
       <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
         <Btn big variant="primary" disabled={step < 5} onClick={clearOne}>CONTINUE</Btn>

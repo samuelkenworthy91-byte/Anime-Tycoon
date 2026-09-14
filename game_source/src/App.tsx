@@ -173,7 +173,8 @@ export default function App() {
     sellerAuctionOpen,
     decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
     auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
-  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen;
+    productionRevealOpen: screen === "release" || !!released,
+  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !released;
   useEffect(() => {
     if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
   }, [pendingLevelUp, levelUpPresentationAllowed]);
@@ -703,7 +704,7 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
-          <div className={cn("game-controls absolute right-3 top-2.5 z-40", controlsOpen && "game-controls-open")}>
+          <div className={cn("game-controls absolute right-3 top-2.5 z-[60]", controlsOpen && "game-controls-open")}>
             <button
               type="button"
               aria-label={controlsOpen ? "Close sound and speed controls" : "Open sound and speed controls"}
