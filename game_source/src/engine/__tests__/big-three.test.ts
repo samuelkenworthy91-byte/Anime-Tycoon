@@ -7,6 +7,8 @@ import { pickRivalPoster } from "../rivalPosters";
 import { initialRun, migrateRun } from "../state";
 import {
   BIG_THREE_MAX_SLOTS,
+  BIG_THREE_RIVAL_COOLDOWN_WEEKS,
+  BIG_THREE_RIVAL_GRACE_WEEKS,
   BIG_THREE_SEED_POSTER_ID,
   BIG_THREE_START_WEEK,
   advanceBigThreeWeek,
@@ -110,21 +112,34 @@ describe("Year 6 Big Three endgame", () => {
     expect(twice.fans).toBe(next.fans);
   });
 
-  it("does not reserve a player slot: qualifying rivals can complete the three first", () => {
+  it("does not reserve a player slot, but rival cultural consensus cannot consume both open places instantly", () => {
     let run = initialRun("House", "steady");
     run.week = BIG_THREE_START_WEEK;
     run = syncBigThreeEra(run);
     const studio = run.rivalWorld.studios.find((s) => s.id !== "Sunnyrise")!;
     const release = (title: string, week: number) => ({
-      title, studioId: studio.id, studio: studio.name, score: 37, week, year: 6,
+      title, studioId: studio.id, studio: studio.name, score: 37, week, year: Math.floor(week / 48) + 1,
       genres: ["fantasy"] as GenreId[], animeType: "shonen" as const, revenue: 4_000_000, fans: 150_000,
       kind: "original" as const, hallOfFame: true, craft: { story: 52, art: 54, sound: 50 }, posterId: null, franchiseKey: title,
     });
+
     run = { ...run, week: BIG_THREE_START_WEEK + 1, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Crown", BIG_THREE_START_WEEK + 1)] } : s) } };
     run = advanceBigThreeWeek(run);
-    run = { ...run, week: BIG_THREE_START_WEEK + 2, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Throne", BIG_THREE_START_WEEK + 2)] } : s) } };
+    expect(run.bigThree.slots).toHaveLength(1); // Year-6 shock gets breathing room.
+
+    run = { ...run, week: BIG_THREE_START_WEEK + BIG_THREE_RIVAL_GRACE_WEEKS };
+    run = advanceBigThreeWeek(run);
+    expect(run.bigThree.slots).toHaveLength(2);
+
+    const firstRivalRecognition = run.bigThree.slots[1].recognisedWeek;
+    run = { ...run, week: firstRivalRecognition + 1, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Throne", firstRivalRecognition + 1)] } : s) } };
+    run = advanceBigThreeWeek(run);
+    expect(run.bigThree.slots).toHaveLength(2);
+
+    run = { ...run, week: firstRivalRecognition + BIG_THREE_RIVAL_COOLDOWN_WEEKS };
     run = advanceBigThreeWeek(run);
     expect(run.bigThree.slots).toHaveLength(BIG_THREE_MAX_SLOTS);
+
     const { run: player, d } = playerCandidate("Too Late");
     const filled = { ...player, bigThree: run.bigThree };
     expect(recognise(filled, d, "late").bigThree.slots).toHaveLength(3);

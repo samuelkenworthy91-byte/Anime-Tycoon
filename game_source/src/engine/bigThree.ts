@@ -14,6 +14,8 @@ export const BIG_THREE_BREAKOUT_REACH = 120_000;
 export const BIG_THREE_PLAYER_FAN_REWARD = 75_000;
 export const BIG_THREE_PLAYER_RD_REWARD = 60;
 export const BIG_THREE_RENEWAL_LEVERAGE = 0.12;
+export const BIG_THREE_RIVAL_GRACE_WEEKS = 24;
+export const BIG_THREE_RIVAL_COOLDOWN_WEEKS = 48;
 
 export const BIG_THREE_SEED_TITLE = "Astra Breaker: Eclipse";
 export const BIG_THREE_SEED_STUDIO_ID = "Sunnyrise";
@@ -453,6 +455,14 @@ function rivalSlot(run: RunState, studio: RivalStudio, release: RivalRelease, me
 export function advanceBigThreeWeek(inputRun: RunState): RunState {
   let run = syncBigThreeEra(inputRun);
   if (!run.bigThree.introduced) return run;
+  const latestRecognitionWeek = Math.max(BIG_THREE_START_WEEK, ...run.bigThree.slots.map((slot) => slot.recognisedWeek));
+  const rivalConsensusDelay = run.bigThree.slots.length <= 1 ? BIG_THREE_RIVAL_GRACE_WEEKS : BIG_THREE_RIVAL_COOLDOWN_WEEKS;
+  /* Fandom consensus should feel historical, not like another weekly ranking.
+     Rival releases accumulate during the quiet period and compete once the
+     culture has had time to settle. Player releases are deliberately not
+     blocked here: no slot is reserved, but the player gets a real window to
+     answer the Year-6 shock before rivals can consume both open places. */
+  if (run.week < latestRecognitionWeek + rivalConsensusDelay) return refreshBigThreeOwnership(run);
   const lastScan = run.bigThree.lastRivalScanWeek;
   if (run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) {
     return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, lastRivalScanWeek: run.week } });
@@ -490,6 +500,9 @@ export function advanceBigThreeWeek(inputRun: RunState): RunState {
       } : studio),
     };
     notices.push(`🌠 FANDOM CONSENSUS — “${candidate.release.title}” (${candidate.studio.name}) enters THE BIG THREE. ${BIG_THREE_MAX_SLOTS - state.slots.length} place${BIG_THREE_MAX_SLOTS - state.slots.length === 1 ? "" : "s"} remain.`);
+    /* At most one rival can crystallise into cultural canon in a single
+       recognition window. Another name must survive a fresh consensus cycle. */
+    break;
   }
 
   return refreshBigThreeOwnership({ ...run, rivalWorld, bigThree: state, notices: notices.slice(-40) });

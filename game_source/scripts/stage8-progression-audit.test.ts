@@ -108,5 +108,8 @@ describe("Stage 8 progression audit", () => {
     expect(report.capabilityFiveTrackEnvelope).toBeGreaterThanOrEqual(90_000_000);
     expect(careers.every((career) => career.slots >= 1 && career.slots <= BIG_THREE_MAX_SLOTS)).toBe(true);
     expect(careers.every((career) => career.years[0] === 6)).toBe(true);
+    /* The seeded title begins Year 6, but rival-only careers must not be able
+       to crystallise all three names in the same cultural moment. */
+    expect(thirdSlotYears.every((year) => year >= 7)).toBe(true);
   }, 120_000);
 });
