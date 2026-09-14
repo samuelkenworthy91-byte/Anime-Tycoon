@@ -2,6 +2,51 @@ import type { PointType } from "./data";
 import { draftCost, type Project, type ProjectStage } from "./projects";
 import type { RunState } from "./state";
 
+export type InvestmentTierId = "standard" | "extended" | "prestige" | "obsessive";
+export type ProductionCapabilityId = "writing" | "animation" | "sound" | "post" | "marketing";
+
+export interface InvestmentTierDef {
+  id: InvestmentTierId;
+  name: string;
+  minOffice: number;
+  costMult: number;
+  pointMult: number;
+  repairMult: number;
+  hypeMult: number;
+  scheduleMult: number;
+  riskMult: number;
+  description: string;
+}
+
+/** Spend rises much faster than output. These are deliberately not tied to
+ * current bank balance: a rich studio can buy certainty, but never efficiently. */
+export const INVESTMENT_TIERS: readonly InvestmentTierDef[] = [
+  { id: "standard", name: "Standard", minOffice: 0, costMult: 1, pointMult: 1, repairMult: 1, hypeMult: 1, scheduleMult: 1, riskMult: 1, description: "Normal targeted intervention." },
+  { id: "extended", name: "Extended", minOffice: 1, costMult: 2.75, pointMult: 1.55, repairMult: 1.35, hypeMult: 1.45, scheduleMult: 1.25, riskMult: .9, description: "More people and passes; clearly stronger, much less efficient." },
+  { id: "prestige", name: "Prestige", minOffice: 2, costMult: 7.5, pointMult: 2.15, repairMult: 1.7, hypeMult: 1.85, scheduleMult: 1.45, riskMult: .78, description: "Top-tier external talent and extensive rework." },
+  { id: "obsessive", name: "Obsessive", minOffice: 2, costMult: 18, pointMult: 2.7, repairMult: 2, hypeMult: 2.15, scheduleMult: 1.6, riskMult: .68, description: "Blank-cheque craft obsession. Huge spend for diminishing returns." },
+] as const;
+
+export interface CapabilityDef {
+  id: ProductionCapabilityId;
+  name: string;
+  description: string;
+}
+
+export const CAPABILITY_DEFS: readonly CapabilityDef[] = [
+  { id: "writing", name: "Writing Development", description: "Permanent experience from repeated script-room and story consultancy investment." },
+  { id: "animation", name: "Animation Pipeline", description: "Permanent know-how from repeated animation rescue and finishing investment." },
+  { id: "sound", name: "Sound & Music", description: "Permanent recording, scoring and audio-production know-how." },
+  { id: "post", name: "Post-Production", description: "Permanent retake, continuity and finishing capability." },
+  { id: "marketing", name: "Marketing / Launch", description: "Permanent launch-material and campaign execution capability." },
+] as const;
+
+/** Cumulative qualifying spend needed to reach each permanent level.
+ * Gaps widen sharply so a late-game blank cheque moves the needle without
+ * turning one purchase into an entire maxed department. */
+export const CAPABILITY_THRESHOLDS = [150_000, 500_000, 1_250_000, 2_500_000, 4_500_000, 7_500_000, 12_000_000, 18_000_000] as const;
+export const MAX_CAPABILITY_LEVEL = CAPABILITY_THRESHOLDS.length;
+
 export interface InterventionDef {
   id: string;
   name: string;
@@ -14,27 +59,74 @@ export interface InterventionDef {
   hype?: number;
   days?: number;
   risk: number;
+  scalable?: boolean;
+  capability?: ProductionCapabilityId;
 }
 
 export const INTERVENTIONS: InterventionDef[] = [
-  { id: "writing_overhaul", name: "Writing Room Overhaul", cost: 38_000, stages: ["concept", "preprod"], description: "Rebuild weak structure; may create continuity notes.", point: "story", points: 34, issueDelta: 1, risk: .2 },
-  { id: "animation_pass", name: "Extra Animation Pass", cost: 65_000, stages: ["animation", "post"], description: "Target key sequences, not the whole show.", point: "art", points: 38, issueDelta: -1, risk: .12 },
-  { id: "retakes", name: "Retakes / Reshoots", cost: 52_000, stages: ["sound", "post"], description: "Repair performances at schedule cost.", point: "sound", points: 28, issueDelta: -1, days: 7, risk: .1 },
-  { id: "soundtrack", name: "Soundtrack Enhancement", cost: 45_000, stages: ["sound", "post"], description: "Commission a specialist suite.", point: "sound", points: 32, risk: .08 },
+  { id: "writing_overhaul", name: "Writing Room Overhaul", cost: 38_000, stages: ["concept", "preprod"], description: "Rebuild weak structure; may create continuity notes.", point: "story", points: 34, issueDelta: 1, risk: .2, scalable: true, capability: "writing" },
+  { id: "animation_pass", name: "Extra Animation Pass", cost: 65_000, stages: ["animation", "post"], description: "Target key sequences, not the whole show.", point: "art", points: 38, issueDelta: -1, risk: .12, scalable: true, capability: "animation" },
+  { id: "retakes", name: "Retakes / Reshoots", cost: 52_000, stages: ["sound", "post"], description: "Repair performances at schedule cost.", point: "sound", points: 28, issueDelta: -1, days: 7, risk: .1, scalable: true, capability: "post" },
+  { id: "soundtrack", name: "Soundtrack Enhancement", cost: 45_000, stages: ["sound", "post"], description: "Commission a specialist suite.", point: "sound", points: 32, risk: .08, scalable: true, capability: "sound" },
   { id: "schedule", name: "Schedule Extension", cost: 22_000, stages: ["concept", "preprod", "animation", "sound", "post"], description: "Buy two weeks; hype cools while rivals keep moving.", days: 14, hype: -6, risk: 0 },
-  { id: "consultant", name: "Specialist Consultant", cost: 30_000, stages: ["concept", "preprod", "animation"], description: "Reduce adaptation/technical mistakes; imperfect advice.", points: 18, issueDelta: -2, risk: .18 },
-  { id: "continuity", name: "Continuity Repair", cost: 48_000, stages: ["post", "marketing"], description: "Expensive surgery for accumulated notes.", point: "story", points: 15, issueDelta: -4, risk: .08 },
+  { id: "consultant", name: "Specialist Consultant", cost: 30_000, stages: ["concept", "preprod", "animation"], description: "Reduce adaptation/technical mistakes; imperfect advice.", points: 18, issueDelta: -2, risk: .18, scalable: true, capability: "writing" },
+  { id: "continuity", name: "Continuity Repair", cost: 48_000, stages: ["post", "marketing"], description: "Expensive surgery for accumulated notes.", point: "story", points: 15, issueDelta: -4, risk: .08, scalable: true, capability: "post" },
   { id: "crunch", name: "Executive Crunch", cost: 18_000, stages: ["animation", "sound", "post"], description: "Fast output with a real chance of more errors.", points: 26, issueDelta: 2, risk: .4 },
-  { id: "final_polish", name: "Final Polish Pass", cost: 72_000, stages: ["post", "marketing", "ready"], description: "Diminishing returns; cannot fix a broken foundation.", points: 22, issueDelta: -2, risk: .1 },
+  { id: "final_polish", name: "Final Polish Pass", cost: 72_000, stages: ["post", "marketing", "ready"], description: "Diminishing returns; cannot fix a broken foundation.", points: 22, issueDelta: -2, risk: .1, scalable: true, capability: "post" },
+  { id: "launch_upgrade", name: "Launch Materials Upgrade", cost: 55_000, stages: ["marketing", "ready"], description: "Premium trailers, key art and launch assets. Raises awareness, not review quality.", hype: 12, risk: 0, scalable: true, capability: "marketing" },
 ];
 
-export function interventionBlock(run: RunState, p: Project, d: InterventionDef): string | null {
-  if (p.stage === "airing" || p.stage === "done") return "Already released";
-  if (!d.stages.includes(p.stage)) return `Only during ${d.stages.join("/")}`;
-  if (run.cash < d.cost) return "Not enough cash";
-  if ((p.interventions ?? []).includes(d.id)) return "Already used";
-  return null;
+const tierById = (id: InvestmentTierId) => INVESTMENT_TIERS.find((x) => x.id === id)!;
+const round5k = (v: number) => Math.max(5_000, Math.round(v / 5_000) * 5_000);
+const scaleSigned = (v: number, mult: number) => v === 0 ? 0 : Math.sign(v) * Math.max(1, Math.round(Math.abs(v) * mult));
+
+export const interventionInvestmentKey = (id: string, tier: InvestmentTierId) => `${id}::${tier}`;
+export function parseInterventionInvestmentKey(key: string): { id: string; tier: InvestmentTierId } {
+  const [id, tierRaw] = key.split("::");
+  const tier = INVESTMENT_TIERS.some((x) => x.id === tierRaw) ? tierRaw as InvestmentTierId : "standard";
+  return { id, tier };
 }
+
+/** Existing saves recorded exact intervention names; Stage 5 records the same
+ * name followed by a tier. startsWith therefore lets historic rescue spending
+ * seed the new permanent capability tracks without a destructive migration. */
+function capabilityForSpendLabel(label: string): ProductionCapabilityId | null {
+  const def = INTERVENTIONS.find((d) => d.capability && label.startsWith(d.name));
+  return def?.capability ?? null;
+}
+
+export function capabilitySpend(run: Pick<RunState, "strategicSpend">, id: ProductionCapabilityId): number {
+  return (run.strategicSpend ?? []).reduce((sum, spend) => capabilityForSpendLabel(spend.label) === id ? sum + Math.max(0, spend.amount) : sum, 0);
+}
+
+export function capabilityLevelFromSpend(spend: number): number {
+  return CAPABILITY_THRESHOLDS.reduce((level, threshold) => spend >= threshold ? level + 1 : level, 0);
+}
+
+export interface ProductionCapabilityStatus extends CapabilityDef {
+  spend: number;
+  level: number;
+  nextThreshold: number | null;
+  toNext: number;
+  effect: string;
+}
+
+export function productionCapabilities(run: Pick<RunState, "strategicSpend">): ProductionCapabilityStatus[] {
+  return CAPABILITY_DEFS.map((def) => {
+    const spend = capabilitySpend(run, def.id);
+    const level = capabilityLevelFromSpend(spend);
+    const nextThreshold = CAPABILITY_THRESHOLDS[level] ?? null;
+    const effect = def.id === "post"
+      ? `+${level * 2}% related rescue output · stronger repair/risk control`
+      : def.id === "marketing"
+        ? `+${level * 2}% related launch intervention effect`
+        : `+${level * 2}% related intervention output`;
+    return { ...def, spend, level, nextThreshold, toNext: nextThreshold === null ? 0 : Math.max(0, nextThreshold - spend), effect };
+  });
+}
+
+export const productionCapability = (run: Pick<RunState, "strategicSpend">, id: ProductionCapabilityId) =>
+  productionCapabilities(run).find((x) => x.id === id)!;
 
 function tunedIntervention(run: RunState, d: InterventionDef) {
   let points = d.points ?? 0;
@@ -58,34 +150,101 @@ function tunedIntervention(run: RunState, d: InterventionDef) {
     risk *= .8;
     boosts.push("Private Screening Theatre");
   }
+  if (run.capitalProjects.includes("distribution_network") && d.id === "launch_upgrade") {
+    boosts.push("Worldwide Distribution Network");
+  }
   return { points, risk, issueDelta, boosts };
 }
 
-export function applyIntervention(run: RunState, projectId: string, id: string, rng = Math.random): RunState | null {
-  const d = INTERVENTIONS.find((x) => x.id === id);
-  const p = run.projects.find((x) => x.id === projectId);
-  if (!d || !p || interventionBlock(run, p, d)) return null;
+export interface InterventionQuote {
+  intervention: InterventionDef;
+  tier: InvestmentTierDef;
+  cost: number;
+  points: number;
+  issueDelta: number;
+  hype: number;
+  days: number;
+  risk: number;
+  capability: ProductionCapabilityStatus | null;
+  boosts: string[];
+}
+
+export function interventionQuote(run: RunState, d: InterventionDef, tierId: InvestmentTierId = "standard"): InterventionQuote | null {
+  const tier = tierById(tierId);
+  if (!tier) return null;
+  if (!d.scalable && tierId !== "standard") return null;
   const tuned = tunedIntervention(run, d);
-  const success = rng() >= tuned.risk;
+  const capability = d.capability ? productionCapability(run, d.capability) : null;
+  const capabilityMult = 1 + (capability?.level ?? 0) * .02;
+  const postRepairMult = d.capability === "post" ? 1 + (capability?.level ?? 0) * .025 : capabilityMult;
+  const marketingCapitalMult = d.id === "launch_upgrade" && run.capitalProjects.includes("distribution_network") ? 1.12 : 1;
+  const riskExperience = d.capability === "post" ? Math.max(.72, 1 - (capability?.level ?? 0) * .025) : Math.max(.82, 1 - (capability?.level ?? 0) * .015);
+  return {
+    intervention: d,
+    tier,
+    cost: round5k(d.cost * tier.costMult),
+    points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult)),
+    issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult),
+    hype: scaleSigned(d.hype ?? 0, tier.hypeMult * (d.capability === "marketing" ? capabilityMult : 1) * marketingCapitalMult),
+    days: Math.max(0, Math.round((d.days ?? 0) * tier.scheduleMult)),
+    risk: Math.max(0, Math.min(.9, tuned.risk * tier.riskMult * riskExperience)),
+    capability,
+    boosts: tuned.boosts,
+  };
+}
+
+export function interventionBlock(run: RunState, p: Project, d: InterventionDef, tierId: InvestmentTierId = "standard"): string | null {
+  const tier = tierById(tierId);
+  const quote = interventionQuote(run, d, tierId);
+  if (!quote) return d.scalable ? "Unavailable investment tier" : "This is a single-scale emergency action";
+  if (p.stage === "airing" || p.stage === "done") return "Already released";
+  if (!d.stages.includes(p.stage)) return `Only during ${d.stages.join("/")}`;
+  if (run.officeLevel < tier.minOffice) return `${tier.name} investment requires studio level ${tier.minOffice + 1}`;
+  if (run.cash < quote.cost) return "Not enough cash";
+  if ((p.interventions ?? []).includes(d.id)) return "Already used on this production";
+  return null;
+}
+
+export function applyIntervention(run: RunState, projectId: string, key: string, rng = Math.random): RunState | null {
+  const parsed = parseInterventionInvestmentKey(key);
+  const d = INTERVENTIONS.find((x) => x.id === parsed.id);
+  const p = run.projects.find((x) => x.id === projectId);
+  if (!d || !p || interventionBlock(run, p, d, parsed.tier)) return null;
+  const quote = interventionQuote(run, d, parsed.tier)!;
+  const success = rng() >= quote.risk;
   const point = d.point ?? (["story", "art", "sound"] as PointType[])[Math.floor(rng() * 3)];
-  const gain = success ? tuned.points : Math.round(tuned.points * .25);
+  const gain = success ? quote.points : Math.round(quote.points * .25);
+  const issueDelta = quote.issueDelta + (success ? 0 : quote.points > 0 ? 1 : 0);
   const updated: Project = {
     ...p,
-    points: { ...p.points, [point]: p.points[point] + gain },
-    issues: Math.max(0, p.issues + tuned.issueDelta + (success ? 0 : 1)),
-    hype: Math.max(0, p.hype + (d.hype ?? 0)),
-    deadlineDay: (p.deadlineDay ?? p.deadlineWeek * 7) + (d.days ?? 0),
-    deadlineWeek: p.deadlineWeek + Math.ceil((d.days ?? 0) / 7),
-    spent: p.spent + d.cost,
+    points: gain > 0 ? { ...p.points, [point]: p.points[point] + gain } : p.points,
+    issues: Math.max(0, p.issues + issueDelta),
+    hype: Math.max(0, p.hype + quote.hype),
+    deadlineDay: (p.deadlineDay ?? p.deadlineWeek * 7) + quote.days,
+    deadlineWeek: p.deadlineWeek + Math.ceil(quote.days / 7),
+    spent: p.spent + quote.cost,
     interventions: [...(p.interventions ?? []), d.id],
   };
-  const capital = tuned.boosts.length ? ` · ${tuned.boosts.join(" + ")} enhanced the pass` : "";
+  const label = d.scalable ? `${d.name} · ${quote.tier.name}` : d.name;
+  const strategicSpend = [...run.strategicSpend, { id: `int_${run.week}_${projectId}_${d.id}_${parsed.tier}`, label, amount: quote.cost, week: run.week, projectId }];
+  const previousLevel = d.capability ? productionCapability(run, d.capability).level : 0;
+  const nextCapability = d.capability ? productionCapability({ strategicSpend }, d.capability) : null;
+  const capabilityNotice = nextCapability && nextCapability.level > previousLevel
+    ? ` · ${nextCapability.name} rises to Lv${nextCapability.level}`
+    : "";
+  const capital = quote.boosts.length ? ` · ${quote.boosts.join(" + ")} enhanced the pass` : "";
+  const effects = [
+    gain > 0 ? `+${gain} ${point}` : null,
+    quote.issueDelta < 0 ? `${Math.abs(quote.issueDelta)} note${Math.abs(quote.issueDelta) === 1 ? "" : "s"} repaired` : quote.issueDelta > 0 ? `+${quote.issueDelta} rework note${quote.issueDelta === 1 ? "" : "s"}` : null,
+    quote.hype !== 0 ? `${quote.hype > 0 ? "+" : ""}${quote.hype} hype` : null,
+    quote.days > 0 ? `+${quote.days} schedule days` : null,
+  ].filter(Boolean).join(" · ");
   return {
     ...run,
-    cash: run.cash - d.cost,
+    cash: run.cash - quote.cost,
     projects: run.projects.map((x) => x.id === projectId ? updated : x),
-    strategicSpend: [...run.strategicSpend, { id: `int_${run.week}_${projectId}_${id}`, label: d.name, amount: d.cost, week: run.week, projectId }],
-    notices: [...run.notices, `${success ? "✅" : "⚠️"} ${d.name} on “${p.draft.title}”: ${success ? `+${gain} ${point}` : "limited improvement and an extra note"}${capital} (−£${d.cost.toLocaleString("en-GB")}).`],
+    strategicSpend,
+    notices: [...run.notices, `${success ? "✅" : "⚠️"} ${quote.tier.name} ${d.name} on “${p.draft.title}”: ${success ? (effects || "completed") : `limited improvement${gain > 0 ? ` (+${gain} ${point})` : ""}`}${capital} (−£${quote.cost.toLocaleString("en-GB")})${capabilityNotice}.`].slice(-40),
   };
 }
 
