@@ -150,9 +150,7 @@ function tunedIntervention(run: RunState, d: InterventionDef) {
     risk *= .8;
     boosts.push("Private Screening Theatre");
   }
-  if (run.capitalProjects.includes("distribution_network") && d.id === "launch_upgrade") {
-    boosts.push("Worldwide Distribution Network");
-  }
+  if (run.capitalProjects.includes("distribution_network") && d.id === "launch_upgrade") boosts.push("Worldwide Distribution Network");
   return { points, risk, issueDelta, boosts };
 }
 
@@ -182,7 +180,7 @@ export function interventionQuote(run: RunState, d: InterventionDef, tierId: Inv
   return {
     intervention: d,
     tier,
-    cost: round5k(d.cost * tier.costMult),
+    cost: tierId === "standard" ? d.cost : round5k(d.cost * tier.costMult),
     points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult)),
     issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult),
     hype: scaleSigned(d.hype ?? 0, tier.hypeMult * (d.capability === "marketing" ? capabilityMult : 1) * marketingCapitalMult),
@@ -229,9 +227,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
   const strategicSpend = [...run.strategicSpend, { id: `int_${run.week}_${projectId}_${d.id}_${parsed.tier}`, label, amount: quote.cost, week: run.week, projectId }];
   const previousLevel = d.capability ? productionCapability(run, d.capability).level : 0;
   const nextCapability = d.capability ? productionCapability({ strategicSpend }, d.capability) : null;
-  const capabilityNotice = nextCapability && nextCapability.level > previousLevel
-    ? ` · ${nextCapability.name} rises to Lv${nextCapability.level}`
-    : "";
+  const capabilityNotice = nextCapability && nextCapability.level > previousLevel ? ` · ${nextCapability.name} rises to Lv${nextCapability.level}` : "";
   const capital = quote.boosts.length ? ` · ${quote.boosts.join(" + ")} enhanced the pass` : "";
   const effects = [
     gain > 0 ? `+${gain} ${point}` : null,
