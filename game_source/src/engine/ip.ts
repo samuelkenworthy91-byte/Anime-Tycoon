@@ -61,7 +61,7 @@ export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
   };
 });
 
-export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; /** AUCTION_AWARD_PROVENANCE_V1 */ acquisition?: "auction"; auctionId?: string; ownerStudioId?: string; }
+export interface IPContract { ipId:string; acquiredWeek:number; expiresWeek:number; purchasePrice:number; royaltyRate:number; ownershipShare:number; sequelRights:boolean; merchRights:boolean; internationalRights:boolean; adaptations:number; bestScore:number; discoveredArcs:string[]; /** permanent negotiating leverage earned by a Big Three adaptation */ bigThreePrestige?: boolean; /** AUCTION_AWARD_PROVENANCE_V1 */ acquisition?: "auction"; auctionId?: string; ownerStudioId?: string; }
 export interface AuctionBid { studioId:"player"|string; amount:number; week:number; }
 export interface IPAuction { id:string; ipId:string; type:AuctionType; opensWeek:number; closesWeek:number; currentBid:number; leadingStudioId:string|null; playerMaxBid:number; bids:AuctionBid[]; appraisalLevel:0|1|2|3; resolved:boolean; winnerId:string|null; winningBid:number; playerSkipped?:boolean; }
 export interface IPMarketState { nextAuctionWeek:number; auctions:IPAuction[]; owned:Record<string,IPContract>; rivalOwned:Record<string,string>; history:string[]; studioArcs:string[]; legalReputation:number; pendingPromptId:string|null; annualAuctionVersion:1; lastCommissionedAuctionYear:number; }

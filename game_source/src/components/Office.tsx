@@ -109,6 +109,7 @@ import { cn } from "../utils/cn";
 import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
+import BigThreeBoard from "./BigThreeBoard";
 
 /* =================================================================== */
 export default function Office({
@@ -933,6 +934,7 @@ export default function Office({
 
       {modal === "hof" && (
         <Modal title="STUDIO RECORDS" onClose={() => setModal(null)}>
+          <BigThreeBoard run={run} />
           <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-cyanx">
             <Crown size={14} /> ALL-TIME INDUSTRY RECORDS
           </div>

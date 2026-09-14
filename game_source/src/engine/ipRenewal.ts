@@ -38,7 +38,8 @@ export function ipRenewalCost(market: IPMarketState, ipId: string, legalTier = 0
   const adaptationPremium = Math.min(0.55, Math.max(0, contract.adaptations) * 0.10);
   const scorePremium = Math.min(0.45, Math.max(0, contract.bestScore - 24) * 0.025);
   const prestigePremium = Math.min(0.38, ip.prestige / 260);
-  const legalDiscount = Math.min(0.24, Math.max(0, legalTier) * 0.045 + Math.max(0, market.legalReputation) * 0.004);
+  const prestigeLeverage = contract.bigThreePrestige ? 0.12 : 0;
+  const legalDiscount = Math.min(0.34, Math.max(0, legalTier) * 0.045 + Math.max(0, market.legalReputation) * 0.004 + prestigeLeverage);
   const marketValue = ip.rightsBaseValue * (0.52 + adaptationPremium + scorePremium + prestigePremium);
   return rounded5k(Math.max(contract.purchasePrice * 0.35, marketValue * (1 - legalDiscount)));
 }

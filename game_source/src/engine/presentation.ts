@@ -20,6 +20,7 @@ export type PresentationScreen =
 export const PRESENTATION_PRIORITY = {
   criticalReveal: 100,
   playerDecision: 80,
+  culturalReveal: 70,
   productionReveal: 60,
   majorAnnouncement: 50,
   levelUp: 20,

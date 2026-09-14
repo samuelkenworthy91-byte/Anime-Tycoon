@@ -23,6 +23,7 @@ import {
   type RunState,
 } from "./engine/state";
 import { advanceAwardsWeek, pendingNominationAnnouncement, restoreAwardNominationMetadata } from "./engine/awardCycle";
+import { advanceBigThreeWeek, pendingBigThreeReveal, syncBigThreeEra } from "./engine/bigThree";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
@@ -53,6 +54,7 @@ import { canPresentDeferredLevelUp } from "./engine/presentation";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
+import BigThreeReveal from "./components/BigThreeReveal";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -161,21 +163,26 @@ export default function App() {
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
   const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
   const sellerAuctionOpen = !!run?.sellerAuction;
+  const bigThreePresentation = run ? pendingBigThreeReveal(run) : null;
+  const bigThreeRevealOpen = !!bigThreePresentation && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
-  const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
+  const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen;
   const levelUpPresentationAllowed = canPresentDeferredLevelUp({
     screen,
     paused,
     sellerAuctionOpen,
     decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
     auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
-  }) && !nominationAnnouncementOpen;
+  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen;
   useEffect(() => {
     if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
   }, [pendingLevelUp, levelUpPresentationAllowed]);
   useEffect(() => {
     if (nominationAnnouncementOpen) setTimeSpeed(0);
   }, [nominationAnnouncementOpen]);
+  useEffect(() => {
+    if (bigThreeRevealOpen) setTimeSpeed(0);
+  }, [bigThreeRevealOpen]);
   useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
 
   /* ------------------------------------------------------- game clock */
@@ -202,7 +209,7 @@ export default function App() {
           if (daily.attention) setTimeSpeed(0);
           if (weekBoundary) {
             const before = n;
-            n = advanceAwardsWeek(n, { liveDaysAlreadyApplied: true });
+            n = advanceBigThreeWeek(advanceAwardsWeek(n, { liveDaysAlreadyApplied: true }));
             const attention =
               n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
               n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
@@ -253,7 +260,8 @@ export default function App() {
     primeAudio();
     sfx.fanfare();
     const migrated = migrateRun(save.run);
-    const resumed = restoreAwardNominationMetadata(migrated, save.run.yearShows);
+    const restored = restoreAwardNominationMetadata(migrated, save.run.yearShows);
+    const resumed = syncBigThreeEra(restored);
     setMeta(save.meta);
     setRun(resumed);
     setReleased(null);
@@ -746,6 +754,10 @@ export default function App() {
               setRun((current) => current ? (resolveStudioEvent(current, current.studioEvents[0].id, choiceId) ?? current) : current);
             }}
           />
+        )}
+
+        {run && bigThreeRevealOpen && bigThreePresentation && (
+          <BigThreeReveal run={run} presentation={bigThreePresentation} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
         )}
 
         {run && nominationAnnouncementOpen && (

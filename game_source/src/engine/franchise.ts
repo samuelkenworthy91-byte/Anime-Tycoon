@@ -77,6 +77,8 @@ export interface Franchise {
   alive: boolean;
   /** irreversible sale of the original IP to an outside buyer */
   soldTo?: { id: string; name: string; kind: "network" | "rival"; week: number; price: number };
+  /** permanent cultural prestige once an entry is named to the era's Big Three */
+  bigThree?: boolean;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -100,7 +102,8 @@ export function merchValueOf(fr: Franchise): number {
   const popF = 0.3 + fr.popularity / 100;
   const charF = 1 + (top ? top.popularity : 0) / 400;
   const cultF = fr.cult ? 1.35 : 1;
-  return Math.round((base * popF * charF * cultF) / 1_000) * 1_000;
+  const bigThreeF = fr.bigThree ? 1.25 : 1;
+  return Math.round((base * popF * charF * cultF * bigThreeF) / 1_000) * 1_000;
 }
 
 /* ======================================================== continuations */

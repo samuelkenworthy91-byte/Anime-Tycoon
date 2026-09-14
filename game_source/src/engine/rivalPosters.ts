@@ -47,6 +47,9 @@ export const RIVAL_POSTER_SLOTS: RivalPoster[] = MANIFEST.posters;
 
 const BY_ID = new Map(RIVAL_POSTERS.map((p) => [p.id, p]));
 
+/** Dedicated Year-6 Big Three flagship art; never consumed by routine rival slates. */
+export const BIG_THREE_RESERVED_POSTER_IDS = new Set(["sunrise_p003"]);
+
 export const rivalPosterById = (id: string | null | undefined): RivalPoster | null =>
   (id && BY_ID.get(id)) || null;
 
@@ -96,7 +99,7 @@ export function pickRivalPoster(ctx: PosterPickCtx): RivalPoster | null {
   if (!studioPool.length) return null;
   /* Anime Type is a hard visual constraint: a Shonen release can never be
      assigned Shojo-only key art, and vice versa. */
-  const pool = studioPool.filter((p) => p.animeTypes.includes(ctx.animeType));
+  const pool = studioPool.filter((p) => p.animeTypes.includes(ctx.animeType) && !BIG_THREE_RESERVED_POSTER_IDS.has(p.id));
   if (!pool.length) return null;
 
   /* franchise family continuity: prefer a yet-unused image from the same

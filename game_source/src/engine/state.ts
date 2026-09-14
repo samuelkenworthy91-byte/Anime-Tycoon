@@ -232,6 +232,7 @@ import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPo
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
 import { trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
+import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -393,6 +394,8 @@ export interface RunState {
   revBoostUntil: number;
   /** auction calendar, adaptation contracts and studio-wide discovered story blueprints */
   ipMarket: IPMarketState;
+  /** Year-6+ fan-decided cultural canon. Exactly three slots can ever be filled. */
+  bigThree: BigThreeState;
   /** one-off strategic spending is recorded for finance/history UI */
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
   capitalProjects: string[];
@@ -541,6 +544,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     staffResting: {},
     revBoostUntil: 0,
     ipMarket: initIPMarket(0),
+    bigThree: initialBigThreeState(),
     strategicSpend: [],
     capitalProjects: [],
     staffContracts: {},
@@ -667,6 +671,7 @@ export function migrateRun(raw: unknown): RunState {
     arcGenreKnowledge: migratedResearchArcGenreKnowledge,
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     ipMarket: migrateIPMarket((r as { ipMarket?: unknown }).ipMarket, r.week ?? 0),
+    bigThree: migrateBigThreeState((r as { bigThree?: unknown }).bigThree),
     strategicSpend: Array.isArray(r.strategicSpend) ? r.strategicSpend : [],
     capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
     staffContracts: r.staffContracts && typeof r.staffContracts === "object" ? r.staffContracts : {},
@@ -2727,7 +2732,7 @@ export function releaseProject(
   const runnerCareerGain = gainShowrunnerXp(r.showrunner, r.showrunnerCareer, SHOWRUNNER_RELEASE_XP(result.total, result.tier === "hit" || result.hallOfFame));
   if (runnerCareerGain.levelsGained > 0) notices.push(`${r.showrunnerName || showrunnerDefaultName(r.showrunner)} reaches Showrunner Lv${runnerCareerGain.career.level}!`);
 
-  const run: RunState = {
+  const baseRun: RunState = {
     ...r,
     showrunnerCareer: runnerCareerGain.career,
     cash: r.cash - extra.spent + bonusCash,
@@ -2810,6 +2815,15 @@ export function releaseProject(
     /* the finished team is freed for the next production */
     projects: r.projects.map((x) => (x.id === projectId ? { ...released, staffIds: [] } : x)),
   };
+
+  const run = recognisePlayerBigThreeRelease(baseRun, {
+    projectId,
+    draft,
+    score: result.total,
+    points: result.points,
+    reach: Math.round(result.fans),
+    franchiseKey: fkey,
+  });
 
   return { run, result };
 }
