@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BarChart3, Gavel, Handshake, Lock, Scale, ScrollText, Trophy } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, commissionRightsAuction, commissionedAuctionBlock, commissionedAuctionFee, genreLabel, ipById, negotiateRights } from "../engine/ip";
+import { IP_AUTO_RENEW_HEADROOM, ipRenewalQuote, renewIPContract, setIPAutoRenew } from "../engine/ipRenewal";
 import { formatGBP, formatGBPShort } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
@@ -55,11 +56,37 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
     };
   });
 
+  const renew = (ipId: string) => setRun((r) => {
+    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    if (!quote?.available || r.cash < quote.cost) return r;
+    const out = renewIPContract(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    if (!out) return r;
+    return {
+      ...r,
+      cash: r.cash - out.cost,
+      ipMarket: out.market,
+      strategicSpend: [...r.strategicSpend, { id: `ip_renew_manual_${r.week}_${ipId}`, label: `IP rights renewal: ${ipById(ipId)?.title ?? ipId}`, amount: out.cost, week: r.week }],
+      notices: [...r.notices, `✅ ${ipById(ipId)?.title ?? ipId} rights renewed for ${formatGBP(out.cost)}.`],
+    };
+  });
+
+  const toggleAutoRenew = (ipId: string) => setRun((r) => {
+    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    if (!quote) return r;
+    const enabled = !quote.autoRenew;
+    const cap = Math.max(5_000, Math.round((quote.cost * IP_AUTO_RENEW_HEADROOM) / 5_000) * 5_000);
+    return {
+      ...r,
+      ipMarket: setIPAutoRenew(r.ipMarket, ipId, enabled, cap),
+      notices: [...r.notices, `${ipById(ipId)?.title ?? ipId}: auto-renew ${enabled ? `enabled up to ${formatGBP(cap)}` : "disabled"}.`],
+    };
+  });
+
   return <div className="space-y-4">
     <div className="rounded-xl border border-gold/35 bg-gold/5 p-3 text-xs text-paper/65">
       <b className="text-gold">RIGHTS MARKET</b> · A rights opportunity has a random chance to appear and can fire at most once per 48-week industry year. Entering launches the live auction room; returned opportunities remain here until the end of the week.
       <div className="mt-2 flex flex-wrap gap-2 text-[9px]">
-        <span className={cn("rounded border px-2 py-1", legal ? "border-gold/40 text-gold" : "border-line text-paper/40")}>LEGAL DESK T{legal} · {legal ? `+${legal * 14}% negotiation chance` : "build for better rights terms"}</span>
+        <span className={cn("rounded border px-2 py-1", legal ? "border-gold/40 text-gold" : "border-line text-paper/40")}>LEGAL DESK T{legal} · {legal ? `+${legal * 14}% negotiation chance + cheaper renewals` : "build for better rights terms"}</span>
         <span className={cn("rounded border px-2 py-1", data ? "border-cyanx/40 text-cyanx" : "border-line text-paper/40")}>DATA LAB T{data} · {data ? `${data} appraisal layer${data > 1 ? "s" : ""} pre-revealed` : "build to reduce uncertainty"}</span>
       </div>
     </div>
@@ -104,19 +131,28 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
       <div className="mb-2 flex items-center gap-2 text-xs font-black tracking-widest text-cyanx"><ScrollText size={14} /> OWNED IP ({owned.length})</div>
       {owned.length === 0 ? <div className="rounded-xl border border-dashed border-line p-4 text-center text-xs text-paper/45">Win an auction to build a licensed slate.</div> : <div className="space-y-3">{owned.map((c) => {
         const ip = ipById(c.ipId)!;
+        const renewal = ipRenewalQuote(run.ipMarket, c.ipId, run.week, legal);
         const expired = c.expiresWeek <= run.week;
-        return <div key={c.ipId} className={cn("ink-card flex gap-3 p-3", expired && "opacity-55")}>
+        const remaining = Math.max(0, c.expiresWeek - run.week);
+        return <div key={c.ipId} className={cn("ink-card flex gap-3 p-3", expired && "border-neon/40 bg-neon/5")}>
           <KeyArt ipId={ip.id} />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2"><b>{ip.title}</b>{c.bestScore >= 32 && <Trophy size={13} className="text-gold" />}</div>
-            <div className="mt-1 text-[10px] text-paper/55">Royalty {Math.round(c.royaltyRate * 100)}% · Ownership {Math.round(c.ownershipShare * 100)}% · {Math.max(0, c.expiresWeek - run.week)} wk remaining · {c.adaptations} adaptation(s)</div>
+            <div className="flex items-center gap-2"><b>{ip.title}</b>{c.bestScore >= 32 && <Trophy size={13} className="text-gold" />}{expired && <span className="rounded border border-neon/50 px-1.5 py-.5 text-[8px] font-black text-neon">EXPIRED</span>}</div>
+            <div className="mt-1 text-[10px] text-paper/55">Royalty {Math.round(c.royaltyRate * 100)}% · Ownership {Math.round(c.ownershipShare * 100)}% · {expired ? "rights expired" : `${remaining} wk remaining`} · {c.adaptations} adaptation(s)</div>
             <div className="mt-1 flex flex-wrap gap-1 text-[8px]">{[["SEQUEL", c.sequelRights], ["MERCH", c.merchRights], ["INTL", c.internationalRights]].map(([x, on]) => <span key={String(x)} className={cn("rounded border px-1.5 py-.5", on ? "border-mint/40 text-mint" : "border-line text-paper/35")}>{on ? "✓ " : <Lock size={7} className="inline" />}{x}</span>)}</div>
+            {renewal?.available && <div className={cn("mt-2 rounded-lg border p-2", expired ? "border-neon/35 bg-neon/5" : "border-gold/25 bg-gold/5")}>
+              <div className="text-[9px] leading-relaxed text-paper/55"><b className={expired ? "text-neon" : "text-gold"}>{expired ? "RIGHTS LAPSED" : "RENEWAL WINDOW OPEN"}</b> · Current quote {formatGBPShort(renewal.cost)}. Successful properties become more expensive to retain; your Legal Desk discounts the quote.</div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <Btn variant="gold" disabled={run.cash < renewal.cost} onClick={() => renew(c.ipId)}>RENEW · {formatGBPShort(renewal.cost)}</Btn>
+                <Btn variant={renewal.autoRenew ? "cyan" : "ghost"} onClick={() => toggleAutoRenew(c.ipId)}>{renewal.autoRenew ? `AUTO ✓ ≤${formatGBPShort(renewal.autoRenewMaxCost)}` : "ENABLE AUTO-RENEW"}</Btn>
+              </div>
+            </div>}
             <div className="mt-2 flex flex-wrap gap-1.5">
               <Btn variant="primary" disabled={expired} onClick={() => onAdapt(ip.id)}>ADAPT</Btn>
-              {!c.sequelRights && ip.sequelRightsAvailable && <Btn variant="ghost" onClick={() => negotiate(ip.id, "sequel")}><Scale size={11} /> SEQUEL</Btn>}
-              {!c.merchRights && ip.merchRightsAvailable && <Btn variant="ghost" onClick={() => negotiate(ip.id, "merch")}>MERCH</Btn>}
-              {!c.internationalRights && ip.internationalRightsAvailable && <Btn variant="ghost" onClick={() => negotiate(ip.id, "international")}>INTL</Btn>}
-              <Btn variant="ghost" onClick={() => negotiate(ip.id, "royalty")}>ROYALTY</Btn><Btn variant="ghost" onClick={() => negotiate(ip.id, "ownership")}>OWNERSHIP</Btn>
+              {!c.sequelRights && ip.sequelRightsAvailable && <Btn variant="ghost" disabled={expired} onClick={() => negotiate(ip.id, "sequel")}><Scale size={11} /> SEQUEL</Btn>}
+              {!c.merchRights && ip.merchRightsAvailable && <Btn variant="ghost" disabled={expired} onClick={() => negotiate(ip.id, "merch")}>MERCH</Btn>}
+              {!c.internationalRights && ip.internationalRightsAvailable && <Btn variant="ghost" disabled={expired} onClick={() => negotiate(ip.id, "international")}>INTL</Btn>}
+              <Btn variant="ghost" disabled={expired} onClick={() => negotiate(ip.id, "royalty")}>ROYALTY</Btn><Btn variant="ghost" disabled={expired} onClick={() => negotiate(ip.id, "ownership")}>OWNERSHIP</Btn>
             </div>
           </div>
         </div>;
