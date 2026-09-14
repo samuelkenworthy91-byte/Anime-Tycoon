@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Crown, Lock, Radio, Sparkles, Star, Users } from "lucide-react";
+import { Crown, Radio, Sparkles, Star, Users } from "lucide-react";
 import {
   acknowledgeBigThreeReveal,
   resolveBigThreeSlotOwner,
@@ -9,7 +9,7 @@ import {
 import type { RunState } from "../engine/state";
 import { Btn } from "../fx/fx";
 import { primeAudio, sfx } from "../engine/audio";
-import { BigThreePoster } from "./BigThreeBoard";
+import { BigThreeMountain } from "./BigThreeMountain";
 import "./bigThreeReveal.css";
 
 type RevealBeat = "blackout" | "consensus" | "wall" | "impact" | "legacy";
@@ -73,7 +73,7 @@ export default function BigThreeReveal({
             next={next}
           />
         )}
-        {beat === "impact" && <ImpactBeat slot={slot} intro={intro} next={next} />}
+        {beat === "impact" && <ImpactBeat slot={slot} slots={resolvedSlots} intro={intro} next={next} />}
         {beat === "legacy" && (
           <LegacyBeat
             slot={slot}
@@ -135,7 +135,7 @@ function ConsensusBeat({ chatter, next }: { chatter: string[]; next: () => void 
         <span>×</span>
         <span>MOMENTUM</span>
       </div>
-      <Btn big variant="gold" className="mx-auto mt-8 w-full max-w-sm" onClick={next}>SHOW ME THE CANON</Btn>
+      <Btn big variant="gold" className="mx-auto mt-8 w-full max-w-sm" onClick={next}>SHOW ME THE MONUMENT</Btn>
     </div>
   );
 }
@@ -157,53 +157,35 @@ function WallBeat({
       <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.06] px-3 py-1 text-[9px] font-black tracking-[0.25em] text-gold/80">
         <Crown size={12} /> THE BIG THREE
       </div>
-      <h2 className="big3-wordmark mt-3 font-display text-3xl font-black sm:text-5xl">THREE NAMES DEFINE AN ERA.</h2>
+      <h2 className="big3-wordmark mt-3 font-display text-3xl font-black sm:text-5xl">THREE NAMES ARE CARVED INTO AN ERA.</h2>
       <p className="mx-auto mt-2 max-w-2xl text-[10px] text-paper/45 sm:text-xs">
-        {intro ? "The first name has crystallised. Two places remain unwritten." : "One of the empty places is no longer empty."}
+        {intro ? "One place in the mountain is about to stop being blank. Two remain for history to decide." : "The cliff face is changing again. Another name has become too large to fade."}
       </p>
-      <div className="mt-7 grid grid-cols-3 gap-2 sm:gap-4">
-        {wall.map((entry, index) => {
-          const incoming = index === incomingIndex;
-          return (
-            <div key={entry?.id ?? `slot-${index}`} className={`big3-monolith rounded-2xl p-2 sm:p-3 ${incoming ? "big3-monolith-incoming" : ""}`}>
-              {entry && !incoming ? (
-                <>
-                  <div className="mx-auto max-w-[180px]"><BigThreePoster slot={entry} studio={entry.originalStudio} /></div>
-                  <div className="mt-2 truncate font-display text-[10px] font-black text-gold sm:text-sm">{entry.title}</div>
-                  <div className="truncate text-[7px] font-bold tracking-wider text-paper/35 sm:text-[9px]">{entry.originalStudio}</div>
-                </>
-              ) : (
-                <div className="big3-seal flex h-full min-h-[160px] flex-col items-center justify-center rounded-xl sm:min-h-[250px]">
-                  <Lock size={incoming ? 28 : 20} className={incoming ? "text-gold" : "text-paper/20"} />
-                  <div className={`mt-3 font-display font-black ${incoming ? "text-gold" : "text-paper/25"}`}>SLOT {index + 1}</div>
-                  <div className="mt-1 text-[7px] font-black tracking-[0.2em] text-paper/30 sm:text-[9px]">{incoming ? "CONSENSUS LOCKED" : "UNCLAIMED"}</div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="mt-6">
+        <BigThreeMountain slots={wall} incomingIndex={incomingIndex} concealIncoming />
       </div>
-      <Btn big variant="gold" className="mx-auto mt-7 w-full max-w-sm" onClick={next}>REVEAL THE NAME</Btn>
+      <Btn big variant="gold" className="mx-auto mt-7 w-full max-w-sm" onClick={next}>CARVE THE NAME</Btn>
     </div>
   );
 }
 
-function ImpactBeat({ slot, intro, next }: { slot: BigThreeSlot; intro: boolean; next: () => void }) {
+function ImpactBeat({ slot, slots, intro, next }: { slot: BigThreeSlot; slots: BigThreeSlot[]; intro: boolean; next: () => void }) {
+  const wall = Array.from({ length: 3 }, (_, index) => slots[index] ?? null);
   return (
-    <div className="big3-stage w-full max-w-4xl text-center">
+    <div className="big3-stage w-full max-w-5xl text-center">
       <div className="big3-flash pointer-events-none fixed inset-0 z-20" />
       <div className="relative z-30">
-        <div className="big3-impact mx-auto w-full max-w-[260px] sm:max-w-[330px]">
-          <BigThreePoster slot={slot} studio={slot.originalStudio} />
+        <div className="big3-impact mx-auto w-full">
+          <BigThreeMountain slots={wall} focusSlotId={slot.id} />
         </div>
-        <div className="big3-impact mt-6" style={{ animationDelay: ".14s" }}>
-          <div className="font-jp text-[9px] tracking-[0.48em] text-gold/60">{intro ? "THE FIRST NAME" : "THE NEW NAME"}</div>
+        <div className="big3-impact mt-5" style={{ animationDelay: ".14s" }}>
+          <div className="font-jp text-[9px] tracking-[0.48em] text-gold/60">{intro ? "THE FIRST MONUMENT" : "THE NEW MONUMENT"}</div>
           <h2 className="big3-wordmark mx-auto mt-2 max-w-3xl font-display text-4xl font-black leading-[0.9] text-gold sm:text-6xl">{slot.title}</h2>
           <div className="mt-3 text-sm font-black tracking-[0.22em] text-paper/72">{slot.originalStudio}</div>
           <div className="mx-auto mt-5 h-px w-40 bg-gradient-to-r from-transparent via-gold/70 to-transparent" />
-          <div className="mt-4 text-[10px] font-black tracking-[0.28em] text-paper/40">HAS ENTERED THE BIG THREE</div>
+          <div className="mt-4 text-[10px] font-black tracking-[0.28em] text-paper/40">CARVED INTO THE BIG THREE</div>
         </div>
-        <Btn big variant="gold" className="mx-auto mt-8 w-full max-w-sm" onClick={next}>SEE WHY IT STUCK</Btn>
+        <Btn big variant="gold" className="mx-auto mt-8 w-full max-w-sm" onClick={next}>SEE WHY IT ENDURES</Btn>
       </div>
     </div>
   );
@@ -227,8 +209,8 @@ function LegacyBeat({
         <h2 className="mt-3 font-display text-3xl font-black sm:text-5xl">{slot.title}</h2>
         <p className="mx-auto mt-3 max-w-2xl text-[10px] leading-relaxed text-paper/50 sm:text-xs">
           {intro
-            ? "The era now has its first monument. From this point onward, every studio is competing not just for scores or trophies, but for one of the two names fandom will remember beside it."
-            : `No committee can revoke this. “${slot.title}” now belongs to the permanent cultural record of this era.`}
+            ? "The era now has its first monument. From this point onward, every studio is competing not just for scores or trophies, but to have its work carved beside it."
+            : `No committee can revoke this. “${slot.title}” now occupies a permanent place in the cultural landscape of this era.`}
         </p>
       </div>
 
@@ -253,7 +235,7 @@ function LegacyBeat({
         </div>
       </div>
 
-      <Btn big variant="gold" className="mx-auto mt-6 w-full max-w-sm" onClick={finish}>LOCK IT INTO HISTORY</Btn>
+      <Btn big variant="gold" className="mx-auto mt-6 w-full max-w-sm" onClick={finish}>LEAVE IT IN STONE</Btn>
     </div>
   );
 }
