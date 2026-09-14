@@ -34,6 +34,18 @@ describe("playtest regression guards", () => {
     expect(css).toContain("safe-area-inset-top");
   });
 
+  it("lets Space pause and resume the live clock at its previous speed without stealing typing spaces", () => {
+    const app = readFileSync("src/App.tsx", "utf8");
+    expect(app).toContain('lastClockSpeedRef');
+    expect(app).toContain('e.code === "Space"');
+    expect(app).toContain('!e.repeat');
+    expect(app).toContain('tag === "INPUT"');
+    expect(app).toContain('tag === "TEXTAREA"');
+    expect(app).toContain('target.isContentEditable');
+    expect(app).toContain('return lastClockSpeedRef.current');
+    expect(app).toContain('pendingLevelUp && levelUpPresentationAllowed');
+  });
+
   it("keeps the worker dossier close target deliberately below the very top edge", () => {
     const css = readFileSync("src/mobile-layout.css", "utf8");
     expect(css).toContain("margin-top: 5px");

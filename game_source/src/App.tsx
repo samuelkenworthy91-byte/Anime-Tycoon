@@ -84,8 +84,12 @@ export default function App() {
   const [clockPhase, setClockPhase] = useState(0);
   const dayAccRef = useRef(0);
   const dayCountRef = useRef(0);
+  const lastClockSpeedRef = useRef<1 | 4 | 8 | 12>(1);
 
   const canPause = screen !== "title" && screen !== "gameover" && screen !== "retrospective";
+  useEffect(() => {
+    if (timeSpeed > 0) lastClockSpeedRef.current = timeSpeed;
+  }, [timeSpeed]);
   /* bumped whenever a save is written/cleared so the title screen re-reads it */
   const [saveStamp, setSaveStamp] = useState(0);
 
@@ -502,7 +506,34 @@ export default function App() {
 
   /* --------------------------------------------------------- hotkeys */
   useEffect(() => {
+    const isTextEntryTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable || !!target.closest('[contenteditable="true"], [role="textbox"]');
+    };
     const h = (e: KeyboardEvent) => {
+      const liveEditing = screen === "produce" && focus?.milestone === "edit" && !!focus.projectId;
+      const clockHotkeyAllowed =
+        (screen === "office" || liveEditing) &&
+        !paused &&
+        !sellerAuctionOpen &&
+        !bigThreeRevealOpen &&
+        !nominationAnnouncementOpen &&
+        !(pendingLevelUp && levelUpPresentationAllowed) &&
+        (run?.studioEvents.length ?? 0) === 0 &&
+        !run?.ipMarket.pendingPromptId &&
+        !released;
+
+      if ((e.code === "Space" || e.key === " ") && !e.repeat && clockHotkeyAllowed && !isTextEntryTarget(e.target)) {
+        e.preventDefault();
+        setTimeSpeed((speed) => {
+          if (speed === 0) return lastClockSpeedRef.current;
+          lastClockSpeedRef.current = speed;
+          return 0;
+        });
+        sfx.click();
+        return;
+      }
       if (e.key === "Escape" || e.key.toLowerCase() === "p") {
         if (canPause) {
           setPaused((p) => !p);
@@ -517,7 +548,7 @@ export default function App() {
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [canPause]);
+  }, [canPause, screen, focus?.milestone, focus?.projectId, paused, sellerAuctionOpen, bigThreeRevealOpen, nominationAnnouncementOpen, pendingLevelUp, levelUpPresentationAllowed, run?.studioEvents.length, run?.ipMarket.pendingPromptId, released]);
 
   const pauseMenu = useMemo(
     () => (
@@ -551,7 +582,7 @@ export default function App() {
             Autosaving continuously — SAVE GAME writes a slot you can come back to.
           </div>
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
-            <Keyboard size={12} /> Staff run production automatically · ENTER next · M mute · ESC pause
+            <Keyboard size={12} /> SPACE clock pause/resume · M mute · ESC pause menu
           </div>
         </div>
       </div>
