@@ -74,6 +74,314 @@
     #08050d;
 }
 
+.big3-mountain-scene {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 300px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(255,214,106,.22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 76% 17%, rgba(255,221,145,.18), transparent 7%),
+    radial-gradient(circle at 50% 36%, rgba(121,92,176,.20), transparent 28%),
+    linear-gradient(180deg, #0c1020 0%, #171628 38%, #09080d 100%);
+  box-shadow:
+    inset 0 0 90px rgba(0,0,0,.65),
+    0 24px 65px rgba(0,0,0,.42);
+}
+
+.big3-mountain-compact {
+  min-height: 220px;
+  aspect-ratio: 16 / 7.7;
+  border-radius: 18px;
+}
+
+.big3-mountain-skyglow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.42) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 28% 9%, rgba(255,255,255,.24) 0 1px, transparent 1.3px),
+    radial-gradient(circle at 48% 17%, rgba(255,214,106,.28) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 68% 10%, rgba(255,255,255,.30) 0 1px, transparent 1.3px),
+    radial-gradient(circle at 86% 24%, rgba(255,255,255,.32) 0 1px, transparent 1.4px),
+    linear-gradient(180deg, rgba(31,28,60,.08), rgba(5,4,9,.4));
+}
+
+.big3-mountain-distant {
+  position: absolute;
+  z-index: 1;
+  left: -4%;
+  right: -4%;
+  bottom: 25%;
+  height: 52%;
+  clip-path: polygon(0 66%, 11% 41%, 20% 55%, 31% 20%, 41% 50%, 54% 13%, 65% 48%, 75% 26%, 86% 51%, 100% 32%, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, #343443 0%, #171720 58%, #0b0a0e 100%);
+  filter: blur(.5px);
+  opacity: .8;
+}
+
+.big3-mountain-cliff {
+  position: absolute;
+  z-index: 2;
+  left: -3%;
+  right: -3%;
+  bottom: -5%;
+  height: 80%;
+  clip-path: polygon(0 42%, 8% 31%, 18% 38%, 29% 17%, 39% 29%, 51% 9%, 62% 31%, 72% 17%, 83% 35%, 92% 27%, 100% 40%, 100% 100%, 0 100%);
+  background:
+    radial-gradient(ellipse at 15% 35%, rgba(207,190,161,.20), transparent 18%),
+    radial-gradient(ellipse at 70% 28%, rgba(223,207,176,.15), transparent 20%),
+    radial-gradient(ellipse at 46% 54%, rgba(30,27,24,.40), transparent 30%),
+    repeating-linear-gradient(102deg, rgba(255,255,255,.035) 0 1px, transparent 1px 11px),
+    linear-gradient(180deg, #82796c 0%, #5f584e 38%, #37332e 72%, #1a1715 100%);
+  box-shadow: inset 0 22px 38px rgba(255,239,206,.07), inset 0 -65px 90px rgba(0,0,0,.46);
+}
+
+.big3-mountain-cliff::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(16deg, transparent 0 18px, rgba(255,255,255,.035) 19px 20px, transparent 21px 35px),
+    repeating-linear-gradient(164deg, transparent 0 31px, rgba(0,0,0,.10) 32px 34px, transparent 35px 57px);
+  mix-blend-mode: overlay;
+  opacity: .65;
+}
+
+.big3-carving-grid {
+  position: absolute;
+  z-index: 5;
+  left: 7%;
+  right: 7%;
+  bottom: 16%;
+  align-items: end;
+}
+
+.big3-carving {
+  position: relative;
+  min-width: 0;
+  transform: translateZ(0);
+}
+
+.big3-relief-shell,
+.big3-unhewn {
+  width: min(100%, 210px);
+  margin-inline: auto;
+  aspect-ratio: 4 / 5;
+  clip-path: polygon(13% 2%, 87% 2%, 98% 17%, 94% 78%, 78% 98%, 22% 98%, 6% 78%, 2% 17%);
+}
+
+.big3-relief-shell {
+  position: relative;
+  overflow: hidden;
+  background: #6d6559;
+  filter: drop-shadow(0 11px 10px rgba(0,0,0,.42));
+  box-shadow: inset 0 0 32px rgba(0,0,0,.45);
+}
+
+.big3-relief-poster {
+  position: absolute;
+  inset: 4% 7% 6%;
+  transform: scale(1.06);
+  filter: grayscale(1) sepia(.16) saturate(.28) contrast(1.32) brightness(.78);
+  opacity: .78;
+  mix-blend-mode: luminosity;
+}
+
+.big3-relief-poster > * {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.big3-relief-stone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 34% 25%, rgba(255,245,222,.25), transparent 22%),
+    radial-gradient(circle at 68% 58%, rgba(28,24,20,.32), transparent 28%),
+    linear-gradient(112deg, rgba(255,255,255,.12), transparent 34%, rgba(0,0,0,.20) 71%, rgba(255,255,255,.04));
+  mix-blend-mode: soft-light;
+  opacity: .92;
+}
+
+.big3-relief-chisel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(82deg, transparent 0 9px, rgba(255,255,255,.065) 10px 11px, transparent 12px 19px),
+    repeating-linear-gradient(173deg, transparent 0 17px, rgba(0,0,0,.09) 18px 19px, transparent 20px 30px);
+  mix-blend-mode: overlay;
+  opacity: .7;
+}
+
+.big3-relief-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 3px rgba(231,216,187,.14),
+    inset 0 0 32px 9px rgba(0,0,0,.38),
+    inset 8px 5px 14px rgba(255,248,227,.08);
+}
+
+.big3-stone-plaque {
+  position: relative;
+  z-index: 3;
+  width: 90%;
+  margin: -5px auto 0;
+  padding: 7px 6px 6px;
+  clip-path: polygon(4% 0, 96% 0, 100% 25%, 97% 100%, 3% 100%, 0 25%);
+  background:
+    repeating-linear-gradient(165deg, rgba(255,255,255,.035) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #5a5349, #302c27);
+  box-shadow: 0 5px 11px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.08);
+  text-shadow: 0 1px 1px rgba(0,0,0,.85);
+}
+
+.big3-carving-empty {
+  display: flex;
+  align-items: end;
+}
+
+.big3-unhewn {
+  position: relative;
+  display: flex;
+  min-height: 185px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #c9b898;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,235,190,.08), transparent 24%),
+    repeating-linear-gradient(101deg, rgba(255,255,255,.035) 0 1px, transparent 1px 10px),
+    linear-gradient(165deg, #61594f, #312d28 68%, #1c1916);
+  box-shadow: inset 0 0 34px rgba(0,0,0,.4), 0 11px 12px rgba(0,0,0,.34);
+}
+
+.big3-unhewn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(24deg, transparent 0 22px, rgba(0,0,0,.09) 23px 24px, transparent 25px 39px),
+    radial-gradient(ellipse at 23% 72%, rgba(0,0,0,.18), transparent 20%);
+  opacity: .85;
+}
+
+.big3-unhewn-mark {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(214,195,160,.20);
+  border-radius: 999px;
+  background: rgba(18,16,14,.24);
+  color: rgba(228,209,176,.64);
+  box-shadow: inset 0 0 20px rgba(0,0,0,.24);
+}
+
+.big3-carving-incoming {
+  z-index: 7;
+}
+
+.big3-unhewn-incoming {
+  box-shadow:
+    inset 0 0 36px rgba(255,214,106,.08),
+    0 0 42px rgba(255,214,106,.10),
+    0 11px 12px rgba(0,0,0,.34);
+  animation: big3-rock-breathe 1.65s ease-in-out infinite;
+}
+
+.big3-unhewn-incoming::after {
+  content: "";
+  position: absolute;
+  inset: 8% 12%;
+  background:
+    linear-gradient(118deg, transparent 43%, rgba(255,214,106,.78) 44% 45%, transparent 46%) 35% 25% / 40% 42% no-repeat,
+    linear-gradient(62deg, transparent 46%, rgba(255,214,106,.52) 47% 48%, transparent 49%) 61% 48% / 44% 38% no-repeat,
+    linear-gradient(146deg, transparent 46%, rgba(255,214,106,.35) 47% 48%, transparent 49%) 47% 72% / 48% 35% no-repeat;
+  filter: drop-shadow(0 0 5px rgba(255,214,106,.55));
+  opacity: .58;
+  animation: big3-cracks 1.65s ease-in-out infinite;
+}
+
+.big3-carving-focus {
+  z-index: 8;
+  animation: big3-carving-rise .85s cubic-bezier(.08,.8,.16,1.12) both;
+}
+
+.big3-carving-focus .big3-relief-shell {
+  animation: big3-relief-carve 1.05s cubic-bezier(.12,.78,.18,1) both;
+}
+
+.big3-carving-focus::after {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  left: 5%;
+  right: 5%;
+  bottom: 8%;
+  height: 42%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 65%, rgba(231,205,157,.46) 0 2px, transparent 3px),
+    radial-gradient(circle at 38% 45%, rgba(231,205,157,.38) 0 2px, transparent 3px),
+    radial-gradient(circle at 58% 72%, rgba(231,205,157,.42) 0 2px, transparent 3px),
+    radial-gradient(circle at 76% 38%, rgba(231,205,157,.36) 0 2px, transparent 3px),
+    radial-gradient(ellipse at 50% 86%, rgba(201,176,135,.35), transparent 55%);
+  filter: blur(.4px);
+  animation: big3-stone-dust 1.25s ease-out both;
+}
+
+.big3-mountain-inscription {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 6.5%;
+  width: 70%;
+  transform: translateX(-50%);
+  color: rgba(220,202,169,.45);
+  font-family: inherit;
+  font-size: clamp(9px, 1.45vw, 17px);
+  font-weight: 900;
+  letter-spacing: .5em;
+  text-align: center;
+  text-indent: .5em;
+  text-shadow: -1px -1px 0 rgba(10,8,7,.75), 1px 1px 0 rgba(255,238,205,.09);
+}
+
+.big3-mountain-plaza {
+  position: absolute;
+  z-index: 7;
+  left: 17%;
+  right: 17%;
+  bottom: 1.8%;
+  display: flex;
+  justify-content: space-between;
+  opacity: .85;
+}
+
+.big3-mountain-plaza i {
+  display: block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #ffd66a;
+  box-shadow: 0 0 7px 2px rgba(255,214,106,.5), 0 -4px 12px rgba(255,214,106,.2);
+}
+
 .big3-impact {
   animation: big3-impact .65s cubic-bezier(.1,.88,.18,1.18) both;
 }
@@ -123,6 +431,34 @@
   50% { transform: translateY(-3px); filter: brightness(1.18); }
 }
 
+@keyframes big3-rock-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(.88); }
+  50% { transform: translateY(-2px) scale(1.008); filter: brightness(1.08); }
+}
+
+@keyframes big3-cracks {
+  0%, 100% { opacity: .34; filter: drop-shadow(0 0 2px rgba(255,214,106,.35)); }
+  50% { opacity: .8; filter: drop-shadow(0 0 8px rgba(255,214,106,.7)); }
+}
+
+@keyframes big3-carving-rise {
+  0% { transform: translateY(9px) scale(.94); }
+  60% { transform: translateY(-4px) scale(1.025); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes big3-relief-carve {
+  0% { filter: drop-shadow(0 11px 10px rgba(0,0,0,.42)) brightness(.45); clip-path: polygon(18% 10%, 82% 10%, 88% 22%, 86% 70%, 72% 87%, 28% 87%, 14% 70%, 12% 22%); }
+  50% { filter: drop-shadow(0 11px 14px rgba(255,214,106,.18)) brightness(1.2); }
+  100% { filter: drop-shadow(0 11px 10px rgba(0,0,0,.42)) brightness(1); clip-path: polygon(13% 2%, 87% 2%, 98% 17%, 94% 78%, 78% 98%, 22% 98%, 6% 78%, 2% 17%); }
+}
+
+@keyframes big3-stone-dust {
+  0% { opacity: 0; transform: translateY(-8px) scale(.78); }
+  28% { opacity: .8; }
+  100% { opacity: 0; transform: translateY(28px) scale(1.28); }
+}
+
 @keyframes big3-impact {
   0% { opacity: 0; transform: scale(.72); filter: blur(12px) brightness(2.2); }
   55% { opacity: 1; transform: scale(1.035); filter: blur(0) brightness(1.3); }
@@ -139,6 +475,51 @@
   .big3-monolith { min-height: 132px; }
   .big3-lockline::before,
   .big3-lockline::after { width: 42px; }
+
+  .big3-mountain-scene {
+    min-height: 238px;
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+  }
+
+  .big3-mountain-compact {
+    min-height: 185px;
+    aspect-ratio: 16 / 9.5;
+    border-radius: 14px;
+  }
+
+  .big3-carving-grid {
+    left: 3.5%;
+    right: 3.5%;
+    bottom: 17%;
+    gap: 5px;
+  }
+
+  .big3-relief-shell,
+  .big3-unhewn {
+    width: 100%;
+  }
+
+  .big3-unhewn {
+    min-height: 132px;
+  }
+
+  .big3-unhewn-mark {
+    width: 31px;
+    height: 31px;
+  }
+
+  .big3-stone-plaque {
+    width: 96%;
+    padding: 5px 4px 4px;
+  }
+
+  .big3-mountain-inscription {
+    bottom: 6%;
+    font-size: 7px;
+    letter-spacing: .34em;
+    text-indent: .34em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,7 +529,12 @@
   .big3-monolith::before,
   .big3-monolith-incoming,
   .big3-impact,
-  .big3-flash {
+  .big3-flash,
+  .big3-unhewn-incoming,
+  .big3-unhewn-incoming::after,
+  .big3-carving-focus,
+  .big3-carving-focus .big3-relief-shell,
+  .big3-carving-focus::after {
     animation: none !important;
     opacity: 1;
     transform: none;
