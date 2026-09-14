@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ArrowUpCircle, Check, ChevronDown, ChevronUp, Hammer, Lock } from "lucide-react";
+import { ArrowUpCircle, Check, ChevronDown, ChevronUp, Hammer, Lock, TrendingUp } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
-import { formatGBP } from "../engine/data";
+import { formatGBP, formatGBPShort } from "../engine/data";
 import {
   FACILITY_DEFS,
   MAX_TIER,
@@ -12,6 +12,7 @@ import {
   type FacilityDef,
 } from "../engine/facilities";
 import { facilityBlockReason, officeSlots, type RunState } from "../engine/state";
+import { productionCapabilities } from "../engine/spending";
 import { cn } from "../utils/cn";
 
 const CATEGORY_LABEL: Record<FacilityDef["category"], string> = {
@@ -75,7 +76,6 @@ function FacilityCard({
         <span className="text-paper/40">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span>
       </button>
 
-      {/* current effect, always visible once owned */}
       {owned && (
         <ul className="mt-1.5 space-y-0.5">
           {def.effects(tier).map((line, i) => (
@@ -140,6 +140,7 @@ export default function FacilitiesPanel({
   const upkeep = facilityUpkeep(run.facilities);
   const owned = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
   const buildable = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) === 0);
+  const capabilities = productionCapabilities(run);
 
   return (
     <div className="space-y-2.5">
@@ -154,6 +155,23 @@ export default function FacilitiesPanel({
       </div>
       <div className="text-[9px] text-paper/40">
         Rooms occupy one slot each — a small studio must specialise. Upgrades never need a new slot. Moving office takes every room with you.
+      </div>
+
+      <div className="rounded-xl border border-cyanx/25 bg-cyanx/[.035] p-2.5">
+        <div className="flex items-center gap-1.5 text-[9px] font-black tracking-[0.18em] text-cyanx"><TrendingUp size={11}/> PRODUCTION CAPABILITY</div>
+        <div className="mt-1 text-[8px] leading-relaxed text-paper/40">Permanent know-how earned by spending on related production interventions. It survives projects and saves; later levels require increasingly large lifetime investment.</div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+          {capabilities.map((cap) => {
+            const pct = cap.nextThreshold === null ? 100 : Math.min(100, Math.round(cap.spend / Math.max(1, cap.nextThreshold) * 100));
+            return <div key={cap.id} className="rounded-lg border border-line bg-panel2/60 p-2" title={cap.description}>
+              <div className="flex items-start justify-between gap-1"><b className="text-[8px] leading-tight text-paper/75">{cap.name.toUpperCase()}</b><span className="shrink-0 text-[8px] font-black text-cyanx">LV{cap.level}</span></div>
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-abyss"><div className="h-full rounded-full bg-cyanx" style={{width:`${pct}%`}}/></div>
+              <div className="mt-1 text-[7px] text-paper/40">{cap.effect}</div>
+              <div className="mt-1 text-[7px] font-bold text-paper/55">{formatGBPShort(cap.spend)} invested</div>
+              <div className="text-[6.5px] text-paper/30">{cap.nextThreshold === null ? "MAXIMUM CAPABILITY" : `${formatGBPShort(cap.toNext)} to Lv${cap.level + 1}`}</div>
+            </div>;
+          })}
+        </div>
       </div>
 
       {owned.length > 0 && (
