@@ -31,6 +31,29 @@ function rivalCycleEntries(run: RunState, year: number): AwardNominee[] {
   );
 }
 
+function emptyNominationMarker(year: number): AwardNominee {
+  return {
+    title: `Awards nominations marker Y${year}`,
+    studio: "London Anime Awards",
+    studioId: "awards-committee",
+    player: false,
+    animeType: "shonen",
+    genres: [],
+    score: 0,
+    story: 0,
+    art: 0,
+    sound: 0,
+    audience: 0,
+    sourceId: `__award_nominations_${year}`,
+    posterId: null,
+    draft: null,
+    protag: null,
+    nominationYear: year,
+    nominationCategories: [],
+    nominationAnnouncementSeen: false,
+  };
+}
+
 export function nominationFrozenForYear(run: RunState, year: number): boolean {
   return run.yearShows.some((entry) => entry.nominationYear === year && Array.isArray(entry.nominationCategories));
 }
@@ -101,7 +124,8 @@ export function freezeNominationsIfDue(run: RunState): RunState {
       : entry
   );
   const candidateSlate = [...playerRows, ...rivalCycleEntries(run, year)];
-  const frozen = freezeNominationEntries(year, candidateSlate);
+  const selected = freezeNominationEntries(year, candidateSlate);
+  const frozen = selected.length ? selected : [emptyNominationMarker(year)];
 
   const playerNominations = frozen
     .filter((entry) => entry.player && (entry.nominationCategories?.length ?? 0) > 0)
