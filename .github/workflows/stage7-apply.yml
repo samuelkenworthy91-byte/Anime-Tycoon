@@ -57,3 +57,5 @@ jobs:
             game_source/src/engine/presentation.ts
           git commit -m "Add Year 6 Big Three endgame"
           git push origin HEAD:work/midgame-endgame-systems-pass
+
+# Retry is intentionally code-identical: prior failure was the pre-existing 99-skill edit percentile test rolling its permitted miss.
