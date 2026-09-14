@@ -22,7 +22,7 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
-import { advanceAwardsWeek, pendingNominationAnnouncement } from "./engine/awardCycle";
+import { advanceAwardsWeek, pendingNominationAnnouncement, restoreAwardNominationMetadata } from "./engine/awardCycle";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
@@ -252,7 +252,8 @@ export default function App() {
     if (!save) return;
     primeAudio();
     sfx.fanfare();
-    const resumed = migrateRun(save.run);
+    const migrated = migrateRun(save.run);
+    const resumed = restoreAwardNominationMetadata(migrated, save.run.yearShows);
     setMeta(save.meta);
     setRun(resumed);
     setReleased(null);
