@@ -79,12 +79,18 @@ describe("Year 6 Big Three endgame", () => {
 
   it("seeds Sunnyrise exactly once at the start of Year 6 with a persistent reveal", () => {
     let run = initialRun("House", "steady");
+    const sunnyBefore = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     run.week = BIG_THREE_START_WEEK;
     run = syncBigThreeEra(run);
+    const sunnyAfter = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     expect(run.bigThree.introduced).toBe(true);
     expect(run.bigThree.slots).toHaveLength(1);
     expect(run.bigThree.slots[0]).toMatchObject({ title: "Astra Breaker: Eclipse", originalStudio: "Sunnyrise", recognisedYear: 6, posterId: BIG_THREE_SEED_POSTER_ID });
     expect(pendingBigThreeReveal(run)?.reveal.kind).toBe("era");
+    expect(sunnyAfter.fans).toBe(sunnyBefore.fans + 180_000);
+    expect(sunnyAfter.revenue).toBe(sunnyBefore.revenue + 4_200_000);
+    expect(sunnyAfter.releasesCount).toBe(sunnyBefore.releasesCount + 1);
+    expect(sunnyAfter.masterpieces).toBe(sunnyBefore.masterpieces + 1);
     const twice = syncBigThreeEra(run);
     expect(twice.bigThree.slots).toHaveLength(1);
     expect(twice.rivalWorld.studios.find((s) => s.id === "Sunnyrise")?.releases.filter((r) => r.title === "Astra Breaker: Eclipse")).toHaveLength(1);
@@ -101,12 +107,19 @@ describe("Year 6 Big Three endgame", () => {
     const { run: base, d } = playerCandidate();
     const fans = base.fans;
     const rd = base.rd;
+    const popularityBefore = base.franchises[d.title].popularity;
+    const rivalriesBefore = base.rivalWorld.studios.map((studio) => [studio.id, studio.rivalry] as const);
     const next = recognise(base, d);
     expect(next.bigThree.slots).toHaveLength(2);
     expect(next.bigThree.slots[1]).toMatchObject({ player: true, originalStudio: "Player House", title: d.title });
     expect(next.fans).toBe(fans + 75_000);
     expect(next.rd).toBe(rd + 60);
     expect(next.franchises[d.title].bigThree).toBe(true);
+    expect(next.franchises[d.title].popularity).toBe(Math.min(100, popularityBefore + 12));
+    for (const [id, rivalry] of rivalriesBefore) {
+      const rival = next.rivalWorld.studios.find((studio) => studio.id === id)!;
+      if (rival.status !== "collapsed") expect(rival.rivalry).toBe(Math.min(100, rivalry + 8));
+    }
     const twice = recognise(next, d);
     expect(twice.bigThree.slots).toHaveLength(2);
     expect(twice.fans).toBe(next.fans);
@@ -127,9 +140,14 @@ describe("Year 6 Big Three endgame", () => {
     run = advanceBigThreeWeek(run);
     expect(run.bigThree.slots).toHaveLength(1); // Year-6 shock gets breathing room.
 
+    const rivalBeforeRecognition = run.rivalWorld.studios.find((s) => s.id === studio.id)!;
     run = { ...run, week: BIG_THREE_START_WEEK + BIG_THREE_RIVAL_GRACE_WEEKS };
     run = advanceBigThreeWeek(run);
     expect(run.bigThree.slots).toHaveLength(2);
+    const rivalAfterRecognition = run.rivalWorld.studios.find((s) => s.id === studio.id)!;
+    expect(rivalAfterRecognition.fans).toBe(rivalBeforeRecognition.fans + 50_000);
+    expect(rivalAfterRecognition.reputation).toBe(Math.min(100, rivalBeforeRecognition.reputation + 8));
+    expect(rivalAfterRecognition.momentum).toBe(Math.min(30, rivalBeforeRecognition.momentum + 8));
 
     const firstRivalRecognition = run.bigThree.slots[1].recognisedWeek;
     run = { ...run, week: firstRivalRecognition + 1, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Throne", firstRivalRecognition + 1)] } : s) } };
