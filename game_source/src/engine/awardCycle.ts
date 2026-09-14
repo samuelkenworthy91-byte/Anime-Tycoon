@@ -1,4 +1,5 @@
 import { advanceWeeks, type RunState } from "./state";
+import { tickIPRenewals } from "./ipRenewal";
 import {
   awardNomineeKey,
   freezeNominationEntries,
@@ -218,8 +219,8 @@ export function freezeNominationsIfDue(run: RunState): RunState {
 }
 
 /** Weekly App wrapper. The core simulation still owns the year-end ceremony;
- * we only freeze the slate before it and preserve post-cutoff player releases
- * for the following award cycle. */
+ * we freeze nominations before it, preserve post-cutoff releases, and run the
+ * independent-IP renewal lifecycle immediately after the core weekly tick. */
 export function advanceAwardsWeek(
   run: RunState,
   opts: { liveDaysAlreadyApplied?: boolean } = {}
@@ -241,7 +242,19 @@ export function advanceAwardsWeek(
       }))
     : [];
 
-  const advanced = advanceWeeks(prepared, 1, opts);
+  let advanced = advanceWeeks(prepared, 1, opts);
+  const renewal = tickIPRenewals(advanced.ipMarket, advanced.week, advanced.cash, advanced.facilities.legal ?? 0);
+  if (renewal.cashDelta !== 0 || renewal.notices.length > 0 || renewal.market !== advanced.ipMarket) {
+    advanced = {
+      ...advanced,
+      cash: advanced.cash + renewal.cashDelta,
+      ipMarket: renewal.market,
+      notices: [...advanced.notices, ...renewal.notices],
+      strategicSpend: renewal.cashDelta < 0
+        ? [...advanced.strategicSpend, { id: `ip_renew_${advanced.week}`, label: "Automatic IP rights renewal", amount: -renewal.cashDelta, week: advanced.week }]
+        : advanced.strategicSpend,
+    };
+  }
   return carry.length ? { ...advanced, yearShows: [...advanced.yearShows, ...carry] } : advanced;
 }
 
