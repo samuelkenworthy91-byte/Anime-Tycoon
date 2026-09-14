@@ -78,10 +78,10 @@ export function BigThreeMountain({
                   <div className="big3-unhewn-mark">
                     {incoming ? <Sparkles size={compact ? 15 : 20} /> : <Lock size={compact ? 13 : 18} />}
                   </div>
-                  <div className="mt-2 font-display text-[8px] font-black tracking-[0.14em] text-stone sm:text-[10px]">
+                  <div className="mt-2 font-display text-[8px] font-black tracking-[0.14em] text-[#c9b898] sm:text-[10px]">
                     {incoming ? "THE STONE IS MOVING" : `PLACE ${index + 1}`}
                   </div>
-                  <div className="mt-1 text-[6px] font-black tracking-[0.18em] text-stone/45 sm:text-[8px]">
+                  <div className="mt-1 text-[6px] font-black tracking-[0.18em] text-[#c9b898]/45 sm:text-[8px]">
                     {incoming ? "CONSENSUS FORMING" : "UNWRITTEN"}
                   </div>
                 </div>
