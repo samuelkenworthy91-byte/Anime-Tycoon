@@ -27,6 +27,9 @@ jobs:
       - name: Run awards capacity simulation
         working-directory: game_source
         run: npx vitest run scripts/award-craft-capacity-sim.test.ts --reporter=verbose
+      - name: Run Stage 8 progression audit
+        working-directory: game_source
+        run: npx vitest run scripts/stage8-progression-audit.test.ts --reporter=verbose
       - name: Run focused awards and IP tests
         working-directory: game_source
         run: npx vitest run src/engine/__tests__/award-nominations.test.ts src/engine/__tests__/award-expectations.test.ts src/engine/__tests__/ip-renewal.test.ts --reporter=verbose
