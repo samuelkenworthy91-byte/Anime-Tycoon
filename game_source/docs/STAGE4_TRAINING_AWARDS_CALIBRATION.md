@@ -24,8 +24,8 @@ Skill courses:
 Cash and R&D costs rise sharply by course strength, current raw skill and career level. Higher Training Room tiers make lower-tier courses slightly more efficient. A staff member can complete one paid course per industry week.
 
 Genre preparation writes directly into the existing `genreExperience` system:
-- Genre Familiarity targets experience 2, removing the harshest novice output penalty.
-- Genre Competence targets experience 4 and positive baseline contribution.
-- Genre Specialist targets experience 8 for a strong late-game personal multiplier.
+- Genre Familiarity targets experience 2, moving a completely untested employee from ×0.60 personal output to ×0.90 in that genre.
+- Genre Competence targets experience 4, reaching ×1.04 personal output before other trait/specialisation effects.
+- Genre Specialist targets experience 8, reaching ×1.20 personal output before other trait/specialisation effects.
 
 Existing experience is never reduced. Related genre groups, favourite genres and specialisations receive retraining discounts. Only genres already unlocked by the studio can be trained.
