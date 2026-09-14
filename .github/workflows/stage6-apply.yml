@@ -46,3 +46,4 @@ jobs:
           git add game_source/src/engine/state.ts game_source/src/engine/spending.ts game_source/src/components/Projects.tsx game_source/src/components/Ship.tsx game_source/src/components/Rivals.tsx .github/workflows/midgame-endgame-validation.yml
           git commit -m "Add studio signature-genre specialisation"
           git push origin HEAD:work/midgame-endgame-systems-pass
+# retry after neutral worker fixture
