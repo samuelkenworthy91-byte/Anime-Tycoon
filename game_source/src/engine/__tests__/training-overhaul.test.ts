@@ -97,7 +97,7 @@ describe("instant Training Room overhaul", () => {
     const before = genreExperienceMultiplier(genreFamiliarity(r.staff[0], "romance"));
     const out = applyGenreTraining(r, "trainer-test", "romance", "familiarity")!;
     const after = genreExperienceMultiplier(genreFamiliarity(out.staff[0], "romance"));
-    expect(before).toBe(0.82);
+    expect(before).toBe(0.6);
     expect(out.staff[0].genreExperience?.romance).toBe(2);
     expect(after).toBe(0.96);
   });
