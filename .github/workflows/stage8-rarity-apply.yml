@@ -1,0 +1,47 @@
+name: Apply Stage 8 Big Three Rarity
+
+on:
+  push:
+    branches:
+      - work/midgame-endgame-systems-pass
+    paths:
+      - .github/workflows/stage8-rarity-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: work/midgame-endgame-systems-pass
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply Stage 8 rarity patch
+        run: python game_source/scripts/apply-stage8-rarity.py
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Validate Big Three and Stage 8 audit
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/big-three.test.ts src/engine/__tests__/stage8-hardening.test.ts scripts/stage8-progression-audit.test.ts --reporter=verbose
+      - name: Run full suite
+        working-directory: game_source
+        run: npm test
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
+      - name: Commit Stage 8 rarity correction
+        run: |
+          git config user.name "samuelkenworthy91-byte"
+          git config user.email "samuel.kenworthy91@gmail.com"
+          git add game_source/src/engine/bigThree.ts game_source/src/engine/__tests__/big-three.test.ts game_source/scripts/stage8-progression-audit.test.ts
+          git commit -m "Pace Big Three cultural recognition"
+          git push origin HEAD:work/midgame-endgame-systems-pass
