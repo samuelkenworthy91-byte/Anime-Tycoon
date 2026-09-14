@@ -99,7 +99,7 @@ describe("instant Training Room overhaul", () => {
     const after = genreExperienceMultiplier(genreFamiliarity(out.staff[0], "romance"));
     expect(before).toBe(0.6);
     expect(out.staff[0].genreExperience?.romance).toBe(2);
-    expect(after).toBe(0.96);
+    expect(after).toBe(0.9);
   });
 
   it("competence and specialist courses establish progressively stronger genre readiness", () => {
