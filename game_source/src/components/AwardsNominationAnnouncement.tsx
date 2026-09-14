@@ -1,7 +1,7 @@
 import { Award, CheckCircle2, Trophy } from "lucide-react";
 import { Btn } from "../fx/fx";
 import type { RunState } from "../engine/state";
-import { acknowledgeNominationAnnouncement, awardCraftOutputFloor, pendingNominationAnnouncement } from "../engine/awardCycle";
+import { acknowledgeNominationAnnouncement, awardCraftOutputFloors, pendingNominationAnnouncement } from "../engine/awardCycle";
 
 export default function AwardsNominationAnnouncement({
   run,
@@ -20,7 +20,7 @@ export default function AwardsNominationAnnouncement({
     }))
     .filter((row) => row.mine.length > 0);
   const total = playerRows.reduce((sum, row) => sum + row.mine.length, 0);
-  const craftFloor = awardCraftOutputFloor(pending.year);
+  const craftFloors = awardCraftOutputFloors(pending.year);
 
   return (
     <div className="fixed inset-0 z-[108] flex items-center justify-center bg-abyss/92 p-3 backdrop-blur-xl">
@@ -35,7 +35,7 @@ export default function AwardsNominationAnnouncement({
             The Year {pending.year} shortlist is now locked. These are the nominations that will carry through to the ceremony.
           </p>
           <div className="mx-auto mt-3 max-w-md rounded-xl border border-cyanx/25 bg-cyanx/5 px-3 py-2 text-[10px] leading-relaxed text-cyanx/80">
-            Industry expectations rise every year. Best Writing, Best Animation and Best Original Score require at least <b>{craftFloor}</b> raw output in their discipline this year, alongside the normal review-quality standard.
+            Industry expectations rise with the studios of the era. This year the raw production floors are <b>Writing {craftFloors.writing}</b> · <b>Animation {craftFloors.animation}</b> · <b>Score {craftFloors.score}</b>, alongside the normal review-quality standard.
           </div>
         </div>
 

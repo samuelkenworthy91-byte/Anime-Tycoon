@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { initialRun, type RunState } from "../state";
 import {
-  AWARD_CRAFT_OUTPUT_BASE,
-  AWARD_CRAFT_OUTPUT_YEAR_STEP,
   awardCraftOutputFloor,
+  awardCraftOutputFloors,
   awardDisciplineOutput,
   freezeNominationsIfDue,
 } from "../awardCycle";
@@ -17,59 +16,68 @@ const nominee = (over: Partial<AwardNominee> = {}): AwardNominee => ({
   player: true,
   animeType: "shonen",
   genres: ["slice" as GenreId],
-  score: 30,
-  story: 28,
-  art: 28,
-  sound: 28,
-  audience: 50_000,
-  sourceId: "legacy-craft-row",
+  score: 36,
+  story: 40,
+  art: 40,
+  sound: 40,
+  audience: 250_000,
+  sourceId: "craft-row",
   posterId: null,
   draft: null,
   protag: null,
   ...over,
 });
 
-describe("rising awards craft expectations", () => {
-  it("raises the raw discipline floor every single year", () => {
-    expect(awardCraftOutputFloor(1)).toBe(AWARD_CRAFT_OUTPUT_BASE);
-    expect(awardCraftOutputFloor(2)).toBe(AWARD_CRAFT_OUTPUT_BASE + AWARD_CRAFT_OUTPUT_YEAR_STEP);
-    expect(awardCraftOutputFloor(3)).toBe(AWARD_CRAFT_OUTPUT_BASE + AWARD_CRAFT_OUTPUT_YEAR_STEP * 2);
-    expect(awardCraftOutputFloor(12)).toBe(380);
+describe("sim-calibrated annual awards craft expectations", () => {
+  it("uses separate discipline curves derived from full-studio capacity", () => {
+    expect(awardCraftOutputFloors(1)).toEqual({ writing: 150, animation: 300, score: 150 });
+    expect(awardCraftOutputFloors(6)).toEqual({ writing: 1200, animation: 1500, score: 975 });
+    expect(awardCraftOutputFloors(12)).toEqual({ writing: 1700, animation: 2150, score: 1475 });
+    expect(awardCraftOutputFloor(12, "animation")).toBeGreaterThan(awardCraftOutputFloor(6, "animation"));
   });
 
-  it("uses the exact project discipline points when the player release is still in project history", () => {
+  it("continues escalating after Year 12 for Dynasty saves", () => {
+    expect(awardCraftOutputFloor(13, "writing")).toBe(1750);
+    expect(awardCraftOutputFloor(13, "animation")).toBe(2300);
+    expect(awardCraftOutputFloor(13, "score")).toBe(1550);
+  });
+
+  it("uses exact retained player production points", () => {
     const seed = initialRun("Test Studio", "steady");
     const entry = nominee({ sourceId: "released-project" });
     const run = {
       ...seed,
-      projects: [{ id: "released-project", points: { story: 211, art: 287, sound: 164 } }],
+      projects: [{ id: "released-project", points: { story: 1211, art: 1587, sound: 1004 } }],
     } as unknown as RunState;
-    expect(awardDisciplineOutput(run, entry, "writing")).toBe(211);
-    expect(awardDisciplineOutput(run, entry, "animation")).toBe(287);
-    expect(awardDisciplineOutput(run, entry, "score")).toBe(164);
+    expect(awardDisciplineOutput(run, entry, "writing", 6)).toBe(1211);
+    expect(awardDisciplineOutput(run, entry, "animation", 6)).toBe(1587);
+    expect(awardDisciplineOutput(run, entry, "score", 6)).toBe(1004);
   });
 
-  it("keeps a legacy/rival-compatible fallback on the same hundreds-scale", () => {
+  it("projects rivals and legacy rows onto the current-year raw scale", () => {
     const run = initialRun("Test Studio", "steady");
-    const entry = nominee({ story: 30, art: 35, sound: 40 });
-    expect(awardDisciplineOutput(run, entry, "writing")).toBe(180);
-    expect(awardDisciplineOutput(run, entry, "animation")).toBe(210);
-    expect(awardDisciplineOutput(run, entry, "score")).toBe(240);
+    const rival = nominee({ player: false, studioId: "rival", sourceId: "rival-row", story: 30, art: 30, sound: 30 });
+    // Year 6 craft-quality minimum is 30, so a rival exactly on that
+    // compressed metric floor maps exactly to each simulated raw floor.
+    expect(awardDisciplineOutput(run, rival, "writing", 6)).toBe(1200);
+    expect(awardDisciplineOutput(run, rival, "animation", 6)).toBe(1500);
+    expect(awardDisciplineOutput(run, rival, "score", 6)).toBe(975);
   });
 
-  it("allows Year 1 craft that clears 160 but rejects the same output once Year 2 expects 180", () => {
-    const row = nominee({ story: 28, art: 28, sound: 28 }); // fallback output 168
-    const y1 = freezeNominationsIfDue({ ...initialRun("Test Studio", "steady"), week: 43, yearShows: [row] });
-    const y1Frozen = y1.yearShows.find((n) => n.nominationYear === 1 && n.player)!;
-    expect(y1Frozen.nominationCategories).toContain("writing");
-    expect(y1Frozen.nominationCategories).toContain("animation");
-    expect(y1Frozen.nominationCategories).toContain("score");
-
-    const y2 = freezeNominationsIfDue({ ...initialRun("Test Studio", "steady"), week: 91, yearShows: [row] });
-    const y2Frozen = y2.yearShows.find((n) => n.nominationYear === 2 && n.player)!;
-    expect(y2Frozen.nominationCategories).not.toContain("writing");
-    expect(y2Frozen.nominationCategories).not.toContain("animation");
-    expect(y2Frozen.nominationCategories).not.toContain("score");
-    expect(y2Frozen.nominationCategories).toContain("aoty");
+  it("requires the player to clear each discipline's own Year 6 raw floor", () => {
+    const seed = initialRun("Test Studio", "steady");
+    const row = nominee({ sourceId: "year6-project" });
+    const run = {
+      ...seed,
+      week: 283,
+      day: 283 * 7,
+      yearShows: [row],
+      projects: [{ id: "year6-project", points: { story: 1199, art: 1500, sound: 975 } }],
+    } as unknown as RunState;
+    const frozen = freezeNominationsIfDue(run);
+    const entry = frozen.yearShows.find((n) => n.nominationYear === 6 && n.player)!;
+    expect(entry.nominationCategories).not.toContain("writing");
+    expect(entry.nominationCategories).toContain("animation");
+    expect(entry.nominationCategories).toContain("score");
   });
 });

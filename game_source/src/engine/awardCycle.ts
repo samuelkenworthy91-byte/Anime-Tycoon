@@ -20,10 +20,35 @@ export const AWARD_NOMINATION_CUTOFF_WEEK = 43;
  * of Story/Animation/Sound that was award-worthy in Year 1 cannot coast to a
  * nomination forever. The existing overall-review/craft qualification remains
  * in place as a second gate. */
-export const AWARD_CRAFT_OUTPUT_BASE = 160;
-export const AWARD_CRAFT_OUTPUT_YEAR_STEP = 20;
-export const awardCraftOutputFloor = (year: number) =>
-  AWARD_CRAFT_OUTPUT_BASE + Math.max(0, Math.floor(year) - 1) * AWARD_CRAFT_OUTPUT_YEAR_STEP;
+export type AwardCraftCategory = "writing" | "animation" | "score";
+
+/** Sim-calibrated discipline floors. Each value is approximately 96% of the
+ * median raw output produced by a fully staffed, fully funded studio using the
+ * likely office/facility progression for that year. Because the live engine
+ * naturally produces much more Animation than Sound, each discipline needs its
+ * own curve rather than one shared number. */
+export const AWARD_CRAFT_OUTPUT_FLOORS: Record<AwardCraftCategory, readonly number[]> = {
+  writing:   [150, 325, 575, 725, 1000, 1200, 1325, 1375, 1475, 1575, 1650, 1700],
+  animation: [300, 550, 825, 1025, 1350, 1500, 1625, 1750, 1875, 1925, 2000, 2150],
+  score:     [150, 300, 475, 625, 900, 975, 1125, 1175, 1300, 1350, 1400, 1475],
+};
+
+export function awardCraftOutputFloor(year: number, category: AwardCraftCategory = "writing"): number {
+  const y = Math.max(1, Math.floor(year));
+  const curve = AWARD_CRAFT_OUTPUT_FLOORS[category];
+  if (y <= curve.length) return curve[y - 1];
+  // Dynasty saves keep escalating beyond the calibrated 12-year campaign at
+  // the final observed annual rate instead of freezing expectations forever.
+  const last = curve[curve.length - 1];
+  const prior = curve[curve.length - 2];
+  return last + (y - curve.length) * Math.max(25, last - prior);
+}
+
+export const awardCraftOutputFloors = (year: number) => ({
+  writing: awardCraftOutputFloor(year, "writing"),
+  animation: awardCraftOutputFloor(year, "animation"),
+  score: awardCraftOutputFloor(year, "score"),
+});
 
 export const awardYearAtWeek = (week: number) => Math.floor(Math.max(0, week) / 48) + 1;
 export const awardWeekInYear = (week: number) => ((Math.max(0, week) % 48) + 48) % 48;
@@ -32,7 +57,7 @@ export const awardCycleStartWeek = (year: number) => year <= 1 ? 1 : (year - 2) 
 
 const CATEGORY_IDS = new Set<AwardCategoryId>(["aoty", "shonen", "shojo", "writing", "animation", "score", "fanfav"]);
 const CRAFT_CATEGORY_IDS = ["writing", "animation", "score"] as const;
-type CraftCategoryId = typeof CRAFT_CATEGORY_IDS[number];
+type CraftCategoryId = AwardCraftCategory;
 const CRAFT_CATEGORY_SET = new Set<AwardCategoryId>(CRAFT_CATEGORY_IDS);
 
 function rivalCycleEntries(run: RunState, year: number): AwardNominee[] {
@@ -134,7 +159,7 @@ const craftMetric = (entry: AwardNominee, category: CraftCategoryId) =>
  * desk-bubble simulation; their frozen craft score is converted onto the same
  * visible hundreds-scale (x6). Old/legacy player rows use the same fallback so
  * loading an old career never makes an otherwise valid awards year disappear. */
-export function awardDisciplineOutput(run: RunState, entry: AwardNominee, category: CraftCategoryId): number {
+export function awardDisciplineOutput(run: RunState, entry: AwardNominee, category: CraftCategoryId, year = awardYearAtWeek(run.week)): number {
   if (entry.player && entry.sourceId) {
     const project = run.projects.find((p) => p.id === entry.sourceId);
     if (project) {
@@ -143,7 +168,14 @@ export function awardDisciplineOutput(run: RunState, entry: AwardNominee, catego
       return Math.round(project.points.sound);
     }
   }
-  return Math.round(craftMetric(entry, category) * 6);
+  /** Rival releases and legacy player rows predate literal production-point
+   * storage. Their bounded craft metric is projected onto the current year's
+   * simulated raw-output scale. A rival that merely clears the normal craft
+   * quality gate sits on the raw floor; exceptional craft rises above it. */
+  const era = year <= 2 ? 0 : year <= 5 ? 1 : year <= 8 ? 2 : 3;
+  const metricFloor = 28 + era * 2;
+  const rawFloor = awardCraftOutputFloor(year, category);
+  return Math.round(rawFloor * Math.max(0, craftMetric(entry, category)) / metricFloor);
 }
 
 /** Keep all normal nominations, then replace only the three craft categories
@@ -167,9 +199,9 @@ function freezeWithRisingCraftFloor(run: RunState, year: number, candidateSlate:
     }
   }
 
-  const floor = awardCraftOutputFloor(year);
   for (const category of CRAFT_CATEGORY_IDS) {
-    const eligible = candidateSlate.filter((entry) => awardDisciplineOutput(run, entry, category) >= floor);
+    const floor = awardCraftOutputFloor(year, category);
+    const eligible = candidateSlate.filter((entry) => awardDisciplineOutput(run, entry, category, year) >= floor);
     const categoryFrozen = freezeNominationEntries(year, eligible);
     for (const entry of categoryFrozen) {
       if (entry.nominationCategories?.includes(category)) add(entry, category);
@@ -206,10 +238,11 @@ export function freezeNominationsIfDue(run: RunState): RunState {
   const playerNominations = frozen
     .filter((entry) => entry.player && (entry.nominationCategories?.length ?? 0) > 0)
     .flatMap((entry) => (entry.nominationCategories ?? []).map((category) => `${entry.title} — ${category}`));
-  const craftFloor = awardCraftOutputFloor(year);
+  const craftFloors = awardCraftOutputFloors(year);
+  const craftStandard = `Writing ${craftFloors.writing}+ · Animation ${craftFloors.animation}+ · Score ${craftFloors.score}+`;
   const notice = playerNominations.length
-    ? `🏆 London Anime Awards nominations announced: ${playerNominations.join(" · ")} · Craft floor ${craftFloor}+.`
-    : `🏆 London Anime Awards nominations announced. Your studio did not make this year's shortlist. Craft floor: ${craftFloor}+ Story/Animation/Sound output.`;
+    ? `🏆 London Anime Awards nominations announced: ${playerNominations.join(" · ")} · Craft standards: ${craftStandard}.`
+    : `🏆 London Anime Awards nominations announced. Your studio did not make this year's shortlist. Craft standards: ${craftStandard}.`;
 
   return {
     ...run,

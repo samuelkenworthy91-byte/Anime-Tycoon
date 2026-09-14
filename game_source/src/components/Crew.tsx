@@ -75,6 +75,7 @@ import {
 } from "../engine/state";
 import { projectOfStaff } from "../engine/projects";
 import Portrait from "./Portrait";
+import StaffTrainingPanel from "./StaffTrainingPanel";
 import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
 import { showrunnerStats } from "../engine/studioOps";
@@ -175,9 +176,6 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
   const prog = levelProgress(xp);
   const spec = specDef(s.spec);
   const headSlot = (Object.entries(run.heads) as [HeadSlot, string][]).find(([, id]) => id === s.id)?.[0];
-  const trainTier = run.facilities.training ?? 0;
-  const trainBlock = trainBlockReason(run, s.id);
-  const cost = trainCost(trainTier);
   const bondsWith = run.staff
     .filter((o) => o.id !== s.id)
     .map((o) => ({ other: o, bond: bondBetween(run.bonds, s, o) }))
@@ -338,64 +336,7 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
             )}
           </div>
 
-          {/* training */}
-          {trainTier > 0 && (
-            <div>
-              <div className="flex items-center gap-1 text-[8px] font-bold tracking-[0.2em] text-paper/40">
-                <GraduationCap size={10} /> TRAINING · {formatGBP(cost.cash)} + {cost.rd} RD → +1 skill, +{trainXp(trainTier)} XP
-              </div>
-              <div className="mt-1 flex gap-1.5">
-                {(["story", "art", "sound"] as PointType[]).map((t) => (
-                  <Btn
-                    key={t}
-                    variant="ghost"
-                    className="!px-2 !py-1 text-[9px]"
-                    disabled={!!trainBlock}
-                    onClick={() => {
-                      sfx.fanfare();
-                      setRun((r) => trainStaff(r, s.id, t) ?? r);
-                    }}
-                  >
-                    <span style={{ color: POINT_COLOR[t] }}>+1 {t.toUpperCase()}</span>
-                  </Btn>
-                ))}
-              </div>
-              {trainBlock && <div className="mt-0.5 text-[8px] text-neon">{trainBlock}</div>}
-            </div>
-          )}
-
-          {/* intensive development — one exact level, canonical stat growth */}
-          {(() => {
-            const rdCost = intensiveRdCost(s.level);
-            const atMax = s.level >= MAX_LEVEL;
-            return (
-              <div className="rounded-xl border border-viol/40 bg-viol/5 p-2">
-                <div className="flex items-center gap-1 text-[8px] font-bold tracking-[0.2em] text-viol">
-                  <Brain size={10} /> INTENSIVE DEVELOPMENT · {rdCost} RD → exactly Lv{s.level + 1} {levelTitle(s.level + 1)}
-                </div>
-                <div className="mt-1 text-[8px] text-paper/45">
-                  {atMax
-                    ? "Already at the top of the career ladder."
-                    : "Escalating RD cost · reaches exactly the next level, then rolls hidden-Potential growth through the normal XP path."}
-                </div>
-                <Btn
-                  variant="ghost"
-                  className="mt-1.5 w-full !py-1 text-[9px]"
-                  disabled={atMax || run.rd < rdCost}
-                  onClick={() => {
-                    if (atMax || run.rd < rdCost) return;
-                    const nx = intensiveDevelop(run, s.id);
-                    if (!nx) return;
-                    const after = nx.staff.find((x) => x.id === s.id)!;
-                    sfx.fanfare();
-                    setRun(() => nx);
-                  }}
-                >
-                  {atMax ? "MAX LEVEL" : run.rd < rdCost ? `NEEDS ${rdCost} RD (${run.rd})` : `DEVELOP — ${rdCost} RD`}
-                </Btn>
-              </div>
-            );
-          })()}
+          <StaffTrainingPanel staff={s} run={run} setRun={setRun} />
 
           <div className="flex justify-end">
             <button onClick={fire} className="btn-press flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[10px] text-neon/80 hover:bg-neon/10">
