@@ -1,0 +1,64 @@
+name: One-off stale branch cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cleanup-stale-branches.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete branches more than 400 commits behind promoted main
+        shell: bash
+        env:
+          BASELINE_MAIN: 6a9784b4800cfe4bb96606002cfdc9cd0bd8121c
+          CUTOFF: '400'
+        run: |
+          set -u
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+
+          echo "## Stale branch cleanup" >> "$GITHUB_STEP_SUMMARY"
+          echo "Baseline main: \`$BASELINE_MAIN\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Rule: delete only when branch is **more than $CUTOFF commits behind** the baseline." >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+
+          deleted=0
+          failed=0
+          kept=0
+
+          while IFS= read -r ref; do
+            branch="${ref#refs/remotes/origin/}"
+            [[ "$branch" == "HEAD" || "$branch" == "main" ]] && continue
+
+            behind=$(git rev-list --count "origin/$branch..$BASELINE_MAIN")
+            if (( behind > CUTOFF )); then
+              echo "DELETE $branch ($behind behind)"
+              if git push origin --delete "$branch"; then
+                echo "- Deleted \`$branch\` — $behind behind" >> "$GITHUB_STEP_SUMMARY"
+                deleted=$((deleted + 1))
+              else
+                echo "- FAILED to delete \`$branch\` — $behind behind" >> "$GITHUB_STEP_SUMMARY"
+                failed=$((failed + 1))
+              fi
+            else
+              echo "KEEP   $branch ($behind behind)"
+              kept=$((kept + 1))
+            fi
+          done < <(git for-each-ref --format='%(refname)' refs/remotes/origin | sort)
+
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "Deleted: **$deleted** · Kept: **$kept** · Failed: **$failed**" >> "$GITHUB_STEP_SUMMARY"
+
+          if (( failed > 0 )); then
+            exit 1
+          fi
