@@ -1,0 +1,68 @@
+name: Apply Space Clock Hotkey
+
+on:
+  push:
+    branches:
+      - work/midgame-endgame-systems-pass
+    paths:
+      - .github/workflows/apply-space-clock-hotkey.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/midgame-endgame-systems-pass
+          fetch-depth: 0
+
+      - name: Apply clock hotkey patch
+        run: python game_source/scripts/apply-space-clock-hotkey.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run focused regression
+        working-directory: game_source
+        run: npx vitest run src/engine/__tests__/playtest-regressions.test.ts --reporter=verbose
+
+      - name: Run full suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production GitHack bundle
+        working-directory: game_source
+        run: npm run build
+
+      - name: Verify compiled clock hotkey
+        working-directory: game_source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html = fs.readFileSync('dist/index.html', 'utf8');
+          for (const marker of ['Space', 'TEXTAREA', 'contenteditable']) {
+            if (!html.includes(marker)) throw new Error(`Compiled bundle missing clock-hotkey marker: ${marker}`);
+          }
+          console.log('Compiled browser bundle contains Space clock hotkey guards.');
+          NODE
+
+      - name: Commit source and refreshed dist
+        run: |
+          git config user.name 'samuelkenworthy91-byte'
+          git config user.email 'samuel.kenworthy91@gmail.com'
+          git add game_source/src/App.tsx game_source/src/engine/__tests__/playtest-regressions.test.ts
+          git add -f game_source/dist
+          git commit -m 'Add Space clock pause resume hotkey'
+          git push origin HEAD:work/midgame-endgame-systems-pass
