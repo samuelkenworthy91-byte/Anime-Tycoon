@@ -48,6 +48,7 @@ import AuctionForecast from "./components/AuctionForecast";
 import AuctionCeremony from "./components/AuctionCeremony";
 import SellerAuctionCeremony from "./components/SellerAuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
+import { canPresentDeferredLevelUp } from "./engine/presentation";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
@@ -158,8 +159,17 @@ export default function App() {
 
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
   const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
-  useEffect(() => { if (pendingLevelUp) setTimeSpeed(0); }, [pendingLevelUp]);
   const sellerAuctionOpen = !!run?.sellerAuction;
+  const levelUpPresentationAllowed = canPresentDeferredLevelUp({
+    screen,
+    paused,
+    sellerAuctionOpen,
+    decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
+    auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
+  });
+  useEffect(() => {
+    if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
+  }, [pendingLevelUp, levelUpPresentationAllowed]);
   useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
 
   /* ------------------------------------------------------- game clock */
@@ -733,8 +743,8 @@ export default function App() {
           />
         )}
 
-        {run && (run.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <ShowrunnerLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
-        {run && !(run.showrunnerCareer?.pendingLevelUps?.length ?? 0) && run.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0) && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && <StaffLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
+        {run && levelUpPresentationAllowed && (run.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0 && <ShowrunnerLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
+        {run && levelUpPresentationAllowed && !(run.showrunnerCareer?.pendingLevelUps?.length ?? 0) && run.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0) && <StaffLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}
 
         {paused && pauseMenu}
         {paused && savePicker && savePickerOverlay}
