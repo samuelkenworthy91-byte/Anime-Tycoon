@@ -293,8 +293,8 @@ export function recognisePlayerBigThreeRelease(run: RunState, input: BigThreePla
   let next = syncBigThreeEra(run);
   if (!next.bigThree.introduced || next.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) return next;
   if (next.bigThree.slots.some((slot) => slot.sourceId === `player:${input.projectId}` || (slot.player && slot.title === input.draft.title && slot.recognisedWeek === next.week))) return next;
-  const craft = playerCraftFor(input.points);
-  const craftFloor = Math.min(craft.story, craft.art, craft.score);
+  const craft = playerCraftFor(input.score, input.points);
+  const craftFloor = Math.min(craft.story, craft.art, craft.sound);
   const momentum = playerMomentum(next, input.franchiseKey, input.reach);
   const metrics: BigThreeMetrics = {
     score: input.score,
