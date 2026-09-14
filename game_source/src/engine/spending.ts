@@ -41,9 +41,6 @@ export const CAPABILITY_DEFS: readonly CapabilityDef[] = [
   { id: "marketing", name: "Marketing / Launch", description: "Permanent launch-material and campaign execution capability." },
 ] as const;
 
-/** Cumulative qualifying spend needed to reach each permanent level.
- * Gaps widen sharply so a late-game blank cheque moves the needle without
- * turning one purchase into an entire maxed department. */
 export const CAPABILITY_THRESHOLDS = [150_000, 500_000, 1_250_000, 2_500_000, 4_500_000, 7_500_000, 12_000_000, 18_000_000] as const;
 export const MAX_CAPABILITY_LEVEL = CAPABILITY_THRESHOLDS.length;
 
@@ -61,9 +58,12 @@ export interface InterventionDef {
   risk: number;
   scalable?: boolean;
   capability?: ProductionCapabilityId;
+  /** UI-only tier marker. Canonical project history always stores baseId. */
+  investmentTier?: InvestmentTierId;
+  baseId?: string;
 }
 
-export const INTERVENTIONS: InterventionDef[] = [
+export const BASE_INTERVENTIONS: InterventionDef[] = [
   { id: "writing_overhaul", name: "Writing Room Overhaul", cost: 38_000, stages: ["concept", "preprod"], description: "Rebuild weak structure; may create continuity notes.", point: "story", points: 34, issueDelta: 1, risk: .2, scalable: true, capability: "writing" },
   { id: "animation_pass", name: "Extra Animation Pass", cost: 65_000, stages: ["animation", "post"], description: "Target key sequences, not the whole show.", point: "art", points: 38, issueDelta: -1, risk: .12, scalable: true, capability: "animation" },
   { id: "retakes", name: "Retakes / Reshoots", cost: 52_000, stages: ["sound", "post"], description: "Repair performances at schedule cost.", point: "sound", points: 28, issueDelta: -1, days: 7, risk: .1, scalable: true, capability: "post" },
@@ -80,18 +80,40 @@ const tierById = (id: InvestmentTierId) => INVESTMENT_TIERS.find((x) => x.id ===
 const round5k = (v: number) => Math.max(5_000, Math.round(v / 5_000) * 5_000);
 const scaleSigned = (v: number, mult: number) => v === 0 ? 0 : Math.sign(v) * Math.max(1, Math.round(Math.abs(v) * mult));
 
-export const interventionInvestmentKey = (id: string, tier: InvestmentTierId) => `${id}::${tier}`;
+export const interventionInvestmentKey = (id: string, tier: InvestmentTierId) => tier === "standard" ? id : `${id}::${tier}`;
 export function parseInterventionInvestmentKey(key: string): { id: string; tier: InvestmentTierId } {
   const [id, tierRaw] = key.split("::");
   const tier = INVESTMENT_TIERS.some((x) => x.id === tierRaw) ? tierRaw as InvestmentTierId : "standard";
   return { id, tier };
 }
 
-/** Existing saves recorded exact intervention names; Stage 5 records the same
- * name followed by a tier. startsWith therefore lets historic rescue spending
- * seed the new permanent capability tracks without a destructive migration. */
+/** Existing Project Board code consumes INTERVENTIONS directly. Stage 5 keeps
+ * that contract stable by exposing each scalable tier as a catalogue row while
+ * the engine below normalises every row back to its canonical base action. */
+export const INTERVENTIONS: InterventionDef[] = BASE_INTERVENTIONS.flatMap((base) => {
+  const tiers = base.scalable ? INVESTMENT_TIERS : INVESTMENT_TIERS.slice(0, 1);
+  return tiers.map((tier) => ({
+    ...base,
+    id: interventionInvestmentKey(base.id, tier.id),
+    baseId: base.id,
+    investmentTier: tier.id,
+    name: base.scalable ? `${base.name} · ${tier.name}` : base.name,
+    cost: tier.id === "standard" ? base.cost : round5k(base.cost * tier.costMult),
+    description: tier.id === "standard" ? base.description : `${tier.description} ${Math.round(tier.pointMult * 100)}% craft-scale effect for ${Math.round(tier.costMult * 100)}% base cost.`,
+  }));
+});
+
+function baseIntervention(d: InterventionDef): InterventionDef {
+  const id = d.baseId ?? parseInterventionInvestmentKey(d.id).id;
+  return BASE_INTERVENTIONS.find((x) => x.id === id) ?? d;
+}
+
+function resolvedTier(d: InterventionDef, tierId: InvestmentTierId): InvestmentTierId {
+  return d.investmentTier && tierId === "standard" ? d.investmentTier : tierId;
+}
+
 function capabilityForSpendLabel(label: string): ProductionCapabilityId | null {
-  const def = INTERVENTIONS.find((d) => d.capability && label.startsWith(d.name));
+  const def = BASE_INTERVENTIONS.find((d) => d.capability && label.startsWith(d.name));
   return def?.capability ?? null;
 }
 
@@ -128,12 +150,12 @@ export function productionCapabilities(run: Pick<RunState, "strategicSpend">): P
 export const productionCapability = (run: Pick<RunState, "strategicSpend">, id: ProductionCapabilityId) =>
   productionCapabilities(run).find((x) => x.id === id)!;
 
-function tunedIntervention(run: RunState, d: InterventionDef) {
+function tunedIntervention(run: RunState, d0: InterventionDef) {
+  const d = baseIntervention(d0);
   let points = d.points ?? 0;
   let risk = d.risk;
   let issueDelta = d.issueDelta ?? 0;
   const boosts: string[] = [];
-
   if (run.capitalProjects.includes("mocap_stage") && (d.id === "animation_pass" || d.id === "retakes")) {
     points += d.id === "animation_pass" ? 14 : 9;
     risk *= .55;
@@ -167,10 +189,12 @@ export interface InterventionQuote {
   boosts: string[];
 }
 
-export function interventionQuote(run: RunState, d: InterventionDef, tierId: InvestmentTierId = "standard"): InterventionQuote | null {
-  const tier = tierById(tierId);
+export function interventionQuote(run: RunState, d0: InterventionDef, tierId: InvestmentTierId = "standard"): InterventionQuote | null {
+  const d = baseIntervention(d0);
+  const useTier = resolvedTier(d0, tierId);
+  const tier = tierById(useTier);
   if (!tier) return null;
-  if (!d.scalable && tierId !== "standard") return null;
+  if (!d.scalable && useTier !== "standard") return null;
   const tuned = tunedIntervention(run, d);
   const capability = d.capability ? productionCapability(run, d.capability) : null;
   const capabilityMult = 1 + (capability?.level ?? 0) * .02;
@@ -180,7 +204,7 @@ export function interventionQuote(run: RunState, d: InterventionDef, tierId: Inv
   return {
     intervention: d,
     tier,
-    cost: tierId === "standard" ? d.cost : round5k(d.cost * tier.costMult),
+    cost: useTier === "standard" ? d.cost : round5k(d.cost * tier.costMult),
     points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult)),
     issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult),
     hype: scaleSigned(d.hype ?? 0, tier.hypeMult * (d.capability === "marketing" ? capabilityMult : 1) * marketingCapitalMult),
@@ -191,9 +215,11 @@ export function interventionQuote(run: RunState, d: InterventionDef, tierId: Inv
   };
 }
 
-export function interventionBlock(run: RunState, p: Project, d: InterventionDef, tierId: InvestmentTierId = "standard"): string | null {
-  const tier = tierById(tierId);
-  const quote = interventionQuote(run, d, tierId);
+export function interventionBlock(run: RunState, p: Project, d0: InterventionDef, tierId: InvestmentTierId = "standard"): string | null {
+  const d = baseIntervention(d0);
+  const useTier = resolvedTier(d0, tierId);
+  const tier = tierById(useTier);
+  const quote = interventionQuote(run, d, useTier);
   if (!quote) return d.scalable ? "Unavailable investment tier" : "This is a single-scale emergency action";
   if (p.stage === "airing" || p.stage === "done") return "Already released";
   if (!d.stages.includes(p.stage)) return `Only during ${d.stages.join("/")}`;
@@ -205,7 +231,7 @@ export function interventionBlock(run: RunState, p: Project, d: InterventionDef,
 
 export function applyIntervention(run: RunState, projectId: string, key: string, rng = Math.random): RunState | null {
   const parsed = parseInterventionInvestmentKey(key);
-  const d = INTERVENTIONS.find((x) => x.id === parsed.id);
+  const d = BASE_INTERVENTIONS.find((x) => x.id === parsed.id);
   const p = run.projects.find((x) => x.id === projectId);
   if (!d || !p || interventionBlock(run, p, d, parsed.tier)) return null;
   const quote = interventionQuote(run, d, parsed.tier)!;
@@ -289,11 +315,6 @@ export interface CoProductionOffer {
   fit: boolean;
 }
 
-/**
- * Rival co-productions deliberately reuse ProjectCommission. That makes the
- * cash injection + back-end share save-stable and lets the authoritative
- * release reducer settle the partner share without a parallel finance path.
- */
 export function coProductionOffer(run: RunState, projectId: string): CoProductionOffer | null {
   const p = run.projects.find((x) => x.id === projectId);
   if (!p || p.commission || !["concept", "preprod", "animation", "sound"].includes(p.stage)) return null;
@@ -307,7 +328,6 @@ export function coProductionOffer(run: RunState, projectId: string): CoProductio
     .sort((a, b) => b.score - a.score);
   const pick = rivals[0];
   if (!pick) return null;
-
   const total = Math.max(1, draftCost(p.draft));
   const remaining = Math.max(0, total - p.spent);
   if (remaining < 15_000) return null;
