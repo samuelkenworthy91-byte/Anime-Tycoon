@@ -111,9 +111,11 @@ export default function LibraryPanel({
   const [picking, setPicking] = useState<null | "crossover" | "spinoff">(null);
   const [confirmSale, setConfirmSale] = useState(false);
 
-  const list = Object.values(run.franchises).sort(
+  const allFranchises = Object.values(run.franchises).sort(
     (a, b) => b.popularity - a.popularity || b.totalRevenue - a.totalRevenue
   );
+  const list = allFranchises.filter((fr) => !fr.soldTo);
+  const soldArchive = allFranchises.filter((fr) => !!fr.soldTo);
   const open = openKey ? run.franchises[openKey] : null;
 
   if (run.sellerAuction) return <SellerAuctionCeremony run={run} setRun={setRun} />;
@@ -122,9 +124,14 @@ export default function LibraryPanel({
   if (!open) {
     return (
       <div className="space-y-1.5 text-[12px]">
-        {list.length === 0 && (
+        {allFranchises.length === 0 && (
           <div className="rounded-xl border border-dashed border-paper/20 p-4 text-center text-paper/40">
             Ship a show and it lives here forever — your studio's library of IPs.
+          </div>
+        )}
+        {allFranchises.length > 0 && list.length === 0 && (
+          <div className="rounded-xl border border-dashed border-paper/20 p-4 text-center text-paper/40">
+            You currently control no original franchises. Sold properties remain in the archive below as historical records.
           </div>
         )}
         {list.map((fr) => {
@@ -164,6 +171,35 @@ export default function LibraryPanel({
             </button>
           );
         })}
+
+        {soldArchive.length > 0 && (
+          <div className="pt-3">
+            <div className="mb-1.5 flex items-center justify-between text-[9px] font-black tracking-widest text-paper/40">
+              <span>SOLD RIGHTS ARCHIVE</span>
+              <span>{soldArchive.length} historic IP{soldArchive.length === 1 ? "" : "s"}</span>
+            </div>
+            <div className="space-y-1">
+              {soldArchive.map((fr) => (
+                <button
+                  key={fr.key}
+                  className="block w-full rounded-lg border border-paper/10 bg-paper/[.03] px-2.5 py-2 text-left opacity-70"
+                  onClick={() => {
+                    sfx.select();
+                    setOpenKey(fr.key);
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="min-w-0 truncate font-display text-xs font-bold text-paper/65">{fr.baseTitle}</span>
+                    <span className="shrink-0 rounded border border-neon/30 px-1.5 py-.5 text-[7px] font-black text-neon">SOLD</span>
+                  </div>
+                  <div className="mt-.5 text-[9px] text-paper/35">
+                    {fr.soldTo?.name} · sold for {formatGBPShort(fr.soldTo?.price ?? 0)} · historical record only
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -183,6 +219,7 @@ export default function LibraryPanel({
     onContinue({ key: fr.key, kind, ...extra });
   };
 
+  /* Sold IP is archive-only and can never be offered as a crossover partner. */
   const otherFranchises = list.filter((f) => f.key !== fr.key);
 
   return (
@@ -195,15 +232,16 @@ export default function LibraryPanel({
           setPicking(null);
         }}
       >
-        <ArrowLeft size={13} /> ALL FRANCHISES
+        <ArrowLeft size={13} /> {fr.soldTo ? "SOLD RIGHTS ARCHIVE" : "ALL FRANCHISES"}
       </button>
 
       {/* ------------------------------------------------------- profile */}
-      <div className="ink-card p-3">
+      <div className={cn("ink-card p-3", fr.soldTo && "opacity-80")}>
         <div className="flex items-baseline justify-between gap-2">
           <div className="min-w-0 truncate font-display text-base font-extrabold">
             {fr.baseTitle}
             {fr.cult && <span className="ml-2 text-[10px] font-bold text-viol">🕯️ CULT CLASSIC</span>}
+            {fr.soldTo && <span className="ml-2 rounded border border-neon/40 px-1.5 py-.5 text-[8px] font-black text-neon">SOLD RIGHTS</span>}
           </div>
           {hofEntries > 0 && (
             <div className="flex shrink-0 items-center gap-1 text-[10px] font-bold text-gold">
@@ -244,7 +282,7 @@ export default function LibraryPanel({
               {fr.fatigue}
             </span>
           </div>
-          {fr.fatigue >= 40 && (
+          {!fr.soldTo && fr.fatigue >= 40 && (
             <div className="text-[10px] text-paper/45">Fans are tiring of this IP — resting it restores excitement.</div>
           )}
         </div>
@@ -252,18 +290,18 @@ export default function LibraryPanel({
 
       <div className={cn("rounded-xl border p-3", fr.soldTo ? "border-neon/45 bg-neon/5" : "border-gold/35 bg-gold/5")}>
         <div className="text-[10px] font-black tracking-widest text-gold">IP RIGHTS</div>
-        {fr.soldTo ? <div className="mt-1 text-xs text-neon"><b>SOLD TO {fr.soldTo.name.toUpperCase()}</b> · {formatGBPShort(fr.soldTo.price)} · week {fr.soldTo.week}. Historic credits stay here, but continuations, merchandise and every cast member tied to this IP are no longer yours to use.</div> : (()=>{const block=franchiseSaleBlock(run,fr.key);return <><div className="mt-1 text-[10px] text-paper/50">Successful original IP can enter a live no-reserve rights auction. Networks and rival studios bid according to appetite and genre fit: the room may explode into a bidding war, or your property may sell for a painful lowball. The cast rights go with it.</div>{!block?<div className="mt-2 flex flex-wrap gap-2">{!confirmSale?<Btn variant="gold" onClick={()=>setConfirmSale(true)}>LIST IP FOR NO-RESERVE AUCTION</Btn>:<><div className="w-full rounded-lg border border-neon/45 bg-neon/5 p-2 text-[10px] text-neon"><b>FINAL WARNING:</b> once listed, you cannot withdraw it. Whatever the room bids becomes the sale price, and this IP’s cast becomes unavailable to your studio.</div><Btn variant="gold" onClick={()=>{setRun(r=>startFranchiseAuction(r,fr.key)??r);setConfirmSale(false);}}>COMMIT TO AUCTION</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(false)}>CANCEL</Btn></>}</div>:<div className="mt-2 text-[9px] text-paper/40">{block}</div>}</>;})()}
+        {fr.soldTo ? <div className="mt-1 text-xs text-neon"><b>SOLD TO {fr.soldTo.name.toUpperCase()}</b> · {formatGBPShort(fr.soldTo.price)} · week {fr.soldTo.week}. Historic credits stay here, but this property is archive-only: it cannot appear in sequel, crossover or merchandising choices, and every cast member tied to it is unavailable to your studio.</div> : (()=>{const block=franchiseSaleBlock(run,fr.key);return <><div className="mt-1 text-[10px] text-paper/50">Successful original IP can enter a live no-reserve rights auction. Networks and rival studios bid according to appetite and genre fit: the room may explode into a bidding war, or your property may sell for a painful lowball. The cast rights go with it.</div>{!block?<div className="mt-2 flex flex-wrap gap-2">{!confirmSale?<Btn variant="gold" onClick={()=>setConfirmSale(true)}>LIST IP FOR NO-RESERVE AUCTION</Btn>:<><div className="w-full rounded-lg border border-neon/45 bg-neon/5 p-2 text-[10px] text-neon"><b>FINAL WARNING:</b> once listed, you cannot withdraw it. Whatever the room bids becomes the sale price, and this IP’s cast becomes unavailable to your studio.</div><Btn variant="gold" onClick={()=>{setRun(r=>startFranchiseAuction(r,fr.key)??r);setConfirmSale(false);}}>COMMIT TO AUCTION</Btn><Btn variant="ghost" onClick={()=>setConfirmSale(false)}>CANCEL</Btn></>}</div>:<div className="mt-2 text-[9px] text-paper/40">{block}</div>}</>;})()}
       </div>
 
       {/* ---------------------------------------------------------- cast */}
       {fr.cast.length > 0 && (
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-            <Heart size={11} /> CHARACTER POPULARITY
+            <Heart size={11} /> CHARACTER POPULARITY {fr.soldTo && <span className="ml-auto text-[8px] text-neon">RIGHTS TRANSFERRED</span>}
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {fr.cast.map((c) => (
-              <div key={c.role} className="flex items-center gap-2 rounded-md border border-paper/10 bg-paper/5 p-1.5">
+              <div key={c.role} className={cn("flex items-center gap-2 rounded-md border border-paper/10 bg-paper/5 p-1.5", fr.soldTo && "opacity-40 grayscale")}>
                 <Portrait img={castById(c.id).img} alt="" className="h-8 w-8 rounded-md" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[11px] font-bold">
@@ -279,7 +317,7 @@ export default function LibraryPanel({
             ))}
           </div>
           <div className="mt-1 text-[9px] text-paper/40">
-            Popular characters sell merch, carry spin-offs and soften fan verdicts.
+            {fr.soldTo ? "Character rights transferred with the IP. These cast members remain visible only for the historical record." : "Popular characters sell merch, carry spin-offs and soften fan verdicts."}
           </div>
         </div>
       )}
@@ -327,120 +365,124 @@ export default function LibraryPanel({
         </div>
       </div>
 
-      {/* --------------------------------------------------------- merch */}
-      <div>
-        <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-          <ShoppingBag size={11} /> MERCHANDISING
-        </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {MERCH_PRODUCTS.map((p) => {
-            const block = merchBlock(fr, p, run.week, run.cash, run.research ?? []);
-            const ret = merchReturn(fr, p);
-            /* research gates get a labelled 🔒 RESEARCH chip so the next
-               unlock is obvious — other gates stay plain-economic */
-            const researchGate = block?.includes("research (R&D)");
-            return (
-              <div key={p.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-mint/30 bg-mint/5")}>
-                <div className="flex items-center gap-1 text-[11px] font-bold">
-                  {p.id === "mobile" && <Gamepad2 size={11} />}
-                  {p.label}
-                  {researchGate && <span className="ml-auto rounded bg-viol/25 px-1 py-px text-[7px] font-black tracking-widest text-viol">🔒 R&D</span>}
-                </div>
-                <div className="text-[9px] text-paper/45">{p.desc}</div>
-                <div className="mt-1 text-[9px] text-paper/60">
-                  −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(ret)}</b> / {p.weeks} wk
-                </div>
-                {block ? (
-                  <div className={cn("mt-1 text-[9px]", researchGate ? "font-bold text-viol" : "text-paper/40")}>{block}</div>
-                ) : (
-                  <Btn variant="cyan" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doMerch(p.id)}>
-                    LAUNCH
-                  </Btn>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ------------------------------------------------- continuations */}
-      <div>
-        <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-          <Clapperboard size={11} /> CONTINUE THE STORY
-        </div>
-        <div className="space-y-1.5">
-          {CONTINUATIONS.map((c) => {
-            const block =
-              (c.medium && !run.mediumsUnlocked.includes(c.medium)
-                ? `Research the ${MEDIUMS[c.medium].label} format first`
-                : null) ??
-              continuationBlock(fr, c.kind, {
-                week: run.week,
-                franchiseCount: list.length,
-                officeLevel: run.officeLevel,
-                projects: run.projects,
-              });
-            const expected = expectedScore(fr, c.kind);
-            const needsPick = c.kind === "crossover" || c.kind === "spinoff";
-            return (
-              <div key={c.kind} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5" : "border-paper/20 bg-paper/5")}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="text-[11px] font-bold">
-                      {c.label}
-                      {c.fee > 0 && <span className="ml-1.5 text-[9px] text-paper/50">+{formatGBPShort(c.fee)} fee</span>}
+      {!fr.soldTo && (
+        <>
+          {/* --------------------------------------------------------- merch */}
+          <div>
+            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
+              <ShoppingBag size={11} /> MERCHANDISING
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {MERCH_PRODUCTS.map((p) => {
+                const block = merchBlock(fr, p, run.week, run.cash, run.research ?? []);
+                const ret = merchReturn(fr, p);
+                /* research gates get a labelled 🔒 RESEARCH chip so the next
+                   unlock is obvious — other gates stay plain-economic */
+                const researchGate = block?.includes("research (R&D)");
+                return (
+                  <div key={p.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-mint/30 bg-mint/5")}>
+                    <div className="flex items-center gap-1 text-[11px] font-bold">
+                      {p.id === "mobile" && <Gamepad2 size={11} />}
+                      {p.label}
+                      {researchGate && <span className="ml-auto rounded bg-viol/25 px-1 py-px text-[7px] font-black tracking-widest text-viol">🔒 R&D</span>}
                     </div>
-                    <div className="text-[9px] text-paper/45">{c.desc}</div>
-                    <div className="text-[9px] text-paper/40">
-                      {block ?? `${c.risk} Fans will expect ≥${expected}/40. Fatigue +${c.fatigueAdd}.`}
+                    <div className="text-[9px] text-paper/45">{p.desc}</div>
+                    <div className="mt-1 text-[9px] text-paper/60">
+                      −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(ret)}</b> / {p.weeks} wk
                     </div>
-                  </div>
-                  {!block && (
-                    <Btn
-                      variant={c.kind === "season" ? "gold" : "ghost"}
-                      className="shrink-0 !py-1 text-[10px]"
-                      onClick={() => {
-                        if (needsPick) {
-                          sfx.click();
-                          setPicking(c.kind as "crossover" | "spinoff");
-                        } else startContinuation(c.kind);
-                      }}
-                    >
-                      {needsPick ? "CHOOSE…" : "GREENLIGHT"}
-                    </Btn>
-                  )}
-                </div>
-
-                {/* crossover partner / spin-off character pickers */}
-                {picking === "crossover" && c.kind === "crossover" && (
-                  <div className="mt-1.5 space-y-1 border-t border-paper/10 pt-1.5">
-                    <div className="text-[9px] tracking-widest text-paper/45">CROSS OVER WITH…</div>
-                    {otherFranchises.map((f) => (
-                      <Btn key={f.key} variant="ghost" className="w-full !justify-between !py-1 text-[10px]" onClick={() => startContinuation("crossover", { crossKey: f.key })}>
-                        <span className="truncate">{f.baseTitle}</span>
-                        <span className="text-paper/50">pop {f.popularity}</span>
+                    {block ? (
+                      <div className={cn("mt-1 text-[9px]", researchGate ? "font-bold text-viol" : "text-paper/40")}>{block}</div>
+                    ) : (
+                      <Btn variant="cyan" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doMerch(p.id)}>
+                        LAUNCH
                       </Btn>
-                    ))}
+                    )}
                   </div>
-                )}
-                {picking === "spinoff" && c.kind === "spinoff" && (
-                  <div className="mt-1.5 space-y-1 border-t border-paper/10 pt-1.5">
-                    <div className="text-[9px] tracking-widest text-paper/45">STARRING…</div>
-                    {fr.cast
-                      .filter((ch) => ch.popularity >= 45)
-                      .map((ch) => (
-                        <Btn key={ch.id} variant="ghost" className="w-full !justify-between !py-1 text-[10px]" onClick={() => startContinuation("spinoff", { spinChar: ch.id })}>
-                          <span className="truncate">{ch.name}</span>
-                          <span className="text-paper/50">pop {ch.popularity}</span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ------------------------------------------------- continuations */}
+          <div>
+            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
+              <Clapperboard size={11} /> CONTINUE THE STORY
+            </div>
+            <div className="space-y-1.5">
+              {CONTINUATIONS.map((c) => {
+                const block =
+                  (c.medium && !run.mediumsUnlocked.includes(c.medium)
+                    ? `Research the ${MEDIUMS[c.medium].label} format first`
+                    : null) ??
+                  continuationBlock(fr, c.kind, {
+                    week: run.week,
+                    franchiseCount: list.length,
+                    officeLevel: run.officeLevel,
+                    projects: run.projects,
+                  });
+                const expected = expectedScore(fr, c.kind);
+                const needsPick = c.kind === "crossover" || c.kind === "spinoff";
+                return (
+                  <div key={c.kind} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5" : "border-paper/20 bg-paper/5")}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold">
+                          {c.label}
+                          {c.fee > 0 && <span className="ml-1.5 text-[9px] text-paper/50">+{formatGBPShort(c.fee)} fee</span>}
+                        </div>
+                        <div className="text-[9px] text-paper/45">{c.desc}</div>
+                        <div className="text-[9px] text-paper/40">
+                          {block ?? `${c.risk} Fans will expect ≥${expected}/40. Fatigue +${c.fatigueAdd}.`}
+                        </div>
+                      </div>
+                      {!block && (
+                        <Btn
+                          variant={c.kind === "season" ? "gold" : "ghost"}
+                          className="shrink-0 !py-1 text-[10px]"
+                          onClick={() => {
+                            if (needsPick) {
+                              sfx.click();
+                              setPicking(c.kind as "crossover" | "spinoff");
+                            } else startContinuation(c.kind);
+                          }}
+                        >
+                          {needsPick ? "CHOOSE…" : "GREENLIGHT"}
                         </Btn>
-                      ))}
+                      )}
+                    </div>
+
+                    {/* crossover partner / spin-off character pickers */}
+                    {picking === "crossover" && c.kind === "crossover" && (
+                      <div className="mt-1.5 space-y-1 border-t border-paper/10 pt-1.5">
+                        <div className="text-[9px] tracking-widest text-paper/45">CROSS OVER WITH…</div>
+                        {otherFranchises.map((f) => (
+                          <Btn key={f.key} variant="ghost" className="w-full !justify-between !py-1 text-[10px]" onClick={() => startContinuation("crossover", { crossKey: f.key })}>
+                            <span className="truncate">{f.baseTitle}</span>
+                            <span className="text-paper/50">pop {f.popularity}</span>
+                          </Btn>
+                        ))}
+                      </div>
+                    )}
+                    {picking === "spinoff" && c.kind === "spinoff" && (
+                      <div className="mt-1.5 space-y-1 border-t border-paper/10 pt-1.5">
+                        <div className="text-[9px] tracking-widest text-paper/45">STARRING…</div>
+                        {fr.cast
+                          .filter((ch) => ch.popularity >= 45)
+                          .map((ch) => (
+                            <Btn key={ch.id} variant="ghost" className="w-full !justify-between !py-1 text-[10px]" onClick={() => startContinuation("spinoff", { spinChar: ch.id })}>
+                              <span className="truncate">{ch.name}</span>
+                              <span className="text-paper/50">pop {ch.popularity}</span>
+                            </Btn>
+                          ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
