@@ -119,6 +119,42 @@
   .nice-scroll {
     scrollbar-width: thin;
   }
+
+  /* Candidate/employee dossier (Crew.tsx z-[97]). On Pixel-class portrait
+     viewports the previous 92vh bottom sheet could extend beneath the Android
+     top inset and its X scrolled away with the content. Start the sheet below
+     the system/HUD controls and keep its header — including close — pinned. */
+  [class~="z-[97]"] {
+    align-items: flex-start !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 44px) !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  [class~="z-[97]"] > .nice-scroll {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 60px) !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [class~="z-[97]"] > .nice-scroll > .flex.items-start.gap-3 {
+    position: sticky;
+    top: -1rem;
+    z-index: 6;
+    margin: -1rem -1rem 0;
+    padding: 1rem 1rem .75rem;
+    border-bottom: 1px solid rgba(120, 112, 142, .28);
+    background: rgba(24, 18, 38, .98);
+    backdrop-filter: blur(10px);
+  }
+
+  [class~="z-[97]"] > .nice-scroll > .flex.items-start.gap-3 button:last-child {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -3px;
+  }
 }
 
 @media (min-width: 601px), (orientation: landscape) {
