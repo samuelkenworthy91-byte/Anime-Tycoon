@@ -1,5 +1,6 @@
 import { advanceWeeks, type RunState } from "./state";
 import {
+  awardNomineeKey,
   freezeNominationEntries,
   frozenNominationEntries,
   nominationSlateFromFrozen,
@@ -13,12 +14,25 @@ import {
  * the in-game equivalent of a November nominations announcement. */
 export const AWARD_NOMINATION_CUTOFF_WEEK = 43;
 
+/** Craft awards also have a raw discipline-output expectation that rises every
+ * industry year. Audiences acclimatise to better production values, so a level
+ * of Story/Animation/Sound that was award-worthy in Year 1 cannot coast to a
+ * nomination forever. The existing overall-review/craft qualification remains
+ * in place as a second gate. */
+export const AWARD_CRAFT_OUTPUT_BASE = 160;
+export const AWARD_CRAFT_OUTPUT_YEAR_STEP = 20;
+export const awardCraftOutputFloor = (year: number) =>
+  AWARD_CRAFT_OUTPUT_BASE + Math.max(0, Math.floor(year) - 1) * AWARD_CRAFT_OUTPUT_YEAR_STEP;
+
 export const awardYearAtWeek = (week: number) => Math.floor(Math.max(0, week) / 48) + 1;
 export const awardWeekInYear = (week: number) => ((Math.max(0, week) % 48) + 48) % 48;
 export const awardCutoffAbsoluteWeek = (year: number) => (Math.max(1, year) - 1) * 48 + AWARD_NOMINATION_CUTOFF_WEEK;
 export const awardCycleStartWeek = (year: number) => year <= 1 ? 1 : (year - 2) * 48 + AWARD_NOMINATION_CUTOFF_WEEK + 1;
 
 const CATEGORY_IDS = new Set<AwardCategoryId>(["aoty", "shonen", "shojo", "writing", "animation", "score", "fanfav"]);
+const CRAFT_CATEGORY_IDS = ["writing", "animation", "score"] as const;
+type CraftCategoryId = typeof CRAFT_CATEGORY_IDS[number];
+const CRAFT_CATEGORY_SET = new Set<AwardCategoryId>(CRAFT_CATEGORY_IDS);
 
 function rivalCycleEntries(run: RunState, year: number): AwardNominee[] {
   const start = awardCycleStartWeek(year);
@@ -111,6 +125,64 @@ export function restoreAwardNominationMetadata(run: RunState, rawYearShows: unkn
   return changed ? { ...run, yearShows } : run;
 }
 
+const craftMetric = (entry: AwardNominee, category: CraftCategoryId) =>
+  category === "writing" ? entry.story : category === "animation" ? entry.art : entry.sound;
+
+/** The player has literal production points retained on the released project,
+ * so award craft floors use those exact numbers. Rival shows do not run the
+ * desk-bubble simulation; their frozen craft score is converted onto the same
+ * visible hundreds-scale (x6). Old/legacy player rows use the same fallback so
+ * loading an old career never makes an otherwise valid awards year disappear. */
+export function awardDisciplineOutput(run: RunState, entry: AwardNominee, category: CraftCategoryId): number {
+  if (entry.player && entry.sourceId) {
+    const project = run.projects.find((p) => p.id === entry.sourceId);
+    if (project) {
+      if (category === "writing") return Math.round(project.points.story);
+      if (category === "animation") return Math.round(project.points.art);
+      return Math.round(project.points.sound);
+    }
+  }
+  return Math.round(craftMetric(entry, category) * 6);
+}
+
+/** Keep all normal nominations, then replace only the three craft categories
+ * with category-specific selections made from shows that also clear the rising
+ * raw-output floor. Re-running freezeNominationEntries for each category keeps
+ * the Stage-2 studio-diversity rules intact. */
+function freezeWithRisingCraftFloor(run: RunState, year: number, candidateSlate: AwardNominee[]): AwardNominee[] {
+  const standard = freezeNominationEntries(year, candidateSlate);
+  const byKey = new Map<string, { nominee: AwardNominee; categories: AwardCategoryId[] }>();
+
+  const add = (nominee: AwardNominee, category: AwardCategoryId) => {
+    const key = awardNomineeKey(nominee);
+    const row = byKey.get(key) ?? { nominee, categories: [] };
+    if (!row.categories.includes(category)) row.categories.push(category);
+    byKey.set(key, row);
+  };
+
+  for (const entry of standard) {
+    for (const category of entry.nominationCategories ?? []) {
+      if (!CRAFT_CATEGORY_SET.has(category)) add(entry, category);
+    }
+  }
+
+  const floor = awardCraftOutputFloor(year);
+  for (const category of CRAFT_CATEGORY_IDS) {
+    const eligible = candidateSlate.filter((entry) => awardDisciplineOutput(run, entry, category) >= floor);
+    const categoryFrozen = freezeNominationEntries(year, eligible);
+    for (const entry of categoryFrozen) {
+      if (entry.nominationCategories?.includes(category)) add(entry, category);
+    }
+  }
+
+  return [...byKey.values()].map(({ nominee, categories }) => ({
+    ...nominee,
+    nominationYear: year,
+    nominationCategories: categories,
+    nominationAnnouncementSeen: false,
+  }));
+}
+
 /** Freeze the November slate once. The existing player award rows are marked
  * as considered so any production released after this point can be carried
  * into the following award cycle instead of disappearing at year end. */
@@ -127,15 +199,16 @@ export function freezeNominationsIfDue(run: RunState): RunState {
       : entry
   );
   const candidateSlate = [...playerRows, ...rivalCycleEntries(run, year)];
-  const selected = freezeNominationEntries(year, candidateSlate);
+  const selected = freezeWithRisingCraftFloor(run, year, candidateSlate);
   const frozen = selected.length ? selected : [emptyNominationMarker(year)];
 
   const playerNominations = frozen
     .filter((entry) => entry.player && (entry.nominationCategories?.length ?? 0) > 0)
     .flatMap((entry) => (entry.nominationCategories ?? []).map((category) => `${entry.title} — ${category}`));
+  const craftFloor = awardCraftOutputFloor(year);
   const notice = playerNominations.length
-    ? `🏆 London Anime Awards nominations announced: ${playerNominations.join(" · ")}`
-    : "🏆 London Anime Awards nominations announced. Your studio did not make this year's shortlist.";
+    ? `🏆 London Anime Awards nominations announced: ${playerNominations.join(" · ")} · Craft floor ${craftFloor}+.`
+    : `🏆 London Anime Awards nominations announced. Your studio did not make this year's shortlist. Craft floor: ${craftFloor}+ Story/Animation/Sound output.`;
 
   return {
     ...run,
