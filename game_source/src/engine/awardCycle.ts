@@ -1,6 +1,5 @@
 import { advanceWeeks, type RunState } from "./state";
 import {
-  awardNomineeKey,
   freezeNominationEntries,
   frozenNominationEntries,
   nominationSlateFromFrozen,
@@ -58,47 +57,51 @@ export function nominationFrozenForYear(run: RunState, year: number): boolean {
   return run.yearShows.some((entry) => entry.nominationYear === year && Array.isArray(entry.nominationCategories));
 }
 
+function validLicensedProof(raw: unknown): AwardNominee["licensedIpAward"] | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const proof = raw as { ipId?: unknown; auctionId?: unknown; ownerStudioId?: unknown };
+  return typeof proof.ipId === "string" && typeof proof.auctionId === "string" && typeof proof.ownerStudioId === "string"
+    ? { ipId: proof.ipId, auctionId: proof.auctionId, ownerStudioId: proof.ownerStudioId }
+    : undefined;
+}
+
 /** `migrateRun()` intentionally rebuilds award rows field-by-field for old
  * saves. Keep that defensive migration untouched, then merge the optional
- * Stage-2 nomination metadata back from the raw save using stable production
- * identity. This makes frozen November slates survive save/reload without a
- * save-envelope bump or risky changes to the large central migration. */
+ * Stage-2 nomination metadata back from the raw save. That migration preserves
+ * yearShows length and order, which matters because a nominated player release
+ * exists once as its original annual row and once as the frozen shortlist row.
+ * Index restoration keeps those two rows distinct instead of tagging both.
+ * We also restore the pre-existing licensed-IP ownership proof/studio identity
+ * that the defensive mapper omits, so a licensed nominee cannot disappear
+ * merely because the player saved after nominations and reloaded. */
 export function restoreAwardNominationMetadata(run: RunState, rawYearShows: unknown): RunState {
   if (!Array.isArray(rawYearShows) || rawYearShows.length === 0 || run.yearShows.length === 0) return run;
-  const rawByKey = new Map<string, Partial<AwardNominee>>();
-  for (const raw of rawYearShows) {
-    if (!raw || typeof raw !== "object") continue;
-    const n = raw as Partial<AwardNominee>;
-    if (typeof n.title !== "string" || typeof n.studio !== "string") continue;
-    rawByKey.set(awardNomineeKey({
-      title: n.title,
-      studio: n.studio,
-      player: !!n.player,
-      animeType: n.animeType ?? "shonen",
-      genres: n.genres ?? [],
-      score: typeof n.score === "number" ? n.score : 0,
-      story: typeof n.story === "number" ? n.story : 0,
-      art: typeof n.art === "number" ? n.art : 0,
-      sound: typeof n.sound === "number" ? n.sound : 0,
-      audience: typeof n.audience === "number" ? n.audience : 0,
-      sourceId: typeof n.sourceId === "string" ? n.sourceId : null,
-    }), n);
-  }
-
   let changed = false;
-  const yearShows = run.yearShows.map((entry) => {
-    const raw = rawByKey.get(awardNomineeKey(entry));
-    if (!raw) return entry;
+  const yearShows = run.yearShows.map((entry, index) => {
+    const raw0 = rawYearShows[index];
+    if (!raw0 || typeof raw0 !== "object") return entry;
+    const raw = raw0 as Partial<AwardNominee>;
     const nominationYear = typeof raw.nominationYear === "number" ? Math.max(1, Math.floor(raw.nominationYear)) : undefined;
     const nominationCategories = Array.isArray(raw.nominationCategories)
       ? raw.nominationCategories.filter((id): id is AwardCategoryId => typeof id === "string" && CATEGORY_IDS.has(id as AwardCategoryId))
       : undefined;
     const nominationAnnouncementSeen = typeof raw.nominationAnnouncementSeen === "boolean" ? raw.nominationAnnouncementSeen : undefined;
     const nominationConsideredYear = typeof raw.nominationConsideredYear === "number" ? Math.max(1, Math.floor(raw.nominationConsideredYear)) : undefined;
-    if (nominationYear === undefined && nominationCategories === undefined && nominationAnnouncementSeen === undefined && nominationConsideredYear === undefined) return entry;
+    const studioId = typeof raw.studioId === "string" ? raw.studioId : entry.studioId;
+    const licensedIpAward = validLicensedProof(raw.licensedIpAward) ?? entry.licensedIpAward;
+    if (
+      nominationYear === undefined &&
+      nominationCategories === undefined &&
+      nominationAnnouncementSeen === undefined &&
+      nominationConsideredYear === undefined &&
+      studioId === entry.studioId &&
+      licensedIpAward === entry.licensedIpAward
+    ) return entry;
     changed = true;
     return {
       ...entry,
+      studioId,
+      licensedIpAward,
       nominationYear,
       nominationCategories,
       nominationAnnouncementSeen,
