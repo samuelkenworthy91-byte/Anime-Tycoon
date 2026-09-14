@@ -247,12 +247,17 @@ describe("Stage 8 Pixel portrait layout guards", () => {
     expect(css).toContain("min-height: 36px");
   });
 
-  it("keeps the Big Three cinematic vertically scrollable and safe-area aware on Pixel portrait", () => {
+  it("keeps the Big Three cinematic and mountain monument safe on Pixel portrait", () => {
     const reveal = readFileSync("src/components/BigThreeReveal.tsx", "utf8");
+    const mountain = readFileSync("src/components/BigThreeMountain.tsx", "utf8");
+    const css = readFileSync("src/components/bigThreeReveal.css", "utf8");
     expect(reveal).toContain("overflow-y-auto");
     expect(reveal).toContain("safe-area-inset-top");
     expect(reveal).toContain("safe-area-inset-bottom");
-    expect(reveal).toContain("grid-cols-3");
-    expect(reveal).toContain("min-h-[160px]");
+    expect(mountain).toContain("grid-cols-3");
+    expect(mountain).toContain("big3-mountain-scene");
+    expect(css).toContain("@media (max-width: 640px)");
+    expect(css).toContain(".big3-mountain-compact");
+    expect(css).toContain(".big3-unhewn");
   });
 });
