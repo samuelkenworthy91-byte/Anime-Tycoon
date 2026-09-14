@@ -132,30 +132,35 @@ with median second-slot year 7 and median third-slot year 8. All 16 rival-only c
 
 Crucially, **player recognition is not blocked by the rival grace/cooldown**. There is still no reserved player slot. A player release that genuinely meets the critic, reach, craft and cultural-momentum requirements can seize an open position sooner; the cadence only prevents the AI from mechanically consuming both places before the player has a meaningful endgame response window.
 
-## Big Three player-craft integration repair
+## Big Three integrity comparison
 
-The slower rivalry cadence exposed a latent Stage-7 bug in a path that had previously been masked by the wall filling rapidly.
+During Stage 8, an interim pacing refactor was deliberately compared against the validated Stage-7 checkpoint rather than being accepted purely because the tests were green. That comparison caught an over-broad rewrite which had altered established Stage-7 side-effects while changing rival-recognition timing.
 
-`playerCraftFor()` has the signature:
+Before final sign-off, the Big Three engine was restored from the validated Stage-7 base and the Stage-8 change was reduced to the intended hardening layer only:
 
-`playerCraftFor(score, points)`
+- 48-week rival grace after the Year-6 seed;
+- 72-week rival cooldown after a later rival recognition;
+- at most one rival recognition per consensus window.
 
-and returns Story / Art / Sound craft values. The Big Three integration had incorrectly called it with only `points` and then attempted to read a non-existent `craft.score` field.
+The Stage-7 behaviours explicitly preserved include:
 
-Stage 8 corrects this to:
+- Sunnyrise's seeded flagship updating its rival-studio fans, revenue, reputation, momentum, release history and franchise record;
+- old post-Year-6 saves starting rival competition from the feature's introduction point rather than retroactively awarding old releases;
+- creator/current-owner handling for original and licensed properties;
+- player Big Three franchise popularity and merchandise-value effects;
+- licensed-IP Big Three history and renewal leverage;
+- rival-studio rivalry reactions when the player earns a slot;
+- rival fan/reputation/momentum rewards when a rival earns a slot;
+- historical draft/poster/licensed-IP data on Big Three records.
 
-- call `playerCraftFor(input.score, input.points)`;
-- calculate the craft floor from `story`, `art`, and `sound`.
+The player craft integration was already correct at the Stage-7 checkpoint (`playerCraftFor(score, points)` with a Story/Art/Sound floor). A temporary Stage-8 refactor briefly regressed that call during development, but it was not a Stage-7 defect and is not present in the final implementation.
 
-This restores real shipped production craft as the player Big Three craft gate and removes the reachable long-run crash.
+The Big Three regression tests now assert several of these side-effects directly, so a future pacing or presentation refactor cannot remain green while silently removing the established Stage-7 behaviour.
 
 ## Conclusion
 
 Stage 8 did not justify broad late-game nerfs. Training, intervention ROI, capability costs, specialisation, awards, insolvency, migration and mobile layout all held within the intended design envelopes.
 
-The audit did justify two concrete corrections:
+The material balance correction justified by the audit was to stretch rival Big Three recognition across the endgame rather than allowing the wall to fill in Year 6. The final integrity comparison then ensured that this pacing change was layered onto the validated Stage-7 behaviour rather than replacing it.
 
-1. stretch rival Big Three recognition across the endgame rather than letting the wall fill in Year 6;
-2. repair the player Big Three craft integration so it uses the real awards craft API correctly.
-
-These are now permanent regression targets rather than one-off manual findings.
+The Stage-8 migration guards, sink audit, Big Three progression audit and strengthened Big Three side-effect tests are now permanent regression targets rather than one-off manual findings.
