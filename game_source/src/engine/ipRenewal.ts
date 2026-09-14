@@ -91,6 +91,7 @@ export function renewIPContract(
   const ip = ipById(ipId);
   const cost = ipRenewalCost(market, ipId, legalTier);
   if (!baseContract || !ip || cost === null) return null;
+  if (baseContract.expiresWeek - week > IP_RENEWAL_WINDOW_WEEKS) return null;
   const contract = renewalContract(baseContract);
   const starts = Math.max(week, baseContract.expiresWeek);
   const next = {
