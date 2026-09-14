@@ -117,7 +117,13 @@ describe("studio signature-genre specialisation", () => {
 
   it("feeds specialisation into live worker output rather than adding a flat review bonus", () => {
     let run = withFantasyHistory([]);
-    const worker = { ...run.candidates[0], stamina: 100, favGenre: "slice" as GenreId, spec: undefined };
+    const worker = {
+      ...run.candidates[0],
+      stamina: 100,
+      favGenre: "horror" as GenreId,
+      spec: undefined,
+      genreExperience: { fantasy: 3, slice: 3 },
+    };
     const sig = makeProject(draft(["fantasy"]), run.week, run.day);
     sig.staffIds = [worker.id];
     const out = makeProject(draft(["slice"]), run.week, run.day);
