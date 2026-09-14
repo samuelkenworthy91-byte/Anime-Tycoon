@@ -231,6 +231,7 @@ import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
 import { trailblazerProductionMult } from "./showrunnerPerks";
+import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -723,7 +724,7 @@ export function refreshRecruitmentAds(r: RunState): RunState | null {
   return {
     ...r,
     cash: r.cash - cost,
-    candidates: rollHirePool(r.week),
+    candidates: alignRecruitmentPool(r, rollHirePool(r.week)),
     recruitmentAdRefreshes: refreshes + 1,
     recruitmentAdMonth: month,
   };
@@ -908,7 +909,11 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
   const studio = { ...studioProduction(heads, staffArr, r.showrunner), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
-  const mods: StaffModFn = (st, p, team) => personMod(st, p, team, { bonds });
+  const mods: StaffModFn = (st, p, team) => {
+    const base = personMod(st, p, team, { bonds });
+    const signature = specialisationProjectEffects(r, p.draft);
+    return { ...base, out: base.out * signature.outputMult, pace: base.pace * signature.paceMult };
+  };
 
   for (let i = 1; i <= n; i++) {
     const w = r.week + i;
@@ -1929,6 +1934,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
        percentile check instead of a removed weekly quality calculation. */
     effective *= personMod(st, project, team, { bonds: r.bonds ?? {} }).out;
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
+    effective *= specialisationProjectEffects(r, project.draft).outputMult;
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -1948,7 +1954,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
   return Math.max(0, effective);
 }
 
-function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
+function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Project): number {
   let skill = showrunnerContractSkill(r.showrunner, r.showrunnerCareer, type);
   skill *= facilityFX(r.facilities).pointMult[type];
   skill *= studioPointMult(r.heads ?? {}, r.staff, r.legends ?? [])[type];
@@ -1956,6 +1962,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType): number {
   if (type === "story" && r.research.includes("storyboard")) skill *= 1.15;
   if (type === "art" && r.research.includes("mocap")) skill *= 1.12;
   skill *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
+  if (project) skill *= specialisationProjectEffects(r, project.draft).outputMult;
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
 }
@@ -2044,9 +2051,9 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
   } else if (!runnerJob && Math.random() < 0.22) {
     const active = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
     if (active) {
-      const skills = POINT_TYPES.map((type) => ({ type, skill: showrunnerEffectiveSkill(r, type) })).sort((a, b) => b.skill - a.skill);
+      const skills = POINT_TYPES.map((type) => ({ type, skill: showrunnerEffectiveSkill(r, type, active) })).sort((a, b) => b.skill - a.skill);
       const type = Math.random() < 0.62 ? skills[0].type : POINT_TYPES[Math.floor(Math.random() * POINT_TYPES.length)];
-      const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
+      const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type, active));
       if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "project", projectId: active.id });
     }
   }
@@ -2059,7 +2066,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const name = face?.name ?? `${r.studio} showrunner`;
     if (roll() < PROJECT_RESEARCH_PULSE_CHANCE) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "research" });
-    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * (r.showrunner === "steady" ? 0.75 : 1)) {
+    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * specialisationProjectEffects(r, production.draft).issueChanceMult * (r.showrunner === "steady" ? 0.75 : 1)) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "note" });
     }
   }
@@ -2131,7 +2138,12 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds: nx.bonds ?? {} });
     const discovery = trailblazerProductionMult(nx.showrunner, p.draft.genres, nx.comboLevels ?? {});
-    return { ...base, out: base.out * discovery, pace: base.pace * discovery };
+    const signature = specialisationProjectEffects(nx, p.draft);
+    return {
+      ...base,
+      out: base.out * discovery * signature.outputMult,
+      pace: base.pace * discovery * signature.paceMult,
+    };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
   const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);

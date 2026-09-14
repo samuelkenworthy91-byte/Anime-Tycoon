@@ -46,7 +46,7 @@ import {
 import Portrait from "./Portrait";
 import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
-import { INTERVENTIONS, interventionBlock } from "../engine/spending";
+import { INTERVENTIONS, interventionBlock, interventionQuote } from "../engine/spending";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -240,7 +240,11 @@ function ProjectCard({
         <details className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
           <summary className="cursor-pointer text-[10px] font-black tracking-widest text-gold">PAID PRODUCTION INTERVENTIONS</summary>
           <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
-            {INTERVENTIONS.map((d) => { const block=interventionBlock(run,p,d); return <button key={d.id} disabled={!!block} title={block??d.description} onClick={()=>onIntervention(p.id,d.id)} className={cn("rounded-lg border p-2 text-left text-[9px]",block?"border-line/40 opacity-35":"border-gold/35 bg-gold/5 hover:border-gold")}><b className="block text-paper">{d.name}</b><span className="text-gold">−{formatGBPShort(d.cost)}</span><span className="ml-1 text-paper/40">{block??d.description}</span></button>})}
+            {INTERVENTIONS.map((d) => {
+              const block = interventionBlock(run, p, d);
+              const quote = interventionQuote(run, d, "standard", p.draft);
+              return <button key={d.id} disabled={!!block} title={block ?? d.description} onClick={() => onIntervention(p.id, d.id)} className={cn("rounded-lg border p-2 text-left text-[9px]", block ? "border-line/40 opacity-35" : "border-gold/35 bg-gold/5 hover:border-gold")}><b className="block text-paper">{d.name}</b><span className="text-gold">−{formatGBPShort(quote?.cost ?? d.cost)}</span><span className="ml-1 text-paper/40">{block ?? d.description}</span></button>;
+            })}
           </div>
         </details>
       )}

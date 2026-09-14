@@ -1,6 +1,7 @@
 import type { PointType } from "./data";
 import { draftCost, type Project, type ProjectStage } from "./projects";
 import type { RunState } from "./state";
+import { specialisationProjectEffects } from "./specialisation";
 
 export type InvestmentTierId = "standard" | "extended" | "prestige" | "obsessive";
 export type ProductionCapabilityId = "writing" | "animation" | "sound" | "post" | "marketing";
@@ -189,7 +190,7 @@ export interface InterventionQuote {
   boosts: string[];
 }
 
-export function interventionQuote(run: RunState, d0: InterventionDef, tierId: InvestmentTierId = "standard"): InterventionQuote | null {
+export function interventionQuote(run: RunState, d0: InterventionDef, tierId: InvestmentTierId = "standard", draft?: Project["draft"]): InterventionQuote | null {
   const d = baseIntervention(d0);
   const useTier = resolvedTier(d0, tierId);
   const tier = tierById(useTier);
@@ -197,19 +198,25 @@ export function interventionQuote(run: RunState, d0: InterventionDef, tierId: In
   if (!d.scalable && useTier !== "standard") return null;
   const tuned = tunedIntervention(run, d);
   const capability = d.capability ? productionCapability(run, d.capability) : null;
+  const signature = draft ? specialisationProjectEffects(run, draft) : null;
   const capabilityMult = 1 + (capability?.level ?? 0) * .02;
+  const signatureEffectMult = signature?.interventionEffectMult ?? 1;
   const postRepairMult = d.capability === "post" ? 1 + (capability?.level ?? 0) * .025 : capabilityMult;
   const marketingCapitalMult = d.id === "launch_upgrade" && run.capitalProjects.includes("distribution_network") ? 1.12 : 1;
   const riskExperience = d.capability === "post" ? Math.max(.72, 1 - (capability?.level ?? 0) * .025) : Math.max(.82, 1 - (capability?.level ?? 0) * .015);
   return {
     intervention: d,
     tier,
-    cost: useTier === "standard" ? d.cost : round5k(d.cost * tier.costMult),
-    points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult)),
-    issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult),
-    hype: scaleSigned(d.hype ?? 0, tier.hypeMult * (d.capability === "marketing" ? capabilityMult : 1) * marketingCapitalMult),
+    cost: (() => {
+      const baseCost = useTier === "standard" ? d.cost : round5k(d.cost * tier.costMult);
+      const mult = signature?.interventionCostMult ?? 1;
+      return Math.abs(mult - 1) < .001 ? baseCost : round5k(baseCost * mult);
+    })(),
+    points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult * signatureEffectMult)),
+    issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult * (tuned.issueDelta < 0 ? signatureEffectMult : 1)),
+    hype: scaleSigned(d.hype ?? 0, tier.hypeMult * (d.capability === "marketing" ? capabilityMult : 1) * marketingCapitalMult * signatureEffectMult),
     days: Math.max(0, Math.round((d.days ?? 0) * tier.scheduleMult)),
-    risk: Math.max(0, Math.min(.9, tuned.risk * tier.riskMult * riskExperience)),
+    risk: Math.max(0, Math.min(.9, tuned.risk * tier.riskMult * riskExperience * (signature?.interventionRiskMult ?? 1))),
     capability,
     boosts: tuned.boosts,
   };
@@ -219,7 +226,7 @@ export function interventionBlock(run: RunState, p: Project, d0: InterventionDef
   const d = baseIntervention(d0);
   const useTier = resolvedTier(d0, tierId);
   const tier = tierById(useTier);
-  const quote = interventionQuote(run, d, useTier);
+  const quote = interventionQuote(run, d, useTier, p.draft);
   if (!quote) return d.scalable ? "Unavailable investment tier" : "This is a single-scale emergency action";
   if (p.stage === "airing" || p.stage === "done") return "Already released";
   if (!d.stages.includes(p.stage)) return `Only during ${d.stages.join("/")}`;
@@ -234,7 +241,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
   const d = BASE_INTERVENTIONS.find((x) => x.id === parsed.id);
   const p = run.projects.find((x) => x.id === projectId);
   if (!d || !p || interventionBlock(run, p, d, parsed.tier)) return null;
-  const quote = interventionQuote(run, d, parsed.tier)!;
+  const quote = interventionQuote(run, d, parsed.tier, p.draft)!;
   const success = rng() >= quote.risk;
   const point = d.point ?? (["story", "art", "sound"] as PointType[])[Math.floor(rng() * 3)];
   const gain = success ? quote.points : Math.round(quote.points * .25);

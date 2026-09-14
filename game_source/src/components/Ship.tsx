@@ -13,6 +13,7 @@ import {
   campaignFitLabel,
   strategicCampaignHype,
 } from "../engine/marketing";
+import { campaignForecastAccess, specialisationProjectEffects } from "../engine/specialisation";
 import { cn } from "../utils/cn";
 
 /** Release prep: choose a small strategic campaign mix, then air — or delay. */
@@ -40,6 +41,8 @@ export default function Ship({
   const fx = facilityFX(run.facilities);
   const mktTier = run.facilities.marketing ?? 0;
   const dataTier = run.facilities.data ?? 0;
+  const forecastAccess = campaignForecastAccess(run, project.draft, dataTier);
+  const houseEffect = specialisationProjectEffects(run, project.draft);
 
   const buyCampaign = (id: string, cost: number, h: number) => {
     if (bought.length >= MAX_STRATEGIC_CAMPAIGNS) return;
@@ -91,7 +94,8 @@ export default function Ship({
           <b className="text-paper">CAMPAIGN INTELLIGENCE</b>
           <span>Marketing Office T{mktTier}: hype ×{fx.hypeMult.toFixed(2)}, prices −{Math.round(fx.promoDiscount * 100)}%</span>
           <span>·</span>
-          <span className={dataTier ? "text-cyanx" : "text-paper/35"}>Data Lab T{dataTier}: {dataTier ? "fit forecast active" : "fit hidden"}</span>
+          <span className={forecastAccess === "exact" ? "text-cyanx" : forecastAccess === "band" ? "text-gold" : "text-paper/35"}>Data Lab T{dataTier}: {forecastAccess === "exact" ? "exact fit forecast" : forecastAccess === "band" ? "directional fit band" : "fit hidden"}</span>
+          {houseEffect.active && <span className={houseEffect.signature ? "font-bold text-mint" : "font-bold text-neon"}>{houseEffect.signature ? `SIGNATURE · ${houseEffect.rank.toUpperCase()}` : "OUTSIDE SPECIALITY · LOWER CONFIDENCE"}</span>}
           <span className="ml-auto font-bold text-gold">{bought.length}/{MAX_STRATEGIC_CAMPAIGNS} booked</span>
         </div>
 
@@ -105,6 +109,8 @@ export default function Ship({
             const hypeGain = strategicCampaignHype(campaign, project.draft, fx.hypeMult, run.capitalProjects);
             const afford = run.cash - spent >= cost;
             const capitalActive = !!campaign.capitalSynergy && run.capitalProjects.includes(campaign.capitalSynergy);
+            const fitKnown = forecastAccess !== "hidden";
+            const fitExact = forecastAccess === "exact";
             return (
               <div key={campaign.id} className={cn("ink-card p-3", isBought && "border-mint/60", capitalActive && "ring-1 ring-gold/20")}>
                 <div className="flex items-center gap-1.5">
@@ -114,7 +120,7 @@ export default function Ship({
                 </div>
                 <div className="mt-0.5 text-[10px] text-paper/50">{campaign.description}</div>
                 <div className="mt-1 flex flex-wrap gap-1 text-[8px]">
-                  <span className={cn("rounded border px-1.5 py-.5", dataTier ? (fit >= 1.05 ? "border-mint/40 text-mint" : fit < .9 ? "border-neon/40 text-neon" : "border-line text-paper/55") : "border-line text-paper/35")}>{dataTier ? `FIT ${campaignFitLabel(fit)} · ×${fit.toFixed(2)}` : "FIT ??? · build Data Lab"}</span>
+                  <span className={cn("rounded border px-1.5 py-.5", fitKnown ? (fit >= 1.05 ? "border-mint/40 text-mint" : fit < .9 ? "border-neon/40 text-neon" : "border-line text-paper/55") : "border-line text-paper/35")}>{fitKnown ? `FIT ${campaignFitLabel(fit)}${fitExact ? ` · ×${fit.toFixed(2)}` : " · directional"}` : "FIT ??? · improve forecasting"}</span>
                   {capitalActive && <span className="rounded border border-gold/40 px-1.5 py-.5 text-gold">CAPITAL SYNERGY +20%</span>}
                   {run.capitalProjects.includes("flagship_hq") && <span className="rounded border border-viol/40 px-1.5 py-.5 text-viol">FLAGSHIP +10%</span>}
                 </div>

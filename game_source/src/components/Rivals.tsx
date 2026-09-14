@@ -24,6 +24,7 @@ import {
   type RivalStudio,
 } from "../engine/rivals";
 import { campaignPressureFor, hireRivalTalent, rivalTalentPoachTerms, studioRankings, type RunState } from "../engine/state";
+import StudioIdentity from "./StudioIdentity";
 import { cn } from "../utils/cn";
 
 const genreLabel = (id: string) => GENRES.find((g) => g.id === id)?.label ?? id;
@@ -279,7 +280,7 @@ export default function RivalsPanel({
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
 }) {
-  const [tab, setTab] = useState<"rankings" | "studios" | "talent">("rankings");
+  const [tab, setTab] = useState<"identity" | "rankings" | "studios" | "talent">("rankings");
   const entries = studioRankings(run);
   const pressure = campaignPressureFor(run);
 
@@ -295,6 +296,7 @@ export default function RivalsPanel({
       <div className="mb-2 flex gap-1">
         {(
           [
+            ["identity", "IDENTITY"],
             ["rankings", "RANKINGS"],
             ["studios", "STUDIOS"],
             ["talent", "TALENT"],
@@ -315,6 +317,8 @@ export default function RivalsPanel({
           </button>
         ))}
       </div>
+
+      {tab === "identity" && <StudioIdentity run={run} setRun={setRun} />}
 
       {tab === "rankings" && (
         <>
