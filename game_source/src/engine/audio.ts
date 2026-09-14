@@ -117,6 +117,36 @@ export const sfx = {
     noise(grand ? 2.4 : 1.7, grand ? 0.085 : 0.06, 7000, 0.06, true);
     [660, 784, 880, 988].forEach((f, i) => tone(f, 0.24, "sine", grand ? 0.08 : 0.05, 0.16 + i * 0.17, f * 1.08, true));
   },
+  bigThreeSignal() {
+    stopCeremonyAudio();
+    tone(48, 1.8, "sine", 0.20, 0, 62, true);
+    tone(72, 1.55, "triangle", 0.09, 0.18, 92, true);
+    noise(1.4, 0.035, 520, 0.05, true);
+    [220, 277, 330].forEach((f, i) => tone(f, 0.52, "sine", 0.045, 0.72 + i * 0.22, f * 1.04, true));
+  },
+  bigThreePulse() {
+    tone(58, 0.22, "sine", 0.30, 0, 46, true);
+    noise(0.08, 0.20, 420, 0, true);
+    tone(58, 0.24, "sine", 0.25, 0.34, 44, true);
+    noise(0.08, 0.16, 420, 0.34, true);
+  },
+  bigThreeWall() {
+    tone(82, 0.85, "sine", 0.18, 0, 54, true);
+    [196, 247, 294].forEach((f, i) => tone(f, 0.72, "triangle", 0.06, i * 0.08, f * 0.98, true));
+    noise(0.5, 0.05, 1100, 0.16, true);
+  },
+  bigThreeImpact() {
+    stopCeremonyAudio();
+    noise(0.18, 0.52, 900, 0, true);
+    tone(42, 1.25, "sine", 0.42, 0, 32, true);
+    tone(96, 0.48, "sawtooth", 0.18, 0, 52, true);
+    [261.63, 329.63, 392, 523.25].forEach((f, i) => tone(f, 1.25, "sine", 0.095, 0.10 + i * 0.045, f * 1.015, true));
+    noise(1.8, 0.045, 6500, 0.14, true);
+  },
+  bigThreeLegacy() {
+    [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => tone(f, 0.55, "triangle", 0.10, i * 0.10, f * 1.02, true));
+    tone(65, 0.9, "sine", 0.14, 0.08, 52, true);
+  },
   click() {
     tone(720, 0.06, "square", 0.22);
   },
