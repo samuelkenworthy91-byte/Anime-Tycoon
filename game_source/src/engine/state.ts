@@ -1,3 +1,5 @@
+import { initialExpansion, migrateExpansion, snapshotProduction, expansionBusyReason, advanceExpansionDay, finishExpansionProduction, settleProjectReceipt, type ExpansionState } from "./studioExpansion";
+import { initialOverseas, migrateOverseas, defaultContent, overseasOf, advanceOverseasWeek, type OverseasState } from "./overseas";
 import {
   GENRES,
   ARCS,
@@ -249,6 +251,9 @@ export interface HofEntry {
 
 /** weekly income / fans still to arrive from aired shows */
 export interface Payout {
+  sourceProjectId?: string;
+  sourceReleaseId?: string;
+  instalment?: number;
   week: number;
   amount: number;
   fans: number;
@@ -273,6 +278,8 @@ export interface AudienceTestJob {
 }
 
 export interface RunState {
+  expansion?: ExpansionState;
+  overseas?: OverseasState;
   /** locked canonical Cast/Genre schema marker */
   castGenreV2: 2;
   studio: string;
@@ -542,6 +549,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     audienceComboSeries: {},
     audienceInsights: [],
     staffResting: {},
+    expansion: initialExpansion(),
+    overseas: initialOverseas(),
     revBoostUntil: 0,
     ipMarket: initIPMarket(0),
     bigThree: initialBigThreeState(),
@@ -664,6 +673,8 @@ export function migrateRun(raw: unknown): RunState {
     audienceInsights: Array.isArray(r.audienceInsights) ? r.audienceInsights : [],
     day: typeof r.day === "number" ? r.day : (r.week ?? 0) * 7,
     staffResting: r.staffResting && typeof r.staffResting === "object" ? r.staffResting : {},
+    expansion: migrateExpansion(r.expansion, Math.max(r.day ?? 0,(r.week ?? 0)*7)),
+    overseas: migrateOverseas(r.overseas,r.week ?? 0),
     genreKnowledge: migrateGenreRecord(r.genreKnowledge),
     arcCombos: migratedResearchArcCombos,
     arcUnlocked: migratedResearchArcUnlocked,
@@ -856,6 +867,19 @@ const commissionForShowrunner = (showrunner: string, c: Commission): Commission 
 
 /** Advance the calendar: weekly payouts land, wages + rent charged at month end, rival shows air, and each year ends with the awards ceremony. */
 export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyApplied?: boolean } = {}): RunState {
+  if (n <= 0) return r;
+  if (n > 1) {
+    let next = r;
+    for (let i = 0; i < n; i++) next = advanceWeeks(next, 1, opts);
+    return next;
+  }
+  if (!opts.liveDaysAlreadyApplied) {
+    for (let day = r.week * 7 + 1; day <= (r.week + 1) * 7; day++) r = advanceExpansionDay({ ...r, day });
+  }
+  const sourceWeek = r.week;
+  r = { ...advanceOverseasWeek({ ...r, week: sourceWeek + 1 }), week: sourceWeek };
+  for (const payout of r.payouts) if (payout.week === sourceWeek + 1) r = settleProjectReceipt(r, payout);
+
   let cash = r.cash;
   let fans = r.fans;
   const notices = [...r.notices];
@@ -944,7 +968,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
        app has already banked seven daily project ticks, so it skips this fallback. */
     if (!opts.liveDaysAlreadyApplied) {
       const loadMap = projectLoadMap(projects, staffArr, r.facilities, research);
-      const tick = tickProjectsWeek(projects, staffArr, w, fx, mods, studio, loadMap);
+      const tick = tickProjectsWeek(projects, staffArr.filter(s => !expansionBusyReason(r,s.id)), w, fx, mods, studio, loadMap);
       projects = tick.projects;
       cash += tick.cashDelta;
       notices.push(...tick.notices);
@@ -963,7 +987,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     if (!opts.liveDaysAlreadyApplied) {
       const keep: ContractAssignment[] = [];
       for (const job of contractJobs) {
-        const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !(r.staffResting ?? {})[s.id]);
+        const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !expansionBusyReason(r,s.id) && !(r.staffResting ?? {})[s.id]);
         const runnerSkill = job.showrunner ? showrunnerContractSkill(r.showrunner, r.showsMade, job.contract.type) : 0;
         const baseline = contractWeeklyOutput(job.contract, crew, research, runnerSkill);
         const live = job.liveProgressThisWeek ?? 0;
@@ -1523,7 +1547,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     if (r.cash + (commission?.advance ?? 0) < projectUpfront(d) + contFee) return null;
   }
 
-  let p = makeProject(d, r.week, r.day ?? r.week * 7);
+  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player" };
   const decisionQuality = decisionReleaseQualityBonus(r, d);
   if (decisionQuality.length) {
     for (const bonus of decisionQuality) p = { ...p, points: { ...p.points, [bonus.point]: p.points[bonus.point] + bonus.amount } };
@@ -1549,6 +1573,8 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       },
     };
   }
+  r = snapshotProduction(r, p);
+  r = { ...r, overseas: { ...overseasOf(r), profiles: { ...overseasOf(r).profiles, [p.id]: defaultContent(p) } } };
   return {
     ...r,
     cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
@@ -1570,6 +1596,8 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
 
 /** work outside major productions also occupies staff. */
 export function staffOperationReason(r: RunState, staffId: string): string | null {
+  const expansionReason = expansionBusyReason(r, staffId);
+  if (expansionReason) return expansionReason;
   if (r.audienceTest) return `Test audience study: ${r.audienceTest.title}`;
   const c = (r.contractJobs ?? []).find((j) => j.staffIds.includes(staffId));
   if (c) return `Contract: ${c.contract.name}`;
@@ -1823,7 +1851,7 @@ function finishResearchJob(r: RunState, job: ResearchJob): RunState {
 }
 
 function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; studioLocked: boolean } {
-  let nx = r;
+  let nx = advanceExpansionDay(r);
   let attention = false;
   const studioLocked = !!r.audienceTest;
 
@@ -1973,7 +2001,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
 }
 
 function liveWorkEligible(r: RunState, st: Staff, pendingIds: Set<string> = new Set()): boolean {
-  if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
+  if (expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
   if (pendingIds.has(st.id)) return true;
   const contract = (r.contractJobs ?? []).some((j) => j.staffIds.includes(st.id));
   const project = projectOfStaff(r.projects, st.id);
@@ -2026,7 +2054,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
   if (r.audienceTest) return [];
   const pulses: DeskPulse[] = [];
   const eligible = r.staff.filter((st) => {
-    if ((r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
+    if (expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
     const contract = (r.contractJobs ?? []).some((j) => j.staffIds.includes(st.id));
     const project = projectOfStaff(r.projects, st.id);
     const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
@@ -2151,7 +2179,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
-  const dayTick = tickProjectsDay(nx.projects, nx.staff, nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
+  const dayTick = tickProjectsDay(nx.projects, nx.staff.filter(s => !expansionBusyReason(nx,s.id)), nx.day ?? nx.week * 7, fx, mods, studio, loadMap);
   nx = { ...nx, projects: dayTick.projects, cash: nx.cash + dayTick.cashDelta, notices: [...nx.notices, ...dayTick.notices].slice(-40) };
 
   const staff = nx.staff.map((st0) => {
@@ -2159,7 +2187,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     const project = projectOfStaff(nx.projects, st.id);
     const contract = (nx.contractJobs ?? []).find((j) => j.staffIds.includes(st.id));
     const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
-    const busy = production || !!contract;
+    const busy = !expansionBusyReason(nx, st.id) && (production || !!contract);
     if (resting[st.id]) {
       st.stamina = Math.min(100, st.stamina + (50 + baseFx.staminaRest * 2) * staminaRecoveryMult(nx.showrunner));
       if (st.stamina >= 100) delete resting[st.id];
@@ -2185,7 +2213,7 @@ export function tickEditWorkPulse(r: RunState, projectId: string): { run: RunSta
   const target = projectById(r, projectId);
   if (!target || target.milestone !== "edit" || target.issues <= 0)
     return { run: r, pulses: [], attention: !!target && target.milestone === "edit" && target.issues <= 0 };
-  const candidates = r.staff.filter((st) => target.staffIds.includes(st.id) && !(r.staffResting ?? {})[st.id] && st.stamina > 0);
+  const candidates = r.staff.filter((st) => target.staffIds.includes(st.id) && !expansionBusyReason(r,st.id) && !(r.staffResting ?? {})[st.id] && st.stamina > 0);
   const sampled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 2);
   let left = target.issues;
   const pulses: DeskPulse[] = [];
@@ -2225,6 +2253,7 @@ export function tickEditDay(r: RunState, projectId: string): { run: RunState; pu
   const fx = facilityFX(nx.facilities);
   const staff = nx.staff.map((st0) => {
     if (!target.staffIds.includes(st0.id)) return st0;
+    if (expansionBusyReason(nx, st0.id)) return {...st0,stamina:Math.min(100,st0.stamina+18+fx.staminaRest)};
     const st = { ...st0 };
     if (resting[st.id]) {
       st.stamina = Math.min(100, st.stamina + 50 + fx.staminaRest * 2);
@@ -2251,6 +2280,7 @@ const rushRoll = (skill: number, crunching = false) => {
 
 /** Pick a lead, then return to the office: the actual work now happens as days pass. */
 export function startMilestoneRush(r: RunState, projectId: string, a: RushAssignment): RunState | null {
+  if (expansionBusyReason(r,a.leadId)) return null;
   const target = r.projects.find((x) => x.id === projectId);
   if (!target || !target.milestone || target.milestone === "edit" || target.rush) return null;
   if (r.cash < a.cost) return null;
@@ -2316,7 +2346,7 @@ export function tickRushDay(r: RunState): { run: RunState; pulses: DeskPulse[]; 
   let attention = false;
   let projects = r.projects.map((pr0) => {
     const rush0 = pr0.rush;
-    if (!rush0 || rush0.boostPrompt) return pr0;
+    if (!rush0 || rush0.boostPrompt || expansionBusyReason(r,rush0.leadId)) return pr0;
     const crunching = (rush0.crunchDays ?? 0) > 0;
     const pts = rushRoll(rush0.skill, crunching);
     let pr: Project = {
@@ -2337,7 +2367,7 @@ export function tickRushDay(r: RunState): { run: RunState; pulses: DeskPulse[]; 
 
     /* A staff member may walk over with one optional experiment during the rush. */
     if (!rush.boostAsked && rush.daysWorked >= 1 && rush.daysWorked < rush.durationDays && Math.random() < 0.24) {
-      const team = r.staff.filter((s) => pr.staffIds.includes(s.id));
+      const team = r.staff.filter((s) => pr.staffIds.includes(s.id) && !expansionBusyReason(r,s.id));
       const candidates = team.map((s) => ({ actorId: s.id, name: s.name, skill: Math.round(staffPoint(s, rush.type)), type: rush.type }));
       candidates.push({ actorId: "showrunner", name: r.studio + " showrunner", skill: showrunnerContractSkill(r.showrunner, r.showsMade, rush.type), type: rush.type });
       const pick = candidates[Math.floor(Math.random() * candidates.length)];
@@ -2685,7 +2715,7 @@ export function releaseProject(
   chunks[AIR_WEEKS - 1].fans += result.fans - accF;
   chunks.forEach((c, i) => {
     if (c.amount !== 0 || c.fans !== 0)
-      payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: payoutLabelFor(draft.medium, draft.title) });
+      payouts.push({ week: start + i, amount: c.amount, fans: c.fans, label: payoutLabelFor(draft.medium, draft.title), sourceProjectId: projectId, instalment: i });
   });
 
   const released: Project = { ...p, stage: "airing", result, airedWeek: start };
@@ -2825,7 +2855,9 @@ export function releaseProject(
     franchiseKey: fkey,
   });
 
-  return { run, result };
+  let expanded = finishExpansionProduction(run, { ...p, result });
+  if (bonusCash) expanded = settleProjectReceipt(expanded, {week:r.week,amount:bonusCash,fans:0,label:"Commission quality bonus",sourceProjectId:projectId,sourceReleaseId:"commission-bonus"});
+  return { run: expanded, result };
 }
 
 export interface ShowSaleOffer {
@@ -2874,7 +2906,8 @@ export function sellReadyProject(r:RunState,projectId:string,offerId:string):{ru
     rivalWorld={...rivalWorld,studios:rivalWorld.studios.map(st=>{if(st.id!==offer.buyerId)return st;const revenue=Math.max(offer.cash,Math.round(released.result.revenue*.85));const fans=Math.max(offer.creatorFans*4,Math.round(released.result.fans*.8));const release={title:p.draft.title,studioId:st.id,studio:st.name,score:released.result.total,week:r.week,year,genres:[...p.draft.genres],animeType:p.draft.animeType,revenue,fans,kind:"original" as const,hallOfFame:released.result.hallOfFame,craft,posterId:null,franchiseKey:null};return {...st,revenue:st.revenue+revenue,fans:st.fans+fans,releasesCount:st.releasesCount+1,hits:st.hits+(released.result.total>=27?1:0),masterpieces:st.masterpieces+(released.result.total>=32?1:0),avgScore:Math.round(((st.avgScore*Math.max(1,st.releasesCount))+released.result.total)/(Math.max(1,st.releasesCount)+1)*10)/10,releases:[...st.releases,release].slice(-120)};})};
   }
   const run={...released.run,cash:r.cash+offer.cash,fans:r.fans+offer.creatorFans,totalRevenue:r.totalRevenue+offer.cash,payouts:r.payouts,franchises,rivalWorld,yearShows:released.run.yearShows.filter(n=>n.sourceId!==projectId),notices:[...released.run.notices,`💼 ${offer.buyerName} buys the completed release of “${p.draft.title}” for £${offer.cash.toLocaleString("en-GB")}. Your studio keeps the underlying IP but receives only ${offer.creatorFans.toLocaleString("en-GB")} creator fans.${offer.awardRisk?" The rival now owns this release for awards.":""}`]};
-  return {run,result:released.result,offer};
+  const soldRun: RunState = { ...run, projects: run.projects.map(x => x.id === projectId ? { ...x, distributionOwner: offer.buyerId } : x) };
+  return {run:settleProjectReceipt(soldRun,{week:r.week,amount:offer.cash,fans:0,label:"Completed show sale",sourceProjectId:projectId,sourceReleaseId:"completed-sale"}),result:released.result,offer};
 }
 
 export interface FranchiseSaleOffer { buyerType:"network"|"rival"; buyerId:string; buyerName:string; price:number; }

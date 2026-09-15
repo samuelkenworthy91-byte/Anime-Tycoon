@@ -168,6 +168,8 @@ export const MILESTONE_LABEL: Record<MilestoneId, string> = {
 };
 
 export interface Project {
+  /** Distribution ownership is explicit for productions created after this expansion. */
+  distributionOwner?: string;
   id: string;
   draft: Draft;
   stage: ProjectStage;

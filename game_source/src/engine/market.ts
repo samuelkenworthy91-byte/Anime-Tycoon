@@ -373,7 +373,8 @@ export function rollMarketEvent(
   lateStageProjectId: string | null,
   topFranchise?: { key: string; title: string; popularity: number } | null
 ): MarketEvent | null {
-  const kinds: MarketEventKind[] = ["emergency", "adaptation", "overseas"];
+  // Old blanket overseas offers remain valid; new deals are per production.
+  const kinds: MarketEventKind[] = ["emergency", "adaptation"];
   if (readyProjectId) kinds.push("bidding");
   if (lateStageProjectId) kinds.push("sponsor");
   if (topFranchise) kinds.push("gamelicence", "collab");

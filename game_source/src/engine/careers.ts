@@ -705,6 +705,7 @@ export const HEAD_OUTPUT_BONUS = 1.1;
 export const HEAD_SALARY_MULT = 1.25;
 
 export interface LegendRec {
+  staffId?: string;
   name: string;
   role: StaffRole;
   look?: number;
@@ -808,6 +809,7 @@ export const retirementEligible = (s: Staff, week: number) =>
 
 export function toLegend(s: Staff, week: number): LegendRec {
   return {
+    staffId: s.id,
     name: s.name,
     role: s.role,
     look: s.look,

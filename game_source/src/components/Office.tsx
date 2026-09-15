@@ -1,3 +1,4 @@
+import StudioExpansionPanel from "./StudioExpansionPanel";
 import { Fragment, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -141,7 +142,7 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more">(null);
+  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion">(null);
   const [fcOpen, setFcOpen] = useState(false);
   const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
@@ -464,6 +465,7 @@ export default function Office({
         </div>
       </div>
 
+      {modal === "expansion" && <Modal title="STUDIO CULTURE & OVERSEAS" onClose={() => setModal(null)}><StudioExpansionPanel run={run} setRun={setRun}/></Modal>}
       {/* ----------------------------------------------------------- MORE */}
       {modal === "newproject" && (
         <Modal title="NEW PROJECT" onClose={() => setModal(null)}>
@@ -476,6 +478,7 @@ export default function Office({
 
       {modal === "more" && (
         <Modal title="STUDIO MENU" onClose={() => setModal(null)}>
+          <button className="btn-press ink-card mb-3 min-h-11 w-full p-3 text-left font-bold text-gold" onClick={() => setModal("expansion")}>STUDIO CULTURE & OVERSEAS</button>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("facilities")}><Hammer size={16} className="text-gold"/><span className="text-xs font-bold">STUDIO ROOMS</span></button>
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("market")}><BarChart3 size={16} className="text-mint"/><span className="text-xs font-bold">MARKET</span></button>
@@ -1113,12 +1116,12 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="anim-pop nice-scroll max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
+        className="anim-pop nice-scroll max-h-[calc(100dvh-5rem)] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-3 flex items-center justify-between">
+        <div className="sticky top-0 z-10 mb-3 flex items-center justify-between bg-panel pb-2">
           <h3 className="font-display text-lg font-extrabold">{title}</h3>
-          <button onClick={onClose} className="btn-press rounded-lg border border-line p-1.5 text-paper/60 hover:bg-panel3" aria-label="Close">
+          <button onClick={onClose} className="btn-press min-h-11 min-w-11 rounded-lg border border-line p-1.5 text-paper/60 hover:bg-panel3" aria-label="Close">
             <X size={15} />
           </button>
         </div>
