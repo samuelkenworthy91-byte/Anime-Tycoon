@@ -9,6 +9,7 @@ on:
       - arena/01a0759f-anime-tycoon
       - work/final-awards-rival-posters
       - work/casting-catalog-rebuild
+      - work/first-seen-tutorial-overlays
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
@@ -61,13 +62,28 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Rename playtest APK
-        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/work/first-seen-tutorial-overlays" ]; then
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Tutorial-UX-Playtest.apk
+          else
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
+          fi
 
-      - name: Upload APK artifact
+      - name: Upload main APK artifact
+        if: github.ref != 'refs/heads/work/first-seen-tutorial-overlays'
         uses: actions/upload-artifact@v4
         with:
           name: anime-runner-main-playtest-apk
           path: Anime-Runner-Main-Playtest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload tutorial UX APK artifact
+        if: github.ref == 'refs/heads/work/first-seen-tutorial-overlays'
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-runner-tutorial-ux-playtest-apk
+          path: Anime-Runner-Tutorial-UX-Playtest.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -85,3 +101,18 @@ jobs:
             --target "$BUILT_SHA" \
             --title 'Anime Runner Main Playtest' \
             --notes "Android debug APK built from main at ${BUILT_SHA}."
+
+      - name: Publish direct tutorial UX playtest APK
+        if: github.ref == 'refs/heads/work/first-seen-tutorial-overlays'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='tutorial-ux-playtest'
+          APK='Anime-Runner-Tutorial-UX-Playtest.apk'
+          BUILT_SHA="$(git rev-parse HEAD)"
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target "$BUILT_SHA" \
+            --title 'Anime Runner Tutorial UX Playtest' \
+            --notes "Android debug APK built from work/first-seen-tutorial-overlays at ${BUILT_SHA}."
