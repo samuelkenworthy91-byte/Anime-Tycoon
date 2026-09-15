@@ -14,7 +14,7 @@ const IMPACT: Record<string, string> = {
   operations: "Production scheduling +10 percentage points · production burn ×0.90",
   franchise: "New sequel/continuation fatigue ×0.75 (25% less fatigue added)",
   mentor: "Weekly staff work XP ×1.25 · resting stamina recovery ×1.25",
-  research: "R&D project duration ×0.75 · RD prices unchanged",
+  research: "R&D project duration ×0.75 · RD prices ×0.90",
   casting: "Positive story structures ×1.15 · release fans ×1.25, or ×1.50 when Story leads a coherent release",
   festival: "Experimental genre-pair synergy above neutral ×1.60",
   dealmaker: "Unknown direction targets are revealed as a ±10 range (20 points wide)",

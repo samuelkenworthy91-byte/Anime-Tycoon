@@ -201,6 +201,7 @@ import {
   rushBoostPoint,
   rushResearchCost,
   showrunnerContractSkill,
+  researchRdCost,
   researchWeeks,
   weeklyWorkXpMult,
   staminaRecoveryMult,
@@ -3140,13 +3141,15 @@ export function researchBlockReason(r: RunState, id: string): string | null {
   if (def.requires && !r.research.includes(def.requires))
     return `Requires ${RESEARCH.find((x) => x.id === def.requires)?.name ?? def.requires} first`;
   if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";
-  if (r.rd < def.rd) return `Needs ${def.rd} research data (you have ${r.rd})`;
+  const effectiveRdCost = researchRdCost(def.rd, r.showrunner);
+  if (r.rd < effectiveRdCost) return `Needs ${effectiveRdCost} research data (you have ${r.rd})`;
   return null;
 }
 
 export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {
   if (researchBlockReason(r, id)) return null;
-  if (r.rd < rdCost) return null;
+  const effectiveRdCost = researchRdCost(rdCost, r.showrunner);
+  if (r.rd < effectiveRdCost) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
   const baseResearchWeeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
@@ -3157,12 +3160,12 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
     id: `research_${id}_${r.week}`, researchId: id, name: def.name,
     startWeek: r.week, completesWeek: r.week + weeks,
     startDay: r.day ?? r.week * 7, completesDay: (r.day ?? r.week * 7) + weeks * 7,
-    rdCost,
+    rdCost: effectiveRdCost,
   };
   return {
-    ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],
+    ...r, rd: r.rd - effectiveRdCost, researchJobs: [...(r.researchJobs ?? []), job],
     decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "researchSpeed" && m.expiresWeek >= r.week && m.uses > 0),
-    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${rdCost} RD).${researchDecisionMult < 1 ? " Decision-event acceleration applied." : ""}`],
+    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${effectiveRdCost} RD).${researchDecisionMult < 1 ? " Decision-event acceleration applied." : ""}`],
   };
 }
 

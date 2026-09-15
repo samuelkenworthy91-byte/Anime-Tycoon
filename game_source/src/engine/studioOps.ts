@@ -57,6 +57,9 @@ export const trainingWeeks = (tier: number) => Math.max(2, 5 - Math.max(1, tier)
 /** Apply duration reduction AFTER archive bonuses; keep fractional time so the
  * locked 25% reduction is never replaced by a 25% increase in research rate.
  * Calendar completion is observed on the next daily (or legacy weekly) tick. */
+export const researchRdCost = (rd: number, showrunner = "") =>
+  Math.max(1, Math.round(rd * (showrunner === "research" ? 0.9 : 1)));
+
 export const researchWeeks = (rd: number, archiveTier: number, showrunner = "") =>
   Math.max(2, Math.round(2 + rd / 18) - archiveTier) * (showrunner === "research" ? 0.75 : 1);
 export const weeklyWorkXpMult = (showrunner: string) => showrunner === "mentor" ? 1.25 : 1;

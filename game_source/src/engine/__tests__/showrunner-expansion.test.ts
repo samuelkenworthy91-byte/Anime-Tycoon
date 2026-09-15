@@ -24,7 +24,7 @@ describe("showrunner expansion", () => {
     }
   });
 
-  it("Ravi applies exactly 0.75 duration after archive bonuses, without changing RD", () => {
+  it("Ravi applies exactly 0.75 duration after archive bonuses with a 10% RD discount", () => {
     for (const tier of [0, 1, 3]) for (const cost of [18, 36, 85]) {
       expect(researchWeeks(cost, tier, "research")).toBe(researchWeeks(cost, tier, "vision") * 0.75);
     }
@@ -32,7 +32,9 @@ describe("showrunner expansion", () => {
     const seed = { ...initialRun("Research", "vision"), rd: 1000, day: 3, facilities: { archive: 1 } };
     const normal = startResearchProject(seed, def.id, def.rd)!;
     const ravi = startResearchProject({ ...seed, showrunner: "research" }, def.id, def.rd)!;
-    expect(ravi.rd).toBe(normal.rd);
+    expect(normal.rd).toBe(1000 - def.rd);
+    expect(ravi.rd).toBe(1000 - Math.max(1, Math.round(def.rd * 0.9)));
+    expect(ravi.researchJobs[0].rdCost).toBe(Math.max(1, Math.round(def.rd * 0.9)));
     expect(ravi.researchJobs[0].completesDay! - 3).toBe((normal.researchJobs[0].completesDay! - 3) * 0.75);
     const due = ravi.researchJobs[0].completesDay!;
     expect(tickStudioDay({ ...ravi, day: Math.ceil(due) - 1 }).run.research).not.toContain(def.id);

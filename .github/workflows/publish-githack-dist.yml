@@ -30,93 +30,6 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Apply Ravi research discount
-        working-directory: game_source
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-
-          const replaceOnce = (path, from, to) => {
-            const text = fs.readFileSync(path, 'utf8');
-            const count = text.split(from).length - 1;
-            if (count !== 1) throw new Error(`${path}: expected exactly one match, found ${count}`);
-            fs.writeFileSync(path, text.replace(from, to));
-          };
-
-          replaceOnce(
-            'src/engine/data.ts',
-            'perk: "Rapid Prototyping — research projects take 25% less time. Research data costs are unchanged."',
-            'perk: "Rapid Prototyping — research projects take 25% less time and cost 10% less Research Data."'
-          );
-
-          replaceOnce(
-            'src/engine/showrunnerImpact.ts',
-            'research: "R&D project duration ×0.75 · RD prices unchanged",',
-            'research: "R&D project duration ×0.75 · RD prices ×0.90",'
-          );
-
-          replaceOnce(
-            'src/engine/studioOps.ts',
-            'export const researchWeeks = (rd: number, archiveTier: number, showrunner = "") =>\n  Math.max(2, Math.round(2 + rd / 18) - archiveTier) * (showrunner === "research" ? 0.75 : 1);',
-            'export const researchRdCost = (rd: number, showrunner = "") =>\n  Math.max(1, Math.round(rd * (showrunner === "research" ? 0.9 : 1)));\n\nexport const researchWeeks = (rd: number, archiveTier: number, showrunner = "") =>\n  Math.max(2, Math.round(2 + rd / 18) - archiveTier) * (showrunner === "research" ? 0.75 : 1);'
-          );
-
-          replaceOnce(
-            'src/engine/state.ts',
-            '  rushResearchCost,\n  showrunnerContractSkill,\n  researchWeeks,',
-            '  rushResearchCost,\n  showrunnerContractSkill,\n  researchRdCost,\n  researchWeeks,'
-          );
-          replaceOnce(
-            'src/engine/state.ts',
-            '  if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";\n  if (r.rd < def.rd) return `Needs ${def.rd} research data (you have ${r.rd})`;',
-            '  if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";\n  const effectiveRdCost = researchRdCost(def.rd, r.showrunner);\n  if (r.rd < effectiveRdCost) return `Needs ${effectiveRdCost} research data (you have ${r.rd})`;'
-          );
-          replaceOnce(
-            'src/engine/state.ts',
-            'export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {\n  if (researchBlockReason(r, id)) return null;\n  if (r.rd < rdCost) return null;',
-            'export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {\n  if (researchBlockReason(r, id)) return null;\n  const effectiveRdCost = researchRdCost(rdCost, r.showrunner);\n  if (r.rd < effectiveRdCost) return null;'
-          );
-          replaceOnce(
-            'src/engine/state.ts',
-            '    rdCost,\n  };\n  return {\n    ...r, rd: r.rd - rdCost, researchJobs: [...(r.researchJobs ?? []), job],',
-            '    rdCost: effectiveRdCost,\n  };\n  return {\n    ...r, rd: r.rd - effectiveRdCost, researchJobs: [...(r.researchJobs ?? []), job],'
-          );
-          replaceOnce(
-            'src/engine/state.ts',
-            '    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${rdCost} RD).${researchDecisionMult < 1 ? " Decision-event acceleration applied." : ""}`],',
-            '    notices: [...r.notices, `🔬 ${def.name} begins — ${Math.ceil(weeks * 7)} days in R&D (cost ${effectiveRdCost} RD).${researchDecisionMult < 1 ? " Decision-event acceleration applied." : ""}`],'
-          );
-
-          replaceOnce(
-            'src/components/Office.tsx',
-            'import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";',
-            'import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";\nimport { researchRdCost } from "../engine/studioOps";'
-          );
-          replaceOnce(
-            'src/components/Office.tsx',
-            '  const research = (id: string, rd: number) => {\n    if (run.rd < rd) return;\n    sfx.fanfare();\n    setRun((r) => startResearchProject(r, id, rd) ?? r);\n  };',
-            '  const research = (id: string, rd: number) => {\n    if (run.rd < researchRdCost(rd, run.showrunner)) return;\n    sfx.fanfare();\n    setRun((r) => startResearchProject(r, id, rd) ?? r);\n  };'
-          );
-          replaceOnce(
-            'src/components/Office.tsx',
-            '{u.repeatable && block === null ? "RUN AGAIN" : "START"} · {u.rd} RD',
-            '{u.repeatable && block === null ? "RUN AGAIN" : "START"} · {researchRdCost(u.rd, run.showrunner)} RD'
-          );
-
-          replaceOnce(
-            'src/engine/__tests__/showrunner-expansion.test.ts',
-            'it("Ravi applies exactly 0.75 duration after archive bonuses, without changing RD",',
-            'it("Ravi applies exactly 0.75 duration after archive bonuses with a 10% RD discount",'
-          );
-          replaceOnce(
-            'src/engine/__tests__/showrunner-expansion.test.ts',
-            '    expect(ravi.rd).toBe(normal.rd);\n    expect(ravi.researchJobs[0].completesDay! - 3).toBe((normal.researchJobs[0].completesDay! - 3) * 0.75);',
-            '    expect(normal.rd).toBe(1000 - def.rd);\n    expect(ravi.rd).toBe(1000 - Math.max(1, Math.round(def.rd * 0.9)));\n    expect(ravi.researchJobs[0].rdCost).toBe(Math.max(1, Math.round(def.rd * 0.9)));\n    expect(ravi.researchJobs[0].completesDay! - 3).toBe((normal.researchJobs[0].completesDay! - 3) * 0.75);'
-          );
-
-          console.log('Applied Ravi: 25% faster research + 10% Research Data discount, including player-facing copy and tests.');
-          NODE
-
       - name: Apply discovery-gated cast filtering
         working-directory: game_source
         run: node scripts/patch-cast-secret-visibility.mjs
@@ -182,15 +95,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git checkout HEAD^ -- .github/workflows/publish-githack-dist.yml
           git add -f \
-            .github/workflows/publish-githack-dist.yml \
-            game_source/src/engine/data.ts \
-            game_source/src/engine/showrunnerImpact.ts \
-            game_source/src/engine/studioOps.ts \
-            game_source/src/engine/state.ts \
-            game_source/src/components/Office.tsx \
-            game_source/src/engine/__tests__/showrunner-expansion.test.ts \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
             game_source/src/engine/__tests__/cast-display-filter.test.ts \
@@ -202,8 +107,8 @@ jobs:
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
           if git diff --cached --quiet; then
-            echo 'Ravi patch, runtime and dist already current'
+            echo 'runtime, cast filtering and dist already current'
           else
-            git commit -m 'Give Ravi a 10% research data discount'
+            git commit -m 'Gate secret cast affinities behind discovery'
             git push origin HEAD:main
           fi

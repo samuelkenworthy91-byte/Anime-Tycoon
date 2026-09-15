@@ -81,6 +81,7 @@ import {
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
+import { researchRdCost } from "../engine/studioOps";
 import { activeProjects } from "../engine/projects";
 import ProjectTracker from "./ProjectTracker";
 import KnowledgeDossier, { type KnowledgeSelection } from "./KnowledgeDossier";
@@ -161,7 +162,7 @@ export default function Office({
   const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
 
   const research = (id: string, rd: number) => {
-    if (run.rd < rd) return;
+    if (run.rd < researchRdCost(rd, run.showrunner)) return;
     sfx.fanfare();
     setRun((r) => startResearchProject(r, id, rd) ?? r);
   };
@@ -715,7 +716,7 @@ export default function Office({
                             <span className="text-xs font-bold text-gold">⭐ ALL CAST PROFILED ✓</span>
                           ) : (
                             <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(u.id, u.rd)}>
-                              {u.repeatable && block === null ? "RUN AGAIN" : "START"} · {u.rd} RD
+                              {u.repeatable && block === null ? "RUN AGAIN" : "START"} · {researchRdCost(u.rd, run.showrunner)} RD
                             </Btn>
                           )}
                         </div>
