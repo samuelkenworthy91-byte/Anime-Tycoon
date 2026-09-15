@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - work/first-seen-tutorial-overlays
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
@@ -24,10 +25,10 @@ jobs:
   publish-dist:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout tutorial UX branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: work/first-seen-tutorial-overlays
           fetch-depth: 0
 
       - name: Import promised-lead crown icon
@@ -42,6 +43,10 @@ jobs:
               s = s.replace('  Calendar,\n', '  Calendar,\n  Crown,\n', 1)
               p.write_text(s)
           PY
+
+      - name: Wire first-seen tutorials into complex systems
+        working-directory: game_source
+        run: node scripts/patch-first-seen-tutorials.mjs
 
       - name: Apply discovery-gated cast filtering
         working-directory: game_source
@@ -101,14 +106,21 @@ jobs:
             if (!html.includes(id)) throw new Error(`Compiled browser bundle missing genre id: ${id}`);
             if (!html.includes(label)) throw new Error(`Compiled browser bundle missing genre label: ${label}`);
           }
-          console.log('Verified compiled browser bundle contains Vampire, Grimdark and all five Genre 30 expansion genres.');
+          if (!html.includes('HOW THIS WORKS')) throw new Error('Compiled browser bundle missing tutorial replay control');
+          if (!html.includes('FIRST-TIME GUIDE')) throw new Error('Compiled browser bundle missing first-time tutorial overlay');
+          console.log('Verified compiled browser bundle contains Genre 30 and first-seen tutorials.');
           NODE
 
-      - name: Commit refreshed runtime and dist
+      - name: Commit validated tutorial integration
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout origin/main -- .github/workflows/publish-githack-dist.yml
+          git rm game_source/scripts/patch-first-seen-tutorials.mjs
           git add -f \
+            .github/workflows/publish-githack-dist.yml \
+            game_source/src/components/StudioExpansionPanel.tsx \
+            game_source/docs/THREE_CLICK_UX_AUDIT.md \
             game_source/src/components/Projects.tsx \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
@@ -120,9 +132,5 @@ jobs:
             game_source/src/engine/generated/arcV3.json \
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
-          if git diff --cached --quiet; then
-            echo 'runtime, promised-lead icon and dist already current'
-          else
-            git commit -m 'Import promised-lead project icon'
-            git push origin HEAD:main
-          fi
+          git commit -m 'Wire first-seen tutorials into complex systems'
+          git push origin HEAD:work/first-seen-tutorial-overlays
