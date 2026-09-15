@@ -1,3 +1,4 @@
+import { migrateStrategy, uncertainReception, regionalMarketFactor, distributorTerms, advanceOverseasStrategy, type OverseasStrategy } from "./overseasStrategy";
 import type { RunState } from "./state";
 import type { AudienceId, GenreId } from "./data";
 import type { Project } from "./projects";
@@ -163,6 +164,8 @@ export interface OverseasRequest {
   campaign: 0 | 15000 | 40000;
 }
 export interface RegionalRelease extends OverseasRequest {
+  modelReception?: number;
+  packageId?: string;
   id: string;
   signedWeek: number;
   opensWeek: number;
@@ -184,6 +187,7 @@ export interface RegionalRelease extends OverseasRequest {
   royaltyRate: number;
 }
 export interface OverseasState {
+  strategy?: OverseasStrategy;
   version: 1;
   introducedWeek: number;
   profiles: Record<string, ContentProfile>;
@@ -211,6 +215,7 @@ export function migrateOverseas(
   return {
     ...initialOverseas(week),
     ...raw,
+    strategy: migrateStrategy(raw.strategy),
     profiles: { ...(raw.profiles ?? {}) },
     releases: Array.isArray(raw.releases) ? raw.releases : [],
     exposure: { ...(raw.exposure ?? {}) },
@@ -504,7 +509,9 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     addressable = Math.round(t.population * t.mix[q.segment]),
     remaining = Math.max(0, addressable - (o.exposure[audienceKey] ?? 0));
   if (remaining < 100) return fail("This audience has already been reached");
-  const reception = regionalReception(p, profile, q),
+  const model = regionalReception(p, profile, q);
+  const market = regionalMarketFactor(r,q,opensWeek), terms=distributorTerms(r,q);
+  const reception = {score:uncertainReception(r,q,model.score),reasons:[...model.reasons,...market.reasons]},
     competition = o.releases.filter(
       (a) =>
         a.territory === t.id &&
@@ -517,7 +524,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     Math.min(
       remaining,
       (remaining *
-        d.reach *
+        terms.reach * market.mult *
         (0.2 + reception.score / 125) *
         campaign *
         recognition) /
@@ -525,7 +532,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     ),
   );
   const gross = Math.round(viewers * (d.id === "broadcast" ? 4 : 6)),
-    distributorCut = Math.round(gross * d.share);
+    distributorCut = Math.round(gross * terms.share);
   const royaltyRate = p.draft.licensedIpId
       ? (r.ipMarket.owned[p.draft.licensedIpId]?.royaltyRate ?? 0)
       : 0,
@@ -550,6 +557,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     viewers,
     fans,
     reception: reception.score,
+    modelReception: model.score,
     reasons: reception.reasons,
     language: t.language,
     editionKey,
@@ -673,11 +681,11 @@ export function advanceOverseasWeek(r: RunState): RunState {
     }
     return r.week >= a.endsWeek ? { ...a, status: "completed" as const } : a;
   });
-  return {
+  return advanceOverseasStrategy({
     ...r,
     payouts,
     totalRevenue,
     franchises,
     overseas: { ...o, releases, recognition },
-  };
+  });
 }
