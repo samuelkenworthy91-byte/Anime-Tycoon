@@ -8,7 +8,9 @@ on:
       - "game_source/src/**"
       - "game_source/public/**"
       - "game_source/scripts/**"
-      - "game_source/docs/**"
+      - "game_source/docs/content-v3/**"
+      - "game_source/docs/content-v5/**"
+      - "game_source/docs/content-v6/**"
       - "game_source/art_src/cast_v6_genre30_upload_staging/**"
       - "game_source/package.json"
       - "game_source/package-lock.json"
@@ -27,10 +29,6 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-
-      - name: Apply promised-lead quick action and UX audit
-        working-directory: game_source
-        run: node scripts/apply-three-click-promise-ux.mjs
 
       - name: Apply discovery-gated cast filtering
         working-directory: game_source
@@ -93,16 +91,11 @@ jobs:
           console.log('Verified compiled browser bundle contains Vampire, Grimdark and all five Genre 30 expansion genres.');
           NODE
 
-      - name: Commit promised-lead UX, audit, refreshed runtime and dist
+      - name: Commit refreshed runtime and dist
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -f \
-            game_source/src/components/Projects.tsx \
-            game_source/src/components/Office.tsx \
-            game_source/src/components/StudioExpansionPanel.tsx \
-            game_source/src/engine/studioExpansion.ts \
-            game_source/src/engine/__tests__/studio-expansion.test.ts \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
             game_source/src/engine/__tests__/cast-display-filter.test.ts \
@@ -111,12 +104,11 @@ jobs:
             game_source/src/engine/generated/castV3.json \
             game_source/src/engine/generated/genreV3.json \
             game_source/src/engine/generated/arcV3.json \
-            game_source/docs/THREE_CLICK_UX_AUDIT.md \
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
           if git diff --cached --quiet; then
-            echo 'promised-lead UX, audit, runtime and dist already current'
+            echo 'runtime, cast filtering and dist already current'
           else
-            git commit -m 'Streamline promised creative lead assignment'
+            git commit -m 'Gate secret cast affinities behind discovery'
             git push origin HEAD:main
           fi
