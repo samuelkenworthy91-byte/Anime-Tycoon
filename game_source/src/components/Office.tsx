@@ -1,5 +1,5 @@
 import StudioExpansionPanel from "./StudioExpansionPanel";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
@@ -86,7 +86,7 @@ import { activeProjects } from "../engine/projects";
 import ProjectTracker from "./ProjectTracker";
 import KnowledgeDossier, { type KnowledgeSelection } from "./KnowledgeDossier";
 import { buyInvestment, computeIndustryRecords } from "../engine/legacy";
-import { resumeAuto, setDelegation, takeOver } from "../engine/automation";
+import { AUTO_MIN_OFFICE, resumeAuto, setDelegation, takeOver } from "../engine/automation";
 import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
 import Poster from "./Poster";
@@ -113,6 +113,8 @@ import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequireme
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
 import BigThreeBoard from "./BigThreeBoard";
 import { appointCreativeLead, expansionOf } from "../engine/studioExpansion";
+import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
+import { markTutorialSeen, tutorialSeen, type TutorialId } from "../engine/tutorials";
 
 /* =================================================================== */
 export default function Office({
@@ -147,6 +149,7 @@ export default function Office({
   const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion">(null);
   const [fcOpen, setFcOpen] = useState(false);
   const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
+  const [tutorial, setTutorial] = useState<TutorialId | null>(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const fc = forecastWeek(run);
   const ticker = useMemo(() => [...run.notices.slice(-6).reverse(), ...NEWS].join(" ✦ "), [run.notices]);
@@ -161,6 +164,22 @@ export default function Office({
   const roomsUsed = slotsUsed(run.facilities);
   /* rooms drawn as glowing door signs inside the office scene */
   const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
+
+  useEffect(() => {
+    if (tutorial) return;
+    const unseen = (id: TutorialId) => !tutorialSeen(run, id);
+    if (run.cash < 0 && (run.negativeCashWeeks ?? 0) > 0 && unseen("financial-distress")) setTutorial("financial-distress");
+    else if (run.dynasty && unseen("dynasty-mode")) setTutorial("dynasty-mode");
+    else if (modal === "sequels" && Object.keys(run.franchises).length > 0 && unseen("franchise-library")) setTutorial("franchise-library");
+    else if (modal === "research" && run.showsMade > 0 && unseen("studio-knowledge")) setTutorial("studio-knowledge");
+    else if (modal === "projects" && run.officeLevel >= AUTO_MIN_OFFICE && unseen("auto-manage")) setTutorial("auto-manage");
+    else if (modal === "facilities" && run.showsMade > 0 && unseen("production-capability")) setTutorial("production-capability");
+  }, [modal, run.cash, run.negativeCashWeeks, run.dynasty, run.showsMade, run.officeLevel, run.franchises, run.tutorialsSeen, tutorial]);
+
+  const dismissTutorial = () => {
+    if (tutorial) setRun((r) => markTutorialSeen(r, tutorial));
+    setTutorial(null);
+  };
 
   const research = (id: string, rd: number) => {
     if (run.rd < researchRdCost(rd, run.showrunner)) return;
@@ -469,6 +488,8 @@ export default function Office({
 
       {modal === "expansion" && <Modal title="STUDIO CULTURE & OVERSEAS" onClose={() => setModal(null)}><StudioExpansionPanel run={run} setRun={setRun}/></Modal>}
       {/* ----------------------------------------------------------- MORE */}
+      <FirstSeenTutorial id={tutorial ?? "financial-distress"} open={tutorial !== null} onDismiss={dismissTutorial} />
+
       {modal === "newproject" && (
         <Modal title="NEW PROJECT" onClose={() => setModal(null)}>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -579,6 +600,7 @@ export default function Office({
 
       {modal === "facilities" && (
         <Modal title="STUDIO ROOMS" onClose={() => setModal(null)}>
+          <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("production-capability")} /></div>
           <FacilitiesPanel
             run={run}
             onBuy={(id) => {
@@ -592,6 +614,7 @@ export default function Office({
       {/* -------------------------------------------------------- PROJECTS */}
       {modal === "projects" && (
         <Modal title="PROJECT BOARD" onClose={() => setModal(null)}>
+          {run.officeLevel >= AUTO_MIN_OFFICE && <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("auto-manage")} /></div>}
           <ProjectsPanel
             run={run}
             onAppointPromise={(projectId, promiseId) => {
@@ -662,6 +685,7 @@ export default function Office({
       {/* -------------------------------------------------------- RESEARCH */}
       {modal === "research" && (
         <Modal title="RESEARCH & DEVELOPMENT" onClose={() => setModal(null)}>
+          <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("studio-knowledge")} /></div>
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-viol/40 bg-viol/10 p-2.5">
             <Database size={16} className="text-viol" />
             <span className="text-sm font-bold">
@@ -920,6 +944,7 @@ export default function Office({
       {/* ------------------------------------------------------------- HOF */}
       {modal === "sequels" && (
         <Modal title="FRANCHISE LIBRARY" onClose={() => setModal(null)}>
+          <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("franchise-library")} /></div>
           <LibraryPanel
             run={run}
             setRun={setRun}
@@ -941,6 +966,7 @@ export default function Office({
       {/* --------------------------------------------------------- DYNASTY */}
       {modal === "dynasty" && (
         <Modal title="STUDIO DYNASTY" onClose={() => setModal(null)}>
+          <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("dynasty-mode")} /></div>
           <DynastyPanel
             run={run}
             onBuy={(id) => {
