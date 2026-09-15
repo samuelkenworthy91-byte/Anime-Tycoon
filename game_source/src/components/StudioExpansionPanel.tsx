@@ -171,6 +171,13 @@ function StaffAmbitions(props: Props) {
                 "Former employee"}
               : original {genreName(p.genre)}
             </b>
+            {p.vision && (
+              <div className="rounded-lg border border-viol/40 bg-viol/10 p-2 text-xs">
+                <b className="text-viol">“{p.vision.title}”</b>
+                <p>{genreName(p.vision.primaryGenre)}{p.vision.secondaryGenre ? " + " + genreName(p.vision.secondaryGenre) : ""} · {p.vision.audience} audience</p>
+                <p>Creator requests {p.vision.arcs.length} specific story beats and has preferred character designs for the four main cast roles.</p>
+              </div>
+            )}
             <p>
               {p.status === "developing"
                 ? "Development: " + p.progress + "/28 paid working days"

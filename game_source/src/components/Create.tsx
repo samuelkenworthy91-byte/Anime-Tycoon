@@ -75,6 +75,7 @@ import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
+import { visionAlignment } from "../engine/creatorVision";
 
 import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
 
@@ -179,11 +180,13 @@ function CastPick({
   on,
   onPick,
   blocked,
+  creatorPick = false,
 }: {
   m: CastMember;
   on: boolean;
   onPick: () => void;
   blocked?: string;
+  creatorPick?: boolean;
 }) {
   return (
     <button
@@ -191,7 +194,7 @@ function CastPick({
       onClick={onPick}
       className={cn(
         "btn-press group relative overflow-hidden rounded-2xl border text-left",
-        on ? "border-neon shadow-[0_0_26px_rgba(255,77,141,.4)]" : "border-line hover:border-neon/40",
+        on ? "border-neon shadow-[0_0_26px_rgba(255,77,141,.4)]" : creatorPick ? "border-viol shadow-[0_0_24px_rgba(167,139,250,.42)]" : "border-line hover:border-neon/40",
         blocked && "opacity-40 grayscale",
         "aspect-square"
       )}
@@ -208,6 +211,7 @@ function CastPick({
         <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {(m.epithet ?? m.archetype)}</div>
       </div>
       {blocked && <div className="absolute inset-x-1 top-1 z-20 rounded-md border border-neon/60 bg-ink/90 px-1.5 py-1 text-center text-[7px] font-black tracking-wider text-neon">RIGHTS SOLD · {blocked}</div>}
+      {creatorPick && !blocked && <div className="absolute right-1 top-1 z-20 rounded-md border border-viol/70 bg-ink/90 px-1.5 py-1 text-[7px] font-black tracking-wider text-viol">CREATOR PICK</div>}
       {on && (
         <div className="absolute left-1.5 top-1.5 rounded-full bg-neon p-1 text-white">
           <Check size={12} />
@@ -260,6 +264,22 @@ export default function Create({
   const planDef = plan ? continuationDef(plan.kind) : null;
   const expectation = planFr && plan ? expectedScore(planFr, plan.kind) : null;
   const marketBrief = (run.decisionModifiers ?? []).find((m) => m.kind === "marketBrief" && m.expiresWeek >= run.week && m.uses > 0);
+  const creatorPromise = useMemo(() => {
+    if (plan || commission) return null;
+    const open = (run.expansion?.promises ?? []).filter((p) => p.status === "active" && !p.projectId && p.vision);
+    if (!open.length) return null;
+    if (d.genres.length) return open.find((p) => d.genres.includes(p.genre)) ?? null;
+    return open.length === 1 ? open[0] : null;
+  }, [run.expansion, d.genres, plan, commission]);
+  const creatorVision = creatorPromise?.vision;
+  const creatorStaff = creatorPromise ? run.staff.find((s) => s.id === creatorPromise.staffId) : undefined;
+  const creatorAlignment = creatorVision ? visionAlignment(d, creatorVision) : null;
+  const [creatorTitleApplied, setCreatorTitleApplied] = useState<string | null>(null);
+  useEffect(() => {
+    if (!creatorPromise || !creatorVision || creatorTitleApplied === creatorPromise.id || !d.genres.includes(creatorPromise.genre)) return;
+    setD((old) => ({ ...old, title: creatorVision.title }));
+    setCreatorTitleApplied(creatorPromise.id);
+  }, [creatorPromise, creatorVision, creatorTitleApplied, d.genres]);
   const unavailableCast = useMemo(() => soldCastRights(run), [run.franchises]);
 
   const set = (patch: Partial<Draft>) => setD((old) => ({ ...old, ...patch }));
@@ -619,6 +639,17 @@ export default function Create({
           </div>
         </div>
       </div>
+
+      {creatorVision && creatorPromise && (
+        <div className="relative z-10 border-b border-viol/40 bg-viol/10 px-3 py-2 text-[10px] text-paper/80">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
+            <b className="tracking-wider text-viol">CREATOR VISION · {creatorStaff?.name ?? "CREATOR"}</b>
+            <span>“{creatorVision.title}” · {GENRES.find((g) => g.id === creatorVision.primaryGenre)?.label}{creatorVision.secondaryGenre ? " + " + GENRES.find((g) => g.id === creatorVision.secondaryGenre)?.label : ""}</span>
+            <span className="text-viol">Alignment {creatorAlignment?.score ?? 0}%</span>
+            <span className="text-paper/45">Purple glow = their preference, not a studio meta recommendation.</span>
+          </div>
+        </div>
+      )}
 
       {marketBrief && (
         <div className="relative z-10 border-b border-gold/30 bg-gold/10 px-3 py-2 text-[10px] text-paper/80">
@@ -1089,6 +1120,7 @@ export default function Create({
                     m={m}
                     on={d[castRow.role] === m.id}
                     blocked={unavailableCast[m.id]?.title}
+                    creatorPick={creatorVision?.cast[castRow.role] === m.id}
                     onPick={() => {
                       sfx.select();
                       if (castRow.role === "protag") set({ protag: m.id, protagName: m.name });
@@ -1352,6 +1384,7 @@ export default function Create({
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {visibleArcs.map((a) => {
                     const on = d.arcs.includes(a.id);
+                    const creatorPick = creatorVision?.arcs.includes(a.id) ?? false;
                     const reason = arcLockReason(a, run);
                     const baseLocked = a.franchiseOnly && !d.franchiseKey && Object.keys(run.franchises).length === 0;
                     const locked = baseLocked || reason !== null;
@@ -1371,7 +1404,7 @@ export default function Create({
                         onKeyDown={(e) => !locked && (e.key === "Enter" || e.key === " ") && toggleArc(a.id)}
                         className={cn(
                           "btn-press relative cursor-pointer rounded-2xl border p-2.5 text-left",
-                          on ? "border-neon bg-neon/10" : "border-line bg-panel2/70 hover:border-neon/40",
+                          on ? "border-neon bg-neon/10" : creatorPick && !locked ? "border-viol/80 bg-viol/10 shadow-[0_0_22px_rgba(167,139,250,.28)]" : "border-line bg-panel2/70 hover:border-neon/40",
                           locked && "cursor-not-allowed opacity-60 saturate-50"
                         )}
                       >
@@ -1384,6 +1417,7 @@ export default function Create({
                           </span>
                         </div>
                         <div className="mt-0.5 text-[10px] text-paper/50">{a.desc}</div>
+                        {creatorPick && <div className="mt-1 inline-flex rounded border border-viol/60 bg-viol/10 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-viol">CREATOR PICK</div>}
                         {locked ? (
                           <div className="mt-1.5 flex items-center gap-2">
                             <span className="rounded bg-panel3 px-1.5 py-0.5 text-[9px] font-bold text-gold/90">{reason}</span>

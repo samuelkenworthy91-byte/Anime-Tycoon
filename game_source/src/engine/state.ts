@@ -48,6 +48,7 @@ import {
 } from "./castV2Migration";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
+import { creatorVisionEffectsForProject } from "./creatorVision";
 import {
   bumpRivalry,
   computeRankings,
@@ -90,6 +91,7 @@ import {
   marketSalary,
   moraleDelta,
   moraleOf,
+  moraleXpMultiplier,
   personMod,
   poachable,
   releaseXp,
@@ -941,7 +943,13 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds });
     const signature = specialisationProjectEffects(r, p.draft);
-    return { ...base, out: base.out * signature.outputMult, pace: base.pace * signature.paceMult };
+    const creator = creatorVisionEffectsForProject(r.expansion?.promises, p, st.id);
+    return {
+      ...base,
+      out: base.out * signature.outputMult * creator.outputMult,
+      pace: base.pace * signature.paceMult,
+      xpMult: base.xpMult * creator.xpMult,
+    };
   };
 
   for (let i = 1; i <= n; i++) {
@@ -1089,7 +1097,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           dm += fx.moraleRest;
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
-          const m = personMod(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)), { bonds });
+          const m = mods(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)));
           const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner));
           nx = g.staff;
           if (g.levelsGained > 0)
@@ -2825,7 +2833,8 @@ export function releaseProject(
         };
         nx = recordShow(nx, draft.title, result.total, r.week, draft.genres);
         nx = moraleDelta(nx, moraleSwing);
-        const g = gainXp(nx, xp);
+        const creatorXp = creatorVisionEffectsForProject(r.expansion?.promises, p, nx.id).xpMult;
+        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp);
         if (g.levelsGained > 0)
           notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
         return g.staff;

@@ -4,6 +4,7 @@ import type { GenreId, StaffRole } from "./data";
 import type { Project } from "./projects";
 import { moraleDelta } from "./careers";
 import { genreTargetFor } from "./genreTargets";
+import { generateCreatorVision, visionAlignment, visionEffects, type CreatorVision } from "./creatorVision";
 
 export interface Policies {
   recovery: 0 | 7 | 14;
@@ -21,6 +22,8 @@ export interface PromiseRecord {
   projectId?: string;
   extended: boolean;
   editApproved?: boolean;
+  vision?: CreatorVision;
+  visionAlignment?: number;
   history: string[];
 }
 export interface Pitch {
@@ -33,6 +36,7 @@ export interface Pitch {
   cost: number;
   report?: string;
   developmentDays?: Policies["development"];
+  vision?: CreatorVision;
 }
 export interface ProductionCredit {
   days: number;
@@ -300,19 +304,35 @@ export function appointCreativeLead(
     (c.leads[promise.role] && c.leads[promise.role] !== promise.staffId)
   )
     return null;
-  return write(r, {
-    ...x,
-    promises: x.promises.map((a) =>
-      a.id === promiseId ? { ...a, projectId } : a,
-    ),
-    credits: {
-      ...x.credits,
-      [projectId]: {
-        ...c,
-        leads: { ...c.leads, [promise.role]: promise.staffId },
+  const alignment = promise.vision ? visionAlignment(p.draft, promise.vision) : null;
+  const effects = alignment ? visionEffects(alignment) : null;
+  return {
+    ...write(r, {
+      ...x,
+      promises: x.promises.map((a) =>
+        a.id === promiseId
+          ? {
+              ...a,
+              projectId,
+              visionAlignment: alignment?.score,
+              history: alignment
+                ? [...a.history, "Creator vision alignment locked at " + alignment.score + "% (" + effects!.label + ")."]
+                : a.history,
+            }
+          : a,
+      ),
+      credits: {
+        ...x.credits,
+        [projectId]: {
+          ...c,
+          leads: { ...c.leads, [promise.role]: promise.staffId },
+        },
       },
-    },
-  });
+    }),
+    staff: effects
+      ? r.staff.map((s) => s.id === promise.staffId ? moraleDelta(s, effects.moraleDelta) : s)
+      : r.staff,
+  };
 }
 export function pitchAction(
   r: RunState,
@@ -384,8 +404,14 @@ export function pitchAction(
   if (action === "accept") {
     const next = promiseLeadership(r, pitch.staffId, pitch.genre);
     if (!next) return null;
+    const nx = expansionOf(next);
     return write(next, {
-      ...expansionOf(next),
+      ...nx,
+      promises: nx.promises.map((p) =>
+        p.staffId === pitch.staffId && p.status === "active" && p.createdDay === gameDay(r)
+          ? { ...p, vision: pitch.vision }
+          : p,
+      ),
       pitches: x.pitches.map((p) =>
         p.id === id ? { ...p, status: "accepted" } : p,
       ),
@@ -606,6 +632,7 @@ export function advanceExpansionDay(r: RunState): RunState {
         status: "offered",
         progress: 0,
         cost: Math.round(8000 * (1 + r.officeLevel * 0.75)),
+        vision: generateCreatorVision("pitch:" + s.id + ":" + week, genre, r.genresUnlocked, s),
       };
       x = event(
         { ...x, pitches: [...x.pitches, pitch], lastPitchWeek: week },

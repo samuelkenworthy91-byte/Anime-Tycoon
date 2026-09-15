@@ -1,6 +1,7 @@
 import type { RunState } from "./state";
 import { expansionOf, gameDay } from "./studioExpansion";
-import { bondBetween, bondKey, moraleDelta } from "./careers";
+import { bondBetween, bondKey, genreFamiliarity, moraleDelta } from "./careers";
+import { ROLE_POINT, STAFF_STAT_CAP, type GenreId } from "./data";
 
 export type StaffStoryKind =
   | "recognition"
@@ -111,15 +112,36 @@ export function advanceStaffStories(r: RunState): RunState {
     if (progress < 8) return { ...s, progress };
     const key = bondKey(s.staffIds[0], s.staffIds[1]);
     bonds = { ...bonds, [key]: Math.max(8, bonds[key] ?? 0) };
-    staff = staff.map((st) =>
-      s.staffIds.includes(st.id) ? moraleDelta(st, 4) : st,
-    );
+    const mentor = staff.find((st) => st.id === s.staffIds[0])!;
+    const junior = staff.find((st) => st.id === s.staffIds[1])!;
+    const focus = ROLE_POINT[junior.role];
+    const skillGap = Math.max(0, mentor[focus] - junior[focus]);
+    const skillGain = Math.max(1, Math.min(5, Math.ceil(skillGap / 20)));
+    const strongestGenre = (mentor.favGenre ?? Object.entries(mentor.genreExperience ?? {}).sort((a, b) => Number(b[1] ?? 0) - Number(a[1] ?? 0))[0]?.[0]) as GenreId | undefined;
+    const mentorGenre = strongestGenre ? genreFamiliarity(mentor, strongestGenre) : 0;
+    const juniorGenre = strongestGenre ? genreFamiliarity(junior, strongestGenre) : 0;
+    const genreGain = strongestGenre && mentorGenre > juniorGenre ? Math.min(2, mentorGenre - juniorGenre) : 0;
+    staff = staff.map((st) => {
+      let next = s.staffIds.includes(st.id) ? moraleDelta(st, 4) : st;
+      if (st.id !== junior.id) return next;
+      next = { ...next, [focus]: Math.min(STAFF_STAT_CAP, next[focus] + skillGain) };
+      if (strongestGenre && genreGain > 0) {
+        next = {
+          ...next,
+          genreExperience: {
+            ...(next.genreExperience ?? {}),
+            [strongestGenre]: Math.max(next.genreExperience?.[strongestGenre] ?? 0, juniorGenre + genreGain),
+          },
+        };
+      }
+      return next;
+    });
     return {
       ...s,
       progress,
       status: "resolved" as const,
       outcome:
-        "Eight mentoring days completed: both gained morale and established a working relationship.",
+        "Eight mentoring days completed: " + junior.name + " gained +" + skillGain + " " + focus + (strongestGenre && genreGain ? " and " + genreGain + " steps of " + strongestGenre + " familiarity" : "") + "; both gained morale and established a working relationship.",
     };
   });
   let history = x.history;

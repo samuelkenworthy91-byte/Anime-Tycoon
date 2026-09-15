@@ -484,6 +484,24 @@ export function rollHirePool(week: number, count = 3, rng: () => number = Math.r
 export const moraleOf = (s: Staff) => s.morale ?? 70;
 /** morale output factor: 70 morale = ×1.00, 100 = ×1.11, 20 = ×0.82 */
 export const moraleF = (s: Staff) => 0.75 + moraleOf(s) / 280;
+/** Happier staff learn faster from real production work. */
+export const moraleXpMultiplier = (s: Staff) => {
+  const morale = moraleOf(s);
+  if (morale >= 90) return 1.20;
+  if (morale >= 75) return 1.10;
+  if (morale < 25) return 0.85;
+  if (morale < 50) return 0.95;
+  return 1;
+};
+/** High morale softens salary demands; miserable stars demand a premium to stay. */
+export const moraleSalaryDemandMultiplier = (s: Staff) => {
+  const morale = moraleOf(s);
+  if (morale >= 90) return 0.92;
+  if (morale >= 75) return 0.97;
+  if (morale < 25) return 1.08;
+  if (morale < 50) return 1.03;
+  return 1;
+};
 /** Fragile Confidence doubles every swing */
 export function moraleDelta(s: Staff, delta: number): Staff {
   const mult = hasTrait(s, "fragile") ? 2 : 1;
@@ -620,7 +638,7 @@ export function personMod(s: Staff, p: Project, team: Staff[], ctx: CareerCtx): 
   let out = cond * staffGenreMultiplier(s, p.draft.genres);
   let pace = cond;
   let aura = 0;
-  let xpMult = 1;
+  let xpMult = moraleXpMultiplier(s);
 
   /* traits — deliberately large enough that hiring personality matters */
   if (hasTrait(s, "perfectionist")) { out *= 1.30; pace *= 0.75; }
@@ -751,7 +769,7 @@ export interface StaffEvent {
 
 /** what this person is worth on the open market */
 export const marketSalary = (s: Staff) =>
-  Math.round((280 + staffPoint(s, ROLE_POINT[s.role]) * 13 + s.level * 140) / 10) * 10;
+  Math.round(((280 + staffPoint(s, ROLE_POINT[s.role]) * 13 + s.level * 140) * moraleSalaryDemandMultiplier(s)) / 10) * 10;
 
 export const wantsRaise = (s: Staff, week: number) =>
   marketSalary(s) > s.salary * 1.35 && week - (s.joinedWeek ?? 0) >= 24;
