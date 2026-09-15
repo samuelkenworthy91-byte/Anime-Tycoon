@@ -30,6 +30,19 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Import promised-lead crown icon
+        working-directory: game_source
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/components/Projects.tsx')
+          s = p.read_text()
+          head = s.split('} from "lucide-react";', 1)[0]
+          if '  Crown,\n' not in head:
+              s = s.replace('  Calendar,\n', '  Calendar,\n  Crown,\n', 1)
+              p.write_text(s)
+          PY
+
       - name: Apply discovery-gated cast filtering
         working-directory: game_source
         run: node scripts/patch-cast-secret-visibility.mjs
@@ -96,6 +109,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -f \
+            game_source/src/components/Projects.tsx \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
             game_source/src/engine/__tests__/cast-display-filter.test.ts \
@@ -107,8 +121,8 @@ jobs:
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
           if git diff --cached --quiet; then
-            echo 'runtime, cast filtering and dist already current'
+            echo 'runtime, promised-lead icon and dist already current'
           else
-            git commit -m 'Gate secret cast affinities behind discovery'
+            git commit -m 'Import promised-lead project icon'
             git push origin HEAD:main
           fi
