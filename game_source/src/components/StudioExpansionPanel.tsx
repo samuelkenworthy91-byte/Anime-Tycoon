@@ -1,7 +1,9 @@
 import OverseasStrategyPanel from "./OverseasStrategyPanel";
 import { regionalForecast } from "../engine/overseasStrategy";
 import { StaffStoryInbox } from "./StaffCultureProfile";
-import { useState } from "react";
+import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
+import { markTutorialSeen, tutorialSeen, type TutorialId } from "../engine/tutorials";
+import { useEffect, useState } from "react";
 import { assignToProject, type RunState } from "../engine/state";
 import { GENRES, formatGBP, type GenreId } from "../engine/data";
 import {
@@ -85,27 +87,47 @@ function useRunAction({ run, setRun }: Props) {
   return { message, act };
 }
 export default function StudioExpansionPanel(props: Props) {
+  const { run, setRun } = props;
   const [tab, setTab] = useState<"staff" | "policies" | "overseas">("staff");
+  const [tutorial, setTutorial] = useState<TutorialId | null>(null);
+  const expansion = expansionOf(run);
+  const hasCreatorCommitment =
+    expansion.pitches.some((p) => !["declined", "accepted"].includes(p.status)) ||
+    expansion.promises.some((p) => p.status === "active");
+  const tabTutorial: TutorialId =
+    tab === "staff" ? "passion-projects" :
+    tab === "policies" ? "working-policies" : "overseas-markets";
+
+  useEffect(() => {
+    if (tab === "staff" && !hasCreatorCommitment) return;
+    if (!tutorialSeen(run, tabTutorial)) setTutorial(tabTutorial);
+  }, [tab, tabTutorial, hasCreatorCommitment, run.tutorialsSeen]);
+
+  const dismissTutorial = () => {
+    if (tutorial) setRun((r) => markTutorialSeen(r, tutorial));
+    setTutorial(null);
+  };
+
   return (
     <div className="space-y-4 text-sm">
-      <div
-        className="flex flex-wrap gap-2"
-        aria-label="Studio expansion sections"
-      >
-        {(["staff", "policies", "overseas"] as const).map((t) => (
-          <button
-            key={t}
-            className={button + (t === tab ? " text-gold" : "")}
-            aria-pressed={t === tab}
-            onClick={() => setTab(t)}
-          >
-            {t === "staff"
-              ? "AMBITIONS"
-              : t === "policies"
-                ? "WORKING POLICIES"
-                : "OVERSEAS MARKETS"}
-          </button>
-        ))}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-1 flex-wrap gap-2" aria-label="Studio expansion sections">
+          {(["staff", "policies", "overseas"] as const).map((t) => (
+            <button
+              key={t}
+              className={button + (t === tab ? " text-gold" : "")}
+              aria-pressed={t === tab}
+              onClick={() => setTab(t)}
+            >
+              {t === "staff"
+                ? "AMBITIONS"
+                : t === "policies"
+                  ? "WORKING POLICIES"
+                  : "OVERSEAS MARKETS"}
+            </button>
+          ))}
+        </div>
+        <TutorialHelpButton onClick={() => setTutorial(tabTutorial)} />
       </div>
       {tab === "staff" ? (
         <StaffAmbitions {...props} />
@@ -114,6 +136,7 @@ export default function StudioExpansionPanel(props: Props) {
       ) : (
         <OverseasPanel {...props} />
       )}
+      <FirstSeenTutorial id={tutorial ?? tabTutorial} open={tutorial !== null} onDismiss={dismissTutorial} />
     </div>
   );
 }

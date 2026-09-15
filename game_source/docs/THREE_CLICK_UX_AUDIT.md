@@ -49,6 +49,12 @@ New paths: Office → Project Board → **ASSIGN + NAME [CREATOR] [DEPARTMENT] L
 5. **Contextual parity.** A production action that becomes eligible while the player is in a rush, edit, release or project screen must appear there as well as on its dashboard; never force a back-out-and-reopen loop.
 6. **Do not count meaningful creative decisions as navigation.** Building a show can involve many creative selections. The three-click rule is about getting to the relevant decision, not deleting game depth.
 
+## First-seen tutorial fallback
+
+If a routine system still legitimately takes more than three navigation/action clicks after streamlining, its first real encounter must open a short player-facing tutorial. The tutorial must use visual screen previews of the actual controls, show no more than three numbered steps, explain the consequence of the final action, appear only once per save, and remain replayable from a **HOW THIS WORKS** button on that page. Tutorials support complexity; they do not excuse avoidable menu depth.
+
+The first covered systems are Passion Projects, Working Policies and Overseas Markets, because the current audit identifies those as the clearest 4+ click flows.
+
 ## Proposed implementation order
 
 ### Pass A — Staff and creator actions
