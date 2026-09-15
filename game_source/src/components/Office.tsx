@@ -50,6 +50,7 @@ import {
   SHOWRUNNERS,
   MEDIUMS,
   POINT_COLOR,
+  staffPoint,
   workerLookIndex,
   dateLabel,
   formatGBP,
@@ -68,6 +69,7 @@ import {
   relocateOffice,
   staffCapacity,
   startBlockReason,
+  startContractAssignment,
   startResearchProject,
   startTestAudience,
   unlockFormat,
@@ -78,6 +80,7 @@ import {
   studioScore,
   contractDailyOutputEstimateForRun,
   researchBlockReason,
+  staffBusyReason,
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
@@ -575,9 +578,26 @@ export default function Office({
                   <div className="font-display text-sm font-extrabold text-gold">{formatGBP(c.pay)}</div>
                   <div className="text-[10px] font-bold text-viol">+{c.rd} RD</div>
                 </div>
-                <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" onClick={() => onContract(c)}>
-                  TAKE
-                </Btn>
+                {(() => {
+                  const best = run.staff
+                    .filter((st) => !staffBusyReason(run, st.id))
+                    .sort((a, b) => staffPoint(b, c.type) - staffPoint(a, c.type))
+                    .slice(0, 3);
+                  return <div className="flex flex-col gap-1">
+                    <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" disabled={best.length === 0} onClick={() => {
+                      sfx.fanfare();
+                      setRun((r) => {
+                        const ids = r.staff
+                          .filter((st) => !staffBusyReason(r, st.id))
+                          .sort((a, b) => staffPoint(b, c.type) - staffPoint(a, c.type))
+                          .slice(0, 3)
+                          .map((st) => st.id);
+                        return startContractAssignment(r, c, ids, false) ?? r;
+                      });
+                    }}>QUICK BEST TEAM</Btn>
+                    <Btn variant="ghost" className="!px-3 !py-1 text-[9px]" onClick={() => onContract(c)}>CUSTOM TEAM</Btn>
+                  </div>;
+                })()}
               </div>
             ))}
           </div>
