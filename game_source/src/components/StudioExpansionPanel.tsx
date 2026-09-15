@@ -1,3 +1,5 @@
+import OverseasStrategyPanel from "./OverseasStrategyPanel";
+import { regionalForecast } from "../engine/overseasStrategy";
 import { StaffStoryInbox } from "./StaffCultureProfile";
 import { useState } from "react";
 import { assignToProject, type RunState } from "../engine/state";
@@ -128,7 +130,7 @@ function StaffAmbitions(props: Props) {
         stage, then release an original production with at least 60%
         participation in their department's production days.
       </p>
-      <StaffStoryInbox {...props}/>
+      <StaffStoryInbox {...props} />
       <div className="ink-card space-y-2 p-3">
         <b>Agree a leadership opportunity</b>
         <Select
@@ -431,6 +433,7 @@ function OverseasPanel(props: Props) {
     quote = quoteOverseas(run, q),
     a = quote.release,
     profile = p ? (o.profiles[p.id] ?? defaultContent(p)) : null;
+  const forecast = a ? regionalForecast(run, a) : null;
   const locked =
     !!p &&
     (p.stage !== "concept" || (expansionOf(run).credits[p.id]?.days ?? 0) > 0);
@@ -557,18 +560,25 @@ function OverseasPanel(props: Props) {
           <p>
             Release weeks {a.opensWeek}–{a.endsWeek - 1}
           </p>
-          <p>
-            Regional reception {a.reception}/100 · viewers{" "}
-            {a.viewers.toLocaleString("en-GB")}
-          </p>
-          <p>
-            Gross {formatGBP(a.gross)} − distributor{" "}
-            {formatGBP(a.distributorCut)} − royalty {formatGBP(a.royalty)} =
-            studio receipts {formatGBP(a.receipts)}
-          </p>
-          <p>
-            Contribution before staff pool: {formatGBP(a.receipts - a.cost)}
-          </p>
+          {forecast && (
+            <>
+              <p>
+                Reception estimate {forecast.reception[0]}–
+                {forecast.reception[1]}/100.
+              </p>
+              <p>
+                Studio receipt estimate {formatGBP(forecast.receipts[0])}–
+                {formatGBP(forecast.receipts[1])}, after distributor share and
+                royalties.
+              </p>
+              <p>
+                Contribution before staff pool:{" "}
+                {formatGBP(forecast.receipts[0] - a.cost)} to{" "}
+                {formatGBP(forecast.receipts[1] - a.cost)}.
+              </p>
+              <p className="text-xs">{forecast.confidence}</p>
+            </>
+          )}
           {a.reasons.map((t) => (
             <p className="text-xs" key={t}>
               {t}
@@ -576,6 +586,7 @@ function OverseasPanel(props: Props) {
           ))}
         </div>
       )}
+      <OverseasStrategyPanel run={run} setRun={props.setRun} request={q} />
       <p role="status" className="text-gold">
         {message || quote.block}
       </p>
@@ -622,12 +633,18 @@ function OverseasPanel(props: Props) {
               </b>
               <p>
                 {TERRITORIES.find((t) => t.id === a.territory)?.name} ·{" "}
-                {a.status} · {a.reception}/100
+                {a.status} ·{" "}
+                {a.recognised ? a.reception + "/100" : "Reception pending"}
               </p>
               <p>
-                Studio receipts {formatGBP(a.receipts)} · cost{" "}
-                {formatGBP(a.cost)} · {a.viewers.toLocaleString("en-GB")}{" "}
-                viewers
+                Cost {formatGBP(a.cost)}
+                {a.recognised
+                  ? " · studio receipts " +
+                    formatGBP(a.receipts) +
+                    " · " +
+                    a.viewers.toLocaleString("en-GB") +
+                    " viewers"
+                  : " · audiences and receipts will be revealed at opening"}
               </p>
             </div>
           ))}
