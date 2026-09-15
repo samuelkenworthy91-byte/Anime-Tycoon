@@ -1,3 +1,4 @@
+import { advanceStaffStories, storyBusyReason, type StaffStory } from "./staffStories";
 import type { RunState, Payout } from "./state";
 import type { GenreId, StaffRole } from "./data";
 import type { Project } from "./projects";
@@ -52,6 +53,9 @@ export interface ProjectAccount {
   settled: string[];
 }
 export interface ExpansionState {
+  stories?: StaffStory[];
+  lastStoryDay?: number;
+  storyDay?: number;
   version: 1;
   introducedDay: number;
   lastDay: number;
@@ -179,6 +183,7 @@ export function expansionBusyReason(
   day = gameDay(r),
 ): string | null {
   const x = expansionOf(r);
+  if (storyBusyReason(r,id,day)) return "Paid mentorship";
   if ((x.leave[id] ?? 0) > day)
     return "Protected recovery until day " + x.leave[id];
   if (
@@ -614,7 +619,7 @@ export function advanceExpansionDay(r: RunState): RunState {
   for (const p of r.projects)
     if (["ready", "airing", "done"].includes(p.stage))
       next = grantRecovery(next, p.id);
-  return next;
+  return advanceStaffStories(next);
 }
 export function finishExpansionProduction(r: RunState, p: Project): RunState {
   let x = expansionOf(r);
