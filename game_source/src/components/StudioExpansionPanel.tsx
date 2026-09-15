@@ -1,3 +1,4 @@
+import { StaffStoryInbox } from "./StaffCultureProfile";
 import { useState } from "react";
 import { assignToProject, type RunState } from "../engine/state";
 import { GENRES, formatGBP, type GenreId } from "../engine/data";
@@ -127,6 +128,7 @@ function StaffAmbitions(props: Props) {
         stage, then release an original production with at least 60%
         participation in their department's production days.
       </p>
+      <StaffStoryInbox {...props}/>
       <div className="ink-card space-y-2 p-3">
         <b>Agree a leadership opportunity</b>
         <Select

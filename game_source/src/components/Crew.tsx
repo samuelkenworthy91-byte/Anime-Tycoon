@@ -1,3 +1,4 @@
+import { StaffCultureProfile } from "./StaffCultureProfile";
 import { useEffect, useState } from "react";
 import {
   Award,
@@ -310,6 +311,8 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
               </div>
             </div>
           )}
+
+          <StaffCultureProfile run={run} setRun={setRun} staffId={s.id}/>
 
           {/* career history */}
           <div>
