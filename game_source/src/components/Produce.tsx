@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Building2, ChevronLeft, MonitorPlay, Music4, PenTool, Scissors } from "lucide-react";
+import { Building2, ChevronLeft, Crown, MonitorPlay, Music4, PenTool, Scissors } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import {
@@ -22,7 +22,8 @@ import { exactDirectionKnown, rushBoostPoint, rushOutcomeRange, rushResearchCost
 import { personMod, staffGenreMultiplier } from "../engine/careers";
 import { genreTargetFor } from "../engine/genreTargets";
 import { engineerEyeRange, trailblazerProductionMult } from "../engine/showrunnerPerks";
-import { MILESTONE_LABEL, draftCost } from "../engine/projects";
+import { MILESTONE_LABEL, TEAM_MAX, draftCost } from "../engine/projects";
+import { expansionOf } from "../engine/studioExpansion";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
@@ -32,12 +33,13 @@ const PHASES: Record<Exclude<MilestoneId, "edit">, { idx: 0 | 1 | 2; name: strin
   sound: { idx: 2, name: "RECORDING RUSH", icon: Music4, a: "Soundtrack", b: "Voice Cast", type: "sound" },
 };
 
-export default function Produce({ run, project, milestone, workPulses = [], onDone, onBack }: {
+export default function Produce({ run, project, milestone, workPulses = [], onAppointPromise, onDone, onBack }: {
   run: RunState;
   project: Project;
   milestone: MilestoneId;
   paused: boolean;
   workPulses?: DeskPulse[];
+  onAppointPromise: (projectId: string, promiseId: string) => void;
   onDone: (o: MilestoneOutcome) => void;
   onBack: () => void;
 }) {
@@ -57,6 +59,74 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
   const runnerName = run.showrunnerName?.trim() || runner.name;
   const runnerStats = showrunnerStats(run.showrunner, run.showrunnerCareer);
   const team = useMemo(() => run.staff.filter((s) => project.staffIds.includes(s.id)), [run.staff, project.staffIds]);
+  const expansion = expansionOf(run);
+  const productionCredit = expansion.credits[project.id];
+  const promiseCandidates = expansion.promises.filter((promise) =>
+    promise.status === "active" &&
+    (!promise.projectId || promise.projectId === project.id) &&
+    !project.commission &&
+    !project.draft.continuation &&
+    !project.draft.licensedIpId &&
+    project.draft.genres.includes(promise.genre)
+  );
+  const phasePromiseRole = phase
+    ? phase.type === "story"
+      ? "writer"
+      : phase.type === "art"
+        ? "animator"
+        : "composer"
+    : null;
+  const renderPromiseActions = (role?: "writer" | "animator" | "composer") => {
+    const relevant = promiseCandidates.filter((promise) => !role || promise.role === role);
+    if (!relevant.length) return null;
+    return (
+      <div className="mt-3 space-y-2">
+        {relevant.map((promise) => {
+          const creator = run.staff.find((st) => st.id === promise.staffId);
+          if (!creator) return null;
+          const total = productionCredit?.byRole[promise.role] ?? 0;
+          const creatorDays = productionCredit?.roleStaff[promise.staffId] ?? 0;
+          const participation = total > 0 ? Math.round((creatorDays / total) * 100) : 0;
+          const named = productionCredit?.leads[promise.role] === promise.staffId && promise.projectId === project.id;
+          const conflictingLead = !!productionCredit?.leads[promise.role] && productionCredit.leads[promise.role] !== promise.staffId;
+          const alreadyAssigned = project.staffIds.includes(promise.staffId);
+          const early = project.stage === "concept" && total === 0;
+          const earnedLate = total > 0 && participation >= 60;
+          const canAutoAssign = alreadyAssigned || project.staffIds.length < TEAM_MAX;
+          const canName = !named && !conflictingLead && canAutoAssign && (early || (alreadyAssigned && earnedLate));
+          const leadLabel = promise.role === "writer" ? "WRITING" : promise.role === "animator" ? "ANIMATION" : "SOUND";
+          return (
+            <div key={promise.id} className="rounded-xl border border-viol/55 bg-viol/10 p-3">
+              <div className="flex items-center gap-2">
+                <Crown size={14} className="shrink-0 text-gold" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[10px] font-black tracking-wider text-gold">PROMISED {leadLabel} LEAD</div>
+                  <div className="truncate text-[10px] text-paper/70">{creator.name} · {participation}% department participation</div>
+                </div>
+                {named && <span className="rounded bg-mint/15 px-1.5 py-0.5 text-[8px] font-black text-mint">NAMED</span>}
+              </div>
+              {!named && canName && (
+                <Btn variant="gold" className="mt-2 w-full !py-1.5 text-[10px]" onClick={() => onAppointPromise(project.id, promise.id)}>
+                  <Crown size={12} /> {alreadyAssigned ? `NAME ${creator.name.toUpperCase()} ${leadLabel} LEAD` : `ASSIGN + NAME ${creator.name.toUpperCase()} ${leadLabel} LEAD`}
+                </Btn>
+              )}
+              {!named && !canName && (
+                <div className="mt-1.5 text-[9px] text-paper/50">
+                  {conflictingLead
+                    ? `Another ${leadLabel.toLowerCase()} lead is already named.`
+                    : !canAutoAssign
+                      ? "Team is full — make a slot before naming this promised lead."
+                      : total > 0
+                        ? `Keep ${creator.name} on the project until they reach 60% of ${leadLabel.toLowerCase()} production days. Current: ${participation}%.`
+                        : `Assign ${creator.name} before ${leadLabel.toLowerCase()} work begins, or they can still earn the role later at 60% participation.`}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
   const [crunch, setCrunch] = useState(false);
   const [shown, setShown] = useState(0);
   const shownRef = useRef(0);
@@ -102,6 +172,8 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
             <h2 className="font-display text-3xl font-extrabold">POLISH OR SHIP?</h2>
             <p className="mt-1 text-xs text-paper/55">Editing notes only move one way: down. Keep the calendar running to chase a cleaner master; every cleared note improves final quality and earns +1 RD. The trade-off is time and money.</p>
           </div>
+
+          {renderPromiseActions()}
 
           <div className={cn("mt-4 rounded-2xl border p-4 text-center", remaining === 0 ? "border-mint/60 bg-mint/10" : "border-gold/45 bg-gold/5")}>
             <div className="text-[9px] font-extrabold tracking-[0.3em] text-paper/45">EDITOR NOTES REMAINING</div>
@@ -265,6 +337,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
             <h2 className="font-display text-3xl font-extrabold">DIRECTION MEETING</h2>
             <p className="mt-1 text-xs text-paper/55">Set the balance, appoint one specialist, then the rush resolves as a short studio spotlight. Their skill sets the RNG floor and ceiling.</p>
           </div>
+          {phasePromiseRole && renderPromiseActions(phasePromiseRole)}
           <div className="mt-4 ink-card p-4">
             <div className="flex items-center gap-2"><span className="rounded-lg bg-panel3 p-2" style={{ color: POINT_COLOR[phase!.type] }}><Icon size={18} /></span><div><div className="font-display text-sm font-extrabold">{phase!.name}</div><div className="text-[10px] text-paper/40">One lead · one bounded roll · one big creative injection</div></div></div>
             <div className="mt-4 flex justify-between text-[10px] font-bold"><span className="text-neon2">{phase!.a}</span><span className="text-cyanx">{phase!.b}</span></div>
@@ -320,6 +393,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onDo
       ) : mode === "assign" ? (
         <div className="nice-scroll relative z-10 mx-auto w-full max-w-3xl flex-1 overflow-y-auto p-4">
           <div className="text-center"><div className="text-[11px] tracking-[0.4em] text-cyanx">{phase!.name}</div><h2 className="font-display text-3xl font-extrabold">WHO GETS THE SPOTLIGHT?</h2><p className="mt-1 text-xs text-paper/55">Higher relevant skill raises both the minimum and maximum result. The reveal is instant and does not consume calendar days.</p></div>
+          {phasePromiseRole && renderPromiseActions(phasePromiseRole)}
           <button onClick={() => setCrunch((v) => !v)} disabled={run.cash < crunchCost} className={cn("btn-press mx-auto mt-3 flex max-w-xl items-center gap-2 rounded-xl border px-3 py-2 text-left", crunch ? "border-neon bg-neon/10" : "border-line bg-panel2/60", run.cash < crunchCost && "opacity-40") }>
             <span className="text-lg">⚡</span><span className="min-w-0 flex-1"><span className="block text-xs font-extrabold">{crunch ? "CRUNCH ENABLED" : "OPTIONAL CRUNCH"}</span><span className="block text-[9px] text-paper/50">+25% rush output · £9,000 · roughly doubles mistake risk</span></span><span className="font-display text-xs font-extrabold text-neon">{crunch ? "ON" : "OFF"}</span>
           </button>

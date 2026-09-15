@@ -6,6 +6,7 @@ import { ARCS, type Contract, type Draft } from "./engine/data";
 import type { ShowResult } from "./engine/scoring";
 import {
   applyMilestone,
+  assignToProject,
   initialRun,
   tickStudioDay,
   tickStudioWorkPulse,
@@ -55,6 +56,7 @@ import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
 import BigThreeReveal from "./components/BigThreeReveal";
+import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -437,6 +439,22 @@ export default function App() {
     [focus]
   );
 
+  const appointPromiseLead = useCallback((projectId: string, promiseId: string) => {
+    sfx.click();
+    setRun((current) => {
+      if (!current) return current;
+      const promise = expansionOf(current).promises.find((p) => p.id === promiseId);
+      const project = current.projects.find((p) => p.id === projectId);
+      if (!promise || !project) return current;
+      const staged = project.staffIds.includes(promise.staffId)
+        ? current
+        : assignToProject(current, projectId, promise.staffId);
+      const assigned = staged.projects.find((p) => p.id === projectId)?.staffIds.includes(promise.staffId);
+      if (!assigned) return current;
+      return appointCreativeLead(staged, projectId, promiseId) ?? current;
+    });
+  }, []);
+
   /* --------------------------------------------------------- release */
   const openShip = useCallback((projectId: string) => {
     sfx.select();
@@ -671,6 +689,7 @@ export default function App() {
             milestone={focus.milestone}
             paused={paused}
             workPulses={workPulses}
+            onAppointPromise={appointPromiseLead}
             onDone={finishMilestone}
             onBack={() => {
               sfx.back();

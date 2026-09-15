@@ -10,13 +10,13 @@ From the main office, any routine management goal should be reachable and commit
 
 Old path: Office → More/Studio Culture → Ambitions → promise card/project selector, then back to production. In practice this was 4–6 navigation/actions and required remembering a promise outside the production context.
 
-New path: Office → Project Board → **ASSIGN + NAME [CREATOR] [DEPARTMENT] LEAD**. Two clicks from the office if the project qualifies. The promise card is visible beside team/rush/intervention controls. If the creator was not named before department work began, they can still earn the appointment later once they personally hold at least 60% of the department's recorded production days. This keeps the promise meaningful without creating a hidden irreversible failure.
+New paths: Office → Project Board → **ASSIGN + NAME [CREATOR] [DEPARTMENT] LEAD** (two clicks), or act directly inside the relevant Story / Animation / Sound rush with no detour. The Edit Bay also shows any still-unfulfilled promised lead who has earned at least 60% of their department's recorded production days. The Project Board remains the overview; rush/edit screens are contextual shortcuts. This keeps the promise meaningful without creating a hidden irreversible failure.
 
 ## Current click-depth audit
 
 | Goal | Current path | Approx. clicks | Status | Streamlining direction |
 | --- | --- | ---: | --- | --- |
-| Name promised creative lead | Project Board → promise action | 2 | PASS after this patch | Keep on project card and surface progress % |
+| Name promised creative lead | Project Board → promise action, or relevant Rush/Edit Bay → promise action | 1–2 | PASS | Keep the same action in every production context where it becomes eligible |
 | Assign staff to a project | Project Board → Team → Assign | 3 | PASS | Keep team accordion state sticky while board is open |
 | Start a milestone rush | Project Board → Assign Rush Lead → choose lead | 3 | PASS | Prefer promised/department leads at top of selector |
 | Buy a production intervention | Project Board → Paid Interventions → intervention | 3 | PASS | Auto-expand when project is in crisis |
@@ -46,7 +46,8 @@ New path: Office → Project Board → **ASSIGN + NAME [CREATOR] [DEPARTMENT] LE
 2. **One sheet, one commitment.** A click may open a bottom sheet; the next click selects the target; the third commits. Avoid modal → tab → accordion → selector chains.
 3. **Blocked actions should link to their remedy.** “Needs Research Lab”, “needs genre licence”, “needs creator approval”, etc. should be tappable shortcuts to the exact purchase/research/negotiation control.
 4. **Urgent/eligible actions surface themselves.** Promises, pitches, staff stories, expiring rights, salary requests and overseas opportunities should create a contextual CTA where the player is already looking.
-5. **Do not count meaningful creative decisions as navigation.** Building a show can involve many creative selections. The three-click rule is about getting to the relevant decision, not deleting game depth.
+5. **Contextual parity.** A production action that becomes eligible while the player is in a rush, edit, release or project screen must appear there as well as on its dashboard; never force a back-out-and-reopen loop.
+6. **Do not count meaningful creative decisions as navigation.** Building a show can involve many creative selections. The three-click rule is about getting to the relevant decision, not deleting game depth.
 
 ## Proposed implementation order
 
