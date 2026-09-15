@@ -154,18 +154,18 @@ const replaceOnce = (text, before, after, label) => {
             </div>
             {!named && canName && (
               <Btn variant="gold" className="mt-2 w-full !py-1.5 text-[10px]" onClick={() => onAppointPromise(p.id, promise.id)}>
-                <Crown size={12} /> {alreadyAssigned ? `NAME ${creator.name.toUpperCase()} ${leadLabel} LEAD` : `ASSIGN + NAME ${creator.name.toUpperCase()} ${leadLabel} LEAD`}
+                <Crown size={12} /> {alreadyAssigned ? "NAME " + creator.name.toUpperCase() + " " + leadLabel + " LEAD" : "ASSIGN + NAME " + creator.name.toUpperCase() + " " + leadLabel + " LEAD"}
               </Btn>
             )}
             {!named && !canName && (
               <div className="mt-1.5 text-[9px] text-paper/50">
                 {conflictingLead
-                  ? `Another ${leadLabel.toLowerCase()} lead is already named.`
+                  ? "Another " + leadLabel.toLowerCase() + " lead is already named."
                   : !canAutoAssign
                     ? "Team is full — make a slot before naming this promised lead."
                     : total > 0
-                      ? `Keep ${creator.name} on the project until they reach 60% of ${leadLabel.toLowerCase()} production days. Current: ${participation}%.`
-                      : `Assign ${creator.name} before ${leadLabel.toLowerCase()} work begins, or they can still earn the role later by reaching 60% participation.`}
+                      ? "Keep " + creator.name + " on the project until they reach 60% of " + leadLabel.toLowerCase() + " production days. Current: " + participation + "%."
+                      : "Assign " + creator.name + " before " + leadLabel.toLowerCase() + " work begins, or they can still earn the role later by reaching 60% participation."}
               </div>
             )}
           </div>
