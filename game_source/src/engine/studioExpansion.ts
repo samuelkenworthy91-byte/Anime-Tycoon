@@ -297,13 +297,21 @@ export function appointCreativeLead(
     p.draft.continuation ||
     p.commission ||
     !p.draft.genres.includes(promise.genre) ||
-    p.stage !== "concept" ||
     !p.staffIds.includes(promise.staffId) ||
-    (c.byRole[promise.role] ?? 0) > 0 ||
     expansionBusyReason(r, promise.staffId) ||
+    (promise.projectId && promise.projectId !== projectId) ||
     (c.leads[promise.role] && c.leads[promise.role] !== promise.staffId)
   )
     return null;
+  if (promise.projectId === projectId && c.leads[promise.role] === promise.staffId)
+    return r;
+  const total = c.byRole[promise.role] ?? 0,
+    creatorDays = c.roleStaff[promise.staffId] ?? 0,
+    share = total > 0 ? creatorDays / total : 0;
+  const earlyAppointment = p.stage === "concept" && total === 0;
+  const earnedLateAppointment =
+    !["airing", "done"].includes(p.stage) && total > 0 && share >= 0.6;
+  if (!earlyAppointment && !earnedLateAppointment) return null;
   const alignment = promise.vision ? visionAlignment(p.draft, promise.vision) : null;
   const effects = alignment ? visionEffects(alignment) : null;
   return {
@@ -315,9 +323,15 @@ export function appointCreativeLead(
               ...a,
               projectId,
               visionAlignment: alignment?.score,
-              history: alignment
-                ? [...a.history, "Creator vision alignment locked at " + alignment.score + "% (" + effects!.label + ")."]
-                : a.history,
+              history: [
+                ...a.history,
+                earnedLateAppointment && !earlyAppointment
+                  ? "Named as department lead after earning at least 60% of recorded department participation."
+                  : "Named as department lead before department production began.",
+                ...(alignment
+                  ? ["Creator vision alignment locked at " + alignment.score + "% (" + effects!.label + ")."]
+                  : []),
+              ],
             }
           : a,
       ),

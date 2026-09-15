@@ -126,9 +126,9 @@ function StaffAmbitions(props: Props) {
   return (
     <div className="space-y-4">
       <p>
-        Commit to a creator's next step. Name their leadership at the concept
-        stage, then release an original production with at least 60%
-        participation in their department's production days.
+        Commit to a creator's next step. The quickest route is now the Project Board:
+        name them before their department starts, or later once they have personally earned
+        at least 60% of that department's recorded production days. Then release within the deadline.
       </p>
       <StaffStoryInbox {...props} />
       <div className="ink-card space-y-2 p-3">

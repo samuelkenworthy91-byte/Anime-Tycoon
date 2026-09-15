@@ -112,6 +112,7 @@ import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
 import BigThreeBoard from "./BigThreeBoard";
+import { appointCreativeLead, expansionOf } from "../engine/studioExpansion";
 
 /* =================================================================== */
 export default function Office({
@@ -593,6 +594,20 @@ export default function Office({
         <Modal title="PROJECT BOARD" onClose={() => setModal(null)}>
           <ProjectsPanel
             run={run}
+            onAppointPromise={(projectId, promiseId) => {
+              sfx.click();
+              setRun((r) => {
+                const promise = expansionOf(r).promises.find((p) => p.id === promiseId);
+                const project = r.projects.find((p) => p.id === projectId);
+                if (!promise || !project) return r;
+                const staged = project.staffIds.includes(promise.staffId)
+                  ? r
+                  : assignToProject(r, projectId, promise.staffId);
+                const assigned = staged.projects.find((p) => p.id === projectId)?.staffIds.includes(promise.staffId);
+                if (!assigned) return r;
+                return appointCreativeLead(staged, projectId, promiseId) ?? r;
+              });
+            }}
             onAssign={(projectId, staffId) => {
               sfx.click();
               setRun((r) => assignToProject(r, projectId, staffId));

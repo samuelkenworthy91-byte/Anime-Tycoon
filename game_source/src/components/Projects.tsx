@@ -47,6 +47,7 @@ import Portrait from "./Portrait";
 import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
 import { INTERVENTIONS, interventionBlock, interventionQuote } from "../engine/spending";
+import { expansionOf } from "../engine/studioExpansion";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -73,6 +74,7 @@ function ProjectCard({
   onScrap,
   onContinueSeason,
   onIntervention,
+  onAppointPromise,
 }: {
   p: Project;
   run: RunState;
@@ -86,6 +88,7 @@ function ProjectCard({
   /** jump straight into creating this IP's next season while it's still on air */
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
+  onAppointPromise: (projectId: string, promiseId: string) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
@@ -104,6 +107,16 @@ function ProjectCard({
     ["composer", run.heads.composer ?? null],
     ["production", run.heads.production ?? null],
   ];
+  const expansion = expansionOf(run);
+  const productionCredit = expansion.credits[p.id];
+  const promiseCandidates = expansion.promises.filter((promise) =>
+    promise.status === "active" &&
+    (!promise.projectId || promise.projectId === p.id) &&
+    !p.commission &&
+    !p.draft.continuation &&
+    !p.draft.licensedIpId &&
+    p.draft.genres.includes(promise.genre)
+  );
 
   return (
     <div className={cn("ink-card p-3", p.milestone && "border-neon/60", p.stage === "ready" && "border-gold/60")}>
@@ -235,6 +248,50 @@ function ProjectCard({
           <Banknote size={10} /> {formatGBPShort(p.spent)} spent
         </span>
       </div>
+
+      {inPipeline && promiseCandidates.map((promise) => {
+        const creator = run.staff.find((s) => s.id === promise.staffId);
+        if (!creator) return null;
+        const total = productionCredit?.byRole[promise.role] ?? 0;
+        const creatorDays = productionCredit?.roleStaff[promise.staffId] ?? 0;
+        const participation = total > 0 ? Math.round((creatorDays / total) * 100) : 0;
+        const named = productionCredit?.leads[promise.role] === promise.staffId && promise.projectId === p.id;
+        const conflictingLead = !!productionCredit?.leads[promise.role] && productionCredit.leads[promise.role] !== promise.staffId;
+        const alreadyAssigned = p.staffIds.includes(promise.staffId);
+        const early = p.stage === "concept" && total === 0;
+        const earnedLate = total > 0 && participation >= 60;
+        const canAutoAssign = alreadyAssigned || p.staffIds.length < TEAM_MAX;
+        const canName = !named && !conflictingLead && canAutoAssign && (early || (alreadyAssigned && earnedLate));
+        const leadLabel = promise.role === "writer" ? "WRITING" : promise.role === "animator" ? "ANIMATION" : "SOUND";
+        return (
+          <div key={promise.id} className="mt-2 rounded-lg border border-viol/55 bg-viol/10 p-2.5">
+            <div className="flex items-center gap-2">
+              <Crown size={13} className="text-gold" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[10px] font-black tracking-wider text-gold">LEADERSHIP PROMISE · {leadLabel} LEAD</div>
+                <div className="truncate text-[10px] text-paper/70">{creator.name} · {participation}% department participation</div>
+              </div>
+              {named && <span className="rounded bg-mint/15 px-1.5 py-0.5 text-[8px] font-black text-mint">NAMED LEAD</span>}
+            </div>
+            {!named && canName && (
+              <Btn variant="gold" className="mt-2 w-full !py-1.5 text-[10px]" onClick={() => onAppointPromise(p.id, promise.id)}>
+                <Crown size={12} /> {alreadyAssigned ? "NAME " + creator.name.toUpperCase() + " " + leadLabel + " LEAD" : "ASSIGN + NAME " + creator.name.toUpperCase() + " " + leadLabel + " LEAD"}
+              </Btn>
+            )}
+            {!named && !canName && (
+              <div className="mt-1.5 text-[9px] text-paper/50">
+                {conflictingLead
+                  ? "Another " + leadLabel.toLowerCase() + " lead is already named."
+                  : !canAutoAssign
+                    ? "Team is full — make a slot before naming this promised lead."
+                    : total > 0
+                      ? "Keep " + creator.name + " on the project until they reach 60% of " + leadLabel.toLowerCase() + " production days. Current: " + participation + "%."
+                      : "Assign " + creator.name + " before " + leadLabel.toLowerCase() + " work begins, or they can still earn the role later by reaching 60% participation."}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {inPipeline && (
         <details className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
@@ -471,6 +528,7 @@ export default function ProjectsPanel({
   onScrap,
   onContinueSeason,
   onIntervention,
+  onAppointPromise,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -484,6 +542,7 @@ export default function ProjectsPanel({
   /** greenlight the next season of an IP straight from its airing card */
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
+  onAppointPromise: (projectId: string, promiseId: string) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
@@ -548,6 +607,7 @@ export default function ProjectsPanel({
           onScrap={onScrap}
           onContinueSeason={onContinueSeason}
           onIntervention={onIntervention}
+          onAppointPromise={onAppointPromise}
         />
       ))}
 

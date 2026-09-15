@@ -233,13 +233,19 @@ describe("staff ambitions and working agreements", () => {
       next.staff,
     );
   });
-  it("does not appoint a creator after department production starts", () => {
-    const r = advanceExpansionDay(
-      promiseLeadership(studio(), "writer", "romance")!,
-    );
-    expect(
-      appointCreativeLead(r, "project", expansionOf(r).promises[0].id),
-    ).toBeNull();
+  it("allows a late lead appointment once the creator has earned at least 60% department participation", () => {
+    let r = promiseLeadership(studio(), "writer", "romance")!;
+    r = credit(r, 6);
+    r = { ...r, projects: r.projects.map((p) => ({ ...p, stage: "post" as const })) };
+    const next = appointCreativeLead(r, "project", expansionOf(r).promises[0].id);
+    expect(next).not.toBeNull();
+    expect(expansionOf(next!).credits.project.leads.writer).toBe("writer");
+  });
+  it("still rejects a late lead appointment below 60% participation", () => {
+    let r = promiseLeadership(studio(), "writer", "romance")!;
+    r = credit(r, 5);
+    r = { ...r, projects: r.projects.map((p) => ({ ...p, stage: "post" as const })) };
+    expect(appointCreativeLead(r, "project", expansionOf(r).promises[0].id)).toBeNull();
   });
   it("offers one extension and fails only after the deadline", () => {
     let r = leadRun();
