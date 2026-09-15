@@ -3,7 +3,7 @@ name: Publish GitHack dist
 on:
   push:
     branches:
-      - main
+      - work/first-seen-tutorial-overlays
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
@@ -24,24 +24,15 @@ jobs:
   publish-dist:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout tutorial UX branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: work/first-seen-tutorial-overlays
           fetch-depth: 0
 
-      - name: Import promised-lead crown icon
+      - name: Apply tutorial context integration
         working-directory: game_source
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('src/components/Projects.tsx')
-          s = p.read_text()
-          head = s.split('} from "lucide-react";', 1)[0]
-          if '  Crown,\n' not in head:
-              s = s.replace('  Calendar,\n', '  Calendar,\n  Crown,\n', 1)
-              p.write_text(s)
-          PY
+        run: node scripts/patch-tutorial-contexts.mjs
 
       - name: Apply discovery-gated cast filtering
         working-directory: game_source
@@ -75,40 +66,36 @@ jobs:
             if (!genre) throw new Error(`Missing expansion genre: ${id}`);
             if (!(genre.rd > 0)) throw new Error(`Expansion genre is not researchable: ${id}`);
           }
-          console.log('Verified 30 genres and all 7 expansion genres are researchable in R&D.');
+          console.log('Verified 30 genres and all expansion genres are researchable in R&D.');
           NODE
 
       - name: Build browser dist
         working-directory: game_source
         run: npm run build
 
-      - name: Verify compiled GitHack bundle contains Genre 30
+      - name: Verify compiled tutorial bundle
         working-directory: game_source
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const html = fs.readFileSync('dist/index.html', 'utf8');
-          const required = [
-            ['vampire', 'Vampire'],
-            ['grimdark', 'Grimdark'],
-            ['monster_taming', 'Monster Taming'],
-            ['crime', 'Crime'],
-            ['kaiju', 'Kaiju'],
-            ['cosmic_horror', 'Cosmic Horror'],
-            ['arabia', 'Arabia'],
-          ];
-          for (const [id, label] of required) {
-            if (!html.includes(id)) throw new Error(`Compiled browser bundle missing genre id: ${id}`);
-            if (!html.includes(label)) throw new Error(`Compiled browser bundle missing genre label: ${label}`);
+          for (const marker of ['HOW THIS WORKS','RIGHTS MARKET & LICENSED ADAPTATIONS','YOUR STUDIO IS IN DEBT','STUDIO DYNASTY MODE','PRODUCTION CAPABILITY','HEAD VACANCY']) {
+            if (!html.includes(marker)) throw new Error(`Compiled browser bundle missing tutorial marker: ${marker}`);
           }
-          console.log('Verified compiled browser bundle contains Vampire, Grimdark and all five Genre 30 expansion genres.');
+          console.log('Verified compiled browser bundle contains complete tutorial/context pass.');
           NODE
 
-      - name: Commit refreshed runtime and dist
+      - name: Commit validated tutorial integration
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout origin/main -- .github/workflows/publish-githack-dist.yml
+          git rm game_source/scripts/patch-tutorial-contexts.mjs
           git add -f \
+            .github/workflows/publish-githack-dist.yml \
+            game_source/src/components/Office.tsx \
+            game_source/src/components/IPMarket.tsx \
+            game_source/src/components/Crew.tsx \
             game_source/src/components/Projects.tsx \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
@@ -120,9 +107,5 @@ jobs:
             game_source/src/engine/generated/arcV3.json \
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
-          if git diff --cached --quiet; then
-            echo 'runtime, promised-lead icon and dist already current'
-          else
-            git commit -m 'Import promised-lead project icon'
-            git push origin HEAD:main
-          fi
+          git commit -m 'Wire complete tutorial context pass'
+          git push origin HEAD:work/first-seen-tutorial-overlays
