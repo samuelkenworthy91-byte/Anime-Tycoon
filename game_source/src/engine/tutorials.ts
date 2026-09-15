@@ -3,7 +3,14 @@ import type { RunState } from "./state";
 export type TutorialId =
   | "passion-projects"
   | "working-policies"
-  | "overseas-markets";
+  | "overseas-markets"
+  | "rights-market"
+  | "financial-distress"
+  | "dynasty-mode"
+  | "franchise-library"
+  | "studio-knowledge"
+  | "auto-manage"
+  | "production-capability";
 
 declare module "./state" {
   interface RunState {
