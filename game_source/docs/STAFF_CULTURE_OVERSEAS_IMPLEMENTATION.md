@@ -1,104 +1,118 @@
-# Staff culture and overseas markets — implementation status
+# Staff culture and overseas markets — completion pass
 
 Branch: `work/staff-culture-overseas-expansion`
-Starting main commit: `f579951f589099a0c13ff3c911e4fff3b0122550`
-Source implementation commit: `84b8f9ba62ce484d4006585498823679cee1c263`
+Original main base: `f579951f589099a0c13ff3c911e4fff3b0122550`
+Initial playable pass: `a2d9e6cdb07ff39ac6e980d2c6d3b0f6da3c5348`
 
-This is a playable first implementation of the staff ambition, working-policy and overseas-market proposals. It is ready for balance and mobile playtesting, not a claim that every narrative and market-depth feature in the wider proposal is finished. Main has not been changed.
+The feature scope described below is implemented. Main has not been merged. Physical Pixel 9a/browser verification remains blocked by the test environment; balance numbers are initial tuning rather than a guarantee of long-term balance.
 
-## Where to find it
+## Saved implementation steps
+
+Each step was committed and pushed before the next one began:
+
+1. `c89a12dac89d745e539e313204565d21cdf89bc7` — staff story chains and paid mentorship, 31 focused tests passing.
+2. `fa2eb22026cb7252de216b532da630e9a90facc0` — employee-profile integration, production build passing.
+3. `2005277c627b06e0303a2aa8205c9e22e46d03b3` — overseas strategy engine and catalogue searches, 42 focused tests passing.
+4. `a9fe92818d12b479ee521a33d175f0cd945f2127` — overseas strategy controls and uncertain player-facing forecasts, full suite and build passing.
+
+The final checkpoint includes this document and the refreshed `dist/index.html` playtest build.
+
+## Access
 
 Office → MORE → STUDIO CULTURE & OVERSEAS.
 
-Three sections provide ambitions and agreements, working policies, and overseas release planning. Controls use 44px minimum heights; the shared office modal has a sticky close header and a viewport-height limit. Actual Pixel 9a portrait verification is still required.
+Employee cards also expose AMBITIONS & WORKING AGREEMENTS: current promises, project participation, deadlines, recovery, profit payments, pitch acceptance, extension choices and personal stories.
 
-## Staff ambitions and stories
+## Staff ambitions, promises and stories
 
-- Staff with 24 weeks' tenure and two release credits can offer a personal genre pitch. Pitches use the creator's unlocked favourite genre where possible.
-- Offers are deterministic, with an eight-week studio cooldown, a 48-week employee cooldown and at most two outstanding pitches.
-- A prototype costs £8,000 × (1 + 0.75 × office level), takes 28 paid development days and produces a single-genre direction report. Pairing genres can change that direction. Research does not add free production quality.
-- Fund development, accept a leadership brief immediately, decline without a promise, or cancel committed development without a refund.
-- Manual leadership agreements are also available. Each creator has at most one active commitment.
-- Appoint a named department lead to a matching, self-funded original production during concept, before their department starts accruing production days. Commissioned, licensed and continuation projects do not qualify.
-- Release within 48 game weeks with at least 60% eligible department-day participation. Waiting at a milestone does not accrue participation. Assignment time, rather than random quality output, is measured.
-- A fulfilled opportunity earns morale and a success-dependent story entry. A missed deadline loses morale. One 12-week extension is available at a morale cost. Retirement voids the promise using the employee's stable ID; other departure breaks it.
-- A fulfilled promise protects the original cut. A limited overseas broadcast edition requires explicit creator agreement, recorded in the agreement history, with a morale trade-off. An absent creator cannot be silently substituted.
+- Staff with at least 24 weeks' tenure and two release credits can offer personal pitches. The studio has an eight-week pitch cooldown, each employee has a 48-week cooldown, and at most two pitches remain outstanding.
+- Development costs £8,000 × (1 + 0.75 × office level), takes 28 paid working days and reveals a single-genre direction report. It does not grant free production quality or promise that a genre pairing has the same target.
+- A player can fund development, accept a leadership brief immediately, decline without promising, or cancel development without refunding committed spending.
+- Leadership agreements require a matching, self-funded original production, named leadership before departmental work starts, release within 48 game weeks and at least 60% department-day participation. Milestone waiting does not count. One 12-week extension has a morale cost.
+- Fulfilment, missed deadlines, retirement and departure have persistent outcomes. Stable employee IDs distinguish retirement from a different employee with the same name.
+- Fulfilled promises protect the original cut. A limited overseas edit needs an explicit creator agreement with a morale trade-off; an absent creator cannot be silently replaced.
 
-The first story chain is pitch → prototype/decision → leadership → release or missed promise → optional overseas edit agreement. Larger authored event families, interpersonal stories and employee-dossier presentation are future work.
+Five personal story families extend this loop:
 
-## Working policies
-
-Policy changes activate at the next four-week payroll boundary and cannot be queued repeatedly. Productions snapshot their terms when greenlit; funded prototypes snapshot their development schedule. Legacy productions acquire no retroactive obligations.
-
-| Policy | Choices | Effect |
+| Story | Trigger and choices | Persistent consequence |
 |---|---|---|
-| Protected recovery | 0, 7 or 14 days | Contributors with at least 25% production participation receive paid leave and morale when production completes. Explicit recall costs morale. |
-| Contribution profit share | 0%, 5% or 10% | Pays staff from positive cash receipts less tracked direct project costs. Contributor shares survive departure. |
-| Creative development | Full time, 2 or 4 days per four weeks | Full-time prototypes require a free creator; reserved days allow another assignment outside development time. |
+| Recognition | A fulfilled creative promise; studio showcase or private thanks | Morale response; a showcase can lead to mentoring |
+| Mentorship | A recognised senior creator and a colleague at least three levels junior | £4,000, two paid days per week for eight sessions; both gain morale and establish the existing relationship-system bond |
+| Creative clash | An established clash between current collaborators | £3,000 mediation resets relationship accumulation and improves morale, or continuing work loses morale; personalities remain unchanged |
+| Recovery request | An available employee has very low stamina | Paid recovery and morale, or deferral with a morale cost |
+| Trust repair | A missed creative promise | Practical recovery support or acknowledgement; the broken promise remains in history |
 
-Leave and development block live production, editing and rush contributions. Staff continue receiving normal wages. Recovery restores energy. Profit pools exclude general payroll and rent; the UI explains this contribution-profit definition.
+Story offers expire after 28 days. A studio cooldown and employee cooldown limit repeated offers. Departures archive affected stories without substituting another employee. Daily story progress is idempotent across repeated calls and saves. Mentorship uses the same availability checks as production and editing.
 
-The project ledger includes domestic receipts, completed-show sale proceeds, commission advances and quality bonuses, and overseas receipts. Direct production, original launch, localisation and overseas campaign spending reduce contribution profit. Each identified receipt is settled once; rounding remainder is allocated deterministically. Overseas costs added after an earlier bonus do not claw back previously paid staff bonuses.
+## Working policies and accounting
 
-## Overseas releases and audience sensibilities
+Policies activate at the next four-week payroll boundary. New productions snapshot recovery/profit terms; funded prototypes snapshot their development schedule. Existing production agreements survive policy changes. Old productions gain no retroactive obligations.
 
-Three fictional territories avoid assigning uniform tastes to real nationalities. Each contains six interest groups, with different population weights and established genre audiences:
+- Recovery: 0, 7 or 14 paid days for contributors with at least 25% participation; an explicit recall costs morale.
+- Profit pool: 0%, 5% or 10% of positive cash receipts less tracked direct project costs. Shares survive staff departure and rounding is deterministic.
+- Development: dedicated full-time work or two/four reserved days per four weeks. Reserved-time creators can hold another assignment on other days.
 
-- Source enthusiasts: continuity and fidelity.
-- Animation enthusiasts: visual craft.
-- Character fans: story craft.
-- Mainstream entertainment: accessibility and context.
-- Family co-viewers: suitable intensity.
-- Experimental viewers: complexity and originality.
+The ledger recognises identified domestic receipts, completed-show sales, commission advances/bonuses and overseas receipts. Production, original launch, localisation, campaigns and project-specific negotiation spending reduce contribution profit. General payroll, rent and studio-wide event sponsorship are excluded. Previously paid bonuses are not clawed back if later investment reduces contribution profit. A stable receipt ledger prevents paying the same bonus twice.
 
-Age targeting adds distinct kids, teens, adults and family responses within an interest group. It does not create a fresh audience pool. Sensibilities use six authored creative dimensions: violence, horror, sexual content, language, complexity and context. Genre-based defaults can be adjusted at concept before the first production day, then lock. These choices affect overseas suitability and reception; domestic scoring is preserved.
+## Overseas audiences and distribution
 
-Release choices include specialist or family distribution; original subtitles, standard dub, premium dub or a limited broadcast edit; and £0/£15,000/£40,000 campaigns. The forecast explains audience fit, timing, upfront cost, distributor share, licensed-IP royalty and net studio receipts. A family broadcaster rejects unsuitable originals; very intense material cannot be made suitable through a light edit.
+Three fictional territories contain different mixes of six viewer-interest groups: source enthusiasts, animation enthusiasts, character fans, mainstream entertainment, family co-viewers and experimental viewers. Kids, teens, adults and family targeting modify response within those audiences; changing demographic does not create a new population pool.
 
-Language/edition work can be reused after localisation completes. Territorial exclusivity prevents overlapping releases of the same production. Same-edition repeats have a 48-week cooldown. Each project/territory/interest group has finite reach; changing age target does not reset it. Studio recognition and competing releases affect the next signed deal.
+Creative profiles track violence, horror, sexual content, language, complexity and context. Genre defaults can be adjusted at concept before the first production day. They lock thereafter. Domestic critic scoring is preserved.
 
-Signing freezes the terms, spends the launch cost and reserves audience exposure. At opening, exact weekly instalments enter the existing payout system. The release creates no second domestic critic result, show-made count or award entry.
+Players choose specialist or family distribution, subtitles/standard dub/premium dub/limited edited dub, and a launch campaign. Family broadcasters reject unsuitable originals, and very intense material cannot be made suitable through a light edit. Completed language/edition work can be reused. Territorial exclusivity and same-edition cooldowns prevent overlapping contracts; finite project/territory/interest-group reach prevents repeat releases from minting fresh audiences.
 
-### Ownership and compatibility
+Signed deals freeze their terms. Exact reception, viewers and receipts are hidden in the UI until opening. Local release uses the existing weekly payout system, without adding another domestic review, show-made count or award entry.
 
-- New productions have explicit distribution ownership. Completed-show sales transfer those rights.
-- Sold franchises and commissioned productions without a territorial grant cannot sign new overseas releases.
-- Licensed productions require international rights covering the entire release window. Royalty is charged once, after the distributor share.
-- Old productions require exact stable source-ID evidence of a retained release; ambiguous historical ownership is not guessed from a title. The £5,000 review is offered only as a conservative clearance mechanism and can fail when the old save lacks proof.
-- Already signed releases retain their committed terms. New contracts recheck rights.
-- Old blanket overseas offers/boosts are honoured until their existing expiry. New blanket offers are no longer generated; new overseas business uses per-production contracts.
+### Research and uncertainty
+
+Reception includes a stable regional-season response and a smaller production-specific response. Reopening the screen or reloading the same save does not reroll them. Ordinary forecasts show a broad range; an Audience Data Lab study costs research data and reveals the regional component, narrowing the range. Studies last through the current 12-week market season. Actual release response remains uncertain even after research.
+
+The player-facing forecast shows a reception range, a net receipt range and contribution after upfront spending. Committed outcomes are not shown early in the signed-release list.
+
+### Distributor relationships and negotiations
+
+Relationships are tracked separately for each territory/distributor pair. A completed profitable, well-received release improves trust; weaker outcomes reduce it. Completion settles the relationship change once. Strong relationships improve future revenue shares.
+
+The Legal Desk offers a paid negotiation for either a lower distributor share or more reach. Concessions last 12 weeks, cannot be repeatedly purchased while active, and are frozen into a signed contract. The fee is a direct project cost.
+
+### Regional events and rival activity
+
+Each territory has a deterministic 12-week programming/festival/audience event aimed at one interest group. Opening during that window supports reach. A £12,000 sponsorship adds a bounded benefit while the event applies; it cannot be purchased repeatedly or improve previously signed outcomes.
+
+Competing regional windows derive from actual rival releases. Rival tier, genre fit and score determine their overseas positioning. Overlapping releases reduce addressable reach, with a cap on pressure. The UI lists competing productions and event windows. This adds competition to the overseas model without counting a rival's domestic production twice.
+
+### Multi-territory packages
+
+A Legal Desk can sign two or three territories for one production using the selected distributor, audience, edition and campaign. Packages reduce distributor fees by 10% and pay matching language/edition localisation once. The quoted package cost agrees with cash, release costs and the strategic-spending ledger. Validation is atomic: an unavailable or unaffordable component prevents the entire package from signing.
+
+### Ownership and older catalogues
+
+New productions retain explicit distribution ownership; completed-show sales transfer it. Sold franchises, ungranted commissioned productions and licensed projects lacking international rights cannot sign new overseas releases. Licensed rights must cover the full release window; royalties are charged once after distributor share.
+
+For old titles, an immediate review still requires an exact retained source ID. A Legal Desk can also open a two-week historical search using retained player-release evidence, exact award nominee IDs and identified domestic receipts. Cases freeze available evidence so an annual rollover does not discard it midway. Missing evidence remains visibly unresolved: the game does not guess ownership from a title or grant rights because the player paid a search fee.
+
+Previously offered blanket overseas deals and their existing boosts remain valid until expiry. New blanket offers are no longer generated.
 
 ## Code map
 
-| File | Responsibility |
+| Files | Responsibility |
 |---|---|
-| `src/engine/studioExpansion.ts` | Agreements, pitches, production participation, policies, leave and receipt ledger |
-| `src/engine/overseas.ts` | Territories, audience fit, editions, rights checks and signed-release cashflow |
-| `src/engine/state.ts` | Additive save migration and integration with production, staff availability, release, sale and calendar operations |
-| `src/engine/projects.ts` | Explicit production distribution ownership |
-| `src/engine/careers.ts` | Stable staff identity in retirement records |
-| `src/engine/market.ts` | Retirement of new blanket overseas offers |
-| `src/components/StudioExpansionPanel.tsx` | Player decisions, forecasts and histories |
-| `src/components/Office.tsx` | Menu access and modal layout |
-| `src/engine/__tests__/studio-expansion.test.ts` | 26 focused regressions |
+| `studioExpansion.ts`, `staffStories.ts` | Production agreements, availability, leave, receipts and personal story progression |
+| `overseas.ts`, `overseasStrategy.ts` | Audience response, rights, cashflow, forecasts, studies, negotiations, packages, events and rival competition |
+| `state.ts`, `projects.ts`, `careers.ts`, `market.ts` | Save/calendar integration, ownership, retirement identity and legacy offer compatibility |
+| `StudioExpansionPanel.tsx`, `StaffCultureProfile.tsx`, `OverseasStrategyPanel.tsx`, `Crew.tsx`, `Office.tsx` | Player controls, employee integration, forecast visibility and modal access |
+| `studio-expansion.test.ts`, `staff-stories.test.ts`, `overseas-strategy.test.ts` | 42 focused regression tests |
 
-## Validation
+## Verification and remaining validation
 
-- Focused suite: 26/26 passed.
-- Full suite: 702/702 tests passed across 87 files.
-- Production build and post-build cast verification passed, including all 520 Genre 30 source-identical portraits.
-- TypeScript comparison against the starting main commit: no new diagnostics. The repository already has unrelated TypeScript errors, so this is not a clean whole-repo typecheck claim.
-- Browser validation was blocked by the execution environment: the local browser download failed certificate verification, and the connected browser could not access the local server. No certificate checks or access controls were disabled.
+- Full suite: **718 tests passed across 89 files**.
+- Production build and post-build canonical cast verification passed, including all 520 source-identical Genre 30 portraits.
+- Focused tests cover story chains, eight real mentorship days, duplicate calls, departed employees, research and negotiation repeat guards, forecast bounds, atomic packages, shared localisation cost, seasonal sponsorship expiry, relationship settlement and historical evidence.
+- A 104-week progression test includes a mid-release save/reload and verifies that the regional contract completes and settles once.
+- No diagnostics in the new modules/components were reported by TypeScript. The repository still has pre-existing errors; this is not a clean whole-repository typecheck claim.
+- Physical Pixel 9a and interactive browser validation remain unverified. The earlier local browser install failed certificate verification and the connected browser could not access the local server. No security controls were weakened to bypass that restriction.
 
-## Playtest checklist and remaining scope
+Before main promotion, manually check portrait scrolling and close controls, forecast readability, package selection, staff-story choices, and the feel of costs over a real career. The existing headless weekly production fallback is coarser than live daily production; exact equivalence is not claimed. These validation limits do not represent additional unimplemented story/market features.
 
-1. On a fresh or copied save, open the new panel on Pixel 9a portrait; check the close button from every tab and after scrolling. Check that game controls do not overlap it.
-2. Promise leadership, greenlight a matching original and appoint the creator before advancing time. Confirm participation, deadline and fulfilment read clearly.
-3. Schedule recovery and profit share, then greenlight another production. Confirm leave blocks work and cash receipts produce the expected bonus statement.
-4. Compare low-intensity family and complex adult/experimental releases. Compare a dub's extra cost with its accessibility benefit. Verify loss-making contracts are clearly visible.
-5. Sign a release, save/reload during localisation, and follow every instalment. Try an overlapping deal and a repeat age target; neither should replenish the same audience.
-6. Try a sold production, a commission and a licensed production whose international rights expire before the proposed release ends.
-
-Initial territory populations, fees, localising times, reach and reception weights need long-career balance testing. Forecasts are deterministic signed outcomes in this first pass; Data Lab uncertainty bands and market research are not implemented. Distributor relationships, richer regional events, multi-territory package negotiations, rival overseas strategies and a larger authored staff-story library remain follow-up work. The existing headless weekly production fallback remains coarser than live daily production; exact live-versus-headless work equivalence is not claimed.
-
-The generated web build accompanies this branch. No APK, main merge or production deployment is part of this change.
+No APK, main merge or production deployment has been performed.
