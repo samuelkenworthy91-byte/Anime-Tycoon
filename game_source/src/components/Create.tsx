@@ -55,7 +55,6 @@ import {
   comboLevelBonus,
   formatGBP,
   mediumAllowsScope,
-  randomTitle,
   scopeLabel,
   slotForMedium,
   type AudienceId,
@@ -76,6 +75,7 @@ import { partnerById, type Commission } from "../engine/market";
 import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from "../engine/franchise";
 import { type ContinuationPlan } from "./Library";
 import { visionAlignment } from "../engine/creatorVision";
+import { randomAnimeTitle } from "../engine/titleGenerator";
 
 import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
 
@@ -125,7 +125,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
   const startMedium: MediumId =
     last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "fanweb";
   const base: Draft = {
-    title: randomTitle(),
+    title: randomAnimeTitle([], fr && plan?.kind !== "crossover" ? fr.animeType : last?.animeType ?? "shonen"),
     medium: startMedium,
     budget: last?.budget ?? "standard",
     scope: mediumAllowsScope(startMedium, last?.scope ?? "standard") ? (last?.scope ?? "standard") : "standard",
@@ -687,7 +687,7 @@ export default function Create({
                     onChange={(e) => set({ title: e.target.value.slice(0, 64) })}
                     className="ink-input flex-1 px-4 py-3 font-display text-lg font-extrabold"
                   />
-                  <Btn variant="ghost" onClick={() => set({ title: randomTitle() })} aria-label="Random title">
+                  <Btn variant="ghost" onClick={() => set({ title: randomAnimeTitle(d.genres, d.animeType) })} aria-label="Random title" title={d.genres.length ? "Generate a title using the selected genre style" : "Generate a title from the full anime title pool"}>
                     <Dices size={18} />
                   </Btn>
                 </div>
@@ -962,6 +962,24 @@ export default function Create({
                       <X size={11} /> CLEAR ALL
                     </button>
                   )}
+                  {(() => {
+                    const active = isCastFilterActive("type", d.animeType);
+                    const hasTypeFilter = castFilters.some((filter) => filter.kind === "type");
+                    const blocked = castFilterAtLimit && !active && !hasTypeFilter;
+                    return (
+                      <button
+                        disabled={blocked}
+                        onClick={() => toggleCastFilter({ kind: "type", value: d.animeType })}
+                        className={cn(
+                          "btn-press rounded-lg border px-2 py-1.5 text-[9px] font-bold",
+                          active ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/50",
+                          blocked && "cursor-not-allowed opacity-35"
+                        )}
+                      >
+                        {active ? "FILTERING: " : "FILTER: "}{ANIME_TYPE_LABEL[d.animeType]}
+                      </button>
+                    );
+                  })()}
                   {d.genres.map((genre) => {
                     const g = GENRES.find((x) => x.id === genre);
                     const active = isCastFilterActive("genre", genre);

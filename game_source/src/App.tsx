@@ -18,6 +18,7 @@ import {
   projectById,
   releaseProject,
   sellReadyProject,
+  shelveReadyProject,
   startBlockReason,
   startContractAssignment,
   startProject,
@@ -56,6 +57,7 @@ import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
 import BigThreeReveal from "./components/BigThreeReveal";
+import StaffRequestOverlay, { nextStaffRequestId } from "./components/StaffRequestOverlay";
 import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
@@ -77,16 +79,19 @@ export default function App() {
   const [licensedIpId, setLicensedIpId] = useState<string | null>(null);
   const [auctionId, setAuctionId] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
-  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
+  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12 | 30>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [dismissedStaffRequests, setDismissedStaffRequests] = useState<string[]>([]);
+  const dismissedStaffRequestSet = useMemo(() => new Set(dismissedStaffRequests), [dismissedStaffRequests]);
+  useEffect(() => { if ((run?.week ?? -1) === 0) setDismissedStaffRequests([]); }, [run?.week]);
   /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
   const dayAccRef = useRef(0);
   const dayCountRef = useRef(0);
-  const lastClockSpeedRef = useRef<1 | 4 | 8 | 12>(1);
+  const lastClockSpeedRef = useRef<1 | 4 | 8 | 12 | 30>(1);
 
   const canPause = screen !== "title" && screen !== "gameover" && screen !== "retrospective";
   useEffect(() => {
@@ -173,6 +178,8 @@ export default function App() {
   const bigThreeRevealOpen = !!bigThreePresentation && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
   const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen;
+  const pendingStaffRequestId = run ? nextStaffRequestId(run, dismissedStaffRequestSet) : null;
+  const staffRequestPresentationOpen = !!pendingStaffRequestId && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen && !nominationAnnouncementOpen && !released;
   const levelUpPresentationAllowed = canPresentDeferredLevelUp({
     screen,
     paused,
@@ -180,7 +187,7 @@ export default function App() {
     decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
     auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
     productionRevealOpen: screen === "release" || !!released,
-  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !released;
+  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !staffRequestPresentationOpen && !released;
   useEffect(() => {
     if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
   }, [pendingLevelUp, levelUpPresentationAllowed]);
@@ -190,6 +197,7 @@ export default function App() {
   useEffect(() => {
     if (bigThreeRevealOpen) setTimeSpeed(0);
   }, [bigThreeRevealOpen]);
+  useEffect(() => { if (staffRequestPresentationOpen) setTimeSpeed(0); }, [staffRequestPresentationOpen]);
   useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
 
   /* ------------------------------------------------------- game clock */
@@ -498,6 +506,16 @@ export default function App() {
     setScreen("office");
   }, [run, shipId]);
 
+  const shelveShow = useCallback(() => {
+    if (!run || !shipId) return;
+    const next = shelveReadyProject(run, shipId);
+    if (!next) return;
+    sfx.select();
+    setRun(next);
+    setShipId(null);
+    setScreen("office");
+  }, [run, shipId]);
+
   const continueFromRelease = useCallback(() => {
     setReleased(null);
     setScreen("office");
@@ -660,6 +678,7 @@ export default function App() {
             onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
+            onReleaseShelved={openShip}
             workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
@@ -704,6 +723,7 @@ export default function App() {
             project={projectById(run, shipId)!}
             onAir={airShow}
             onSell={sellShow}
+            onShelve={shelveShow}
             onBack={() => {
               sfx.back();
               setShipId(null);
@@ -765,7 +785,7 @@ export default function App() {
               {controlsOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}
             </button>
             <div className="game-controls-panel flex gap-1.5">
-            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12] as const).map((speed) => (
+            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12, 30] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>
@@ -813,6 +833,15 @@ export default function App() {
 
         {run && nominationAnnouncementOpen && (
           <AwardsNominationAnnouncement run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
+        )}
+
+        {run && staffRequestPresentationOpen && (
+          <StaffRequestOverlay
+            run={run}
+            setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
+            dismissed={dismissedStaffRequestSet}
+            onDismiss={(id) => setDismissedStaffRequests((current) => current.includes(id) ? current : [...current, id])}
+          />
         )}
 
         {run && levelUpPresentationAllowed && (run.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0 && <ShowrunnerLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}

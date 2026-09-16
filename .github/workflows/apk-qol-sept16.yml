@@ -1,0 +1,82 @@
+name: Build QoL Sept16 Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/qol-playtest-sept16
+    paths:
+      - "game_source/**"
+      - ".github/workflows/apk-qol-sept16.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Build web app and sync Capacitor
+        working-directory: game_source
+        run: npm run apk:sync
+
+      - name: Make Gradle wrapper executable
+        working-directory: game_source
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: game_source/android
+        run: ./gradlew assembleDebug
+
+      - name: Rename playtest APK
+        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-QoL-Sept16-Playtest.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anime-runner-qol-sept16-playtest-apk
+          path: Anime-Runner-QoL-Sept16-Playtest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish direct GitHub playtest APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='qol-sept16-playtest'
+          APK='Anime-Runner-QoL-Sept16-Playtest.apk'
+          BUILT_SHA="$(git rev-parse HEAD)"
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target "$BUILT_SHA" \
+            --title 'Anime Runner QoL Sept16 Playtest' \
+            --notes "Android debug APK built from work/qol-playtest-sept16 at ${BUILT_SHA}. Main is untouched. Includes the expanded genre-aware title generator and restored Jobs Quick Pick."

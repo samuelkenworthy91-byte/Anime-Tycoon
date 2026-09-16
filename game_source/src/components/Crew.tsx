@@ -81,6 +81,7 @@ import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
 import { showrunnerStats } from "../engine/studioOps";
 import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";
+import { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -136,7 +137,7 @@ function AbilitySheet({ info, onClose }: { info: AbilityInfo | null; onClose: ()
   );
 }
 
-function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: Staff | null; canHire: boolean; onHire: (s: Staff) => void; onClose: () => void }) {
+function CandidateSheet({ candidate, canHire, research, onHire, onClose }: { candidate: Staff | null; canHire: boolean; research: readonly string[]; onHire: (s: Staff) => void; onClose: () => void }) {
   const [hireName, setHireName] = useState(candidate?.name ?? "");
   useEffect(() => { setHireName(candidate?.name ?? ""); }, [candidate?.id]);
   if (!candidate) return null;
@@ -158,7 +159,7 @@ function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: St
           <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={17}/></button>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">{(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{Math.round(candidate[t])}</div></div>)}</div>
-        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}<div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Development rolls reveal who has the highest ceiling.</div></div>
+        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}{canSeeCandidatePotential(research) ? <div className="mt-2 text-[9px] font-bold text-gold">POTENTIAL OUTLOOK · {potentialLabel(candidate)}</div> : <div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Unlock Talent Scouting to assess candidates before signing.</div>}</div>
         <div className="mt-3"><div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div><div className="mt-1 grid gap-1.5 sm:grid-cols-2">{rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}</div></div>
         <div className="mt-3 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3"><div className="text-[9px] font-extrabold tracking-widest text-cyanx">SIGNING NAME</div><div className="mt-1 flex gap-2"><input value={hireName} onChange={(e)=>setHireName(e.target.value.slice(0,48))} className="ink-input min-w-0 flex-1 px-3 py-2 text-sm font-bold" aria-label="Staff name"/><Btn variant="ghost" onClick={()=>setHireName(randomStaffName())} aria-label="Randomise staff name"><Dices size={15}/></Btn></div><div className="mt-1 text-[8px] text-paper/40">Rename them now or keep the generated name. This does not change their abilities, portrait or hidden Potential.</div></div>
         <Btn big variant="cyan" className="mt-4 w-full" disabled={!canHire || !cleanName} onClick={() => onHire({ ...candidate, name: cleanName })}>{canHire ? `SIGN ${cleanName || candidate.name} · ${formatGBP(candidate.cost)}` : "CANNOT HIRE"}</Btn>
@@ -258,6 +259,8 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
           </div>
         ))}
       </div>
+
+      {canSeeEmployeePotential(run.research) && <div className="mt-1.5 rounded-lg border border-gold/30 bg-gold/5 px-2 py-1 text-[9px] font-bold text-gold">POTENTIAL · {potentialLabel(s)}</div>}
 
       {/* spec + traits (always visible — this is who they are) */}
       <div className="mt-1.5 flex flex-wrap gap-1">
@@ -616,7 +619,7 @@ export default function CrewPanel({
         </div>
       </div>
       <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
-      <CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />
+      <CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} research={run.research} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />
     </div>
   );
 }

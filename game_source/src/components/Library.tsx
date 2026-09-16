@@ -102,15 +102,18 @@ export default function LibraryPanel({
   run,
   setRun,
   onContinue,
+  onReleaseShelved,
 }: {
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
   onContinue: (plan: ContinuationPlan) => void;
+  onReleaseShelved: (projectId: string) => void;
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [picking, setPicking] = useState<null | "crossover" | "spinoff">(null);
   const [confirmSale, setConfirmSale] = useState(false);
 
+  const shelved = run.projects.filter((project) => project.stage === "shelved").sort((a, b) => (b.shelvedWeek ?? 0) - (a.shelvedWeek ?? 0));
   const allFranchises = Object.values(run.franchises).sort(
     (a, b) => b.popularity - a.popularity || b.totalRevenue - a.totalRevenue
   );
@@ -124,6 +127,22 @@ export default function LibraryPanel({
   if (!open) {
     return (
       <div className="space-y-1.5 text-[12px]">
+        {shelved.length > 0 && (
+          <section className="mb-3 rounded-xl border border-gold/35 bg-gold/5 p-3">
+            <div className="text-[9px] font-black tracking-widest text-gold">SHELVED MASTERS · {shelved.length}</div>
+            <div className="mt-2 space-y-2">
+              {shelved.map((project) => {
+                const weeks = Math.max(0, run.week - (project.shelvedWeek ?? run.week));
+                return <div key={project.id} className="rounded-lg border border-line bg-panel2/70 p-2">
+                  <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1"><b className="block truncate">{project.draft.title}</b><span className="text-[9px] text-paper/45">Shelved {weeks} week{weeks === 1 ? "" : "s"} · hype 0 · finished quality preserved</span></div>
+                    <Btn variant="gold" className="!px-2 !py-1 text-[9px]" onClick={() => onReleaseShelved(project.id)}>PREPARE RELEASE</Btn>
+                  </div>
+                </div>;
+              })}
+            </div>
+          </section>
+        )}
         {allFranchises.length === 0 && (
           <div className="rounded-xl border border-dashed border-paper/20 p-4 text-center text-paper/40">
             Ship a show and it lives here forever — your studio's library of IPs.
