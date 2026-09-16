@@ -7,6 +7,8 @@ import { formatGBP, formatGBPShort } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { CAPITAL_PROJECTS, buyCapitalProject, coProductionOffer, startCoProduction } from "../engine/spending";
+import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
+import { markTutorialSeen } from "../engine/tutorials";
 
 function KeyArt({ ipId }: { ipId: string }) {
   const ip = ipById(ipId)!;
@@ -29,6 +31,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   const sorted = useMemo(() => [...active].sort((a, b) => a.closesWeek - b.closesWeek), [active]);
   const coProdProjects = run.projects.filter((p) => ["concept", "preprod", "animation", "sound"].includes(p.stage));
   const [confirmCommission, setConfirmCommission] = useState(false);
+  const [help, setHelp] = useState(false);
   const manualFee = commissionedAuctionFee(run);
   const manualBlock = commissionedAuctionBlock(run);
 
@@ -82,9 +85,10 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
     };
   });
 
-  return <div className="space-y-4">
+  return <><div className="space-y-4">
     <div className="rounded-xl border border-gold/35 bg-gold/5 p-3 text-xs text-paper/65">
       <b className="text-gold">RIGHTS MARKET</b> · A rights opportunity has a random chance to appear and can fire at most once per 48-week industry year. Entering launches the live auction room; returned opportunities remain here until the end of the week.
+      <div className="mt-2"><TutorialHelpButton onClick={() => setHelp(true)} /></div>
       <div className="mt-2 flex flex-wrap gap-2 text-[9px]">
         <span className={cn("rounded border px-2 py-1", legal ? "border-gold/40 text-gold" : "border-line text-paper/40")}>LEGAL DESK T{legal} · {legal ? `+${legal * 14}% negotiation chance + cheaper renewals` : "build for better rights terms"}</span>
         <span className={cn("rounded border px-2 py-1", data ? "border-cyanx/40 text-cyanx" : "border-line text-paper/40")}>DATA LAB T{data} · {data ? `${data} appraisal layer${data > 1 ? "s" : ""} pre-revealed` : "build to reduce uncertainty"}</span>
@@ -181,5 +185,5 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
         return <div key={d.id} className={cn("ink-card p-3", ownedProject && "border-mint/40")}><b className="text-sm">{d.name}</b><div className="text-[10px] text-paper/50">{d.description}</div>{ownedProject ? <div className="mt-2 text-[10px] font-bold text-mint">COMPLETED · EFFECT ACTIVE</div> : <Btn variant="gold" className="mt-2" disabled={locked} onClick={() => setRun((r) => buyCapitalProject(r, d.id) ?? r)}>INVEST {formatGBPShort(d.cost)}</Btn>}</div>;
       })}</div>
     </section>
-  </div>;
+  </div><FirstSeenTutorial id="rights-market" open={help} onDismiss={() => { setRun((r) => markTutorialSeen(r, "rights-market")); setHelp(false); }} /></>;
 }
