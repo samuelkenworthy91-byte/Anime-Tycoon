@@ -43,4 +43,51 @@ changed = replaceOnce(
   '<span className="font-display text-sm font-extrabold text-gold">{Math.ceil(hype)}%</span>',
 ) || changed;
 
+const narrativeResearch = '  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },';
+const potentialResearch = `${narrativeResearch}\n  { id: "staff_appraisal", name: "Staff Appraisal", rd: 40, desc: "Reveals a broad long-term Potential band for employees already on your payroll." },\n  { id: "talent_scouting", name: "Talent Scouting", rd: 70, desc: "Extends Potential bands to recruitment candidates before you sign them.", requires: "staff_appraisal" },`;
+changed = replaceOnce("src/engine/data.ts", narrativeResearch, potentialResearch) || changed;
+
+const crewImport = 'import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";';
+const crewImportAfter = `${crewImport}\nimport { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";`;
+changed = replaceOnce("src/components/Crew.tsx", crewImport, crewImportAfter) || changed;
+
+changed = replaceOnce(
+  "src/components/Crew.tsx",
+  'function CandidateSheet({ candidate, canHire, onHire, onClose }: { candidate: Staff | null; canHire: boolean; onHire: (s: Staff) => void; onClose: () => void }) {',
+  'function CandidateSheet({ candidate, canHire, research, onHire, onClose }: { candidate: Staff | null; canHire: boolean; research: readonly string[]; onHire: (s: Staff) => void; onClose: () => void }) {',
+) || changed;
+
+changed = replaceOnce(
+  "src/components/Crew.tsx",
+  '<div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Development rolls reveal who has the highest ceiling.</div>',
+  '{canSeeCandidatePotential(research) ? <div className="mt-2 text-[9px] font-bold text-gold">POTENTIAL OUTLOOK · {potentialLabel(candidate)}</div> : <div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Unlock Talent Scouting to assess candidates before signing.</div>}',
+) || changed;
+
+changed = replaceOnce(
+  "src/components/Crew.tsx",
+  '      {/* spec + traits (always visible — this is who they are) */}',
+  '      {canSeeEmployeePotential(run.research) && <div className="mt-1.5 rounded-lg border border-gold/30 bg-gold/5 px-2 py-1 text-[9px] font-bold text-gold">POTENTIAL · {potentialLabel(s)}</div>}\n\n      {/* spec + traits (always visible — this is who they are) */}',
+) || changed;
+
+changed = replaceOnce(
+  "src/components/Crew.tsx",
+  '<CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />',
+  '<CandidateSheet candidate={candidate} canHire={!!candidate && run.cash >= candidate.cost && run.staff.length < maxStaff} research={run.research} onHire={(c) => { hire(c); setCandidate(null); }} onClose={() => setCandidate(null)} />',
+) || changed;
+
+const levelImport = 'import Portrait from "./Portrait";';
+const levelImportAfter = `${levelImport}\nimport { canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";`;
+changed = replaceOnce("src/components/StaffLevelUpModal.tsx", levelImport, levelImportAfter) || changed;
+
+changed = replaceOnce(
+  "src/components/StaffLevelUpModal.tsx",
+  '<div className="text-[10px] text-paper/50">{ROLE_LABEL[staff.role]} · hidden development potential</div>',
+  '<div className="text-[10px] text-paper/50">{ROLE_LABEL[staff.role]} · {canSeeEmployeePotential(run.research) ? `Potential: ${potentialLabel(staff)}` : "hidden development potential"}</div>',
+) || changed;
+changed = replaceOnce(
+  "src/components/StaffLevelUpModal.tsx",
+  '<div className="mt-2 text-[9px] text-paper/40">Potential stays hidden. Watch long-term growth to discover who can become exceptional.</div>',
+  '<div className="mt-2 text-[9px] text-paper/40">{canSeeEmployeePotential(run.research) ? `Potential outlook: ${potentialLabel(staff)}. Exact numeric Potential remains hidden.` : "Potential stays hidden. Staff Appraisal can reveal a broad long-term outlook."}</div>',
+) || changed;
+
 console.log(changed ? "QoL source patches applied." : "QoL source patches already present.");
