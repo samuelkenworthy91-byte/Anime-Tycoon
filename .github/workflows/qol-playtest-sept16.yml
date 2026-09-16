@@ -1,0 +1,34 @@
+name: QoL playtest patch
+
+on:
+  push:
+    branches:
+      - work/qol-playtest-sept16
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/qol-playtest-sept16
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply source patch
+        run: node game_source/scripts/apply-qol-playtest-sept16.mjs
+      - name: Commit patched sources
+        run: |
+          if git diff --quiet; then
+            echo "No source changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/App.tsx game_source/src/components/Create.tsx game_source/src/components/Ship.tsx
+          git commit -m "Apply speed casting and hype QoL fixes"
+          git push
