@@ -24,7 +24,6 @@ changed = replaceOnce(
   'export const ARC_RESEARCH_UNLOCK_IDS: string[] = [...new Set(ARC_RESEARCH_GENRE_KEYS.map((key) => key.slice(0, key.lastIndexOf("|"))))]\n  .filter((id) => !!ARCS.find((arc) => arc.id === id)?.unlock);\n\n/** Full non-secret research pools. Licensed-property/studio-blueprint arcs stay\n * on their intended discovery path and are never spoiled by generic R&D. */\nexport const ARC_RESEARCH_ALL_GENRE_KEYS: string[] = GENRES.flatMap((genre) =>\n  ARCS\n    .filter((arc) => !arc.franchiseOnly && arc.unlock?.kind !== "studioArc")\n    .map((arc) => arcGenreKey(arc.id, genre.id))\n).sort();\nexport const ARC_RESEARCH_ALL_COMBO_IDS: string[] = ARC_COMBOS\n  .filter((combo) => combo.arcs.every((arcId) => {\n    const arc = ARCS.find((candidate) => candidate.id === arcId);\n    return !!arc && !arc.franchiseOnly && arc.unlock?.kind !== "studioArc";\n  }))\n  .map((combo) => combo.id)\n  .sort();',
 ) || changed;
 
-/* Add the new pool imports to state.ts beside the existing research constants. */
 changed = replaceOnce(
   "src/engine/state.ts",
   '  ARC_RESEARCH_COMBOS,\n  ARC_RESEARCH_GENRE_KEYS,\n  ARC_RESEARCH_UNLOCK_IDS,',
@@ -54,12 +53,8 @@ changed = replaceOnce(
 changed = replaceOnce(
   "src/engine/state.ts",
   '  if (researchId === "genre_studies") {\n    arcGenreKnowledge = { ...carrier.arcGenreKnowledge };\n    for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);\n    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...ARC_RESEARCH_UNLOCK_IDS])];\n    notices.push(`📚 Genre Studies adds at least two usable story beats for every genre to Quick Picks (${ARC_RESEARCH_GENRE_KEYS.length} relationships).`);\n  }',
-  '  if (researchId === "genre_studies") {\n    const firstPass = !carrier.research.includes("genre_studies");\n    arcGenreKnowledge = { ...carrier.arcGenreKnowledge };\n    const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);\n    const discoveries = firstPass ? ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key)) : unknown.slice(0, GENRE_STUDY_BATCH);\n    for (const key of discoveries) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);\n    const discoveredArcIds = discoveries.map((key) => key.slice(0, key.lastIndexOf("|")));\n    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...(firstPass ? ARC_RESEARCH_UNLOCK_IDS : []), ...discoveredArcIds])];\n    const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;\n    notices.push(firstPass\n      ? `📚 Genre Studies establishes the studio's first curated Quick Picks and maps ${discoveries.length} useful relationships.`\n      : `📚 Genre Studies maps ${discoveries.length} more arc/genre relationships. ${known}/${ARC_RESEARCH_ALL_GENRE_KEYS.length} understood.`);\n  }',
+  '  if (researchId === "genre_studies") {\n    const firstPass = !carrier.research.includes("genre_studies");\n    arcGenreKnowledge = { ...carrier.arcGenreKnowledge };\n    const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);\n    const discoveries = firstPass ? ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key)) : unknown.slice(0, GENRE_STUDY_BATCH);\n    for (const key of discoveries) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);\n    const discoveredArcIds = discoveries.map((key) => key.slice(0, key.lastIndexOf("|")));\n    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...(firstPass ? ARC_RESEARCH_UNLOCK_IDS : []), ...discoveredArcIds])];\n    const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;\n    notices.push(firstPass\n      ? `📚 Genre Studies establishes the studio\'s first curated Quick Picks and maps ${discoveries.length} useful relationships.`\n      : `📚 Genre Studies maps ${discoveries.length} more arc/genre relationships. ${known}/${ARC_RESEARCH_ALL_GENRE_KEYS.length} understood.`);\n  }',
 ) || changed;
-
-/* Because applyResearchCompletion calculates `research` before the branch, use
- * the incoming carrier to identify the first pass above, then the returned
- * research array records that the programme has begun. */
 
 changed = replaceOnce(
   "src/components/Office.tsx",
