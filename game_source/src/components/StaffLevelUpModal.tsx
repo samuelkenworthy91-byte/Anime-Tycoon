@@ -4,6 +4,7 @@ import { Btn } from "../fx/fx";
 import { POINT_COLOR, ROLE_LABEL, workerLook, type PointType } from "../engine/data";
 import type { RunState } from "../engine/state";
 import Portrait from "./Portrait";
+import { canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
 
 export default function StaffLevelUpModal({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => RunState) => void }) {
   const staff = useMemo(() => run.staff.find((s) => (s.pendingLevelUps?.length ?? 0) > 0) ?? null, [run.staff]);
@@ -29,7 +30,7 @@ export default function StaffLevelUpModal({ run, setRun }: { run: RunState; setR
       <div className="mt-2 text-[10px] font-black tracking-[0.35em] text-gold">STAFF LEVEL UP</div>
       <Portrait img={workerLook(staff).portrait} name={staff.name} alt={staff.name} className="mx-auto mt-3 h-24 w-24 rounded-2xl border border-gold/40 object-cover" />
       <div className="mt-2 font-display text-2xl font-extrabold">{staff.name}</div>
-      <div className="text-[10px] text-paper/50">{ROLE_LABEL[staff.role]} · hidden development potential</div>
+      <div className="text-[10px] text-paper/50">{ROLE_LABEL[staff.role]} · {canSeeEmployeePotential(run.research) ? `Potential: ${potentialLabel(staff)}` : "hidden development potential"}</div>
       <div className="mt-4 min-h-56 space-y-2">
         {step >= 1 && <div className="anim-pop font-display text-3xl font-black text-gold">Lv {record.beforeLevel} → Lv {record.afterLevel}</div>}
         {step >= 2 && <div className="anim-pop text-sm font-extrabold tracking-wider text-paper">{record.title.toUpperCase()}</div>}
@@ -44,7 +45,7 @@ export default function StaffLevelUpModal({ run, setRun }: { run: RunState; setR
         <Btn big variant="primary" disabled={step < 5} onClick={clearOne}>CONTINUE</Btn>
         <Btn variant="ghost" onClick={clearAll}>SKIP ALL</Btn>
       </div>
-      <div className="mt-2 text-[9px] text-paper/40">Potential stays hidden. Watch long-term growth to discover who can become exceptional.</div>
+      <div className="mt-2 text-[9px] text-paper/40">{canSeeEmployeePotential(run.research) ? `Potential outlook: ${potentialLabel(staff)}. Exact numeric Potential remains hidden.` : "Potential stays hidden. Staff Appraisal can reveal a broad long-term outlook."}</div>
     </div>
   </div>;
 }

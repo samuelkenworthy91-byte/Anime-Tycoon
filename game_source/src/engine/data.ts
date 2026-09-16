@@ -574,6 +574,8 @@ export const RESEARCH: ResearchItem[] = [
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%. Also unlocks Mobile Game licences.", requires: "merch", section: "merch" },
   { id: "genre_studies", name: "Genre Studies", rd: 32, desc: "Researches at least two usable, positive story-arc fits for every genre (usually three) and adds them to the Story Arc quick picks." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, desc: "Researches several classic story structures, permanently revealing their combo ratings in the Story Arc planner." },
+  { id: "staff_appraisal", name: "Staff Appraisal", rd: 40, desc: "Reveals a broad long-term Potential band for employees already on your payroll." },
+  { id: "talent_scouting", name: "Talent Scouting", rd: 70, desc: "Extends Potential bands to recruitment candidates before you sign them.", requires: "staff_appraisal" },
   /* ---- timed merch product research (Part D): each product line needs
      Merch Division plus its own dedicated project before launch ---- */
   { id: "merch_plush", name: "Plush Production", rd: 18, desc: "Unlocks the Plushies merchandise line for your franchises.", requires: "merch", section: "merch" },
