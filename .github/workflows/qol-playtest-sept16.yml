@@ -25,6 +25,7 @@ jobs:
         run: |
           node game_source/scripts/apply-qol-playtest-sept16.mjs
           node game_source/scripts/apply-qol-research.mjs
+          node game_source/scripts/apply-qol-ip-franchise.mjs
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
