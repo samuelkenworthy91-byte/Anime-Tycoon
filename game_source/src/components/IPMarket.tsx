@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { BarChart3, Gavel, Handshake, Lock, Scale, ScrollText, Trophy } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { AUCTION_TYPE_LABEL, SOURCE_LABEL, appraiseAuction, commissionRightsAuction, commissionedAuctionBlock, commissionedAuctionFee, genreLabel, ipById, negotiateRights } from "../engine/ip";
-import { IP_AUTO_RENEW_HEADROOM, ipRenewalQuote, renewIPContract, setIPAutoRenew } from "../engine/ipRenewal";
+import { IP_AUTO_RENEW_HEADROOM, IP_RENEWAL_WINDOW_WEEKS, ipRenewalQuote, renewIPContract, setIPAutoRenew } from "../engine/ipRenewal";
 import { formatGBP, formatGBPShort } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
@@ -140,6 +140,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
             <div className="flex items-center gap-2"><b>{ip.title}</b>{c.bestScore >= 32 && <Trophy size={13} className="text-gold" />}{expired && <span className="rounded border border-neon/50 px-1.5 py-.5 text-[8px] font-black text-neon">EXPIRED</span>}</div>
             <div className="mt-1 text-[10px] text-paper/55">Royalty {Math.round(c.royaltyRate * 100)}% · Ownership {Math.round(c.ownershipShare * 100)}% · {expired ? "rights expired" : `${remaining} wk remaining`} · {c.adaptations} adaptation(s)</div>
             <div className="mt-1 flex flex-wrap gap-1 text-[8px]">{[["SEQUEL", c.sequelRights], ["MERCH", c.merchRights], ["INTL", c.internationalRights]].map(([x, on]) => <span key={String(x)} className={cn("rounded border px-1.5 py-.5", on ? "border-mint/40 text-mint" : "border-line text-paper/35")}>{on ? "✓ " : <Lock size={7} className="inline" />}{x}</span>)}</div>
+            {renewal && !renewal.available && !expired && <div className="mt-2 rounded-lg border border-line bg-panel2/55 p-2 text-[9px] text-paper/55"><b className="text-cyanx">LICENCE EXTENSION</b> · {remaining} weeks remain. Extension window opens in <b>{Math.max(0,remaining-IP_RENEWAL_WINDOW_WEEKS)} week{Math.max(0,remaining-IP_RENEWAL_WINDOW_WEEKS)===1?"":"s"}</b>. You can enable renewal once the property enters its final {IP_RENEWAL_WINDOW_WEEKS} weeks.</div>}
             {renewal?.available && <div className={cn("mt-2 rounded-lg border p-2", expired ? "border-neon/35 bg-neon/5" : "border-gold/25 bg-gold/5")}>
               <div className="text-[9px] leading-relaxed text-paper/55"><b className={expired ? "text-neon" : "text-gold"}>{expired ? "RIGHTS LAPSED" : "RENEWAL WINDOW OPEN"}</b> · Current quote {formatGBPShort(renewal.cost)}. Successful properties become more expensive to retain; your Legal Desk discounts the quote.</div>
               <div className="mt-1.5 flex flex-wrap gap-1.5">

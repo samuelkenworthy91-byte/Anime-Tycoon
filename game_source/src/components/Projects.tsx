@@ -33,7 +33,7 @@ import {
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
-import { SEQUEL_SCORE_THRESHOLD } from "../engine/franchise";
+import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
 import {
   MILESTONE_LABEL,
   PRODUCTION_STAGES,
@@ -549,11 +549,15 @@ export default function ProjectsPanel({
   const active = activeProjects(run.projects);
   const airing = run.projects.filter((p) => p.stage === "airing");
   const done = run.projects.filter((p) => p.stage === "done").slice(-4).reverse();
+  const quickSequels = Object.values(run.franchises)
+    .filter((fr) => !continuationBlock(fr, "season", { week: run.week, franchiseCount: Object.keys(run.franchises).length, officeLevel: run.officeLevel, projects: run.projects }))
+    .sort((a, b) => b.lastEntryWeek - a.lastEntryWeek || b.lastScore - a.lastScore);
   const fc = forecastWeek(run);
 
   return (
     <div className="space-y-2.5">
       <StudioSlate run={run} />
+      {quickSequels.length > 0 && onContinueSeason && <section className="rounded-xl border border-gold/30 bg-gold/5 p-2.5"><div className="text-[9px] font-black tracking-[0.22em] text-gold">TRUE SEQUELS READY</div><div className="mt-1 text-[9px] text-paper/45">Only the latest eligible state of each series appears here. Reboots, spin-offs and sold properties stay in the Library.</div><div className="mt-2 space-y-1.5">{quickSequels.map((fr)=>{const latest=fr.entries[fr.entries.length-1];const ago=Math.max(0,run.week-fr.lastEntryWeek);return <div key={fr.key} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/60 p-2"><div className="min-w-0 flex-1"><b className="block truncate text-xs">{fr.baseTitle}</b><div className="text-[9px] text-paper/45">Latest: {latest?.title??fr.baseTitle} · {ago} week{ago===1?"":"s"} ago · {fr.lastScore}/40</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" onClick={()=>onContinueSeason(fr.key)}>SEASON {fr.season+1}</Btn></div>})}</div></section>}
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold tracking-[0.25em] text-paper/45">
           SLOTS {active.length}/{cap}
