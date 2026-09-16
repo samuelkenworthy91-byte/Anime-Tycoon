@@ -178,6 +178,7 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
   const prog = levelProgress(xp);
   const spec = specDef(s.spec);
   const headSlot = (Object.entries(run.heads) as [HeadSlot, string][]).find(([, id]) => id === s.id)?.[0];
+  const quickHeadSlots = (["writer", "animator", "composer", "production"] as HeadSlot[]).filter((slot) => !run.heads[slot] && !headBlockReason(run, slot, s.id));
   const bondsWith = run.staff
     .filter((o) => o.id !== s.id)
     .map((o) => ({ other: o, bond: bondBetween(run.bonds, s, o) }))
@@ -284,6 +285,13 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
         })}
       </div>
       <AbilitySheet info={sheet} onClose={() => setSheet(null)} />
+      {!headSlot && quickHeadSlots.length > 0 && (
+        <div className="mt-2 rounded-lg border border-gold/35 bg-gold/5 p-2">
+          <div className="text-[8px] font-black tracking-widest text-gold">HEAD VACANCY · ELIGIBLE NOW</div>
+          <div className="mt-1 flex flex-wrap gap-1">{quickHeadSlots.map((slot) => <Btn key={slot} variant="gold" className="!px-2 !py-1 text-[8px]" onClick={() => { sfx.fanfare(); setRun((r) => appointHead(r, slot, s.id) ?? r); }}><Crown size={9}/> APPOINT {HEAD_TITLES[slot].toUpperCase()}</Btn>)}</div>
+          <div className="mt-1 text-[7px] text-paper/40">Appointment applies the normal +25% head salary premium.</div>
+        </div>
+      )}
 
       {open && (
         <div className="mt-2 space-y-2 border-t border-line/60 pt-2">
