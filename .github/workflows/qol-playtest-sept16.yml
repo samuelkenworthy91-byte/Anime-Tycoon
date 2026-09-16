@@ -19,8 +19,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Apply source patch
-        run: node game_source/scripts/apply-qol-playtest-sept16.mjs
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Apply source patches
+        run: |
+          node game_source/scripts/apply-qol-playtest-sept16.mjs
+          node game_source/scripts/apply-qol-research.mjs
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run tests
+        working-directory: game_source
+        run: npm test
+      - name: Production build
+        working-directory: game_source
+        run: npm run build
       - name: Commit patched sources
         run: |
           if git diff --quiet; then
