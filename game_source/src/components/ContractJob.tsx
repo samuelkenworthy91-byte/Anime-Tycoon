@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Briefcase, Calendar, Check, ChevronLeft, Database, UserRound, Users } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Briefcase, Calendar, Check, ChevronLeft, Database, Sparkles, UserRound, Users } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, ROLE_LABEL, SHOWRUNNERS, formatGBP, staffPoint, type Contract } from "../engine/data";
@@ -26,6 +26,43 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
   const projected = Math.round(dailyRate * contract.weeks * 7);
   const eta = seats > 0 ? Math.max(1, Math.ceil(contract.target / Math.max(0.1, dailyRate))) : 0;
   const likely = projected >= contract.target;
+
+  /* Quick Pick is deliberately resource-aware: choose the smallest available
+     team projected to finish by the deadline; if no combination can do that,
+     choose the highest-output three-seat team. This restores the one-tap job
+     assignment flow without quietly pulling busy staff off productions. */
+  const quickPick = useMemo(() => {
+    const staffIds = run.staff.filter((s) => !staffBusyReason(run, s.id)).map((s) => s.id);
+    const seats: ({ kind: "staff"; id: string } | { kind: "runner" })[] = staffIds.map((id) => ({ kind: "staff" as const, id }));
+    if (!runnerBusy) seats.push({ kind: "runner" });
+    type Candidate = { staffIds: string[]; showrunner: boolean; rate: number; size: number; meets: boolean };
+    let best: Candidate | null = null;
+    const consider = (picked: typeof seats) => {
+      const ids = picked.filter((x): x is { kind: "staff"; id: string } => x.kind === "staff").map((x) => x.id);
+      const showrunner = picked.some((x) => x.kind === "runner");
+      const rate = contractSelectionDailyOutputEstimate(run, contract, ids, showrunner);
+      const candidate: Candidate = { staffIds: ids, showrunner, rate, size: picked.length, meets: rate * contract.weeks * 7 >= contract.target };
+      if (!best ||
+        (candidate.meets && !best.meets) ||
+        (candidate.meets === best.meets && candidate.meets && candidate.size < best.size) ||
+        (candidate.meets === best.meets && (!candidate.meets || candidate.size === best.size) && candidate.rate > best.rate)) best = candidate;
+    };
+    for (let a = 0; a < seats.length; a++) {
+      consider([seats[a]]);
+      for (let b = a + 1; b < seats.length; b++) {
+        consider([seats[a], seats[b]]);
+        for (let c = b + 1; c < seats.length; c++) consider([seats[a], seats[b], seats[c]]);
+      }
+    }
+    return best;
+  }, [run, contract, runnerBusy]);
+
+  const applyQuickPick = () => {
+    if (!quickPick) return;
+    sfx.click();
+    setSelected(quickPick.staffIds);
+    setShowrunnerSelected(quickPick.showrunner);
+  };
 
   const toggle = (id: string) => {
     if (staffBusyReason(run, id)) return;
@@ -68,7 +105,7 @@ export default function ContractJob({ run, contract, onDone, onBack }: {
           </div>
 
           <div className="ink-card p-3">
-            <div className="mb-2 flex items-center gap-2"><Users size={14} className="text-cyanx" /><span className="font-display text-sm font-extrabold">TEAM {seats}/3</span></div>
+            <div className="mb-2 flex items-center gap-2"><Users size={14} className="text-cyanx" /><span className="font-display text-sm font-extrabold">TEAM {seats}/3</span><Btn variant="ghost" className="ml-auto !px-2 !py-1 text-[9px]" disabled={!quickPick} onClick={applyQuickPick}><Sparkles size={12}/> QUICK PICK</Btn></div>
             <div className="space-y-1.5">
               <button disabled={runnerBusy && !showrunnerSelected} onClick={toggleRunner} className={cn("btn-press flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left", showrunnerSelected ? "border-gold/70 bg-gold/10" : runnerBusy ? "border-line/40 bg-panel2/30 opacity-50" : "border-gold/35 bg-panel2/50 hover:border-gold/70")}>
                 <span className={cn("flex h-5 w-5 items-center justify-center rounded border", showrunnerSelected ? "border-gold bg-gold text-ink" : "border-line")}>{showrunnerSelected && <Check size={13} />}</span>
