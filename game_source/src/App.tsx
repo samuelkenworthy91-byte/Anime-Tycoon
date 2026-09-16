@@ -18,6 +18,7 @@ import {
   projectById,
   releaseProject,
   sellReadyProject,
+  shelveReadyProject,
   startBlockReason,
   startContractAssignment,
   startProject,
@@ -498,6 +499,16 @@ export default function App() {
     setScreen("office");
   }, [run, shipId]);
 
+  const shelveShow = useCallback(() => {
+    if (!run || !shipId) return;
+    const next = shelveReadyProject(run, shipId);
+    if (!next) return;
+    sfx.select();
+    setRun(next);
+    setShipId(null);
+    setScreen("office");
+  }, [run, shipId]);
+
   const continueFromRelease = useCallback(() => {
     setReleased(null);
     setScreen("office");
@@ -660,6 +671,7 @@ export default function App() {
             onContinue={continueFranchise}
             onMilestone={openMilestone}
             onShip={openShip}
+            onReleaseShelved={openShip}
             workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
@@ -704,6 +716,7 @@ export default function App() {
             project={projectById(run, shipId)!}
             onAir={airShow}
             onSell={sellShow}
+            onShelve={shelveShow}
             onBack={() => {
               sfx.back();
               setShipId(null);

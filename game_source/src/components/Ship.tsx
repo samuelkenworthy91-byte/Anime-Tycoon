@@ -22,12 +22,14 @@ export default function Ship({
   project,
   onAir,
   onSell,
+  onShelve,
   onBack,
 }: {
   run: RunState;
   project: Project;
   onAir: (spent: number, hype: number) => void;
   onSell: (offerId: string) => void;
+  onShelve: () => void;
   onBack: () => void;
 }) {
   const [spent, setSpent] = useState(0);
@@ -152,9 +154,10 @@ export default function Ship({
 
         <div className="mt-4 flex gap-2">
           <Btn variant="ghost" onClick={onBack}><ChevronLeft size={16} /> DELAY</Btn>
+          {project.stage === "ready" && <Btn variant="ghost" onClick={onShelve}>SHELVE MASTER</Btn>}
           <Btn big variant="gold" className="flex-1" onClick={() => onAir(spent, hype)}><Rocket size={20} /> AIR THE SHOW!</Btn>
         </div>
-        <div className="mt-1.5 text-center text-[9px] text-paper/45">Delaying keeps production costs burning while launch heat cools. Campaign spending is committed only when you air.</div>
+        <div className="mt-1.5 text-center text-[9px] text-paper/45">{project.stage === "shelved" ? "Shelved masters keep their finished quality. Fresh campaigns rebuild hype, but eventual sales are reduced." : "Delaying keeps production costs burning while launch heat cools. Shelving moves the completed master to the Library, clears hype and stops production burn."} Campaign spending is committed only when you air.</div>
       </div>
     </div>
   );

@@ -126,6 +126,7 @@ export default function Office({
   onContinue,
   onMilestone,
   onShip,
+  onReleaseShelved,
   workPulses = [],
   clockDay = 0,
   clockPhase = 0,
@@ -140,6 +141,7 @@ export default function Office({
   onContinue: (plan: ContinuationPlan) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
+  onReleaseShelved: (projectId: string) => void;
   workPulses?: import("../engine/state").DeskPulse[];
   clockDay?: number;
   clockPhase?: number;
@@ -926,6 +928,10 @@ export default function Office({
             onContinue={(plan) => {
               setModal(null);
               onContinue(plan);
+            }}
+            onReleaseShelved={(projectId) => {
+              setModal(null);
+              onReleaseShelved(projectId);
             }}
           />
         </Modal>

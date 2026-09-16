@@ -2428,6 +2428,25 @@ export function respondRushBoost(r: RunState, projectId: string, chance: number 
   };
 }
 
+export const SHELVED_RELEASE_REVENUE_MULT = 0.8;
+
+/** Move a finished master into the library. Quality is frozen, current hype is
+ * deliberately lost, staff are freed and the project stops occupying studio
+ * capacity until the player chooses to launch it. */
+export function shelveReadyProject(r: RunState, projectId: string): RunState | null {
+  const target = r.projects.find((p) => p.id === projectId);
+  if (!target || target.stage !== "ready") return null;
+  return {
+    ...r,
+    projects: r.projects.map((p) =>
+      p.id === projectId
+        ? { ...p, stage: "shelved" as const, hype: 0, staffIds: [], milestone: null, rush: null, auto: null, shelvedWeek: r.week }
+        : p,
+    ),
+    notices: [...r.notices, `📚 “${target.draft.title}” has been shelved. Hype falls to 0; the finished master can be launched later from the Library.`].slice(-40),
+  };
+}
+
 /** score a ready project without committing anything */
 /** trends × saturation × split attention × any licensing boost */
 export function marketMultiplierFor(r: RunState, p: Project): number {
@@ -2532,7 +2551,7 @@ export function releaseProject(
   extra: { spent: number; hype: number }
 ): { run: RunState; result: ShowResult } | null {
   const p0 = projectById(r, projectId);
-  if (!p0 || p0.stage !== "ready") return null;
+  if (!p0 || (p0.stage !== "ready" && p0.stage !== "shelved")) return null;
   const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
   let result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
   const draft = p.draft;
@@ -2554,6 +2573,16 @@ export function releaseProject(
       hype: extra.hype,
       genreIdeal: genreTargetFor(draft.genres).ideal,
     });
+  }
+
+  if (p.shelvedWeek !== undefined) {
+    const before = result.revenue;
+    result = {
+      ...result,
+      revenue: Math.round(result.revenue * SHELVED_RELEASE_REVENUE_MULT),
+      breakdown: [...result.breakdown, { label: "Shelved-master launch", pts: `×${SHELVED_RELEASE_REVENUE_MULT.toFixed(2)} sales · quality unchanged` }],
+    };
+    void before;
   }
 
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */

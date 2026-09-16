@@ -71,6 +71,7 @@ export type ProjectStage =
   | "post"
   | "marketing"
   | "ready"
+  | "shelved"
   | "airing"
   | "done";
 
@@ -121,6 +122,7 @@ export const STAGE_LABEL: Record<ProjectStage, string> = {
   post: "Post / QA",
   marketing: "Marketing",
   ready: "Ready to Air",
+  shelved: "Shelved Master",
   airing: "On Air",
   done: "Completed",
 };
@@ -134,6 +136,7 @@ export const STAGE_FOCUS: Record<ProjectStage, PointType | null> = {
   post: null,
   marketing: null,
   ready: null,
+  shelved: null,
   airing: null,
   done: null,
 };
@@ -195,6 +198,8 @@ export interface Project {
   liveQuality?: Points;
   issues: number;
   hype: number;
+  /** week a completed master was deliberately moved into the library */
+  shelvedWeek?: number;
   /** everything spent on this show so far (upfront + burn + sprints) */
   spent: number;
   /** production cost charged every week while in the pipeline */
@@ -313,7 +318,7 @@ export const projectUpfront = (d: Draft) => Math.round(draftCost(d) * 0.4);
 
 /** projects that occupy a production slot */
 export const activeProjects = (projects: Project[]) =>
-  projects.filter((p) => p.stage !== "airing" && p.stage !== "done");
+  projects.filter((p) => p.stage !== "airing" && p.stage !== "done" && p.stage !== "shelved");
 
 export const isLate = (p: Project, week: number) =>
   p.stage !== "airing" && p.stage !== "done" && week > p.deadlineWeek;
