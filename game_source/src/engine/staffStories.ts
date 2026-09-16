@@ -24,6 +24,12 @@ export interface StaffStory {
   nextDay?: number;
   outcome?: string;
 }
+
+/** Recovery conversations should feel meaningful rather than repetitive.
+ * One in-game year is 48 weeks = 336 days. */
+export const RECOVERY_REQUEST_COOLDOWN_DAYS = 48 * 7;
+export const RECOVERY_REQUEST_STAMINA_THRESHOLD = 15;
+
 export const storyChoices: Record<
   StaffStoryKind,
   { id: string; label: string; cost: number }[]
@@ -167,6 +173,13 @@ export function advanceStaffStories(r: RunState): RunState {
           s.status === "offered" ||
           day - s.openedDay < 84),
     );
+  const recoveryOnCooldown = (id: string) =>
+    stories.some(
+      (s) =>
+        s.kind === "recovery" &&
+        s.staffIds.includes(id) &&
+        day - s.openedDay < RECOVERY_REQUEST_COOLDOWN_DAYS,
+    );
   const seen = (source: string) => stories.some((s) => s.source === source);
   const create = (
     kind: StaffStoryKind,
@@ -280,12 +293,15 @@ export function advanceStaffStories(r: RunState): RunState {
         );
     }
   const tired = eligible.find(
-    (s) => s.stamina < 25 && (x.leave[s.id] ?? 0) <= day,
+    (s) =>
+      s.stamina < RECOVERY_REQUEST_STAMINA_THRESHOLD &&
+      (x.leave[s.id] ?? 0) <= day &&
+      !recoveryOnCooldown(s.id),
   );
   if (tired)
     return create(
       "recovery",
-      "recovery:" + tired.id + ":" + Math.floor(day / 84),
+      "recovery:" + tired.id + ":" + Math.floor(day / RECOVERY_REQUEST_COOLDOWN_DAYS),
       [tired.id],
       tired.name + " asks for breathing room",
       "Low stamina has become a personal concern. Protected time has a real production opportunity cost.",
