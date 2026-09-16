@@ -77,7 +77,7 @@ export default function App() {
   const [licensedIpId, setLicensedIpId] = useState<string | null>(null);
   const [auctionId, setAuctionId] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
-  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12>(1);
+  const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12 | 30>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function App() {
   const [clockPhase, setClockPhase] = useState(0);
   const dayAccRef = useRef(0);
   const dayCountRef = useRef(0);
-  const lastClockSpeedRef = useRef<1 | 4 | 8 | 12>(1);
+  const lastClockSpeedRef = useRef<1 | 4 | 8 | 12 | 30>(1);
 
   const canPause = screen !== "title" && screen !== "gameover" && screen !== "retrospective";
   useEffect(() => {
@@ -765,7 +765,7 @@ export default function App() {
               {controlsOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}
             </button>
             <div className="game-controls-panel flex gap-1.5">
-            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12] as const).map((speed) => (
+            {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12, 30] as const).map((speed) => (
               <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>

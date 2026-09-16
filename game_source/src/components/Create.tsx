@@ -962,6 +962,24 @@ export default function Create({
                       <X size={11} /> CLEAR ALL
                     </button>
                   )}
+                  {(() => {
+                    const active = isCastFilterActive("type", d.animeType);
+                    const hasTypeFilter = castFilters.some((filter) => filter.kind === "type");
+                    const blocked = castFilterAtLimit && !active && !hasTypeFilter;
+                    return (
+                      <button
+                        disabled={blocked}
+                        onClick={() => toggleCastFilter({ kind: "type", value: d.animeType })}
+                        className={cn(
+                          "btn-press rounded-lg border px-2 py-1.5 text-[9px] font-bold",
+                          active ? "border-neon bg-neon/10 text-neon" : "border-line text-paper/50",
+                          blocked && "cursor-not-allowed opacity-35"
+                        )}
+                      >
+                        {active ? "FILTERING: " : "FILTER: "}{ANIME_TYPE_LABEL[d.animeType]}
+                      </button>
+                    );
+                  })()}
                   {d.genres.map((genre) => {
                     const g = GENRES.find((x) => x.id === genre);
                     const active = isCastFilterActive("genre", genre);
