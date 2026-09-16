@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { dateLabel, formatGBP, GENRES, workerLook } from "../engine/data";
@@ -130,7 +131,7 @@ function Person({ staff }: { staff: RunState["staff"][number] }) {
   );
 }
 
-function Shell({ title, onDismiss, children }: { title: string; onDismiss: () => void; children: React.ReactNode }) {
+function Shell({ title, onDismiss, children }: { title: string; onDismiss: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-[91] flex items-end justify-center bg-abyss/75 p-3 backdrop-blur-sm sm:items-center">
       <div className="anim-pop max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-gold/45 bg-panel p-4 shadow-2xl">

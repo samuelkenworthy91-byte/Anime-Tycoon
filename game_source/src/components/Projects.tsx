@@ -243,7 +243,7 @@ function ProjectCard({
           <Scissors size={10} /> {p.issues}
         </span>
         <span className="ink-chip flex items-center gap-1 px-1.5 py-0.5 text-gold">
-          <Flame size={10} /> {p.hype}
+          <Flame size={10} /> {Math.ceil(p.hype)}
         </span>
         <span className="ink-chip flex items-center gap-1 px-1.5 py-0.5 text-paper/55">
           <Banknote size={10} /> {formatGBPShort(p.spent)} spent

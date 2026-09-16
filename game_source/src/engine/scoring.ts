@@ -596,7 +596,7 @@ export function computeResult(opts: {
   if (showrunner === "genre" && newCombo)
     breakdown.push({ label: "Roxie Kade · No Blueprint", pts: "×1.35 production output & pace on this first-time genre pairing" });
   if (showrunner === "marketer")
-    breakdown.push({ label: "Sana Kobayashi · Buzz Engine", pts: `+10 opening hype · final hype ${Math.round(hype)} · marketing gains ×1.50` });
+    breakdown.push({ label: "Sana Kobayashi · Buzz Engine", pts: `+10 opening hype · final hype ${Math.ceil(hype)} · marketing gains ×1.50` });
   if (showrunner === "steady")
     breakdown.push({ label: "Genji Ashida · Steady Hand", pts: `staff contribution ×1.50 · note chance ×0.75 · ${issues} unresolved note${issues === 1 ? "" : "s"}` });
 

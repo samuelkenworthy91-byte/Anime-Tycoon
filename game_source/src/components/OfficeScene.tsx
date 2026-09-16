@@ -89,6 +89,37 @@ interface Body {
   flip: boolean;
 }
 
+type SpriteMetric = { scale: number; shift: number };
+const DEFAULT_SPRITE_METRIC: SpriteMetric = { scale: 1, shift: 0 };
+const spriteMetricCache = new Map<string, SpriteMetric>();
+function measureSprite(img: HTMLImageElement): SpriteMetric {
+  const cached = spriteMetricCache.get(img.currentSrc || img.src);
+  if (cached) return cached;
+  try {
+    const ratio = Math.min(1, 128 / Math.max(1, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * ratio));
+    const h = Math.max(1, Math.round(img.naturalHeight * ratio));
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return DEFAULT_SPRITE_METRIC;
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let minY = h, maxY = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (data[(y * w + x) * 4 + 3] > 24) { minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+    }
+    if (maxY < minY) return DEFAULT_SPRITE_METRIC;
+    const visible = Math.max(0.01, (maxY - minY + 1) / h);
+    const bottomPad = Math.max(0, (h - 1 - maxY) / h);
+    const metric = { scale: Math.max(0.84, Math.min(1.28, 0.82 / visible)), shift: Math.min(16, bottomPad * 100) };
+    spriteMetricCache.set(img.currentSrc || img.src, metric);
+    return metric;
+  } catch {
+    return DEFAULT_SPRITE_METRIC;
+  }
+}
+
 /* --------------------------------------------------------------- sprite */
 function Character({
   src,
@@ -124,6 +155,8 @@ function Character({
   const [stepping, setStepping] = useState(false);
   /* sprite art may not be generated yet — fall back to a colored token */
   const [err, setErr] = useState(false);
+  const [spriteMetric, setSpriteMetric] = useState<SpriteMetric>(() => spriteMetricCache.get(src) ?? DEFAULT_SPRITE_METRIC);
+  useEffect(() => setSpriteMetric(spriteMetricCache.get(src) ?? DEFAULT_SPRITE_METRIC), [src]);
   useEffect(() => {
     if (body.dur <= 0) return;
     setStepping(true);
@@ -178,9 +211,11 @@ function Character({
             alt={label}
             draggable={false}
             onError={() => setErr(true)}
+            onLoad={(event) => setSpriteMetric(measureSprite(event.currentTarget))}
             className="h-full w-auto select-none drop-shadow-[0_6px_10px_rgba(8,6,20,.55)]"
             style={{
-              transform: body.flip ? "scaleX(-1)" : undefined,
+              transform: `translateY(${spriteMetric.shift}%) scale(${spriteMetric.scale})${body.flip ? " scaleX(-1)" : ""}`,
+              transformOrigin: "50% 100%",
               filter: tired
                 ? "saturate(.55) brightness(.82) contrast(1.02)"
                 : "saturate(1.04) contrast(1.03)",

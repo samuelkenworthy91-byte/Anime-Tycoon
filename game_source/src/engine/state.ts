@@ -2115,7 +2115,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
   /* ---- rare project-wide outcomes on the active production ---- */
   const production = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
   if (production) {
-    const face = r.staff.find((st) => production.staffIds.includes(st.id));
+    const face = r.staff.find((st) => production.staffIds.includes(st.id) && liveWorkEligible(r, st));
     const actorId = face?.id ?? "showrunner";
     const name = face?.name ?? `${r.studio} showrunner`;
     if (roll() < PROJECT_RESEARCH_PULSE_CHANCE) {

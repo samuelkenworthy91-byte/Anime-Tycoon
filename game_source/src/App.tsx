@@ -57,6 +57,7 @@ import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
 import BigThreeReveal from "./components/BigThreeReveal";
+import StaffRequestOverlay, { nextStaffRequestId } from "./components/StaffRequestOverlay";
 import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
@@ -82,6 +83,9 @@ export default function App() {
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [dismissedStaffRequests, setDismissedStaffRequests] = useState<string[]>([]);
+  const dismissedStaffRequestSet = useMemo(() => new Set(dismissedStaffRequests), [dismissedStaffRequests]);
+  useEffect(() => { if ((run?.week ?? -1) === 0) setDismissedStaffRequests([]); }, [run?.week]);
   /* GDS-style live studio clock: one in-game day = 10 real seconds at 1×. */
   const [clockDay, setClockDay] = useState(0);
   const [clockPhase, setClockPhase] = useState(0);
@@ -174,6 +178,8 @@ export default function App() {
   const bigThreeRevealOpen = !!bigThreePresentation && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
   const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen;
+  const pendingStaffRequestId = run ? nextStaffRequestId(run, dismissedStaffRequestSet) : null;
+  const staffRequestPresentationOpen = !!pendingStaffRequestId && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen && !nominationAnnouncementOpen && !released;
   const levelUpPresentationAllowed = canPresentDeferredLevelUp({
     screen,
     paused,
@@ -181,7 +187,7 @@ export default function App() {
     decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
     auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
     productionRevealOpen: screen === "release" || !!released,
-  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !released;
+  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !staffRequestPresentationOpen && !released;
   useEffect(() => {
     if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
   }, [pendingLevelUp, levelUpPresentationAllowed]);
@@ -191,6 +197,7 @@ export default function App() {
   useEffect(() => {
     if (bigThreeRevealOpen) setTimeSpeed(0);
   }, [bigThreeRevealOpen]);
+  useEffect(() => { if (staffRequestPresentationOpen) setTimeSpeed(0); }, [staffRequestPresentationOpen]);
   useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
 
   /* ------------------------------------------------------- game clock */
@@ -826,6 +833,15 @@ export default function App() {
 
         {run && nominationAnnouncementOpen && (
           <AwardsNominationAnnouncement run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
+        )}
+
+        {run && staffRequestPresentationOpen && (
+          <StaffRequestOverlay
+            run={run}
+            setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
+            dismissed={dismissedStaffRequestSet}
+            onDismiss={(id) => setDismissedStaffRequests((current) => current.includes(id) ? current : [...current, id])}
+          />
         )}
 
         {run && levelUpPresentationAllowed && (run.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0 && <ShowrunnerLevelUpModal run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />}

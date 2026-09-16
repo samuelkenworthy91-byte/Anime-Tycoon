@@ -103,6 +103,7 @@ import OfficeScene from "./OfficeScene";
 import ProjectsPanel from "./Projects";
 import FacilitiesPanel from "./Facilities";
 import CrewPanel from "./Crew";
+import { totalStaffRequestCount } from "./StaffRequestOverlay";
 import MarketPanel from "./Market";
 import LibraryPanel, { type ContinuationPlan } from "./Library";
 import RivalsPanel from "./Rivals";
@@ -444,8 +445,8 @@ export default function Office({
           </Btn>
           <Btn variant="ghost" className="relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("staff")}>
             <Users size={15} /> STAFF
-            {run.staffEvents.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-display text-[8px] font-extrabold text-ink">{run.staffEvents.length}</span>
+            {totalStaffRequestCount(run) > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-display text-[8px] font-extrabold text-ink">{totalStaffRequestCount(run)}</span>
             )}
           </Btn>
           <Btn variant="ghost" className="relative !min-h-0 !px-1.5 !py-1.5 text-[9px] sm:text-[10px]" onClick={() => setModal("more")}>
