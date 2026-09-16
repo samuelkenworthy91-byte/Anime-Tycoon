@@ -21,8 +21,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: game_source/package-lock.json
-      - name: Apply current source patch
-        run: node game_source/scripts/apply-qol-ip-franchise.mjs
+      - name: Apply final source patches
+        run: node game_source/scripts/apply-qol-finalize.mjs
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
@@ -32,7 +32,7 @@ jobs:
       - name: Production build
         working-directory: game_source
         run: npm run build
-      - name: Commit patched sources
+      - name: Commit validated source fixes
         run: |
           if git diff --quiet; then
             echo "No source changes needed"
@@ -41,5 +41,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add game_source/src
-          git commit -m "Apply licensed IP and franchise QoL fixes"
+          git commit -m "Finish QoL playtest pass"
           git push
