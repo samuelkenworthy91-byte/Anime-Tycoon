@@ -6,6 +6,7 @@ on:
     branches:
       - work/qol-playtest-sept16
     paths:
+      - "game_source/**"
       - ".github/workflows/apk-qol-sept16.yml"
 
 permissions:
@@ -78,4 +79,4 @@ jobs:
             "$APK" \
             --target "$BUILT_SHA" \
             --title 'Anime Runner QoL Sept16 Playtest' \
-            --notes "Android debug APK built from work/qol-playtest-sept16 at ${BUILT_SHA}. Main is untouched."
+            --notes "Android debug APK built from work/qol-playtest-sept16 at ${BUILT_SHA}. Main is untouched. Includes the expanded genre-aware title generator and restored Jobs Quick Pick."
