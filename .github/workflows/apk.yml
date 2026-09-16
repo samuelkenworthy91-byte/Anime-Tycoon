@@ -1,4 +1,5 @@
 name: Build Android APK
+# Fresh-build trigger: latest main after three-click audit integration.
 
 on:
   workflow_dispatch:
