@@ -127,6 +127,7 @@ export default function Office({
   onLicensed,
   onAuction,
   onContract,
+  onQuickContract,
   onCommission,
   onContinue,
   onMilestone,
@@ -142,6 +143,7 @@ export default function Office({
   onLicensed: (ipId: string) => void;
   onAuction: (auctionId: string) => void;
   onContract: (c: Contract) => void;
+  onQuickContract: (c: Contract) => void;
   onCommission: (c: Commission) => void;
   onContinue: (plan: ContinuationPlan) => void;
   onMilestone: (projectId: string) => void;
@@ -580,9 +582,14 @@ export default function Office({
                   <div className="font-display text-sm font-extrabold text-gold">{formatGBP(c.pay)}</div>
                   <div className="text-[10px] font-bold text-viol">+{c.rd} RD</div>
                 </div>
-                <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" onClick={() => onContract(c)}>
-                  TAKE
-                </Btn>
+                <div className="flex shrink-0 flex-col gap-1">
+                  <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" onClick={() => onContract(c)}>
+                    TAKE
+                  </Btn>
+                  <Btn variant="ghost" className="!px-2 !py-1 text-[8px] leading-tight" onClick={() => { sfx.click(); setModal(null); onQuickContract(c); }}>
+                    <Sparkles size={10} /> <span>QUICK BEST<br/>TEAM</span>
+                  </Btn>
+                </div>
               </div>
             ))}
           </div>
