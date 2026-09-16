@@ -78,6 +78,8 @@ import {
   studioScore,
   contractDailyOutputEstimateForRun,
   researchBlockReason,
+  researchProjectCost,
+  researchProgressLabel,
   type RunState,
 } from "../engine/state";
 import { FACILITY_DEFS, slotsUsed } from "../engine/facilities";
@@ -165,7 +167,7 @@ export default function Office({
   const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
 
   const research = (id: string, rd: number) => {
-    if (run.rd < researchRdCost(rd, run.showrunner)) return;
+    if (run.rd < researchProjectCost(run, id, rd)) return;
     sfx.fanfare();
     setRun((r) => startResearchProject(r, id, rd) ?? r);
   };
@@ -709,8 +711,11 @@ export default function Office({
                     const pending = run.researchJobs.find((j) => j.researchId === u.id);
                     const block = researchBlockReason(run, u.id);
                     const displayResearch = experimentalStudyPresentation(u, owned);
+                    const progress = researchProgressLabel(run, u.id);
+                    const complete = !!block?.startsWith("COMPLETE —");
+                    const currentCost = researchProjectCost(run, u.id, u.rd);
                     return (
-                      <div key={u.id} className={cn("ink-card p-3", owned && !u.repeatable && "border-mint/50", block === "ALL CAST PROFILED — every hidden affinity is known" && "border-gold/50 bg-gold/5")}>
+                      <div key={u.id} className={cn("ink-card p-3", owned && !u.repeatable && "border-mint/50", (block === "ALL CAST PROFILED — every hidden affinity is known" || complete) && "border-gold/50 bg-gold/5")}>
                         <div className="flex items-center gap-1.5">
                           <Sparkles size={13} className="text-viol" />
                           <span className="font-display text-sm font-extrabold">{displayResearch.name}</span>
@@ -719,6 +724,7 @@ export default function Office({
                           )}
                         </div>
                         <div className="mt-0.5 text-[11px] text-paper/55">{displayResearch.desc}</div>
+                        {progress && <div className="mt-1 text-[9px] font-bold tracking-wider text-cyanx">{progress} · NEXT RUN {currentCost} RD</div>}
                         {u.requires && !run.research.includes(u.requires) && (
                           <div className="mt-1 text-[10px] font-bold text-gold">
                             🔒 Requires {RESEARCH.find((x) => x.id === u.requires)?.name}
@@ -731,9 +737,11 @@ export default function Office({
                             <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, Math.ceil((pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7)))} DAYS</span>
                           ) : block === "ALL CAST PROFILED — every hidden affinity is known" ? (
                             <span className="text-xs font-bold text-gold">⭐ ALL CAST PROFILED ✓</span>
+                          ) : complete ? (
+                            <span className="text-xs font-bold text-gold">⭐ RESEARCH COMPLETE ✓</span>
                           ) : (
                             <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(u.id, u.rd)}>
-                              {u.repeatable && block === null ? "RUN AGAIN" : "START"} · {researchRdCost(u.rd, run.showrunner)} RD
+                              {u.repeatable && owned ? "RUN AGAIN" : "START"} · {currentCost} RD
                             </Btn>
                           )}
                         </div>

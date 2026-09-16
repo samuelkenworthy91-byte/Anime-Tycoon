@@ -7,6 +7,8 @@ import {
   ARC_RESEARCH_COMBOS,
   ARC_RESEARCH_GENRE_KEYS,
   ARC_RESEARCH_UNLOCK_IDS,
+  ARC_RESEARCH_ALL_GENRE_KEYS,
+  ARC_RESEARCH_ALL_COMBO_IDS,
   MEDIUMS,
   OFFICES,
   PRODUCTION_SCOPES,
@@ -1818,19 +1820,29 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   const notices = [...carrier.notices];
 
   if (researchId === "narrative_analytics") {
-    arcCombos = [...new Set([...carrier.arcCombos, ...ARC_RESEARCH_COMBOS])];
+    const firstPass = !carrier.research.includes("narrative_analytics");
+    const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
+    const discoveries = firstPass ? ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id)) : unknown.slice(0, NARRATIVE_STUDY_BATCH);
+    arcCombos = [...new Set([...carrier.arcCombos, ...discoveries])];
     arcKnowledge = { ...carrier.arcKnowledge };
-    for (const id of ARC_RESEARCH_COMBOS) {
+    for (const id of discoveries) {
       const combo = ARC_COMBOS.find((c) => c.id === id);
       for (const arcId of combo?.arcs ?? []) arcKnowledge[arcId] = Math.max(1, arcKnowledge[arcId] ?? 0);
     }
-    notices.push("📚 Narrative Analytics adds several proven structures to the Studio Bible.");
+    notices.push(`📚 Narrative Analytics reveals ${discoveries.length} more structure${discoveries.length === 1 ? "" : "s"}. ${arcCombos.filter((id) => ARC_RESEARCH_ALL_COMBO_IDS.includes(id)).length}/${ARC_RESEARCH_ALL_COMBO_IDS.length} standard structures understood.`);
   }
   if (researchId === "genre_studies") {
+    const firstPass = !carrier.research.includes("genre_studies");
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
-    for (const key of ARC_RESEARCH_GENRE_KEYS) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
-    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...ARC_RESEARCH_UNLOCK_IDS])];
-    notices.push(`📚 Genre Studies adds at least two usable story beats for every genre to Quick Picks (${ARC_RESEARCH_GENRE_KEYS.length} relationships).`);
+    const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);
+    const discoveries = firstPass ? ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key)) : unknown.slice(0, GENRE_STUDY_BATCH);
+    for (const key of discoveries) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
+    const discoveredArcIds = discoveries.map((key) => key.slice(0, key.lastIndexOf("|")));
+    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...(firstPass ? ARC_RESEARCH_UNLOCK_IDS : []), ...discoveredArcIds])];
+    const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;
+    notices.push(firstPass
+      ? `📚 Genre Studies establishes the studio's first curated Quick Picks and maps ${discoveries.length} useful relationships.`
+      : `📚 Genre Studies maps ${discoveries.length} more arc/genre relationships. ${known}/${ARC_RESEARCH_ALL_GENRE_KEYS.length} understood.`);
   }
   if (researchId === TALENT_ANALYSIS_ID) {
     /* collect every valid, non-legacy cast id the studio has NOT yet
@@ -3159,6 +3171,43 @@ export const undiscoveredProfileIds = (r: Pick<RunState, "castAffinityDiscovered
 export const allCastProfiled = (r: Pick<RunState, "castAffinityDiscovered">): boolean =>
   undiscoveredProfileIds(r).length === 0;
 
+export const GENRE_STUDY_BATCH = 30;
+export const NARRATIVE_STUDY_BATCH = 10;
+
+export function researchProgressLabel(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): string | null {
+  if (id === "genre_studies") {
+    const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
+    return `ARC FITS ${known}/${ARC_RESEARCH_ALL_GENRE_KEYS.length}`;
+  }
+  if (id === "narrative_analytics") {
+    const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos.includes(comboId)).length;
+    return `STRUCTURES ${known}/${ARC_RESEARCH_ALL_COMBO_IDS.length}`;
+  }
+  return null;
+}
+
+function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): number {
+  if (!r.research.includes(id)) return 0;
+  if (id === "genre_studies") {
+    const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
+    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_GENRE_KEYS.length) / GENRE_STUDY_BATCH);
+  }
+  if (id === "narrative_analytics") {
+    const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos.includes(comboId)).length;
+    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_COMBOS.length) / NARRATIVE_STUDY_BATCH);
+  }
+  return 0;
+}
+
+/** Escalating base RD cost: each completed repeat pass adds 50% of the original
+ * cost. Showrunner discounts are applied after this value is calculated. */
+export function researchProjectCost(r: RunState, id: string, fallbackRd?: number): number {
+  const def = RESEARCH.find((x) => x.id === id);
+  const base = fallbackRd ?? def?.rd ?? 0;
+  const repeats = repeatResearchRunIndex(r, id);
+  return researchRdCost(Math.round(base * (1 + repeats * 0.5)), r.showrunner);
+}
+
 /** why a research project can't be started (null = allowed). Repeatable
  *  projects skip the "already researched" rule; talent analysis needs an
  *  undiscovered subject so a completed project can never be wasted. */
@@ -3170,18 +3219,22 @@ export function researchBlockReason(r: RunState, id: string): string | null {
   if (def.requires && !r.research.includes(def.requires))
     return `Requires ${RESEARCH.find((x) => x.id === def.requires)?.name ?? def.requires} first`;
   if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";
-  const effectiveRdCost = researchRdCost(def.rd, r.showrunner);
+  if (id === "genre_studies" && ARC_RESEARCH_ALL_GENRE_KEYS.every((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0)) return "COMPLETE — every standard arc/genre relationship is understood";
+  if (id === "narrative_analytics" && ARC_RESEARCH_ALL_COMBO_IDS.every((comboId) => r.arcCombos.includes(comboId))) return "COMPLETE — every standard story structure is understood";
+  const effectiveRdCost = researchProjectCost(r, id, def.rd);
   if (r.rd < effectiveRdCost) return `Needs ${effectiveRdCost} research data (you have ${r.rd})`;
   return null;
 }
 
 export function startResearchProject(r: RunState, id: string, rdCost: number): RunState | null {
   if (researchBlockReason(r, id)) return null;
-  const effectiveRdCost = researchRdCost(rdCost, r.showrunner);
-  if (r.rd < effectiveRdCost) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
-  const baseResearchWeeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
+  const runIndex = repeatResearchRunIndex(r, id);
+  const scaledBaseRd = Math.round(rdCost * (1 + runIndex * 0.5));
+  const effectiveRdCost = researchProjectCost(r, id, rdCost);
+  if (r.rd < effectiveRdCost) return null;
+  const baseResearchWeeks = researchWeeks(scaledBaseRd, r.facilities.archive ?? 0, r.showrunner);
   const researchDecisionMult = decisionResearchSpeedMult(r);
   const staffResearchMult = staffResearchDurationMult(r.staff);
   const weeks = Math.max(0.25, baseResearchWeeks * researchDecisionMult * staffResearchMult);
