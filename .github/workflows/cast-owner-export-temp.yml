@@ -1,0 +1,66 @@
+name: Temporary cast owner export
+
+on:
+  push:
+    branches:
+      - analysis/cast-owner-export-20260917
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Export live Casting Catalog V7 owners
+        working-directory: game_source
+        run: |
+          cat > src/engine/__tests__/cast-owner-export-temp.test.ts <<'EOF'
+          import { expect, it } from "vitest";
+          import { CAST_V2 } from "../castV2";
+          import { SECRET_COMBOS } from "../data";
+          import { castingCatalogMeta } from "../castCatalog";
+
+          it("exports every experimental pair owner", () => {
+            const secretKeys = new Set(Object.keys(SECRET_COMBOS));
+            const roleOrder: Record<string, number> = { protag: 0, secondary: 1, pet: 2, villain: 3 };
+            const typeOrder: Record<string, number> = { shonen: 0, shojo: 1 };
+            const rows: Array<Record<string, unknown>> = [];
+            for (const member of CAST_V2) {
+              const meta = castingCatalogMeta(member);
+              if (!meta?.active) continue;
+              for (const key of meta.pairKeys) {
+                if (!secretKeys.has(key)) continue;
+                rows.push({
+                  key,
+                  role: member.role,
+                  type: member.type,
+                  id: member.id,
+                  name: member.name,
+                  visible: member.visibleAff,
+                  hidden: meta.secretGenre,
+                  kind: meta.kind,
+                });
+              }
+            }
+            rows.sort((a, b) =>
+              String(a.key).localeCompare(String(b.key)) ||
+              (typeOrder[String(a.type)] ?? 9) - (typeOrder[String(b.type)] ?? 9) ||
+              (roleOrder[String(a.role)] ?? 9) - (roleOrder[String(b.role)] ?? 9)
+            );
+            console.log("CAST_OWNER_EXPORT_BEGIN");
+            for (const row of rows) console.log(`CAST_OWNER ${JSON.stringify(row)}`);
+            console.log("CAST_OWNER_EXPORT_END");
+            expect(rows).toHaveLength(secretKeys.size * 8);
+          });
+          EOF
+          npx vitest run src/engine/__tests__/cast-owner-export-temp.test.ts --reporter=verbose
