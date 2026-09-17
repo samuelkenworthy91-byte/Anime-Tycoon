@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Temporary branch-only final copy migration used by the validated gameplay pass.
 ROOT = Path('game_source/src')
 
 def replace(rel: str, old: str, new: str) -> None:
