@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   apply-and-validate:
+    if: contains(github.event.head_commit.message, '[apply-gameplay-pass]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +26,7 @@ jobs:
         run: |
           python3 .github/scripts/apply_gameplay_pass.py
           python3 .github/scripts/fix_gameplay_pass_test.py
+          python3 .github/scripts/final_gameplay_text_fix.py
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
@@ -47,4 +49,6 @@ jobs:
             exit 0
           fi
           git commit -m "Implement licensed IP awards and Big Three balance pass"
+          git fetch origin work/licensed-ip-awards-big-three-pass
+          git rebase origin/work/licensed-ip-awards-big-three-pass
           git push origin HEAD:work/licensed-ip-awards-big-three-pass
