@@ -47,6 +47,7 @@ jobs:
                   type: member.type,
                   id: member.id,
                   name: member.name,
+                  img: member.img,
                   visible: member.visibleAff,
                   hidden: meta.secretGenre,
                   kind: meta.kind,
@@ -63,9 +64,44 @@ jobs:
           });
           EOF
           npx vitest run src/engine/__tests__/cast-owner-export-temp.test.ts --reporter=verbose
-      - name: Upload owner map
+      - name: Collect owner portraits
+        working-directory: game_source
+        run: |
+          mkdir -p cast-owner-images
+          node <<'NODE' > /tmp/cast-owner-images.tsv
+          const rows = require('./cast-owner-export.json');
+          const seen = new Set();
+          for (const row of rows) {
+            if (seen.has(row.id)) continue;
+            seen.add(row.id);
+            console.log(`${row.id}\t${row.img}`);
+          }
+          NODE
+          missing=0
+          while IFS=$'\t' read -r id img; do
+            src=""
+            for candidate in "public/img/$img" "public/$img" "src/assets/$img"; do
+              if [ -f "$candidate" ]; then src="$candidate"; break; fi
+            done
+            if [ -z "$src" ]; then
+              src=$(find . -type f -path "*/$img" -print -quit)
+            fi
+            if [ -z "$src" ]; then
+              echo "MISSING $id $img"
+              missing=$((missing+1))
+              continue
+            fi
+            ext="${src##*.}"
+            cp "$src" "cast-owner-images/$id.$ext"
+          done < /tmp/cast-owner-images.tsv
+          echo "Unique portraits: $(find cast-owner-images -type f | wc -l)"
+          echo "Missing portraits: $missing"
+          test "$missing" -eq 0
+      - name: Upload owner map and portraits
         uses: actions/upload-artifact@v4
         with:
-          name: cast-owner-export
-          path: game_source/cast-owner-export.json
+          name: cast-owner-export-with-images
+          path: |
+            game_source/cast-owner-export.json
+            game_source/cast-owner-images
           retention-days: 1
