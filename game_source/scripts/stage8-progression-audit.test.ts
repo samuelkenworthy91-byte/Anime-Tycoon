@@ -107,11 +107,11 @@ describe("Stage 8 progression audit", () => {
     expect(intervention.at(-1)!.cashPerPoint).toBeGreaterThan(intervention[0].cashPerPoint * 5);
     expect(report.capabilityFiveTrackEnvelope).toBeGreaterThanOrEqual(90_000_000);
     expect(careers.every((career) => career.slots >= 1 && career.slots <= BIG_THREE_MAX_SLOTS)).toBe(true);
-    expect(careers.every((career) => career.years[0] === 6)).toBe(true);
-    /* Rival-only careers must leave a genuine endgame response window: the
-       seeded name opens Year 6, the earliest rival consensus is Year 7, and a
-       third rival name cannot complete the cultural canon before Year 8. */
-    expect(secondSlotYears.every((year) => year >= 7)).toBe(true);
-    expect(thirdSlotYears.every((year) => year >= 8)).toBe(true);
+    expect(careers.every((career) => career.years[0] === 3)).toBe(true);
+    /* Rival-only careers must leave a genuine response window: the seeded
+       name opens Year 3, the earliest later consensus is Year 4, and another
+       name cannot complete the cultural canon before Year 5. */
+    expect(secondSlotYears.every((year) => year >= 4)).toBe(true);
+    expect(thirdSlotYears.every((year) => year >= 5)).toBe(true);
   }, 120_000);
 });
