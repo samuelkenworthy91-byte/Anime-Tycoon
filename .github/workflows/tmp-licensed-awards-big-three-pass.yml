@@ -1,4 +1,4 @@
-name: Temporary licensed IP awards Big Three pass
+name: Finalize licensed IP awards Big Three pass
 
 on:
   push:
@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  apply-and-validate:
-    if: contains(github.event.head_commit.message, '[apply-gameplay-pass]')
+  finalize-and-validate:
+    if: contains(github.event.head_commit.message, '[finalize-gameplay-pass]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,33 +22,106 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: game_source/package-lock.json
-      - name: Apply targeted source changes
+      - name: Apply final calibration and copy
+        shell: bash
         run: |
-          python3 .github/scripts/apply_gameplay_pass.py
-          python3 .github/scripts/fix_gameplay_pass_test.py
-          python3 .github/scripts/final_gameplay_text_fix.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def repl(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"{path}: missing expected text: {old[:120]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          repl('game_source/src/engine/bigThree.ts',
+               'export const BIG_THREE_MIN_CRAFT_FLOOR = 36;\nexport const BIG_THREE_MIN_MOMENTUM = 78;',
+               'export const BIG_THREE_MIN_CRAFT_FLOOR = 32;\nexport const BIG_THREE_MIN_MOMENTUM = 68;')
+
+          repl('game_source/src/engine/bigThree.ts',
+               '  const craft = playerCraftFor(release.score, release.points);\n  const craftFloor = Math.min(craft.story, craft.art, craft.sound);\n  const momentum = playerMomentum(run, release.franchiseKey, release.reach);\n  const metrics: BigThreeMetrics = { score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: culturalScore(release.score, release.reach, craftFloor, momentum) };',
+               '  const craft = playerCraftFor(release.score, release.points);\n  const craftFloor = Math.min(craft.story, craft.art, craft.sound);\n  const franchiseFollowing = Math.max(release.reach, run.franchises[release.franchiseKey]?.lifetimeFans ?? 0);\n  const momentum = playerMomentum(run, release.franchiseKey, franchiseFollowing);\n  const metrics: BigThreeMetrics = { score: release.score, reach: franchiseFollowing, craftFloor, momentum, culturalScore: culturalScore(release.score, franchiseFollowing, craftFloor, momentum) };')
+
+          repl('game_source/src/engine/bigThree.ts',
+               '    score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: metrics.culturalScore, posterId: null,',
+               '    score: release.score, reach: metrics.reach, craftFloor, momentum, culturalScore: metrics.culturalScore, posterId: null,')
+
+          repl('game_source/src/engine/bigThree.ts',
+               '''function rivalMetrics(studio: RivalStudio, release: RivalRelease): BigThreeMetrics {
+  const craftFloor = Math.min(release.craft.story, release.craft.art, release.craft.sound);
+  const momentum = rivalMomentum(studio, release);
+  return {
+    score: release.score,
+    reach: release.fans,
+    craftFloor,
+    momentum,
+    culturalScore: culturalScore(release.score, release.fans, craftFloor, momentum),
+  };
+}''',
+               '''function rivalMetrics(studio: RivalStudio, release: RivalRelease): BigThreeMetrics {
+  const craftFloor = Math.min(release.craft.story, release.craft.art, release.craft.sound);
+  const momentum = rivalMomentum(studio, release);
+  const priorFranchiseFans = release.franchiseKey
+    ? studio.releases
+        .filter((other) => other.franchiseKey === release.franchiseKey && !(other.week === release.week && other.title === release.title))
+        .reduce((sum, other) => sum + other.fans, 0)
+    : 0;
+  const franchiseFollowing = release.fans + priorFranchiseFans;
+  return {
+    score: release.score,
+    reach: franchiseFollowing,
+    craftFloor,
+    momentum,
+    culturalScore: culturalScore(release.score, franchiseFollowing, craftFloor, momentum),
+  };
+}''')
+
+          repl('game_source/src/engine/bigThree.ts',
+               '    score: release.score,\n    reach: release.fans,\n    craftFloor: metrics.craftFloor,',
+               '    score: release.score,\n    reach: metrics.reach,\n    craftFloor: metrics.craftFloor,')
+
+          repl('game_source/src/components/BigThreeBoard.tsx',
+               '<div className="text-[9px] text-paper/50">Fan-decided cultural canon · three permanent monuments for this era</div>',
+               '<div className="text-[9px] text-paper/50">Fan-decided cultural canon · three permanent monuments for this era</div><div className="mt-0.5 text-[8px] text-gold/65">38+/40 · 150,000+ franchise following · elite craft · sustained cultural momentum · at least 48 weeks between inductions</div>')
+          repl('game_source/src/components/BigThreeBoard.tsx',
+               'The cultural landscape changes in Year 6.',
+               'The cultural landscape changes in Year 3.')
+          repl('game_source/src/components/BigThreeReveal.tsx',
+               'Your studio gains +75,000 fans, +60 RD, permanent franchise prestige and stronger renewal leverage for a licensed property.',
+               'Your studio gains +75,000 fans, +60 RD and permanent franchise prestige. Big Three properties get +40% direct continuation revenue and +60% merchandise demand; licensed properties also gain stronger renewal leverage.')
+          repl('game_source/src/engine/state.ts',
+               '/** Year-6+ fan-decided cultural canon. Exactly three slots can ever be filled. */',
+               '/** Year-3+ fan-decided cultural canon. Exactly three slots can ever be filled. */')
+          repl('game_source/src/engine/rivalPosters.ts',
+               '/** Dedicated Year-6 Big Three flagship art; never consumed by routine rival slates. */',
+               '/** Dedicated Year-3 Big Three flagship art; never consumed by routine rival slates. */')
+
+          audit = Path('game_source/scripts/stage8-progression-audit.test.ts')
+          text = audit.read_text()
+          needle = '    expect(secondSlotYears.every((year) => year >= 4)).toBe(true);\n    expect(thirdSlotYears.every((year) => year >= 5)).toBe(true);'
+          replacement = '    expect(secondSlotYears.every((year) => year >= 4)).toBe(true);\n    expect(thirdSlotYears.every((year) => year >= 5)).toBe(true);\n    expect(secondSlotYears.length).toBeGreaterThan(0);\n    expect(thirdSlotYears.length).toBeGreaterThan(0);'
+          if needle not in text:
+              raise SystemExit('stage8 progression audit: expected Big Three assertions not found')
+          audit.write_text(text.replace(needle, replacement, 1))
+          PY
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
       - name: Focused regression tests
         working-directory: game_source
-        run: npx vitest run src/engine/__tests__/big-three.test.ts src/engine/__tests__/award-expectations.test.ts src/engine/__tests__/gameplay-pass-regressions.test.ts --reporter=verbose
+        run: npx vitest run src/engine/__tests__/big-three.test.ts src/engine/__tests__/award-expectations.test.ts src/engine/__tests__/gameplay-pass-regressions.test.ts scripts/stage8-progression-audit.test.ts --reporter=verbose
       - name: Full test suite
         working-directory: game_source
         run: npm test
       - name: Production build
         working-directory: game_source
         run: npm run build
-      - name: Commit validated gameplay pass
+      - name: Commit final validated source and remove temporary machinery
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add game_source/src
-          if git diff --cached --quiet; then
-            echo "No source changes to commit"
-            exit 0
-          fi
-          git commit -m "Implement licensed IP awards and Big Three balance pass"
-          git fetch origin work/licensed-ip-awards-big-three-pass
-          git rebase origin/work/licensed-ip-awards-big-three-pass
+          git rm -f .github/scripts/apply_gameplay_pass.py .github/scripts/final_gameplay_text_fix.py .github/scripts/fix_gameplay_pass_test.py .github/workflows/tmp-licensed-awards-big-three-pass.yml
+          git add game_source/src game_source/scripts/stage8-progression-audit.test.ts
+          git commit -m "Finalize licensed IP awards and Big Three balance pass"
           git push origin HEAD:work/licensed-ip-awards-big-three-pass
