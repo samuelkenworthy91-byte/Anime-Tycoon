@@ -26,6 +26,7 @@ jobs:
         run: |
           cat > src/engine/__tests__/cast-owner-export-temp.test.ts <<'EOF'
           import { expect, it } from "vitest";
+          import { writeFileSync } from "node:fs";
           import { CAST_V2 } from "../castV2";
           import { SECRET_COMBOS } from "../data";
           import { castingCatalogMeta } from "../castCatalog";
@@ -57,10 +58,14 @@ jobs:
               (typeOrder[String(a.type)] ?? 9) - (typeOrder[String(b.type)] ?? 9) ||
               (roleOrder[String(a.role)] ?? 9) - (roleOrder[String(b.role)] ?? 9)
             );
-            console.log("CAST_OWNER_EXPORT_BEGIN");
-            for (const row of rows) console.log(`CAST_OWNER ${JSON.stringify(row)}`);
-            console.log("CAST_OWNER_EXPORT_END");
+            writeFileSync("cast-owner-export.json", JSON.stringify(rows, null, 2));
             expect(rows).toHaveLength(secretKeys.size * 8);
           });
           EOF
           npx vitest run src/engine/__tests__/cast-owner-export-temp.test.ts --reporter=verbose
+      - name: Upload owner map
+        uses: actions/upload-artifact@v4
+        with:
+          name: cast-owner-export
+          path: game_source/cast-owner-export.json
+          retention-days: 1
