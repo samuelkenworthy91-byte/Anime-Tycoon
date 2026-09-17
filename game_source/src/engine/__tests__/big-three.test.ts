@@ -42,34 +42,27 @@ const draft = (title = "Crown of Tomorrow", genres: GenreId[] = ["fantasy", "mec
 
 function playerCandidate(title = "Crown of Tomorrow", licensedIpId?: string) {
   let run = initialRun("Player House", "steady");
-  run.week = BIG_THREE_START_WEEK;
+  run.week = BIG_THREE_START_WEEK + BIG_THREE_RIVAL_GRACE_WEEKS;
   run = syncBigThreeEra(run);
   const d = draft(title, ["fantasy", "mecha"], licensedIpId);
   const fr = createFranchise(title, d, {
     protag: d.protag, protagName: d.protagName, secondary: d.secondary, secondaryName: "S", pet: d.pet, petName: "P", villain: d.villain, villainName: "V",
-  }, { total: 36, revenue: 4_000_000, fans: 150_000, hallOfFame: true }, run.week);
+  }, { total: 39, revenue: 4_000_000, fans: 200_000, hallOfFame: true }, run.week);
   fr.popularity = 88;
   fr.lifetimeFans = 160_000;
-  fr.entries.push({ kind: "season", title: `${title} II`, score: 35, revenue: 2_000_000, fans: 80_000, week: run.week, animeType: "shonen" });
-  fr.lastScore = 35;
-  fr.bestScore = 36;
+  fr.entries.push({ kind: "season", title: `${title} II`, score: 38, revenue: 2_000_000, fans: 100_000, week: run.week, animeType: "shonen" });
+  fr.lastScore = 38;
+  fr.bestScore = 39;
   run.franchises = { [title]: fr };
   return { run, d };
 }
 
 function recognise(run: ReturnType<typeof initialRun>, d: Draft, projectId = "p1") {
-  return recognisePlayerBigThreeRelease(run, {
-    projectId,
-    draft: d,
-    score: 36,
-    points: { story: 360, art: 390, sound: 350 },
-    reach: 150_000,
-    franchiseKey: d.title,
-  });
+  return advanceBigThreeWeek(recognisePlayerBigThreeRelease(run, { projectId, draft: d, score: 39, points: { story: 520, art: 560, sound: 500 }, reach: 200_000, franchiseKey: d.title }));
 }
 
-describe("Year 6 Big Three endgame", () => {
-  it("stays dormant before Year 6", () => {
+describe("Year 3 Big Three cultural canon", () => {
+  it("stays dormant before Year 3", () => {
     const run = initialRun("House", "steady");
     run.week = BIG_THREE_START_WEEK - 1;
     const next = syncBigThreeEra(run);
@@ -77,7 +70,7 @@ describe("Year 6 Big Three endgame", () => {
     expect(next.bigThree.slots).toHaveLength(0);
   });
 
-  it("seeds Sunnyrise exactly once at the start of Year 6 with a persistent reveal", () => {
+  it("seeds Sunnyrise exactly once at the start of Year 3 with a persistent reveal", () => {
     let run = initialRun("House", "steady");
     const sunnyBefore = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     run.week = BIG_THREE_START_WEEK;
@@ -85,7 +78,7 @@ describe("Year 6 Big Three endgame", () => {
     const sunnyAfter = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     expect(run.bigThree.introduced).toBe(true);
     expect(run.bigThree.slots).toHaveLength(1);
-    expect(run.bigThree.slots[0]).toMatchObject({ title: "Astra Breaker: Eclipse", originalStudio: "Sunnyrise", recognisedYear: 6, posterId: BIG_THREE_SEED_POSTER_ID });
+    expect(run.bigThree.slots[0]).toMatchObject({ title: "Astra Breaker: Eclipse", originalStudio: "Sunnyrise", recognisedYear: 3, posterId: BIG_THREE_SEED_POSTER_ID });
     expect(pendingBigThreeReveal(run)?.reveal.kind).toBe("era");
     expect(sunnyAfter.fans).toBe(sunnyBefore.fans + 180_000);
     expect(sunnyAfter.revenue).toBe(sunnyBefore.revenue + 4_200_000);
@@ -97,10 +90,10 @@ describe("Year 6 Big Three endgame", () => {
   });
 
   it("requires critics, reach, craft and cultural momentum together", () => {
-    expect(bigThreeQualifies({ score: 36, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(true);
-    expect(bigThreeQualifies({ score: 33, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
-    expect(bigThreeQualifies({ score: 36, reach: 20_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
-    expect(bigThreeQualifies({ score: 36, reach: 150_000, craftFloor: 20, momentum: 80, culturalScore: 400 })).toBe(false);
+    expect(bigThreeQualifies({ score: 38, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(true);
+    expect(bigThreeQualifies({ score: 37, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
+    expect(bigThreeQualifies({ score: 38, reach: 149_999, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
+    expect(bigThreeQualifies({ score: 38, reach: 150_000, craftFloor: 35, momentum: 80, culturalScore: 400 })).toBe(false);
   });
 
   it("lets a qualifying player production claim an open slot and grants prestige rewards once", () => {
@@ -131,14 +124,14 @@ describe("Year 6 Big Three endgame", () => {
     run = syncBigThreeEra(run);
     const studio = run.rivalWorld.studios.find((s) => s.id !== "Sunnyrise")!;
     const release = (title: string, week: number) => ({
-      title, studioId: studio.id, studio: studio.name, score: 37, week, year: Math.floor(week / 48) + 1,
-      genres: ["fantasy"] as GenreId[], animeType: "shonen" as const, revenue: 4_000_000, fans: 150_000,
+      title, studioId: studio.id, studio: studio.name, score: 39, week, year: Math.floor(week / 48) + 1,
+      genres: ["fantasy"] as GenreId[], animeType: "shonen" as const, revenue: 4_000_000, fans: 300_000,
       kind: "original" as const, hallOfFame: true, craft: { story: 52, art: 54, sound: 50 }, posterId: null, franchiseKey: title,
     });
 
     run = { ...run, week: BIG_THREE_START_WEEK + 1, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Crown", BIG_THREE_START_WEEK + 1)] } : s) } };
     run = advanceBigThreeWeek(run);
-    expect(run.bigThree.slots).toHaveLength(1); // Year-6 shock gets breathing room.
+    expect(run.bigThree.slots).toHaveLength(1); // Year-3 shock gets breathing room.
 
     const rivalBeforeRecognition = run.rivalWorld.studios.find((s) => s.id === studio.id)!;
     run = { ...run, week: BIG_THREE_START_WEEK + BIG_THREE_RIVAL_GRACE_WEEKS };
@@ -163,7 +156,7 @@ describe("Year 6 Big Three endgame", () => {
     expect(recognise(filled, d, "late").bigThree.slots).toHaveLength(3);
   });
 
-  it("migrates a post-Year-6 old save neutrally, then initialises once and survives JSON reload", () => {
+  it("migrates a post-Year-3 old save neutrally, then initialises once and survives JSON reload", () => {
     const old = initialRun("Legacy", "steady") as Partial<ReturnType<typeof initialRun>>;
     old.week = BIG_THREE_START_WEEK + 70;
     delete old.bigThree;
@@ -190,7 +183,7 @@ describe("Year 6 Big Three endgame", () => {
   it("gives a Big Three licensed adaptation lasting renewal leverage", () => {
     const ip = AUCTION_IPS[0];
     const { run: base, d } = playerCandidate(ip.title, ip.id);
-    const contract = { ipId: ip.id, acquiredWeek: 200, expiresWeek: 300, purchasePrice: ip.rightsBaseValue, royaltyRate: ip.royaltyRate, ownershipShare: .7, sequelRights: true, merchRights: true, internationalRights: true, adaptations: 1, bestScore: 36, discoveredArcs: [] };
+    const contract = { ipId: ip.id, acquiredWeek: 200, expiresWeek: 300, purchasePrice: ip.rightsBaseValue, royaltyRate: ip.royaltyRate, ownershipShare: .7, sequelRights: true, merchRights: true, internationalRights: true, adaptations: 1, bestScore: 39, discoveredArcs: [] };
     let run = { ...base, ipMarket: { ...initIPMarket(base.week), owned: { [ip.id]: contract } } };
     const before = ipRenewalCost(run.ipMarket, ip.id, 0)!;
     run = recognise(run, d);

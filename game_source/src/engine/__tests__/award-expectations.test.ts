@@ -42,16 +42,14 @@ describe("sim-calibrated annual awards craft expectations", () => {
     expect(awardCraftOutputFloor(13, "score")).toBe(1550);
   });
 
-  it("uses exact retained player production points", () => {
-    const seed = initialRun("Test Studio", "steady");
-    const entry = nominee({ sourceId: "released-project" });
-    const run = {
-      ...seed,
-      projects: [{ id: "released-project", points: { story: 1211, art: 1587, sound: 1004 } }],
-    } as unknown as RunState;
-    expect(awardDisciplineOutput(run, entry, "writing", 6)).toBe(1211);
-    expect(awardDisciplineOutput(run, entry, "animation", 6)).toBe(1587);
-    expect(awardDisciplineOutput(run, entry, "score", 6)).toBe(1004);
+  it("uses the same normalized craft scale for player and rival entries", () => {
+    const run = initialRun("Test Studio", "steady");
+    const player = nominee({ story: 32, art: 32, sound: 32, sourceId: "released-project" });
+    const rival = nominee({ player: false, studioId: "rival", sourceId: "rival-row", story: 32, art: 32, sound: 32 });
+    expect(awardDisciplineOutput(run, player, "writing", 6)).toBe(1200);
+    expect(awardDisciplineOutput(run, rival, "writing", 6)).toBe(1200);
+    expect(awardDisciplineOutput(run, player, "animation", 6)).toBe(1500);
+    expect(awardDisciplineOutput(run, rival, "score", 6)).toBe(975);
   });
 
   it("projects rivals and legacy rows onto the current-year raw scale", () => {
@@ -64,16 +62,10 @@ describe("sim-calibrated annual awards craft expectations", () => {
     expect(awardDisciplineOutput(run, rival, "score", 6)).toBe(975);
   });
 
-  it("requires the player to clear each discipline's own Year 6 raw floor", () => {
+  it("applies the same Year 6 craft gate to player disciplines", () => {
     const seed = initialRun("Test Studio", "steady");
-    const row = nominee({ sourceId: "year6-project" });
-    const run = {
-      ...seed,
-      week: 283,
-      day: 283 * 7,
-      yearShows: [row],
-      projects: [{ id: "year6-project", points: { story: 1199, art: 1500, sound: 975 } }],
-    } as unknown as RunState;
+    const row = nominee({ sourceId: "year6-project", story: 31, art: 32, sound: 32 });
+    const run = { ...seed, week: 283, day: 283 * 7, yearShows: [row] } as unknown as RunState;
     const frozen = freezeNominationsIfDue(run);
     const entry = frozen.yearShows.find((n) => n.nominationYear === 6 && n.player)!;
     expect(entry.nominationCategories).not.toContain("writing");

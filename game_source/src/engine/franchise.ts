@@ -75,6 +75,8 @@ export interface Franchise {
   spunFrom?: string;
   /** legacy flag kept for older saves/UI */
   alive: boolean;
+  /** external licensed property this franchise originated from; optional for old saves */
+  licensedIpId?: string;
   /** irreversible sale of the original IP to an outside buyer */
   soldTo?: { id: string; name: string; kind: "network" | "rival"; week: number; price: number };
   /** permanent cultural prestige once an entry is named to the era's Big Three */
@@ -102,7 +104,7 @@ export function merchValueOf(fr: Franchise): number {
   const popF = 0.3 + fr.popularity / 100;
   const charF = 1 + (top ? top.popularity : 0) / 400;
   const cultF = fr.cult ? 1.35 : 1;
-  const bigThreeF = fr.bigThree ? 1.25 : 1;
+  const bigThreeF = fr.bigThree ? 1.6 : 1;
   return Math.round((base * popF * charF * cultF * bigThreeF) / 1_000) * 1_000;
 }
 
@@ -273,8 +275,8 @@ export function continuationBlock(
  *  Popularity sells, fatigue repels, format sets the ceiling. */
 export function franchiseBoost(fr: Franchise | null, d: Draft, partner?: Franchise | null): number {
   if (!fr || !d.continuation) {
-    /* legacy path: plain next-season bonus */
-    return d.franchiseKey ? 1 + 0.12 * Math.max(0, d.season - 1) : 1;
+    const base = d.franchiseKey ? 1 + 0.12 * Math.max(0, d.season - 1) : 1;
+    return fr?.bigThree ? Math.round(base * 1.4 * 100) / 100 : base;
   }
   const def = continuationDef(d.continuation);
   if (!def) return 1;
@@ -289,7 +291,11 @@ export function franchiseBoost(fr: Franchise | null, d: Draft, partner?: Franchi
   if (d.continuation === "crossover" && partner) {
     mult *= 0.85 + (fr.popularity + partner.popularity) / 250;
   }
-  return Math.round(clamp(mult, 0.5, 3) * 100) / 100;
+  const bounded = clamp(mult, 0.5, 3);
+  const bigThreeHalo = fr.bigThree
+    ? (d.continuation === "spinoff" || d.continuation === "crossover" ? 1.2 : 1.4)
+    : 1;
+  return Math.round(bounded * bigThreeHalo * 100) / 100;
 }
 
 /* ----------------------------------------------------- fan expectations */
@@ -395,6 +401,7 @@ export function createFranchise(
     merchValue: 0,
     cult: false,
     merchCooldown: {},
+    licensedIpId: d.licensedIpId,
     spunFrom,
     alive: result.hallOfFame,
   };

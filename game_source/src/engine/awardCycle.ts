@@ -154,24 +154,10 @@ export function restoreAwardNominationMetadata(run: RunState, rawYearShows: unkn
 const craftMetric = (entry: AwardNominee, category: CraftCategoryId) =>
   category === "writing" ? entry.story : category === "animation" ? entry.art : entry.sound;
 
-/** The player has literal production points retained on the released project,
- * so award craft floors use those exact numbers. Rival shows do not run the
- * desk-bubble simulation; their frozen craft score is converted onto the same
- * visible hundreds-scale (x6). Old/legacy player rows use the same fallback so
- * loading an old career never makes an otherwise valid awards year disappear. */
+/** Project both player and rival craft onto one annual comparison scale.
+ * Player craft already comes from real department output via playerCraftFor();
+ * rivals use frozen persona-shaped craft. */
 export function awardDisciplineOutput(run: RunState, entry: AwardNominee, category: CraftCategoryId, year = awardYearAtWeek(run.week)): number {
-  if (entry.player && entry.sourceId) {
-    const project = run.projects.find((p) => p.id === entry.sourceId);
-    if (project) {
-      if (category === "writing") return Math.round(project.points.story);
-      if (category === "animation") return Math.round(project.points.art);
-      return Math.round(project.points.sound);
-    }
-  }
-  /** Rival releases and legacy player rows predate literal production-point
-   * storage. Their bounded craft metric is projected onto the current year's
-   * simulated raw-output scale. A rival that merely clears the normal craft
-   * quality gate sits on the raw floor; exceptional craft rises above it. */
   const era = year <= 2 ? 0 : year <= 5 ? 1 : year <= 8 ? 2 : 3;
   const metricFloor = 28 + era * 2;
   const rawFloor = awardCraftOutputFloor(year, category);

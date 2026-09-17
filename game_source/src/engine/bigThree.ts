@@ -4,18 +4,18 @@ import { merchValueOf } from "./franchise";
 import type { RivalFranchise, RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
-export const BIG_THREE_START_WEEK = 5 * 48; // opening of industry Year 6
+export const BIG_THREE_START_WEEK = 2 * 48; // opening of industry Year 3
 export const BIG_THREE_MAX_SLOTS = 3;
-export const BIG_THREE_MIN_SCORE = 34;
-export const BIG_THREE_MIN_REACH = 55_000;
-export const BIG_THREE_MIN_CRAFT_FLOOR = 32;
-export const BIG_THREE_MIN_MOMENTUM = 68;
-export const BIG_THREE_BREAKOUT_REACH = 120_000;
+export const BIG_THREE_MIN_SCORE = 38;
+export const BIG_THREE_MIN_REACH = 150_000;
+export const BIG_THREE_MIN_CRAFT_FLOOR = 36;
+export const BIG_THREE_MIN_MOMENTUM = 78;
+export const BIG_THREE_BREAKOUT_REACH = 300_000;
 export const BIG_THREE_PLAYER_FAN_REWARD = 75_000;
 export const BIG_THREE_PLAYER_RD_REWARD = 60;
 export const BIG_THREE_RENEWAL_LEVERAGE = 0.12;
 export const BIG_THREE_RIVAL_GRACE_WEEKS = 48;
-export const BIG_THREE_RIVAL_COOLDOWN_WEEKS = 72;
+export const BIG_THREE_RIVAL_COOLDOWN_WEEKS = 48;
 
 export const BIG_THREE_SEED_TITLE = "Astra Breaker: Eclipse";
 export const BIG_THREE_SEED_STUDIO_ID = "Sunnyrise";
@@ -69,6 +69,7 @@ export interface BigThreeReveal {
 export interface BigThreeState {
   introduced: boolean;
   slots: BigThreeSlot[];
+  candidates: BigThreeSlot[];
   pendingReveals: BigThreeReveal[];
   lastRivalScanWeek: number;
 }
@@ -88,6 +89,7 @@ const clamp = (value: number, lo: number, hi: number) => Math.max(lo, Math.min(h
 export const initialBigThreeState = (): BigThreeState => ({
   introduced: false,
   slots: [],
+  candidates: [],
   pendingReveals: [],
   lastRivalScanWeek: BIG_THREE_START_WEEK - 1,
 });
@@ -131,6 +133,7 @@ export function migrateBigThreeState(raw: unknown): BigThreeState {
   if (!raw || typeof raw !== "object") return initialBigThreeState();
   const b = raw as Partial<BigThreeState>;
   const slots = (Array.isArray(b.slots) ? b.slots : []).map(migrateSlot).filter((x): x is BigThreeSlot => !!x).slice(0, BIG_THREE_MAX_SLOTS);
+  const candidates = (Array.isArray(b.candidates) ? b.candidates : []).map(migrateSlot).filter((x): x is BigThreeSlot => !!x).filter((candidate) => !slots.some((slot) => slot.sourceId === candidate.sourceId)).slice(0, 12);
   const slotIds = new Set(slots.map((slot) => slot.id));
   const pendingReveals = (Array.isArray(b.pendingReveals) ? b.pendingReveals : []).flatMap((rawReveal) => {
     if (!rawReveal || typeof rawReveal !== "object") return [];
@@ -141,6 +144,7 @@ export function migrateBigThreeState(raw: unknown): BigThreeState {
   return {
     introduced: b.introduced === true || slots.length > 0,
     slots,
+    candidates,
     pendingReveals,
     lastRivalScanWeek: typeof b.lastRivalScanWeek === "number" ? b.lastRivalScanWeek : BIG_THREE_START_WEEK - 1,
   };
@@ -194,7 +198,7 @@ function seedSlot(): BigThreeSlot {
     currentOwnerType: "rival",
     player: false,
     recognisedWeek: BIG_THREE_START_WEEK,
-    recognisedYear: 6,
+    recognisedYear: 3,
     genres: ["mecha", "space"],
     animeType: "shonen",
     score: 38,
@@ -222,7 +226,7 @@ function seedRivalRelease(run: RunState): RunState {
       studio: studio.name,
       score: 38,
       week: BIG_THREE_START_WEEK,
-      year: 6,
+      year: 3,
       genres: ["mecha", "space"],
       animeType: "shonen",
       revenue: 4_200_000,
@@ -315,101 +319,50 @@ export function syncBigThreeEra(input: RunState): RunState {
       introduced: true,
       slots: [slot],
       pendingReveals: [...run.bigThree.pendingReveals, { id: "big-three-era-intro", kind: "era", slotId: slot.id }],
-      /* old post-Year-6 saves start competing from the moment this feature is
+      /* old post-Year-3 saves start competing from the moment this feature is
          introduced; we do not retroactively steal both open slots with releases
          the player never had the chance to answer. */
       lastRivalScanWeek: run.week,
     },
-    notices: [...run.notices, `🌠 YEAR 6 — fans name ${BIG_THREE_SEED_TITLE} (${BIG_THREE_SEED_STUDIO}) as the first title of anime's new Big Three. Two places remain.`].slice(-40),
+    notices: [...run.notices, `🌠 YEAR 3 — fans name ${BIG_THREE_SEED_TITLE} (${BIG_THREE_SEED_STUDIO}) as the first title of anime's new Big Three. Two places remain.`].slice(-40),
   };
 }
 
 export function recognisePlayerBigThreeRelease(inputRun: RunState, release: BigThreePlayerReleaseInput): RunState {
-  let run = syncBigThreeEra(inputRun);
+  const run = syncBigThreeEra(inputRun);
   if (!run.bigThree.introduced || run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) return run;
   const sourceId = `player:${release.projectId}`;
-  if (run.bigThree.slots.some((slot) => slot.sourceId === sourceId)) return run;
+  if (run.bigThree.slots.some((slot) => slot.sourceId === sourceId) || run.bigThree.candidates.some((slot) => slot.sourceId === sourceId)) return run;
   const craft = playerCraftFor(release.score, release.points);
   const craftFloor = Math.min(craft.story, craft.art, craft.sound);
   const momentum = playerMomentum(run, release.franchiseKey, release.reach);
-  const metrics: BigThreeMetrics = {
-    score: release.score,
-    reach: release.reach,
-    craftFloor,
-    momentum,
-    culturalScore: culturalScore(release.score, release.reach, craftFloor, momentum),
-  };
+  const metrics: BigThreeMetrics = { score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: culturalScore(release.score, release.reach, craftFloor, momentum) };
   if (!bigThreeQualifies(metrics)) return run;
-
-  const slot: BigThreeSlot = {
-    id: `big-three-slot-${run.bigThree.slots.length + 1}`,
-    sourceId,
-    title: release.draft.title,
-    originalStudioId: "player",
-    originalStudio: run.studio,
-    currentOwnerId: "player",
-    currentOwner: run.studio,
-    currentOwnerType: "player",
-    player: true,
-    recognisedWeek: run.week,
-    recognisedYear: yearOf(run.week),
-    genres: [...release.draft.genres],
-    animeType: release.draft.animeType,
-    score: release.score,
-    reach: release.reach,
-    craftFloor,
-    momentum,
-    culturalScore: metrics.culturalScore,
-    posterId: null,
-    franchiseKey: release.franchiseKey,
-    licensedIpId: release.draft.licensedIpId ?? null,
+  const candidate: BigThreeSlot = {
+    id: `big-three-candidate-${release.projectId}`, sourceId, title: release.draft.title,
+    originalStudioId: "player", originalStudio: run.studio, currentOwnerId: "player", currentOwner: run.studio, currentOwnerType: "player", player: true,
+    recognisedWeek: run.week, recognisedYear: yearOf(run.week), genres: [...release.draft.genres], animeType: release.draft.animeType,
+    score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: metrics.culturalScore, posterId: null,
+    franchiseKey: release.franchiseKey, licensedIpId: release.draft.licensedIpId ?? null,
     draft: { ...release.draft, genres: [...release.draft.genres], arcs: [...release.draft.arcs], sliders: [...release.draft.sliders] as [number, number, number] },
     protag: release.draft.protag,
   };
+  return { ...run, bigThree: { ...run.bigThree, candidates: [...run.bigThree.candidates, candidate].sort((a,b)=>b.culturalScore-a.culturalScore||b.score-a.score).slice(0,12) }, notices: [...run.notices, `🌠 CULTURAL PHENOMENON — “${candidate.title}” has entered Big Three speculation. A place can only be named after the current 48-week consensus window settles.`].slice(-40) };
+}
 
+function promotePlayerCandidate(run: RunState, candidate: BigThreeSlot): RunState {
+  const slot: BigThreeSlot = { ...candidate, id: `big-three-slot-${run.bigThree.slots.length + 1}`, recognisedWeek: run.week, recognisedYear: yearOf(run.week) };
   let franchises = run.franchises;
-  const fr = franchises[release.franchiseKey];
-  if (fr) {
-    const boosted = { ...fr, bigThree: true, popularity: Math.min(100, fr.popularity + 12) };
-    boosted.merchValue = merchValueOf(boosted);
-    franchises = { ...franchises, [release.franchiseKey]: boosted };
+  if (slot.franchiseKey) {
+    const fr = franchises[slot.franchiseKey];
+    if (fr) { const boosted = { ...fr, bigThree: true, popularity: Math.min(100, fr.popularity + 12) }; boosted.merchValue = merchValueOf(boosted); franchises = { ...franchises, [slot.franchiseKey]: boosted }; }
   }
-
   let ipMarket = run.ipMarket;
-  const licensedIpId = release.draft.licensedIpId;
-  if (licensedIpId && ipMarket.owned[licensedIpId]) {
-    ipMarket = {
-      ...ipMarket,
-      owned: {
-        ...ipMarket.owned,
-        [licensedIpId]: { ...ipMarket.owned[licensedIpId], bigThreePrestige: true },
-      },
-      history: [...ipMarket.history, `Big Three cultural recognition: ${release.draft.title}. Renewal leverage improved.`].slice(-100),
-    };
-  }
-
-  const rivalWorld = {
-    ...run.rivalWorld,
-    studios: run.rivalWorld.studios.map((studio) => studio.status === "collapsed" ? studio : { ...studio, rivalry: Math.min(100, studio.rivalry + 8) }),
-  };
-
-  return {
-    ...run,
-    fans: run.fans + BIG_THREE_PLAYER_FAN_REWARD,
-    rd: run.rd + BIG_THREE_PLAYER_RD_REWARD,
-    franchises,
-    ipMarket,
-    rivalWorld,
-    bigThree: {
-      ...run.bigThree,
-      slots: [...run.bigThree.slots, slot],
-      pendingReveals: [...run.bigThree.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }],
-    },
-    notices: [
-      ...run.notices,
-      `🌠 FANDOM CONSENSUS — “${release.draft.title}” enters THE BIG THREE (+${BIG_THREE_PLAYER_FAN_REWARD.toLocaleString("en-GB")} fans, +${BIG_THREE_PLAYER_RD_REWARD} RD).`,
-    ].slice(-40),
-  };
+  if (slot.licensedIpId && ipMarket.owned[slot.licensedIpId]) ipMarket = { ...ipMarket, owned: { ...ipMarket.owned, [slot.licensedIpId]: { ...ipMarket.owned[slot.licensedIpId], bigThreePrestige: true } }, history: [...ipMarket.history, `Big Three cultural recognition: ${slot.title}. Renewal leverage improved.`].slice(-100) };
+  const rivalWorld = { ...run.rivalWorld, studios: run.rivalWorld.studios.map((studio) => studio.status === "collapsed" ? studio : { ...studio, rivalry: Math.min(100, studio.rivalry + 8) }) };
+  return { ...run, fans: run.fans + BIG_THREE_PLAYER_FAN_REWARD, rd: run.rd + BIG_THREE_PLAYER_RD_REWARD, franchises, ipMarket, rivalWorld,
+    bigThree: { ...run.bigThree, slots: [...run.bigThree.slots, slot], candidates: [], pendingReveals: [...run.bigThree.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }] },
+    notices: [...run.notices, `🌠 FANDOM CONSENSUS — “${slot.title}” enters THE BIG THREE (+${BIG_THREE_PLAYER_FAN_REWARD.toLocaleString("en-GB")} fans, +${BIG_THREE_PLAYER_RD_REWARD} RD). BIG THREE HALO: direct franchise releases +40%, related spin-offs/crossovers +20%, merchandise demand +60%.`].slice(-40) };
 }
 
 function rivalMetrics(studio: RivalStudio, release: RivalRelease): BigThreeMetrics {
@@ -455,59 +408,21 @@ function rivalSlot(run: RunState, studio: RivalStudio, release: RivalRelease, me
 export function advanceBigThreeWeek(inputRun: RunState): RunState {
   let run = syncBigThreeEra(inputRun);
   if (!run.bigThree.introduced) return run;
-  if (run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) {
-    return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, lastRivalScanWeek: run.week } });
-  }
-
+  if (run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, candidates: [], lastRivalScanWeek: run.week } });
   const latestRecognitionWeek = Math.max(BIG_THREE_START_WEEK, ...run.bigThree.slots.map((slot) => slot.recognisedWeek));
-  const rivalConsensusDelay = run.bigThree.slots.length <= 1 ? BIG_THREE_RIVAL_GRACE_WEEKS : BIG_THREE_RIVAL_COOLDOWN_WEEKS;
-  /* Fandom consensus should feel historical, not like another weekly ranking.
-     Rival releases accumulate during the quiet period and compete once the
-     culture has had time to settle. Player releases are deliberately not
-     blocked here: no slot is reserved, but the player gets a real window to
-     answer the Year-6 shock before rivals can consume both open places. */
-  if (run.week < latestRecognitionWeek + rivalConsensusDelay) return refreshBigThreeOwnership(run);
-
+  if (run.week < latestRecognitionWeek + BIG_THREE_RIVAL_COOLDOWN_WEEKS) return refreshBigThreeOwnership(run);
   const lastScan = run.bigThree.lastRivalScanWeek;
-
-  const candidates = run.rivalWorld.studios.flatMap((studio) =>
-    studio.releases
-      .filter((release) => release.week > lastScan && release.week <= run.week && release.title !== BIG_THREE_SEED_TITLE)
-      .map((release) => ({ studio, release, metrics: rivalMetrics(studio, release) }))
-      .filter((candidate) => bigThreeQualifies(candidate.metrics))
-  ).sort((a, b) => b.metrics.culturalScore - a.metrics.culturalScore || b.release.score - a.release.score);
-
-  let state = { ...run.bigThree, slots: [...run.bigThree.slots], pendingReveals: [...run.bigThree.pendingReveals], lastRivalScanWeek: run.week };
-  let rivalWorld = run.rivalWorld;
-  const notices = [...run.notices];
-
-  for (const candidate of candidates) {
-    if (state.slots.length >= BIG_THREE_MAX_SLOTS) break;
-    const sourceId = `rival:${candidate.studio.id}:${candidate.release.week}:${candidate.release.title}`;
-    if (state.slots.some((slot) => slot.sourceId === sourceId)) continue;
-    const stagedRun = { ...run, bigThree: state };
-    const slot = rivalSlot(stagedRun, candidate.studio, candidate.release, candidate.metrics);
-    state = {
-      ...state,
-      slots: [...state.slots, slot],
-      pendingReveals: [...state.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }],
-    };
-    rivalWorld = {
-      ...rivalWorld,
-      studios: rivalWorld.studios.map((studio) => studio.id === candidate.studio.id ? {
-        ...studio,
-        fans: studio.fans + 50_000,
-        reputation: Math.min(100, studio.reputation + 8),
-        momentum: Math.min(30, studio.momentum + 8),
-      } : studio),
-    };
-    notices.push(`🌠 FANDOM CONSENSUS — “${candidate.release.title}” (${candidate.studio.name}) enters THE BIG THREE. ${BIG_THREE_MAX_SLOTS - state.slots.length} place${BIG_THREE_MAX_SLOTS - state.slots.length === 1 ? "" : "s"} remain.`);
-    /* At most one rival can crystallise into cultural canon in a single
-       recognition window. Another name must survive a fresh consensus cycle. */
-    break;
-  }
-
-  return refreshBigThreeOwnership({ ...run, rivalWorld, bigThree: state, notices: notices.slice(-40) });
+  const rivalCandidates = run.rivalWorld.studios.flatMap((studio) => studio.releases.filter((release) => release.week > lastScan && release.week <= run.week && release.title !== BIG_THREE_SEED_TITLE).map((release) => ({ studio, release, metrics: rivalMetrics(studio, release) })).filter((candidate) => bigThreeQualifies(candidate.metrics))).sort((a,b)=>b.metrics.culturalScore-a.metrics.culturalScore||b.release.score-a.release.score);
+  const playerCandidate = [...run.bigThree.candidates].filter((candidate)=>!run.bigThree.slots.some((slot)=>slot.sourceId===candidate.sourceId)).sort((a,b)=>b.culturalScore-a.culturalScore||b.score-a.score)[0];
+  const rivalCandidate = rivalCandidates.find((candidate)=>!run.bigThree.slots.some((slot)=>slot.sourceId===`rival:${candidate.studio.id}:${candidate.release.week}:${candidate.release.title}`));
+  run = { ...run, bigThree: { ...run.bigThree, lastRivalScanWeek: run.week } };
+  if (!playerCandidate && !rivalCandidate) return refreshBigThreeOwnership(run);
+  if (playerCandidate && (!rivalCandidate || playerCandidate.culturalScore >= rivalCandidate.metrics.culturalScore)) return refreshBigThreeOwnership(promotePlayerCandidate(run, playerCandidate));
+  const candidate = rivalCandidate!;
+  const slot = rivalSlot(run, candidate.studio, candidate.release, candidate.metrics);
+  const rivalWorld = { ...run.rivalWorld, studios: run.rivalWorld.studios.map((studio) => studio.id === candidate.studio.id ? { ...studio, fans: studio.fans + 50_000, reputation: Math.min(100, studio.reputation + 8), momentum: Math.min(30, studio.momentum + 8) } : studio) };
+  const remaining = BIG_THREE_MAX_SLOTS - run.bigThree.slots.length - 1;
+  return refreshBigThreeOwnership({ ...run, rivalWorld, bigThree: { ...run.bigThree, slots: [...run.bigThree.slots, slot], candidates: [], pendingReveals: [...run.bigThree.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }] }, notices: [...run.notices, `🌠 FANDOM CONSENSUS — “${candidate.release.title}” (${candidate.studio.name}) enters THE BIG THREE. ${remaining} place${remaining === 1 ? "" : "s"} remain.`].slice(-40) });
 }
 
 export function pendingBigThreeReveal(run: RunState): { reveal: BigThreeReveal; slot: BigThreeSlot } | null {

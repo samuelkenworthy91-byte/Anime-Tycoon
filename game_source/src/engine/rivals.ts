@@ -345,6 +345,13 @@ export const RIVAL_STATUS_LABEL: Record<RivalStatus, string> = {
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const clampPct = (v: number) => clamp(Math.round(v), 0, 100);
 
+export function shapeRivalScore(raw: number): number {
+  let shaped = raw;
+  if (shaped > 30) shaped = 30 + (shaped - 30) * 0.55;
+  if (shaped > 36) shaped = 36 + (shaped - 36) * 0.45;
+  return clamp(Math.round(shaped), 4, 39);
+}
+
 /** small deterministic PRNG so personalities survive save/load */
 function hashStr(s: string): number {
   let h = 2166136261;
@@ -800,7 +807,7 @@ function computeScore(studio: RivalStudio, prod: { genres: GenreId[]; franchiseK
   }
   s += studio.momentum * 0.08;
   s += (Math.random() * 2 - 1) * p.variance;
-  return clamp(Math.round(s), 4, 39);
+  return shapeRivalScore(s);
 }
 
 export interface RivalLicensedIpSeed { id: string; title: string; genreTags: GenreId[]; animeType: AnimeType; sourceType: string; rightsBaseValue: number; }
@@ -825,7 +832,7 @@ export function ensureRivalLicensedAdaptations(
       const id = `licensed_${ipId}_${hashStr(studio.id).toString(36)}`;
       const fit = studio.specialist.filter((g) => ip.genreTags.includes(g)).length * 2 + studio.preferred.filter((g) => ip.genreTags.includes(g)).length;
       const jitter = ((hashStr(`${id}|score`) % 900) / 100) - 4.5;
-      const score = clamp(Math.round(13 + studio.tier * 2.4 + studio.reputation * .07 + PERSONAS[studio.persona].qualityBias + fit * 1.3 + jitter), 5, 39);
+      const score = Math.max(5, shapeRivalScore(13 + studio.tier * 2.4 + studio.reputation * .07 + PERSONAS[studio.persona].qualityBias + fit * 1.3 + jitter));
       const medium: MediumId = ip.sourceType === "film" ? "movie" : ip.sourceType === "webcomic" ? "ona" : "tv";
       const budget: BudgetId = ip.rightsBaseValue >= 2_500_000 ? "blockbuster" : ip.rightsBaseValue < 500_000 ? "indie" : "standard";
       const releaseWeek = week + 8 + (hashStr(`${id}|week`) % 11);

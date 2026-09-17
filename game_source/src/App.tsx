@@ -28,6 +28,7 @@ import {
 } from "./engine/state";
 import { advanceAwardsWeek, pendingNominationAnnouncement, restoreAwardNominationMetadata } from "./engine/awardCycle";
 import { advanceBigThreeWeek, pendingBigThreeReveal, syncBigThreeEra } from "./engine/bigThree";
+import { ipById } from "./engine/ip";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
@@ -363,10 +364,21 @@ export default function App() {
   /** a continuation chosen in the franchise library */
   const continueFranchise = useCallback((plan: ContinuationPlan) => {
     sfx.select();
+    const fr = run?.franchises[plan.key];
+    const licensedId = fr?.licensedIpId ?? (run && fr
+      ? Object.keys(run.ipMarket.owned).find((id) => ipById(id)?.title === fr.baseTitle)
+      : undefined);
+    if (licensedId && run?.ipMarket.owned[licensedId]) {
+      setContPlan(null);
+      setPendingCommission(null);
+      setLicensedIpId(licensedId);
+      setScreen("licensed");
+      return;
+    }
     setContPlan(plan);
     setPendingCommission(null);
     setScreen("create");
-  }, []);
+  }, [run]);
 
   /** a commission brief was accepted on the market screen */
   const takeCommission = useCallback((c: Commission) => {
