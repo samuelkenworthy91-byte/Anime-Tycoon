@@ -8,8 +8,8 @@ export const BIG_THREE_START_WEEK = 2 * 48; // opening of industry Year 3
 export const BIG_THREE_MAX_SLOTS = 3;
 export const BIG_THREE_MIN_SCORE = 38;
 export const BIG_THREE_MIN_REACH = 150_000;
-export const BIG_THREE_MIN_CRAFT_FLOOR = 36;
-export const BIG_THREE_MIN_MOMENTUM = 78;
+export const BIG_THREE_MIN_CRAFT_FLOOR = 32;
+export const BIG_THREE_MIN_MOMENTUM = 68;
 export const BIG_THREE_BREAKOUT_REACH = 300_000;
 export const BIG_THREE_PLAYER_FAN_REWARD = 75_000;
 export const BIG_THREE_PLAYER_RD_REWARD = 60;
@@ -335,14 +335,15 @@ export function recognisePlayerBigThreeRelease(inputRun: RunState, release: BigT
   if (run.bigThree.slots.some((slot) => slot.sourceId === sourceId) || run.bigThree.candidates.some((slot) => slot.sourceId === sourceId)) return run;
   const craft = playerCraftFor(release.score, release.points);
   const craftFloor = Math.min(craft.story, craft.art, craft.sound);
-  const momentum = playerMomentum(run, release.franchiseKey, release.reach);
-  const metrics: BigThreeMetrics = { score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: culturalScore(release.score, release.reach, craftFloor, momentum) };
+  const franchiseFollowing = Math.max(release.reach, run.franchises[release.franchiseKey]?.lifetimeFans ?? 0);
+  const momentum = playerMomentum(run, release.franchiseKey, franchiseFollowing);
+  const metrics: BigThreeMetrics = { score: release.score, reach: franchiseFollowing, craftFloor, momentum, culturalScore: culturalScore(release.score, franchiseFollowing, craftFloor, momentum) };
   if (!bigThreeQualifies(metrics)) return run;
   const candidate: BigThreeSlot = {
     id: `big-three-candidate-${release.projectId}`, sourceId, title: release.draft.title,
     originalStudioId: "player", originalStudio: run.studio, currentOwnerId: "player", currentOwner: run.studio, currentOwnerType: "player", player: true,
     recognisedWeek: run.week, recognisedYear: yearOf(run.week), genres: [...release.draft.genres], animeType: release.draft.animeType,
-    score: release.score, reach: release.reach, craftFloor, momentum, culturalScore: metrics.culturalScore, posterId: null,
+    score: release.score, reach: metrics.reach, craftFloor, momentum, culturalScore: metrics.culturalScore, posterId: null,
     franchiseKey: release.franchiseKey, licensedIpId: release.draft.licensedIpId ?? null,
     draft: { ...release.draft, genres: [...release.draft.genres], arcs: [...release.draft.arcs], sliders: [...release.draft.sliders] as [number, number, number] },
     protag: release.draft.protag,
@@ -368,12 +369,16 @@ function promotePlayerCandidate(run: RunState, candidate: BigThreeSlot): RunStat
 function rivalMetrics(studio: RivalStudio, release: RivalRelease): BigThreeMetrics {
   const craftFloor = Math.min(release.craft.story, release.craft.art, release.craft.sound);
   const momentum = rivalMomentum(studio, release);
+  const priorFranchiseFans = release.franchiseKey
+    ? studio.releases.filter((other) => other.franchiseKey === release.franchiseKey && !(other.week === release.week && other.title === release.title)).reduce((sum, other) => sum + other.fans, 0)
+    : 0;
+  const franchiseFollowing = release.fans + priorFranchiseFans;
   return {
     score: release.score,
-    reach: release.fans,
+    reach: franchiseFollowing,
     craftFloor,
     momentum,
-    culturalScore: culturalScore(release.score, release.fans, craftFloor, momentum),
+    culturalScore: culturalScore(release.score, franchiseFollowing, craftFloor, momentum),
   };
 }
 
@@ -393,7 +398,7 @@ function rivalSlot(run: RunState, studio: RivalStudio, release: RivalRelease, me
     genres: [...release.genres],
     animeType: release.animeType,
     score: release.score,
-    reach: release.fans,
+    reach: metrics.reach,
     craftFloor: metrics.craftFloor,
     momentum: metrics.momentum,
     culturalScore: metrics.culturalScore,

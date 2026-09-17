@@ -224,7 +224,7 @@ function LegacyBeat({
       {slot.player && (
         <div className="mx-auto mt-4 max-w-3xl rounded-2xl border border-mint/35 bg-mint/[0.07] p-3 text-center text-[9px] leading-relaxed text-mint sm:text-[10px]">
           <Sparkles size={13} className="mr-1 inline" />
-          Your studio gains +75,000 fans, +60 RD, permanent franchise prestige and stronger renewal leverage for a licensed property.
+          Your studio gains +75,000 fans, +60 RD and permanent franchise prestige. Big Three properties get +40% direct continuation revenue and +60% merchandise demand; licensed properties also gain stronger renewal leverage.
         </div>
       )}
 

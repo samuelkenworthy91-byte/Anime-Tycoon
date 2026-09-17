@@ -93,7 +93,7 @@ describe("Year 3 Big Three cultural canon", () => {
     expect(bigThreeQualifies({ score: 38, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(true);
     expect(bigThreeQualifies({ score: 37, reach: 150_000, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
     expect(bigThreeQualifies({ score: 38, reach: 149_999, craftFloor: 45, momentum: 80, culturalScore: 400 })).toBe(false);
-    expect(bigThreeQualifies({ score: 38, reach: 150_000, craftFloor: 35, momentum: 80, culturalScore: 400 })).toBe(false);
+    expect(bigThreeQualifies({ score: 38, reach: 150_000, craftFloor: 31, momentum: 80, culturalScore: 400 })).toBe(false);
   });
 
   it("lets a qualifying player production claim an open slot and grants prestige rewards once", () => {

@@ -113,5 +113,7 @@ describe("Stage 8 progression audit", () => {
        name cannot complete the cultural canon before Year 5. */
     expect(secondSlotYears.every((year) => year >= 4)).toBe(true);
     expect(thirdSlotYears.every((year) => year >= 5)).toBe(true);
+    expect(secondSlotYears.length).toBeGreaterThan(0);
+    expect(thirdSlotYears.length).toBeGreaterThan(0);
   }, 120_000);
 });
