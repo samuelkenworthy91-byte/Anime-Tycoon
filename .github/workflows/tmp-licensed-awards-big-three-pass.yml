@@ -22,7 +22,9 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
       - name: Apply targeted source changes
-        run: python3 .github/scripts/apply_gameplay_pass.py
+        run: |
+          python3 .github/scripts/apply_gameplay_pass.py
+          python3 .github/scripts/fix_gameplay_pass_test.py
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
