@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "../utils/cn";
+import { assetPath } from "../utils/assetPath";
 
 /**
  * Renders a cast/staff portrait. Character sheets are 2x2 grids; the inner
@@ -44,7 +45,7 @@ export default function Portrait({
       );
     return (
       <img
-        src={img}
+        src={assetPath(img)}
         alt={alt ?? name ?? ""}
         onError={() => setErr(true)}
         className={cn("object-cover", className)}
@@ -57,7 +58,7 @@ export default function Portrait({
     <div className={cn("relative overflow-hidden", className)} style={style}>
       {!err && (
         <img
-          src={img}
+          src={assetPath(img)}
           alt={alt ?? name ?? ""}
           onError={() => setErr(true)}
           className="absolute max-w-none"
