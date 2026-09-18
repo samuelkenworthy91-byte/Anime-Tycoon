@@ -90,6 +90,17 @@ describe("staff story chains", () => {
     expect(expansionOf(r).stories![0].status).toBe("resolved");
     expect(r.bonds["junior~senior"]).toBe(8);
   });
+  it("does not surface another personal request inside a three-year cooldown", () => {
+    const r = {
+      ...base(),
+      week: 100,
+      day: 700,
+      staff: [staff("senior", 5), { ...staff("junior"), stamina: 5, lastRequestWeek: 50 }],
+    };
+    const next = advanceStaffStories(r);
+    expect((expansionOf(next).stories ?? []).some((story) => story.staffIds.includes("junior"))).toBe(false);
+  });
+
   it("archives a departed participant without substituting another employee", () => {
     const r = base(),
       next = advanceStaffStories({
