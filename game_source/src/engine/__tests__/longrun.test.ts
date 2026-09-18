@@ -183,8 +183,10 @@ describe("long-run simulation", () => {
       expect(r.fans).toBeGreaterThanOrEqual(0);
       /* a career is actually a career */
       expect(r.showsMade).toBeGreaterThan(0);
-      /* staff progress: somebody should have levelled up meaningfully */
-      expect(Math.max(...r.staff.map((s) => s.level))).toBeGreaterThanOrEqual(4);
+      /* staff progress: somebody should have levelled up meaningfully.
+         Veterans can legitimately retire into the permanent legend ledger before
+         Year 12, so current staff alone is not the complete career history. */
+      expect(Math.max(0, ...r.staff.map((s) => s.level), ...r.legends.map((l) => l.level))).toBeGreaterThanOrEqual(4);
     }
   }, 60_000);
 
