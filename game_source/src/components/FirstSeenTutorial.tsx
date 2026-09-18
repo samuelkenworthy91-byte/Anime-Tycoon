@@ -5,7 +5,6 @@ import { cn } from "../utils/cn";
 
 type PreviewId =
   | "pitch" | "project-lead" | "rush-lead"
-  | "policy-tabs" | "policy-options" | "policy-schedule"
   | "overseas-title" | "overseas-shape" | "overseas-sign"
   | "rights-appraise" | "rights-own" | "rights-adapt"
   | "debt-clock" | "debt-recover" | "debt-shutdown"
@@ -23,15 +22,6 @@ const GUIDES: Record<TutorialId, Guide> = {
       { title: "1 · DECIDE ON THE PITCH", body: "In Ambitions, fund development if you want more information, or accept the leadership brief immediately. Declining makes no promise.", preview: "pitch", callout: "Accepting creates a 48-week leadership promise." },
       { title: "2 · PUT THEM ON THE SHOW", body: "Once you greenlight a matching original show, the Project Board surfaces the promise. Assign and name them lead in one action if there is room.", preview: "project-lead", callout: "You do not need to return to Studio Culture." },
       { title: "3 · THE PROMISE FOLLOWS PRODUCTION", body: "The relevant Story, Animation or Sound Rush also shows the promised lead. If you missed the early appointment they can still earn it at 60% department participation.", preview: "rush-lead", callout: "Release the qualifying original show before the deadline." },
-    ],
-  },
-  "working-policies": {
-    eyebrow: "STUDIO CULTURE", title: "WORKING POLICIES & STAFF REQUESTS",
-    intro: "Policies change recovery, profit sharing and creator development. Staff requests are separate decisions: urgent requests pop up, and closing a popup simply leaves it waiting in Staff / Studio Culture.",
-    steps: [
-      { title: "1 · OPEN WORKING POLICIES", body: "Use the Working Policies tab inside Studio Culture. The current policy stays visible so you can compare before committing.", preview: "policy-tabs", callout: "Policy changes are deliberately infrequent." },
-      { title: "2 · SET THE THREE TERMS", body: "Choose paid recovery, the staff profit pool and how many days creators reserve for development while doing other work. A person asking for breathing room cannot make that same recovery request again for a full 48-week game year.", preview: "policy-options", callout: "Closing a staff-request popup means deal with it later, not reject it." },
-      { title: "3 · SCHEDULE THE CHANGE", body: "Press Schedule Policy Change. New terms begin at the next four-week payroll boundary; existing productions keep the terms they started with.", preview: "policy-schedule", callout: "The exact start day is shown before the change takes effect." },
     ],
   },
   "overseas-markets": {
