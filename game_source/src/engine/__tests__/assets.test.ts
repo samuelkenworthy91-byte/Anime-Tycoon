@@ -70,7 +70,7 @@ describe("installed art assets", () => {
       for (const ent of readdirSync(dir, { withFileTypes: true })) {
         const full = path.join(dir, ent.name);
         if (ent.isDirectory()) {
-          if (ent.name !== "node_modules" && !ent.name.startsWith(".")) scanRuntime(full);
+          if (ent.name !== "node_modules" && ent.name !== "__tests__" && !ent.name.startsWith(".")) scanRuntime(full);
         } else if (/\.(tsx?|jsx?|css)$/.test(ent.name)) {
           const src = readFileSync(full, "utf8");
           const matches = [...src.matchAll(/[\"'\`]\/(?:img|cast|rival-posters|auction-ip|awards)\/[\w\-./]+/g)];
