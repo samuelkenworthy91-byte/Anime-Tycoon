@@ -2,6 +2,7 @@ import type { Franchise } from "./franchise";
 
 export interface AmbientEventContext {
   week: number;
+  studio: string;
   cash: number;
   fans: number;
   franchises: Record<string, Franchise>;
@@ -23,7 +24,33 @@ export interface AmbientEventOutcome {
 const pick = <T,>(xs: readonly T[], rng: () => number): T => xs[Math.floor(rng() * xs.length)];
 const money = (n: number) => "£" + Math.abs(n).toLocaleString("en-GB");
 
-export function rollAmbientEvent(ctx: AmbientEventContext, rng: () => number = Math.random): AmbientEventOutcome | null {
+function hash32(text: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+function ambientRng(studio: string, week: number): () => number {
+  let x = hash32(`${studio}:${week}:ambient`) || 0x9e3779b9;
+  return () => {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    return (x >>> 0) / 4_294_967_296;
+  };
+}
+
+/** Ambient texture deliberately uses its own deterministic stream so adding
+ * flavour events cannot perturb production, hiring or rival simulation RNG. */
+export function ambientEventOccurs(studio: string, week: number): boolean {
+  if (week < 12 || week % 4 !== 2) return false;
+  return ambientRng(studio, week)() < 0.65;
+}
+
+export function rollAmbientEvent(ctx: AmbientEventContext, rng: () => number = ambientRng(ctx.studio, ctx.week)): AmbientEventOutcome | null {
   const franchises = Object.values(ctx.franchises).filter((fr) => !fr.soldTo);
   const hot = franchises.length ? [...franchises].sort((a, b) => b.popularity - a.popularity)[0] : null;
   const active = ctx.active.length ? pick(ctx.active, rng) : null;
