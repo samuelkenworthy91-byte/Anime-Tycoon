@@ -1,4 +1,5 @@
 import { Lock, Sparkles } from "lucide-react";
+import { assetPath } from "../utils/assetPath";
 import { castById } from "../engine/data";
 import { ipById } from "../engine/ip";
 import { rivalPosterById } from "../engine/rivalPosters";
@@ -28,7 +29,7 @@ function FallbackPoster({ slot }: { slot: BigThreeSlot }) {
 export function BigThreePoster({ slot, studio }: { slot: BigThreeSlot; studio: string }) {
   const licensed = slot.licensedIpId ? ipById(slot.licensedIpId) : null;
   if (licensed?.posterAsset) {
-    return <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-xl"><img src={licensed.posterAsset} alt={`${slot.title} poster`} className="absolute inset-0 h-full w-full object-cover" /></div>;
+    return <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-xl"><img src={assetPath(licensed.posterAsset)} alt={`${slot.title} poster`} className="absolute inset-0 h-full w-full object-cover" /></div>;
   }
   if (slot.player && slot.draft) {
     const lead = castById(slot.draft.protag);
@@ -36,7 +37,7 @@ export function BigThreePoster({ slot, studio }: { slot: BigThreeSlot; studio: s
   }
   const rival = slot.posterId ? rivalPosterById(slot.posterId) : null;
   if (rival) {
-    return <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-xl"><img src={rival.img} alt={`${slot.title} poster`} className="absolute inset-0 h-full w-full object-cover" /></div>;
+    return <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-xl"><img src={assetPath(rival.img)} alt={`${slot.title} poster`} className="absolute inset-0 h-full w-full object-cover" /></div>;
   }
   return <FallbackPoster slot={slot} />;
 }
