@@ -6,6 +6,7 @@ import { IP_AUTO_RENEW_HEADROOM, IP_RENEWAL_WINDOW_WEEKS, ipRenewalQuote, renewI
 import { formatGBP, formatGBPShort } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
+import { assetPath } from "../utils/assetPath";
 import { CAPITAL_PROJECTS, buyCapitalProject, coProductionOffer, startCoProduction } from "../engine/spending";
 import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
 import { markTutorialSeen } from "../engine/tutorials";
@@ -17,7 +18,7 @@ function KeyArt({ ipId }: { ipId: string }) {
     <div className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-xl border border-paper/15" style={{ background: `linear-gradient(145deg,${ip.posterPalette[0]},${ip.posterPalette[1]} 62%,${ip.posterPalette[2]})` }}>
       <div className="absolute inset-0 gridlines opacity-30" />
       {!loaded && <><div className="absolute inset-x-2 bottom-2 font-display text-sm font-black leading-[.9] text-white drop-shadow">{ip.title.toUpperCase()}</div><div className="absolute left-2 top-2 rounded bg-black/55 px-1 text-[7px] font-black tracking-widest">{ip.sourceType.toUpperCase()}</div></>}
-      <img src={ip.posterAsset} alt={`${ip.title} poster`} className="absolute inset-0 h-full w-full object-cover" onLoad={() => setLoaded(true)} onError={(e) => { e.currentTarget.style.display = "none"; setLoaded(false); }} />
+      <img src={assetPath(ip.posterAsset)} alt={`${ip.title} poster`} className="absolute inset-0 h-full w-full object-cover" onLoad={() => setLoaded(true)} onError={(e) => { e.currentTarget.style.display = "none"; setLoaded(false); }} />
     </div>
   );
 }
