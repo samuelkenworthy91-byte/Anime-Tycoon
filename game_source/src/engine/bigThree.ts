@@ -324,7 +324,7 @@ export function syncBigThreeEra(input: RunState): RunState {
          the player never had the chance to answer. */
       lastRivalScanWeek: run.week,
     },
-    notices: [...run.notices, `🌠 YEAR 3 — fans name ${BIG_THREE_SEED_TITLE} (${BIG_THREE_SEED_STUDIO}) as the first title of anime's new Big Three. Two places remain.`].slice(-40),
+    notices: [...run.notices, `🌠 YEAR 5 — fans name ${BIG_THREE_SEED_TITLE} (${BIG_THREE_SEED_STUDIO}) as the first title of anime's new Big Three. Two places remain.`].slice(-40),
   };
 }
 
