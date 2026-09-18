@@ -73,6 +73,8 @@ export interface AdvancedDecisionContext {
   researchJobs?: { id: string; name: string }[];
   yearShows?: { sourceId?: string | null; title: string; story: number; art: number; sound: number; audience: number; score: number }[];
   research?: string[];
+  /** recently used templates are suppressed so rare decisions stay varied */
+  recentTemplates?: string[];
 }
 
 let seq = 0;
@@ -327,7 +329,10 @@ export function rollAdvancedDecision(week: number, ctx: AdvancedDecisionContext)
       ]) : null,
   ];
 
-  const pool = makers.map((f) => f()).filter((x): x is AdvancedDecisionEvent => !!x);
+  const recent = new Set((ctx.recentTemplates ?? []).slice(-8));
+  const all = makers.map((f) => f()).filter((x): x is AdvancedDecisionEvent => !!x);
+  const fresh = all.filter((event) => !recent.has(event.payload.template));
+  const pool = fresh.length ? fresh : all;
   if (!pool.length) return null;
   return pick(pool);
 }
