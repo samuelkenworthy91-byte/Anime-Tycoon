@@ -609,6 +609,7 @@ export function advanceExpansionDay(r: RunState): RunState {
       .filter(
         (s) =>
           week - (s.joinedWeek ?? week) >= 24 &&
+          week - (s.lastRequestWeek ?? -1000) >= 144 &&
           (s.shows?.length ?? 0) >= 2 &&
           !x.promises.some(
             (p) => p.staffId === s.id && p.status === "active",
@@ -648,11 +649,14 @@ export function advanceExpansionDay(r: RunState): RunState {
         cost: Math.round(8000 * (1 + r.officeLevel * 0.75)),
         vision: generateCreatorVision("pitch:" + s.id + ":" + week, genre, r.genresUnlocked, s),
       };
+      staff = staff.map((employee) =>
+        employee.id === s.id ? { ...employee, lastRequestWeek: week } : employee
+      );
       x = event(
         { ...x, pitches: [...x.pitches, pitch], lastPitchWeek: week },
         pitch.id,
         day,
-        s.name + " has pitched an original " + genre + " production.",
+        s.name + " has pitched an original " + genre + " production. They will not make another personal request for three years.",
       );
     }
   }
