@@ -1,5 +1,5 @@
 import { initialExpansion, migrateExpansion, snapshotProduction, expansionBusyReason, advanceExpansionDay, finishExpansionProduction, settleProjectReceipt, type ExpansionState } from "./studioExpansion";
-import { initialOverseas, migrateOverseas, defaultContent, overseasOf, advanceOverseasWeek, type OverseasState } from "./overseas";
+import { initialOverseas, migrateOverseas, defaultContent, overseasOf, advanceOverseasWeek, overseasTierOf, overseasUpkeep, type OverseasState } from "./overseas";
 import {
   GENRES,
   ARCS,
@@ -120,6 +120,10 @@ import {
   SEQUEL_SCORE_THRESHOLD,
   franchiseBoost,
   MERCH_COOLDOWN,
+  MERCH_TIERS,
+  FRANCHISE_CAMPAIGNS,
+  applyFranchiseCampaign,
+  franchiseCampaignBlock,
   merchBlock,
   merchProductById,
   merchReturn,
@@ -214,6 +218,7 @@ import {
 } from "./studioOps";
 import { gainShowrunnerXp, initialShowrunnerCareer, migrateShowrunnerCareer, showrunnerDefaultName, SHOWRUNNER_RELEASE_XP, type ShowrunnerCareer } from "./showrunnerCareer";
 import { rollStudioEvent, type StudioEvent } from "./events";
+import { ambientEventOccurs, rollAmbientEvent } from "./ambientEvents";
 import { genreTargetFor } from "./genreTargets";
 import {
   consumeDecisionModifiers,
@@ -406,7 +411,7 @@ export interface RunState {
   revBoostUntil: number;
   /** auction calendar, adaptation contracts and studio-wide discovered story blueprints */
   ipMarket: IPMarketState;
-  /** Year-3+ fan-decided cultural canon. Exactly three slots can ever be filled. */
+  /** Year-5+ fan-decided cultural canon. Exactly three slots can ever be filled. */
   bigThree: BigThreeState;
   /** one-off strategic spending is recorded for finance/history UI */
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
@@ -764,8 +769,53 @@ export const campaignPressureFor = (r: RunState) => industryPressure({
   playerRank: r.rivalWorld?.playerRank,
 });
 
+export const merchTierOf = (r: Pick<RunState, "capitalProjects">): number => {
+  let tier = 0;
+  for (const def of MERCH_TIERS) if (r.capitalProjects.includes(def.id)) tier = Math.max(tier, def.tier);
+  return tier;
+};
+
+export const merchUpkeep = (r: Pick<RunState, "capitalProjects">): number => {
+  const tier = merchTierOf(r);
+  return tier ? MERCH_TIERS[tier - 1].upkeep : 0;
+};
+
+export const commercialUpkeep = (r: Pick<RunState, "capitalProjects">): number =>
+  merchUpkeep(r) + overseasUpkeep(r);
+
+export function buyMerchInfrastructure(r: RunState): RunState | null {
+  if (r.officeLevel < 1 || !r.research.includes("merch")) return null;
+  const tier = merchTierOf(r);
+  const next = MERCH_TIERS[tier];
+  if (!next || r.cash < next.cost) return null;
+  return {
+    ...r,
+    cash: r.cash - next.cost,
+    capitalProjects: [...r.capitalProjects, next.id],
+    strategicSpend: [...r.strategicSpend, { id: `merch_infra_${r.week}_${next.tier}`, label: next.name, amount: next.cost, week: r.week }],
+    notices: [...r.notices, `🛍 ${next.name} opened (−£${next.cost.toLocaleString("en-GB")}). Weekly overhead £${next.upkeep.toLocaleString("en-GB")}.`].slice(-40),
+  };
+}
+
+export function runFranchiseCampaign(r: RunState, franchiseKey: string, campaignId: string): RunState | null {
+  const fr = r.franchises[franchiseKey];
+  const campaign = FRANCHISE_CAMPAIGNS.find((x) => x.id === campaignId);
+  if (!fr || !campaign || franchiseCampaignBlock(fr, campaign, r.week, r.cash)) return null;
+  const next = applyFranchiseCampaign(fr, campaign, r.week);
+  return {
+    ...r,
+    cash: r.cash - campaign.cost,
+    franchises: { ...r.franchises, [franchiseKey]: next },
+    strategicSpend: [...r.strategicSpend, { id: `franchise_campaign_${r.week}_${franchiseKey}_${campaign.id}`, label: `${fr.baseTitle}: ${campaign.label}`, amount: campaign.cost, week: r.week }],
+    notices: [...r.notices, `📣 ${campaign.label} for “${fr.baseTitle}”: +${campaign.popularity} popularity, +${campaign.fatigue} fatigue, attention held for ${campaign.freezeWeeks} weeks.`].slice(-40),
+  };
+}
+
 export const weeklyOutgoings = (r: RunState) =>
-  office(r).rent + r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * campaignPressureFor(r).salaryMult + facilityUpkeep(r.facilities);
+  office(r).rent +
+  r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * campaignPressureFor(r).salaryMult +
+  facilityUpkeep(r.facilities) +
+  commercialUpkeep(r);
 
 /** the studio's staff capacity — dynasty investments can add desks */
 export const staffCapacity = (r: RunState) =>
@@ -820,9 +870,11 @@ export function forecastWeek(r: RunState): WeekForecast {
     const wages = r.staff.reduce((a, s) => a + s.salary, 0) * dynastySalaryMult(r) * campaignPressureFor(r).salaryMult * 4;
     const rent = office(r).rent * 4;
     const upkeep = facilityUpkeep(r.facilities) * 4;
+    const commercial = commercialUpkeep(r) * 4;
     if (wages > 0) costsDue.push({ label: "Wages", amount: Math.round(wages) });
     if (rent > 0) costsDue.push({ label: "Rent", amount: Math.round(rent) });
     if (upkeep > 0) costsDue.push({ label: "Facilities", amount: Math.round(upkeep) });
+    if (commercial > 0) costsDue.push({ label: "Commercial divisions", amount: Math.round(commercial) });
   }
   const net = income - burn - lateFees - payday;
   return { week: w, income, payoutsDue, burn, lateFees, payday, costsDue, net, cashAfter: r.cash + net };
@@ -1135,8 +1187,9 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       for (const st of staffArr) {
         if (events.length >= 2) break;
         if (events.some((e) => e.staffId === st.id)) continue;
-        if (w - (st.lastEventWeek ?? -99) < 24) continue;
-        if (wantsRaise(st, w)) {
+        const personalRequestReady = w - (st.lastRequestWeek ?? -1000) >= 144;
+        const externalPoachReady = w - (st.lastEventWeek ?? -1000) >= 72;
+        if (personalRequestReady && wantsRaise(st, w)) {
           events.push({
             id: `ev${w}_${st.id}`,
             staffId: st.id,
@@ -1145,9 +1198,9 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
             week: w,
             expiresWeek: w + 8,
           });
-          staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastEventWeek: w } : x));
-          notices.push(`${st.name} requests a salary review (£${marketSalary(st).toLocaleString("en-GB")}/wk).`);
-        } else if (poachable(st) && !(r.staffContracts?.[st.id]?.exclusive && r.staffContracts[st.id].expiresWeek > w) && Math.random() < 0.35) {
+          staffArr = staffArr.map((x) => (x.id === st.id ? { ...x, lastRequestWeek: w } : x));
+          notices.push(`${st.name} requests a salary review (£${marketSalary(st).toLocaleString("en-GB")}/wk). They will not make another personal request for three years.`);
+        } else if (externalPoachReady && poachable(st) && !(r.staffContracts?.[st.id]?.exclusive && r.staffContracts[st.id].expiresWeek > w) && Math.random() < 0.35) {
           const poacher = pickPoacher(rivalWorld);
           if (poacher) {
             const offer = Math.round((st.salary * 1.6) / 10) * 10;
@@ -1211,6 +1264,44 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
+    /* Ambient industry life: frequent enough to make the world feel alive,
+       never blocking and never pausing the studio clock. */
+    if (ambientEventOccurs(r.studio, w)) {
+      const ambient = rollAmbientEvent({
+        week: w,
+        studio: r.studio,
+        cash,
+        fans,
+        franchises,
+        active: projects.filter((p) => !["done", "airing"].includes(p.stage)).map((p) => ({ id: p.id, title: p.draft.title, hype: p.hype, issues: p.issues })),
+        staff: staffArr.map((s) => ({ id: s.id, name: s.name, stamina: s.stamina })),
+        merchTier: merchTierOf(r),
+        overseasTier: overseasTierOf(r),
+      });
+      if (ambient) {
+        cash += ambient.cashDelta ?? 0;
+        fans = Math.max(0, fans + (ambient.fansDelta ?? 0));
+        if (ambient.franchise && franchises[ambient.franchise.key]) {
+          const fr = franchises[ambient.franchise.key];
+          const next = {
+            ...fr,
+            popularity: Math.max(0, Math.min(100, fr.popularity + (ambient.franchise.popularity ?? 0))),
+            fatigue: Math.max(0, Math.min(100, fr.fatigue + (ambient.franchise.fatigue ?? 0))),
+          };
+          next.merchValue = merchValueOf(next);
+          franchises = { ...franchises, [fr.key]: next };
+        }
+        if (ambient.project) {
+          projects = projects.map((p) => p.id === ambient.project!.id ? {
+            ...p,
+            hype: Math.max(0, Math.min(100, p.hype + (ambient.project!.hype ?? 0))),
+            issues: Math.max(0, p.issues + (ambient.project!.issues ?? 0)),
+          } : p);
+        }
+        notices.push(ambient.text);
+      }
+    }
+
     /* the market breathes every season */
     if (w % 12 === 0) {
       const drift = driftMarket(market);
@@ -1249,10 +1340,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
-    /* High-stakes studio/industry decisions. Roughly 4 per industry year;
-       every one is blocking and the App halts the live clock immediately. */
+    /* High-stakes decisions are deliberately rare: about 2–3 per year.
+       Ambient events carry most world texture without interrupting play. */
     studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
-    if (w % 7 === 0 && studioEvents.length === 0 && Math.random() < 0.60) {
+    if (w % 12 === 6 && studioEvents.length === 0 && Math.random() < 0.65) {
       const sev = rollStudioEvent(w, {
         crew: staffArr.map((s) => ({
           id: s.id,
@@ -1271,6 +1362,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         researchJobs,
         yearShows,
         research,
+        recentTemplates: r.studioEventHistory ?? [],
       });
       if (sev) {
         studioEvents = [sev];
@@ -1282,7 +1374,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const bill = perWeek * 4;
       cash -= bill;
       notices.push(
-        `Payday: wages + rent${facilityUpkeep(r.facilities) > 0 ? " + facilities" : ""} −£${bill.toLocaleString("en-GB")}.`
+        `Payday: wages + rent${facilityUpkeep(r.facilities) > 0 ? " + facilities" : ""}${commercialUpkeep(r) > 0 ? " + commercial divisions" : ""} −£${bill.toLocaleString("en-GB")}.`
       );
     }
     if (w % 6 === 0)
@@ -2667,32 +2759,20 @@ export function releaseProject(
     );
     const v = judged.verdict;
     franchises[prevFr.key] = judged.franchise;
+    result = {
+      ...result,
+      fans: Math.round(result.fans * v.fanMult),
+      breakdown: [...result.breakdown, { label: `Fans + zeitgeist · expected ${v.expected}/40`, pts: `×${v.fanMult.toFixed(2)} fan gain` }],
+    };
     if (v.verdict === "delight") {
-      result = {
-        ...result,
-        fans: Math.round(result.fans * v.fanMult),
-        breakdown: [...result.breakdown, { label: `Fans expected ${v.expected}/40`, pts: "exceeded! +15% fans" }],
-      };
-      frNotices.push(`Fans are ecstatic — “${draft.title}” beat the ${v.expected}/40 they hoped for!`);
+      frNotices.push(`Fans are ecstatic — “${draft.title}” beat the ${v.expected}/40 they hoped for, and the franchise's cultural heat converts that attention into audience growth.`);
     } else if (v.verdict === "disappointment") {
-      result = {
-        ...result,
-        fans: Math.round(result.fans * v.fanMult),
-        breakdown: [
-          ...result.breakdown,
-          { label: `Fans expected ${v.expected}/40`, pts: `betrayed — ${Math.round((1 - v.fanMult) * 100)}% fans lost` },
-        ],
-      };
-      frNotices.push(
-        `💔 “${draft.title}” scored ${result.total}/40 against the ${v.expected}/40 fans expected. The franchise takes the hit.`
-      );
-    } else {
-      result = { ...result, breakdown: [...result.breakdown, { label: `Fans expected ${v.expected}/40`, pts: "met" }] };
+      frNotices.push(`💔 “${draft.title}” scored ${result.total}/40 against the ${v.expected}/40 fans expected. The franchise takes the hit.`);
     }
     if (kind === "spinoff") {
       /* the featured character carries their fame into a brand-new IP */
       const feat = prevFr.cast.find((c) => c.id === draft.spinChar);
-      const spin = createFranchise(draft.title, draft, castSeed, resShape, r.week, prevFr.key);
+      const spin = createFranchise(draft.title, draft, castSeed, { ...resShape, fans: result.fans }, r.week, prevFr.key);
       if (feat) {
         spin.cast = spin.cast.map((c) =>
           c.id === feat.id ? { ...c, popularity: Math.min(100, Math.max(c.popularity, feat.popularity)) } : c
@@ -3535,7 +3615,8 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const fr = r.franchises[franchiseKey];
   const product = merchProductById(productId);
   if (!fr || !product) return null;
-  if (merchBlock(fr, product, r.week, r.cash, r.research ?? [])) return null;
+  const tier = merchTierOf(r);
+  if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
   const total = Math.round(merchReturn(fr, product) * merchDecisionMult);
   const weekly = Math.floor(total / product.weeks);
@@ -3550,8 +3631,12 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   }
   const next: Franchise = {
     ...fr,
+    popularity: Math.min(100, fr.popularity + (product.popularityGain ?? 0)),
+    fatigue: Math.min(100, fr.fatigue + (product.fatigueAdd ?? 0)),
+    zeitgeistFreezeUntil: product.freezeWeeks ? Math.max(fr.zeitgeistFreezeUntil ?? 0, r.week + product.freezeWeeks) : fr.zeitgeistFreezeUntil,
     merchCooldown: { ...fr.merchCooldown, [product.id]: r.week + MERCH_COOLDOWN },
   };
+  next.merchValue = merchValueOf(next);
   return {
     ...r,
     cash: r.cash - product.cost,
@@ -3560,7 +3645,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     franchises: { ...r.franchises, [franchiseKey]: next },
     notices: [
       ...r.notices,
-      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks.`,
-    ],
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
+    ].slice(-40),
   };
 }

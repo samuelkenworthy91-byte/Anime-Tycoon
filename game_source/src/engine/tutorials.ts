@@ -2,7 +2,6 @@ import type { RunState } from "./state";
 
 export type TutorialId =
   | "passion-projects"
-  | "working-policies"
   | "overseas-markets"
   | "rights-market"
   | "financial-distress"

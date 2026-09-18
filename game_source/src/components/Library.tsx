@@ -23,18 +23,23 @@ import { GENRES, MEDIUMS, castById, dateLabel, formatGBPShort } from "../engine/
 import {
   CONTINUATIONS,
   MERCH_PRODUCTS,
+  MERCH_TIERS,
+  FRANCHISE_CAMPAIGNS,
   continuationBlock,
   expectedScore,
   filmsOf,
   merchBlock,
   merchReturn,
+  franchiseCampaignBlock,
+  zeitgeistOf,
+  zeitgeistLabel,
   ovasOf,
   seasonsOf,
   spinoffsOf,
   topCharacter,
   type EntryKind,
 } from "../engine/franchise";
-import { franchiseSaleBlock, launchMerch, startFranchiseAuction, type RunState } from "../engine/state";
+import { buyMerchInfrastructure, franchiseSaleBlock, launchMerch, merchTierOf, runFranchiseCampaign, startFranchiseAuction, type RunState } from "../engine/state";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import SellerAuctionCeremony from "./SellerAuctionCeremony";
@@ -227,10 +232,19 @@ export default function LibraryPanel({
   const fr = open;
   const hofEntries = fr.entries.filter((e) => e.hallOfFame).length;
   const top = topCharacter(fr);
+  const zeitgeist = zeitgeistOf(fr);
+  const merchTier = merchTierOf(run);
+  const currentMerchTier = merchTier ? MERCH_TIERS[merchTier - 1] : null;
+  const nextMerchTier = MERCH_TIERS[merchTier] ?? null;
 
   const doMerch = (productId: string) => {
     sfx.fanfare();
     setRun((r) => launchMerch(r, fr.key, productId) ?? r);
+  };
+
+  const doCampaign = (campaignId: string) => {
+    sfx.select();
+    setRun((r) => runFranchiseCampaign(r, fr.key, campaignId) ?? r);
   };
 
   const startContinuation = (kind: Exclude<EntryKind, "original">, extra?: Partial<ContinuationPlan>) => {
@@ -283,6 +297,7 @@ export default function LibraryPanel({
           <Stat k="LIFETIME FANS" v={fr.lifetimeFans.toLocaleString("en-GB")} />
           <Stat k="TOTAL REVENUE" v={formatGBPShort(fr.totalRevenue)} accent="#5ef0c0" />
           <Stat k="MERCH VALUE" v={formatGBPShort(fr.merchValue)} accent="#5ef0c0" />
+          <Stat k="ZEITGEIST" v={`${zeitgeist} · ${zeitgeistLabel(fr)}`} accent={zeitgeist >= 70 ? "#5ef0c0" : zeitgeist >= 50 ? "#ffd166" : "#ff9d5e"} />
           <Stat k="LAST ENTRY" v={dateLabel(fr.lastEntryWeek)} />
         </div>
 
@@ -301,8 +316,23 @@ export default function LibraryPanel({
               {fr.fatigue}
             </span>
           </div>
-          {!fr.soldTo && fr.fatigue >= 40 && (
-            <div className="text-[10px] text-paper/45">Fans are tiring of this IP — resting it restores excitement.</div>
+          <div className="flex items-center gap-2">
+            <span className="w-16 text-[9px] tracking-wider text-paper/45">ZEITGEIST</span>
+            <Bar v={zeitgeist} color={zeitgeist >= 70 ? "#5ef0c0" : zeitgeist >= 50 ? "#ffd166" : "#ff9d5e"} />
+            <span className="w-8 text-right text-[10px] font-bold">{zeitgeist}</span>
+          </div>
+          {!fr.soldTo && (
+            <div className="text-[10px] text-paper/45">
+              {fr.fatigue >= 80
+                ? "Audience burnout is crushing cultural momentum. Rest or reboot before forcing another push."
+                : fr.fatigue >= 60
+                  ? "The IP is overexposed. More promotion can keep it visible, but the commercial curve is falling."
+                  : fr.fatigue >= 25 && fr.fatigue <= 45
+                    ? "Sweet spot: the franchise is visible without yet exhausting its audience."
+                    : fr.fatigue < 15
+                      ? "Underexposed: attention is cooling even though the audience is fresh."
+                      : "Popularity and exposure are currently in a healthy range."}
+            </div>
           )}
         </div>
       </div>
@@ -386,31 +416,80 @@ export default function LibraryPanel({
 
       {!fr.soldTo && (
         <>
+          {/* ---------------------------------------------- zeitgeist campaigns */}
+          <div>
+            <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
+              <Flame size={11} /> KEEP IN THE ZEITGEIST
+            </div>
+            <div className="mb-2 text-[9px] text-paper/45">
+              Promotion can keep a franchise commercially hot around a release, but every push adds fatigue. The strongest long-run strategy is to peak near launch rather than stay saturated forever.
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {FRANCHISE_CAMPAIGNS.map((campaign) => {
+                const block = franchiseCampaignBlock(fr, campaign, run.week, run.cash);
+                return (
+                  <div key={campaign.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-gold/25 bg-gold/5")}>
+                    <div className="text-[11px] font-bold">{campaign.label}</div>
+                    <div className="text-[9px] text-paper/45">{campaign.description}</div>
+                    <div className="mt-1 text-[9px] text-paper/60">
+                      −{formatGBPShort(campaign.cost)} · +{campaign.popularity} Pop · +{campaign.fatigue} Fatigue · hold {campaign.freezeWeeks} wk
+                    </div>
+                    {block ? <div className="mt-1 text-[9px] text-paper/40">{block}</div> : (
+                      <Btn variant="gold" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doCampaign(campaign.id)}>
+                        RUN CAMPAIGN
+                      </Btn>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* --------------------------------------------------------- merch */}
           <div>
             <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-              <ShoppingBag size={11} /> MERCHANDISING
+              <ShoppingBag size={11} /> MERCHANDISING · TIER {merchTier}/4
+            </div>
+            <div className="mb-2 rounded-md border border-gold/20 bg-gold/5 p-2 text-[9px] text-paper/55">
+              {currentMerchTier
+                ? <><b className="text-gold">{currentMerchTier.name}</b> · {formatGBPShort(currentMerchTier.upkeep)}/week upkeep. Product families unlock together as the commercial operation expands.</>
+                : <><b>NO MERCH OPERATION</b> · Research Merch Division, then invest in Domestic Merch.</>}
+              {nextMerchTier && (
+                <div className="mt-1.5">
+                  <Btn
+                    variant="gold"
+                    className="w-full !py-1 text-[10px]"
+                    disabled={!run.research.includes("merch") || run.officeLevel < 1 || run.cash < nextMerchTier.cost}
+                    onClick={() => setRun((r) => buyMerchInfrastructure(r) ?? r)}
+                  >
+                    INVEST {formatGBPShort(nextMerchTier.cost)} · TIER {nextMerchTier.tier} {nextMerchTier.name.toUpperCase()}
+                  </Btn>
+                  {!run.research.includes("merch") && <div className="mt-1 text-paper/40">Research Merch Division first.</div>}
+                  {run.officeLevel < 1 && <div className="mt-1 text-paper/40">Requires the Anime Runner Building (Studio 2).</div>}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {MERCH_PRODUCTS.map((p) => {
-                const block = merchBlock(fr, p, run.week, run.cash, run.research ?? []);
+                const block = merchBlock(fr, p, run.week, run.cash, merchTier);
                 const ret = merchReturn(fr, p);
-                /* research gates get a labelled 🔒 RESEARCH chip so the next
-                   unlock is obvious — other gates stay plain-economic */
-                const researchGate = block?.includes("research (R&D)");
                 return (
                   <div key={p.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-mint/30 bg-mint/5")}>
                     <div className="flex items-center gap-1 text-[11px] font-bold">
                       {p.id === "mobile" && <Gamepad2 size={11} />}
+                      {p.id === "tcg" && <Sparkles size={11} className="text-gold" />}
                       {p.label}
-                      {researchGate && <span className="ml-auto rounded bg-viol/25 px-1 py-px text-[7px] font-black tracking-widest text-viol">🔒 R&D</span>}
+                      <span className="ml-auto rounded border border-paper/15 px-1 py-px text-[7px] font-black text-paper/45">T{p.tier}</span>
                     </div>
                     <div className="text-[9px] text-paper/45">{p.desc}</div>
                     <div className="mt-1 text-[9px] text-paper/60">
                       −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(ret)}</b> / {p.weeks} wk
                     </div>
+                    {(p.popularityGain || p.fatigueAdd) && (
+                      <div className="text-[9px] text-gold/70">+{p.popularityGain ?? 0} Pop · +{p.fatigueAdd ?? 0} Fatigue{p.freezeWeeks ? ` · attention held ${p.freezeWeeks} wk` : ""}</div>
+                    )}
                     {block ? (
-                      <div className={cn("mt-1 text-[9px]", researchGate ? "font-bold text-viol" : "text-paper/40")}>{block}</div>
+                      <div className="mt-1 text-[9px] text-paper/40">{block}</div>
                     ) : (
                       <Btn variant="cyan" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doMerch(p.id)}>
                         LAUNCH

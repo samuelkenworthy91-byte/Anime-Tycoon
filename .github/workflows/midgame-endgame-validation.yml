@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - work/midgame-endgame-systems-pass
+      - work/zeitgeist-commercial-events-pass
   workflow_dispatch:
 
 permissions:

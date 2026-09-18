@@ -18,6 +18,7 @@ import { catalogHasSecret, isCastingActive } from "../castCatalog";
 import {
   MERCH_CAPABILITY_RESEARCH,
   MERCH_PRODUCTS,
+  MERCH_TIERS,
   createFranchise,
   merchBlock,
   merchProductById,
@@ -59,63 +60,33 @@ const warmFr = (over: Partial<Franchise> = {}): Franchise => ({
 /* ---------------------------------------------- merch research (PART D) */
 
 describe("merch research identity", () => {
-  it("MERCH DIVISION is the capability research every line requires", () => {
+  it("MERCH DIVISION remains the capability research that opens commercial infrastructure", () => {
     expect(MERCH_CAPABILITY_RESEARCH).toBe("merch");
     const r = RESEARCH.find((x) => x.id === "merch")!;
     expect(r).toBeTruthy();
+    expect(r.desc).toContain("infrastructure");
   });
 
-  it("every merch product maps to exactly one named research in R&D", () => {
-    for (const p of MERCH_PRODUCTS) {
-      expect(p.research).toBeTruthy();
-      const def = RESEARCH.find((x) => x.id === p.research);
-      expect(def, `${p.label} research ${p.research} missing from RESEARCH`).toBeTruthy();
-      expect(p.researchName).toBe(def!.name);
-      expect(def!.section).toBe("merch");
-      expect(def!.requires).toBe(MERCH_CAPABILITY_RESEARCH);
-    }
+  it("individual SKU research has been replaced by four paid infrastructure tiers", () => {
+    const retired = ["merch_plush", "merch_soundtrack", "merch_figures", "merch_apparel", "merch_collectors"];
+    expect(RESEARCH.filter((x) => retired.includes(x.id))).toHaveLength(0);
+    expect(MERCH_TIERS).toHaveLength(4);
+    expect(MERCH_TIERS.map((x) => x.cost)).toEqual([250_000, 1_500_000, 8_000_000, 35_000_000]);
+    expect(MERCH_TIERS.every((x) => x.upkeep > 0)).toBe(true);
   });
 
-  it("the five required individual lines exist with sane costs", () => {
-    const want = ["merch_plush", "merch_soundtrack", "merch_figures", "merch_apparel", "merch_collectors"];
-    for (const id of want) {
-      const def = RESEARCH.find((x) => x.id === id);
-      expect(def, id).toBeTruthy();
-      expect(def!.rd).toBeGreaterThan(0);
-      expect(def!.rd).toBeLessThanOrEqual(120);
-    }
+  it("product families open by tier and the TCG lives in Fan Ecosystem tier 3", () => {
+    expect(MERCH_PRODUCTS.length).toBeGreaterThan(6);
+    expect(merchProductById("tcg")?.tier).toBe(3);
+    expect(merchProductById("mobile")?.tier).toBe(4);
+    expect(merchBlock(warmFr(), merchProductById("tcg")!, 10, 99_000_000, 2)).toContain("Tier 3");
+    expect(merchBlock(warmFr(), merchProductById("tcg")!, 10, 99_000_000, 3)).toBeNull();
   });
 
-  it("without MERCH DIVISION every merch action is research-blocked first", () => {
-    const fr = warmFr();
-    const research: string[] = [];
-    for (const p of MERCH_PRODUCTS) {
-      const block = merchBlock(fr, p, 10, 99_000_000, research);
-      expect(block, p.id).toBe("Requires Merch Division research (R&D)");
-    }
-  });
-
-  it("after MERCH DIVISION, each line still needs its own research — and reports it", () => {
-    const fr = warmFr();
-    const research: string[] = ["merch"];
-    const plush = merchProductById("plush")!;
-    expect(merchBlock(fr, plush, 10, 99_000_000, research)).toBe("Requires Plush Production research (R&D)");
-    const ost = merchProductById("ost")!;
-    expect(merchBlock(fr, ost, 10, 99_000_000, research)).toBe("Requires Soundtrack Publishing research (R&D)");
-    const plushResearch: string[] = ["merch", "merch_plush"];
-    expect(merchBlock(fr, plush, 10, 99_000_000, plushResearch)).toBeNull();
-    expect(merchBlock(fr, merchProductById("figures")!, 10, 99_000_000, plushResearch)).toBe("Requires Scale Figure Licensing research (R&D)");
+  it("Global Merch still builds on Merch Division rather than restoring SKU research", () => {
     const m2 = RESEARCH.find((x) => x.id === "merch2")!;
     expect(m2.requires).toBe("merch");
     expect(m2.section).toBe("merch");
-  });
-
-  it("research-hard gate comes BEFORE cash/capacity gates so players see the true blocker", () => {
-    const broke = 0;
-    const fr = warmFr();
-    expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch"])).toBe("Requires Scale Figure Licensing research (R&D)");
-    expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch", "merch_figures"])).not.toBe("Requires Scale Figure Licensing research (R&D)");
-    expect(merchBlock(fr, merchProductById("figures")!, 10, broke, ["merch", "merch_figures"])).toBeTruthy();
   });
 });
 
@@ -186,9 +157,9 @@ describe("TALENT ANALYSIS repeatable research", () => {
     expect(startResearchProject(r, TALENT_ANALYSIS_ID, 85)).toBeNull();
   });
 
-  it("protects research dependency rules for merch lines (requires merch)", () => {
+  it("protects the remaining Global Merch dependency on Merch Division", () => {
     const r = richRun({ research: [] });
-    expect(researchBlockReason(r, "merch_figures")).toContain("Merch Division");
-    expect(researchBlockReason(richRun({ research: ["merch"] }), "merch_figures")).toBeNull();
+    expect(researchBlockReason(r, "merch2")).toContain("Merch Division");
+    expect(researchBlockReason(richRun({ research: ["merch"] }), "merch2")).toBeNull();
   });
 });

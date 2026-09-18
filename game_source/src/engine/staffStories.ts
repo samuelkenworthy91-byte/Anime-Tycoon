@@ -25,9 +25,10 @@ export interface StaffStory {
   outcome?: string;
 }
 
-/** Recovery conversations should feel meaningful rather than repetitive.
- * One in-game year is 48 weeks = 336 days. */
-export const RECOVERY_REQUEST_COOLDOWN_DAYS = 48 * 7;
+/** Personal staff requests should feel like character moments, not inbox churn.
+ * Three industry years = 144 weeks = 1,008 days. */
+export const PERSONAL_REQUEST_COOLDOWN_DAYS = 144 * 7;
+export const RECOVERY_REQUEST_COOLDOWN_DAYS = PERSONAL_REQUEST_COOLDOWN_DAYS;
 export const RECOVERY_REQUEST_STAMINA_THRESHOLD = 15;
 
 export const storyChoices: Record<
@@ -165,7 +166,13 @@ export function advanceStaffStories(r: RunState): RunState {
       .length >= 2
   )
     return next;
+  const requestReady = (id: string) => {
+    const employee = staff.find((s) => s.id === id);
+    if (!employee) return false;
+    return Math.floor(day / 7) - (employee.lastRequestWeek ?? -1000) >= 144;
+  };
   const free = (id: string) =>
+    requestReady(id) &&
     !stories.some(
       (s) =>
         s.staffIds.includes(id) &&
@@ -189,6 +196,11 @@ export function advanceStaffStories(r: RunState): RunState {
     text: string,
   ): RunState => ({
     ...next,
+    staff: next.staff.map((employee) =>
+      ids.includes(employee.id)
+        ? { ...employee, lastRequestWeek: Math.floor(day / 7) }
+        : employee
+    ),
     expansion: {
       ...x,
       lastStoryDay: day,

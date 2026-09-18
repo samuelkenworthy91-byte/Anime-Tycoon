@@ -8,8 +8,6 @@ import { assignToProject, type RunState } from "../engine/state";
 import { GENRES, formatGBP, type GenreId } from "../engine/data";
 import {
   expansionOf,
-  schedulePolicies,
-  policyChangeBlock,
   promiseLeadership,
   renegotiatePromise,
   appointCreativeLead,
@@ -17,7 +15,6 @@ import {
   recallStaff,
   approveCreatorEdit,
   gameDay,
-  type Policies,
 } from "../engine/studioExpansion";
 import {
   overseasOf,
@@ -31,6 +28,9 @@ import {
   quoteOverseas,
   signOverseas,
   reviewLegacyRights,
+  OVERSEAS_TIERS,
+  overseasTierOf,
+  buyOverseasInfrastructure,
   type OverseasRequest,
   type ContentProfile,
 } from "../engine/overseas";
@@ -88,11 +88,11 @@ function useRunAction({ run, setRun }: Props) {
 }
 export default function StudioExpansionPanel(props: Props) {
   const { run, setRun } = props;
-  const [tab, setTab] = useState<"staff" | "policies" | "overseas">("staff");
+  const [tab, setTab] = useState<"staff" | "overseas">("staff");
   const [tutorial, setTutorial] = useState<TutorialId | null>(null);
   const expansion = expansionOf(run);
   const hasCreatorCommitment = expansion.pitches.some((p) => !["declined", "accepted"].includes(p.status)) || expansion.promises.some((p) => p.status === "active");
-  const tabTutorial: TutorialId = tab === "staff" ? "passion-projects" : tab === "policies" ? "working-policies" : "overseas-markets";
+  const tabTutorial: TutorialId = tab === "staff" ? "passion-projects" : "overseas-markets";
   useEffect(() => {
     if (tab === "staff" && !hasCreatorCommitment) return;
     if (!tutorial && !tutorialSeen(run, tabTutorial)) setTutorial(tabTutorial);
@@ -104,28 +104,18 @@ export default function StudioExpansionPanel(props: Props) {
         className="flex flex-1 flex-wrap gap-2"
         aria-label="Studio expansion sections"
       >
-        {(["staff", "policies", "overseas"] as const).map((t) => (
+        {(["staff", "overseas"] as const).map((t) => (
           <button
             key={t}
             className={button + (t === tab ? " text-gold" : "")}
             aria-pressed={t === tab}
             onClick={() => setTab(t)}
           >
-            {t === "staff"
-              ? "AMBITIONS"
-              : t === "policies"
-                ? "WORKING POLICIES"
-                : "OVERSEAS MARKETS"}
+            {t === "staff" ? "AMBITIONS" : "OVERSEAS MARKETS"}
           </button>
         ))}
       </div><TutorialHelpButton onClick={() => setTutorial(tabTutorial)} /></div>
-      {tab === "staff" ? (
-        <StaffAmbitions {...props} />
-      ) : tab === "policies" ? (
-        <PolicyPanel {...props} />
-      ) : (
-        <OverseasPanel {...props} />
-      )}
+      {tab === "staff" ? <StaffAmbitions {...props} /> : <OverseasPanel {...props} />}
       <FirstSeenTutorial id={tutorial ?? tabTutorial} open={tutorial !== null} onDismiss={dismissTutorial} />
     </div>
   );
@@ -326,115 +316,6 @@ function StaffAmbitions(props: Props) {
     </div>
   );
 }
-function PolicyPanel(props: Props) {
-  const { run } = props,
-    x = expansionOf(run),
-    { message, act } = useRunAction(props),
-    [choice, setChoice] = useState<Policies>(() => ({ ...x.policies }));
-  return (
-    <div className="space-y-3">
-      <p>
-        Changes take effect at the next payroll boundary. Existing productions
-        and funded prototypes keep their agreed terms.
-      </p>
-      <Select
-        label="Protected recovery"
-        value={choice.recovery}
-        onChange={(v) =>
-          setChoice({ ...choice, recovery: Number(v) as Policies["recovery"] })
-        }
-        options={[
-          { value: 0, label: "Standard stamina recovery" },
-          { value: 7, label: "7 days paid recovery · +3 morale" },
-          { value: 14, label: "14 days paid recovery · +5 morale" },
-        ]}
-      />
-      <Select
-        label="Staff share of project contribution profit"
-        value={choice.profit}
-        onChange={(v) =>
-          setChoice({ ...choice, profit: Number(v) as Policies["profit"] })
-        }
-        options={[0, 5, 10].map((n) => ({
-          value: n,
-          label: n + "% of positive receipts less tracked direct costs",
-        }))}
-      />
-      <p className="text-xs text-paper/65">
-        Bonuses use cash received, after tracked production, localisation and
-        campaign costs. Studio rent and general payroll are excluded.
-        Contributor shares survive departure.
-      </p>
-      <Select
-        label="Creative development schedule"
-        value={choice.development}
-        onChange={(v) =>
-          setChoice({
-            ...choice,
-            development: Number(v) as Policies["development"],
-          })
-        }
-        options={[
-          { value: 0, label: "Dedicated full-time development" },
-          { value: 2, label: "Reserve 2 days per four weeks" },
-          { value: 4, label: "Reserve 4 days per four weeks" },
-        ]}
-      />
-      <p className="text-xs">
-        Reserved days let funded creators keep production assignments on other
-        days. Each prototype requires 28 development days.
-      </p>
-      <button
-        className={button}
-        disabled={!!policyChangeBlock(run)}
-        onClick={() => act((r) => schedulePolicies(r, choice))}
-      >
-        SCHEDULE POLICY CHANGE
-      </button>
-      <p role="status">{message || policyChangeBlock(run)}</p>
-      <p>
-        Current: {x.policies.recovery} recovery days · {x.policies.profit}%
-        profit pool · {x.policies.development || "full-time"} development days.
-      </p>
-      {x.pendingPolicy && (
-        <p>New policy begins on day {x.pendingPolicy.day}.</p>
-      )}
-      {Object.entries(x.leave)
-        .filter(([, d]) => d > gameDay(run))
-        .map(([id, d]) => (
-          <div className="ink-card p-3" key={id}>
-            {run.staff.find((s) => s.id === id)?.name ?? "Former employee"}:
-            recovery until day {d}.{" "}
-            <button
-              className={button}
-              onClick={() => act((r) => recallStaff(r, id))}
-            >
-              RECALL · −8 MORALE
-            </button>
-          </div>
-        ))}
-      <details>
-        <summary>Staff profit statements</summary>
-        {Object.entries(x.accounts).map(([id, a]) => (
-          <div className="ink-card my-2 p-3" key={id}>
-            <b>{run.projects.find((p) => p.id === id)?.draft.title ?? id}</b>
-            <p>
-              Receipts {formatGBP(a.receipts)} · direct costs{" "}
-              {formatGBP(a.cost)} · staff paid {formatGBP(a.paid)}
-            </p>
-            {Object.entries(a.entitlements).map(([sid, paid]) => (
-              <p key={sid}>
-                {run.staff.find((s) => s.id === sid)?.name ??
-                  "Former contributor"}
-                : {formatGBP(paid)}
-              </p>
-            ))}
-          </div>
-        ))}
-      </details>
-    </div>
-  );
-}
 function OverseasPanel(props: Props) {
   const { run } = props,
     o = overseasOf(run),
@@ -461,8 +342,32 @@ function OverseasPanel(props: Props) {
     if (p && profile)
       act((r) => setContentProfile(r, p.id, { ...profile, [key]: value }));
   };
+  const infrastructureTier = overseasTierOf(run);
+  const nextInfrastructure = OVERSEAS_TIERS[infrastructureTier] ?? null;
+  const currentInfrastructure = infrastructureTier ? OVERSEAS_TIERS[infrastructureTier - 1] : null;
   return (
     <div className="space-y-3">
+      <div className="ink-card space-y-2 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <b className="text-gold">INTERNATIONAL INFRASTRUCTURE</b>
+          <span className="text-xs text-paper/55">Tier {infrastructureTier}/4</span>
+        </div>
+        <p className="text-xs text-paper/60">
+          {currentInfrastructure
+            ? `${currentInfrastructure.name} · £${currentInfrastructure.upkeep.toLocaleString("en-GB")}/week upkeep · up to ${currentInfrastructure.maxConcurrent} live campaign${currentInfrastructure.maxConcurrent === 1 ? "" : "s"}`
+            : "Build an Export Desk to start selling completed productions overseas."}
+        </p>
+        {nextInfrastructure && (
+          <button
+            className={button}
+            disabled={run.officeLevel < 1 || run.cash < nextInfrastructure.cost}
+            onClick={() => act((r) => buyOverseasInfrastructure(r), `${nextInfrastructure.name} opened.`)}
+          >
+            INVEST {formatGBP(nextInfrastructure.cost)} · {nextInfrastructure.name.toUpperCase()}
+          </button>
+        )}
+        {run.officeLevel < 1 && <p className="text-xs text-paper/45">Requires the Anime Runner Building (Studio 2).</p>}
+      </div>
       <p>
         Three fictional territories contain different mixtures of viewers.
         Choose an edition and audience; overseas reception is separate from the
@@ -563,7 +468,7 @@ function OverseasPanel(props: Props) {
         onChange={(v) =>
           setQ({ ...q, campaign: Number(v) as OverseasRequest["campaign"] })
         }
-        options={[0, 15000, 40000].map((n) => ({
+        options={[0, 75000, 250000].map((n) => ({
           value: n,
           label: formatGBP(n),
         }))}

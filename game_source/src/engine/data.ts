@@ -145,6 +145,8 @@ export interface Staff {
   lastTrainedWeek?: number;
   /** cooldown so salary/poach events do not spam */
   lastEventWeek?: number;
+  /** personal requests are deliberately rare: one request per employee per three-year window */
+  lastRequestWeek?: number;
 }
 
 export interface CastMember {
@@ -566,23 +568,18 @@ export const RESEARCH: ResearchItem[] = [
   { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "All live contribution checks gain +12% effective skill." },
   { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
-  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show. Unlocks the merchandising capability itself — individual product lines still need their own research." },
+  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show. Unlocks commercial merchandising infrastructure; product families then open together by investment tier." },
   { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art contribution checks gain +12% effective skill." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
-  { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30%. Also unlocks Mobile Game licences.", requires: "merch", section: "merch" },
+  { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30% and improves the economics of a fully built consumer-products business.", requires: "merch", section: "merch" },
   { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Progressive story research. The first study adds strong Quick Picks; later studies reveal more arc × genre fits until every standard arc is understood." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Progressive structure research. Repeat studies reveal more real combo effects until every standard story structure is understood." },
   { id: "staff_appraisal", name: "Staff Appraisal", rd: 40, desc: "Reveals a broad long-term Potential band for employees already on your payroll." },
   { id: "talent_scouting", name: "Talent Scouting", rd: 70, desc: "Extends Potential bands to recruitment candidates before you sign them.", requires: "staff_appraisal" },
-  /* ---- timed merch product research (Part D): each product line needs
-     Merch Division plus its own dedicated project before launch ---- */
-  { id: "merch_plush", name: "Plush Production", rd: 18, desc: "Unlocks the Plushies merchandise line for your franchises.", requires: "merch", section: "merch" },
-  { id: "merch_soundtrack", name: "Soundtrack Publishing", rd: 14, desc: "Unlocks the Soundtrack merchandise line for your franchises.", requires: "merch", section: "merch" },
-  { id: "merch_figures", name: "Scale Figure Licensing", rd: 30, desc: "Unlocks the Scale Figures merchandise line for your franchises.", requires: "merch", section: "merch" },
-  { id: "merch_apparel", name: "Apparel Partnerships", rd: 26, desc: "Unlocks the Clothing Line merchandise line for your franchises.", requires: "merch", section: "merch" },
-  { id: "merch_collectors", name: "Collector Editions", rd: 40, desc: "Unlocks the Collector's Edition merchandise line for your franchises.", requires: "merch", section: "merch" },
+  /* Merchandise product families now unlock by paid infrastructure tier in
+     the Franchise Library rather than one R&D project per individual SKU. */
   /* ---- repeatable hidden-affinity R&D (Part F) ---- */
   { id: "talent_analysis", name: "Talent Analysis", rd: 85, repeatable: true, desc: "An exhaustive profiling programme. On completion, ONE cast member's hidden affinity is permanently revealed. Repeatable until every talent is profiled." },
 ];

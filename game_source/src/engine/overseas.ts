@@ -3,6 +3,7 @@ import type { RunState } from "./state";
 import type { AudienceId, GenreId } from "./data";
 import type { Project } from "./projects";
 import { expansionOf } from "./studioExpansion";
+import { merchValueOf } from "./franchise";
 
 export const SEGMENTS = [
   {
@@ -38,6 +39,46 @@ export const SEGMENTS = [
 ] as const;
 export type SegmentId = (typeof SEGMENTS)[number]["id"];
 export type TerritoryId = "aurora" | "meridian" | "pelagic";
+
+export type OverseasTier = 1 | 2 | 3 | 4;
+export interface OverseasTierDef {
+  tier: OverseasTier;
+  id: string;
+  name: string;
+  cost: number;
+  upkeep: number;
+  maxConcurrent: number;
+  description: string;
+}
+export const OVERSEAS_TIERS: OverseasTierDef[] = [
+  { tier: 1, id: "overseas_tier_1", name: "Export Desk", cost: 400_000, upkeep: 6_000, maxConcurrent: 1, description: "Basic subtitled exports and one live territorial campaign." },
+  { tier: 2, id: "overseas_tier_2", name: "International Division", cost: 2_500_000, upkeep: 22_000, maxConcurrent: 2, description: "Full dubbing, regional marketing and two simultaneous campaigns." },
+  { tier: 3, id: "overseas_tier_3", name: "Regional Offices", cost: 12_000_000, upkeep: 65_000, maxConcurrent: 3, description: "Premium localisation, broadcast recuts and major regional launches." },
+  { tier: 4, id: "overseas_tier_4", name: "Global Distribution Arm", cost: 50_000_000, upkeep: 160_000, maxConcurrent: 6, description: "Worldwide exploitation, stronger distribution economics and a true global slate." },
+];
+
+export function overseasTierOf(r: Pick<RunState, "capitalProjects">): number {
+  let tier = 0;
+  for (const def of OVERSEAS_TIERS) if (r.capitalProjects.includes(def.id)) tier = Math.max(tier, def.tier);
+  return tier;
+}
+export function overseasUpkeep(r: Pick<RunState, "capitalProjects">): number {
+  const tier = overseasTierOf(r);
+  return tier ? OVERSEAS_TIERS[tier - 1].upkeep : 0;
+}
+export function buyOverseasInfrastructure(r: RunState): RunState | null {
+  if (r.officeLevel < 1) return null;
+  const tier = overseasTierOf(r);
+  const next = OVERSEAS_TIERS[tier];
+  if (!next || r.cash < next.cost) return null;
+  return {
+    ...r,
+    cash: r.cash - next.cost,
+    capitalProjects: [...r.capitalProjects, next.id],
+    strategicSpend: [...r.strategicSpend, { id: `overseas_infra_${r.week}_${next.tier}`, label: next.name, amount: next.cost, week: r.week }],
+    notices: [...r.notices, `🌍 ${next.name} opened (−£${next.cost.toLocaleString("en-GB")}). Weekly overhead £${next.upkeep.toLocaleString("en-GB")}.`].slice(-40),
+  };
+}
 export const TERRITORIES: {
   id: TerritoryId;
   name: string;
@@ -50,7 +91,7 @@ export const TERRITORIES: {
     id: "aurora",
     name: "Aurora Union",
     language: "Auroran",
-    population: 120000,
+    population: 2_400_000,
     mix: {
       source: 0.15,
       animation: 0.25,
@@ -65,7 +106,7 @@ export const TERRITORIES: {
     id: "meridian",
     name: "Meridian Republics",
     language: "Meridian",
-    population: 160000,
+    population: 3_200_000,
     mix: {
       source: 0.1,
       animation: 0.1,
@@ -80,7 +121,7 @@ export const TERRITORIES: {
     id: "pelagic",
     name: "Pelagic Federation",
     language: "Auroran",
-    population: 90000,
+    population: 1_800_000,
     mix: {
       source: 0.2,
       animation: 0.15,
@@ -98,7 +139,7 @@ export const DISTRIBUTORS = [
     name: "Festival & Specialist Network",
     share: 0.25,
     reach: 0.5,
-    fee: 6000,
+    fee: 35_000,
     weeks: 8,
     maxIntensity: 3,
   },
@@ -107,7 +148,7 @@ export const DISTRIBUTORS = [
     name: "National Family Network",
     share: 0.4,
     reach: 0.8,
-    fee: 14000,
+    fee: 90_000,
     weeks: 12,
     maxIntensity: 1,
   },
@@ -140,16 +181,16 @@ export const EDITIONS: {
   {
     id: "subtitles",
     name: "Subtitled original",
-    cost: 8000,
+    cost: 35_000,
     days: 14,
     quality: 0,
   },
-  { id: "dub", name: "Standard dub", cost: 28000, days: 28, quality: 5 },
-  { id: "premium", name: "Premium dub", cost: 65000, days: 42, quality: 9 },
+  { id: "dub", name: "Standard dub", cost: 120_000, days: 28, quality: 5 },
+  { id: "premium", name: "Premium dub", cost: 350_000, days: 42, quality: 9 },
   {
     id: "edited",
     name: "Edited broadcast dub",
-    cost: 42000,
+    cost: 180_000,
     days: 35,
     quality: 2,
   },
@@ -161,7 +202,7 @@ export interface OverseasRequest {
   segment: SegmentId;
   audience: AudienceId;
   edition: EditionKind;
-  campaign: 0 | 15000 | 40000;
+  campaign: 0 | 75000 | 250000;
 }
 export interface RegionalRelease extends OverseasRequest {
   modelReception?: number;
@@ -447,9 +488,19 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     !e ||
     !SEGMENTS.some((s) => s.id === q.segment) ||
     !["kids", "teens", "adults", "family"].includes(q.audience) ||
-    ![0, 15000, 40000].includes(q.campaign)
+    ![0, 75000, 250000].includes(q.campaign)
   )
     return fail("Choose a production and release terms");
+  const infrastructureTier = overseasTierOf(r);
+  if (infrastructureTier <= 0) return fail("Build an Export Desk before signing overseas releases");
+  const tierDef = OVERSEAS_TIERS[infrastructureTier - 1];
+  const activeCount = o.releases.filter((release) => release.endsWeek > r.week).length;
+  if (activeCount >= tierDef.maxConcurrent) return fail(`${tierDef.name} can manage ${tierDef.maxConcurrent} live overseas campaign${tierDef.maxConcurrent === 1 ? "" : "s"} at once`);
+  if (infrastructureTier === 1 && q.edition !== "subtitles") return fail("Export Desk supports subtitled releases only");
+  if (infrastructureTier === 2 && !["subtitles", "dub"].includes(q.edition)) return fail("Premium localisation requires Regional Offices");
+  if (infrastructureTier === 1 && q.campaign !== 0) return fail("Regional campaigns require an International Division");
+  if (infrastructureTier === 2 && q.campaign === 250000) return fail("Major regional campaigns require Regional Offices");
+
   const profile = o.profiles[p.id] ?? defaultContent(p),
     intensity = Math.max(
       profile.violence,
@@ -518,7 +569,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
         a.segment === q.segment &&
         a.endsWeek > opensWeek,
     ).length;
-  const campaign = q.campaign === 40000 ? 1.3 : q.campaign === 15000 ? 1.15 : 1,
+  const campaign = q.campaign === 250000 ? 1.35 : q.campaign === 75000 ? 1.15 : 1,
     recognition = 1 + Math.min(0.15, (o.recognition[t.id] ?? 0) / 100000);
   const viewers = Math.floor(
     Math.min(
@@ -531,7 +582,9 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
         (1 + competition * 0.15),
     ),
   );
-  const gross = Math.round(viewers * (d.id === "broadcast" ? 4 : 6)),
+  const infrastructureRevenue = [0, 1, 1.08, 1.22, 1.40][infrastructureTier] ?? 1;
+  const networkRevenue = r.capitalProjects.includes("distribution_network") ? 1.18 : 1;
+  const gross = Math.round(viewers * (d.id === "broadcast" ? 4 : 6) * infrastructureRevenue * networkRevenue),
     distributorCut = Math.round(gross * terms.share);
   const royaltyRate = p.draft.licensedIpId
       ? (r.ipMarket.owned[p.draft.licensedIpId]?.royaltyRate ?? 0)
@@ -665,12 +718,19 @@ export function advanceOverseasWeek(r: RunState): RunState {
       const p = r.projects.find((p) => p.id === a.projectId),
         key = p?.draft.franchiseKey ?? p?.draft.title,
         fr = key ? franchises[key] : null;
-      if (key && fr)
-        franchises[key] = {
+      if (key && fr) {
+        const popularityGain = a.reception >= 80 ? 5 : a.reception >= 65 ? 3 : a.reception >= 50 ? 1 : 0;
+        const fatigueGain = a.reception >= 80 ? 2 : a.reception >= 65 ? 1 : 0;
+        const updated = {
           ...fr,
           totalRevenue: fr.totalRevenue + a.receipts,
           lifetimeFans: Math.max(0, fr.lifetimeFans + a.fans),
+          popularity: Math.min(100, fr.popularity + popularityGain),
+          fatigue: Math.min(100, fr.fatigue + fatigueGain),
         };
+        updated.merchValue = merchValueOf(updated);
+        franchises[key] = updated;
+      }
       return {
         ...a,
         recognised: true,

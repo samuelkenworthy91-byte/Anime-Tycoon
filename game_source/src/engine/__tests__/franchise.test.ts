@@ -5,6 +5,9 @@ import {
   CULT_CHANCE,
   MERCH_COOLDOWN,
   MERCH_PRODUCTS,
+  MERCH_TIERS,
+  FRANCHISE_CAMPAIGNS,
+  applyFranchiseCampaign,
   continuationBlock,
   continuationDef,
   createFranchise,
@@ -22,6 +25,7 @@ import {
   spinoffsOf,
   tickFranchise,
   topCharacter,
+  zeitgeistOf,
   type Franchise,
 } from "../franchise";
 import {
@@ -84,6 +88,7 @@ const richRun = (over: Partial<RunState> = {}): RunState => ({
   cash: 50_000_000,
   rd: 500,
   officeLevel: 4,
+  capitalProjects: MERCH_TIERS.map((tier) => tier.id),
   ...over,
 });
 
@@ -213,7 +218,7 @@ describe("fan expectations", () => {
     if (out.result.total < 34) {
       expect(out.run.franchises.IP.popularity).toBeLessThan(80);
       expect(out.run.franchises.IP.entries[1].disappointment).toBe(true);
-      expect(out.result.breakdown.some((b) => b.label.startsWith("Fans expected"))).toBe(true);
+      expect(out.result.breakdown.some((b) => b.label.startsWith("Fans + zeitgeist"))).toBe(true);
     }
   });
 });
@@ -318,17 +323,16 @@ describe("character popularity", () => {
 
 /* -------------------------------------------------------- merchandising */
 describe("merchandising", () => {
-  it("offers six product lines with rising demands", () => {
-    expect(MERCH_PRODUCTS).toHaveLength(6);
+  it("offers a tiered product catalogue including a TCG", () => {
+    expect(MERCH_PRODUCTS.length).toBeGreaterThanOrEqual(10);
+    expect(merchProductById("tcg")?.tier).toBe(3);
     expect(merchProductById("mobile")!.minPop).toBeGreaterThan(merchProductById("plush")!.minPop);
     expect(merchProductById("collectors")!.minScore).toBeGreaterThan(0);
   });
 
-  const ALL_MERCH_RESEARCH = ["merch", "merch_plush", "merch_soundtrack", "merch_figures", "merch_apparel", "merch_collectors", "merch2"];
-
-  it("launching a line costs cash now and schedules royalties", () => {
+  it("launching a line costs cash now and schedules materially larger royalties", () => {
     const fr = mkFr({ popularity: 70, lifetimeFans: 300_000 });
-    const r = richRun({ franchises: { IP: fr }, research: [...ALL_MERCH_RESEARCH] });
+    const r = richRun({ franchises: { IP: fr } });
     const out = launchMerch(r, "IP", "figures")!;
     const product = merchProductById("figures")!;
     expect(out.cash).toBe(r.cash - product.cost);
@@ -336,21 +340,55 @@ describe("merchandising", () => {
     expect(rows).toHaveLength(product.weeks);
     expect(rows.reduce((a, p) => a + p.amount, 0)).toBe(merchReturn(fr, product));
     expect(out.franchises.IP.merchCooldown.figures).toBe(r.week + MERCH_COOLDOWN);
+    expect(merchReturn(fr, product)).toBeGreaterThan(product.cost);
   });
 
   it("the same line cannot be spammed before its cooldown", () => {
     const fr = mkFr({ popularity: 70 });
-    let r = richRun({ franchises: { IP: fr }, research: [...ALL_MERCH_RESEARCH] });
+    let r = richRun({ franchises: { IP: fr } });
     r = launchMerch(r, "IP", "plush")!;
     expect(launchMerch(r, "IP", "plush")).toBeNull();
-    expect(launchMerch(r, "IP", "ost")).toBeTruthy(); // other lines unaffected
+    expect(launchMerch(r, "IP", "ost")).toBeTruthy();
   });
 
-  it("cold or unproven IPs cannot carry premium products", () => {
+  it("tier gates and franchise pedigree stop premium products arriving too early", () => {
+    const warm = mkFr({ popularity: 70, bestScore: 34 });
+    expect(merchBlock(warm, merchProductById("tcg")!, 10, 10_000_000, 2)).toContain("Tier 3");
+    expect(merchBlock(warm, merchProductById("tcg")!, 10, 10_000_000, 3)).toBeNull();
     const cold = mkFr({ popularity: 10, bestScore: 20 });
-    expect(merchBlock(cold, merchProductById("mobile")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeTruthy();
-    expect(merchBlock(cold, merchProductById("collectors")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeTruthy();
-    expect(merchBlock(cold, merchProductById("ost")!, 10, 10_000_000, ALL_MERCH_RESEARCH)).toBeNull();
+    expect(merchBlock(cold, merchProductById("mobile")!, 10, 100_000_000, 4)).toBeTruthy();
+    expect(merchBlock(cold, merchProductById("collectors")!, 10, 100_000_000, 4)).toBeTruthy();
+    expect(merchBlock(cold, merchProductById("ost")!, 10, 100_000_000, 4)).toBeNull();
+  });
+
+  it("a TCG launch keeps an IP visible but deliberately adds fatigue", () => {
+    const fr = mkFr({ popularity: 70, fatigue: 30, bestScore: 34 });
+    const r = richRun({ franchises: { IP: fr } });
+    const out = launchMerch(r, "IP", "tcg")!;
+    expect(out.franchises.IP.popularity).toBe(78);
+    expect(out.franchises.IP.fatigue).toBe(44);
+    expect(out.franchises.IP.zeitgeistFreezeUntil).toBeGreaterThan(r.week);
+    expect(out.payouts.filter((p) => p.label.includes("Trading Card Game"))).toHaveLength(36);
+  });
+});
+
+/* ----------------------------------------------------------- zeitgeist */
+describe("franchise zeitgeist", () => {
+  it("rewards the popularity/fatigue sweet spot rather than maximum exposure", () => {
+    const dormant = mkFr({ popularity: 90, fatigue: 0 });
+    const sweet = mkFr({ popularity: 90, fatigue: 35 });
+    const burnt = mkFr({ popularity: 90, fatigue: 85 });
+    expect(zeitgeistOf(sweet)).toBeGreaterThan(zeitgeistOf(dormant));
+    expect(zeitgeistOf(sweet)).toBeGreaterThan(zeitgeistOf(burnt));
+  });
+
+  it("paid campaigns trade future fatigue for immediate cultural relevance", () => {
+    const fr = mkFr({ popularity: 60, fatigue: 20 });
+    const campaign = FRANCHISE_CAMPAIGNS.find((x) => x.id === "anniversary")!;
+    const next = applyFranchiseCampaign(fr, campaign, 100);
+    expect(next.popularity).toBe(76);
+    expect(next.fatigue).toBe(42);
+    expect(next.zeitgeistFreezeUntil).toBe(116);
   });
 });
 

@@ -279,13 +279,13 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
 
 export interface CapitalDef { id: string; name: string; cost: number; minOffice: number; description: string; }
 export const CAPITAL_PROJECTS: CapitalDef[] = [
-  { id: "screening_theatre", name: "Private Screening Theatre", cost: 1_500_000, minOffice: 2, description: "Improves consultant/final-polish work and prestige launch campaigns." },
-  { id: "mocap_stage", name: "Performance Capture Stage", cost: 18_000_000, minOffice: 3, description: "Strengthens animation passes and retakes while cutting failure risk." },
-  { id: "orchestra_hall", name: "Orchestral Recording Hall", cost: 42_000_000, minOffice: 4, description: "Greatly strengthens soundtrack enhancement work." },
-  { id: "global_merch", name: "Global Merch Centre", cost: 120_000_000, minOffice: 4, description: "Boosts character-led and international launch campaigns." },
-  { id: "distribution_network", name: "Worldwide Distribution Network", cost: 260_000_000, minOffice: 4, description: "Boosts mass-media and international campaigns across territories." },
-  { id: "convention_venue", name: "Exhibition & Convention Venue", cost: 480_000_000, minOffice: 4, description: "Supercharges convention panels and owned fan events." },
-  { id: "flagship_hq", name: "Global Flagship Headquarters", cost: 1_100_000_000, minOffice: 4, description: "Improves every strategic campaign and gives stronger co-production terms." },
+  { id: "screening_theatre", name: "Private Screening Theatre", cost: 1_500_000, minOffice: 1, description: "Improves consultant/final-polish work and prestige launch campaigns." },
+  { id: "mocap_stage", name: "Performance Capture Stage", cost: 18_000_000, minOffice: 1, description: "Strengthens animation passes and retakes while cutting failure risk." },
+  { id: "orchestra_hall", name: "Orchestral Recording Hall", cost: 42_000_000, minOffice: 1, description: "Greatly strengthens soundtrack enhancement work." },
+  { id: "global_merch", name: "Global Merch Centre", cost: 120_000_000, minOffice: 1, description: "Boosts character-led and international launch campaigns." },
+  { id: "distribution_network", name: "Worldwide Distribution Network", cost: 260_000_000, minOffice: 1, description: "Boosts mass-media and international campaigns across territories." },
+  { id: "convention_venue", name: "Exhibition & Convention Venue", cost: 480_000_000, minOffice: 1, description: "Supercharges convention panels and owned fan events." },
+  { id: "flagship_hq", name: "Global Flagship Headquarters", cost: 1_100_000_000, minOffice: 1, description: "Improves every strategic campaign and gives stronger co-production terms." },
 ];
 
 export function buyCapitalProject(run: RunState, id: string): RunState | null {
