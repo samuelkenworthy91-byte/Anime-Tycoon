@@ -1361,6 +1361,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         researchJobs,
         yearShows,
         research,
+        recentTemplates: r.studioEventHistory ?? [],
       });
       if (sev) {
         studioEvents = [sev];
