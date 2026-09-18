@@ -62,6 +62,7 @@ function run(): RunState {
       ...r,
       cash: 1000000,
       rd: 100,
+      capitalProjects: ["overseas_tier_4"],
       facilities: { legal: 1, data: 1 },
       projects: [p],
     },
@@ -129,7 +130,7 @@ describe("overseas strategy", () => {
       single = qs.reduce((s, q) => s + quoteOverseas(r, q).release!.cost, 0),
       pack = regionalPackage(r, qs);
     expect(pack.block).toBeNull();
-    expect(pack.cost).toBe(single - 8000 - 1200);
+    expect(pack.cost).toBe(single - 35_000 - 7_000);
     expect(pack.run!.cash).toBe(r.cash - pack.cost);
     expect(overseasOf(pack.run!).releases).toHaveLength(2);
     expect(
