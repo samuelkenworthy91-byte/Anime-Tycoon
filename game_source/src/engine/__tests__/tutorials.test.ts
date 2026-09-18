@@ -7,7 +7,7 @@ describe("first-seen tutorials", () => {
     const run = initialRun("Tutorial Test", "steady");
     delete run.tutorialsSeen;
     const migrated = migrateRun(run);
-    expect(tutorialSeen(migrated, "working-policies")).toBe(false);
+    expect(tutorialSeen(migrated, "overseas-markets")).toBe(false);
   });
 
   it("persists an acknowledgement without duplicating ids", () => {
