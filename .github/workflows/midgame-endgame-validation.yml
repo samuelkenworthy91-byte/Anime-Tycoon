@@ -36,7 +36,7 @@ jobs:
         run: npx vitest run src/engine/__tests__/award-nominations.test.ts src/engine/__tests__/award-expectations.test.ts src/engine/__tests__/ip-renewal.test.ts --reporter=verbose
       - name: Run full test suite
         working-directory: game_source
-        run: npm test
+        run: LONGRUN_LOG=1 npm test
       - name: Build production web app
         working-directory: game_source
         run: npm run build
