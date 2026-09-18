@@ -621,6 +621,9 @@ export function applyFranchiseCampaign(fr: Franchise, campaign: FranchiseCampaig
 }
 
 /* -------------------------------------------------------- merchandising */
+/** Research still establishes the Merch Division itself; individual SKUs are no longer separate studies. */
+export const MERCH_CAPABILITY_RESEARCH = "merch";
+
 export type MerchTier = 1 | 2 | 3 | 4;
 export interface MerchTierDef {
   tier: MerchTier;
@@ -672,7 +675,8 @@ export const MERCH_COOLDOWN = 40;
 export const merchProductById = (id: string): MerchProduct | null =>
   MERCH_PRODUCTS.find((p) => p.id === id) ?? null;
 
-export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, tier: number = 4): string | null {
+export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, tierOrLegacy: number | readonly string[] = 4): string | null {
+  const tier = typeof tierOrLegacy === "number" ? tierOrLegacy : 4;
   if (fr.soldTo) return `IP sold to ${fr.soldTo.name} — merchandising rights left with the buyer`;
   if (tier < product.tier) return `Requires Merch Tier ${product.tier}: ${MERCH_TIERS[product.tier - 1].name}`;
   if (cash < product.cost) return "Not enough cash";
