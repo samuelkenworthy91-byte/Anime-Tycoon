@@ -61,8 +61,8 @@ function recognise(run: ReturnType<typeof initialRun>, d: Draft, projectId = "p1
   return advanceBigThreeWeek(recognisePlayerBigThreeRelease(run, { projectId, draft: d, score: 39, points: { story: 520, art: 560, sound: 500 }, reach: 200_000, franchiseKey: d.title }));
 }
 
-describe("Year 3 Big Three cultural canon", () => {
-  it("stays dormant before Year 3", () => {
+describe("Year 5 Big Three cultural canon", () => {
+  it("stays dormant before Year 5", () => {
     const run = initialRun("House", "steady");
     run.week = BIG_THREE_START_WEEK - 1;
     const next = syncBigThreeEra(run);
@@ -70,7 +70,7 @@ describe("Year 3 Big Three cultural canon", () => {
     expect(next.bigThree.slots).toHaveLength(0);
   });
 
-  it("seeds Sunnyrise exactly once at the start of Year 3 with a persistent reveal", () => {
+  it("seeds Sunnyrise exactly once at the start of Year 5 with a persistent reveal", () => {
     let run = initialRun("House", "steady");
     const sunnyBefore = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     run.week = BIG_THREE_START_WEEK;
@@ -78,7 +78,7 @@ describe("Year 3 Big Three cultural canon", () => {
     const sunnyAfter = run.rivalWorld.studios.find((s) => s.id === "Sunnyrise")!;
     expect(run.bigThree.introduced).toBe(true);
     expect(run.bigThree.slots).toHaveLength(1);
-    expect(run.bigThree.slots[0]).toMatchObject({ title: "Astra Breaker: Eclipse", originalStudio: "Sunnyrise", recognisedYear: 3, posterId: BIG_THREE_SEED_POSTER_ID });
+    expect(run.bigThree.slots[0]).toMatchObject({ title: "Astra Breaker: Eclipse", originalStudio: "Sunnyrise", recognisedYear: 5, posterId: BIG_THREE_SEED_POSTER_ID });
     expect(pendingBigThreeReveal(run)?.reveal.kind).toBe("era");
     expect(sunnyAfter.fans).toBe(sunnyBefore.fans + 180_000);
     expect(sunnyAfter.revenue).toBe(sunnyBefore.revenue + 4_200_000);
@@ -131,7 +131,7 @@ describe("Year 3 Big Three cultural canon", () => {
 
     run = { ...run, week: BIG_THREE_START_WEEK + 1, rivalWorld: { ...run.rivalWorld, studios: run.rivalWorld.studios.map((s) => s.id === studio.id ? { ...s, releases: [...s.releases, release("Rival Crown", BIG_THREE_START_WEEK + 1)] } : s) } };
     run = advanceBigThreeWeek(run);
-    expect(run.bigThree.slots).toHaveLength(1); // Year-3 shock gets breathing room.
+    expect(run.bigThree.slots).toHaveLength(1); // Year-5 shock gets breathing room.
 
     const rivalBeforeRecognition = run.rivalWorld.studios.find((s) => s.id === studio.id)!;
     run = { ...run, week: BIG_THREE_START_WEEK + BIG_THREE_RIVAL_GRACE_WEEKS };
@@ -156,7 +156,7 @@ describe("Year 3 Big Three cultural canon", () => {
     expect(recognise(filled, d, "late").bigThree.slots).toHaveLength(3);
   });
 
-  it("migrates a post-Year-3 old save neutrally, then initialises once and survives JSON reload", () => {
+  it("migrates a post-Year-5 old save neutrally, then initialises once and survives JSON reload", () => {
     const old = initialRun("Legacy", "steady") as Partial<ReturnType<typeof initialRun>>;
     old.week = BIG_THREE_START_WEEK + 70;
     delete old.bigThree;
