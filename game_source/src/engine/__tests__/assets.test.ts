@@ -63,6 +63,24 @@ function collectRefs(): string[] {
 
 describe("installed art assets", () => {
   const refs = collectRefs();
+
+  it("uses deployment-relative runtime asset references", () => {
+    const offenders: string[] = [];
+    const scanRuntime = (dir: string) => {
+      for (const ent of readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+          if (ent.name !== "node_modules" && !ent.name.startsWith(".")) scanRuntime(full);
+        } else if (/\.(tsx?|jsx?|css)$/.test(ent.name)) {
+          const src = readFileSync(full, "utf8");
+          const matches = [...src.matchAll(/[\"'\`]\/(?:img|cast|rival-posters|auction-ip|awards)\/[\w\-./]+/g)];
+          for (const match of matches) offenders.push(path.relative(ROOT, full) + ": " + match[0]);
+        }
+      }
+    };
+    scanRuntime(path.join(ROOT, "src"));
+    expect(offenders, "root-relative runtime assets break nested GitHack hosting:\n" + offenders.join("\n")).toEqual([]);
+  });
   it("finds a meaningful number of references", () => {
     expect(refs.length).toBeGreaterThan(40);
   });
