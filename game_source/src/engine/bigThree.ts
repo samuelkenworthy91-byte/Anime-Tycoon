@@ -1,10 +1,10 @@
 import type { AnimeType, Draft, GenreId } from "./data";
 import { playerCraftFor } from "./awards";
-import { merchValueOf } from "./franchise";
+import { merchValueOf, zeitgeistOf } from "./franchise";
 import type { RivalFranchise, RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
-export const BIG_THREE_START_WEEK = 2 * 48; // opening of industry Year 3
+export const BIG_THREE_START_WEEK = 4 * 48; // opening of industry Year 5
 export const BIG_THREE_MAX_SLOTS = 3;
 export const BIG_THREE_MIN_SCORE = 38;
 export const BIG_THREE_MIN_REACH = 150_000;
@@ -167,7 +167,7 @@ function playerMomentum(run: RunState, franchiseKey: string, reach: number): num
   const fr = run.franchises[franchiseKey];
   if (!fr) return reach >= BIG_THREE_BREAKOUT_REACH ? 72 : 0;
   return clamp(Math.round(
-    fr.popularity * 0.55 +
+    zeitgeistOf(fr) * 0.60 +
     Math.min(24, fr.entries.length * 7) +
     Math.min(18, fr.lifetimeFans / 5_000) +
     (fr.cult ? 8 : 0)
@@ -198,7 +198,7 @@ function seedSlot(): BigThreeSlot {
     currentOwnerType: "rival",
     player: false,
     recognisedWeek: BIG_THREE_START_WEEK,
-    recognisedYear: 3,
+    recognisedYear: 5,
     genres: ["mecha", "space"],
     animeType: "shonen",
     score: 38,
@@ -226,7 +226,7 @@ function seedRivalRelease(run: RunState): RunState {
       studio: studio.name,
       score: 38,
       week: BIG_THREE_START_WEEK,
-      year: 3,
+      year: 5,
       genres: ["mecha", "space"],
       animeType: "shonen",
       revenue: 4_200_000,
@@ -319,7 +319,7 @@ export function syncBigThreeEra(input: RunState): RunState {
       introduced: true,
       slots: [slot],
       pendingReveals: [...run.bigThree.pendingReveals, { id: "big-three-era-intro", kind: "era", slotId: slot.id }],
-      /* old post-Year-3 saves start competing from the moment this feature is
+      /* old post-Year-5 saves start competing from the moment this feature is
          introduced; we do not retroactively steal both open slots with releases
          the player never had the chance to answer. */
       lastRivalScanWeek: run.week,
