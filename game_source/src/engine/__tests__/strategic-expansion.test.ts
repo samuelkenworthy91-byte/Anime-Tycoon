@@ -42,6 +42,7 @@ describe("strategic economy expansion", () => {
     expect(CAPITAL_PROJECTS).toHaveLength(7);
     expect(CAPITAL_PROJECTS.map((x) => x.id)).toContain("distribution_network");
     expect(CAPITAL_PROJECTS.map((x) => x.id)).toContain("flagship_hq");
+    expect(CAPITAL_PROJECTS.every((x) => x.minOffice === 1)).toBe(true);
   });
 
   it("makes campaign fit change reach without changing production points", () => {
