@@ -116,6 +116,7 @@ function studio(): RunState {
     week: 0,
     day: 0,
     cash: 1000000,
+    capitalProjects: ["overseas_tier_4"],
     staff: [worker()],
     projects: [p],
     genresUnlocked: ["romance", "slice"] as Draft["genres"],
@@ -499,7 +500,7 @@ describe("overseas editions, audiences and rights", () => {
     r = { ...r, week: a.opensWeek, day: a.opensWeek * 7 };
     const q = quoteOverseas(r, request(r, { territory: "pelagic" }));
     expect(q.reused).toBe(true);
-    expect(q.release!.cost).toBe(6000);
+    expect(q.release!.cost).toBe(35_000);
   });
   it("does not refresh audience capacity by changing demographics", () => {
     let r = signOverseas(released(), request(released()))!;
