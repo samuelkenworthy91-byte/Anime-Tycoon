@@ -81,10 +81,71 @@ export interface Franchise {
   soldTo?: { id: string; name: string; kind: "network" | "rival"; week: number; price: number };
   /** permanent cultural prestige once an entry is named to the era's Big Three */
   bigThree?: boolean;
+  /** promotion can temporarily hold attention rather than letting popularity cool */
+  zeitgeistFreezeUntil?: number;
+  /** per-campaign cooldowns; kept on the franchise because campaigns are IP-specific */
+  campaignCooldown?: Record<string, number>;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 export const clampPct = (v: number) => clamp(Math.round(v), 0, 100);
+
+const ZEITGEIST_EXPOSURE_CURVE: readonly [number, number][] = [
+  [0, 0.92],
+  [15, 1.00],
+  [35, 1.08],
+  [50, 1.00],
+  [65, 0.88],
+  [80, 0.68],
+  [95, 0.42],
+  [100, 0.30],
+];
+
+function curveValue(points: readonly [number, number][], x: number): number {
+  const value = clamp(x, points[0][0], points[points.length - 1][0]);
+  for (let i = 1; i < points.length; i++) {
+    const [x1, y1] = points[i - 1];
+    const [x2, y2] = points[i];
+    if (value <= x2) {
+      const t = x2 === x1 ? 0 : (value - x1) / (x2 - x1);
+      return y1 + (y2 - y1) * t;
+    }
+  }
+  return points[points.length - 1][1];
+}
+
+/** Cultural relevance right now: high popularity is strongest when exposure is
+ *  neither dormant nor exhausted. This is intentionally a bell-ish curve. */
+export function zeitgeistOf(fr: Pick<Franchise, "popularity" | "fatigue">): number {
+  return clampPct(fr.popularity * curveValue(ZEITGEIST_EXPOSURE_CURVE, fr.fatigue));
+}
+
+export function zeitgeistRevenueMult(fr: Pick<Franchise, "popularity" | "fatigue">): number {
+  const z = zeitgeistOf(fr);
+  if (z < 25) return 0.80;
+  if (z < 50) return 0.95;
+  if (z < 70) return 1.10;
+  if (z < 85) return 1.25;
+  return 1.40;
+}
+
+export function zeitgeistFanMult(fr: Pick<Franchise, "popularity" | "fatigue">): number {
+  const z = zeitgeistOf(fr);
+  if (z < 25) return 0.85;
+  if (z < 50) return 0.95;
+  if (z < 70) return 1.05;
+  if (z < 85) return 1.15;
+  return 1.25;
+}
+
+export function zeitgeistLabel(fr: Pick<Franchise, "popularity" | "fatigue">): string {
+  const z = zeitgeistOf(fr);
+  if (z >= 85) return "CULTURAL PHENOMENON";
+  if (z >= 70) return "HOT";
+  if (z >= 50) return "CURRENT";
+  if (z >= 25) return "COOLING";
+  return "OUT OF THE CONVERSATION";
+}
 
 /* ------------------------------------------------------------ derived stats */
 export const countKind = (fr: Franchise, kind: EntryKind) =>
@@ -100,12 +161,15 @@ export const topCharacter = (fr: Franchise): FranchiseChar | null =>
 /** estimated merchandise value — fans buy what they love right now */
 export function merchValueOf(fr: Franchise): number {
   const top = topCharacter(fr);
-  const base = fr.lifetimeFans * 0.25 + fr.bestScore * 2_500;
-  const popF = 0.3 + fr.popularity / 100;
-  const charF = 1 + (top ? top.popularity : 0) / 400;
-  const cultF = fr.cult ? 1.35 : 1;
+  /* Consumer products are now a real second business. Following, critical
+     pedigree and proven franchise revenue all contribute to the addressable
+     merchandise market; current zeitgeist determines how much converts now. */
+  const base = fr.lifetimeFans * 1.8 + fr.bestScore * 16_000 + fr.totalRevenue * 0.025;
+  const zeitgeistF = 0.55 + zeitgeistOf(fr) / 100;
+  const charF = 1 + (top ? top.popularity : 0) / 300;
+  const cultF = fr.cult ? 1.25 : 1;
   const bigThreeF = fr.bigThree ? 1.6 : 1;
-  return Math.round((base * popF * charF * cultF * bigThreeF) / 1_000) * 1_000;
+  return Math.round((base * zeitgeistF * charF * cultF * bigThreeF) / 1_000) * 1_000;
 }
 
 /* ======================================================== continuations */
@@ -281,15 +345,15 @@ export function franchiseBoost(fr: Franchise | null, d: Draft, partner?: Franchi
   const def = continuationDef(d.continuation);
   if (!def) return 1;
   const seasonMult = d.continuation === "season" ? 1 + 0.12 * Math.max(0, d.season - 1) : 1;
-  const popF = 0.75 + fr.popularity / 130;
-  const fatF = Math.max(0.6, 1 - fr.fatigue / 200);
-  let mult = seasonMult * popF * fatF * def.revMult;
+  /* Zeitgeist replaces the old linear popularity/fatigue pair. It peaks when
+     the property is both popular and visible without being exhausted. */
+  let mult = seasonMult * zeitgeistRevenueMult(fr) * def.revMult;
   if (d.continuation === "spinoff") {
     const feat = fr.cast.find((c) => c.id === d.spinChar) ?? topCharacter(fr);
     mult *= 0.8 + (feat ? feat.popularity : 30) / 150;
   }
   if (d.continuation === "crossover" && partner) {
-    mult *= 0.85 + (fr.popularity + partner.popularity) / 250;
+    mult *= 0.85 + (zeitgeistOf(fr) + zeitgeistOf(partner)) / 250;
   }
   const bounded = clamp(mult, 0.5, 3);
   const bigThreeHalo = fr.bigThree
@@ -319,15 +383,16 @@ export interface ExpectationVerdict {
 export function judgeExpectations(fr: Franchise, kind: EntryKind, total: number): ExpectationVerdict {
   const expected = expectedScore(fr, kind);
   const gap = total - expected;
+  const cultureFans = zeitgeistFanMult(fr);
   if (gap >= 4)
-    return { expected, gap, verdict: "delight", fanMult: 1.15, popDelta: 10 + Math.min(8, gap - 4), fatigueExtra: 0 };
-  if (gap > -4) return { expected, gap, verdict: "fine", fanMult: 1, popDelta: 4, fatigueExtra: 0 };
+    return { expected, gap, verdict: "delight", fanMult: (1.15 * cultureFans), popDelta: 10 + Math.min(8, gap - 4), fatigueExtra: 0 };
+  if (gap > -4) return { expected, gap, verdict: "fine", fanMult: cultureFans, popDelta: 4, fatigueExtra: 0 };
   /* the higher they flew, the harder the fall */
   return {
     expected,
     gap,
     verdict: "disappointment",
-    fanMult: Math.max(0.6, 1 + gap / 40),
+    fanMult: Math.max(0.55, (1 + gap / 40) * cultureFans),
     popDelta: -Math.min(30, Math.round(-gap * 1.8)),
     fatigueExtra: 8,
   };
@@ -493,7 +558,8 @@ export function tickFranchise(
   let fatigue = Math.max(0, fr.fatigue - (rested > 8 ? 3 : 1) * (opts?.restMult ?? 1));
   let popularity = fr.popularity;
   const floor = fr.cult ? 45 : 12;
-  if (popularity > floor) popularity -= 1;
+  const attentionHeld = (fr.zeitgeistFreezeUntil ?? 0) > week;
+  if (!attentionHeld && popularity > floor) popularity -= 1;
   let cult = fr.cult;
   let notice: string | null = null;
   if (
@@ -512,51 +578,103 @@ export function tickFranchise(
   return { franchise: next, notice };
 }
 
+/* ------------------------------------------------ zeitgeist campaigns */
+export interface FranchiseCampaign {
+  id: string;
+  label: string;
+  cost: number;
+  popularity: number;
+  fatigue: number;
+  freezeWeeks: number;
+  cooldown: number;
+  description: string;
+}
+
+export const FRANCHISE_CAMPAIGNS: FranchiseCampaign[] = [
+  { id: "streaming_push", label: "Streaming Push", cost: 75_000, popularity: 6, fatigue: 9, freezeWeeks: 8, cooldown: 16, description: "Platform placement and rewatch promotion hold the title in conversation." },
+  { id: "convention_circuit", label: "Convention Circuit", cost: 150_000, popularity: 10, fatigue: 14, freezeWeeks: 8, cooldown: 20, description: "Cast appearances and fan events create a visible burst of attention." },
+  { id: "brand_blitz", label: "Merch / Brand Blitz", cost: 225_000, popularity: 12, fatigue: 17, freezeWeeks: 12, cooldown: 24, description: "Retail collaborations push the franchise everywhere at once." },
+  { id: "anniversary", label: "Anniversary Campaign", cost: 350_000, popularity: 16, fatigue: 22, freezeWeeks: 16, cooldown: 48, description: "A major anniversary keeps an established property culturally present." },
+  { id: "remaster", label: "Remaster / Re-release", cost: 600_000, popularity: 20, fatigue: 27, freezeWeeks: 16, cooldown: 60, description: "A restored re-release reaches old fans and a new audience." },
+  { id: "saturation", label: "Cultural Saturation Campaign", cost: 1_200_000, popularity: 28, fatigue: 38, freezeWeeks: 20, cooldown: 72, description: "An enormous push can dominate attention now and leave the audience exhausted later." },
+];
+
+export function franchiseCampaignBlock(fr: Franchise, campaign: FranchiseCampaign, week: number, cash: number): string | null {
+  if (fr.soldTo) return `IP sold to ${fr.soldTo.name}`;
+  if (cash < campaign.cost) return "Not enough cash";
+  const ready = fr.campaignCooldown?.[campaign.id] ?? 0;
+  if (week < ready) return `Available again in ${ready - week} wk`;
+  if (fr.fatigue >= 95) return "Audience burnout is too severe — rest or reboot the property";
+  return null;
+}
+
+export function applyFranchiseCampaign(fr: Franchise, campaign: FranchiseCampaign, week: number): Franchise {
+  const next: Franchise = {
+    ...fr,
+    popularity: clampPct(fr.popularity + campaign.popularity),
+    fatigue: clampPct(fr.fatigue + campaign.fatigue),
+    zeitgeistFreezeUntil: Math.max(fr.zeitgeistFreezeUntil ?? 0, week + campaign.freezeWeeks),
+    campaignCooldown: { ...(fr.campaignCooldown ?? {}), [campaign.id]: week + campaign.cooldown },
+  };
+  next.merchValue = merchValueOf(next);
+  return next;
+}
+
 /* -------------------------------------------------------- merchandising */
+export type MerchTier = 1 | 2 | 3 | 4;
+export interface MerchTierDef {
+  tier: MerchTier;
+  id: string;
+  name: string;
+  cost: number;
+  upkeep: number;
+  description: string;
+}
+export const MERCH_TIERS: MerchTierDef[] = [
+  { tier: 1, id: "merch_tier_1", name: "Domestic Merch", cost: 250_000, upkeep: 4_000, description: "Basic consumer products and direct-to-fan fulfilment." },
+  { tier: 2, id: "merch_tier_2", name: "Premium Products", cost: 1_500_000, upkeep: 15_000, description: "Premium manufacturing, collectors' goods and specialist partners." },
+  { tier: 3, id: "merch_tier_3", name: "Fan Ecosystem", cost: 8_000_000, upkeep: 45_000, description: "Trading cards, pop-up retail and event commerce." },
+  { tier: 4, id: "merch_tier_4", name: "Global Consumer Products", cost: 35_000_000, upkeep: 120_000, description: "Worldwide licensing, mobile games and global premium ranges." },
+];
+
 export interface MerchProduct {
   id: string;
   label: string;
   desc: string;
   cost: number;
-  /** payout spread over this many weeks */
   weeks: number;
-  /** share of the IP's merch value returned */
   mult: number;
-  /** minimum current popularity */
   minPop: number;
-  /** minimum best score (collector's items need pedigree) */
   minScore: number;
-  /** popular characters move these */
   charDriven: boolean;
-  /** dedicated research project required before this line can launch
-   *  (on top of the Merch Division capability research) */
-  research: string;
-  /** human name of that research for block messages */
-  researchName: string;
+  tier: MerchTier;
+  popularityGain?: number;
+  fatigueAdd?: number;
+  freezeWeeks?: number;
 }
 
 export const MERCH_PRODUCTS: MerchProduct[] = [
-  { id: "plush", label: "Plushies", desc: "Soft, round, irresistible.", cost: 30_000, weeks: 20, mult: 0.65, minPop: 20, minScore: 0, charDriven: true, research: "merch_plush", researchName: "Plush Production" },
-  { id: "ost", label: "Soundtrack", desc: "The opening on repeat, forever.", cost: 20_000, weeks: 16, mult: 0.5, minPop: 0, minScore: 0, charDriven: false, research: "merch_soundtrack", researchName: "Soundtrack Publishing" },
-  { id: "figures", label: "Scale Figures", desc: "1/7 scale, pre-orders open.", cost: 60_000, weeks: 24, mult: 1.05, minPop: 30, minScore: 0, charDriven: true, research: "merch_figures", researchName: "Scale Figure Licensing" },
-  { id: "apparel", label: "Clothing Line", desc: "Streetwear collab drop.", cost: 45_000, weeks: 20, mult: 0.85, minPop: 40, minScore: 0, charDriven: false, research: "merch_apparel", researchName: "Apparel Partnerships" },
-  { id: "collectors", label: "Collector's Edition", desc: "Box set with art cards & storyboards.", cost: 80_000, weeks: 12, mult: 1.5, minPop: 45, minScore: 28, charDriven: false, research: "merch_collectors", researchName: "Collector Editions" },
-  { id: "mobile", label: "Mobile Game Licence", desc: "Gacha rates sold separately.", cost: 150_000, weeks: 48, mult: 2.1, minPop: 60, minScore: 0, charDriven: true, research: "merch2", researchName: "Global Merch" },
+  { id: "ost", label: "Soundtrack", desc: "Physical/digital soundtrack campaign.", cost: 40_000, weeks: 16, mult: 0.55, minPop: 0, minScore: 0, charDriven: false, tier: 1 },
+  { id: "plush", label: "Plushies", desc: "Character-led plush manufacturing run.", cost: 65_000, weeks: 20, mult: 0.80, minPop: 20, minScore: 0, charDriven: true, tier: 1 },
+  { id: "acrylic", label: "Acrylics & Prints", desc: "Low-risk fan goods with fast turnaround.", cost: 50_000, weeks: 14, mult: 0.70, minPop: 15, minScore: 0, charDriven: true, tier: 1 },
+  { id: "apparel", label: "Apparel Drop", desc: "Streetwear and character fashion collaboration.", cost: 90_000, weeks: 20, mult: 0.95, minPop: 35, minScore: 0, charDriven: false, tier: 1 },
+  { id: "figures", label: "Scale Figures", desc: "Premium figure manufacturing and pre-orders.", cost: 250_000, weeks: 28, mult: 1.40, minPop: 35, minScore: 0, charDriven: true, tier: 2 },
+  { id: "artbook", label: "Production Artbook", desc: "High-margin art and production archive.", cost: 180_000, weeks: 18, mult: 1.10, minPop: 30, minScore: 26, charDriven: false, tier: 2 },
+  { id: "collectors", label: "Collector's Edition", desc: "Deluxe box set, extras and limited packaging.", cost: 350_000, weeks: 16, mult: 1.60, minPop: 45, minScore: 28, charDriven: false, tier: 2 },
+  { id: "tcg", label: "Trading Card Game", desc: "Launch a collectible card ecosystem with organised play.", cost: 650_000, weeks: 36, mult: 3.40, minPop: 55, minScore: 28, charDriven: true, tier: 3, popularityGain: 8, fatigueAdd: 14, freezeWeeks: 12 },
+  { id: "popup", label: "Pop-up Stores & Café", desc: "Temporary themed retail and event-exclusive goods.", cost: 500_000, weeks: 20, mult: 1.80, minPop: 50, minScore: 0, charDriven: true, tier: 3, popularityGain: 4, fatigueAdd: 8, freezeWeeks: 6 },
+  { id: "mobile", label: "Mobile Game Licence", desc: "A high-risk, high-reach global mobile spin-off.", cost: 2_500_000, weeks: 48, mult: 4.20, minPop: 65, minScore: 30, charDriven: true, tier: 4, popularityGain: 6, fatigueAdd: 12, freezeWeeks: 8 },
+  { id: "global_collection", label: "Worldwide Collector Range", desc: "Coordinated premium launch across major markets.", cost: 1_400_000, weeks: 32, mult: 2.80, minPop: 60, minScore: 32, charDriven: true, tier: 4, popularityGain: 5, fatigueAdd: 10, freezeWeeks: 8 },
 ];
 
-export const MERCH_COOLDOWN = 40; // weeks before the same product line refreshes
-
-/** the capability research that turns merchandising on at all */
-export const MERCH_CAPABILITY_RESEARCH = "merch";
+export const MERCH_COOLDOWN = 40;
 
 export const merchProductById = (id: string): MerchProduct | null =>
   MERCH_PRODUCTS.find((p) => p.id === id) ?? null;
 
-/** why a product can't launch right now (null = allowed) */
-export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, research: readonly string[] = ["merch"]): string | null {
+export function merchBlock(fr: Franchise, product: MerchProduct, week: number, cash: number, tier: number = 4): string | null {
   if (fr.soldTo) return `IP sold to ${fr.soldTo.name} — merchandising rights left with the buyer`;
-  if (!research.includes(MERCH_CAPABILITY_RESEARCH)) return "Requires Merch Division research (R&D)";
-  if (!research.includes(product.research)) return `Requires ${product.researchName} research (R&D)`;
+  if (tier < product.tier) return `Requires Merch Tier ${product.tier}: ${MERCH_TIERS[product.tier - 1].name}`;
   if (cash < product.cost) return "Not enough cash";
   if (fr.popularity < product.minPop) return `Needs popularity ${product.minPop}+ (now ${fr.popularity})`;
   if (fr.bestScore < product.minScore) return `Needs a ${product.minScore}+/40 entry on record`;
@@ -565,7 +683,6 @@ export function merchBlock(fr: Franchise, product: MerchProduct, week: number, c
   return null;
 }
 
-/** total the product will return over its run */
 export function merchReturn(fr: Franchise, product: MerchProduct): number {
   const top = topCharacter(fr);
   const charF = product.charDriven ? 1 + (top ? top.popularity : 0) / 250 : 1;
