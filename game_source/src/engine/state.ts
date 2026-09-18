@@ -218,7 +218,7 @@ import {
 } from "./studioOps";
 import { gainShowrunnerXp, initialShowrunnerCareer, migrateShowrunnerCareer, showrunnerDefaultName, SHOWRUNNER_RELEASE_XP, type ShowrunnerCareer } from "./showrunnerCareer";
 import { rollStudioEvent, type StudioEvent } from "./events";
-import { rollAmbientEvent } from "./ambientEvents";
+import { ambientEventOccurs, rollAmbientEvent } from "./ambientEvents";
 import { genreTargetFor } from "./genreTargets";
 import {
   consumeDecisionModifiers,
@@ -1266,9 +1266,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
 
     /* Ambient industry life: frequent enough to make the world feel alive,
        never blocking and never pausing the studio clock. */
-    if (w % 4 === 2 && Math.random() < 0.65) {
+    if (ambientEventOccurs(r.studio, w)) {
       const ambient = rollAmbientEvent({
         week: w,
+        studio: r.studio,
         cash,
         fans,
         franchises,
