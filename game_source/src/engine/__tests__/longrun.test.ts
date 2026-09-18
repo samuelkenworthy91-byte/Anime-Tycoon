@@ -112,7 +112,7 @@ const botHire = (r: RunState): RunState => {
   return { ...r, cash, staff, candidates };
 };
 
-function playCareer(seedLabel: string): RunState {
+function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } {
   /* the sim measures the 12-year economy, so the studio starts as an
      established one that has already climbed the format ladder (the ladder
      itself is covered by format-progression.test.ts) */
@@ -121,6 +121,7 @@ function playCareer(seedLabel: string): RunState {
     mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
   };
   let greenlit = 0;
+  let maxLevelSeen = Math.max(0, ...r.staff.map((s) => s.level));
   for (let w = 0; w < WEEKS; w++) {
     /* play pending milestones */
     for (const p of [...r.projects]) {
@@ -158,6 +159,7 @@ function playCareer(seedLabel: string): RunState {
     for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;
     /* advance one week */
     r = advanceWeeks(r, 1);
+    maxLevelSeen = Math.max(maxLevelSeen, ...r.staff.map((s) => s.level), ...r.legends.map((l) => l.level));
     /* a sane player avoids runaway debt: cap one measurement point */
     if (w % 48 === 0 && process.env.LONGRUN_LOG) {
       const y = w / 48;
@@ -167,13 +169,13 @@ function playCareer(seedLabel: string): RunState {
       );
     }
   }
-  return r;
+  return { run: r, maxLevelSeen };
 }
 
 describe("long-run simulation", () => {
   it("survives twelve years with a sane economy across several careers", () => {
     const results = [playCareer("A"), playCareer("B"), playCareer("C")];
-    for (const r of results) {
+    for (const { run: r, maxLevelSeen } of results) {
       /* no NaN or Infinity anywhere in the money */
       expect(Number.isFinite(r.cash)).toBe(true);
       expect(Number.isFinite(r.fans)).toBe(true);
@@ -183,15 +185,14 @@ describe("long-run simulation", () => {
       expect(r.fans).toBeGreaterThanOrEqual(0);
       /* a career is actually a career */
       expect(r.showsMade).toBeGreaterThan(0);
-      /* staff progress: somebody should have levelled up meaningfully.
-         Veterans can legitimately retire into the permanent legend ledger before
-         Year 12, so current staff alone is not the complete career history. */
-      expect(Math.max(0, ...r.staff.map((s) => s.level), ...r.legends.map((l) => l.level))).toBeGreaterThanOrEqual(4);
+      /* staff progress: somebody should have levelled up meaningfully at some
+         point in the career, even if a rival later poaches that veteran. */
+      expect(maxLevelSeen).toBeGreaterThanOrEqual(4);
     }
   }, 60_000);
 
   it("rivals keep producing across a career instead of stagnating", () => {
-    const r = playCareer("D");
+    const { run: r } = playCareer("D");
     const totalRivalReleases = r.rivalWorld.studios.reduce((a, s) => a + s.releases.length, 0);
     expect(totalRivalReleases).toBeGreaterThan(0);
     /* at least one rival studio should be fielding new shows late on */
