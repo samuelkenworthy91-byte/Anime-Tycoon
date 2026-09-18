@@ -3,6 +3,7 @@ import { licensedAwardPosterAsset, type AwardCategory, type AwardCeremony, type 
 import { castById, type Draft } from "../engine/data";
 import { rivalPosterById } from "../engine/rivalPosters";
 import { cn } from "../utils/cn";
+import { assetPath } from "../utils/assetPath";
 import { primeAudio, sfx } from "../engine/audio";
 import Poster, { PosterDecorationLayer, hofDesign, titleTextStyle } from "./Poster";
 import "./awardsCeremony.css";
@@ -108,7 +109,7 @@ function WinnerPoster({ nominee }: { nominee: AwardNominee }) {
   if (licensedPoster) {
     return (
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]">
-        <img src={licensedPoster} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={assetPath(licensedPoster)} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
       </div>
     );
@@ -132,7 +133,7 @@ function WinnerPoster({ nominee }: { nominee: AwardNominee }) {
 
   return (
     <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-gold/55 bg-[#0d0a17] shadow-[0_24px_90px_rgba(0,0,0,.75)]">
-      <img src={rival.img} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
+      <img src={assetPath(rival.img)} alt={`${nominee.title} poster`} className="absolute inset-0 h-full w-full object-cover" />
       <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
     </div>
   );
@@ -260,14 +261,14 @@ export default function AwardsCeremony({
 
   return (
     <div className="fixed inset-0 z-[90] select-none overflow-hidden bg-[#060409] font-display text-paper">
-      <div className="absolute inset-0 bg-cover bg-center opacity-95" style={{ backgroundImage: "url(/awards/stage-bg.webp)" }} />
+      <div className="absolute inset-0 bg-cover bg-center opacity-95" style={{ backgroundImage: `url(${assetPath("awards/stage-bg.webp")})` }} />
       <div className="absolute inset-0 bg-[radial-gradient(110%_76%_at_50%_108%,rgba(255,190,90,.16),transparent_62%)]" />
-      <img src="/awards/valance.webp" alt="" className="aw-valance pointer-events-none absolute inset-x-0 top-0 z-40 h-auto w-full" />
+      <img src={assetPath("awards/valance.webp")} alt="" className="aw-valance pointer-events-none absolute inset-x-0 top-0 z-40 h-auto w-full" />
 
       {(phase.t === "closed" || phase.t === "opening") && (
         <>
-          <img src="/awards/curtain-left.webp" alt="" className={cn("aw-curtain aw-curtain-left", phase.t === "closed" ? "closed-l" : "open-l")} />
-          <img src="/awards/curtain-right.webp" alt="" className={cn("aw-curtain aw-curtain-right", phase.t === "closed" ? "closed-r" : "open-r")} />
+          <img src={assetPath("awards/curtain-left.webp")} alt="" className={cn("aw-curtain aw-curtain-left", phase.t === "closed" ? "closed-l" : "open-l")} />
+          <img src={assetPath("awards/curtain-right.webp")} alt="" className={cn("aw-curtain aw-curtain-right", phase.t === "closed" ? "closed-r" : "open-r")} />
         </>
       )}
 
