@@ -186,15 +186,15 @@ export const RAW_QUALITY_BASE = 9;
 export const RAW_QUALITY_FLOOR = 12;
 export const RAW_QUALITY_CEILING = 40;
 /** saturating point conversion (see production.ts) scaled into quality */
-export const POINT_QUALITY_SCALE = 0.62;
+export const POINT_QUALITY_SCALE = 0.55;
 /** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
 export const TOP_QUALITY_SLOPE = 0.15;
 /** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
  *  early career meaningful while staying far flatter than the old curve */
-export const CRAFT_LIFT = 2.75;
+export const CRAFT_LIFT = 2.6;
 export const CRAFT_LIFT_DIVISOR = 160;
-export const SLIDER_QUALITY_SCALE = 0.50;
-export const ARC_QUALITY_SCALE = 0.30;
+export const SLIDER_QUALITY_SCALE = 0.35;
+export const ARC_QUALITY_SCALE = 0.22;
 /** bounded negative floor: poor/anti-synergistic arcs can genuinely hurt,
  *  experimentation stays viable (never an abyss) */
 export const ARC_QUALITY_FLOOR = -12;
@@ -473,9 +473,11 @@ export function computeResult(opts: {
      agreement — elite work lands 9s regularly, 10s occasionally. */
   const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
     + expectationAdj + audienceAdj;
-  const arcCriticAdj = clamp(arcQuality * 0.14, -0.9, 1.0);
-  const productionCriticAdj = clamp((pointScore - 7) * 0.07, -0.35, 0.55);
-  const overallDirectionAdj = clamp((sliderFitMult - 0.80) * 1.5, -0.45, 0.38);
+  /* Critics react more strongly to poor creative choices, while excellent
+     choices earn only a modest bonus so top reviews remain genuinely rare. */
+  const arcCriticAdj = clamp(arcQuality * 0.08 - 0.18, -0.65, 0.20);
+  const productionCriticAdj = clamp((pointScore - 9) * 0.04, -0.35, 0.18);
+  const overallDirectionAdj = clamp((sliderFitMult - 0.92) * 1.25, -0.45, 0.10);
   const reviews: Review[] = REVIEWERS.map((r) => {
     let s = base;
     let criteria = "";
