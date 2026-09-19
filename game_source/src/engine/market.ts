@@ -247,6 +247,15 @@ export const partnerById = (id: string): Partner => PARTNERS.find((p) => p.id ==
 export const repAdvanceMult = (rep: number) => 1 + Math.max(-0.2, Math.min(0.3, (rep - 45) / 150));
 export const repShareDelta = (rep: number) => Math.max(-0.08, Math.min(0.06, (45 - rep) / 400));
 
+/** The whole relationship network now has commercial value beyond commission terms.
+ * 45 average reputation is neutral; excellent industry relationships improve
+ * distribution/retail reach, while burned bridges make both harder. */
+export function partnerCommercialMult(partners: Record<string, number>): number {
+  const reps = PARTNERS.map((partner) => partners[partner.id] ?? REP_START);
+  const average = reps.length ? reps.reduce((sum, rep) => sum + rep, 0) / reps.length : REP_START;
+  return Math.max(0.82, Math.min(1.22, 1 + (average - REP_START) / 250));
+}
+
 export type PartnerTierId = "unknown" | "trusted" | "preferred" | "strategic";
 export interface PartnerTier { id: PartnerTierId; label: string; slack: number; desc: string; }
 export function partnerTier(rep: number): PartnerTier {
