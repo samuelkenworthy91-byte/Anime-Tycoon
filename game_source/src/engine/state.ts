@@ -411,7 +411,7 @@ export interface RunState {
   revBoostUntil: number;
   /** auction calendar, adaptation contracts and studio-wide discovered story blueprints */
   ipMarket: IPMarketState;
-  /** Year-5+ fan-decided cultural canon. Exactly three slots can ever be filled. */
+  /** Year-3+ March-selected cultural canon. Exactly three studios can hold one monument each. */
   bigThree: BigThreeState;
   /** one-off strategic spending is recorded for finance/history UI */
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
@@ -478,7 +478,7 @@ export function unlockFormat(r: RunState, medium: MediumId): RunState | null {
   };
 }
 
-/** twelve-year career — after this the studio enters Dynasty Mode */
+/** twenty-five-year career — after this the studio enters Dynasty Mode */
 export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
 export { AIR_WEEKS }; // re-exported for screens that read the broadcast length

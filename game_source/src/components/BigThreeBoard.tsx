@@ -12,10 +12,10 @@ export default function BigThreeBoard({ run }: { run: RunState }) {
         <Crown size={16} className="text-gold" />
         <div>
           <div className="font-display text-sm font-black tracking-wider text-gold">THE BIG THREE</div>
-          <div className="text-[9px] text-paper/50">Fan-decided cultural canon · three permanent monuments for this era</div><div className="mt-0.5 text-[8px] text-gold/65">38+/40 · 150,000+ franchise following · elite craft · sustained zeitgeist and cultural momentum · at least 48 weeks between inductions</div>
+          <div className="text-[9px] text-paper/50">Fan-decided cultural canon · three permanent monuments for this era</div><div className="mt-0.5 text-[8px] text-gold/65">38+/40 · 150,000+ franchise following · elite craft · sustained zeitgeist · judged each March · one title per studio</div>
         </div>
       </div>
-      {!run.bigThree.introduced && <div className="mt-3 rounded-xl border border-dashed border-line p-3 text-center text-[10px] text-paper/45"><Lock size={14} className="mx-auto mb-1"/>The cultural landscape changes in Year 5.</div>}
+      {!run.bigThree.introduced && <div className="mt-3 rounded-xl border border-dashed border-line p-3 text-center text-[10px] text-paper/45"><Lock size={14} className="mx-auto mb-1"/>The first Big Three assessment arrives in March of Year 3.</div>}
       {run.bigThree.introduced && (
         <>
           <div className="mt-3 overflow-hidden rounded-2xl border border-gold/20 bg-abyss/55 p-1.5">

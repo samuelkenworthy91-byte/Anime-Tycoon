@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
 import { runCareerEvaluation, type CareerCategory } from "../engine/legacy";
-import { formatGBP, formatNum, ROLE_LABEL } from "../engine/data";
+import { formatGBP, formatNum, ROLE_LABEL, yearOfWeek } from "../engine/data";
 import type { RunState } from "../engine/state";
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
@@ -55,7 +55,7 @@ export default function Retrospective({
       <div className="relative z-10 mx-auto w-full max-w-3xl space-y-4 p-4 py-8">
         {/* ------------------------------------------------ header */}
         <div className="anim-up text-center">
-          <div className="text-xs tracking-[0.5em] text-paper/50">YEAR 12 · CAREER COMPLETE</div>
+          <div className="text-xs tracking-[0.5em] text-paper/50">YEAR {yearOfWeek(run.week)} · CAREER COMPLETE</div>
           <h1
             className="font-display mt-1 text-4xl font-extrabold md:text-6xl"
             style={{ color: ev.rank.color, textShadow: `0 0 24px ${ev.rank.color}55` }}
