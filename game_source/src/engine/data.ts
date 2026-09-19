@@ -951,9 +951,9 @@ export const workerLookIndex = (s: Staff) => (s.look ?? s.portrait) % WORKER_LOO
 export const workerLook = (s: Staff) => WORKER_LOOKS[workerLookIndex(s)];
 
 let staffId = 0;
-export function rollCandidate(week: number): Staff {
+export function rollCandidate(week: number, forcedRole?: StaffRole): Staff {
   const roles: StaffRole[] = ["writer", "animator", "composer"];
-  const role = roles[Math.floor(Math.random() * 3)];
+  const role = forcedRole ?? roles[Math.floor(Math.random() * 3)];
   const tier = Math.min(45, week * 0.16);
   const main = Math.round(34 + Math.random() * 34 + tier);
   const off = () => Math.round(12 + Math.random() * 30 + tier * 0.5);
