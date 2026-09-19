@@ -124,7 +124,8 @@ describe("March Big Three cultural canon", () => {
     run = syncBigThreeEra(run);
     addRivalRelease(run, 0, "March Crown");
 
-    run.week = BIG_THREE_START_WEEK + 1;
+    run.week = BIG_THREE_START_WEEK + 3;
+    addRivalRelease(run, 0, "Recent March Crown");
     run = advanceBigThreeWeek(run);
     expect(run.bigThree.slots).toHaveLength(0);
 
