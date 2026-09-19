@@ -44,6 +44,7 @@ import {
   type RunState,
 } from "../state";
 import { initRivalWorld } from "../rivals";
+import { projectUpfront } from "../projects";
 
 /* ------------------------------------------------------------ helpers */
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -295,8 +296,7 @@ describe("starting a commissioned project", () => {
     const r = richRun({ commissions: [com()] });
     const selfFunded = startProject(r, draft())!;
     const next = startProject(r, draft(), com())!;
-    expect(next.cash).toBe(r.cash - selfFundedGreenlightCost({ ...r, projects: [] }, draft()) + com().advance + (selfFundedGreenlightCost({ ...r, projects: [] }, draft()) - Math.round(selfFundedGreenlightCost({ ...r, projects: [] }, draft()) / selfFundedStartupMult({ ...r, projects: [] }, draft()))));
-    expect(next.cash).toBe(r.cash - Math.round(selfFundedGreenlightCost({ ...r, projects: [] }, draft()) / selfFundedStartupMult({ ...r, projects: [] }, draft())) + com().advance); // commission bypasses startup surcharge
+    expect(next.cash).toBe(r.cash - projectUpfront(draft()) + com().advance); // commission bypasses startup surcharge
     const p = next.projects[0];
     expect(p.commission?.partnerId).toBe("ntv8");
     expect(p.commission?.share).toBe(0.5);
@@ -327,9 +327,11 @@ describe("early commission bridge", () => {
     expect(selfFundedStartupMult(r, d)).toBe(1.4);
     const p1 = startProject(r, d)!;
     expect(selfFundedStartupMult(p1, d)).toBe(1.25);
-    const p2 = startProject({ ...p1, officeLevel: 4 }, { ...d, title: "Second" })!;
+    const after1 = { ...p1, projects: p1.projects.map((project) => ({ ...project, stage: "done" as const })) };
+    const p2 = startProject(after1, { ...d, title: "Second" })!;
     expect(selfFundedStartupMult(p2, d)).toBe(1.1);
-    const p3 = startProject({ ...p2, officeLevel: 4 }, { ...d, title: "Third" })!;
+    const after2 = { ...p2, projects: p2.projects.map((project) => ({ ...project, stage: "done" as const })) };
+    const p3 = startProject(after2, { ...d, title: "Third" })!;
     expect(selfFundedStartupMult(p3, d)).toBe(1);
   });
 

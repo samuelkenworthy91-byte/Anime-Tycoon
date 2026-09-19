@@ -294,9 +294,7 @@ export default function Create({
   const startupMult = commission ? 1 : selfFundedStartupMult(run, d);
   const dueAtGreenlight = commission ? projectUpfront(d) : selfFundedGreenlightCost(run, d);
   /** Commission advances count when deciding affordability; self-funded starts carry the early-studio premium. */
-  const greenlightBlock = commission
-    ? startBlockReason({ ...run, cash: run.cash + commission.advance }, d)
-    : startBlockReason(run, d);
+  const greenlightBlock = startBlockReason(run, d, commission);
   const arcLimit = PRODUCTION_SCOPES[d.scope ?? "standard"].arcLimit;
   const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
   const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));

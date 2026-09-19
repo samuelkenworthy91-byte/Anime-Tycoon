@@ -1619,7 +1619,7 @@ export function soldCastRights(r: Pick<RunState, "franchises">): Record<string, 
 /** null = a new project can be greenlit; otherwise the blocking reason.
     Covers capacity, cash, and every continuation rule so the UI can say
     WHY a show can't start instead of silently swallowing the click. */
-export function startBlockReason(r: RunState, d?: Draft): string | null {
+export function startBlockReason(r: RunState, d?: Draft, commission?: Commission): string | null {
   const active = activeProjects(r.projects).length;
   const cap = projectCapacity(r);
   if (active >= cap)
@@ -1655,12 +1655,13 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
       if (selected.requiresSequelRights && !contract.sequelRights) return "Negotiate sequel rights first";
     }
   }
-  if (d && r.cash < selfFundedGreenlightCost(r, d)) return "Not enough cash for the greenlight payment";
+  const greenlightRequired = d ? (commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d)) : 0;
+  if (d && r.cash + (commission?.advance ?? 0) < greenlightRequired) return "Not enough cash for the greenlight payment";
   if (d?.continuation) {
     const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
     if (!fr) return "This franchise doesn't exist any more";
     const fee = continuationDef(d.continuation)?.fee ?? 0;
-    if (fee > 0 && r.cash < selfFundedGreenlightCost(r, d) + fee)
+    if (fee > 0 && r.cash + (commission?.advance ?? 0) < greenlightRequired + fee)
       return `Not enough cash — the rights fee alone is £${fee.toLocaleString("en-GB")}`;
     const block = continuationBlock(fr, d.continuation, {
       week: r.week,
