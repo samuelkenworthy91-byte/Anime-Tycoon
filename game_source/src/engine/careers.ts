@@ -454,11 +454,13 @@ export function rollHire(
   week: number,
   rng: () => number = Math.random,
   excludedLooks: ReadonlySet<number> = new Set(),
+  forcedRole?: StaffRole,
 ): Staff {
-  const rolled = rollCandidate(week);
+  const rolled = rollCandidate(week, forcedRole);
   const availableStandard = STANDARD_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
-  const standardLook = availableStandard.length
-    ? availableStandard[Math.min(availableStandard.length - 1, Math.floor(rng() * availableStandard.length))]
+  const weightedLooks = availableStandard.flatMap((look) => look >= 31 ? [look, look, look] : [look]);
+  const standardLook = weightedLooks.length
+    ? weightedLooks[Math.min(weightedLooks.length - 1, Math.floor(rng() * weightedLooks.length))]
     : rolled.look;
   const base = { ...rolled, look: standardLook };
   const specialRoll = rng();
@@ -470,11 +472,13 @@ export function rollHire(
   return ensureCareer(candidate, week);
 }
 
-/** A recruitment advert never shows the same worker appearance twice. */
+/** A recruitment advert always covers the three core disciplines first,
+ * never repeats a worker appearance, and still allows larger pools to add wildcards. */
 export function rollHirePool(week: number, count = 3, rng: () => number = Math.random): Staff[] {
   const usedLooks = new Set<number>();
-  return Array.from({ length: count }, () => {
-    const candidate = rollHire(week, rng, usedLooks);
+  const guaranteedRoles: StaffRole[] = ["writer", "animator", "composer"];
+  return Array.from({ length: count }, (_, index) => {
+    const candidate = rollHire(week, rng, usedLooks, index < guaranteedRoles.length ? guaranteedRoles[index] : undefined);
     if (candidate.look !== undefined) usedLooks.add(candidate.look);
     return candidate;
   });
