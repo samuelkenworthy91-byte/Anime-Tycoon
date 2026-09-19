@@ -309,6 +309,16 @@ function ProjectCard({
           </div>
         </details>
       )}
+      {inPipeline && (p.executiveRushUntilDay ?? -1) >= (run.day ?? run.week * 7) && (
+        <div className="mt-1.5 rounded-lg border border-neon/45 bg-neon/10 px-2.5 py-1.5 text-[9px] font-bold text-neon">
+          ⚡ EXECUTIVE RUSH ACTIVE · ×2 production bubbles · ×2 editor-note risk · {Math.max(0, (p.executiveRushUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
+        </div>
+      )}
+      {inPipeline && (p.noteToRdUntilDay ?? -1) >= (run.day ?? run.week * 7) && (p.noteToRdConverted ?? 0) < 6 && (
+        <div className="mt-1.5 rounded-lg border border-viol/45 bg-viol/10 px-2.5 py-1.5 text-[9px] font-bold text-viol">
+          🧠 CONTINUITY LEARNING ACTIVE · new notes become R&D · {p.noteToRdConverted ?? 0}/6 converted · {Math.max(0, (p.noteToRdUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
+        </div>
+      )}
 
       {/* overall creative lead — available on every production type */}
       {inPipeline && (

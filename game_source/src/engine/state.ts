@@ -2304,6 +2304,18 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     }
   }
 
+  /* Executive Rush duplicates normal production bubbles — including the showrunner —
+     while leaving contracts/research/note bubbles untouched. */
+  const nowDay = r.day ?? r.week * 7;
+  const rushCopies = pulses
+    .filter((pulse) => {
+      if (pulse.kind || pulse.source !== "project" || !pulse.projectId) return false;
+      const project = r.projects.find((candidate) => candidate.id === pulse.projectId);
+      return !!project && (project.executiveRushUntilDay ?? -1) >= nowDay;
+    })
+    .map((pulse, index) => ({ ...pulse, nonce: pulse.nonce + 10_000 + index }));
+  pulses.push(...rushCopies);
+
   /* ---- rare project-wide outcomes on the active production ---- */
   const production = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
   if (production) {
@@ -2312,7 +2324,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const name = face?.name ?? `${r.studio} showrunner`;
     if (roll() < PROJECT_RESEARCH_PULSE_CHANCE) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "research" });
-    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * specialisationProjectEffects(r, production.draft).issueChanceMult * (r.showrunner === "steady" ? 0.75 : 1)) {
+    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * ((production.executiveRushUntilDay ?? -1) >= nowDay ? 2 : 1) * specialisationProjectEffects(r, production.draft).issueChanceMult * (r.showrunner === "steady" ? 0.75 : 1)) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "note" });
     }
   }
@@ -2332,7 +2344,19 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
     if (pulse.kind === "research") {
       rd += pulse.points;
     } else if (pulse.kind === "note") {
-      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
+      const target = projects.find((project) => project.id === pulse.projectId);
+      const protectedNote = !!target && !target.milestone && (target.noteToRdUntilDay ?? -1) >= (r.day ?? r.week * 7) && (target.noteToRdConverted ?? 0) < 6;
+      if (protectedNote) {
+        rd += pulse.points;
+        pulse.kind = "research";
+        projects = projects.map((project) => project.id !== pulse.projectId ? project : ({
+          ...project,
+          rdGained: project.rdGained + pulse.points,
+          noteToRdConverted: (project.noteToRdConverted ?? 0) + pulse.points,
+        }));
+      } else {
+        projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
+      }
     } else if (pulse.source === "project" && pulse.projectId) {
       projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } }));
     } else if (pulse.source === "contract" && pulse.jobId) {

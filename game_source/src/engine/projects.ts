@@ -222,6 +222,11 @@ export interface Project {
   auto?: AutoState | null;
   /** paid, once-per-project contextual interventions */
   interventions?: string[];
+  /** Executive Rush doubles visible production bubbles until this exact day. */
+  executiveRushUntilDay?: number;
+  /** Continuity Repair can convert a limited number of future notes into R&D. */
+  noteToRdUntilDay?: number;
+  noteToRdConverted?: number;
 }
 
 /** delegation state for AUTO MANAGE (see engine/automation.ts) */
