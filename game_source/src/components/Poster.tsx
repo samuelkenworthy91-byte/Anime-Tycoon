@@ -6,6 +6,7 @@ import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import { assetPath } from "../utils/assetPath";
 import { ipById } from "../engine/ip";
+import { rivalPosterById } from "../engine/rivalPosters";
 
 /*
  * <Poster/> — key-visual card for a show.
@@ -262,6 +263,9 @@ export function PosterDecorationLayer({ design }: { design: PosterDesign }) {
 
 export default function Poster(props: PosterProps) {
   const licensedPoster = props.variant !== "mini" && props.draft?.licensedIpId ? ipById(props.draft.licensedIpId)?.posterAsset ?? null : null;
+  const genericPoster = props.variant !== "mini" && !props.draft?.licensedIpId && props.draft?.posterArtId
+    ? rivalPosterById(props.draft.posterArtId)
+    : null;
   const design = useMemo(
     () =>
       props.draft
@@ -279,7 +283,31 @@ export default function Poster(props: PosterProps) {
       </div>
     </div>
   );
+  if (genericPoster) return <PosterGeneric {...props} design={design} img={genericPoster.img} />;
   return <PosterFull {...props} design={design} />;
+}
+
+function PosterGeneric(props: FullProps & { design: PosterDesign; img: string }) {
+  const { design } = props;
+  return (
+    <div className={cn("anim-pop ink-card overflow-hidden", props.className)}>
+      <div className="relative aspect-[4/5] overflow-hidden bg-abyss">
+        <img src={assetPath(props.img)} alt={props.draft?.title ?? "Generic key art"} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-abyss/25" />
+        {props.topLeft && <div className="absolute left-2 top-2 z-10">{props.topLeft}</div>}
+        {props.stamp && <div className="absolute left-1/2 top-6 z-10 -translate-x-1/2 -rotate-6 rounded-xl border-4 bg-ink/80 px-3 py-1.5 text-center font-display text-xl font-extrabold tracking-widest" style={{ borderColor: props.stamp.color, color: props.stamp.color }}>{props.stamp.label}</div>}
+        <div className="absolute inset-x-0 bottom-0 z-10 p-3">
+          <div className="text-center" style={titleTextStyle(design, 21)}>
+            {design.lines.map((line, index) => <div key={index} className="whitespace-nowrap">{line}</div>)}
+          </div>
+          {props.footer}
+          <div className="mt-1.5 border-t border-paper/25 pt-1 text-center font-jp text-[5.5px] leading-[1.5] tracking-[0.14em] text-paper/55">
+            {design.billing.map((line, index) => <div key={index} className="truncate">{line}</div>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ---------------------------------------------------------- full card ---- */
