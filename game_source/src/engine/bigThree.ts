@@ -4,8 +4,8 @@ import { merchValueOf, zeitgeistOf } from "./franchise";
 import type { RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
-/** The Big Three era is first judged in March of Year 3. */
-export const BIG_THREE_START_YEAR = 3;
+/** The Big Three can first be awarded in March of Year 5. */
+export const BIG_THREE_START_YEAR = 5;
 export const BIG_THREE_MARCH_WEEK = 8; // March W1 in the 48-week calendar
 export const BIG_THREE_START_WEEK = (BIG_THREE_START_YEAR - 1) * 48 + BIG_THREE_MARCH_WEEK;
 export const BIG_THREE_MAX_SLOTS = 3;
@@ -247,6 +247,8 @@ export function refreshBigThreeOwnership(run: RunState): RunState {
 export function syncBigThreeEra(input: RunState): RunState {
   const run = refreshBigThreeOwnership(input);
   if (run.week < BIG_THREE_START_WEEK || run.bigThree.introduced) return run;
+  /* Activate the system silently. The player only gets an event when a title
+     actually qualifies, so empty March assessments never become annual pop-ups. */
   return {
     ...run,
     bigThree: {
@@ -254,10 +256,6 @@ export function syncBigThreeEra(input: RunState): RunState {
       introduced: true,
       lastRivalScanWeek: -1,
     },
-    notices: [
-      ...run.notices,
-      "🌠 MARCH, YEAR 3 — the industry begins its annual Big Three cultural assessment. Awards, critics, craft, reach and sustained fandom all matter.",
-    ].slice(-40),
   };
 }
 
@@ -573,13 +571,14 @@ export function advanceBigThreeWeek(inputRun: RunState): RunState {
   run = { ...run, bigThree: { ...run.bigThree, lastRivalScanWeek: run.week } };
 
   if (!selected.length) {
+    /* A March with no qualifying work is intentionally silent. Keep the
+       internal annual assessment cadence, but do not create an event/notice. */
     return refreshBigThreeOwnership({
       ...run,
       bigThree: {
         ...run.bigThree,
         candidates: run.bigThree.candidates.filter((candidate) => candidate.recognisedWeek > run.week - BIG_THREE_LOOKBACK_WEEKS),
       },
-      notices: [...run.notices, "🌠 MARCH BIG THREE CHECK — no production cleared every cultural-canon standard this year."].slice(-40),
     });
   }
 

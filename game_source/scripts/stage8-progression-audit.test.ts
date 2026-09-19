@@ -108,9 +108,9 @@ describe("Stage 8 progression audit", () => {
     expect(intervention.at(-1)!.cashPerPoint).toBeGreaterThan(intervention[0].cashPerPoint * 5);
     expect(report.capabilityFiveTrackEnvelope).toBeGreaterThanOrEqual(90_000_000);
     expect(careers.every((career) => career.slots >= 1 && career.slots <= BIG_THREE_MAX_SLOTS)).toBe(true);
-    /* QoL2 moved the annual assessment to March from Year 3 onward and
-       removed the old seeded Year-5 inductee. Qualification can happen in
-       any later March, but no slot may pre-date the new starting year. */
+    /* The first Big Three slot cannot be awarded before March of Year 5.
+       Empty March assessments are allowed to pass silently, so qualification
+       can happen in any later year without forcing an annual event. */
     expect(careers.every((career) => career.years.every((year) => year >= BIG_THREE_START_YEAR))).toBe(true);
     /* A studio can never own two Big Three places, even when several
        exceptional releases qualify in the same March assessment. */

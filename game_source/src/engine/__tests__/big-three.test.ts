@@ -5,6 +5,7 @@ import { initialRun } from "../state";
 import {
   BIG_THREE_MARCH_WEEK,
   BIG_THREE_MAX_SLOTS,
+  BIG_THREE_START_YEAR,
   BIG_THREE_START_WEEK,
   advanceBigThreeWeek,
   bigThreeQualifies,
@@ -98,17 +99,24 @@ function addRivalRelease(run: ReturnType<typeof initialRun>, studioIndex: number
 }
 
 describe("March Big Three cultural canon", () => {
-  it("stays dormant before March of Year 3 and no longer seeds a fixed rival title", () => {
+  it("stays dormant before March of Year 5 and activates silently if nobody qualifies", () => {
     let run = initialRun("House", "steady");
     run.week = BIG_THREE_START_WEEK - 1;
     run = syncBigThreeEra(run);
     expect(run.bigThree.introduced).toBe(false);
     expect(run.bigThree.slots).toHaveLength(0);
 
+    const noticesBefore = run.notices.length;
     run.week = BIG_THREE_START_WEEK;
     run = syncBigThreeEra(run);
     expect(run.bigThree.introduced).toBe(true);
     expect(run.bigThree.slots).toHaveLength(0);
+    expect(run.notices).toHaveLength(noticesBefore);
+
+    run = advanceBigThreeWeek(run);
+    expect(run.bigThree.slots).toHaveLength(0);
+    expect(run.notices).toHaveLength(noticesBefore);
+    expect(pendingBigThreeReveal(run)).toBeNull();
   });
 
   it("requires critics, reach, craft and cultural momentum together", () => {
@@ -166,7 +174,7 @@ describe("March Big Three cultural canon", () => {
 
     const nominee = rivalNominee(lower.release);
     run.awardsCeremony = {
-      year: 2,
+      year: BIG_THREE_START_YEAR - 1,
       categories: [{
         id: "aoty",
         name: "Anime of the Year",
