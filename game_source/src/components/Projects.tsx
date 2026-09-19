@@ -548,7 +548,14 @@ export default function ProjectsPanel({
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
   const airing = run.projects.filter((p) => p.stage === "airing");
-  const done = run.projects.filter((p) => p.stage === "done").slice(-4).reverse();
+  const done = [...run.projects]
+    .filter((p) => p.stage === "done")
+    .reverse()
+    .filter((project, index, rows) => {
+      const key = project.draft.franchiseKey ?? project.draft.title;
+      return rows.findIndex((candidate) => (candidate.draft.franchiseKey ?? candidate.draft.title) === key) === index;
+    })
+    .slice(0, 4);
   const quickSequels = Object.values(run.franchises)
     .filter((fr) => !continuationBlock(fr, "season", { week: run.week, franchiseCount: Object.keys(run.franchises).length, officeLevel: run.officeLevel, projects: run.projects }))
     .sort((a, b) => b.lastEntryWeek - a.lastEntryWeek || b.lastScore - a.lastScore);
@@ -624,7 +631,7 @@ export default function ProjectsPanel({
 
       {done.length > 0 && (
         <div>
-          <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-paper/40">RECENTLY COMPLETED</div>
+          <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-paper/40">LATEST FRANCHISE INSTALMENTS</div>
           <div className="space-y-1">
             {done.map((p) => (
               <div key={p.id} className="flex items-center gap-2 rounded-lg border border-line/60 bg-panel2/40 px-2.5 py-1.5 text-[11px]">

@@ -779,6 +779,42 @@ export const merchUpkeep = (r: Pick<RunState, "capitalProjects">): number => {
   return tier ? MERCH_TIERS[tier - 1].upkeep : 0;
 };
 
+export const MERCH_PRODUCT_PROJECT_PREFIX = "merch_product_";
+export const merchProductProjectId = (productId: string) => `${MERCH_PRODUCT_PROJECT_PREFIX}${productId}`;
+
+export function merchProductUnlocked(r: Pick<RunState, "capitalProjects">, productId: string): boolean {
+  return r.capitalProjects.includes(merchProductProjectId(productId));
+}
+
+export function merchProductUnlockBlock(r: RunState, productId: string): string | null {
+  const product = merchProductById(productId);
+  if (!product) return "Unknown product line";
+  if (merchProductUnlocked(r, productId)) return "Product line already developed";
+  const tier = merchTierOf(r);
+  if (tier < product.tier) return `Requires Merch Tier ${product.tier}: ${MERCH_TIERS[product.tier - 1].name}`;
+  if (r.cash < product.unlockCost) return `Needs £${product.unlockCost.toLocaleString("en-GB")} to develop`;
+  return null;
+}
+
+export function unlockMerchProduct(r: RunState, productId: string): RunState | null {
+  const product = merchProductById(productId);
+  if (!product || merchProductUnlockBlock(r, productId)) return null;
+  const projectId = merchProductProjectId(productId);
+  return {
+    ...r,
+    cash: r.cash - product.unlockCost,
+    capitalProjects: [...r.capitalProjects, projectId],
+    strategicSpend: [
+      ...r.strategicSpend,
+      { id: `merch_product_${r.week}_${product.id}`, label: `Merch product development: ${product.label}`, amount: product.unlockCost, week: r.week },
+    ],
+    notices: [
+      ...r.notices,
+      `🛍 PRODUCT LINE READY — ${product.label} developed for £${product.unlockCost.toLocaleString("en-GB")}. It can now be launched by eligible franchises.`,
+    ].slice(-40),
+  };
+}
+
 export const commercialUpkeep = (r: Pick<RunState, "capitalProjects">): number =>
   merchUpkeep(r) + overseasUpkeep(r);
 
@@ -3647,6 +3683,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const product = merchProductById(productId);
   if (!fr || !product) return null;
   const tier = merchTierOf(r);
+  if (!merchProductUnlocked(r, product.id)) return null;
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
   const total = Math.round(merchReturn(fr, product) * merchDecisionMult);
