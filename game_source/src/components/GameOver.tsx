@@ -7,8 +7,8 @@ import { formatNum, formatGBP, yearOfWeek } from "../engine/data";
 import { studioScore, type RunState } from "../engine/state";
 import { HighScoreTable } from "./Title";
 
-/** the studio is out of money — the one and only way a run ends. (Year 12 is
- *  a retrospective, never game over; a dynasty save dies only here.) */
+/** the studio is out of money — the one and only way a run ends. (Year 25 is
+ *  a retrospective, never game over; a dynasty run dies only here.) */
 export default function GameOver({
   run,
   onRestart,
