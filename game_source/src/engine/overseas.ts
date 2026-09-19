@@ -624,13 +624,16 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
       : 0,
     royalty = Math.round((gross - distributorCut) * clamp(royaltyRate, 0, 1));
   const receipts = Math.max(0, gross - distributorCut - royalty),
-    catalogueTierMult = [0, 0.75, 0.90, 1.05, 1.20][infrastructureTier] ?? 1,
+    catalogueTierMult = ([0, 0.75, 0.90, 1.05, 1.20][infrastructureTier] ?? 1)
+      * (r.capitalProjects.includes("localisation_campus") ? 1.10 : 1)
+      * (r.capitalProjects.includes("studio_streaming") ? 1.15 : 1),
     catalogueReceipts = Math.max(0, Math.round(receipts * d.catalogueRate * catalogueTierMult)),
     fans =
       reception.score >= 50
         ? Math.floor((viewers * (reception.score - 45)) / 1000)
         : -Math.min(o.recognition[t.id] ?? 0, Math.floor(viewers * 0.02));
-  const cost = (reused ? 0 : e.cost) + d.fee + q.campaign;
+  const localisationCost = reused ? 0 : Math.round(e.cost * (r.capitalProjects.includes("localisation_campus") ? 0.75 : 1));
+  const cost = localisationCost + d.fee + q.campaign;
   const release: RegionalRelease = {
     ...q,
     id: "regional:" + p.id + ":" + t.id + ":" + r.week,

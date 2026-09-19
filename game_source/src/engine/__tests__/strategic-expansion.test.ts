@@ -4,7 +4,7 @@ import { facilityFX } from "../facilities";
 import { STRATEGIC_CAMPAIGNS, campaignFit, strategicCampaignHype } from "../marketing";
 import { makeProject } from "../projects";
 import { CAPITAL_PROJECTS, coProductionOffer, startCoProduction } from "../spending";
-import { initialRun } from "../state";
+import { initialRun, projectCapacity } from "../state";
 
 const draft: Draft = {
   title: "Test Production",
@@ -38,11 +38,12 @@ describe("strategic economy expansion", () => {
     expect(fx.campaignForecast).toBe(true);
   });
 
-  it("keeps the prestige capital-project ladder at seven real investments", () => {
-    expect(CAPITAL_PROJECTS).toHaveLength(7);
-    expect(CAPITAL_PROJECTS.map((x) => x.id)).toContain("distribution_network");
-    expect(CAPITAL_PROJECTS.map((x) => x.id)).toContain("flagship_hq");
-    expect(CAPITAL_PROJECTS.every((x) => x.minOffice === 1)).toBe(true);
+  it("extends the prestige ladder with real late-career money sinks", () => {
+    expect(CAPITAL_PROJECTS).toHaveLength(12);
+    expect(CAPITAL_PROJECTS.map((x) => x.id)).toEqual(expect.arrayContaining(["creator_academy", "localisation_campus", "merch_factory", "studio_streaming", "second_campus", "distribution_network", "flagship_hq"]));
+    expect(CAPITAL_PROJECTS.every((x) => x.minOffice >= 1)).toBe(true);
+    const run = initialRun("Campus Test", "steady");
+    expect(projectCapacity({ ...run, capitalProjects: ["second_campus"] })).toBe(projectCapacity(run) + 1);
   });
 
   it("makes campaign fit change reach without changing production points", () => {

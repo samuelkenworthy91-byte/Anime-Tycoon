@@ -285,12 +285,17 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
 export interface CapitalDef { id: string; name: string; cost: number; minOffice: number; description: string; }
 export const CAPITAL_PROJECTS: CapitalDef[] = [
   { id: "screening_theatre", name: "Private Screening Theatre", cost: 1_500_000, minOffice: 1, description: "Improves consultant/final-polish work and prestige launch campaigns." },
+  { id: "creator_academy", name: "Creator Academy", cost: 12_000_000, minOffice: 1, description: "Named production leads earn 20% more lead XP and personal followers." },
   { id: "mocap_stage", name: "Performance Capture Stage", cost: 18_000_000, minOffice: 1, description: "Strengthens animation passes and retakes while cutting failure risk." },
   { id: "orchestra_hall", name: "Orchestral Recording Hall", cost: 42_000_000, minOffice: 1, description: "Greatly strengthens soundtrack enhancement work." },
+  { id: "localisation_campus", name: "Localisation Campus", cost: 70_000_000, minOffice: 1, description: "Cuts new overseas localisation costs by 25% and strengthens catalogue tails." },
   { id: "global_merch", name: "Global Merch Centre", cost: 120_000_000, minOffice: 1, description: "Boosts character-led and international launch campaigns." },
+  { id: "merch_factory", name: "In-House Merch Manufacturing", cost: 220_000_000, minOffice: 1, description: "Adds 18% to merchandise-line returns after fan demand and partner reach." },
   { id: "distribution_network", name: "Worldwide Distribution Network", cost: 260_000_000, minOffice: 1, description: "Boosts mass-media and international campaigns across territories." },
   { id: "convention_venue", name: "Exhibition & Convention Venue", cost: 480_000_000, minOffice: 1, description: "Supercharges convention panels and owned fan events." },
+  { id: "studio_streaming", name: "Owned Streaming Service", cost: 700_000_000, minOffice: 1, description: "Adds 8% domestic release revenue and strengthens overseas catalogue income." },
   { id: "flagship_hq", name: "Global Flagship Headquarters", cost: 1_100_000_000, minOffice: 1, description: "Improves every strategic campaign and gives stronger co-production terms." },
+  { id: "second_campus", name: "Second Production Campus", cost: 1_800_000_000, minOffice: 1, description: "Adds one permanent major-production slot; department capacity still has to support the extra slate." },
 ];
 
 export function buyCapitalProject(run: RunState, id: string): RunState | null {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCTION_SCOPES, type Draft, type Staff } from "../data";
-import { departmentStatuses } from "../capacity";
+import { departmentStatuses, projectLoadMap } from "../capacity";
 import { partnerTier } from "../market";
 import { draftCost, draftWeeks, makeProject, rawTeamCapacity, teamSpeed } from "../projects";
 import { advanceWeeks, buyFacility, initialRun, startContractAssignment, startResearchProject, trainStaff, type RunState } from "../state";
@@ -28,7 +28,12 @@ describe("deeper studio loop", () => {
     const p1 = { ...makeProject(draft({ title: "A", scope: "prestige", budget: "blockbuster" }), 0), stage: "animation" as const };
     const p2 = { ...makeProject(draft({ title: "B", scope: "prestige", budget: "blockbuster" }), 0), stage: "animation" as const };
     const s = departmentStatuses([p1, p2], [worker("a", "animator", 70), worker("b", "animator", 70)], {}, []);
-    expect(s.find((x) => x.id === "animation")!.overloaded).toBe(true);
+    const animation = s.find((x) => x.id === "animation")!;
+    expect(animation.overloaded).toBe(true);
+    expect(animation.paceMult).toBeLessThan(1);
+    expect(animation.reworkRisk).toBe(true);
+    const load = projectLoadMap([p1, p2], [worker("a", "animator", 70), worker("b", "animator", 70)], {}, []);
+    expect(load[p1.id]).toBe(animation.paceMult);
   });
 
   it("partner reputation has meaningful relationship tiers", () => {

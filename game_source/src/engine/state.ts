@@ -1585,7 +1585,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
 
 /** how many major productions this office can run at once */
 export const projectCapacity = (r: RunState) =>
-  OFFICES[r.officeLevel].projects + (r.dynasty ? dynastyFX(r).extraProjects : 0);
+  OFFICES[r.officeLevel].projects + (r.dynasty ? dynastyFX(r).extraProjects : 0) + (r.capitalProjects.includes("second_campus") ? 1 : 0);
 
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
@@ -2831,6 +2831,13 @@ export function releaseProject(
       ],
     };
   }
+  if (r.capitalProjects.includes("studio_streaming")) {
+    result = {
+      ...result,
+      revenue: Math.round(result.revenue * 1.08),
+      breakdown: [...result.breakdown, { label: "Owned streaming service", pts: "×1.08 domestic revenue" }],
+    };
+  }
 
   if (p.shelvedWeek !== undefined) {
     const before = result.revenue;
@@ -3119,11 +3126,13 @@ export function releaseProject(
         nx = moraleDelta(nx, moraleSwing);
         const creatorXp = creatorVisionEffectsForProject(r.expansion?.promises, p, nx.id).xpMult;
         const isProductionLead = p.creativeLeadId === nx.id;
-        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp * (isProductionLead ? 1.6 : 1));
+        const leadCareerMult = isProductionLead ? 1.6 * (r.capitalProjects.includes("creator_academy") ? 1.2 : 1) : 1;
+        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp * leadCareerMult);
         let careerStaff = g.staff;
         if (isProductionLead) {
           const beforeFollowing = Math.max(0, careerStaff.creatorFans ?? 0);
-          const followingGain = Math.max(25, Math.round(Math.max(0, result.fans) * (0.12 + result.total / 250)));
+          const academyFollowingMult = r.capitalProjects.includes("creator_academy") ? 1.2 : 1;
+          const followingGain = Math.max(25, Math.round(Math.max(0, result.fans) * (0.12 + result.total / 250) * academyFollowingMult));
           const creatorFans = beforeFollowing + followingGain;
           careerStaff = { ...careerStaff, creatorFans };
           const milestones = [1_000, 10_000, 100_000, 1_000_000];
@@ -3814,7 +3823,8 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
   const relationshipMult = partnerCommercialMult(r.partners ?? {});
-  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult);
+  const manufacturingMult = r.capitalProjects.includes("merch_factory") ? 1.18 : 1;
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {
@@ -3841,7 +3851,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     franchises: { ...r.franchises, [franchiseKey]: next },
     notices: [
       ...r.notices,
-      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · partner network ×${relationshipMult.toFixed(2)}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · partner network ×${relationshipMult.toFixed(2)}${manufacturingMult > 1 ? " · in-house manufacturing ×1.18" : ""}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
     ].slice(-40),
   };
 }
