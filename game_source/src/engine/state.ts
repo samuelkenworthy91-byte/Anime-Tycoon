@@ -1784,7 +1784,35 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
   const already = !!p?.staffIds.includes(staffId);
   const op = !already ? staffOperationReason(r, staffId) : null;
   if (op) return { ...r, notices: [...r.notices, `${r.staff.find((s) => s.id === staffId)?.name ?? "That employee"} is unavailable — ${op}.`] };
-  return { ...r, projects: toggleAssign(r.projects, projectId, staffId) };
+  const toggled = toggleAssign(r.projects, projectId, staffId);
+  return {
+    ...r,
+    projects: toggled.map((project) =>
+      project.id === projectId && already && project.creativeLeadId === staffId
+        ? { ...project, creativeLeadId: undefined }
+        : project
+    ),
+  };
+}
+
+/** Any running production can name one assigned employee as its overall creator.
+ * This is intentionally separate from passion-project departmental promises. */
+export function appointProjectLead(r: RunState, projectId: string, staffId: string | null): RunState | null {
+  const p = projectById(r, projectId);
+  if (!p || ["airing", "done", "shelved"].includes(p.stage)) return null;
+  if (staffId !== null && (!p.staffIds.includes(staffId) || !r.staff.some((staff) => staff.id === staffId))) return null;
+  return {
+    ...r,
+    projects: r.projects.map((project) =>
+      project.id === projectId ? { ...project, creativeLeadId: staffId ?? undefined } : project
+    ),
+  };
+}
+
+export function creatorFollowingMult(staff: Pick<Staff, "creatorFans"> | null | undefined): number {
+  const following = Math.max(0, staff?.creatorFans ?? 0);
+  if (!following) return 1;
+  return 1 + Math.min(0.30, Math.log10(1 + following) * 0.05);
 }
 
 export function startContractAssignment(r: RunState, contract: Contract, staffIds: string[], showrunner = false): RunState | null {
@@ -2755,6 +2783,19 @@ export function releaseProject(
     });
   }
 
+  const productionLead = p.creativeLeadId ? r.staff.find((staff) => staff.id === p.creativeLeadId) : undefined;
+  const leadAudienceMult = creatorFollowingMult(productionLead);
+  if (productionLead && leadAudienceMult > 1.001) {
+    result = {
+      ...result,
+      fans: Math.round(result.fans * leadAudienceMult),
+      breakdown: [
+        ...result.breakdown,
+        { label: `${productionLead.name} creator following`, pts: `×${leadAudienceMult.toFixed(2)} fan gain` },
+      ],
+    };
+  }
+
   const relationshipCommercialMult = partnerCommercialMult(r.partners ?? {});
   if (Math.abs(relationshipCommercialMult - 1) >= 0.005) {
     result = {
@@ -3053,10 +3094,21 @@ export function releaseProject(
         nx = recordShow(nx, draft.title, result.total, r.week, draft.genres);
         nx = moraleDelta(nx, moraleSwing);
         const creatorXp = creatorVisionEffectsForProject(r.expansion?.promises, p, nx.id).xpMult;
-        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp);
+        const isProductionLead = p.creativeLeadId === nx.id;
+        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp * (isProductionLead ? 1.6 : 1));
+        let careerStaff = g.staff;
+        if (isProductionLead) {
+          const beforeFollowing = Math.max(0, careerStaff.creatorFans ?? 0);
+          const followingGain = Math.max(25, Math.round(Math.max(0, result.fans) * (0.12 + result.total / 250)));
+          const creatorFans = beforeFollowing + followingGain;
+          careerStaff = { ...careerStaff, creatorFans };
+          const milestones = [1_000, 10_000, 100_000, 1_000_000];
+          const crossed = milestones.find((milestone) => beforeFollowing < milestone && creatorFans >= milestone);
+          if (crossed) notices.push(`⭐ ${careerStaff.name}'s reputation as a creator passes ${crossed.toLocaleString("en-GB")} personal followers.`);
+        }
         if (g.levelsGained > 0)
-          notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
-        return g.staff;
+          notices.push(`${careerStaff.name} is promoted to ${levelTitle(careerStaff.level)} (Lv ${careerStaff.level})!`);
+        return careerStaff;
       });
     })(),
     /* the awards slate keeps REAL production data. Licensed adaptations enter

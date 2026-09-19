@@ -193,6 +193,8 @@ export interface Project {
   lateDays?: number;
   /** ids of staff on this project (exclusive — one project per person) */
   staffIds: string[];
+  /** one overall named creator; distinct from promise-based departmental leadership */
+  creativeLeadId?: string;
   points: Points;
   /** quality already banked by live desk bubbles since the last week boundary */
   liveQuality?: Points;

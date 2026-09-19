@@ -140,6 +140,8 @@ export interface Staff {
   joinedWeek?: number;
   /** shipped shows this person worked on (most recent last) */
   shows?: { title: string; score: number; week: number }[];
+  /** audience that follows this person as a named creator rather than only the studio */
+  creatorFans?: number;
   awardsWon?: number;
   bestShow?: { title: string; score: number } | null;
   lastTrainedWeek?: number;

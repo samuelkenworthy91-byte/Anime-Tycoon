@@ -32,7 +32,7 @@ import {
 } from "../engine/data";
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
-import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
+import { HEAD_TITLES, levelTitle, type HeadSlot } from "../engine/careers";
 import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
 import {
   MILESTONE_LABEL,
@@ -76,6 +76,7 @@ function ProjectCard({
   onContinueSeason,
   onIntervention,
   onAppointPromise,
+  onAppointLead,
 }: {
   p: Project;
   run: RunState;
@@ -90,6 +91,7 @@ function ProjectCard({
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
+  onAppointLead: (projectId: string, staffId: string | null) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
@@ -110,6 +112,7 @@ function ProjectCard({
   ];
   const expansion = expansionOf(run);
   const productionCredit = expansion.credits[p.id];
+  const creativeLead = p.creativeLeadId ? run.staff.find((staff) => staff.id === p.creativeLeadId) : undefined;
   const promiseCandidates = expansion.promises.filter((promise) =>
     promise.status === "active" &&
     (!promise.projectId || promise.projectId === p.id) &&
@@ -305,6 +308,36 @@ function ProjectCard({
             })}
           </div>
         </details>
+      )}
+
+      {/* overall creative lead — available on every production type */}
+      {inPipeline && (
+        <div className="mt-2 rounded-lg border border-gold/30 bg-gold/5 p-2">
+          <div className="flex items-center gap-2">
+            <Crown size={12} className="text-gold" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[9px] font-black tracking-widest text-gold">PRODUCTION LEAD</div>
+              <div className="truncate text-[10px] text-paper/55">
+                {creativeLead
+                  ? `${creativeLead.name} · ${levelTitle(creativeLead.level)} · ${Math.round(creativeLead.creatorFans ?? 0).toLocaleString("en-GB")} followers`
+                  : "Name one assigned employee. Leads earn extra career XP and build a personal audience that can boost future releases."}
+              </div>
+            </div>
+          </div>
+          <select
+            className="mt-1.5 min-h-9 w-full rounded-lg border border-line bg-panel2 px-2 text-[10px]"
+            value={p.creativeLeadId ?? ""}
+            disabled={team.length === 0}
+            onChange={(event) => onAppointLead(p.id, event.target.value || null)}
+          >
+            <option value="">{team.length ? "No named production lead" : "Assign staff to the team first"}</option>
+            {team.map((staff) => (
+              <option key={staff.id} value={staff.id}>
+                {staff.name} · {levelTitle(staff.level)} · {Math.round(staff.creatorFans ?? 0).toLocaleString("en-GB")} followers
+              </option>
+            ))}
+          </select>
+        </div>
       )}
 
       {/* team */}
@@ -530,6 +563,7 @@ export default function ProjectsPanel({
   onContinueSeason,
   onIntervention,
   onAppointPromise,
+  onAppointLead,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -544,6 +578,7 @@ export default function ProjectsPanel({
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
+  onAppointLead: (projectId: string, staffId: string | null) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
@@ -620,6 +655,7 @@ export default function ProjectsPanel({
           onContinueSeason={onContinueSeason}
           onIntervention={onIntervention}
           onAppointPromise={onAppointPromise}
+          onAppointLead={onAppointLead}
         />
       ))}
 
