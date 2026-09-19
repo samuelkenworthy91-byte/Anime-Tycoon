@@ -5,7 +5,6 @@ on:
     branches:
       - work/midgame-endgame-systems-pass
       - work/zeitgeist-commercial-events-pass
-      - qol-pass-2-2026-09-19
   workflow_dispatch:
 
 permissions:
