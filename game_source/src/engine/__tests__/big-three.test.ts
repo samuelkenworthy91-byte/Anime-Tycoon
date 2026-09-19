@@ -99,7 +99,7 @@ function addRivalRelease(run: ReturnType<typeof initialRun>, studioIndex: number
 }
 
 describe("March Big Three cultural canon", () => {
-  it("stays dormant before March of Year 5 and activates silently if nobody qualifies", () => {
+  it("stays dormant before March of Year 3 and activates silently if nobody qualifies", () => {
     let run = initialRun("House", "steady");
     run.week = BIG_THREE_START_WEEK - 1;
     run = syncBigThreeEra(run);
