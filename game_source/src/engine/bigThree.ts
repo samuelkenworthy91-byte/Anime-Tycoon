@@ -4,7 +4,7 @@ import { merchValueOf, zeitgeistOf } from "./franchise";
 import type { RivalFranchise, RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
-export const BIG_THREE_START_WEEK = 4 * 48; // opening of industry Year 5
+export const BIG_THREE_START_WEEK = 2 * 48 + 8; // Year 3, March W1
 export const BIG_THREE_MAX_SLOTS = 3;
 export const BIG_THREE_MIN_SCORE = 38;
 export const BIG_THREE_MIN_REACH = 150_000;
@@ -14,8 +14,9 @@ export const BIG_THREE_BREAKOUT_REACH = 300_000;
 export const BIG_THREE_PLAYER_FAN_REWARD = 75_000;
 export const BIG_THREE_PLAYER_RD_REWARD = 60;
 export const BIG_THREE_RENEWAL_LEVERAGE = 0.12;
-export const BIG_THREE_RIVAL_GRACE_WEEKS = 48;
-export const BIG_THREE_RIVAL_COOLDOWN_WEEKS = 48;
+/** Big Three recognition is reviewed once per year in March. */
+export const BIG_THREE_CHECK_MONTH_OFFSET = 8; // Jan 0-3, Feb 4-7, Mar begins at 8
+export const BIG_THREE_PLAYER_SLOT3_TIEBREAK = 1.025;
 
 export const BIG_THREE_SEED_TITLE = "Astra Breaker: Eclipse";
 export const BIG_THREE_SEED_STUDIO_ID = "Sunnyrise";
@@ -91,7 +92,7 @@ export const initialBigThreeState = (): BigThreeState => ({
   slots: [],
   candidates: [],
   pendingReveals: [],
-  lastRivalScanWeek: BIG_THREE_START_WEEK - 1,
+  lastRivalScanWeek: BIG_THREE_START_WEEK - 48,
 });
 
 function isOwnerType(value: unknown): value is BigThreeOwnerType {
@@ -308,29 +309,25 @@ export function refreshBigThreeOwnership(run: RunState): RunState {
 }
 
 export function syncBigThreeEra(input: RunState): RunState {
-  let run = refreshBigThreeOwnership(input);
+  const run = refreshBigThreeOwnership(input);
   if (run.week < BIG_THREE_START_WEEK || run.bigThree.introduced) return run;
-  run = seedRivalRelease(run);
-  const slot = seedSlot();
   return {
     ...run,
     bigThree: {
       ...run.bigThree,
       introduced: true,
-      slots: [slot],
-      pendingReveals: [...run.bigThree.pendingReveals, { id: "big-three-era-intro", kind: "era", slotId: slot.id }],
-      /* old post-Year-5 saves start competing from the moment this feature is
-         introduced; we do not retroactively steal both open slots with releases
-         the player never had the chance to answer. */
-      lastRivalScanWeek: run.week,
+      slots: [],
+      candidates: [],
+      lastRivalScanWeek: BIG_THREE_START_WEEK - 48,
     },
-    notices: [...run.notices, `🌠 YEAR 5 — fans name ${BIG_THREE_SEED_TITLE} (${BIG_THREE_SEED_STUDIO}) as the first title of anime's new Big Three. Two places remain.`].slice(-40),
+    notices: [...run.notices, "🌠 YEAR 3 — the industry starts talking about a new BIG THREE. Every March, one exceptional title can be recognised. No studio can hold more than one place."].slice(-40),
   };
 }
 
 export function recognisePlayerBigThreeRelease(inputRun: RunState, release: BigThreePlayerReleaseInput): RunState {
   const run = syncBigThreeEra(inputRun);
   if (!run.bigThree.introduced || run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) return run;
+  if (run.bigThree.slots.some((slot) => slot.originalStudioId === "player")) return run;
   const sourceId = `player:${release.projectId}`;
   if (run.bigThree.slots.some((slot) => slot.sourceId === sourceId) || run.bigThree.candidates.some((slot) => slot.sourceId === sourceId)) return run;
   const craft = playerCraftFor(release.score, release.points);
@@ -410,24 +407,90 @@ function rivalSlot(run: RunState, studio: RivalStudio, release: RivalRelease, me
   };
 }
 
+function recentAwardBonus(run: RunState, title: string, studioId: string, studioName: string, player: boolean): number {
+  const ceremony = run.awardsCeremony;
+  if (!ceremony?.categories?.length) return 0;
+  return ceremony.categories.reduce((sum, category) => {
+    const winner = category.winner;
+    const sameTitle = winner.title === title;
+    const sameStudio = player ? winner.player : (!winner.player && winner.studio === studioName);
+    if (!sameTitle || !sameStudio) return sum;
+    return sum + (category.id === "aoty" ? 38 : 12);
+  }, 0);
+}
+
+const isMarchBigThreeCheck = (week: number) =>
+  week >= BIG_THREE_START_WEEK && week % 48 === BIG_THREE_CHECK_MONTH_OFFSET;
+
 export function advanceBigThreeWeek(inputRun: RunState): RunState {
   let run = syncBigThreeEra(inputRun);
-  if (!run.bigThree.introduced) return run;
-  if (run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, candidates: [], lastRivalScanWeek: run.week } });
-  const latestRecognitionWeek = Math.max(BIG_THREE_START_WEEK, ...run.bigThree.slots.map((slot) => slot.recognisedWeek));
-  if (run.week < latestRecognitionWeek + BIG_THREE_RIVAL_COOLDOWN_WEEKS) return refreshBigThreeOwnership(run);
+  if (!run.bigThree.introduced || !isMarchBigThreeCheck(run.week)) return run;
+  if (run.bigThree.slots.length >= BIG_THREE_MAX_SLOTS) {
+    return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, candidates: [], lastRivalScanWeek: run.week } });
+  }
+
+  const usedStudios = new Set(run.bigThree.slots.map((slot) => slot.originalStudioId));
   const lastScan = run.bigThree.lastRivalScanWeek;
-  const rivalCandidates = run.rivalWorld.studios.flatMap((studio) => studio.releases.filter((release) => release.week > lastScan && release.week <= run.week && release.title !== BIG_THREE_SEED_TITLE).map((release) => ({ studio, release, metrics: rivalMetrics(studio, release) })).filter((candidate) => bigThreeQualifies(candidate.metrics))).sort((a,b)=>b.metrics.culturalScore-a.metrics.culturalScore||b.release.score-a.release.score);
-  const playerCandidate = [...run.bigThree.candidates].filter((candidate)=>!run.bigThree.slots.some((slot)=>slot.sourceId===candidate.sourceId)).sort((a,b)=>b.culturalScore-a.culturalScore||b.score-a.score)[0];
-  const rivalCandidate = rivalCandidates.find((candidate)=>!run.bigThree.slots.some((slot)=>slot.sourceId===`rival:${candidate.studio.id}:${candidate.release.week}:${candidate.release.title}`));
+  const firstSlot = run.bigThree.slots.length === 0;
+
+  const rivalCandidates = run.rivalWorld.studios
+    .filter((studio) => !usedStudios.has(studio.id))
+    .flatMap((studio) => studio.releases
+      .filter((release) => release.week > lastScan && release.week <= run.week)
+      .map((release) => {
+        const metrics = rivalMetrics(studio, release);
+        const awardBonus = firstSlot ? recentAwardBonus(run, release.title, studio.id, studio.name, false) : 0;
+        return { studio, release, metrics, selectionScore: metrics.culturalScore + awardBonus };
+      })
+      .filter((candidate) => bigThreeQualifies(candidate.metrics)))
+    .sort((a,b)=>b.selectionScore-a.selectionScore||b.release.score-a.release.score);
+
+  const playerCandidate = usedStudios.has("player")
+    ? undefined
+    : [...run.bigThree.candidates]
+        .filter((candidate) => candidate.recognisedWeek > lastScan && candidate.recognisedWeek <= run.week)
+        .filter((candidate) => !run.bigThree.slots.some((slot)=>slot.sourceId===candidate.sourceId))
+        .map((candidate) => ({
+          candidate,
+          selectionScore: candidate.culturalScore + (firstSlot ? recentAwardBonus(run, candidate.title, "player", run.studio, true) : 0),
+        }))
+        .sort((a,b)=>b.selectionScore-a.selectionScore||b.candidate.score-a.candidate.score)[0];
+
+  const rivalCandidate = rivalCandidates[0];
   run = { ...run, bigThree: { ...run.bigThree, lastRivalScanWeek: run.week } };
-  if (!playerCandidate && !rivalCandidate) return refreshBigThreeOwnership(run);
-  if (playerCandidate && (!rivalCandidate || playerCandidate.culturalScore >= rivalCandidate.metrics.culturalScore)) return refreshBigThreeOwnership(promotePlayerCandidate(run, playerCandidate));
+
+  if (!playerCandidate && !rivalCandidate) {
+    return refreshBigThreeOwnership({ ...run, bigThree: { ...run.bigThree, candidates: [] } });
+  }
+
+  const slotThreePlayerWeight = run.bigThree.slots.length === 2 ? BIG_THREE_PLAYER_SLOT3_TIEBREAK : 1;
+  const playerSelectionScore = (playerCandidate?.selectionScore ?? -Infinity) * slotThreePlayerWeight;
+  if (playerCandidate && (!rivalCandidate || playerSelectionScore >= rivalCandidate.selectionScore)) {
+    return refreshBigThreeOwnership(promotePlayerCandidate(run, playerCandidate.candidate));
+  }
+
   const candidate = rivalCandidate!;
   const slot = rivalSlot(run, candidate.studio, candidate.release, candidate.metrics);
-  const rivalWorld = { ...run.rivalWorld, studios: run.rivalWorld.studios.map((studio) => studio.id === candidate.studio.id ? { ...studio, fans: studio.fans + 50_000, reputation: Math.min(100, studio.reputation + 8), momentum: Math.min(30, studio.momentum + 8) } : studio) };
+  const rivalWorld = {
+    ...run.rivalWorld,
+    studios: run.rivalWorld.studios.map((studio) =>
+      studio.id === candidate.studio.id
+        ? { ...studio, fans: studio.fans + 50_000, reputation: Math.min(100, studio.reputation + 8), momentum: Math.min(30, studio.momentum + 8) }
+        : studio
+    ),
+  };
   const remaining = BIG_THREE_MAX_SLOTS - run.bigThree.slots.length - 1;
-  return refreshBigThreeOwnership({ ...run, rivalWorld, bigThree: { ...run.bigThree, slots: [...run.bigThree.slots, slot], candidates: [], pendingReveals: [...run.bigThree.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }] }, notices: [...run.notices, `🌠 FANDOM CONSENSUS — “${candidate.release.title}” (${candidate.studio.name}) enters THE BIG THREE. ${remaining} place${remaining === 1 ? "" : "s"} remain.`].slice(-40) });
+  return refreshBigThreeOwnership({
+    ...run,
+    rivalWorld,
+    bigThree: {
+      ...run.bigThree,
+      slots: [...run.bigThree.slots, slot],
+      candidates: [],
+      pendingReveals: [...run.bigThree.pendingReveals, { id: `big-three-reveal-${slot.id}`, kind: "new_name", slotId: slot.id }],
+    },
+    notices: [...run.notices, `🌠 MARCH INDUSTRY CONSENSUS — “${candidate.release.title}” (${candidate.studio.name}) enters THE BIG THREE. ${remaining} place${remaining === 1 ? "" : "s"} remain.`].slice(-40),
+  });
 }
 
 export function pendingBigThreeReveal(run: RunState): { reveal: BigThreeReveal; slot: BigThreeSlot } | null {
