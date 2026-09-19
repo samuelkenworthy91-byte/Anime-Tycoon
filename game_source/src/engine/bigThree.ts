@@ -1,7 +1,7 @@
 import type { AnimeType, Draft, GenreId } from "./data";
 import { playerCraftFor } from "./awards";
 import { merchValueOf, zeitgeistOf } from "./franchise";
-import type { RivalFranchise, RivalRelease, RivalStudio } from "./rivals";
+import type { RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
 export const BIG_THREE_START_WEEK = 2 * 48 + 8; // Year 3, March W1
@@ -17,12 +17,6 @@ export const BIG_THREE_RENEWAL_LEVERAGE = 0.12;
 /** Big Three recognition is reviewed once per year in March. */
 export const BIG_THREE_CHECK_MONTH_OFFSET = 8; // Jan 0-3, Feb 4-7, Mar begins at 8
 export const BIG_THREE_PLAYER_SLOT3_TIEBREAK = 1.025;
-
-export const BIG_THREE_SEED_TITLE = "Astra Breaker: Eclipse";
-export const BIG_THREE_SEED_STUDIO_ID = "Sunnyrise";
-export const BIG_THREE_SEED_STUDIO = "Sunnyrise";
-export const BIG_THREE_SEED_POSTER_ID = "sunrise_p003";
-export const BIG_THREE_SEED_FRANCHISE = "big-three:astra-breaker";
 
 export type BigThreeOwnerType = "player" | "rival" | "network" | "rights_holder";
 export type BigThreeRevealKind = "era" | "new_name";
@@ -187,91 +181,6 @@ function rivalMomentum(studio: RivalStudio, release: RivalRelease): number {
   ), 0, 100);
 }
 
-function seedSlot(): BigThreeSlot {
-  return {
-    id: "big-three-slot-1",
-    sourceId: "seed:sunnyrise:astra-breaker",
-    title: BIG_THREE_SEED_TITLE,
-    originalStudioId: BIG_THREE_SEED_STUDIO_ID,
-    originalStudio: BIG_THREE_SEED_STUDIO,
-    currentOwnerId: BIG_THREE_SEED_STUDIO_ID,
-    currentOwner: BIG_THREE_SEED_STUDIO,
-    currentOwnerType: "rival",
-    player: false,
-    recognisedWeek: BIG_THREE_START_WEEK,
-    recognisedYear: 5,
-    genres: ["mecha", "space"],
-    animeType: "shonen",
-    score: 38,
-    reach: 180_000,
-    craftFloor: 48,
-    momentum: 96,
-    culturalScore: 404,
-    posterId: BIG_THREE_SEED_POSTER_ID,
-    franchiseKey: BIG_THREE_SEED_FRANCHISE,
-    licensedIpId: null,
-    draft: null,
-    protag: null,
-  };
-}
-
-function seedRivalRelease(run: RunState): RunState {
-  const seeded = seedSlot();
-  const studios = run.rivalWorld.studios.map((studio) => {
-    if (studio.id !== BIG_THREE_SEED_STUDIO_ID && studio.name !== BIG_THREE_SEED_STUDIO) return studio;
-    const exists = studio.releases.some((release) => release.title === BIG_THREE_SEED_TITLE && release.week === BIG_THREE_START_WEEK);
-    if (exists) return studio;
-    const release: RivalRelease = {
-      title: BIG_THREE_SEED_TITLE,
-      studioId: studio.id,
-      studio: studio.name,
-      score: 38,
-      week: BIG_THREE_START_WEEK,
-      year: 5,
-      genres: ["mecha", "space"],
-      animeType: "shonen",
-      revenue: 4_200_000,
-      fans: 180_000,
-      kind: "original",
-      hallOfFame: true,
-      craft: { story: 52, art: 68, sound: 48 },
-      posterId: BIG_THREE_SEED_POSTER_ID,
-      franchiseKey: BIG_THREE_SEED_FRANCHISE,
-      licensedIpId: null,
-    };
-    const franchise: RivalFranchise = {
-      key: BIG_THREE_SEED_FRANCHISE,
-      baseTitle: BIG_THREE_SEED_TITLE,
-      genres: ["mecha", "space"],
-      animeType: "shonen",
-      season: 1,
-      popularity: 96,
-      bestScore: 38,
-      lastScore: 38,
-      lastEntryWeek: BIG_THREE_START_WEEK,
-      entries: 1,
-      posterId: BIG_THREE_SEED_POSTER_ID,
-      licensedIpId: null,
-    };
-    const count = Math.max(0, studio.releasesCount);
-    return {
-      ...studio,
-      reputation: Math.min(100, studio.reputation + 10),
-      momentum: Math.min(30, studio.momentum + 12),
-      revenue: studio.revenue + release.revenue,
-      fans: studio.fans + release.fans,
-      releasesCount: count + 1,
-      hits: studio.hits + 1,
-      masterpieces: studio.masterpieces + 1,
-      avgScore: Math.round(((studio.avgScore * count + release.score) / (count + 1)) * 10) / 10,
-      releases: [...studio.releases, release].slice(-60),
-      franchises: studio.franchises.some((fr) => fr.key === BIG_THREE_SEED_FRANCHISE) ? studio.franchises : [...studio.franchises, franchise],
-      posterRecent: [...(studio.posterRecent ?? []).filter((id) => id !== BIG_THREE_SEED_POSTER_ID), BIG_THREE_SEED_POSTER_ID].slice(-10),
-    };
-  });
-  return { ...run, rivalWorld: { ...run.rivalWorld, studios } };
-}
-
 export function resolveBigThreeSlotOwner(run: RunState, slot: BigThreeSlot): BigThreeSlot {
   if (slot.franchiseKey && slot.player) {
     const fr = run.franchises[slot.franchiseKey];
@@ -407,7 +316,7 @@ function rivalSlot(run: RunState, studio: RivalStudio, release: RivalRelease, me
   };
 }
 
-function recentAwardBonus(run: RunState, title: string, studioId: string, studioName: string, player: boolean): number {
+function recentAwardBonus(run: RunState, title: string, studioName: string, player: boolean): number {
   const ceremony = run.awardsCeremony;
   if (!ceremony?.categories?.length) return 0;
   return ceremony.categories.reduce((sum, category) => {
@@ -439,7 +348,7 @@ export function advanceBigThreeWeek(inputRun: RunState): RunState {
       .filter((release) => release.week > lastScan && release.week <= run.week)
       .map((release) => {
         const metrics = rivalMetrics(studio, release);
-        const awardBonus = firstSlot ? recentAwardBonus(run, release.title, studio.id, studio.name, false) : 0;
+        const awardBonus = firstSlot ? recentAwardBonus(run, release.title, studio.name, false) : 0;
         return { studio, release, metrics, selectionScore: metrics.culturalScore + awardBonus };
       })
       .filter((candidate) => bigThreeQualifies(candidate.metrics)))
@@ -452,7 +361,7 @@ export function advanceBigThreeWeek(inputRun: RunState): RunState {
         .filter((candidate) => !run.bigThree.slots.some((slot)=>slot.sourceId===candidate.sourceId))
         .map((candidate) => ({
           candidate,
-          selectionScore: candidate.culturalScore + (firstSlot ? recentAwardBonus(run, candidate.title, "player", run.studio, true) : 0),
+          selectionScore: candidate.culturalScore + (firstSlot ? recentAwardBonus(run, candidate.title, run.studio, true) : 0),
         }))
         .sort((a,b)=>b.selectionScore-a.selectionScore||b.candidate.score-a.candidate.score)[0];
 
