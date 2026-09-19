@@ -1347,8 +1347,8 @@ export function formatNum(n: number): string {
 }
 
 /* -------------------------------------------------------------- calendar */
-/** the length of the career campaign — after this the studio enters Dynasty Mode */
-export const CAREER_WEEKS = 48 * 12;
+/** the length of the main career campaign — 25 industry years before the retrospective / optional Dynasty continuation */
+export const CAREER_WEEKS = 48 * 25;
 /** weeks a released show earns broadcast revenue — Game Dev Tycoon style:
     a slow build, a peak, then a long tail of re-runs and word of mouth */
 export const AIR_WEEKS = 12;
