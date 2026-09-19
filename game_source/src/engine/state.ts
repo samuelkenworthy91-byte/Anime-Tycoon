@@ -150,6 +150,7 @@ import {
   marketMult,
   negotiationChance,
   partnerById,
+  partnerCommercialMult,
   pruneReleases,
   saturationOf,
   rollCommission,
@@ -1585,6 +1586,23 @@ export const projectCapacity = (r: RunState) =>
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
 
+export const SELF_FUNDED_STARTUP_MULTS = [1.40, 1.25, 1.10] as const;
+
+/** New studios pay one-off setup inefficiency on their first three original,
+ * fully self-funded productions. Commissions, licensed IP and continuations
+ * bypass it, making early commissioned work a meaningful bridge. */
+export function selfFundedStartupMult(r: Pick<RunState, "projects">, d: Draft): number {
+  if (d.licensedIpId || d.continuation || d.franchiseKey) return 1;
+  const prior = r.projects.filter((project) =>
+    !project.commission && !project.draft.licensedIpId && !project.draft.continuation && !project.draft.franchiseKey
+  ).length;
+  return SELF_FUNDED_STARTUP_MULTS[prior] ?? 1;
+}
+
+export function selfFundedGreenlightCost(r: Pick<RunState, "projects">, d: Draft): number {
+  return Math.round(projectUpfront(d) * selfFundedStartupMult(r, d));
+}
+
 export interface SoldCastRight { franchiseKey: string; title: string; buyer: string; }
 
 /** Cast attached to a sold studio-owned IP leaves with the property. The map is
@@ -1637,12 +1655,12 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
       if (selected.requiresSequelRights && !contract.sequelRights) return "Negotiate sequel rights first";
     }
   }
-  if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
+  if (d && r.cash < selfFundedGreenlightCost(r, d)) return "Not enough cash for the greenlight payment";
   if (d?.continuation) {
     const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
     if (!fr) return "This franchise doesn't exist any more";
     const fee = continuationDef(d.continuation)?.fee ?? 0;
-    if (fee > 0 && r.cash < projectUpfront(d) + fee)
+    if (fee > 0 && r.cash < selfFundedGreenlightCost(r, d) + fee)
       return `Not enough cash — the rights fee alone is £${fee.toLocaleString("en-GB")}`;
     const block = continuationBlock(fr, d.continuation, {
       week: r.week,
@@ -1688,7 +1706,9 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     if (r.cash + (commission?.advance ?? 0) < projectUpfront(d) + contFee) return null;
   }
 
-  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player" };
+  const greenlightCost = commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d);
+  const startupMult = commission ? 1 : selfFundedStartupMult(r, d);
+  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost };
   const decisionQuality = decisionReleaseQualityBonus(r, d);
   if (decisionQuality.length) {
     for (const bonus of decisionQuality) p = { ...p, points: { ...p.points, [bonus.point]: p.points[bonus.point] + bonus.amount } };
@@ -1705,6 +1725,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       commission: {
         partnerId: commission.partnerId,
         partnerName: partner.name,
+        genre: commission.genre,
         advance: commission.advance,
         share: commission.share,
         minQuality: commission.minQuality,
@@ -1718,7 +1739,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   r = { ...r, overseas: { ...overseasOf(r), profiles: { ...overseasOf(r).profiles, [p.id]: defaultContent(p) } } };
   return {
     ...r,
-    cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
+    cash: r.cash - greenlightCost - contFee + (commission?.advance ?? 0),
     projects: [...r.projects, p],
     commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
     decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "releaseQuality" && modifierMatchesDraft(m, d, r.week)),
@@ -1730,7 +1751,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -2725,6 +2746,18 @@ export function releaseProject(
     });
   }
 
+  const relationshipCommercialMult = partnerCommercialMult(r.partners ?? {});
+  if (Math.abs(relationshipCommercialMult - 1) >= 0.005) {
+    result = {
+      ...result,
+      revenue: Math.round(result.revenue * relationshipCommercialMult),
+      breakdown: [
+        ...result.breakdown,
+        { label: "Partner distribution network", pts: `×${relationshipCommercialMult.toFixed(2)} sales` },
+      ],
+    };
+  }
+
   if (p.shelvedWeek !== undefined) {
     const before = result.revenue;
     result = {
@@ -2738,6 +2771,7 @@ export function releaseProject(
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */
   const deal = p.commission;
   let bonusCash = 0;
+  let commissionSucceeded = false;
   let partners = r.partners ?? {};
   if (deal) {
     const cut = Math.round(result.revenue * deal.share);
@@ -2753,6 +2787,7 @@ export function releaseProject(
     let rep = partners[deal.partnerId] ?? REP_START;
     if (result.total >= deal.minQuality) {
       rep += REP_DELIVERED;
+      commissionSucceeded = !late && !!deal.genre;
       if (result.total >= deal.minQuality + 6) {
         rep += REP_EXCELLENT;
         bonusCash = deal.bonus;
@@ -2857,6 +2892,10 @@ export function releaseProject(
         : `${deal.partnerName} is furious: “${draft.title}” scored ${result.total}/40, below the contracted ${deal.minQuality}/40.`
     );
     if (Math.max(r.day ?? r.week * 7, r.week * 7) > (deal.deadlineDay ?? deal.deadlineWeek * 7)) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
+    if (commissionSucceeded && deal.genre && !r.genresUnlocked.includes(deal.genre)) {
+      const learnedGenre = GENRES.find((genre) => genre.id === deal.genre)?.label ?? deal.genre;
+      notices.push(`📚 COMMISSION BREAKTHROUGH — successful delivery teaches the studio ${learnedGenre}. The genre is now permanently available for original productions.`);
+    }
   }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
   for (const breakthrough of breakthroughs) {
@@ -2953,6 +2992,9 @@ export function releaseProject(
     totalRevenue: r.totalRevenue + result.revenue,
     showsMade: r.showsMade + 1,
     hits: r.hits + (result.tier === "hit" || result.hallOfFame ? 1 : 0),
+    genresUnlocked: commissionSucceeded && deal?.genre && !r.genresUnlocked.includes(deal.genre)
+      ? [...r.genresUnlocked, deal.genre]
+      : r.genresUnlocked,
     bestScore: Math.max(r.bestScore, result.total),
     comboLevels: { ...r.comboLevels, [ck]: Math.min(5, (r.comboLevels[ck] ?? 0) + 1) },
     genreKnowledge: draft.genres.reduce((acc, genre) => {
@@ -3059,7 +3101,7 @@ export function showSaleOffers(r:RunState,projectId:string):ShowSaleOffer[] {
   const trackRecord=Math.max(.28,Math.min(1.25,.28+r.showsMade*.055+r.bestScore/58+Math.min(.28,r.fans/180_000)));
   const assetValue=p.spent*.28+points*720+p.hype*1_050+(fr?.popularity??0)*1_550+Math.max(0,r.bestScore-20)*5_000;
   const value=Math.max(20_000,assetValue*(mediumFactor[p.draft.medium]??.7)*marketFactor*trackRecord);
-  const dealmaker=1;
+  const dealmaker=partnerCommercialMult(r.partners ?? {});
   const networks=[{id:"network:kousei",name:"Kousei Broadcast Network"},{id:"network:streamline",name:"Streamline Media"}];
   const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.max(10_000,Math.round(value*(.72+stableDealNumber(projectId+buyer.id)*.28)*dealmaker/5000)*5000),creatorFans:Math.max(50,Math.round((p.hype*7+points*1.2)*(i?0.09:0.07))),awardRisk:false}));
   const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length+st.specialist.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];
@@ -3686,7 +3728,8 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   if (!merchProductUnlocked(r, product.id)) return null;
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
-  const total = Math.round(merchReturn(fr, product) * merchDecisionMult);
+  const relationshipMult = partnerCommercialMult(r.partners ?? {});
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {
@@ -3713,7 +3756,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     franchises: { ...r.franchises, [franchiseKey]: next },
     notices: [
       ...r.notices,
-      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · partner network ×${relationshipMult.toFixed(2)}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
     ].slice(-40),
   };
 }

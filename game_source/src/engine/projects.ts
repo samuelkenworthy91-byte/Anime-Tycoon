@@ -238,7 +238,7 @@ export interface ProjectCommission {
   partnerId: string;
   partnerName: string;
   /** successful delivery permanently teaches the studio this commissioned genre */
-  genre: Draft["genres"][number];
+  genre?: Draft["genres"][number];
   advance: number;
   /** partner's cut of release revenue, 0..1 */
   share: number;

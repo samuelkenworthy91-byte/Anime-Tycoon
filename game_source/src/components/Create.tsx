@@ -68,7 +68,7 @@ import {
   type SlotId,
 } from "../engine/data";
 import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
-import { arcLockReason, formatLockReason, soldCastRights, startBlockReason } from "../engine/state";
+import { arcLockReason, formatLockReason, selfFundedGreenlightCost, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -291,8 +291,12 @@ export default function Create({
   const comboLv = run.comboLevels[currentComboKey] ?? 0;
   const cost = draftCost(d);
   const weeks = draftWeeks(d);
-  /** why this draft can't be greenlit right now (null = good to go) */
-  const greenlightBlock = startBlockReason(run, d);
+  const startupMult = commission ? 1 : selfFundedStartupMult(run, d);
+  const dueAtGreenlight = commission ? projectUpfront(d) : selfFundedGreenlightCost(run, d);
+  /** Commission advances count when deciding affordability; self-funded starts carry the early-studio premium. */
+  const greenlightBlock = commission
+    ? startBlockReason({ ...run, cash: run.cash + commission.advance }, d)
+    : startBlockReason(run, d);
   const arcLimit = PRODUCTION_SCOPES[d.scope ?? "standard"].arcLimit;
   const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
   const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));
@@ -813,7 +817,8 @@ export default function Create({
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                   {GENRES.map((g) => {
                     const on = d.genres.includes(g.id);
-                    const locked = !run.genresUnlocked.includes(g.id);
+                    const commissionAccess = !!commission && commission.genre === g.id;
+                    const locked = !run.genresUnlocked.includes(g.id) && !commissionAccess;
                     const Icon = g.icon;
                     return (
                       <Pick key={g.id} active={on} disabled={locked} onClick={() => toggleGenre(g.id)} ring={g.color}>
@@ -821,7 +826,7 @@ export default function Create({
                           <Icon size={16} style={{ color: g.color }} />
                           <span className="font-display text-sm font-extrabold">{g.label}</span>
                         </div>
-                        <div className="text-[10px] text-paper/50">{locked ? `Licence: ${g.rd} RD in R&D` : g.desc}</div>
+                        <div className="text-[10px] text-paper/50">{locked ? `Licence: ${g.rd} RD in R&D` : commissionAccess && !run.genresUnlocked.includes(g.id) ? "COMMISSION ACCESS · unlock permanently on successful delivery" : g.desc}</div>
                       </Pick>
                     );
                   })}
@@ -1510,7 +1515,7 @@ export default function Create({
                   <Row k="Wages during run" v={`≈ ${formatGBP(run.staff.reduce((a, s) => a + s.salary, 0) * weeks)}`} money />
                   <div className="my-2 border-t border-line/60" />
                   <Row k="TOTAL BUDGET" v={formatGBP(cost)} money />
-                  <Row k="DUE AT GREENLIGHT (40%)" v={formatGBP(projectUpfront(d))} money big />
+                  <Row k={startupMult > 1 ? `DUE AT GREENLIGHT · STARTUP ×${startupMult.toFixed(2)}` : "DUE AT GREENLIGHT (40%)"} v={formatGBP(dueAtGreenlight)} money big />
                   <div className="text-[10px] text-paper/40">The rest burns weekly while the show is in production.</div>
                   {plan && planFr && planDef && expectation !== null && (
                     <>
@@ -1532,7 +1537,7 @@ export default function Create({
                   )}
                   <div className="text-[10px] text-paper/40">
                     {commission
-                      ? "The advance lands the moment production starts. Miss the bar or the deadline and the partner remembers."
+                      ? `${run.genresUnlocked.includes(commission.genre) ? "The advance lands the moment production starts." : "This brief temporarily grants its locked genre; meet quality and deadline to unlock it permanently."} Miss the bar or the deadline and the partner remembers.`
                       : "The studio's cash takes the hit — keep an eye on the office."}
                   </div>
                 </div>

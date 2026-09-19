@@ -19,6 +19,7 @@ import {
   partnerTier,
   negotiationChance,
   partnerById,
+  partnerCommercialMult,
   repLabel,
   saturationOf,
   saturationPenalty,
@@ -211,6 +212,7 @@ export default function MarketPanel({
                   </div>
                 </div>
                 <div className="mt-1 text-[10px] italic text-paper/45">“{c.restriction}”</div>
+                {!run.genresUnlocked.includes(c.genre) && <div className="mt-1 rounded border border-mint/30 bg-mint/10 px-2 py-1 text-[10px] font-bold text-mint">SUCCESSFUL DELIVERY PERMANENTLY UNLOCKS {genreLabel(c.genre).toUpperCase()}</div>}
                 <div className="mt-2 flex gap-1.5">
                   <Btn
                     variant="gold"
@@ -360,8 +362,8 @@ export default function MarketPanel({
               </div>
             );
           })}
-          <div className="mt-2 text-[10px] text-paper/40">
-            Deliver on brief to earn better advances and softer shares. Miss quality bars or deadlines and they remember.
+          <div className="mt-2 rounded-lg border border-cyanx/20 bg-cyanx/5 p-2 text-[10px] text-paper/55">
+            Industry network effect: <b className="text-cyanx">×{partnerCommercialMult(run.partners).toFixed(2)}</b> ordinary show-sale and merchandise reach. Deliver on brief to improve terms and wider commercial access; missed quality bars or deadlines drag both down.
           </div>
         </>
       )}
