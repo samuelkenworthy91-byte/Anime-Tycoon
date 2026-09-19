@@ -564,4 +564,10 @@ describe("overseas editions, audiences and rights", () => {
     expect(r.payouts.filter((p) => p.sourceReleaseId === a.id)).toHaveLength(0);
     expect(r.showsMade).toBe(0);
   });
+
+  it("recruitment pools always cover writer, animator and composer without duplicate looks", () => {
+    const pool = rollHirePool(12, 3, () => 0.42);
+    expect(pool.map((s) => s.role)).toEqual(["writer", "animator", "composer"]);
+    expect(new Set(pool.map((s) => s.look)).size).toBe(3);
+  });
 });

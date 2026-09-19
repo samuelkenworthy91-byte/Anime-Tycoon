@@ -574,8 +574,8 @@ export const RESEARCH: ResearchItem[] = [
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30% and improves the economics of a fully built consumer-products business.", requires: "merch", section: "merch" },
-  { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Progressive story research. The first study adds strong Quick Picks; later studies reveal more arc × genre fits until every standard arc is understood." },
-  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Progressive structure research. Repeat studies reveal more real combo effects until every standard story structure is understood." },
+  { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Progressive story research. The first study reveals 6 useful arc × genre fits; each repeat maps a larger batch until the field is understood." },
+  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Progressive structure research. The first study reveals 6 structures; repeat studies uncover increasingly larger batches." },
   { id: "staff_appraisal", name: "Staff Appraisal", rd: 40, desc: "Reveals a broad long-term Potential band for employees already on your payroll." },
   { id: "talent_scouting", name: "Talent Scouting", rd: 70, desc: "Extends Potential bands to recruitment candidates before you sign them.", requires: "staff_appraisal" },
   /* Merchandise product families now unlock by paid infrastructure tier in
@@ -940,6 +940,9 @@ export const AVRIL_WORKER_LOOK_INDEX = 33;
 export const STANDARD_WORKER_LOOK_INDICES = WORKER_LOOKS
   .map((_, index) => index)
   .filter((index) => index !== DANTE_WORKER_LOOK_INDEX && index !== AVRIL_WORKER_LOOK_INDEX);
+/** QoL2: recent painted worker batches are deliberately more visible in recruitment. */
+export const RECENT_WORKER_LOOK_INDICES = STANDARD_WORKER_LOOK_INDICES
+  .filter((index) => index >= BASE_WORKER_LOOK_IDS.length);
 export const STANDARD_WORKER_LOOK_COUNT = STANDARD_WORKER_LOOK_INDICES.length;
 export const BOSS_LOOK: WorkerLook = {
   sprite: "img/sprite-worker-6.png",
@@ -951,16 +954,20 @@ export const workerLookIndex = (s: Staff) => (s.look ?? s.portrait) % WORKER_LOO
 export const workerLook = (s: Staff) => WORKER_LOOKS[workerLookIndex(s)];
 
 let staffId = 0;
-export function rollCandidate(week: number): Staff {
+export function rollCandidate(
+  week: number,
+  roleOverride?: StaffRole,
+  rng: () => number = Math.random,
+): Staff {
   const roles: StaffRole[] = ["writer", "animator", "composer"];
-  const role = roles[Math.floor(Math.random() * 3)];
+  const role = roleOverride ?? roles[Math.floor(rng() * 3)];
   const tier = Math.min(45, week * 0.16);
-  const main = Math.round(34 + Math.random() * 34 + tier);
-  const off = () => Math.round(12 + Math.random() * 30 + tier * 0.5);
-  const id = `s${++staffId}_${Date.now()}${Math.floor(Math.random() * 999)}`;
+  const main = Math.round(34 + rng() * 34 + tier);
+  const off = () => Math.round(12 + rng() * 30 + tier * 0.5);
+  const id = `s${++staffId}_${Date.now()}${Math.floor(rng() * 999)}`;
   const s: Staff = {
     id,
-    name: randomStaffName(),
+    name: randomStaffName(rng),
     role,
     story: role === "writer" ? main : off(),
     art: role === "animator" ? main : off(),
@@ -970,7 +977,7 @@ export function rollCandidate(week: number): Staff {
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,
-    look: STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(Math.random() * 3)) % STANDARD_WORKER_LOOK_COUNT],
+    look: STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(rng() * 3)) % STANDARD_WORKER_LOOK_COUNT],
   };
   s.salary = Math.round((320 + main * 12) / 10) * 10;
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;

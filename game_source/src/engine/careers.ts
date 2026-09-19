@@ -2,6 +2,7 @@ import {
   AVRIL_WORKER_LOOK_INDEX,
   DANTE_WORKER_LOOK_INDEX,
   GENRES,
+  RECENT_WORKER_LOOK_INDICES,
   ROLE_POINT,
   STANDARD_WORKER_LOOK_INDICES,
   STAFF_STAT_CAP,
@@ -450,15 +451,22 @@ export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
 }
 
 /** roll a fresh candidate with a full personality */
+export const RECENT_WORKER_RECRUITMENT_WEIGHT = 0.65;
+
 export function rollHire(
   week: number,
   rng: () => number = Math.random,
   excludedLooks: ReadonlySet<number> = new Set(),
+  roleOverride?: StaffRole,
 ): Staff {
-  const rolled = rollCandidate(week);
+  const rolled = rollCandidate(week, roleOverride, rng);
   const availableStandard = STANDARD_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
-  const standardLook = availableStandard.length
-    ? availableStandard[Math.min(availableStandard.length - 1, Math.floor(rng() * availableStandard.length))]
+  const availableRecent = RECENT_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
+  const appearancePool = availableRecent.length && rng() < RECENT_WORKER_RECRUITMENT_WEIGHT
+    ? availableRecent
+    : availableStandard;
+  const standardLook = appearancePool.length
+    ? appearancePool[Math.min(appearancePool.length - 1, Math.floor(rng() * appearancePool.length))]
     : rolled.look;
   const base = { ...rolled, look: standardLook };
   const specialRoll = rng();
@@ -470,11 +478,13 @@ export function rollHire(
   return ensureCareer(candidate, week);
 }
 
-/** A recruitment advert never shows the same worker appearance twice. */
+/** Every advert starts with one Writer, one Animator and one Composer.
+ * Larger pools may add random extra candidates after those guaranteed roles. */
 export function rollHirePool(week: number, count = 3, rng: () => number = Math.random): Staff[] {
   const usedLooks = new Set<number>();
-  return Array.from({ length: count }, () => {
-    const candidate = rollHire(week, rng, usedLooks);
+  const guaranteed: StaffRole[] = ["writer", "animator", "composer"];
+  return Array.from({ length: count }, (_, index) => {
+    const candidate = rollHire(week, rng, usedLooks, guaranteed[index]);
     if (candidate.look !== undefined) usedLooks.add(candidate.look);
     return candidate;
   });

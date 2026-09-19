@@ -192,7 +192,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 540_000, rd: 50, upkeep: 1_050 },
     ],
     effects: (t) => [
-      `+${[1, 2, 4][t - 1]} research point${t > 1 ? "s" : ""}/week`,
+      `+${[5, 10, 15][t - 1]} research data/fortnight`,
       `Research projects finish ${t} week${t > 1 ? "s" : ""} sooner`,
     ],
   },
@@ -268,6 +268,7 @@ export interface FacilityFX {
   staminaSave: number;
   moraleRest: number;
   rdWeekly: number;
+  rdFortnightly: number;
   rdMult: number;
   legalNegotiationBonus: number;
   coProductionShareReduction: number;
@@ -291,6 +292,7 @@ export const NO_FX: FacilityFX = {
   staminaSave: 0,
   moraleRest: 0,
   rdWeekly: 0,
+  rdFortnightly: 0,
   rdMult: 1,
   legalNegotiationBonus: 0,
   coProductionShareReduction: 0,
@@ -347,7 +349,7 @@ export function facilityFX(fac: Facilities | undefined): FacilityFX {
 
   const ar = tier("archive");
   if (ar) {
-    fx.rdWeekly += [1, 2, 4][ar - 1];
+    fx.rdFortnightly += [5, 10, 15][ar - 1];
     fx.rdMult *= [1.25, 1.5, 2][ar - 1];
   }
 
