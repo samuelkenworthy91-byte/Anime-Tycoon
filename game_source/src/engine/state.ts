@@ -3818,8 +3818,8 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
 /* ============================ franchising ops ============================ */
 
 /** launch a merchandise line for an IP: pay now, royalties arrive weekly.
- *  Every product requires Merch Division + its own dedicated research —
- *  the existing cost / popularity / pedigree / cooldown gates are unchanged. */
+ *  Every product requires Merch Division, the right infrastructure tier and its
+ *  own paid product-line development before the normal launch gates apply. */
 export function launchMerch(r: RunState, franchiseKey: string, productId: string): RunState | null {
   const fr = r.franchises[franchiseKey];
   const product = merchProductById(productId);
