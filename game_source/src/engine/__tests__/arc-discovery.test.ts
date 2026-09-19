@@ -4,7 +4,6 @@ import {
   ARC_COMBOS,
   ARC_RESEARCH_GENRE_KEYS,
   ARC_RESEARCH_UNLOCK_IDS,
-  GENRE_STUDY_FIRST_BATCH,
   PRODUCTION_SCOPES,
   RESEARCH,
   arcComboRating,
@@ -12,7 +11,7 @@ import {
   arcGenreFit,
   arcGenreKey,
 } from "../data";
-import { applyResearchCompletion, arcLockReason, initialRun, migrateRun } from "../state";
+import { GENRE_STUDY_FIRST_BATCH, applyResearchCompletion, arcLockReason, initialRun, migrateRun } from "../state";
 import { arcClashesFor } from "../creativeDiscovery";
 
 describe("creative discovery", () => {
