@@ -472,7 +472,7 @@ export function computeResult(opts: {
      (36 → ~9.0, 40 → ~9.5). A 10 requires elite quality AND critic
      agreement — elite work lands 9s regularly, 10s occasionally. */
   const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
-    + expectationAdj + audienceAdj - 0.12;
+    + expectationAdj + audienceAdj - 0.14;
   /* Critics react more strongly to poor creative choices, while excellent
      choices earn only a modest bonus so top reviews remain genuinely rare. */
   const arcCriticAdj = clamp(arcQuality * 0.08 - 0.18, -0.65, 0.20);
@@ -501,7 +501,11 @@ export function computeResult(opts: {
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
        higher bar than ordinary rounding. Other bands use a slight conservative
        threshold so strong work is not an automatic Hall of Fame. */
-    s = calibrated >= 9.92 ? 10 : Math.max(floor, Math.floor(calibrated + 0.45));
+    s = calibrated >= 9.92 ? 10 : Math.max(floor, Math.floor(calibrated + 0.43));
+    /* A numerical 10 is a critic calling the work effectively flawless.
+       Even after the raw score clears the 9.92 bar, that judgement is rare;
+       9/10 remains the normal result for excellent work. */
+    if (s === 10 && roll() >= 0.28) s = 9;
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
     return { outlet: r.name, focus: r.focus, criteria, score: s, quote: pool[Math.floor(roll() * pool.length)] };
