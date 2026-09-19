@@ -188,7 +188,7 @@ export const RAW_QUALITY_CEILING = 40;
 /** saturating point conversion (see production.ts) scaled into quality */
 export const POINT_QUALITY_SCALE = 0.55;
 /** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
-export const TOP_QUALITY_SLOPE = 0.15;
+export const TOP_QUALITY_SLOPE = 0.10;
 /** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
  *  early career meaningful while staying far flatter than the old curve */
 export const CRAFT_LIFT = 2.6;
@@ -472,7 +472,7 @@ export function computeResult(opts: {
      (36 → ~9.0, 40 → ~9.5). A 10 requires elite quality AND critic
      agreement — elite work lands 9s regularly, 10s occasionally. */
   const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
-    + expectationAdj + audienceAdj;
+    + expectationAdj + audienceAdj - 0.12;
   /* Critics react more strongly to poor creative choices, while excellent
      choices earn only a modest bonus so top reviews remain genuinely rare. */
   const arcCriticAdj = clamp(arcQuality * 0.08 - 0.18, -0.65, 0.20);
@@ -487,7 +487,7 @@ export function computeResult(opts: {
     }
     if (r.bias === "hype") {
       criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
-      s += (hype / 100) * 0.60 + overallDirectionAdj + clamp(arcsF * 1.5, -0.35, 0.45) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (hype / 100) * 0.50 + overallDirectionAdj + clamp(arcsF * 1.35, -0.35, 0.35) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "harsh") {
       criteria = "Overall execution · Production output · Editing notes · Professional polish";
@@ -497,7 +497,11 @@ export function computeResult(opts: {
       criteria = "Animation/sound output · Technical balance · Direction · Editing notes";
       s += (mix[1] - genreRatio[1]) * 3.0 + (mix[2] - genreRatio[2]) * 1.5 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
-    s = Math.round(clamp(s, floor, 10));
+    const calibrated = clamp(s, floor, 10);
+    /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
+       higher bar than ordinary rounding. Other bands use a slight conservative
+       threshold so strong work is not an automatic Hall of Fame. */
+    s = calibrated >= 9.92 ? 10 : Math.max(floor, Math.floor(calibrated + 0.45));
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
     return { outlet: r.name, focus: r.focus, criteria, score: s, quote: pool[Math.floor(roll() * pool.length)] };
