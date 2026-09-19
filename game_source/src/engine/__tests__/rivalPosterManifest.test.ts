@@ -129,11 +129,21 @@ describe("96-poster expansion plan", () => {
     expect(new Set(additions.map((poster) => poster.id)).size).toBe(96);
     expect(new Set(additions.map((poster) => poster.img)).size).toBe(96);
 
-    const existingIds = new Set(manifest.posters.map((poster) => poster.id));
-    const existingPaths = new Set(live.map((poster) => poster.img));
+    const existingById = new Map(manifest.posters.map((poster) => [poster.id, poster]));
+    const existingByPath = new Map(live.map((poster) => [poster.img, poster]));
     for (const addition of additions) {
-      expect(existingIds.has(addition.id), `${addition.id} ID collision`).toBe(false);
-      expect(existingPaths.has(addition.img), `${addition.id} path collision`).toBe(false);
+      const byId = existingById.get(addition.id);
+      if (byId) {
+        expect(byId.pending, `${addition.id} must be live after application`).toBeFalsy();
+        expect(byId.img).toBe(addition.img);
+        expect(byId.studio).toBe(addition.studio);
+        expect(byId.persona).toBe(addition.persona);
+        expect(byId.animeTypes).toEqual(addition.animeTypes);
+        expect(byId.genres).toEqual(addition.genres);
+        expect(byId.family ?? null).toBe(addition.family ?? null);
+      }
+      const byPath = existingByPath.get(addition.img);
+      if (byPath) expect(byPath.id, `${addition.img} path belongs to another poster`).toBe(addition.id);
     }
 
     for (const studio of Object.keys(STUDIO_PERSONAS)) {
