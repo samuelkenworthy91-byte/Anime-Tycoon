@@ -2458,8 +2458,13 @@ export function tickEditWorkPulse(r: RunState, projectId: string): { run: RunSta
   for (const st of sampled) {
     if (left <= 0) break;
     const type = chooseDiscipline(st);
-    const rolled = percentileSkillOutput(contributionEffectiveSkill(r, st, type, true));
-    const points = Math.min(left, rolled);
+    const effectiveSkill = contributionEffectiveSkill(r, st, type, true);
+    const rolled = percentileSkillOutput(effectiveSkill);
+    /* Editing is deliberate assigned work, not an ambient inspiration check:
+       a genuinely capable editor should never spend a whole visible pulse doing
+       nothing. Low-skill staff can still whiff; 75+ effective skill guarantees
+       at least one note is resolved. */
+    const points = Math.min(left, Math.max(effectiveSkill >= 75 ? 1 : 0, rolled));
     if (points <= 0) continue;
     left -= points;
     pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: "edit", projectId });
