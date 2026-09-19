@@ -1,0 +1,1497 @@
+{
+  "schema": 1,
+  "baseBranch": "qol-pass-2-2026-09-19",
+  "targetBranch": "poster-roster-expansion-2026-09-19",
+  "intendedAdditionalPosters": 96,
+  "intendedPerStudioAdditions": 16,
+  "intendedFinalCapacity": {
+    "perStudio": 44,
+    "studios": 6,
+    "total": 264
+  },
+  "intendedFinalGenerated": 262,
+  "intendedFinalPending": 2,
+  "notes": "Non-runtime art plan. Do not import into RIVAL_POSTERS until every referenced image exists and passes QC.",
+  "additions": [
+    {
+      "id": "toei_exp_kaiju_breakwater",
+      "img": "rival-posters/imported/toei_exp_kaiju_breakwater.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "kaiju",
+        "military"
+      ],
+      "family": "toei-kaiju-sentinels",
+      "concept": "Season 1: Black woman coastal-defence captain Maya Okafor in practical navy-and-orange rescue armour on a storm-lashed breakwater as a colossal bioluminescent sea kaiju rises behind an evacuation fleet; helicopters, spray and searchlights, low-angle heroic scale."
+    },
+    {
+      "id": "toei_exp_kaiju_skyline",
+      "img": "rival-posters/imported/toei_exp_kaiju_skyline.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": "toei-kaiju-sentinels",
+      "concept": "Season 2: the same Maya Okafor, recognisable short natural curls and orange rescue armour, leaping from a tilt-rotor aircraft above a neon coastal skyline while a winged kaiju coils between towers; daylight-to-dusk cyan and orange palette."
+    },
+    {
+      "id": "toei_exp_kaiju_finale",
+      "img": "rival-posters/imported/toei_exp_kaiju_finale.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "kaiju",
+        "survival"
+      ],
+      "family": "toei-kaiju-sentinels",
+      "concept": "Movie/finale: older battle-worn Maya Okafor and a mixed rescue squad stand on a flooded suspension bridge facing three distant kaiju during a red storm sunset; damaged armour, evacuation lights, vast cinematic scale, desperate survival mood."
+    },
+    {
+      "id": "toei_exp_tamer_redcrest",
+      "img": "rival-posters/imported/toei_exp_tamer_redcrest.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "monster_taming",
+        "martial"
+      ],
+      "family": "toei-redcrest-tamers",
+      "concept": "Season 1: Thai teenage boy Niran in a worn red varsity jacket sprints beside his huge feathered fire-lizard companion through a volcanic canyon, both charging toward an unseen rival; dust, sparks and martial-adventure energy."
+    },
+    {
+      "id": "toei_exp_tamer_colosseum",
+      "img": "rival-posters/imported/toei_exp_tamer_colosseum.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "monster_taming",
+        "sports"
+      ],
+      "family": "toei-redcrest-tamers",
+      "concept": "Season 2: the same Niran and red feathered fire-lizard enter a packed circular monster-sport arena opposite a rival girl and blue horned beast; banners without writing, dramatic stadium lights, competitive rather than violent."
+    },
+    {
+      "id": "toei_exp_tamer_emberroad",
+      "img": "rival-posters/imported/toei_exp_tamer_emberroad.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "monster_taming",
+        "fantasy"
+      ],
+      "family": "toei-redcrest-tamers",
+      "concept": "Movie/spin-off: Niran, now older with longer tied-back hair, rides beside his red feathered companion across a glowing fantasy salt flat toward a floating mountain sanctuary; warm sunrise, heroic journey composition."
+    },
+    {
+      "id": "toei_exp_desert_spear",
+      "img": "rival-posters/imported/toei_exp_desert_spear.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "arabia",
+        "martial"
+      ],
+      "family": null,
+      "concept": "Adult Arab woman spear fighter in layered indigo desert travel clothes leaps from a sandstone arch above a caravan ambush; sun blazing through dust, date palms and wind towers in the distance, athletic martial action."
+    },
+    {
+      "id": "toei_exp_bazaar_chase",
+      "img": "rival-posters/imported/toei_exp_bazaar_chase.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "arabia",
+        "crime"
+      ],
+      "family": null,
+      "concept": "Lean Middle Eastern male rooftop runner and a female detective race across fabric awnings through a crowded lantern bazaar at blue hour while masked thieves escape below; parkour crime chase, brass and cobalt palette."
+    },
+    {
+      "id": "toei_exp_shadow_clan",
+      "img": "rival-posters/imported/toei_exp_shadow_clan.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "martial"
+      ],
+      "family": null,
+      "concept": "Four shinobi of varied ages descend diagonally through a moonlit cedar forest in practical layered dark cloth, grappling lines and smoke; central Japanese woman leader drawing a short blade, crisp action geometry."
+    },
+    {
+      "id": "toei_exp_shadow_moon",
+      "img": "rival-posters/imported/toei_exp_shadow_moon.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "supernatural"
+      ],
+      "family": null,
+      "concept": "Scarred older East Asian shinobi faces a towering spectral fox under a blood-red moon on tiled rooftops; paper charms spiral in the wind, stealth tension and supernatural scale."
+    },
+    {
+      "id": "toei_exp_heist_zero",
+      "img": "rival-posters/imported/toei_exp_heist_zero.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "crime",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Mixed-gender heist crew in sleek streetwear bursts from a neon data-vault corridor carrying a transparent evidence case while security drones close in; cyber crime thriller, diagonal action, electric teal against black."
+    },
+    {
+      "id": "toei_exp_crimson_pirate",
+      "img": "rival-posters/imported/toei_exp_crimson_pirate.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "pirate",
+        "arabia"
+      ],
+      "family": null,
+      "concept": "Dark-skinned woman sky-pirate captain in crimson desert leathers swings from a rope between two sail-powered airships above ochre canyon cities; swashbuckling pirate spectacle with Arabian-inspired architecture."
+    },
+    {
+      "id": "toei_exp_city_titan",
+      "img": "rival-posters/imported/toei_exp_city_titan.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "supernatural"
+      ],
+      "family": null,
+      "concept": "Teenage brother and sister stand back-to-back on a commuter-train roof while a colossal translucent guardian beast towers between skyscrapers at sunset; supernatural kaiju spectacle with balanced emotional and action appeal."
+    },
+    {
+      "id": "toei_exp_vampire_hunter",
+      "img": "rival-posters/imported/toei_exp_vampire_hunter.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "vampire",
+        "martial"
+      ],
+      "family": null,
+      "concept": "Muscular South Asian woman vampire hunter in a long charcoal coat drives a silver staff into cathedral steps as red-eyed vampires pour from shattered doors; rain, crimson backlight, martial horror action without gore."
+    },
+    {
+      "id": "toei_exp_grim_legion",
+      "img": "rival-posters/imported/toei_exp_grim_legion.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "grimdark",
+        "military"
+      ],
+      "family": null,
+      "concept": "Weary middle-aged commander with grey curls leads battered infantry through a ruined black-stone fortress beneath enormous broken statues; ash snow and one burning orange banner, grimdark military epic."
+    },
+    {
+      "id": "toei_exp_chef_duel",
+      "img": "rival-posters/imported/toei_exp_chef_duel.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "martial"
+      ],
+      "family": null,
+      "concept": "Two rival chefs, a young Japanese man and an older Black woman, face off across blazing open wok stations in a packed culinary arena; vegetables and flames frozen like combat effects, playful high-energy cooking duel."
+    },
+    {
+      "id": "sunrise_exp_kaiju_protocol1",
+      "img": "rival-posters/imported/sunrise_exp_kaiju_protocol1.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "kaiju",
+        "cyber"
+      ],
+      "family": "sunrise-kaiju-protocol",
+      "concept": "Season 1: Japanese-Brazilian engineer Rei Sato in a white technical flight suit stands inside a glass command deck while a precisely rendered armoured kaiju moves through a rain-soaked smart city; cyan diagnostic light, intricate infrastructure."
+    },
+    {
+      "id": "sunrise_exp_kaiju_protocol2",
+      "img": "rival-posters/imported/sunrise_exp_kaiju_protocol2.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "kaiju",
+        "military"
+      ],
+      "family": "sunrise-kaiju-protocol",
+      "concept": "Season 2: the same Rei Sato, recognisable copper undercut and white flight suit, directs autonomous defence craft around the armoured kaiju above a coastal launch complex; pristine mechanical detail and controlled composition."
+    },
+    {
+      "id": "sunrise_exp_kaiju_protocol3",
+      "img": "rival-posters/imported/sunrise_exp_kaiju_protocol3.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "space"
+      ],
+      "family": "sunrise-kaiju-protocol",
+      "concept": "Movie: Rei Sato floats in an orbital observation bay as the same armoured kaiju clings to a damaged space elevator far outside; Earth curve, immaculate engineering detail, quiet awe rather than chaos."
+    },
+    {
+      "id": "sunrise_exp_cosmic_signal1",
+      "img": "rival-posters/imported/sunrise_exp_cosmic_signal1.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "space"
+      ],
+      "family": "sunrise-deep-signal",
+      "concept": "Season 1: older Chilean radio astronomer Dr. Lucía Vega and a young astronaut study a perfectly circular impossible signal appearing above a lunar array; clinical white hardware, black void, subtle violet anomaly."
+    },
+    {
+      "id": "sunrise_exp_cosmic_signal2",
+      "img": "rival-posters/imported/sunrise_exp_cosmic_signal2.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "cyber"
+      ],
+      "family": "sunrise-deep-signal",
+      "concept": "Season 2: Dr. Lucía Vega, silver braid and amber glasses, surrounded by layered holographic waveforms in an immaculate server observatory as the signal forms an eye-like geometry without literal eyes; technical dread."
+    },
+    {
+      "id": "sunrise_exp_cosmic_signal3",
+      "img": "rival-posters/imported/sunrise_exp_cosmic_signal3.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "mystery"
+      ],
+      "family": "sunrise-deep-signal",
+      "concept": "Movie: the same Lucía walks alone through a silent polar radio dish field at night, aurora interrupted by impossible geometric darkness; reflective mystery, tiny human figure against precise machinery."
+    },
+    {
+      "id": "sunrise_exp_neon_case1",
+      "img": "rival-posters/imported/sunrise_exp_neon_case1.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Black male forensic analyst in a tailored charcoal coat reconstructs a crime scene using translucent volumetric evidence layers in a spotless metro station; cool white and magenta neon, meticulous detective technology."
+    },
+    {
+      "id": "sunrise_exp_neon_case2",
+      "img": "rival-posters/imported/sunrise_exp_neon_case2.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "mystery"
+      ],
+      "family": null,
+      "concept": "East Asian woman detective in her forties examines a single physical red thread pinned across a wall of precise digital evidence inside a glass high-rise office at dawn; restrained noir mystery."
+    },
+    {
+      "id": "sunrise_exp_neon_case3",
+      "img": "rival-posters/imported/sunrise_exp_neon_case3.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "crime",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Young mixed-ethnicity motorcycle courier skids beneath autonomous police drones through a rain-slick elevated city, encrypted data case strapped to the bike; crisp motion and detailed vehicle engineering."
+    },
+    {
+      "id": "sunrise_exp_monster_lab",
+      "img": "rival-posters/imported/sunrise_exp_monster_lab.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Wheelchair-using teen scientist with braided hair calibrates a small robotic dragon companion inside a luminous biotech lab while larger companion creatures rest in transparent habitat bays; affectionate technical monster-taming mood."
+    },
+    {
+      "id": "sunrise_exp_steel_grim",
+      "img": "rival-posters/imported/sunrise_exp_steel_grim.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "grimdark",
+        "mecha"
+      ],
+      "family": null,
+      "concept": "Ancient weathered knight-mecha with exposed repair seams kneels in a flooded ruined cathedral hangar while a lone mechanic approaches with a work light; grimdark atmosphere rendered with obsessive machine detail."
+    },
+    {
+      "id": "sunrise_exp_arabia_clockwork",
+      "img": "rival-posters/imported/sunrise_exp_arabia_clockwork.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "North African woman engineer in cream utility robes repairs a brass solar drone on a rooftop above a dense desert smart-city of wind towers, solar sails and geometric courtyards; precise warm technology aesthetic."
+    },
+    {
+      "id": "sunrise_exp_vampire_clinic",
+      "img": "rival-posters/imported/sunrise_exp_vampire_clinic.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Elegant adult vampire doctor with dark skin and silver locs stands in a sterile night clinic beside a glowing synthetic-blood apparatus; red glass tubing, cool surgical light, restrained futuristic gothic mood."
+    },
+    {
+      "id": "sunrise_exp_shinobi_drone",
+      "img": "rival-posters/imported/sunrise_exp_shinobi_drone.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "shinobi",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Modern shinobi reconnaissance specialist crouches on a quiet high-rise maintenance gantry surrounded by palm-sized stealth drones; matte fabric, rain beads and microscopic mechanical detail, blue-black palette."
+    },
+    {
+      "id": "sunrise_exp_kitchen_lab",
+      "img": "rival-posters/imported/sunrise_exp_kitchen_lab.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "cyber"
+      ],
+      "family": null,
+      "concept": "Middle-aged Korean woman chef in a clean navy apron plates an intricate dish in a precision automated kitchen while robotic arms prepare ingredients behind her; food science meets warm craftsmanship."
+    },
+    {
+      "id": "sunrise_exp_desert_orbit",
+      "img": "rival-posters/imported/sunrise_exp_desert_orbit.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "arabia",
+        "space"
+      ],
+      "family": null,
+      "concept": "Arab male astronaut in a sand-coloured pressure suit walks through an orbital greenhouse inspired by courtyard architecture, with date palms under glass and Earth beyond; polished space engineering and cultural design fusion."
+    },
+    {
+      "id": "bones_exp_void_bloom1",
+      "img": "rival-posters/imported/bones_exp_void_bloom1.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "supernatural"
+      ],
+      "family": "bones-void-bloom",
+      "concept": "Season 1: Ethiopian nonbinary astronomer Hana, shaved head and oversized off-white coat, stands in a field of black flowers that bloom into impossible star patterns beneath a pale daylight sky; asymmetric negative space, cobalt accent."
+    },
+    {
+      "id": "bones_exp_void_bloom2",
+      "img": "rival-posters/imported/bones_exp_void_bloom2.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "horror"
+      ],
+      "family": "bones-void-bloom",
+      "concept": "Season 2: the same Hana, shaved head and off-white coat, reflected dozens of times in shallow water while one reflection looks upward at a violet void instead of the sky; surreal psychological horror, sparse composition."
+    },
+    {
+      "id": "bones_exp_void_bloom3",
+      "img": "rival-posters/imported/bones_exp_void_bloom3.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "survival"
+      ],
+      "family": "bones-void-bloom",
+      "concept": "Movie: older Hana in torn expedition gear crosses a white salt desert where enormous black flower silhouettes hang upside-down in the sky; tiny survival figure, harsh sun, single cobalt scarf accent."
+    },
+    {
+      "id": "bones_exp_blood_mirror1",
+      "img": "rival-posters/imported/bones_exp_blood_mirror1.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "mystery"
+      ],
+      "family": "bones-blood-mirror",
+      "concept": "Season 1: Korean woman violinist vampire Seo-yeon in a burgundy concert suit faces a tall antique mirror that reflects an empty rehearsal room instead of her; angular framing, cream walls and one deep red accent."
+    },
+    {
+      "id": "bones_exp_blood_mirror2",
+      "img": "rival-posters/imported/bones_exp_blood_mirror2.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "supernatural"
+      ],
+      "family": "bones-blood-mirror",
+      "concept": "Season 2: Seo-yeon, same blunt black bob and burgundy suit, plays violin on an abandoned subway platform as translucent commuters from another era gather around her; eerie elegance, graphic negative space."
+    },
+    {
+      "id": "bones_exp_blood_mirror3",
+      "img": "rival-posters/imported/bones_exp_blood_mirror3.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "vampire",
+        "horror"
+      ],
+      "family": "bones-blood-mirror",
+      "concept": "Movie: Seo-yeon in a torn burgundy coat stands before a wall of shattered mirrors, each shard showing a different moonlit city; abstract crimson-black composition, threatening but non-gory vampire horror."
+    },
+    {
+      "id": "bones_exp_ash_crown1",
+      "img": "rival-posters/imported/bones_exp_ash_crown1.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "fantasy"
+      ],
+      "family": null,
+      "concept": "Androgynous young monarch with brown skin sits sideways on a cracked stone throne in an enormous empty hall while their shadow wears a crown twice the size; ash-grey fantasy with a single toxic green accent."
+    },
+    {
+      "id": "bones_exp_ash_crown2",
+      "img": "rival-posters/imported/bones_exp_ash_crown2.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "horror"
+      ],
+      "family": null,
+      "concept": "Older woman in severe black mourning dress walks through a forest of rusted ceremonial swords planted like trees, pale moths clustering around her veil; grimdark gothic unease, almost monochrome."
+    },
+    {
+      "id": "bones_exp_ash_crown3",
+      "img": "rival-posters/imported/bones_exp_ash_crown3.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "grimdark",
+        "survival"
+      ],
+      "family": null,
+      "concept": "Teen boy with prosthetic lower leg drags a battered supply sled across a frozen battlefield beneath floating fortress fragments; stark white snow, charcoal armour scraps, tiny orange survival flare."
+    },
+    {
+      "id": "bones_exp_crime_mask",
+      "img": "rival-posters/imported/bones_exp_crime_mask.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "mystery"
+      ],
+      "family": null,
+      "concept": "Masked stage magician and exhausted woman detective occupy opposite halves of an asymmetric theatre poster, with evidence photographs replaced by blank white rectangles and red string-like light; surreal crime mystery."
+    },
+    {
+      "id": "bones_exp_kaiju_dream",
+      "img": "rival-posters/imported/bones_exp_kaiju_dream.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "cosmic_horror"
+      ],
+      "family": null,
+      "concept": "A sleeping child in a modest apartment fills the foreground while beyond the window a colossal translucent whale-shaped kaiju swims vertically through the night sky among impossible stars; quiet cosmic dread."
+    },
+    {
+      "id": "bones_exp_tamer_strange",
+      "img": "rival-posters/imported/bones_exp_tamer_strange.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "supernatural"
+      ],
+      "family": null,
+      "concept": "Elderly Indigenous woman in a mustard raincoat feeds a tiny many-eyed spirit creature at a rural bus stop while larger friendly silhouettes wait in the fog; strange, tender monster companionship."
+    },
+    {
+      "id": "bones_exp_arabia_djinn",
+      "img": "rival-posters/imported/bones_exp_arabia_djinn.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "supernatural"
+      ],
+      "family": null,
+      "concept": "Young Arab calligrapher sits in an empty tiled courtyard as blue smoke-like djinn forms emerge from spilled ink without forming letters; geometric shadows, surreal cobalt and sand palette."
+    },
+    {
+      "id": "bones_exp_shinobi_ink",
+      "img": "rival-posters/imported/bones_exp_shinobi_ink.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi",
+        "mystery"
+      ],
+      "family": null,
+      "concept": "Female shinobi in loose charcoal robes appears only as fragments between giant sheets of rain and black ink-like shadows, one visible amber eye, abstract city rooftops, experimental mystery composition."
+    },
+    {
+      "id": "bones_exp_cook_nightmare",
+      "img": "rival-posters/imported/bones_exp_cook_nightmare.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "horror"
+      ],
+      "family": null,
+      "concept": "Cheerful elderly chef serves a beautiful midnight banquet in an otherwise empty fluorescent cafeteria while impossibly long shadows of diners occupy every chair; unsettling cooking horror without gore."
+    },
+    {
+      "id": "bones_exp_comedy_absurd",
+      "img": "rival-posters/imported/bones_exp_comedy_absurd.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy",
+        "supernatural"
+      ],
+      "family": null,
+      "concept": "Deadpan office worker in a beige suit waits calmly at a photocopier while a tiny thunder god, floating umbrella and ghost cat cause escalating chaos around him; graphic absurdist supernatural comedy."
+    },
+    {
+      "id": "kyo_exp_velvet_night1",
+      "img": "rival-posters/imported/kyo_exp_velvet_night1.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "romance"
+      ],
+      "family": "kyo-velvet-night",
+      "concept": "Season 1: Indian-Japanese art conservator Asha Mori in a forest-green coat restores a portrait by lamplight while an elegant male vampire waits quietly in the museum doorway; mature romantic tension, warm naturalistic shadows."
+    },
+    {
+      "id": "kyo_exp_velvet_night2",
+      "img": "rival-posters/imported/kyo_exp_velvet_night2.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "mystery"
+      ],
+      "family": "kyo-velvet-night",
+      "concept": "Season 2: the same Asha Mori, long dark braid and green coat, explores a rain-dark ancestral house with the vampire beside her, both reflected differently in a tall window; prestige mystery framing."
+    },
+    {
+      "id": "kyo_exp_velvet_night3",
+      "img": "rival-posters/imported/kyo_exp_velvet_night3.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "mythology"
+      ],
+      "family": "kyo-velvet-night",
+      "concept": "Movie: Asha and the vampire stand far apart in a vast ancient temple archive beneath faded celestial murals, sunrise entering through broken stone; tragic mythic scale, restrained emotion."
+    },
+    {
+      "id": "kyo_exp_rain_case1",
+      "img": "rival-posters/imported/kyo_exp_rain_case1.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "mystery"
+      ],
+      "family": "kyo-rain-case",
+      "concept": "Season 1: middle-aged Japanese woman detective Emi Kuroda in a tan trench coat sits alone in a nearly empty station café studying a small evidence envelope; rainy window, muted blue-grey prestige noir."
+    },
+    {
+      "id": "kyo_exp_rain_case2",
+      "img": "rival-posters/imported/kyo_exp_rain_case2.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "romance"
+      ],
+      "family": "kyo-rain-case",
+      "concept": "Season 2: Emi Kuroda and a weary male journalist shelter under one umbrella outside a courthouse at dusk, neither quite meeting the other's eyes; crime-drama tension with restrained adult romance."
+    },
+    {
+      "id": "kyo_exp_rain_case3",
+      "img": "rival-posters/imported/kyo_exp_rain_case3.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "slice"
+      ],
+      "family": "kyo-rain-case",
+      "concept": "Movie/epilogue: older Emi Kuroda cooks breakfast alone in a small sunlit apartment while a closed case file rests on a chair; quiet aftermath of a crime saga, intimate slice-of-life framing."
+    },
+    {
+      "id": "kyo_exp_arabia_courtyard",
+      "img": "rival-posters/imported/kyo_exp_arabia_courtyard.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "romance"
+      ],
+      "family": null,
+      "concept": "Young Arab architect and older female ceramicist share tea in a shaded courtyard under flowering vines, intricate tilework and soft desert afternoon light; gentle mature romance, elegant cultural detail."
+    },
+    {
+      "id": "kyo_exp_arabia_lantern",
+      "img": "rival-posters/imported/kyo_exp_arabia_lantern.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "mystery"
+      ],
+      "family": null,
+      "concept": "North African teenage girl in a cream school coat follows a line of extinguished lanterns through an old medina before dawn, distant figure at a corner, atmospheric mystery with indigo shadows."
+    },
+    {
+      "id": "kyo_exp_cooking_home",
+      "img": "rival-posters/imported/kyo_exp_cooking_home.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "slice"
+      ],
+      "family": null,
+      "concept": "Three generations of a Vietnamese family prepare dumplings around a worn wooden kitchen table, grandmother guiding a child while rain falls outside; food close-ups, warm domestic slice-of-life emotion."
+    },
+    {
+      "id": "kyo_exp_cooking_movie",
+      "img": "rival-posters/imported/kyo_exp_cooking_movie.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "romance"
+      ],
+      "family": null,
+      "concept": "Two adult chefs in their thirties close a tiny restaurant after service, standing amid stacked chairs and steam from one final shared bowl; quiet romantic film-poster composition, amber night light."
+    },
+    {
+      "id": "kyo_exp_monster_garden",
+      "img": "rival-posters/imported/kyo_exp_monster_garden.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "slice"
+      ],
+      "family": null,
+      "concept": "Soft-spoken Black teenage girl tends a community garden with several small plant-like companion monsters helping carry watering cans; neighbours in background, spring light, grounded wholesome monster-taming."
+    },
+    {
+      "id": "kyo_exp_grim_widow",
+      "img": "rival-posters/imported/kyo_exp_grim_widow.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "romance"
+      ],
+      "family": null,
+      "concept": "Widowed noblewoman in her fifties wearing weathered charcoal riding clothes stands beside an equally weathered female knight on a ruined castle terrace; no embrace, just shared grief and loyalty under winter light."
+    },
+    {
+      "id": "kyo_exp_cosmic_observatory",
+      "img": "rival-posters/imported/kyo_exp_cosmic_observatory.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "mystery"
+      ],
+      "family": null,
+      "concept": "Elderly astronomer and granddaughter sit inside a wooden mountain observatory as every star outside appears to have vanished except one impossible pale ring; quiet emotional cosmic mystery."
+    },
+    {
+      "id": "kyo_exp_shinobi_letters",
+      "img": "rival-posters/imported/kyo_exp_shinobi_letters.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "shinobi",
+        "romance"
+      ],
+      "family": null,
+      "concept": "Young woman courier in understated historical shinobi travel clothes reads a private letter beside a river ferry at dawn while another shinobi waits across the water; subdued longing and espionage atmosphere."
+    },
+    {
+      "id": "kyo_exp_kaiju_after",
+      "img": "rival-posters/imported/kyo_exp_kaiju_after.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "slice"
+      ],
+      "family": null,
+      "concept": "Family of four repairs their small seaside shop after a kaiju evacuation; enormous harmless creature silhouette recedes into morning fog offshore, focus on human aftermath and resilience."
+    },
+    {
+      "id": "kyo_exp_comedy_ensemble",
+      "img": "rival-posters/imported/kyo_exp_comedy_ensemble.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy",
+        "slice"
+      ],
+      "family": null,
+      "concept": "Five mismatched adult flatmates squeeze into a tiny apartment kitchen during a power cut, lit by phones and candles as dinner goes wrong; naturalistic ensemble comedy with expressive faces."
+    },
+    {
+      "id": "madcap_exp_otherworld1",
+      "img": "rival-posters/imported/madcap_exp_otherworld1.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "comedy"
+      ],
+      "family": "madcap-otherworld",
+      "concept": "Season 1: Filipino office worker Marco in rolled-up shirt sleeves tumbles through a glowing portal still clutching a takeaway coffee, landing before baffled fantasy villagers and a tiny dragon; bright broad isekai comedy."
+    },
+    {
+      "id": "madcap_exp_otherworld2",
+      "img": "rival-posters/imported/madcap_exp_otherworld2.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai",
+        "fantasy"
+      ],
+      "family": "madcap-otherworld",
+      "concept": "Season 2: the same Marco, recognisable glasses and rolled sleeves now under mismatched fantasy armour, leads a cheerful adventuring party across a floating bridge with a tiny dragon on his shoulder; colourful quest energy."
+    },
+    {
+      "id": "madcap_exp_otherworld3",
+      "img": "rival-posters/imported/madcap_exp_otherworld3.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "romance"
+      ],
+      "family": "madcap-otherworld",
+      "concept": "Movie/spin-off: Marco at a lantern festival in the fantasy capital awkwardly dances with a confident woman mage while their friends laugh behind them; bright romantic isekai ensemble poster."
+    },
+    {
+      "id": "madcap_exp_pocket_crew1",
+      "img": "rival-posters/imported/madcap_exp_pocket_crew1.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "comedy"
+      ],
+      "family": "madcap-pocket-crew",
+      "concept": "Season 1: Black preteen girl Zara in a yellow raincoat struggles to walk six mischievous pocket-sized companion monsters on tangled leads through a busy neighbourhood; sunny visual comedy."
+    },
+    {
+      "id": "madcap_exp_pocket_crew2",
+      "img": "rival-posters/imported/madcap_exp_pocket_crew2.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "monster_taming",
+        "sports"
+      ],
+      "family": "madcap-pocket-crew",
+      "concept": "Season 2: Zara, same yellow raincoat tied around her waist, cheers as her round blue companion monster races an obstacle course in a packed junior league arena; friendly monster sport."
+    },
+    {
+      "id": "madcap_exp_pocket_crew3",
+      "img": "rival-posters/imported/madcap_exp_pocket_crew3.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "slice"
+      ],
+      "family": "madcap-pocket-crew",
+      "concept": "Movie: Zara and the same six small monsters nap in a messy living room after an adventure, afternoon sunlight and snack wrappers everywhere; cosy character-led monster-taming epilogue."
+    },
+    {
+      "id": "madcap_exp_dungeon_temp1",
+      "img": "rival-posters/imported/madcap_exp_dungeon_temp1.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "cooking"
+      ],
+      "family": null,
+      "concept": "Exhausted young temp worker in office lanyard runs a fantasy dungeon cafeteria, flipping giant omelettes for orcs, elves and slimes; bright ensemble comedy, food front and centre."
+    },
+    {
+      "id": "madcap_exp_dungeon_temp2",
+      "img": "rival-posters/imported/madcap_exp_dungeon_temp2.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "isekai",
+        "survival"
+      ],
+      "family": null,
+      "concept": "University student in modern hiking gear wakes in a hostile floating-island world and improvises a shelter with two strangers as huge harmless-looking beasts circle below; colourful survival isekai."
+    },
+    {
+      "id": "madcap_exp_dungeon_temp3",
+      "img": "rival-posters/imported/madcap_exp_dungeon_temp3.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "monster_taming"
+      ],
+      "family": null,
+      "concept": "Fashion student transported to a fantasy kingdom kneels to befriend a fluffy horned creature while astonished knights watch; playful pastel isekai monster-taming key art."
+    },
+    {
+      "id": "madcap_exp_chef_rush",
+      "img": "rival-posters/imported/madcap_exp_chef_rush.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Chaotic multicultural restaurant brigade of six cooks tries to plate one enormous banquet at once, pans flying and one chef calmly tasting sauce in the centre; bright high-readability cooking comedy."
+    },
+    {
+      "id": "madcap_exp_crime_capers",
+      "img": "rival-posters/imported/madcap_exp_crime_capers.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Three incompetent amateur thieves in badly coordinated smart clothes hide behind the same tiny parked car while an older policewoman watches them from across the street, unimpressed; caper comedy."
+    },
+    {
+      "id": "madcap_exp_vampire_roommate",
+      "img": "rival-posters/imported/madcap_exp_vampire_roommate.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Sleepy vampire roommate in pyjamas shields himself from morning sun with a pizza box while his energetic human flatmate opens every curtain; modern apartment comedy with red-black accents."
+    },
+    {
+      "id": "madcap_exp_arabia_delivery",
+      "img": "rival-posters/imported/madcap_exp_arabia_delivery.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Cheerful young delivery rider on a tiny scooter overloaded with parcels races through a sunlit desert-city market while a pet falcon steals one package; broad action comedy, turquoise and saffron palette."
+    },
+    {
+      "id": "madcap_exp_kaiju_parttime",
+      "img": "rival-posters/imported/madcap_exp_kaiju_parttime.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Teen convenience-store clerk looks bored behind the counter while a friendly baby kaiju peers through the glass storefront and customers casually queue around its tail; deadpan bright comedy."
+    },
+    {
+      "id": "madcap_exp_grim_salaryman",
+      "img": "rival-posters/imported/madcap_exp_grim_salaryman.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen"
+      ],
+      "genres": [
+        "grimdark",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Ordinary salaryman in a cheap suit stands with clipboard among enormous grimdark knights preparing for battle, trying to enforce workplace safety rules; ridiculous scale contrast and smoky fantasy backdrop."
+    },
+    {
+      "id": "madcap_exp_shinobi_school",
+      "img": "rival-posters/imported/madcap_exp_shinobi_school.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Class of teenage shinobi attempts a stealth exercise in a school corridor while one student has obviously fallen through the ceiling; bright expressive ensemble, practical ninja uniforms and slapstick timing."
+    },
+    {
+      "id": "ttl_exp_otherworld_stage1",
+      "img": "rival-posters/imported/ttl_exp_otherworld_stage1.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "idol"
+      ],
+      "family": "ttl-otherworld-stage",
+      "concept": "Season 1: Moroccan-Japanese singer Leila in a jewel-blue performance dress steps through a glowing backstage doorway onto a fantasy amphitheatre filled with winged and horned audiences; luminous isekai concert spectacle."
+    },
+    {
+      "id": "ttl_exp_otherworld_stage2",
+      "img": "rival-posters/imported/ttl_exp_otherworld_stage2.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "magical"
+      ],
+      "family": "ttl-otherworld-stage",
+      "concept": "Season 2: the same Leila, recognisable long dark curls and jewel-blue costume, performs as ribbons of harmless magic form constellations over a floating fantasy stage; elegant magical performance."
+    },
+    {
+      "id": "ttl_exp_otherworld_stage3",
+      "img": "rival-posters/imported/ttl_exp_otherworld_stage3.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "romance"
+      ],
+      "family": "ttl-otherworld-stage",
+      "concept": "Movie: Leila in a simpler blue travel coat meets a fantasy prince-musician on an empty stage after the crowd has gone, moonlit instruments and soft lantern glow; restrained romantic finale."
+    },
+    {
+      "id": "ttl_exp_moonstage1",
+      "img": "rival-posters/imported/ttl_exp_moonstage1.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "idol"
+      ],
+      "family": "ttl-moonstage",
+      "concept": "Season 1: glamorous vampire idol trio of diverse women performs beneath a giant artificial moon, lead singer with silver bob and wine-red suit, elegant audience silhouettes and premium concert lighting."
+    },
+    {
+      "id": "ttl_exp_moonstage2",
+      "img": "rival-posters/imported/ttl_exp_moonstage2.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "magical"
+      ],
+      "family": "ttl-moonstage",
+      "concept": "Season 2: same vampire trio and silver-bob lead singer on a mirrored stage as moon-shaped magical light sigils orbit them; midnight navy, pearl and red palette, graceful transformation energy."
+    },
+    {
+      "id": "ttl_exp_moonstage3",
+      "img": "rival-posters/imported/ttl_exp_moonstage3.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "romance"
+      ],
+      "family": "ttl-moonstage",
+      "concept": "Movie: silver-bob vampire lead singer sits backstage in formal red suit beside her human songwriter, hands almost touching beside an unplugged microphone, dawn light beginning at the window."
+    },
+    {
+      "id": "ttl_exp_monster_idols1",
+      "img": "rival-posters/imported/ttl_exp_monster_idols1.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Four young performers dance with distinct companion monsters integrated into choreography: ribbon fox, drum lizard, glowing bird and round bear; joyful arena stage, clear silhouettes and premium sparkle."
+    },
+    {
+      "id": "ttl_exp_monster_idols2",
+      "img": "rival-posters/imported/ttl_exp_monster_idols2.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "magical"
+      ],
+      "family": null,
+      "concept": "Preteen magical performer in lavender costume bonds with a crescent-shaped cat companion on a small theatre stage as soft light petals swirl around them; cute but polished, not chibi."
+    },
+    {
+      "id": "ttl_exp_monster_idols3",
+      "img": "rival-posters/imported/ttl_exp_monster_idols3.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "comedy"
+      ],
+      "family": null,
+      "concept": "Boy-band rehearsal derailed by oversized playful companion monsters stealing props and instruments, performers laughing rather than posing; colourful backstage comedy with strong character variety."
+    },
+    {
+      "id": "ttl_exp_arabia_dancer",
+      "img": "rival-posters/imported/ttl_exp_arabia_dancer.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Adult Arab woman singer in a modern emerald stage outfit inspired by flowing geometric textiles performs on an open-air rooftop stage above a lantern-lit desert city; elegant dance pose, gold and green glow."
+    },
+    {
+      "id": "ttl_exp_arabia_moon",
+      "img": "rival-posters/imported/ttl_exp_arabia_moon.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "magical"
+      ],
+      "family": null,
+      "concept": "Young male and female magical performers stand on opposite balconies of a moonlit courtyard, streams of blue-gold light joining between them over a fountain; graceful Arabian-inspired fantasy performance."
+    },
+    {
+      "id": "ttl_exp_cooking_cafe",
+      "img": "rival-posters/imported/ttl_exp_cooking_cafe.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "cooking",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Three café-idol performers in tasteful pastel aprons finish decorating elaborate desserts before an evening mini-concert, kitchen and stage visible in one bright composition; food and performance equally readable."
+    },
+    {
+      "id": "ttl_exp_crime_diva",
+      "img": "rival-posters/imported/ttl_exp_crime_diva.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Elegant mature diva in black sequined suit leaves a theatre through a rain-lit alley while a young woman private investigator watches from a taxi; glamorous crime drama with magenta reflections."
+    },
+    {
+      "id": "ttl_exp_cosmic_idol",
+      "img": "rival-posters/imported/ttl_exp_cosmic_idol.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Solo singer performs to an empty planetarium where the projected stars begin forming one vast impossible spiral behind her; she remains poised under a single spotlight, beautiful and unsettling cosmic concert image."
+    },
+    {
+      "id": "ttl_exp_kaiju_guardian",
+      "img": "rival-posters/imported/ttl_exp_kaiju_guardian.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "magical"
+      ],
+      "family": null,
+      "concept": "Magical performance duo on a city rooftop raises luminous ribbons that calm a towering moth-like kaiju rather than fight it; dawn skyline, rose and cyan light, heroic compassionate spectacle."
+    },
+    {
+      "id": "ttl_exp_grim_ballet",
+      "img": "rival-posters/imported/ttl_exp_grim_ballet.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "idol"
+      ],
+      "family": null,
+      "concept": "Adult ballet star in black-and-silver stage costume dances alone in a ruined royal theatre while armoured figures watch silently from broken balconies; ash drifting through spotlight, elegant grimdark performance."
+    }
+  ]
+}
