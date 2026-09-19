@@ -4,8 +4,8 @@ import { merchValueOf, zeitgeistOf } from "./franchise";
 import type { RivalRelease, RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
-/** The Big Three can first be awarded in March of Year 5. */
-export const BIG_THREE_START_YEAR = 5;
+/** The Big Three can first be awarded in March of Year 3. */
+export const BIG_THREE_START_YEAR = 3;
 export const BIG_THREE_MARCH_WEEK = 8; // March W1 in the 48-week calendar
 export const BIG_THREE_START_WEEK = (BIG_THREE_START_YEAR - 1) * 48 + BIG_THREE_MARCH_WEEK;
 export const BIG_THREE_MAX_SLOTS = 3;
