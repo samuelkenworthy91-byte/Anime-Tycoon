@@ -237,6 +237,8 @@ export interface Draft {
   licensedArcId?: string;
   /** canonical property character names are presentation data, never employees */
   licensedCharacters?: string[];
+  /** absent = main-character key visual; otherwise a stable generic poster-art id */
+  posterArtId?: string;
 }
 
 /* ---------------------------------------------------------------- genres */
