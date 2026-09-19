@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CAST_V2, type AnimeType, type CastRole, type Draft, type GenreId } from "../data";
-import { computeResult, seededRng } from "../scoring";
+import { castContribution, computeResult, seededRng } from "../scoring";
 
 const roles: CastRole[] = ["protag", "secondary", "pet", "villain"];
 const genres: GenreId[] = ["romance", "mystery"];
@@ -81,16 +81,12 @@ describe("shojo licensed IP canonical casting", () => {
   });
 
   it("keeps anime-type casting meaningful for ordinary studio-cast productions", () => {
-    const wrong = licensedDraft("shonen");
-    delete wrong.licensedIpId;
-    delete wrong.licensedArcId;
-    delete wrong.licensedCharacters;
+    const member = CAST_V2.find((candidate) => candidate.role === "protag" && candidate.type === "shojo")!;
+    const probeGenres = member.visibleAff.length ? member.visibleAff : genres;
+    const matched = castContribution(member, "protag", { genres: probeGenres, animeType: "shojo" });
+    const mismatched = castContribution(member, "protag", { genres: probeGenres, animeType: "shonen" });
 
-    const matched = licensedDraft("shojo");
-    delete matched.licensedIpId;
-    delete matched.licensedArcId;
-    delete matched.licensedCharacters;
-
-    expect(result(matched).quality).toBeGreaterThan(result(wrong).quality);
+    expect(matched.typeModifier).toBeGreaterThan(mismatched.typeModifier);
+    expect(matched.totalQuality).toBeGreaterThan(mismatched.totalQuality);
   });
 });
