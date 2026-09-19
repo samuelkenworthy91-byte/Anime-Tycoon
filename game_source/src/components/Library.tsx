@@ -344,6 +344,29 @@ export default function LibraryPanel({
       </div>
 
       {/* ---------------------------------------------------------- cast */}
+      {fr.cast.length === 0 && fr.licensedBilling && (
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-cyanx">
+            <Heart size={11} /> SOURCE CHARACTER BILLING
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {([
+              ["protag", "Lead"],
+              ["secondary", "Companion"],
+              ["pet", "Mascot"],
+              ["villain", "Antagonist"],
+            ] as const).map(([role, label]) => (
+              <div key={role} className="rounded-md border border-cyanx/15 bg-cyanx/5 p-2">
+                <div className="text-[8px] font-black tracking-widest text-cyanx/65">{label.toUpperCase()}</div>
+                <div className="truncate text-[11px] font-bold">{fr.licensedBilling?.[role] || "—"}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-1 text-[9px] text-paper/40">
+            These are source-property characters, not studio casting assets. Edited billing carries into the next licensed sequel or reboot.
+          </div>
+        </div>
+      )}
       {fr.cast.length > 0 && (
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
