@@ -791,6 +791,12 @@ export default function App() {
             onAir={airShow}
             onSell={sellShow}
             onShelve={shelveShow}
+            onPosterChoice={(posterArtId) => setRun((current) => current ? {
+              ...current,
+              projects: current.projects.map((project) => project.id === shipId
+                ? { ...project, draft: { ...project.draft, posterArtId } }
+                : project),
+            } : current)}
             onBack={() => {
               sfx.back();
               setShipId(null);
