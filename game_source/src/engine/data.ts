@@ -572,7 +572,7 @@ export const RESEARCH: ResearchItem[] = [
   { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "All live contribution checks gain +12% effective skill." },
   { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
   { id: "marketing", name: "Marketing Dept.", rd: 30, desc: "Unlocks the big promo campaigns." },
-  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show. Unlocks commercial merchandising infrastructure; product families then open together by investment tier." },
+  { id: "merch", name: "Merch Division", rd: 34, desc: "+18% revenue from every show. Unlocks commercial merchandising infrastructure. Build a tier, then develop its product lines individually." },
   { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art contribution checks gain +12% effective skill." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
