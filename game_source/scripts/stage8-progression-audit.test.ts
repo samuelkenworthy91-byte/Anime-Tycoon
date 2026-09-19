@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialRun, advanceWeeks, type RunState } from "../src/engine/state";
-import { advanceBigThreeWeek, BIG_THREE_MAX_SLOTS } from "../src/engine/bigThree";
+import { advanceBigThreeWeek, BIG_THREE_MAX_SLOTS, BIG_THREE_START_YEAR } from "../src/engine/bigThree";
 import { skillTrainingQuote } from "../src/engine/training";
 import { BASE_INTERVENTIONS, CAPABILITY_THRESHOLDS, INVESTMENT_TIERS, interventionQuote } from "../src/engine/spending";
 import type { Staff } from "../src/engine/data";
@@ -50,6 +50,7 @@ function rivalOnlyBigThreeCareer(seed: number) {
       slots: run.bigThree.slots.length,
       years: recognitionWeeks.map((week) => Math.floor(week / 48) + 1),
       rivalSlots: run.bigThree.slots.filter((slot) => !slot.player).length,
+      uniqueStudios: new Set(run.bigThree.slots.map((slot) => slot.originalStudioId)).size,
     };
   } finally {
     Math.random = oldRandom;
@@ -107,12 +108,13 @@ describe("Stage 8 progression audit", () => {
     expect(intervention.at(-1)!.cashPerPoint).toBeGreaterThan(intervention[0].cashPerPoint * 5);
     expect(report.capabilityFiveTrackEnvelope).toBeGreaterThanOrEqual(90_000_000);
     expect(careers.every((career) => career.slots >= 1 && career.slots <= BIG_THREE_MAX_SLOTS)).toBe(true);
-    expect(careers.every((career) => career.years[0] === 5)).toBe(true);
-    /* Rival-only careers must leave a genuine response window: the seeded
-       name opens Year 5, the earliest later consensus is Year 6, and another
-       name cannot complete the cultural canon before Year 7. */
-    expect(secondSlotYears.every((year) => year >= 6)).toBe(true);
-    expect(thirdSlotYears.every((year) => year >= 7)).toBe(true);
+    /* QoL2 moved the annual assessment to March from Year 3 onward and
+       removed the old seeded Year-5 inductee. Qualification can happen in
+       any later March, but no slot may pre-date the new starting year. */
+    expect(careers.every((career) => career.years.every((year) => year >= BIG_THREE_START_YEAR))).toBe(true);
+    /* A studio can never own two Big Three places, even when several
+       exceptional releases qualify in the same March assessment. */
+    expect(careers.every((career) => career.uniqueStudios === career.slots)).toBe(true);
     expect(secondSlotYears.length).toBeGreaterThan(0);
     expect(thirdSlotYears.length).toBeGreaterThan(0);
   }, 120_000);
