@@ -305,7 +305,7 @@ describe("industry records", () => {
 
 /* -------------------------------------------------------- 20+ year sim */
 describe("the long haul", () => {
-  it("simulates 24 years without economy explosions, with rivals, projects, calendar and save reload intact", () => {
+  it("simulates the 25-year campaign plus 12 dynasty years without economy explosions", () => {
     let r = richRun(); // week 0, rich studio
 
     const resolveMilestones = (n: number) => {
@@ -321,7 +321,7 @@ describe("the long haul", () => {
       }
     };
 
-    for (let y = 0; y < 24; y++) {
+    for (let y = 0; y < 37; y++) {
       resolveMilestones(6);
 
       const ready = r.projects.find((p) => p.stage === "ready");
@@ -345,7 +345,7 @@ describe("the long haul", () => {
 
       r = advanceWeeks(r, 48);
 
-      /* the campaign ends at year 12; the save endures into dynasty mode */
+      /* the campaign ends at year 25; the save endures another 12 years in dynasty mode */
       if (r.week >= CAREER_WEEKS && !r.dynasty) {
         r = beginDynastyMode(r);
         if (r.cash < 40_000_000) r = { ...r, cash: 40_000_000 };
@@ -355,8 +355,8 @@ describe("the long haul", () => {
     }
 
     /* ---- calendar & campaign boundary ---- */
-    expect(r.week).toBe(24 * 48);
-    expect(yearOfWeek(r.week)).toBe(yearOfWeek(CAREER_WEEKS) + 12); // 12 campaign years + 12 dynasty years
+    expect(r.week).toBe(37 * 48);
+    expect(yearOfWeek(r.week)).toBe(yearOfWeek(CAREER_WEEKS) + 12); // 25 campaign years + 12 dynasty years
     expect(dateLabel(r.week).length).toBeGreaterThan(0);
     expect(r.dynasty).toBeTruthy();
     expect(r.dynasty!.startedWeek).toBe(CAREER_WEEKS);
