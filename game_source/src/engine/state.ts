@@ -1114,8 +1114,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       researchJobs = keep;
     }
 
-    /* the archive room quietly files away research */
+    /* Archive & Research Room pays in visible fortnightly batches: 5 / 10 / 15 RD. */
     rd += fx.rdWeekly;
+    const archiveTier = r.facilities.archive ?? 0;
+    if (archiveTier > 0 && w % 2 === 0) rd += [5, 10, 15][archiveTier - 1];
 
     /* ------- colleagues who work together grow bonds ------- */
     for (const p of projects) {
@@ -1913,8 +1915,9 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
 
   if (researchId === "narrative_analytics") {
     const firstPass = !carrier.research.includes("narrative_analytics");
+    const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => carrier.arcCombos.includes(id)).length;
     const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
-    const discoveries = firstPass ? ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id)) : unknown.slice(0, NARRATIVE_STUDY_BATCH);
+    const discoveries = unknown.slice(0, progressiveResearchBatch(known));
     arcCombos = [...new Set([...carrier.arcCombos, ...discoveries])];
     arcKnowledge = { ...carrier.arcKnowledge };
     for (const id of discoveries) {
@@ -1926,8 +1929,9 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   if (researchId === "genre_studies") {
     const firstPass = !carrier.research.includes("genre_studies");
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
+    const knownBefore = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;
     const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);
-    const discoveries = firstPass ? ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key)) : unknown.slice(0, GENRE_STUDY_BATCH);
+    const discoveries = unknown.slice(0, progressiveResearchBatch(knownBefore));
     for (const key of discoveries) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
     const discoveredArcIds = discoveries.map((key) => key.slice(0, key.lastIndexOf("|")));
     arcUnlocked = [...new Set([...carrier.arcUnlocked, ...(firstPass ? ARC_RESEARCH_UNLOCK_IDS : []), ...discoveredArcIds])];
@@ -3251,8 +3255,29 @@ export const undiscoveredProfileIds = (r: Pick<RunState, "castAffinityDiscovered
 export const allCastProfiled = (r: Pick<RunState, "castAffinityDiscovered">): boolean =>
   undiscoveredProfileIds(r).length === 0;
 
-export const GENRE_STUDY_BATCH = 30;
-export const NARRATIVE_STUDY_BATCH = 10;
+export const RESEARCH_DISCOVERY_START = 6;
+export const RESEARCH_DISCOVERY_STEP = 4;
+export const RESEARCH_DISCOVERY_CAP = 30;
+
+function progressiveResearchBatch(known: number): number {
+  let completed = 0;
+  let covered = 0;
+  while (covered < Math.max(0, known) && completed < 20) {
+    covered += Math.min(RESEARCH_DISCOVERY_CAP, RESEARCH_DISCOVERY_START + completed * RESEARCH_DISCOVERY_STEP);
+    completed += 1;
+  }
+  return Math.min(RESEARCH_DISCOVERY_CAP, RESEARCH_DISCOVERY_START + completed * RESEARCH_DISCOVERY_STEP);
+}
+
+function progressiveResearchPasses(known: number): number {
+  let completed = 0;
+  let covered = 0;
+  while (covered < Math.max(0, known) && completed < 20) {
+    covered += Math.min(RESEARCH_DISCOVERY_CAP, RESEARCH_DISCOVERY_START + completed * RESEARCH_DISCOVERY_STEP);
+    completed += 1;
+  }
+  return completed;
+}
 
 export function researchProgressLabel(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): string | null {
   if (id === "genre_studies") {
@@ -3270,11 +3295,11 @@ function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledg
   if (!r.research.includes(id)) return 0;
   if (id === "genre_studies") {
     const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
-    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_GENRE_KEYS.length) / GENRE_STUDY_BATCH);
+    return progressiveResearchPasses(known);
   }
   if (id === "narrative_analytics") {
     const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos.includes(comboId)).length;
-    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_COMBOS.length) / NARRATIVE_STUDY_BATCH);
+    return progressiveResearchPasses(known);
   }
   return 0;
 }
