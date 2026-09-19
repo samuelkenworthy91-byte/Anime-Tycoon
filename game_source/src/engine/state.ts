@@ -478,7 +478,7 @@ export function unlockFormat(r: RunState, medium: MediumId): RunState | null {
   };
 }
 
-/** twelve-year career — after this the studio enters Dynasty Mode */
+/** 25-year career — after this the studio enters the retrospective / optional Dynasty continuation */
 export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
 export { AIR_WEEKS }; // re-exported for screens that read the broadcast length
