@@ -192,7 +192,7 @@ export const FACILITY_DEFS: FacilityDef[] = [
       { cost: 540_000, rd: 50, upkeep: 1_050 },
     ],
     effects: (t) => [
-      `+${[1, 2, 4][t - 1]} research point${t > 1 ? "s" : ""}/week`,
+      `+${[5, 10, 15][t - 1]} research data every fortnight`,
       `Research projects finish ${t} week${t > 1 ? "s" : ""} sooner`,
     ],
   },
@@ -347,7 +347,7 @@ export function facilityFX(fac: Facilities | undefined): FacilityFX {
 
   const ar = tier("archive");
   if (ar) {
-    fx.rdWeekly += [1, 2, 4][ar - 1];
+    /* Passive archive income is banked by the calendar in 5-point fortnightly steps. */
     fx.rdMult *= [1.25, 1.5, 2][ar - 1];
   }
 
