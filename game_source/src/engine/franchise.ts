@@ -42,6 +42,15 @@ export interface FranchiseChar {
   popularity: number;
 }
 
+/** Licensed-property billing is deliberately separate from studio cast records:
+ * these are source characters, not hireable/cast assets with portraits or affinities. */
+export interface LicensedBilling {
+  protag: string;
+  secondary: string;
+  pet: string;
+  villain: string;
+}
+
 export interface Franchise {
   key: string;
   baseTitle: string;
@@ -75,8 +84,10 @@ export interface Franchise {
   spunFrom?: string;
   /** legacy flag kept for older saves/UI */
   alive: boolean;
-  /** external licensed property this franchise originated from; optional for old saves */
+  /** external licensed property this franchise originated from */
   licensedIpId?: string;
+  /** latest on-screen/source-character names used by a licensed adaptation */
+  licensedBilling?: LicensedBilling;
   /** irreversible sale of the original IP to an outside buyer */
   soldTo?: { id: string; name: string; kind: "network" | "rival"; week: number; price: number };
   /** permanent cultural prestige once an entry is named to the era's Big Three */
@@ -467,6 +478,12 @@ export function createFranchise(
     cult: false,
     merchCooldown: {},
     licensedIpId: d.licensedIpId,
+    licensedBilling: d.licensedIpId ? {
+      protag: d.protagName.trim(),
+      secondary: (d.secondaryName ?? seed.secondaryName).trim(),
+      pet: (d.petName ?? seed.petName).trim(),
+      villain: (d.villainName ?? seed.villainName).trim(),
+    } : undefined,
     spunFrom,
     alive: result.hallOfFame,
   };
@@ -503,6 +520,13 @@ export function recordContinuation(
       popularity: clampPct(c.popularity + charDelta),
     };
   });
+  const previousLicensedBilling = fr.licensedBilling;
+  const licensedBilling: LicensedBilling | undefined = (fr.licensedIpId || d.licensedIpId) ? {
+    protag: d.protagName.trim(),
+    secondary: d.secondaryName !== undefined ? d.secondaryName.trim() : (previousLicensedBilling?.secondary ?? ""),
+    pet: d.petName !== undefined ? d.petName.trim() : (previousLicensedBilling?.pet ?? ""),
+    villain: d.villainName !== undefined ? d.villainName.trim() : (previousLicensedBilling?.villain ?? ""),
+  } : previousLicensedBilling;
 
   let popularity = clampPct(fr.popularity + verdict.popDelta);
   let fatigue = clampPct(fr.fatigue + ((def?.fatigueAdd ?? 12) + verdict.fatigueExtra + (opts?.fatigueAdd ?? 0)) * (opts?.fatigueMult ?? 1));
@@ -514,6 +538,7 @@ export function recordContinuation(
   const next: Franchise = {
     ...fr,
     cast,
+    licensedBilling,
     entries: [
       ...fr.entries,
       {
