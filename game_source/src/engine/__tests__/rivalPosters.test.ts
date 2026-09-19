@@ -103,6 +103,12 @@ describe("pickRivalPoster", () => {
 });
 
 describe("generic player poster choices", () => {
+  it("removes permanently claimed industry art from player and rival selection", () => {
+    const blocked = ["t1"];
+    expect(genericPosterOptions("shonen", ["mecha"], 6, blocked).some((p) => p.id === "t1")).toBe(false);
+    expect(pickRivalPoster({ studio: "Toe-i Frontier", animeType: "shonen", genres: ["mecha"], blocked, rand: () => 0 })?.id).not.toBe("t1");
+  });
+
   it("is deterministic, anime-type safe and spread across studios", () => {
     const a = genericPosterOptions("shonen", ["mecha", "military"], 6);
     const b = genericPosterOptions("shonen", ["mecha", "military"], 6);

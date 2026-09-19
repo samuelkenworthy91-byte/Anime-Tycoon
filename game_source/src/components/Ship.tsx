@@ -41,7 +41,7 @@ export default function Ship({
   const [bought, setBought] = useState<string[]>([]);
   const [confirmSale, setConfirmSale] = useState<string | null>(null);
   const saleOffers = showSaleOffers(run, project.id);
-  const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, 6);
+  const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, 6, run.playerPosterClaims ?? []);
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
@@ -81,7 +81,7 @@ export default function Ship({
               <Image size={14} className="text-cyanx" />
               <div>
                 <div className="text-[10px] font-black tracking-widest text-cyanx">KEY VISUAL</div>
-                <div className="text-[9px] text-paper/45">Keep the main character or choose genre-matched generic key art. This changes presentation only.</div>
+                <div className="text-[9px] text-paper/45">Choose from the same industry poster pool rivals use. Once your studio releases with one, rivals can never use it again.</div>
               </div>
             </div>
             <div className="nice-scroll mt-2 flex gap-2 overflow-x-auto pb-1">

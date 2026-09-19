@@ -62,6 +62,7 @@ import {
   pickPoacher,
   planRivalYear,
   removeRivalTalent,
+  reservePlayerPosters,
   rivalTalentById,
   rivalTalentToStaff,
   rollRivalryEvents,
@@ -354,6 +355,8 @@ export interface RunState {
   payouts: Payout[];
   /** the persistent rival-studios simulation */
   rivalWorld: RivalWorld;
+  /** shared industry poster assets permanently claimed by player releases */
+  playerPosterClaims?: string[];
   /** the player's releases this calendar year (for the ceremony) */
   yearShows: AwardNominee[];
   /** results of the most recent awards ceremony */
@@ -532,6 +535,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     awards: 0,
     payouts: [],
     rivalWorld: initRivalWorld(0),
+    playerPosterClaims: [],
     yearShows: [],
     awardsCeremony: null,
     incomeThisWeek: 0,
@@ -1283,7 +1287,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     {
       const airingGenres = new Set<GenreId>();
       for (const p of projects) if (p.stage === "airing") p.draft.genres.forEach((g) => airingGenres.add(g));
-      const rivalTick = tickRivalWeek(rivalWorld, w, { playerAiringGenres: airingGenres });
+      const rivalTick = tickRivalWeek(rivalWorld, w, { playerAiringGenres: airingGenres, blockedPosterIds: r.playerPosterClaims ?? [] });
       rivalWorld = rivalTick.world;
       notices.push(...rivalTick.notices);
       recentReleases = [...pruneReleases(recentReleases, w), ...rivalTick.releaseRecords];
@@ -1520,7 +1524,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       rivalWorld = fy.world;
       notices.push(...fy.notices);
       const pressure = industryPressure({ week: w, cash, fans, awards, hits: r.hits, bestScore: r.bestScore, showsMade: r.showsMade, playerRank: rivalWorld.playerRank });
-      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0) });
+      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0), blockedPosterIds: r.playerPosterClaims ?? [] });
       rivalWorld = py.world;
       notices.push(...py.notices);
       if (pressure.level >= 1) notices.push(`📈 INDUSTRY PRESSURE ${pressure.level.toFixed(1)}/6 · ${pressure.band.toUpperCase()} — next year rivals gain +${pressure.rivalBoost.toFixed(1)} quality pressure.`);
@@ -2724,6 +2728,10 @@ export function releaseProject(
 ): { run: RunState; result: ShowResult } | null {
   const p0 = projectById(r, projectId);
   if (!p0 || (p0.stage !== "ready" && p0.stage !== "shelved")) return null;
+  if (p0.draft.posterArtId) {
+    const claims = [...new Set([...(r.playerPosterClaims ?? []), p0.draft.posterArtId])];
+    r = { ...r, playerPosterClaims: claims, rivalWorld: reservePlayerPosters(r.rivalWorld, claims, r.week) };
+  }
   const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
   let result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
   const draft = p.draft;
