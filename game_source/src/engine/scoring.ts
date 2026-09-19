@@ -343,12 +343,15 @@ export function computeResult(opts: {
   const castingBase = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
   const casting = castingBase;
   const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
-  const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
+  const wrongTypeRoles = licensed ? 0 : castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
   /* Bad casting now hurts the WHOLE production instead of merely missing a tiny bonus.
-     Four completely unsuitable roles can cut raw quality by roughly a third. */
-  const castFitMult = clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
+     Four completely unsuitable roles can cut raw quality by roughly a third.
+     Licensed adaptations use canonical source characters, so their internal
+     placeholder cast ids must never create type/affinity penalties. */
+  const castFitMult = licensed ? 1 : clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
   const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
   const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
+    if (licensed) return 0;
     if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
     return part.member.visibleAff.some((genre) => draft.genres.includes(genre)) ? 1 : 0;
   };
@@ -382,7 +385,7 @@ export function computeResult(opts: {
       arcsF += arc.antiF ?? -0.01;
     }
     /* arcs that shine with the right cast member */
-    if (arc.cast && arc.castQ) {
+    if (!licensed && arc.cast && arc.castQ) {
       const m = castOf(arc.cast);
       if (m && m.visibleAff.some((genre) => draft.genres.includes(genre))) {
         arcQ += arc.castQ;
@@ -596,16 +599,16 @@ export function computeResult(opts: {
   if (arcClashesHit.length > 0)
     breakdown.push({ label: `Story clash: ${arcClashesHit.map((c) => c.name).join(", ")}`, pts: `×${arcStructureMult.toFixed(2)} quality` });
   const affNotes: string[] = [];
-  for (const m of [protag, sec, pet, vil]) {
+  if (!licensed) for (const m of [protag, sec, pet, vil]) {
     const visibleHit = m.visibleAff.filter((g) => draft.genres.includes(g));
     const knownHidden = castAffinityDiscovered.includes(m.id) && draft.genres.includes(m.hiddenAff) ? [m.hiddenAff] : [];
     const hit = [...new Set([...visibleHit, ...knownHidden])];
     if (hit.length) affNotes.push(`${m.name} ↔ ${hit.map((g) => `${GENRES.find((x) => x.id === g)!.label}${knownHidden.includes(g) ? " ✦" : ""}`).join("/")}`);
   }
   if (affNotes.length) breakdown.push({ label: "Known cast fit", pts: affNotes.join(" · ") });
-  if (castParts.some((part) => part.typeModifier === TYPE_MATCH_MULTIPLIER))
+  if (!licensed && castParts.some((part) => part.typeModifier === TYPE_MATCH_MULTIPLIER))
     breakdown.push({ label: "Anime Type casting", pts: "Matching traditions strengthen individual cast contributions" });
-  if (publicSalesMultiplier > 1)
+  if (!licensed && publicSalesMultiplier > 1)
     breakdown.push({ label: "Known Correct Cast commercial lift", pts: `×${publicSalesMultiplier.toFixed(3)} sales` });
   if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
 
