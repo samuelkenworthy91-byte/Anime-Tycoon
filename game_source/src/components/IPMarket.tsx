@@ -143,6 +143,8 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
           <KeyArt ipId={ip.id} />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2"><b>{ip.title}</b>{c.bestScore >= 32 && <Trophy size={13} className="text-gold" />}{expired && <span className="rounded border border-neon/50 px-1.5 py-.5 text-[8px] font-black text-neon">EXPIRED</span>}</div>
+            <div className="mt-0.5 text-[9px] font-bold text-cyanx">{SOURCE_LABEL[ip.sourceType]} · {ip.genreTags.map(genreLabel).join(" / ")}</div>
+            <p className="mt-1 text-[10px] leading-relaxed text-paper/60">{ip.description}</p>
             <div className="mt-1 text-[10px] text-paper/55">Royalty {Math.round(c.royaltyRate * 100)}% · Ownership {Math.round(c.ownershipShare * 100)}% · {expired ? "rights expired" : `${remaining} wk remaining`} · {c.adaptations} adaptation(s)</div>
             <div className="mt-1 flex flex-wrap gap-1 text-[8px]">{[["SEQUEL", c.sequelRights], ["MERCH", c.merchRights], ["INTL", c.internationalRights]].map(([x, on]) => <span key={String(x)} className={cn("rounded border px-1.5 py-.5", on ? "border-mint/40 text-mint" : "border-line text-paper/35")}>{on ? "✓ " : <Lock size={7} className="inline" />}{x}</span>)}</div>
             {renewal && !renewal.available && !expired && <div className="mt-2 rounded-lg border border-line bg-panel2/55 p-2 text-[9px] text-paper/55"><b className="text-cyanx">LICENCE EXTENSION</b> · {remaining} weeks remain. Extension window opens in <b>{Math.max(0,remaining-IP_RENEWAL_WINDOW_WEEKS)} week{Math.max(0,remaining-IP_RENEWAL_WINDOW_WEEKS)===1?"":"s"}</b>. You can enable renewal once the property enters its final {IP_RENEWAL_WINDOW_WEEKS} weeks.</div>}
