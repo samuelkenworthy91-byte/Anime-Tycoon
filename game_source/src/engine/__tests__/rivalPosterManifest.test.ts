@@ -195,6 +195,19 @@ describe("96-poster expansion plan", () => {
 
     expect(additions.filter((poster) => poster.genres.includes("romance")).length).toBeLessThanOrEqual(10);
     expect(additions.filter((poster) => poster.genres.includes("mecha")).length).toBeLessThanOrEqual(2);
+
+    for (const genre of ["military", "survival", "pirate", "martial"]) {
+      expect(
+        additions.some((poster) => poster.genres.includes(genre) && poster.animeTypes.includes("shojo")),
+        `${genre} gains Shojo-compatible art`
+      ).toBe(true);
+    }
+    for (const genre of ["idol", "cooking"]) {
+      expect(
+        additions.some((poster) => poster.genres.includes(genre) && poster.animeTypes.includes("shonen")),
+        `${genre} gains Shonen-compatible art`
+      ).toBe(true);
+    }
   });
 
   it("keeps new Shonen and Shojo compatibility effectively balanced", () => {
