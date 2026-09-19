@@ -108,7 +108,7 @@ describe("Stage 8 progression audit", () => {
     expect(intervention.at(-1)!.cashPerPoint).toBeGreaterThan(intervention[0].cashPerPoint * 5);
     expect(report.capabilityFiveTrackEnvelope).toBeGreaterThanOrEqual(90_000_000);
     expect(careers.every((career) => career.slots >= 1 && career.slots <= BIG_THREE_MAX_SLOTS)).toBe(true);
-    /* The first Big Three slot cannot be awarded before March of Year 5.
+    /* The first Big Three slot cannot be awarded before March of Year 3.
        Empty March assessments are allowed to pass silently, so qualification
        can happen in any later year without forcing an annual event. */
     expect(careers.every((career) => career.years.every((year) => year >= BIG_THREE_START_YEAR))).toBe(true);
