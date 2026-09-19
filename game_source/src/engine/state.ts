@@ -1914,7 +1914,6 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   const notices = [...carrier.notices];
 
   if (researchId === "narrative_analytics") {
-    const firstPass = !carrier.research.includes("narrative_analytics");
     const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => carrier.arcCombos.includes(id)).length;
     const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
     const discoveries = unknown.slice(0, progressiveResearchBatch(known));
