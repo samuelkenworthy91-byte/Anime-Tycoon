@@ -42,7 +42,7 @@ import {
   reviewLegacyRights,
   type OverseasRequest,
 } from "../overseas";
-import { toLegend } from "../careers";
+import { rollHirePool, toLegend } from "../careers";
 
 const draft = (): Draft => ({
   title: "A Creator's Journey",
