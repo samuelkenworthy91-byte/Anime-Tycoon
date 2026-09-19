@@ -382,7 +382,8 @@ export const POSTER_RECENT_CAP = 10;
 /** lock a poster identity onto a production; never re-rolled afterwards */
 function assignPoster(
   studio: RivalStudio,
-  show: { genres: GenreId[]; animeType: AnimeType; franchiseKey: string | null }
+  show: { genres: GenreId[]; animeType: AnimeType; franchiseKey: string | null },
+  blocked: readonly string[] = []
 ): { posterId: string | null; posterRecent: string[] } {
   const fr = show.franchiseKey ? studio.franchises.find((f) => f.key === show.franchiseKey) : null;
   const familyId = fr?.posterId ?? null;
@@ -393,6 +394,7 @@ function assignPoster(
     genres: show.genres,
     recent: studio.posterRecent ?? [],
     family,
+    blocked,
     rand: Math.random,
   });
   if (!chosen) return { posterId: null, posterRecent: studio.posterRecent ?? [] };
@@ -683,7 +685,8 @@ function planStudioYear(
   year: number,
   yearStartWeek: number,
   boost = 0,
-  usedTitles = new Set<string>()
+  usedTitles = new Set<string>(),
+  blockedPosterIds: readonly string[] = []
 ): { productions: RivalProduction[]; posterRecent: string[]; franchises: RivalFranchise[] } {
   const empty = { productions: [], posterRecent: studio.posterRecent ?? [], franchises: studio.franchises };
   if (studio.status === "collapsed") return empty;
@@ -748,7 +751,7 @@ function planStudioYear(
     const craft = craftForProduction(studio, { id, score });
     /* permanent key art: franchise continuations prefer the same visual
        family (Season 1 → Season 2 → Movie reads as one world) */
-    const art = licensedIpId ? { posterId: null as string | null, posterRecent } : assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey });
+    const art = licensedIpId ? { posterId: null as string | null, posterRecent } : assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey }, blockedPosterIds);
     posterRecent = art.posterRecent;
     if (franchiseKey && art.posterId) {
       franchises = franchises.map((f) => (f.key === franchiseKey ? { ...f, posterId: art.posterId } : f));
@@ -905,7 +908,7 @@ function yearTransition(studio: RivalStudio, year: number): { studio: RivalStudi
   return { studio: st, notice: null };
 }
 
-export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number }): { world: RivalWorld; notices: string[] } {
+export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number; blockedPosterIds?: readonly string[] }): { world: RivalWorld; notices: string[] } {
   const notices: string[] = [];
   const boost = opts?.qualityBoost ?? 0;
   const usedTitles = new Set(
@@ -918,10 +921,38 @@ export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: nu
     const t = yearTransition(st, year);
     if (t.notice) notices.push(t.notice);
     const next = t.studio;
-    const slate = planStudioYear(next, year, yearStartWeek, boost, usedTitles);
+    const slate = planStudioYear(next, year, yearStartWeek, boost, usedTitles, opts?.blockedPosterIds ?? []);
     return { ...next, productions: slate.productions, posterRecent: slate.posterRecent, franchises: slate.franchises };
   });
   return { world: { ...world, studios, year, yearStartWeek }, notices };
+}
+
+/** Permanently remove player-claimed key art from every unreleased rival slate.
+ * Historical releases remain untouched; future productions are reassigned immediately. */
+export function reservePlayerPosters(world: RivalWorld, blockedIds: readonly string[], currentWeek: number): RivalWorld {
+  const blocked = new Set(blockedIds);
+  if (!blocked.size) return world;
+  return {
+    ...world,
+    studios: world.studios.map((sourceStudio) => {
+      let studio = { ...sourceStudio, posterRecent: [...(sourceStudio.posterRecent ?? [])], franchises: sourceStudio.franchises.map((f) => ({ ...f })) };
+      const productions = sourceStudio.productions.map((prod) => {
+        if (prod.week < currentWeek || !prod.posterId || !blocked.has(prod.posterId) || prod.licensedIpId) return prod;
+        const art = assignPoster(studio, { genres: prod.genres, animeType: prod.animeType, franchiseKey: prod.franchiseKey }, blockedIds);
+        studio = { ...studio, posterRecent: art.posterRecent };
+        if (prod.franchiseKey && art.posterId) {
+          studio = {
+            ...studio,
+            franchises: studio.franchises.map((fr) =>
+              fr.key === prod.franchiseKey && blocked.has(fr.posterId ?? "") ? { ...fr, posterId: art.posterId } : fr
+            ),
+          };
+        }
+        return { ...prod, posterId: art.posterId };
+      });
+      return { ...studio, productions };
+    }),
+  };
 }
 
 /* --------------------------------------------------------- weekly tick */
@@ -939,10 +970,13 @@ function rivalRevenueFans(score: number, medium: MediumId, budget: BudgetId): { 
 export interface RivalTickCtx {
   /** genres of the player's currently-airing shows (for head-to-head rivalry) */
   playerAiringGenres: Set<GenreId>;
+  /** key art permanently claimed by the player studio */
+  blockedPosterIds?: readonly string[];
 }
 
 /** advance the industry one calendar week: premieres land, hits franchise, market floods */
 export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx): RivalTickResult {
+  world = reservePlayerPosters(world, ctx.blockedPosterIds ?? [], week);
   const notices: string[] = [];
   const releaseRecords: ReleaseRecord[] = [];
   const trendShifts: { genre: GenreId; delta: number }[] = [];
@@ -973,7 +1007,7 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
       const id = `rp${++rivalProdSeq}_surp_${week}`;
       const responseBoost = world.playerRank === 1 ? Math.min(3, 1 + Math.max(0, world.year - 1) * 0.25) : 0;
       const score = computeScore(studio, { genres, franchiseKey: fr ? fr.key : null, kind }, responseBoost);
-      const art = licensedIpId ? { posterId: null as string | null, posterRecent: studio.posterRecent ?? [] } : assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null });
+      const art = licensedIpId ? { posterId: null as string | null, posterRecent: studio.posterRecent ?? [] } : assignPoster(studio, { genres, animeType, franchiseKey: fr ? fr.key : null }, ctx.blockedPosterIds ?? []);
       studio.posterRecent = art.posterRecent;
       studio.productions.push({
         id,

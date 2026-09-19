@@ -71,8 +71,8 @@ export const BASE_INTERVENTIONS: InterventionDef[] = [
   { id: "soundtrack", name: "Soundtrack Enhancement", cost: 45_000, stages: ["sound", "post"], description: "Commission a specialist suite.", point: "sound", points: 32, risk: .08, scalable: true, capability: "sound" },
   { id: "schedule", name: "Schedule Extension", cost: 22_000, stages: ["concept", "preprod", "animation", "sound", "post"], description: "Buy two weeks; hype cools while rivals keep moving.", days: 14, hype: -6, risk: 0 },
   { id: "consultant", name: "Specialist Consultant", cost: 30_000, stages: ["concept", "preprod", "animation"], description: "Reduce adaptation/technical mistakes; imperfect advice.", points: 18, issueDelta: -2, risk: .18, scalable: true, capability: "writing" },
-  { id: "continuity", name: "Continuity Repair", cost: 48_000, stages: ["post", "marketing"], description: "Expensive surgery for accumulated notes.", point: "story", points: 15, issueDelta: -4, risk: .08, scalable: true, capability: "post" },
-  { id: "crunch", name: "Executive Crunch", cost: 18_000, stages: ["animation", "sound", "post"], description: "Fast output with a real chance of more errors.", points: 26, issueDelta: 2, risk: .4 },
+  { id: "continuity", name: "Continuity Repair", cost: 48_000, stages: ["post", "marketing"], description: "Repairs accumulated notes, then turns up to six new mistakes into R&D over the next 21 days.", point: "story", points: 15, issueDelta: -4, risk: .08, scalable: true, capability: "post" },
+  { id: "crunch", name: "Executive Rush", cost: 18_000, stages: ["animation", "sound", "post"], description: "For 14 days normal production bubbles fire twice, but new editor-note risk also doubles.", risk: 0 },
   { id: "final_polish", name: "Final Polish Pass", cost: 72_000, stages: ["post", "marketing", "ready"], description: "Diminishing returns; cannot fix a broken foundation.", points: 22, issueDelta: -2, risk: .1, scalable: true, capability: "post" },
   { id: "launch_upgrade", name: "Launch Materials Upgrade", cost: 55_000, stages: ["marketing", "ready"], description: "Premium trailers, key art and launch assets. Raises awareness, not review quality.", hype: 12, risk: 0, scalable: true, capability: "marketing" },
 ];
@@ -246,6 +246,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
   const point = d.point ?? (["story", "art", "sound"] as PointType[])[Math.floor(rng() * 3)];
   const gain = success ? quote.points : Math.round(quote.points * .25);
   const issueDelta = quote.issueDelta + (success ? 0 : quote.points > 0 ? 1 : 0);
+  const nowDay = run.day ?? run.week * 7;
   const updated: Project = {
     ...p,
     points: gain > 0 ? { ...p.points, [point]: p.points[point] + gain } : p.points,
@@ -255,6 +256,8 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
     deadlineWeek: p.deadlineWeek + Math.ceil(quote.days / 7),
     spent: p.spent + quote.cost,
     interventions: [...(p.interventions ?? []), d.id],
+    ...(d.id === "crunch" ? { executiveRushUntilDay: nowDay + 14 } : {}),
+    ...(d.id === "continuity" && success ? { noteToRdUntilDay: nowDay + 21, noteToRdConverted: 0 } : {}),
   };
   const label = d.scalable ? `${d.name} · ${quote.tier.name}` : d.name;
   const strategicSpend = [...run.strategicSpend, { id: `int_${run.week}_${projectId}_${d.id}_${parsed.tier}`, label, amount: quote.cost, week: run.week, projectId }];
@@ -267,6 +270,8 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
     quote.issueDelta < 0 ? `${Math.abs(quote.issueDelta)} note${Math.abs(quote.issueDelta) === 1 ? "" : "s"} repaired` : quote.issueDelta > 0 ? `+${quote.issueDelta} rework note${quote.issueDelta === 1 ? "" : "s"}` : null,
     quote.hype !== 0 ? `${quote.hype > 0 ? "+" : ""}${quote.hype} hype` : null,
     quote.days > 0 ? `+${quote.days} schedule days` : null,
+    d.id === "crunch" ? "14 days ×2 production bubbles · ×2 note risk" : null,
+    d.id === "continuity" && success ? "21 days: up to 6 new notes become R&D" : null,
   ].filter(Boolean).join(" · ");
   return {
     ...run,
@@ -280,12 +285,17 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
 export interface CapitalDef { id: string; name: string; cost: number; minOffice: number; description: string; }
 export const CAPITAL_PROJECTS: CapitalDef[] = [
   { id: "screening_theatre", name: "Private Screening Theatre", cost: 1_500_000, minOffice: 1, description: "Improves consultant/final-polish work and prestige launch campaigns." },
+  { id: "creator_academy", name: "Creator Academy", cost: 12_000_000, minOffice: 1, description: "Named production leads earn 20% more lead XP and personal followers." },
   { id: "mocap_stage", name: "Performance Capture Stage", cost: 18_000_000, minOffice: 1, description: "Strengthens animation passes and retakes while cutting failure risk." },
   { id: "orchestra_hall", name: "Orchestral Recording Hall", cost: 42_000_000, minOffice: 1, description: "Greatly strengthens soundtrack enhancement work." },
+  { id: "localisation_campus", name: "Localisation Campus", cost: 70_000_000, minOffice: 1, description: "Cuts new overseas localisation costs by 25% and strengthens catalogue tails." },
   { id: "global_merch", name: "Global Merch Centre", cost: 120_000_000, minOffice: 1, description: "Boosts character-led and international launch campaigns." },
+  { id: "merch_factory", name: "In-House Merch Manufacturing", cost: 220_000_000, minOffice: 1, description: "Adds 18% to merchandise-line returns after fan demand and partner reach." },
   { id: "distribution_network", name: "Worldwide Distribution Network", cost: 260_000_000, minOffice: 1, description: "Boosts mass-media and international campaigns across territories." },
   { id: "convention_venue", name: "Exhibition & Convention Venue", cost: 480_000_000, minOffice: 1, description: "Supercharges convention panels and owned fan events." },
+  { id: "studio_streaming", name: "Owned Streaming Service", cost: 700_000_000, minOffice: 1, description: "Adds 8% domestic release revenue and strengthens overseas catalogue income." },
   { id: "flagship_hq", name: "Global Flagship Headquarters", cost: 1_100_000_000, minOffice: 1, description: "Improves every strategic campaign and gives stronger co-production terms." },
+  { id: "second_campus", name: "Second Production Campus", cost: 1_800_000_000, minOffice: 1, description: "Adds one permanent major-production slot; department capacity still has to support the extra slate." },
 ];
 
 export function buyCapitalProject(run: RunState, id: string): RunState | null {

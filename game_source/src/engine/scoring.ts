@@ -42,6 +42,8 @@ export interface Points {
 export interface Review {
   outlet: string;
   focus: string;
+  /** player-facing explanation of the evidence this outlet weights most */
+  criteria?: string;
   score: number; // out of 10
   quote: string;
 }
@@ -471,16 +473,34 @@ export function computeResult(opts: {
      agreement — elite work lands 9s regularly, 10s occasionally. */
   const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
     + expectationAdj + audienceAdj;
+  /* Critics react more strongly to poor creative choices, while excellent
+     choices earn only a modest bonus so top reviews remain genuinely rare. */
+  const arcCriticAdj = clamp(arcQuality * 0.08 - 0.18, -0.65, 0.20);
+  const productionCriticAdj = clamp((pointScore - 9) * 0.04, -0.35, 0.18);
+  const overallDirectionAdj = clamp((sliderFitMult - 0.92) * 1.25, -0.45, 0.10);
   const reviews: Review[] = REVIEWERS.map((r) => {
     let s = base;
-    if (r.bias === "story") s += (perPhase[0] - 2) * 0.25 + (mix[0] - genreRatio[0]) * 2.5 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "hype") s += (hype / 100) * 0.55 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "harsh") s += -0.5 - issues * 0.12 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 2.5 - issues * 0.18 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    let criteria = "";
+    if (r.bias === "story") {
+      criteria = "Writing · Story-direction slider · Story/genre balance · Arc structure";
+      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 3.0 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "hype") {
+      criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
+      s += (hype / 100) * 0.60 + overallDirectionAdj + clamp(arcsF * 1.5, -0.35, 0.45) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "harsh") {
+      criteria = "Overall execution · Production output · Editing notes · Professional polish";
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.82) * 0.9 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "tech") {
+      criteria = "Animation/sound output · Technical balance · Direction · Editing notes";
+      s += (mix[1] - genreRatio[1]) * 3.0 + (mix[2] - genreRatio[2]) * 1.5 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
     s = Math.round(clamp(s, floor, 10));
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
-    return { outlet: r.name, focus: r.focus, score: s, quote: pool[Math.floor(roll() * pool.length)] };
+    return { outlet: r.name, focus: r.focus, criteria, score: s, quote: pool[Math.floor(roll() * pool.length)] };
   });
 
   const total = reviews.reduce((a, r) => a + r.score, 0);
@@ -548,11 +568,11 @@ export function computeResult(opts: {
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
     { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
-    { label: "Direction sliders", pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)}` },
+    { label: `Direction sliders (${Math.round(sliderFitMult * 100)}% fit)`, pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)} quality` },
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
       : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
-    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
+    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)} critic quality${arcCombosHit.length ? ` · ${arcCombosHit.length} synergy` : ""}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
     { label: `Genre combo ×${actualComboMult.toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)} quality` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },

@@ -59,6 +59,7 @@ import {
   type GenreId,
 } from "../engine/data";
 import {
+  appointProjectLead,
   assignToProject,
   buyFacility,
   forecastWeek,
@@ -642,6 +643,10 @@ export default function Office({
                 if (!assigned) return r;
                 return appointCreativeLead(staged, projectId, promiseId) ?? r;
               });
+            }}
+            onAppointLead={(projectId, staffId) => {
+              sfx.click();
+              setRun((r) => appointProjectLead(r, projectId, staffId) ?? r);
             }}
             onAssign={(projectId, staffId) => {
               sfx.click();

@@ -100,7 +100,7 @@ describe("format progression — state-level validation", () => {
   });
 
   it("unlocking formats follows the milestone ladder", () => {
-    let r = initialRun("Probe", "producer");
+    let r = { ...initialRun("Probe", "producer"), cash: 1_000_000 };
     /* ONA needs rd 14 + 2 shows */
     r = { ...r, rd: 14, showsMade: 2 };
     expect(formatLockReason(r, "ona")).toBeNull();

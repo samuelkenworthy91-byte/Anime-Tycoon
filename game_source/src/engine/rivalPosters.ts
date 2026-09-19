@@ -56,6 +56,36 @@ export const rivalPosterById = (id: string | null | undefined): RivalPoster | nu
 export const rivalPostersForStudio = (studio: string): RivalPoster[] =>
   RIVAL_POSTERS.filter((p) => p.studio === studio);
 
+/** Player-facing generic key-art pool: genre/type matched and deterministic.
+ * We spread the first picks across studios so the choice actually looks varied. */
+export function genericPosterOptions(animeType: AnimeType, genres: GenreId[], count = 6, blocked: readonly string[] = []): RivalPoster[] {
+  const fit = (p: RivalPoster) => {
+    let score = p.animeTypes.includes(animeType) ? 5 : -100;
+    genres.forEach((genre, index) => {
+      if (p.genres.includes(genre)) score += index === 0 ? 8 : 4;
+    });
+    return score;
+  };
+  const blockedIds = new Set(blocked);
+  const eligible = RIVAL_POSTERS
+    .filter((p) => p.animeTypes.includes(animeType) && !BIG_THREE_RESERVED_POSTER_IDS.has(p.id) && !blockedIds.has(p.id))
+    .sort((a, b) => fit(b) - fit(a) || a.id.localeCompare(b.id));
+
+  const picked: RivalPoster[] = [];
+  const usedStudios = new Set<string>();
+  for (const candidate of eligible) {
+    if (picked.length >= count) break;
+    if (usedStudios.has(candidate.studio)) continue;
+    picked.push(candidate);
+    usedStudios.add(candidate.studio);
+  }
+  for (const candidate of eligible) {
+    if (picked.length >= count) break;
+    if (!picked.some((poster) => poster.id === candidate.id)) picked.push(candidate);
+  }
+  return picked;
+}
+
 /** how many posters of one studio's pool are usable right now */
 export const poolSize = (studio: string): number => rivalPostersForStudio(studio).length;
 
@@ -70,6 +100,8 @@ export interface PosterPickCtx {
   recent?: readonly string[];
   /** franchise visual family to continue, when this is a continuation */
   family?: string | null;
+  /** poster ids permanently claimed by another studio/player */
+  blocked?: readonly string[];
   /** injectable randomness for tests; default Math.random */
   rand?: () => number;
 }
@@ -95,11 +127,12 @@ function fitScore(p: RivalPoster, ctx: PosterPickCtx): number {
 export function pickRivalPoster(ctx: PosterPickCtx): RivalPoster | null {
   const rand = ctx.rand ?? Math.random;
   const recent = new Set(ctx.recent ?? []);
+  const blocked = new Set(ctx.blocked ?? []);
   const studioPool = rivalPostersForStudio(ctx.studio);
   if (!studioPool.length) return null;
   /* Anime Type is a hard visual constraint: a Shonen release can never be
      assigned Shojo-only key art, and vice versa. */
-  const pool = studioPool.filter((p) => p.animeTypes.includes(ctx.animeType) && !BIG_THREE_RESERVED_POSTER_IDS.has(p.id));
+  const pool = studioPool.filter((p) => p.animeTypes.includes(ctx.animeType) && !BIG_THREE_RESERVED_POSTER_IDS.has(p.id) && !blocked.has(p.id));
   if (!pool.length) return null;
 
   /* franchise family continuity: prefer a yet-unused image from the same

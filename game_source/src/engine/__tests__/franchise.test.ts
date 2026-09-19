@@ -17,6 +17,7 @@ import {
   judgeExpectations,
   merchBlock,
   merchProductById,
+  merchFanbaseMult,
   merchReturn,
   merchValueOf,
   migrateFranchise,
@@ -32,6 +33,8 @@ import {
   advanceWeeks,
   initialRun,
   launchMerch,
+  merchProductUnlocked,
+  unlockMerchProduct,
   migrateRun,
   releaseProject,
   resolveMarketEvent,
@@ -88,7 +91,10 @@ const richRun = (over: Partial<RunState> = {}): RunState => ({
   cash: 50_000_000,
   rd: 500,
   officeLevel: 4,
-  capitalProjects: MERCH_TIERS.map((tier) => tier.id),
+  capitalProjects: [
+    ...MERCH_TIERS.map((tier) => tier.id),
+    ...MERCH_PRODUCTS.map((product) => `merch_product_${product.id}`),
+  ],
   ...over,
 });
 
@@ -536,4 +542,28 @@ describe("save/load", () => {
     expect(r.franchises.IP.cult).toBe(true);
     expect(r.franchises.IP.entries).toHaveLength(1);
   });
+
+describe("QoL2 merchandise development", () => {
+  it("requires each product line to be developed after infrastructure is built", () => {
+    const product = merchProductById("plush")!;
+    let r = richRun({
+      capitalProjects: MERCH_TIERS.map((tier) => tier.id),
+      franchises: { IP: mkFr({ popularity: 80, lifetimeFans: 500_000 }) },
+    });
+    expect(merchProductUnlocked(r, product.id)).toBe(false);
+    expect(launchMerch(r, "IP", product.id)).toBeNull();
+    const cashBefore = r.cash;
+    r = unlockMerchProduct(r, product.id)!;
+    expect(merchProductUnlocked(r, product.id)).toBe(true);
+    expect(r.cash).toBe(cashBefore - product.unlockCost);
+    expect(launchMerch(r, "IP", product.id)).not.toBeNull();
+  });
+
+  it("large fanbases materially increase merch demand on a bounded curve", () => {
+    expect(merchFanbaseMult(mkFr({ lifetimeFans: 1_000_000 }))).toBeGreaterThan(
+      merchFanbaseMult(mkFr({ lifetimeFans: 50_000 }))
+    );
+    expect(merchFanbaseMult(mkFr({ lifetimeFans: 100_000_000 }))).toBeLessThanOrEqual(2.25);
+  });
+});
 });

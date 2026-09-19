@@ -2,6 +2,7 @@ import { GENRES, type AnimeType, type AudienceId, type GenreId, type MediumId } 
 import type { RivalWorld } from "./rivals";
 import { USER_IP_CATALOG } from "./userIpCatalog";
 import { IP_HIDDEN_ARC_BY_SLOT } from "./ipHiddenArcs";
+import { sourceCanonFor } from "./ipSourceCanon";
 
 export type IPSourceType = "manga" | "light_novel" | "jrpg" | "visual_novel" | "webcomic" | "game" | "film" | "tv" | "novel" | "comic" | "audio_drama" | "tabletop";
 export type IPRarity = "cult" | "emerging" | "recognised" | "premium" | "legendary";
@@ -23,18 +24,6 @@ export interface AuctionIP {
 const rarityValue: Record<IPRarity, number> = { cult: 1, emerging: 2, recognised: 3, premium: 4, legendary: 5 };
 const rightsScale: Record<IPRarity, number> = { cult: .12, emerging: .38, recognised: 1.2, premium: 2.5, legendary: 6 };
 const arc = (id: string, name: string, extra: Partial<IPArc> = {}): IPArc => ({ id, name, ...extra });
-const FIRST = ["Ari","Mira","Ren","Sena","Noa","Kai","Iris","Theo","Nia","Sol","Emi","Rowan","Juno","Vale","Mika","Rin","Tess","Leo","Aya","Pax"];
-const LAST = ["Vale","Sorn","Quill","Mori","Venn","Kade","Grey","Bloom","Reed","Aster","Hale","Wren","Cole","Finch","Rose","Mercer","Bell","Ash","Line","Voss"];
-const MASCOTS = ["Pip","Mote","Nib","Bit","Chime","Loop","Morrow","Puff","Comma","Beacon"];
-const charsFor = (slot:number):IPCharacter[] => {
-  const n=(k:number)=>`${FIRST[(slot*3+k*5)%FIRST.length]} ${LAST[(slot*7+k*3)%LAST.length]}`;
-  return [
-    {role:"protagonist",name:n(0),description:"The property’s central viewpoint."},
-    {role:"companion",name:n(1),description:"A defining ally, foil or rival."},
-    {role:"antagonist",name:n(2),description:"The principal opposing force."},
-    {role:"mascot",name:MASCOTS[slot%MASCOTS.length],description:"A property-specific supporting icon."},
-  ];
-};
 const rarityFor=(slot:number):IPRarity => slot%10===0?"legendary":slot%5===0?"premium":slot%3===0?"recognised":slot%2===0?"emerging":"cult";
 const paletteFor=(genres:GenreId[],slot:number):[string,string,string] => {
   const a=GENRES.find(g=>g.id===genres[0])?.color??"#6d5bc3"; const b=GENRES.find(g=>g.id===genres[1])?.color??"#d15c82";
@@ -46,16 +35,16 @@ export const AUCTION_IPS: AuctionIP[] = USER_IP_CATALOG.map((raw,index)=>{
   const fanbase=Math.min(98,38+((slot*17)%58)+tier*2); const prestige=Math.min(96,40+((slot*13)%42)+tier*4);
   const merch=Math.min(98,35+((slot*19)%50)+tier*4); const difficulty=Math.min(96,42+((slot*11)%43)+tier*5);
   const rights=Math.round((220_000+fanbase*6_500+prestige*5_500)*rightsScale[rarity]/5000)*5000;
-  const id=raw.id; const hidden=IP_HIDDEN_ARC_BY_SLOT[slot];
+  const id=raw.id; const hidden=IP_HIDDEN_ARC_BY_SLOT[slot]; const canon=sourceCanonFor(slot);
   return {
     id,title:raw.title,sourceType:raw.sourceType as IPSourceType,
-    description:`A sought-after ${String(raw.sourceType).replaceAll("_"," ")} property with a distinctive ${hidden?.name.toLowerCase() ?? "story"} identity.`,
+    description:canon.description,
     genreTags:genres,toneTags:[genres[0],genres[1]],audience:(genres.includes("horror")||genres.includes("mystery")?"adults":genres.includes("comedy")||genres.includes("sports")?"family":"teens") as AudienceId,
     animeType:raw.animeType as AnimeType,fanbase,prestige,merchPotential:merch,adaptationDifficulty:difficulty,
     rightsBaseValue:rights,minimumBid:Math.round(rights*.68/5000)*5000,royaltyRate:Math.max(.06,.18-tier*.02),licenseLength:144+slot%3*48,
     ownershipSharePotential:.45+tier*.07,sequelRightsAvailable:true,merchRightsAvailable:true,internationalRightsAvailable:true,
     creatorControl:Math.min(95,24+difficulty*.62),audienceVolatility:Math.min(95,18+difficulty*.58),expectationLevel:Math.round((fanbase+prestige)/2),scopeComplexity:difficulty,
-    characters:charsFor(slot),availableArcs:[arc(`${id}_opening`,"Opening Movement"),arc(`${id}_turn`,"Turning Point"),arc(`${id}_legacy`,"Legacy Finale",{minAdaptations:1,requiresSequelRights:true})],
+    characters:canon.characters,availableArcs:[arc(`${id}_opening`,"Opening Movement"),arc(`${id}_turn`,"Turning Point"),arc(`${id}_legacy`,"Legacy Finale",{minAdaptations:1,requiresSequelRights:true})],
     specialArcUnlock:hidden?.id,posterSlot:slot,posterAsset:raw.posterAsset,posterPalette:paletteFor(genres,slot),rarity,
     minimumStudioPrestige:Math.max(0,(tier-2)*18),specialRules:[`Signature blueprint: ${hidden?.name ?? "Unknown"}.`,`A ${difficulty>=78?"demanding":"flexible"} adaptation with fan expectations to match.`]
   };

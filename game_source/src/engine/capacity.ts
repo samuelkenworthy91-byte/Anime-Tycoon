@@ -11,6 +11,10 @@ export interface DepartmentStatus {
   demand: number;
   utilization: number;
   overloaded: boolean;
+  /** exact schedule multiplier used by projects sharing this department */
+  paceMult: number;
+  /** sustained severe overload can generate rework notes in animation/post */
+  reworkRisk: boolean;
 }
 
 export const DEPARTMENT_LABEL: Record<DepartmentId, string> = {
@@ -75,7 +79,9 @@ export function departmentStatuses(projects: Project[], staff: Staff[], faciliti
     const capacity = capacities[id];
     const d = demand[id];
     const utilization = capacity > 0 ? d / capacity : d > 0 ? 9 : 0;
-    return { id, label: DEPARTMENT_LABEL[id], capacity, demand: d, utilization, overloaded: utilization > 1 };
+    const paceMult = d <= capacity ? 1 : Math.max(0.52, capacity / Math.max(1, d));
+    const reworkRisk = paceMult < 0.72 && (id === "animation" || id === "post");
+    return { id, label: DEPARTMENT_LABEL[id], capacity, demand: d, utilization, overloaded: utilization > 1, paceMult, reworkRisk };
   });
 }
 
@@ -88,7 +94,7 @@ export function projectLoadMap(projects: Project[], staff: Staff[], facilities: 
     const d = departmentForStage(p.stage);
     if (!d || p.milestone) continue;
     const s = byId[d];
-    out[p.id] = s.demand <= s.capacity ? 1 : Math.max(0.52, s.capacity / Math.max(1, s.demand));
+    out[p.id] = s.paceMult;
   }
   return out;
 }

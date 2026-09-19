@@ -193,6 +193,8 @@ export interface Project {
   lateDays?: number;
   /** ids of staff on this project (exclusive — one project per person) */
   staffIds: string[];
+  /** one overall named creator; distinct from promise-based departmental leadership */
+  creativeLeadId?: string;
   points: Points;
   /** quality already banked by live desk bubbles since the last week boundary */
   liveQuality?: Points;
@@ -220,6 +222,11 @@ export interface Project {
   auto?: AutoState | null;
   /** paid, once-per-project contextual interventions */
   interventions?: string[];
+  /** Executive Rush doubles visible production bubbles until this exact day. */
+  executiveRushUntilDay?: number;
+  /** Continuity Repair can convert a limited number of future notes into R&D. */
+  noteToRdUntilDay?: number;
+  noteToRdConverted?: number;
 }
 
 /** delegation state for AUTO MANAGE (see engine/automation.ts) */
@@ -237,6 +244,8 @@ export interface AutoState {
 export interface ProjectCommission {
   partnerId: string;
   partnerName: string;
+  /** successful delivery permanently teaches the studio this commissioned genre */
+  genre?: Draft["genres"][number];
   advance: number;
   /** partner's cut of release revenue, 0..1 */
   share: number;

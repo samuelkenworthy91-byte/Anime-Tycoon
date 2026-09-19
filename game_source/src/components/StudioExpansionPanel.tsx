@@ -429,7 +429,7 @@ function OverseasPanel(props: Props) {
         }
         options={DISTRIBUTORS.map((d) => ({
           value: d.id,
-          label: d.name + " · " + Math.round(d.share * 100) + "% share",
+          label: d.name + " · " + Math.round(d.share * 100) + "% share · £" + d.perViewer + "/viewer",
         }))}
       />
       <Select
@@ -483,7 +483,7 @@ function OverseasPanel(props: Props) {
               : "New localisation required"}
           </p>
           <p>
-            Release weeks {a.opensWeek}–{a.endsWeek - 1}
+            Release weeks {a.opensWeek}–{a.endsWeek - 1} · catalogue tail {a.catalogueWeeks} weeks
           </p>
           {forecast && (
             <>
@@ -492,9 +492,8 @@ function OverseasPanel(props: Props) {
                 {forecast.reception[1]}/100.
               </p>
               <p>
-                Studio receipt estimate {formatGBP(forecast.receipts[0])}–
-                {formatGBP(forecast.receipts[1])}, after distributor share and
-                royalties.
+                Total studio receipt estimate {formatGBP(forecast.receipts[0])}–
+                {formatGBP(forecast.receipts[1])}, including the declining catalogue tail after distributor share and royalties.
               </p>
               <p>
                 Contribution before staff pool:{" "}
@@ -565,8 +564,8 @@ function OverseasPanel(props: Props) {
                 Cost {formatGBP(a.cost)}
                 {a.recognised
                   ? " · studio receipts " +
-                    formatGBP(a.receipts) +
-                    " · " +
+                    formatGBP(a.receipts + a.catalogueReceipts) +
+                    " total incl. catalogue · " +
                     a.viewers.toLocaleString("en-GB") +
                     " viewers"
                   : " · audiences and receipts will be revealed at opening"}

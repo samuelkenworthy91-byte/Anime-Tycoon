@@ -32,7 +32,7 @@ import {
 } from "../engine/data";
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
-import { HEAD_TITLES, type HeadSlot } from "../engine/careers";
+import { HEAD_TITLES, levelTitle, type HeadSlot } from "../engine/careers";
 import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
 import {
   MILESTONE_LABEL,
@@ -76,6 +76,7 @@ function ProjectCard({
   onContinueSeason,
   onIntervention,
   onAppointPromise,
+  onAppointLead,
 }: {
   p: Project;
   run: RunState;
@@ -90,6 +91,7 @@ function ProjectCard({
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
+  onAppointLead: (projectId: string, staffId: string | null) => void;
 }) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
@@ -110,6 +112,7 @@ function ProjectCard({
   ];
   const expansion = expansionOf(run);
   const productionCredit = expansion.credits[p.id];
+  const creativeLead = p.creativeLeadId ? run.staff.find((staff) => staff.id === p.creativeLeadId) : undefined;
   const promiseCandidates = expansion.promises.filter((promise) =>
     promise.status === "active" &&
     (!promise.projectId || promise.projectId === p.id) &&
@@ -305,6 +308,46 @@ function ProjectCard({
             })}
           </div>
         </details>
+      )}
+      {inPipeline && (p.executiveRushUntilDay ?? -1) >= (run.day ?? run.week * 7) && (
+        <div className="mt-1.5 rounded-lg border border-neon/45 bg-neon/10 px-2.5 py-1.5 text-[9px] font-bold text-neon">
+          ⚡ EXECUTIVE RUSH ACTIVE · ×2 production bubbles · ×2 editor-note risk · {Math.max(0, (p.executiveRushUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
+        </div>
+      )}
+      {inPipeline && (p.noteToRdUntilDay ?? -1) >= (run.day ?? run.week * 7) && (p.noteToRdConverted ?? 0) < 6 && (
+        <div className="mt-1.5 rounded-lg border border-viol/45 bg-viol/10 px-2.5 py-1.5 text-[9px] font-bold text-viol">
+          🧠 CONTINUITY LEARNING ACTIVE · new notes become R&D · {p.noteToRdConverted ?? 0}/6 converted · {Math.max(0, (p.noteToRdUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
+        </div>
+      )}
+
+      {/* overall creative lead — available on every production type */}
+      {inPipeline && (
+        <div className="mt-2 rounded-lg border border-gold/30 bg-gold/5 p-2">
+          <div className="flex items-center gap-2">
+            <Crown size={12} className="text-gold" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[9px] font-black tracking-widest text-gold">PRODUCTION LEAD</div>
+              <div className="truncate text-[10px] text-paper/55">
+                {creativeLead
+                  ? `${creativeLead.name} · ${levelTitle(creativeLead.level)} · ${Math.round(creativeLead.creatorFans ?? 0).toLocaleString("en-GB")} followers`
+                  : "Name one assigned employee. Leads earn extra career XP and build a personal audience that can boost future releases."}
+              </div>
+            </div>
+          </div>
+          <select
+            className="mt-1.5 min-h-9 w-full rounded-lg border border-line bg-panel2 px-2 text-[10px]"
+            value={p.creativeLeadId ?? ""}
+            disabled={team.length === 0}
+            onChange={(event) => onAppointLead(p.id, event.target.value || null)}
+          >
+            <option value="">{team.length ? "No named production lead" : "Assign staff to the team first"}</option>
+            {team.map((staff) => (
+              <option key={staff.id} value={staff.id}>
+                {staff.name} · {levelTitle(staff.level)} · {Math.round(staff.creatorFans ?? 0).toLocaleString("en-GB")} followers
+              </option>
+            ))}
+          </select>
+        </div>
       )}
 
       {/* team */}
@@ -530,6 +573,7 @@ export default function ProjectsPanel({
   onContinueSeason,
   onIntervention,
   onAppointPromise,
+  onAppointLead,
 }: {
   run: RunState;
   onAssign: (projectId: string, staffId: string) => void;
@@ -544,11 +588,19 @@ export default function ProjectsPanel({
   onContinueSeason?: (franchiseKey: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
+  onAppointLead: (projectId: string, staffId: string | null) => void;
 }) {
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
   const airing = run.projects.filter((p) => p.stage === "airing");
-  const done = run.projects.filter((p) => p.stage === "done").slice(-4).reverse();
+  const done = [...run.projects]
+    .filter((p) => p.stage === "done")
+    .reverse()
+    .filter((project, index, rows) => {
+      const key = project.draft.franchiseKey ?? project.draft.title;
+      return rows.findIndex((candidate) => (candidate.draft.franchiseKey ?? candidate.draft.title) === key) === index;
+    })
+    .slice(0, 4);
   const quickSequels = Object.values(run.franchises)
     .filter((fr) => !continuationBlock(fr, "season", { week: run.week, franchiseCount: Object.keys(run.franchises).length, officeLevel: run.officeLevel, projects: run.projects }))
     .sort((a, b) => b.lastEntryWeek - a.lastEntryWeek || b.lastScore - a.lastScore);
@@ -613,6 +665,7 @@ export default function ProjectsPanel({
           onContinueSeason={onContinueSeason}
           onIntervention={onIntervention}
           onAppointPromise={onAppointPromise}
+          onAppointLead={onAppointLead}
         />
       ))}
 
@@ -624,7 +677,7 @@ export default function ProjectsPanel({
 
       {done.length > 0 && (
         <div>
-          <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-paper/40">RECENTLY COMPLETED</div>
+          <div className="mb-1 text-[10px] font-bold tracking-[0.25em] text-paper/40">LATEST FRANCHISE INSTALMENTS</div>
           <div className="space-y-1">
             {done.map((p) => (
               <div key={p.id} className="flex items-center gap-2 rounded-lg border border-line/60 bg-panel2/40 px-2.5 py-1.5 text-[11px]">

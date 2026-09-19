@@ -12,6 +12,7 @@ import { snapshotProduction, expansionOf } from "../studioExpansion";
 import {
   quoteOverseas,
   signOverseas,
+  DISTRIBUTORS,
   overseasOf,
   type OverseasRequest,
 } from "../overseas";
@@ -112,6 +113,17 @@ describe("overseas strategy", () => {
       quoteOverseas(r, q).release,
     );
   });
+  it("offers distinct distributor models and meaningful catalogue-tail income", () => {
+    const r = run();
+    expect(DISTRIBUTORS.length).toBeGreaterThanOrEqual(4);
+    const q = request(r);
+    const base = quoteOverseas(r, q).release!;
+    const streaming = quoteOverseas(r, { ...q, distributor: "streamer" }).release!;
+    expect(base.catalogueReceipts).toBeGreaterThan(0);
+    expect(streaming.catalogueReceipts).toBeGreaterThan(base.catalogueReceipts);
+    expect(streaming.catalogueWeeks).toBeGreaterThanOrEqual(base.catalogueWeeks);
+  });
+
   it("charges negotiations once and snapshots concessions when signing", () => {
     let r = run();
     const q = request(r),
@@ -224,7 +236,7 @@ describe("overseas strategy", () => {
       strategyOf(r).settledReleases.filter((id) => id === a.id),
     ).toHaveLength(1);
     expect(expansionOf(r).accounts.project.receipts).toBeGreaterThanOrEqual(
-      a.receipts,
+      a.receipts + a.catalogueReceipts,
     );
     expect(r.payouts.some((p) => p.sourceReleaseId === a.id)).toBe(false);
   });

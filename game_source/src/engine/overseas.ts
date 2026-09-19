@@ -138,19 +138,49 @@ export const DISTRIBUTORS = [
     id: "specialist",
     name: "Festival & Specialist Network",
     share: 0.25,
-    reach: 0.5,
+    reach: 0.50,
     fee: 35_000,
     weeks: 8,
     maxIntensity: 3,
+    perViewer: 7,
+    catalogueRate: 0.12,
+    catalogueWeeks: 24,
   },
   {
     id: "broadcast",
     name: "National Family Network",
-    share: 0.4,
-    reach: 0.8,
+    share: 0.40,
+    reach: 0.80,
     fee: 90_000,
     weeks: 12,
     maxIntensity: 1,
+    perViewer: 5,
+    catalogueRate: 0.10,
+    catalogueWeeks: 24,
+  },
+  {
+    id: "streamer",
+    name: "Global Streaming Platform",
+    share: 0.32,
+    reach: 0.72,
+    fee: 140_000,
+    weeks: 16,
+    maxIntensity: 3,
+    perViewer: 8,
+    catalogueRate: 0.22,
+    catalogueWeeks: 48,
+  },
+  {
+    id: "collector",
+    name: "Prestige Home Media",
+    share: 0.20,
+    reach: 0.38,
+    fee: 120_000,
+    weeks: 10,
+    maxIntensity: 3,
+    perViewer: 11,
+    catalogueRate: 0.30,
+    catalogueWeeks: 48,
   },
 ] as const;
 export type DistributorId = (typeof DISTRIBUTORS)[number]["id"];
@@ -215,6 +245,9 @@ export interface RegionalRelease extends OverseasRequest {
   distributorCut: number;
   royalty: number;
   receipts: number;
+  /** declining post-window catalogue money, paid monthly after the main run */
+  catalogueReceipts: number;
+  catalogueWeeks: number;
   cost: number;
   viewers: number;
   fans: number;
@@ -584,18 +617,23 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
   );
   const infrastructureRevenue = [0, 1, 1.08, 1.22, 1.40][infrastructureTier] ?? 1;
   const networkRevenue = r.capitalProjects.includes("distribution_network") ? 1.18 : 1;
-  const gross = Math.round(viewers * (d.id === "broadcast" ? 4 : 6) * infrastructureRevenue * networkRevenue),
+  const gross = Math.round(viewers * d.perViewer * infrastructureRevenue * networkRevenue),
     distributorCut = Math.round(gross * terms.share);
   const royaltyRate = p.draft.licensedIpId
       ? (r.ipMarket.owned[p.draft.licensedIpId]?.royaltyRate ?? 0)
       : 0,
     royalty = Math.round((gross - distributorCut) * clamp(royaltyRate, 0, 1));
   const receipts = Math.max(0, gross - distributorCut - royalty),
+    catalogueTierMult = ([0, 0.75, 0.90, 1.05, 1.20][infrastructureTier] ?? 1)
+      * (r.capitalProjects.includes("localisation_campus") ? 1.10 : 1)
+      * (r.capitalProjects.includes("studio_streaming") ? 1.15 : 1),
+    catalogueReceipts = Math.max(0, Math.round(receipts * d.catalogueRate * catalogueTierMult)),
     fans =
       reception.score >= 50
         ? Math.floor((viewers * (reception.score - 45)) / 1000)
         : -Math.min(o.recognition[t.id] ?? 0, Math.floor(viewers * 0.02));
-  const cost = (reused ? 0 : e.cost) + d.fee + q.campaign;
+  const localisationCost = reused ? 0 : Math.round(e.cost * (r.capitalProjects.includes("localisation_campus") ? 0.75 : 1));
+  const cost = localisationCost + d.fee + q.campaign;
   const release: RegionalRelease = {
     ...q,
     id: "regional:" + p.id + ":" + t.id + ":" + r.week,
@@ -606,6 +644,8 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
     distributorCut,
     royalty,
     receipts,
+    catalogueReceipts,
+    catalogueWeeks: d.catalogueWeeks,
     cost,
     viewers,
     fans,
@@ -710,7 +750,31 @@ export function advanceOverseasWeek(r: RunState): RunState {
         assigned += amount;
         assignedFans += fans;
       }
-      totalRevenue += a.receipts;
+      const catalogueInstalments = Math.max(1, Math.ceil(a.catalogueWeeks / 4));
+      let assignedCatalogue = 0;
+      for (let i = 0; i < catalogueInstalments; i++) {
+        const amount =
+          i === catalogueInstalments - 1
+            ? a.catalogueReceipts - assignedCatalogue
+            : Math.floor(a.catalogueReceipts / catalogueInstalments);
+        if (amount > 0) {
+          payouts.push({
+            week: a.endsWeek + (i + 1) * 4,
+            amount,
+            fans: 0,
+            label:
+              "Overseas catalogue · " +
+              a.territory +
+              " · " +
+              (r.projects.find((p) => p.id === a.projectId)?.draft.title ?? a.projectId),
+            sourceProjectId: a.projectId,
+            sourceReleaseId: a.id,
+            instalment: count + i,
+          });
+        }
+        assignedCatalogue += amount;
+      }
+      totalRevenue += a.receipts + a.catalogueReceipts;
       recognition[a.territory] = Math.max(
         0,
         (recognition[a.territory] ?? 0) + a.fans,
@@ -723,7 +787,7 @@ export function advanceOverseasWeek(r: RunState): RunState {
         const fatigueGain = a.reception >= 80 ? 2 : a.reception >= 65 ? 1 : 0;
         const updated = {
           ...fr,
-          totalRevenue: fr.totalRevenue + a.receipts,
+          totalRevenue: fr.totalRevenue + a.receipts + a.catalogueReceipts,
           lifetimeFans: Math.max(0, fr.lifetimeFans + a.fans),
           popularity: Math.min(100, fr.popularity + popularityGain),
           fatigue: Math.min(100, fr.fatigue + fatigueGain),

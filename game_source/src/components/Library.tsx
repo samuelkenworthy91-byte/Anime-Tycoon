@@ -29,6 +29,7 @@ import {
   expectedScore,
   filmsOf,
   merchBlock,
+  merchFanbaseMult,
   merchReturn,
   franchiseCampaignBlock,
   zeitgeistOf,
@@ -39,7 +40,7 @@ import {
   topCharacter,
   type EntryKind,
 } from "../engine/franchise";
-import { buyMerchInfrastructure, franchiseSaleBlock, launchMerch, merchTierOf, runFranchiseCampaign, startFranchiseAuction, type RunState } from "../engine/state";
+import { buyMerchInfrastructure, franchiseSaleBlock, launchMerch, merchProductUnlockBlock, merchProductUnlocked, merchTierOf, runFranchiseCampaign, startFranchiseAuction, unlockMerchProduct, type RunState } from "../engine/state";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import SellerAuctionCeremony from "./SellerAuctionCeremony";
@@ -448,11 +449,11 @@ export default function LibraryPanel({
           {/* --------------------------------------------------------- merch */}
           <div>
             <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-              <ShoppingBag size={11} /> MERCHANDISING · TIER {merchTier}/4
+              <ShoppingBag size={11} /> MERCHANDISING · TIER {merchTier}/4 · FAN DEMAND ×{merchFanbaseMult(fr).toFixed(2)}
             </div>
             <div className="mb-2 rounded-md border border-gold/20 bg-gold/5 p-2 text-[9px] text-paper/55">
               {currentMerchTier
-                ? <><b className="text-gold">{currentMerchTier.name}</b> · {formatGBPShort(currentMerchTier.upkeep)}/week upkeep. Product families unlock together as the commercial operation expands.</>
+                ? <><b className="text-gold">{currentMerchTier.name}</b> · {formatGBPShort(currentMerchTier.upkeep)}/week upkeep. Infrastructure sets the ceiling; each product line is developed separately.</>
                 : <><b>NO MERCH OPERATION</b> · Research Merch Division, then invest in Domestic Merch.</>}
               {nextMerchTier && (
                 <div className="mt-1.5">
@@ -471,10 +472,12 @@ export default function LibraryPanel({
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {MERCH_PRODUCTS.map((p) => {
-                const block = merchBlock(fr, p, run.week, run.cash, merchTier);
+                const developed = merchProductUnlocked(run, p.id);
+                const developBlock = developed ? null : merchProductUnlockBlock(run, p.id);
+                const block = developed ? merchBlock(fr, p, run.week, run.cash, merchTier) : "Develop this product line first";
                 const ret = merchReturn(fr, p);
                 return (
-                  <div key={p.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-mint/30 bg-mint/5")}>
+                  <div key={p.id} className={cn("rounded-md border p-2", developed && !block ? "border-mint/30 bg-mint/5" : "border-paper/10 bg-paper/5")}>
                     <div className="flex items-center gap-1 text-[11px] font-bold">
                       {p.id === "mobile" && <Gamepad2 size={11} />}
                       {p.id === "tcg" && <Sparkles size={11} className="text-gold" />}
@@ -488,7 +491,16 @@ export default function LibraryPanel({
                     {(p.popularityGain || p.fatigueAdd) && (
                       <div className="text-[9px] text-gold/70">+{p.popularityGain ?? 0} Pop · +{p.fatigueAdd ?? 0} Fatigue{p.freezeWeeks ? ` · attention held ${p.freezeWeeks} wk` : ""}</div>
                     )}
-                    {block ? (
+                    {!developed ? (
+                      <>
+                        <div className="mt-1 text-[9px] text-paper/40">{developBlock ?? `Develop for ${formatGBPShort(p.unlockCost)}`}</div>
+                        {!developBlock && (
+                          <Btn variant="gold" className="mt-1 w-full !py-1 text-[10px]" onClick={() => setRun((r) => unlockMerchProduct(r, p.id) ?? r)}>
+                            DEVELOP · {formatGBPShort(p.unlockCost)}
+                          </Btn>
+                        )}
+                      </>
+                    ) : block ? (
                       <div className="mt-1 text-[9px] text-paper/40">{block}</div>
                     ) : (
                       <Btn variant="cyan" className="mt-1 w-full !py-1 text-[10px]" onClick={() => doMerch(p.id)}>
