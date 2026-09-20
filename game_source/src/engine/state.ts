@@ -1849,8 +1849,17 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
   const team = proj?.staffIds ?? [];
   const done = proj?.milestone ?? null;
   const fx = facilityFX(r.facilities);
-  /* Auto-Cleanup now speeds the live Edit Bay instead of erasing notes for free on LOCK. */
-  const withCleanup: MilestoneOutcome = o;
+  /* Auto-Cleanup returns to its original purpose: when final QA is locked,
+     it silently clears 35% of the notes still outstanding after the player's
+     manual edit pass. These automatic fixes do not generate bonus RD. */
+  const manualSquashed = o.squashed ?? 0;
+  const cleanupBase = done === "edit" && proj ? Math.max(0, proj.issues - manualSquashed) : 0;
+  const cleanupSquashed = done === "edit" && r.research.includes("autoclean")
+    ? Math.min(cleanupBase, Math.ceil(cleanupBase * 0.35))
+    : 0;
+  const withCleanup: MilestoneOutcome = cleanupSquashed > 0
+    ? { ...o, squashed: manualSquashed + cleanupSquashed }
+    : o;
   /* the QA suite catches problems before they become issues */
   const guarded: MilestoneOutcome =
     withCleanup.issues > 0 ? { ...withCleanup, issues: Math.max(0, withCleanup.issues - fx.issueGuard) } : withCleanup;
@@ -2188,7 +2197,6 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
   if (editing) {
     effective *= 1 + fx.issueFix * 0.15;
     if (r.research.includes("qa")) effective *= 1.15;
-    if (r.research.includes("autoclean")) effective += 35;
   }
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
