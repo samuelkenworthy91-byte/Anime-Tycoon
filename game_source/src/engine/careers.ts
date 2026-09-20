@@ -8,6 +8,8 @@ import {
   STAFF_STAT_CAP,
   rollCandidate,
   staffPoint,
+  workerLookIndex,
+  workerLookNameGender,
   type GenreId,
   type PointType,
   type Staff,
@@ -15,6 +17,7 @@ import {
   type StaffRole,
 } from "./data";
 import type { Project } from "./projects";
+import { internationalNameForSeed } from "./internationalNames";
 
 /* ====================================================================
    STAFF CAREERS — people, not stat blocks.
@@ -362,6 +365,15 @@ export function ensureCareer(s: Staff, week: number): Staff {
   // Avril's unique name is reserved for her easter-egg identity and dedicated art.
   if (s.name === "Avril" && s.look !== AVRIL_WORKER_LOOK_INDEX) s = { ...s, look: AVRIL_WORKER_LOOK_INDEX };
   const h = idHash(s.id);
+  const lookIndex = workerLookIndex(s);
+  const visualGender = s.look === DANTE_WORKER_LOOK_INDEX || s.name === "Dante"
+    ? "male"
+    : s.look === AVRIL_WORKER_LOOK_INDEX || s.name === "Avril"
+      ? "female"
+      : workerLookNameGender(lookIndex);
+  const migratedName = (s.nameGenderVersion ?? 0) < 2 && s.name !== "Dante" && s.name !== "Avril"
+    ? internationalNameForSeed(visualGender, `worker:${s.id}:${lookIndex}`)
+    : s.name;
   const favGenre = s.favGenre ?? uniformGenreForSeed(idHash(s.id + "|fav-genre"));
   const specGenre = uniformGenreForSeed(idHash(s.id + "|spec-genre"));
   const savedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(s.level || 1)));
@@ -383,7 +395,9 @@ export function ensureCareer(s: Staff, week: number): Staff {
   }
   return {
     ...retro,
-    gender: s.gender ?? (idHash(s.id + "|gender") % 2 === 0 ? "female" : "male"),
+    name: migratedName,
+    gender: visualGender,
+    nameGenderVersion: 2,
     level: inferredLevel,
     xp,
     potential,
@@ -420,6 +434,7 @@ export function applyDanteEasterEgg(s: Staff, week: number): Staff {
     ...s,
     name: "Dante",
     gender: "male",
+    nameGenderVersion: 2,
     look: DANTE_WORKER_LOOK_INDEX,
     potential: 100,
     traits: [...DANTE_TRAITS],
@@ -442,6 +457,7 @@ export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
     ...s,
     name: "Avril",
     gender: "female",
+    nameGenderVersion: 2,
     look: AVRIL_WORKER_LOOK_INDEX,
     potential: 100,
     traits: [...AVRIL_TRAITS],
@@ -471,7 +487,14 @@ export function rollHire(
   const standardLook = appearancePool.length
     ? appearancePool[Math.min(appearancePool.length - 1, Math.floor(rng() * appearancePool.length))]
     : rolled.look;
-  const base = { ...rolled, look: standardLook };
+  const visualGender = workerLookNameGender(standardLook);
+  const base = {
+    ...rolled,
+    look: standardLook,
+    gender: visualGender,
+    nameGenderVersion: 2,
+    name: internationalNameForSeed(visualGender, `worker:${rolled.id}:${standardLook}`),
+  };
   const specialRoll = rng();
   const candidate = specialRoll < DANTE_HIRE_CHANCE && !excludedLooks.has(DANTE_WORKER_LOOK_INDEX)
     ? applyDanteEasterEgg(base, week)
