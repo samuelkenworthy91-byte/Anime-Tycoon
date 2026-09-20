@@ -1,6 +1,6 @@
 import raw from "./generated/internationalNames.json";
 
-export type PersonNameGender = "male" | "female";
+export type PersonNameGender = "male" | "female" | "neutral";
 
 type CountryPool = {
   code: string;
@@ -13,6 +13,7 @@ type CountryPool = {
 type InternationalNameData = {
   countryCount: number;
   countries: CountryPool[];
+  neutralFirstNames: string[];
 };
 
 const DATA = raw as InternationalNameData;
@@ -26,6 +27,7 @@ export function personGender(value: string | undefined | null, rng: () => number
   const g = (value ?? "").trim().toLowerCase();
   if (g === "female" || g === "f" || g === "woman" || g === "girl") return "female";
   if (g === "male" || g === "m" || g === "man" || g === "boy") return "male";
+  if (g === "neutral" || g === "unknown" || g === "unsure" || g === "androgynous") return "neutral";
   return rng() < 0.5 ? "female" : "male";
 }
 
@@ -38,8 +40,9 @@ export function randomInternationalName(
   gender: PersonNameGender,
   rng: () => number = Math.random,
 ): string {
-  const firstCountry = pick(INTERNATIONAL_NAME_COUNTRIES, rng);
-  const first = pick(firstCountry[gender], rng);
+  const first = gender === "neutral"
+    ? pick(DATA.neutralFirstNames, rng)
+    : pick(pick(INTERNATIONAL_NAME_COUNTRIES, rng)[gender], rng);
   const surnameCountry = pick(INTERNATIONAL_NAME_COUNTRIES, rng);
   const surname = pick(surnameCountry.surnames, rng);
   return `${first} ${surname}`;
