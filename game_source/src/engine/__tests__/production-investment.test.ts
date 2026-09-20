@@ -116,18 +116,44 @@ describe("QoL2 timed production interventions", () => {
     }
   });
 
-  it("Continuity Repair converts would-be notes into capped project R&D", () => {
-    let run = withProject("post");
-    run = applyIntervention(run, run.projects[0].id, "continuity", () => 1)!;
-    expect(run.projects[0].noteToRdUntilDay).toBe((run.day ?? run.week * 7) + 21);
+  it("Specialist Consultant creates a 14-day error-learning window", () => {
+    const run = withProject("animation");
+    const before = { ...run.projects[0].points };
+    const out = applyIntervention(run, run.projects[0].id, "consultant", () => 0.5)!;
+    expect(out.projects[0].consultantUntilDay).toBe((run.day ?? run.week * 7) + 14);
+    expect(out.projects[0].consultantConverted).toBe(0);
+    expect(out.projects[0].points).toEqual(before);
+    expect(out.projects[0].issues).toBe(run.projects[0].issues);
+  });
+
+  it("Specialist Consultant converts each would-be error to R&D on a 50/50 roll", () => {
+    let run = withProject("animation");
+    run = applyIntervention(run, run.projects[0].id, "consultant", () => 0.5)!;
     const rdBefore = run.rd;
     const issuesBefore = run.projects[0].issues;
-    let rareRoll = 0;
-    const out = tickStudioWorkPulse(run, () => rareRoll++ === 0 ? 0.5 : 0);
-    expect(out.pulses.some((p) => p.kind === "research")).toBe(true);
-    expect(out.run.rd).toBe(rdBefore + 1);
-    expect(out.run.projects[0].issues).toBe(issuesBefore);
-    expect(out.run.projects[0].noteToRdConverted).toBe(1);
+
+    const conversionRolls = [0.99, 0.01, 0.49];
+    let conversionIndex = 0;
+    const converted = tickStudioWorkPulse(run, () => conversionRolls[conversionIndex++] ?? 0.99);
+    expect(converted.pulses.some((p) => p.kind === "research")).toBe(true);
+    expect(converted.run.rd).toBe(rdBefore + 1);
+    expect(converted.run.projects[0].issues).toBe(issuesBefore);
+    expect(converted.run.projects[0].consultantConverted).toBe(1);
+
+    const noteRolls = [0.99, 0.01, 0.50];
+    let noteIndex = 0;
+    const remainedError = tickStudioWorkPulse(run, () => noteRolls[noteIndex++] ?? 0.99);
+    expect(remainedError.run.rd).toBe(rdBefore);
+    expect(remainedError.run.projects[0].issues).toBe(issuesBefore + 1);
+    expect(remainedError.run.projects[0].consultantConverted ?? 0).toBe(0);
+  });
+
+  it("Continuity Repair fixes existing notes but no longer owns the learning window", () => {
+    const run = withProject("post");
+    const out = applyIntervention(run, run.projects[0].id, "continuity", () => 0.5)!;
+    expect(out.projects[0].issues).toBeLessThan(run.projects[0].issues);
+    expect(out.projects[0].consultantUntilDay).toBeUndefined();
+    expect(out.projects[0].noteToRdUntilDay).toBeUndefined();
   });
 });
 
