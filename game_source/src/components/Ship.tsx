@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { AlertTriangle, Check, ChevronLeft, Image, Megaphone, Rocket, Scissors, Target } from "lucide-react";
+import { useRef, useState } from "react";
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Image, Megaphone, Rocket, Scissors, Target, X } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, formatGBP, type PointType } from "../engine/data";
-import { showSaleOffers, type RunState } from "../engine/state";
+import { showSaleOffers, unavailablePosterIdsForProject, type RunState } from "../engine/state";
 import { facilityFX } from "../engine/facilities";
 import { lateRevenueMult, type Project } from "../engine/projects";
 import {
@@ -15,7 +15,7 @@ import {
 } from "../engine/marketing";
 import { campaignForecastAccess, specialisationProjectEffects } from "../engine/specialisation";
 import { cn } from "../utils/cn";
-import { genericPosterOptions } from "../engine/rivalPosters";
+import { genericPosterOptions, rivalPosterById } from "../engine/rivalPosters";
 import { assetPath } from "../utils/assetPath";
 
 /** Release prep: choose a small strategic campaign mix, then air — or delay. */
@@ -40,8 +40,28 @@ export default function Ship({
   const [hype, setHype] = useState(project.hype);
   const [bought, setBought] = useState<string[]>([]);
   const [confirmSale, setConfirmSale] = useState<string | null>(null);
+  const [posterBrowserOpen, setPosterBrowserOpen] = useState(false);
+  const [posterIndex, setPosterIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const saleOffers = showSaleOffers(run, project.id);
-  const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, 6, run.playerPosterClaims ?? []);
+  const unavailablePosterIds = project.draft.licensedIpId ? [] : unavailablePosterIdsForProject(run, project);
+  const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, undefined, unavailablePosterIds);
+  const selectedPoster = project.draft.posterArtId ? rivalPosterById(project.draft.posterArtId) : null;
+  const posterConflict = !!project.draft.posterArtId && unavailablePosterIds.includes(project.draft.posterArtId);
+  const safePosterIndex = genericPosters.length ? Math.min(posterIndex, genericPosters.length - 1) : 0;
+  const browserPoster = genericPosters[safePosterIndex] ?? null;
+
+  const openPosterBrowser = () => {
+    const selectedIndex = project.draft.posterArtId
+      ? genericPosters.findIndex((poster) => poster.id === project.draft.posterArtId)
+      : -1;
+    setPosterIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setPosterBrowserOpen(true);
+  };
+  const movePoster = (delta: number) => {
+    if (!genericPosters.length) return;
+    setPosterIndex((current) => (current + delta + genericPosters.length) % genericPosters.length);
+  };
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
@@ -79,32 +99,32 @@ export default function Ship({
           <div className="ink-card mt-3 p-3">
             <div className="flex items-center gap-2">
               <Image size={14} className="text-cyanx" />
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-black tracking-widest text-cyanx">KEY VISUAL</div>
-                <div className="text-[9px] text-paper/45">Choose from the same industry poster pool rivals use. Once your studio releases with one, rivals can never use it again.</div>
+                <div className="text-[9px] text-paper/45">Every unclaimed industry poster is available. Once a franchise uses one, that poster belongs to that franchise; its sequels can reuse it.</div>
               </div>
+              <Btn variant="ghost" className="!px-2.5 !py-1.5 text-[9px]" onClick={openPosterBrowser} disabled={!genericPosters.length}>
+                BROWSE {genericPosters.length}
+              </Btn>
             </div>
-            <div className="nice-scroll mt-2 flex gap-3 overflow-x-auto pb-2">
-              <button
-                type="button"
-                onClick={() => onPosterChoice(undefined)}
-                className={cn("h-44 w-[116px] shrink-0 rounded-xl border p-3 text-center text-[10px] font-bold sm:h-52 sm:w-[137px]", !project.draft.posterArtId ? "border-gold bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/55")}
-              >
-                <div className="mb-2 text-2xl">★</div>
-                MAIN CHARACTER
-              </button>
-              {genericPosters.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => onPosterChoice(option.id)}
-                  className={cn("relative h-44 w-[116px] shrink-0 overflow-hidden rounded-xl border sm:h-52 sm:w-[137px]", project.draft.posterArtId === option.id ? "border-gold ring-2 ring-gold/70" : "border-line")}
-                  title={option.genres.join(" / ") + " generic key art"}
-                >
-                  <img src={assetPath(option.img)} alt="Generic poster option" className="absolute inset-0 h-full w-full object-cover" />
-                  {project.draft.posterArtId === option.id && <div className="absolute right-1 top-1 rounded bg-gold px-1 text-[8px] font-black text-ink">✓</div>}
+            <div className="mt-2 flex items-center gap-3">
+              {selectedPoster ? (
+                <button type="button" onClick={openPosterBrowser} className={cn("relative h-40 w-32 shrink-0 overflow-hidden rounded-xl border", posterConflict ? "border-neon ring-2 ring-neon/50" : "border-gold/60")}>
+                  <img src={assetPath(selectedPoster.img)} alt="Selected key visual" className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-x-0 bottom-0 bg-ink/80 px-2 py-1 text-[8px] font-black text-gold">SELECTED POSTER</div>
                 </button>
-              ))}
+              ) : (
+                <button type="button" onClick={openPosterBrowser} className="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded-xl border border-gold/60 bg-gold/10 text-center text-[10px] font-bold text-gold">
+                  <div className="mb-2 text-3xl">★</div>
+                  MAIN CHARACTER
+                </button>
+              )}
+              <div className="min-w-0 text-[10px] text-paper/55">
+                <div className="font-bold text-paper">{selectedPoster ? "Franchise key art selected" : "Main-character key visual selected"}</div>
+                <div className="mt-1">{project.draft.continuation && selectedPoster ? "Inherited from the previous franchise entry unless you change it." : "Tap Browse Posters for a full-screen flick-through gallery."}</div>
+                {posterConflict && <div className="mt-2 rounded-lg border border-neon/50 bg-neon/10 p-2 font-bold text-neon">This poster has since been claimed by another franchise. Choose another poster or Main Character before airing.</div>}
+                {selectedPoster && <button type="button" onClick={() => onPosterChoice(undefined)} className="mt-2 rounded border border-line px-2 py-1 text-[9px] font-bold text-paper/60">USE MAIN CHARACTER INSTEAD</button>}
+              </div>
             </div>
           </div>
         )}
@@ -194,10 +214,60 @@ export default function Ship({
         <div className="mt-4 flex gap-2">
           <Btn variant="ghost" onClick={onBack}><ChevronLeft size={16} /> DELAY</Btn>
           {project.stage === "ready" && <Btn variant="ghost" onClick={onShelve}>SHELVE MASTER</Btn>}
-          <Btn big variant="gold" className="flex-1" onClick={() => onAir(spent, hype)}><Rocket size={20} /> AIR THE SHOW!</Btn>
+          <Btn big variant="gold" className="flex-1" disabled={posterConflict} onClick={() => onAir(spent, hype)}><Rocket size={20} /> {posterConflict ? "CHOOSE AVAILABLE POSTER" : "AIR THE SHOW!"}</Btn>
         </div>
         <div className="mt-1.5 text-center text-[9px] text-paper/45">{project.stage === "shelved" ? "Shelved masters keep their finished quality. Fresh campaigns rebuild hype, but eventual sales are reduced." : "Delaying keeps production costs burning while launch heat cools. Shelving moves the completed master to the Library, clears hype and stops production burn."} Campaign spending is committed only when you air.</div>
       </div>
+
+      {posterBrowserOpen && !project.draft.licensedIpId && (
+        <div
+          className="fixed inset-0 z-[120] flex flex-col bg-abyss px-3 pb-4 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-xl"
+          onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
+          onTouchEnd={(event) => {
+            const start = touchStartX.current;
+            const endX = event.changedTouches[0]?.clientX ?? null;
+            touchStartX.current = null;
+            if (start === null || endX === null || Math.abs(endX - start) < 45) return;
+            movePoster(endX < start ? 1 : -1);
+          }}
+        >
+          <div className="flex items-center gap-2 py-2">
+            <div className="min-w-0 flex-1">
+              <div className="text-[9px] font-black tracking-[0.25em] text-cyanx">POSTER BROWSER</div>
+              <div className="truncate text-xs font-bold">{project.draft.title}</div>
+            </div>
+            <div className="text-[9px] font-bold text-paper/45">{genericPosters.length ? (safePosterIndex + 1) + " / " + genericPosters.length : "NO AVAILABLE POSTERS"}</div>
+            <button type="button" onClick={() => setPosterBrowserOpen(false)} className="btn-press rounded-lg border border-line bg-panel2 p-2 text-paper/70" aria-label="Close poster browser"><X size={18} /></button>
+          </div>
+
+          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+            {browserPoster ? (
+              <>
+                <button type="button" onClick={() => movePoster(-1)} className="absolute left-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Previous poster"><ChevronLeft size={24} /></button>
+                <div className="flex h-full w-full max-w-xl flex-col items-center justify-center px-10">
+                  <img src={assetPath(browserPoster.img)} alt="Poster preview" className="min-h-0 max-h-[72vh] w-auto max-w-full rounded-2xl border border-line object-contain shadow-2xl" />
+                  <div className="mt-2 text-center text-[9px] text-paper/50">
+                    {browserPoster.genres.join(" / ")} · {browserPoster.animeTypes.map((type) => type.toUpperCase()).join(" / ")}
+                  </div>
+                </div>
+                <button type="button" onClick={() => movePoster(1)} className="absolute right-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Next poster"><ChevronRight size={24} /></button>
+              </>
+            ) : (
+              <div className="text-center text-sm text-paper/50">Every poster is currently owned by another franchise.</div>
+            )}
+          </div>
+
+          <div className="mx-auto mt-2 flex w-full max-w-xl gap-2">
+            <Btn variant="ghost" className="flex-1" onClick={() => { onPosterChoice(undefined); setPosterBrowserOpen(false); }}>★ MAIN CHARACTER</Btn>
+            <Btn big variant="gold" className="flex-[1.4]" disabled={!browserPoster} onClick={() => {
+              if (!browserPoster) return;
+              onPosterChoice(browserPoster.id);
+              setPosterBrowserOpen(false);
+            }}>USE THIS POSTER</Btn>
+          </div>
+          <div className="mt-1 text-center text-[8px] text-paper/35">Swipe left/right or use the arrows. Genre and Anime Type affect ordering only — every unclaimed poster remains selectable.</div>
+        </div>
+      )}
     </div>
   );
 }

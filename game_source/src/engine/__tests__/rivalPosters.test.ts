@@ -109,13 +109,15 @@ describe("generic player poster choices", () => {
     expect(pickRivalPoster({ studio: "Toe-i Frontier", animeType: "shonen", genres: ["mecha"], blocked, rand: () => 0 })?.id).not.toBe("t1");
   });
 
-  it("is deterministic, anime-type safe and spread across studios", () => {
-    const a = genericPosterOptions("shonen", ["mecha", "military"], 6);
-    const b = genericPosterOptions("shonen", ["mecha", "military"], 6);
+  it("shows the full shipped catalogue while sorting matching art first", () => {
+    const a = genericPosterOptions("shonen", ["mecha", "military"]);
+    const b = genericPosterOptions("shonen", ["mecha", "military"]);
     expect(a.map((poster) => poster.id)).toEqual(b.map((poster) => poster.id));
-    expect(a.length).toBeGreaterThan(0);
-    expect(a.every((poster) => poster.animeTypes.includes("shonen"))).toBe(true);
-    expect(new Set(a.map((poster) => poster.studio)).size).toBeGreaterThan(1);
+    expect(a).toHaveLength(RIVAL_POSTERS.length);
+    expect(new Set(a.map((poster) => poster.id)).size).toBe(RIVAL_POSTERS.length);
+    expect(a.some((poster) => poster.animeTypes.includes("shojo"))).toBe(true);
+    expect(a[0].animeTypes).toContain("shonen");
+    expect(a[0].genres.some((genre) => ["mecha", "military"].includes(genre))).toBe(true);
   });
 });
 

@@ -68,7 +68,7 @@ import {
   type SlotId,
 } from "../engine/data";
 import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
-import { arcLockReason, formatLockReason, selfFundedGreenlightCost, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
+import { arcLockReason, formatLockReason, latestFranchisePosterId, selfFundedGreenlightCost, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -190,6 +190,7 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     continuation: plan.kind,
     crossKey: plan.crossKey,
     spinChar: plan.spinChar,
+    posterArtId: latestFranchisePosterId(run, plan.key),
   };
 }
 

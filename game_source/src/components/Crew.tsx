@@ -585,6 +585,9 @@ export default function CrewPanel({
                         {ROLE_LABEL[c.role]} · main <b className="text-mint">{Math.round(staffMain(c))}</b> · {formatGBP(c.salary)}/wk
                       </div>
                       <div className="text-[10px] text-gold">sign {formatGBP(c.cost)}</div>
+                      <div className={cn("mt-0.5 text-[8px] font-extrabold tracking-wider", canSeeCandidatePotential(run.research) ? "text-gold" : "text-paper/35")}>
+                        POTENTIAL · {canSeeCandidatePotential(run.research) ? potentialLabel(c).toUpperCase() : "UNKNOWN"}
+                      </div>
                     </div>
                     <Btn
                       variant="cyan"

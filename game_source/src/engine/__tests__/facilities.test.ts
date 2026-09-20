@@ -210,6 +210,29 @@ describe("facility bonuses", () => {
     expect(projectById(r, id)!.issues).toBe(1); // 3 − guard 2
   });
 
+  it("Auto-Cleanup clears 35% of notes still outstanding at final QA", () => {
+    const editor = worker("cleanup", { story: 70, art: 70, sound: 70, stamina: 100 });
+    const base = makeProject(draft(), 0);
+    const p: Project = { ...base, stage: "post", milestone: "edit", issues: 10, staffIds: [editor.id] };
+    const plain = { ...richRun(), staff: [editor], projects: [p], research: [] };
+    const cleaned = { ...plain, research: ["autoclean"] };
+
+    expect(contributionEffectiveSkill(cleaned, editor, "art", true)).toBeCloseTo(
+      contributionEffectiveSkill(plain, editor, "art", true)
+    );
+
+    const rdBefore = cleaned.rd;
+    const out = applyMilestone(cleaned, p.id, {
+      points: { story: 0, art: 0, sound: 0 },
+      issues: 0,
+      spent: 0,
+      rdGained: 0,
+      squashed: 0,
+    });
+    expect(projectById(out, p.id)!.issues).toBe(6);
+    expect(out.rd).toBe(rdBefore);
+  });
+
   it("marketing office multiplies hype gains", () => {
     const fx = facilityFX({ marketing: 3 });
     expect(fx.hypeMult).toBeCloseTo(1.8);

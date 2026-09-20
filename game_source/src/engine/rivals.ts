@@ -82,8 +82,7 @@ export interface RivalFranchise {
   lastScore: number;
   lastEntryWeek: number;
   entries: number;
-  /** current key art of this franchise (first entry's poster) — seasons
-   *  prefer different artwork from the same visual family */
+  /** franchise-owned key art. Continuations reuse it by default. */
   posterId?: string | null;
   /** external auction-IP lineage; continuations keep using its canonical poster */
   licensedIpId?: string | null;
@@ -386,15 +385,26 @@ function assignPoster(
   blocked: readonly string[] = []
 ): { posterId: string | null; posterRecent: string[] } {
   const fr = show.franchiseKey ? studio.franchises.find((f) => f.key === show.franchiseKey) : null;
-  const familyId = fr?.posterId ?? null;
-  const family = familyId ? (rivalPosterById(familyId)?.family ?? null) : null;
+
+  /* A franchise owns its key art. Sequels default to the previous poster and
+     can reuse it forever; another franchise at the same studio may not. */
+  if (fr?.posterId && rivalPosterById(fr.posterId)) {
+    return {
+      posterId: fr.posterId,
+      posterRecent: [...(studio.posterRecent ?? []), fr.posterId].slice(-POSTER_RECENT_CAP),
+    };
+  }
+
+  const franchiseClaims = studio.franchises
+    .filter((candidate) => candidate.key !== show.franchiseKey)
+    .map((candidate) => candidate.posterId)
+    .filter((id): id is string => !!id);
   const chosen = pickRivalPoster({
     studio: studio.name,
     animeType: show.animeType,
     genres: show.genres,
     recent: studio.posterRecent ?? [],
-    family,
-    blocked,
+    blocked: [...blocked, ...franchiseClaims],
     rand: Math.random,
   });
   if (!chosen) return { posterId: null, posterRecent: studio.posterRecent ?? [] };
@@ -749,8 +759,7 @@ function planStudioYear(
     const score = computeScore({ ...studio, franchises }, { genres, franchiseKey, kind }, boost);
     const id = `rp${++rivalProdSeq}_${year}_${i}`;
     const craft = craftForProduction(studio, { id, score });
-    /* permanent key art: franchise continuations prefer the same visual
-       family (Season 1 → Season 2 → Movie reads as one world) */
+    /* permanent key art: franchise continuations reuse their owned poster */
     const art = licensedIpId ? { posterId: null as string | null, posterRecent } : assignPoster({ ...studio, posterRecent, franchises }, { genres, animeType, franchiseKey }, blockedPosterIds);
     posterRecent = art.posterRecent;
     if (franchiseKey && art.posterId) {
@@ -1095,8 +1104,8 @@ export function tickRivalWeek(world: RivalWorld, week: number, ctx: RivalTickCtx
               bestScore: Math.max(f.bestScore, prod.score),
               lastScore: prod.score,
               lastEntryWeek: week,
-              /* the franchise's key art always trails its latest entry */
-              posterId: prod.posterId ?? f.posterId ?? null,
+              /* the franchise keeps ownership of its established key art */
+              posterId: f.posterId ?? prod.posterId ?? null,
             } as RivalFranchise;
           });
         } else {

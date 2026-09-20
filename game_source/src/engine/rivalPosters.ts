@@ -56,11 +56,17 @@ export const rivalPosterById = (id: string | null | undefined): RivalPoster | nu
 export const rivalPostersForStudio = (studio: string): RivalPoster[] =>
   RIVAL_POSTERS.filter((p) => p.studio === studio);
 
-/** Player-facing generic key-art pool: genre/type matched and deterministic.
- * We spread the first picks across studios so the choice actually looks varied. */
-export function genericPosterOptions(animeType: AnimeType, genres: GenreId[], count = 6, blocked: readonly string[] = []): RivalPoster[] {
+/** Player-facing key-art catalogue. Every shipped poster is browseable unless
+ * another franchise already owns it. Genre/type only affect ordering, never
+ * eligibility, so the player can deliberately choose unusual art. */
+export function genericPosterOptions(
+  animeType: AnimeType,
+  genres: GenreId[],
+  count = RIVAL_POSTERS.length,
+  blocked: readonly string[] = [],
+): RivalPoster[] {
   const fit = (p: RivalPoster) => {
-    let score = p.animeTypes.includes(animeType) ? 5 : -100;
+    let score = p.animeTypes.includes(animeType) ? 5 : 0;
     genres.forEach((genre, index) => {
       if (p.genres.includes(genre)) score += index === 0 ? 8 : 4;
     });
@@ -68,22 +74,10 @@ export function genericPosterOptions(animeType: AnimeType, genres: GenreId[], co
   };
   const blockedIds = new Set(blocked);
   const eligible = RIVAL_POSTERS
-    .filter((p) => p.animeTypes.includes(animeType) && !BIG_THREE_RESERVED_POSTER_IDS.has(p.id) && !blockedIds.has(p.id))
+    .filter((p) => !BIG_THREE_RESERVED_POSTER_IDS.has(p.id) && !blockedIds.has(p.id))
     .sort((a, b) => fit(b) - fit(a) || a.id.localeCompare(b.id));
 
-  const picked: RivalPoster[] = [];
-  const usedStudios = new Set<string>();
-  for (const candidate of eligible) {
-    if (picked.length >= count) break;
-    if (usedStudios.has(candidate.studio)) continue;
-    picked.push(candidate);
-    usedStudios.add(candidate.studio);
-  }
-  for (const candidate of eligible) {
-    if (picked.length >= count) break;
-    if (!picked.some((poster) => poster.id === candidate.id)) picked.push(candidate);
-  }
-  return picked;
+  return eligible.slice(0, Math.max(0, count));
 }
 
 /** how many posters of one studio's pool are usable right now */

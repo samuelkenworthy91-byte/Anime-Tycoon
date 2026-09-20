@@ -736,6 +736,53 @@ export function migrateRun(raw: unknown): RunState {
 
 export const office = (r: RunState) => OFFICES[r.officeLevel];
 
+/** Stable poster-owner key for player productions. A spin-off becomes its own
+ * franchise; ordinary continuations keep the parent franchise key. */
+export const posterFranchiseKey = (draft: Draft): string =>
+  draft.continuation === "spinoff" ? draft.title : (draft.franchiseKey ?? draft.title);
+
+/** Poster ids that this project cannot use because another franchise already
+ * owns or has reserved them. The current franchise may reuse any of its own
+ * previous key art indefinitely. */
+export function unavailablePosterIdsForProject(r: RunState, project: Project): string[] {
+  const ownerKey = posterFranchiseKey(project.draft);
+  const ownPosterIds = new Set(
+    r.projects
+      .filter((candidate) => posterFranchiseKey(candidate.draft) === ownerKey)
+      .map((candidate) => candidate.draft.posterArtId)
+      .filter((id): id is string => !!id),
+  );
+  const blocked = new Set<string>();
+
+  for (const candidate of r.projects) {
+    const id = candidate.draft.posterArtId;
+    if (!id || candidate.id === project.id) continue;
+    if (posterFranchiseKey(candidate.draft) !== ownerKey) blocked.add(id);
+  }
+
+  for (const studio of r.rivalWorld.studios) {
+    for (const franchise of studio.franchises) if (franchise.posterId) blocked.add(franchise.posterId);
+    for (const production of studio.productions) if (production.posterId) blocked.add(production.posterId);
+  }
+
+  /* Claims from an older save may predate franchise-aware ownership. Keep them
+     blocked unless the current franchise can prove the poster is already its own. */
+  for (const id of r.playerPosterClaims ?? []) if (!ownPosterIds.has(id)) blocked.add(id);
+
+  return [...blocked];
+}
+
+/** Most recent poster used by a player franchise; continuation setup uses this
+ * as its default before the player opens the full-screen browser. */
+export function latestFranchisePosterId(r: RunState, franchiseKey: string): string | undefined {
+  return [...r.projects]
+    .filter((project) => posterFranchiseKey(project.draft) === franchiseKey && !!project.draft.posterArtId)
+    .sort((a, b) =>
+      (b.airedWeek ?? b.createdWeek) - (a.airedWeek ?? a.createdWeek)
+      || (b.createdDay ?? b.createdWeek * 7) - (a.createdDay ?? a.createdWeek * 7)
+    )[0]?.draft.posterArtId;
+}
+
 export const RECRUITMENT_AD_BASE_COST = 8_000;
 export const RECRUITMENT_AD_COST_STEP = 4_000;
 
@@ -1849,8 +1896,17 @@ export function applyMilestone(r: RunState, projectId: string, o: MilestoneOutco
   const team = proj?.staffIds ?? [];
   const done = proj?.milestone ?? null;
   const fx = facilityFX(r.facilities);
-  /* Auto-Cleanup now speeds the live Edit Bay instead of erasing notes for free on LOCK. */
-  const withCleanup: MilestoneOutcome = o;
+  /* Auto-Cleanup returns to its original purpose: when final QA is locked,
+     it silently clears 35% of the notes still outstanding after the player's
+     manual edit pass. These automatic fixes do not generate bonus RD. */
+  const manualSquashed = o.squashed ?? 0;
+  const cleanupBase = done === "edit" && proj ? Math.max(0, proj.issues - manualSquashed) : 0;
+  const cleanupSquashed = done === "edit" && r.research.includes("autoclean")
+    ? Math.min(cleanupBase, Math.ceil(cleanupBase * 0.35))
+    : 0;
+  const withCleanup: MilestoneOutcome = cleanupSquashed > 0
+    ? { ...o, squashed: manualSquashed + cleanupSquashed }
+    : o;
   /* the QA suite catches problems before they become issues */
   const guarded: MilestoneOutcome =
     withCleanup.issues > 0 ? { ...withCleanup, issues: Math.max(0, withCleanup.issues - fx.issueGuard) } : withCleanup;
@@ -2188,7 +2244,6 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
   if (editing) {
     effective *= 1 + fx.issueFix * 0.15;
     if (r.research.includes("qa")) effective *= 1.15;
-    if (r.research.includes("autoclean")) effective += 35;
   }
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
@@ -2341,14 +2396,15 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
       rd += pulse.points;
     } else if (pulse.kind === "note") {
       const target = projects.find((project) => project.id === pulse.projectId);
-      const protectedNote = !!target && !target.milestone && (target.noteToRdUntilDay ?? -1) >= (r.day ?? r.week * 7) && (target.noteToRdConverted ?? 0) < 6;
-      if (protectedNote) {
+      const consultantActive = !!target && !target.milestone && (target.consultantUntilDay ?? -1) >= (r.day ?? r.week * 7);
+      const consultantConverts = consultantActive && roll() < 0.5;
+      if (consultantConverts) {
         rd += pulse.points;
         pulse.kind = "research";
         projects = projects.map((project) => project.id !== pulse.projectId ? project : ({
           ...project,
           rdGained: project.rdGained + pulse.points,
-          noteToRdConverted: (project.noteToRdConverted ?? 0) + pulse.points,
+          consultantConverted: (project.consultantConverted ?? 0) + pulse.points,
         }));
       } else {
         projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
@@ -2782,6 +2838,7 @@ export function releaseProject(
   const p0 = projectById(r, projectId);
   if (!p0 || (p0.stage !== "ready" && p0.stage !== "shelved")) return null;
   if (p0.draft.posterArtId) {
+    if (unavailablePosterIdsForProject(r, p0).includes(p0.draft.posterArtId)) return null;
     const claims = [...new Set([...(r.playerPosterClaims ?? []), p0.draft.posterArtId])];
     r = { ...r, playerPosterClaims: claims, rivalWorld: reservePlayerPosters(r.rivalWorld, claims, r.week) };
   }
