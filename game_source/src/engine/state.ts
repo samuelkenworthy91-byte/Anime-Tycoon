@@ -2005,10 +2005,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   const notices = [...carrier.notices];
 
   if (researchId === "narrative_analytics") {
-    const firstPass = !carrier.research.includes("narrative_analytics");
-    const knownBefore = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => carrier.arcCombos.includes(id)).length;
-    const passIndex = firstPass ? 0 : completedProgressivePasses(knownBefore, "narrative");
-    const batchSize = progressiveResearchBatch(passIndex, "narrative");
+    const batchSize = researchBatchSize("narrative");
     const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
     const curated = ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id));
     const discoveries = [...curated, ...unknown.filter((id) => !curated.includes(id))].slice(0, batchSize);
@@ -2023,9 +2020,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   if (researchId === "genre_studies") {
     const firstPass = !carrier.research.includes("genre_studies");
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
-    const knownBefore = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;
-    const passIndex = firstPass ? 0 : completedProgressivePasses(knownBefore, "genre");
-    const batchSize = progressiveResearchBatch(passIndex, "genre");
+    const batchSize = researchBatchSize("genre");
     const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);
     const curated = ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key));
     const discoveries = [...curated, ...unknown.filter((key) => !curated.includes(key))].slice(0, batchSize);
@@ -3441,27 +3436,15 @@ export const allCastProfiled = (r: Pick<RunState, "castAffinityDiscovered">): bo
 
 export const GENRE_STUDY_FIRST_BATCH = 6;
 export const NARRATIVE_STUDY_FIRST_BATCH = 6;
-export const GENRE_STUDY_BATCH_STEP = 4;
-export const NARRATIVE_STUDY_BATCH_STEP = 3;
-export const GENRE_STUDY_BATCH_CAP = 30;
-export const NARRATIVE_STUDY_BATCH_CAP = 18;
 
-const progressiveResearchBatch = (passIndex: number, kind: "genre" | "narrative") => {
-  const base = kind === "genre" ? GENRE_STUDY_FIRST_BATCH : NARRATIVE_STUDY_FIRST_BATCH;
-  const step = kind === "genre" ? GENRE_STUDY_BATCH_STEP : NARRATIVE_STUDY_BATCH_STEP;
-  const cap = kind === "genre" ? GENRE_STUDY_BATCH_CAP : NARRATIVE_STUDY_BATCH_CAP;
-  return Math.min(cap, base + Math.max(0, passIndex) * step);
-};
+/** Repeat studies always reveal the same amount. Progression is economic:
+ * every completed pass makes the NEXT pass cost more RD, rather than making
+ * later studies reveal increasingly huge chunks of the answer key. */
+const researchBatchSize = (kind: "genre" | "narrative") =>
+  kind === "genre" ? GENRE_STUDY_FIRST_BATCH : NARRATIVE_STUDY_FIRST_BATCH;
 
-const completedProgressivePasses = (known: number, kind: "genre" | "narrative") => {
-  let total = 0;
-  let passes = 0;
-  while (total < known && passes < 100) {
-    total += progressiveResearchBatch(passes, kind);
-    passes += 1;
-  }
-  return passes;
-};
+const completedResearchPasses = (known: number, kind: "genre" | "narrative") =>
+  Math.ceil(Math.max(0, known) / researchBatchSize(kind));
 
 export function researchProgressLabel(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): string | null {
   if (id === "genre_studies") {
@@ -3479,11 +3462,11 @@ function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledg
   if (!r.research.includes(id)) return 0;
   if (id === "genre_studies") {
     const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
-    return Math.max(1, completedProgressivePasses(known, "genre"));
+    return Math.max(1, completedResearchPasses(known, "genre"));
   }
   if (id === "narrative_analytics") {
     const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos.includes(comboId)).length;
-    return Math.max(1, completedProgressivePasses(known, "narrative"));
+    return Math.max(1, completedResearchPasses(known, "narrative"));
   }
   return 0;
 }
@@ -3519,11 +3502,10 @@ export function startResearchProject(r: RunState, id: string, rdCost: number): R
   if (researchBlockReason(r, id)) return null;
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return null;
-  const runIndex = repeatResearchRunIndex(r, id);
-  const scaledBaseRd = Math.round(rdCost * (1 + runIndex * 0.5));
   const effectiveRdCost = researchProjectCost(r, id, rdCost);
   if (r.rd < effectiveRdCost) return null;
-  const baseResearchWeeks = researchWeeks(scaledBaseRd, r.facilities.archive ?? 0, r.showrunner);
+  /* Repeat-pass scaling is an RD price increase, not a duration increase. */
+  const baseResearchWeeks = researchWeeks(rdCost, r.facilities.archive ?? 0, r.showrunner);
   const researchDecisionMult = decisionResearchSpeedMult(r);
   const staffResearchMult = staffResearchDurationMult(r.staff);
   const weeks = Math.max(0.25, baseResearchWeeks * researchDecisionMult * staffResearchMult);
