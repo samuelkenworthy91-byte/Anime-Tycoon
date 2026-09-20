@@ -187,6 +187,9 @@ export const RAW_QUALITY_FLOOR = 12;
 export const RAW_QUALITY_CEILING = 40;
 /** saturating point conversion (see production.ts) scaled into quality */
 export const POINT_QUALITY_SCALE = 0.55;
+/** Keeps the absolute review curve calibrated now that Story/Art/Sound mix is
+ * only a minor flavour modifier instead of the old large hidden penalty. */
+export const PRODUCTION_CORE_CALIBRATION = 0.89;
 /** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
 export const TOP_QUALITY_SLOPE = 0.10;
 /** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
@@ -430,7 +433,7 @@ export function computeResult(opts: {
   const arcQuality = clamp(arcQ, ARC_QUALITY_FLOOR, 50) * ARC_QUALITY_SCALE;
   const craft = CRAFT_LIFT * Math.log(1 + totalPts / CRAFT_LIFT_DIVISOR);
   let raw = RAW_QUALITY_BASE
-    + (pointScore * POINT_QUALITY_SCALE + craft) * ratioMatch * budgetFactor
+    + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * ratioMatch * budgetFactor
     + sliderPart * SLIDER_QUALITY_SCALE
     + casting
     + arcQuality
