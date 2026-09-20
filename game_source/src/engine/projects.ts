@@ -224,7 +224,10 @@ export interface Project {
   interventions?: string[];
   /** Executive Rush doubles visible production bubbles until this exact day. */
   executiveRushUntilDay?: number;
-  /** Continuity Repair can convert a limited number of future notes into R&D. */
+  /** Specialist Consultant stays for two weeks. Each new production note has a 50/50 chance to become R&D instead. */
+  consultantUntilDay?: number;
+  consultantConverted?: number;
+  /** Legacy QoL2 fields retained only for save compatibility; no longer drive gameplay. */
   noteToRdUntilDay?: number;
   noteToRdConverted?: number;
 }
