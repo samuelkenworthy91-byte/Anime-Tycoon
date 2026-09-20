@@ -581,8 +581,8 @@ export const RESEARCH: ResearchItem[] = [
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
   { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30% and improves the economics of a fully built consumer-products business.", requires: "merch", section: "merch" },
-  { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Progressive story research. The first study reveals 6 useful arc × genre fits; each repeat maps a larger batch until the field is understood." },
-  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Progressive structure research. The first study reveals 6 structures; repeat studies uncover increasingly larger batches." },
+  { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Repeatable story research. Each study reveals up to 6 useful arc × genre fits; later passes cost more Research Data until the field is understood." },
+  { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Repeatable structure research. Each study reveals up to 6 structures; later passes cost more Research Data." },
   { id: "staff_appraisal", name: "Staff Appraisal", rd: 40, desc: "Reveals a broad long-term Potential band for employees already on your payroll." },
   { id: "talent_scouting", name: "Talent Scouting", rd: 70, desc: "Extends Potential bands to recruitment candidates before you sign them.", requires: "staff_appraisal" },
   /* Merchandise product families now unlock by paid infrastructure tier in
