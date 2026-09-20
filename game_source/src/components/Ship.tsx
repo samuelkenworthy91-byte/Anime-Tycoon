@@ -48,7 +48,8 @@ export default function Ship({
   const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, undefined, unavailablePosterIds);
   const selectedPoster = project.draft.posterArtId ? rivalPosterById(project.draft.posterArtId) : null;
   const posterConflict = !!project.draft.posterArtId && unavailablePosterIds.includes(project.draft.posterArtId);
-  const browserPoster = genericPosters[posterIndex] ?? null;
+  const safePosterIndex = genericPosters.length ? Math.min(posterIndex, genericPosters.length - 1) : 0;
+  const browserPoster = genericPosters[safePosterIndex] ?? null;
 
   const openPosterBrowser = () => {
     const selectedIndex = project.draft.posterArtId
@@ -220,7 +221,7 @@ export default function Ship({
 
       {posterBrowserOpen && !project.draft.licensedIpId && (
         <div
-          className="fixed inset-0 z-[120] flex flex-col bg-abyss/98 px-3 pb-4 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-xl"
+          className="fixed inset-0 z-[120] flex flex-col bg-abyss px-3 pb-4 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-xl"
           onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
           onTouchEnd={(event) => {
             const start = touchStartX.current;
@@ -235,7 +236,7 @@ export default function Ship({
               <div className="text-[9px] font-black tracking-[0.25em] text-cyanx">POSTER BROWSER</div>
               <div className="truncate text-xs font-bold">{project.draft.title}</div>
             </div>
-            <div className="text-[9px] font-bold text-paper/45">{genericPosters.length ? (posterIndex + 1) + " / " + genericPosters.length : "NO AVAILABLE POSTERS"}</div>
+            <div className="text-[9px] font-bold text-paper/45">{genericPosters.length ? (safePosterIndex + 1) + " / " + genericPosters.length : "NO AVAILABLE POSTERS"}</div>
             <button type="button" onClick={() => setPosterBrowserOpen(false)} className="btn-press rounded-lg border border-line bg-panel2 p-2 text-paper/70" aria-label="Close poster browser"><X size={18} /></button>
           </div>
 
