@@ -1101,11 +1101,11 @@ export default function Create({
                 <Portrait
                   img={castPicked.img}
                   name={castBillingName(castPicked)}
-                  alt={castPicked.name}
+                  alt={castBillingName(castPicked)}
                   className="h-16 w-16 shrink-0 rounded-xl border border-neon/50 object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="font-display text-base font-extrabold leading-tight">{castPicked.name}</div>
+                  <div className="font-display text-base font-extrabold leading-tight">{castBillingName(castPicked)}</div>
                   <div className="text-[11px] font-bold text-cyanx">{(castPicked.epithet ?? castPicked.archetype)}</div>
                   <div className="truncate text-[10px] italic text-paper/50">“{castPicked.personality}”</div>
                   <div className="mt-1 flex flex-wrap gap-1">
