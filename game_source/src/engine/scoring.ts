@@ -25,6 +25,7 @@ import {
 } from "./data";
 import {
   BUDGET_QUALITY_FACTOR,
+  expectedProductionPoints,
   productionPointScore,
   reviewExpectationAdjustment,
 } from "./production";
@@ -431,7 +432,13 @@ export function computeResult(opts: {
   const pointScore = productionPointScore(totalPts, draft);
   const budgetFactor = BUDGET_QUALITY_FACTOR[draft.budget];
   const arcQuality = clamp(arcQ, ARC_QUALITY_FLOOR, 50) * ARC_QUALITY_SCALE;
-  const craft = CRAFT_LIFT * Math.log(1 + totalPts / CRAFT_LIFT_DIVISOR);
+  /* Craft rewards intensity, not simply episode count. Normalise raw points to
+     a Standard-scope equivalent so an Extended/Prestige show does not review
+     better merely because its larger workload naturally contains more points. */
+  const expectedPts = expectedProductionPoints(draft);
+  const standardExpectedPts = expectedProductionPoints({ scope: "standard", medium: draft.medium });
+  const scopeNormalisedPts = expectedPts > 0 ? totalPts * (standardExpectedPts / expectedPts) : totalPts;
+  const craft = CRAFT_LIFT * Math.log(1 + scopeNormalisedPts / CRAFT_LIFT_DIVISOR);
   let raw = RAW_QUALITY_BASE
     + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * ratioMatch * budgetFactor
     + sliderPart * SLIDER_QUALITY_SCALE
