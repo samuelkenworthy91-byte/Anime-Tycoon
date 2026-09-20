@@ -581,7 +581,7 @@ export const RESEARCH: ResearchItem[] = [
   { id: "mocap", name: "Motion Reference", rd: 40, desc: "Art contribution checks gain +12% effective skill." },
   { id: "cg", name: "CG Assist", rd: 44, desc: "Animation department capacity +20%; blockbuster animation demand −10%." },
   { id: "local", name: "Localisation", rd: 48, desc: "+12% revenue from overseas markets." },
-  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Adds +35 effective skill to live editing checks." },
+  { id: "autoclean", name: "Auto-Cleanup", rd: 52, desc: "Automatically clears 35% of the editing notes still outstanding when you lock final QA." },
   { id: "merch2", name: "Global Merch", rd: 60, desc: "Merch revenue bonus rises to +30% and improves the economics of a fully built consumer-products business.", requires: "merch", section: "merch" },
   { id: "genre_studies", name: "Genre Studies", rd: 32, repeatable: true, desc: "Repeatable story research. Each study reveals up to 6 useful arc × genre fits; later passes cost more Research Data until the field is understood." },
   { id: "narrative_analytics", name: "Narrative Analytics", rd: 38, repeatable: true, desc: "Repeatable structure research. Each study reveals up to 6 structures; later passes cost more Research Data." },
