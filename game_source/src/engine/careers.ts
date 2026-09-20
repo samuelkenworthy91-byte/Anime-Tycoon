@@ -383,6 +383,7 @@ export function ensureCareer(s: Staff, week: number): Staff {
   }
   return {
     ...retro,
+    gender: s.gender ?? (idHash(s.id + "|gender") % 2 === 0 ? "female" : "male"),
     level: inferredLevel,
     xp,
     potential,
@@ -418,6 +419,7 @@ export function applyDanteEasterEgg(s: Staff, week: number): Staff {
   return {
     ...s,
     name: "Dante",
+    gender: "male",
     look: DANTE_WORKER_LOOK_INDEX,
     potential: 100,
     traits: [...DANTE_TRAITS],
@@ -439,6 +441,7 @@ export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
   return {
     ...s,
     name: "Avril",
+    gender: "female",
     look: AVRIL_WORKER_LOOK_INDEX,
     potential: 100,
     traits: [...AVRIL_TRAITS],

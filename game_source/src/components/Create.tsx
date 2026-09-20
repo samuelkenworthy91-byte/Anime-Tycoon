@@ -76,8 +76,22 @@ import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from ".
 import { type ContinuationPlan } from "./Library";
 import { visionAlignment } from "../engine/creatorVision";
 import { randomAnimeTitle } from "../engine/titleGenerator";
+import { internationalNameForSeed } from "../engine/internationalNames";
 
 import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
+
+const castBillingName = (member: CastMember): string =>
+  member.species === "human"
+    ? internationalNameForSeed(member.gender, `cast:${member.id}`)
+    : member.name;
+
+const characterNamePatch = (role: typeof CAST_ORDER[number], member: CastMember): Partial<Draft> => {
+  const name = castBillingName(member);
+  if (role === "protag") return { protag: member.id, protagName: name };
+  if (role === "secondary") return { secondary: member.id, secondaryName: name };
+  if (role === "pet") return { pet: member.id, petName: name };
+  return { villain: member.id, villainName: name };
+};
 
 const MIXED_CAST = {
   protag: mixedCastOrder(PROTAGONISTS),
@@ -124,6 +138,10 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
   const last = run.lastDraft;
   const startMedium: MediumId =
     last?.medium && run.mediumsUnlocked.includes(last.medium) ? last.medium : "fanweb";
+  const initialProtag = PROTAGONISTS.find((member) => member.id === "kai") ?? PROTAGONISTS[0];
+  const initialSecondary = SECONDARY[0];
+  const initialPet = PETS[0];
+  const initialVillain = VILLAINS[0];
   const base: Draft = {
     title: randomAnimeTitle([], fr && plan?.kind !== "crossover" ? fr.animeType : last?.animeType ?? "shonen"),
     medium: startMedium,
@@ -133,11 +151,14 @@ export function freshDraft(run: RunState, plan?: ContinuationPlan): Draft {
     animeType: fr && plan?.kind !== "crossover" ? fr.animeType : last?.animeType ?? "shonen",
     genres: [],
     audience: last?.audience ?? "teens",
-    protag: "kai",
-    protagName: "Kai",
-    secondary: SECONDARY[0].id,
-    pet: PETS[0].id,
-    villain: VILLAINS[0].id,
+    protag: initialProtag.id,
+    protagName: castBillingName(initialProtag),
+    secondary: initialSecondary.id,
+    secondaryName: castBillingName(initialSecondary),
+    pet: initialPet.id,
+    petName: castBillingName(initialPet),
+    villain: initialVillain.id,
+    villainName: castBillingName(initialVillain),
     arcs: [],
     sliders: [50, 50, 50],
     season: 1,
@@ -188,6 +209,7 @@ function CastPick({
   blocked?: string;
   creatorPick?: boolean;
 }) {
+  const displayName = castBillingName(m);
   return (
     <button
       disabled={!!blocked}
@@ -201,13 +223,13 @@ function CastPick({
     >
       <Portrait
         img={m.img}
-        name={m.name}
-        alt={m.name}
+        name={displayName}
+        alt={displayName}
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-2">
-        <div className="font-display text-sm font-extrabold leading-tight">{m.name}</div>
+        <div className="font-display text-sm font-extrabold leading-tight">{displayName}</div>
         <div className="text-[10px] font-bold text-cyanx">{ANIME_TYPE_LABEL[m.type]} · {(m.epithet ?? m.archetype)}</div>
       </div>
       {blocked && <div className="absolute inset-x-1 top-1 z-20 rounded-md border border-neon/60 bg-ink/90 px-1.5 py-1 text-center text-[7px] font-black tracking-wider text-neon">RIGHTS SOLD · {blocked}</div>}
@@ -1078,12 +1100,12 @@ export default function Create({
               <div className="ink-card sticky top-0 z-30 flex items-center gap-3 p-2.5">
                 <Portrait
                   img={castPicked.img}
-                  name={castPicked.name}
-                  alt={castPicked.name}
+                  name={castBillingName(castPicked)}
+                  alt={castBillingName(castPicked)}
                   className="h-16 w-16 shrink-0 rounded-xl border border-neon/50 object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="font-display text-base font-extrabold leading-tight">{castPicked.name}</div>
+                  <div className="font-display text-base font-extrabold leading-tight">{castBillingName(castPicked)}</div>
                   <div className="text-[11px] font-bold text-cyanx">{(castPicked.epithet ?? castPicked.archetype)}</div>
                   <div className="truncate text-[10px] italic text-paper/50">“{castPicked.personality}”</div>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -1124,8 +1146,7 @@ export default function Create({
                     sfx.click();
                     const pick = filteredCastList[Math.floor(Math.random() * filteredCastList.length)];
                     if (!pick) return;
-                    if (castRow.role === "protag") set({ protag: pick.id, protagName: pick.name });
-                    else set({ [castRow.role]: pick.id } as Partial<Draft>);
+                    set(characterNamePatch(castRow.role, pick));
                   }}
                   aria-label="Random pick"
                 >
@@ -1144,8 +1165,7 @@ export default function Create({
                     creatorPick={creatorVision?.cast[castRow.role] === m.id}
                     onPick={() => {
                       sfx.select();
-                      if (castRow.role === "protag") set({ protag: m.id, protagName: m.name });
-                      else set({ [castRow.role]: m.id } as Partial<Draft>);
+                      set(characterNamePatch(castRow.role, m));
                     }}
                   />
                 ))}
