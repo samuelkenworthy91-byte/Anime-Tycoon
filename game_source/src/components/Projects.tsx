@@ -314,9 +314,9 @@ function ProjectCard({
           ⚡ EXECUTIVE RUSH ACTIVE · ×2 production bubbles · ×2 editor-note risk · {Math.max(0, (p.executiveRushUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
         </div>
       )}
-      {inPipeline && (p.noteToRdUntilDay ?? -1) >= (run.day ?? run.week * 7) && (p.noteToRdConverted ?? 0) < 6 && (
+      {inPipeline && (p.consultantUntilDay ?? -1) >= (run.day ?? run.week * 7) && (
         <div className="mt-1.5 rounded-lg border border-viol/45 bg-viol/10 px-2.5 py-1.5 text-[9px] font-bold text-viol">
-          🧠 CONTINUITY LEARNING ACTIVE · new notes become R&D · {p.noteToRdConverted ?? 0}/6 converted · {Math.max(0, (p.noteToRdUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
+          🧠 SPECIALIST CONSULTANT ACTIVE · every new error has a 50/50 chance to become R&D · {p.consultantConverted ?? 0} converted · {Math.max(0, (p.consultantUntilDay ?? 0) - (run.day ?? run.week * 7))} days left
         </div>
       )}
 
