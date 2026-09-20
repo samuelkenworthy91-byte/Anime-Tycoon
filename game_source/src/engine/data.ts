@@ -27,6 +27,7 @@ import genreV2Runtime from "./generated/genreV3.json";
 
 import arcV3Runtime from "./generated/arcV3.json";
 import { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";
+import { personGender, randomInternationalName, type PersonNameGender } from "./internationalNames";
 
 /* ------------------------------------------------------------------ types */
 export type GenreId =
@@ -106,6 +107,8 @@ export interface Staff {
   id: string;
   name: string;
   role: StaffRole;
+  /** generated staff identity; first names are always drawn from the matching gender pool */
+  gender?: PersonNameGender;
   /** raw per-discipline skill 10..999; staffPoint() applies mastery diminishing returns */
   story: number;
   art: number;
@@ -853,31 +856,15 @@ export const ARC_RESEARCH_ALL_COMBO_IDS: string[] = ARC_COMBOS
   .sort();
 
 /* ------------------------------------------------------------------ staff */
-const STAFF_FIRST_NAMES = [
-  "Hana","Yuto","Mei","Ren","Sakura","Daichi","Aoi","Kenji","Mio","Sota","Rin","Takeshi","Nao","Haru","Yuki","Kenta","Asuka","Shun","Emi","Taiga","Kira","Masa","Noa","Goro",
-  "Akira","Ayame","Chika","Eiji","Fumi","Haruka","Itsuki","Jun","Kaede","Keiko","Koharu","Makoto","Minato","Rei","Riku","Satomi","Toma","Yuna",
-  "Minseo","Jiho","Sora","Haejin","Doyun","Yejun","Jiwon","Nari","Hyun","Ara","Seojun","Mina",
-  "Anika","Arjun","Dev","Isha","Kavya","Mira","Naveen","Priya","Ravi","Sana","Tara","Vikram","Zoya",
-  "Amina","Amir","Dalia","Farah","Idris","Ilyas","Layla","Nadia","Omar","Rami","Samira","Yara",
-  "Adaeze","Amara","Ayodele","Chidi","Eshe","Kofi","Lindiwe","Mandla","Nia","Sade","Tariq","Zuri",
-  "Alejandra","Camila","Diego","Elena","Javier","Lucia","Mateo","Rafa","Sofia","Valentina","Ximena",
-  "Astrid","Elias","Freja","Ingrid","Jonas","Leona","Luca","Mara","Niko","Petra","Soren","Talia","Theo","Vera",
-  "Ari","Casey","Drew","Eden","Ellis","Jamie","Jordan","Morgan","Quinn","Riley","Robin","Rowan","Sage","Taylor"
-];
-const STAFF_LAST_NAMES = [
-  "Tanaka","Sato","Kurosawa","Ishikawa","Mori","Abe","Fujimoto","Okabe","Shinohara","Wakamatsu","Hirasawa","Kobayashi","Endo","Miura","Tsukishima","Araki",
-  "Nakamura","Hayashi","Kondo","Maeda","Nakajima","Ogawa","Sasaki","Ueda","Yamada","Yamamoto",
-  "Kim","Park","Choi","Han","Kang","Lim","Seo","Yoon",
-  "Basu","Desai","Kapoor","Mehta","Nair","Patel","Rao","Shah","Singh",
-  "Aziz","Darzi","Haddad","Karim","Khalil","Mansour","Nassar","Rahman","Saleh",
-  "Adebayo","Diallo","Mensah","Ndlovu","Okafor","Osei","Tembo","Traore",
-  "Alvarez","Castillo","Cruz","Delgado","Garcia","Herrera","Morales","Navarro","Reyes","Santos",
-  "Andersen","Berg","Dubois","Fischer","Kovac","Lindholm","Mercer","Moreau","Novak","Rossi","Schmidt","Silva","Varga","Voss",
-  "Bell","Brooks","Chen","Cole","Finch","Grey","Hale","Morgan","Reed","Wren"
-];
-
-export function randomStaffName(rng: () => number = Math.random): string {
-  return `${STAFF_FIRST_NAMES[Math.floor(rng() * STAFF_FIRST_NAMES.length)]} ${STAFF_LAST_NAMES[Math.floor(rng() * STAFF_LAST_NAMES.length)]}`;
+/** International names are sourced from the 50-country generated pool.
+ * First names are gender-locked; surnames are selected independently so
+ * every supported first-name culture can combine with every surname culture. */
+export function randomStaffName(
+  rng: () => number = Math.random,
+  gender?: PersonNameGender,
+): string {
+  const resolvedGender = gender ?? personGender(undefined, rng);
+  return randomInternationalName(resolvedGender, rng);
 }
 
 export const ROLE_LABEL: Record<StaffRole, string> = { writer: "Writer", animator: "Animator", composer: "Composer" };
@@ -969,10 +956,12 @@ export function rollCandidate(
   const main = Math.round(34 + rng() * 34 + tier);
   const off = () => Math.round(12 + rng() * 30 + tier * 0.5);
   const id = `s${++staffId}_${Date.now()}${Math.floor(rng() * 999)}`;
+  const gender = personGender(undefined, rng);
   const s: Staff = {
     id,
-    name: randomStaffName(rng),
+    name: randomStaffName(rng, gender),
     role,
+    gender,
     story: role === "writer" ? main : off(),
     art: role === "animator" ? main : off(),
     sound: role === "composer" ? main : off(),
