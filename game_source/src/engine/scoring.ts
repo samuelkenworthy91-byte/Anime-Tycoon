@@ -302,12 +302,14 @@ export function computeResult(opts: {
 
   const totalPts = points.story + points.art + points.sound;
 
-  /* ---- how well the point mix matches what the genre wants (GDT tech/design) */
+  /* ---- Story / Art / Sound distribution is a light genre flavour, not a quality gate.
+     Great work in one department should be allowed to compensate for a weaker one:
+     total production output matters far more than matching an "ideal" point ratio. */
   const mix: [number, number, number] = totalPts
     ? [points.story / totalPts, points.art / totalPts, points.sound / totalPts]
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
-  const ratioMatch = clamp(1.05 - drift * 0.85, 0.5, 1.05);
+  const ratioMatch = clamp(1.01 - drift * 0.12, 0.94, 1.01);
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -485,8 +487,8 @@ export function computeResult(opts: {
     let s = base;
     let criteria = "";
     if (r.bias === "story") {
-      criteria = "Writing · Story-direction slider · Story/genre balance · Arc structure";
-      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 3.0 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      criteria = "Writing · Story-direction slider · Arc structure · Overall execution";
+      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 0.45 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "hype") {
       criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
@@ -494,11 +496,11 @@ export function computeResult(opts: {
     }
     if (r.bias === "harsh") {
       criteria = "Overall execution · Production output · Editing notes · Professional polish";
-      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.82) * 0.9 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.98) * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "tech") {
-      criteria = "Animation/sound output · Technical balance · Direction · Editing notes";
-      s += (mix[1] - genreRatio[1]) * 3.0 + (mix[2] - genreRatio[2]) * 1.5 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
+      s += (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     const calibrated = clamp(s, floor, 10);
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
@@ -578,7 +580,7 @@ export function computeResult(opts: {
 
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
-    { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
+    { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
     { label: `Direction sliders (${Math.round(sliderFitMult * 100)}% fit)`, pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)} quality` },
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
