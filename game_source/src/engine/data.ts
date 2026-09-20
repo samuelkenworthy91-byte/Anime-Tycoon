@@ -27,7 +27,7 @@ import genreV2Runtime from "./generated/genreV3.json";
 
 import arcV3Runtime from "./generated/arcV3.json";
 import { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";
-import { personGender, randomInternationalName, type PersonNameGender } from "./internationalNames";
+import { randomInternationalName, type PersonNameGender } from "./internationalNames";
 
 /* ------------------------------------------------------------------ types */
 export type GenreId =
@@ -925,6 +925,34 @@ export const WORKER_LOOKS: WorkerLook[] = [
     portrait: `img/portrait-worker-${n}.webp`,
   })),
 ];
+
+/** Visual name-gender judgement from the actual shipped full-body sprites.
+ * "neutral" is intentionally used where the sprite is genuinely ambiguous,
+ * so the game never forces a clearly gendered first name onto uncertain art. */
+const WORKER_LOOK_FILE_IDS = [
+  ...BASE_WORKER_LOOK_IDS,
+  ...NEW_WORKER_LOOK_IDS,
+  32,
+  ...WORKER_EXPANSION_LOOK_IDS,
+] as const;
+const WORKER_NAME_GENDER_BY_FILE: Record<number, PersonNameGender> = {
+  1: "male", 2: "female", 3: "male", 4: "female", 5: "male",
+  7: "female", 8: "male", 9: "female", 10: "male", 11: "female",
+  12: "neutral", 13: "male", 14: "male", 15: "female", 16: "female",
+  17: "female", 18: "male", 19: "female", 20: "female", 21: "male",
+  22: "female", 23: "male", 24: "female", 25: "male", 26: "female",
+  27: "male", 28: "neutral", 29: "neutral", 30: "male", 31: "female",
+  32: "male", 33: "male", 34: "female", 35: "female", 36: "female",
+  37: "male", 38: "female", 39: "male", 40: "female", 41: "male",
+  42: "female",
+};
+export const WORKER_LOOK_GENDERS: PersonNameGender[] = WORKER_LOOK_FILE_IDS.map(
+  (fileId) => WORKER_NAME_GENDER_BY_FILE[fileId] ?? "neutral",
+);
+export const workerLookNameGender = (lookIndex: number | undefined): PersonNameGender => {
+  if (lookIndex === undefined || lookIndex < 0 || lookIndex >= WORKER_LOOK_GENDERS.length) return "neutral";
+  return WORKER_LOOK_GENDERS[lookIndex] ?? "neutral";
+};
 /** Special hires use stable, dedicated indices and never enter ordinary appearance rolls. */
 export const DANTE_WORKER_LOOK_INDEX = 30;
 export const AVRIL_WORKER_LOOK_INDEX = 33;
@@ -956,7 +984,8 @@ export function rollCandidate(
   const main = Math.round(34 + rng() * 34 + tier);
   const off = () => Math.round(12 + rng() * 30 + tier * 0.5);
   const id = `s${++staffId}_${Date.now()}${Math.floor(rng() * 999)}`;
-  const gender = personGender(undefined, rng);
+  const look = STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(rng() * 3)) % STANDARD_WORKER_LOOK_COUNT];
+  const gender = workerLookNameGender(look);
   const s: Staff = {
     id,
     name: randomStaffName(rng, gender),
@@ -970,7 +999,7 @@ export function rollCandidate(
     salary: 0,
     cost: 0,
     portrait: staffId % STAFF_PORTRAITS.length,
-    look: STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(rng() * 3)) % STANDARD_WORKER_LOOK_COUNT],
+    look,
   };
   s.salary = Math.round((320 + main * 12) / 10) * 10;
   s.cost = Math.round((5_000 + main * 420) / 500) * 500;
