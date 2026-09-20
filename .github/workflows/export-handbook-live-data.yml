@@ -21,5 +21,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: anime-runner-handbook-live-data
-          path: |\n            game_source/handbook-live-data.json\n            game_source/handbook-arc-data.json
+          path: |
+            game_source/handbook-live-data.json
+            game_source/handbook-arc-data.json
           if-no-files-found: error
