@@ -736,6 +736,53 @@ export function migrateRun(raw: unknown): RunState {
 
 export const office = (r: RunState) => OFFICES[r.officeLevel];
 
+/** Stable poster-owner key for player productions. A spin-off becomes its own
+ * franchise; ordinary continuations keep the parent franchise key. */
+export const posterFranchiseKey = (draft: Draft): string =>
+  draft.continuation === "spinoff" ? draft.title : (draft.franchiseKey ?? draft.title);
+
+/** Poster ids that this project cannot use because another franchise already
+ * owns or has reserved them. The current franchise may reuse any of its own
+ * previous key art indefinitely. */
+export function unavailablePosterIdsForProject(r: RunState, project: Project): string[] {
+  const ownerKey = posterFranchiseKey(project.draft);
+  const ownPosterIds = new Set(
+    r.projects
+      .filter((candidate) => posterFranchiseKey(candidate.draft) === ownerKey)
+      .map((candidate) => candidate.draft.posterArtId)
+      .filter((id): id is string => !!id),
+  );
+  const blocked = new Set<string>();
+
+  for (const candidate of r.projects) {
+    const id = candidate.draft.posterArtId;
+    if (!id || candidate.id === project.id) continue;
+    if (posterFranchiseKey(candidate.draft) !== ownerKey) blocked.add(id);
+  }
+
+  for (const studio of r.rivalWorld.studios) {
+    for (const franchise of studio.franchises) if (franchise.posterId) blocked.add(franchise.posterId);
+    for (const production of studio.productions) if (production.posterId) blocked.add(production.posterId);
+  }
+
+  /* Claims from an older save may predate franchise-aware ownership. Keep them
+     blocked unless the current franchise can prove the poster is already its own. */
+  for (const id of r.playerPosterClaims ?? []) if (!ownPosterIds.has(id)) blocked.add(id);
+
+  return [...blocked];
+}
+
+/** Most recent poster used by a player franchise; continuation setup uses this
+ * as its default before the player opens the full-screen browser. */
+export function latestFranchisePosterId(r: RunState, franchiseKey: string): string | undefined {
+  return [...r.projects]
+    .filter((project) => posterFranchiseKey(project.draft) === franchiseKey && !!project.draft.posterArtId)
+    .sort((a, b) =>
+      (b.airedWeek ?? b.createdWeek) - (a.airedWeek ?? a.createdWeek)
+      || (b.createdDay ?? b.createdWeek * 7) - (a.createdDay ?? a.createdWeek * 7)
+    )[0]?.draft.posterArtId;
+}
+
 export const RECRUITMENT_AD_BASE_COST = 8_000;
 export const RECRUITMENT_AD_COST_STEP = 4_000;
 
@@ -2791,6 +2838,7 @@ export function releaseProject(
   const p0 = projectById(r, projectId);
   if (!p0 || (p0.stage !== "ready" && p0.stage !== "shelved")) return null;
   if (p0.draft.posterArtId) {
+    if (unavailablePosterIdsForProject(r, p0).includes(p0.draft.posterArtId)) return null;
     const claims = [...new Set([...(r.playerPosterClaims ?? []), p0.draft.posterArtId])];
     r = { ...r, playerPosterClaims: claims, rivalWorld: reservePlayerPosters(r.rivalWorld, claims, r.week) };
   }
