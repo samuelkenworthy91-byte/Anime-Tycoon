@@ -84,11 +84,11 @@ export default function Ship({
                 <div className="text-[9px] text-paper/45">Choose from the same industry poster pool rivals use. Once your studio releases with one, rivals can never use it again.</div>
               </div>
             </div>
-            <div className="nice-scroll mt-2 flex gap-2 overflow-x-auto pb-1">
+            <div className="nice-scroll mt-2 flex gap-3 overflow-x-auto pb-2">
               <button
                 type="button"
                 onClick={() => onPosterChoice(undefined)}
-                className={cn("h-24 w-[76px] shrink-0 rounded-lg border p-2 text-center text-[9px] font-bold", !project.draft.posterArtId ? "border-gold bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/55")}
+                className={cn("h-44 w-[116px] shrink-0 rounded-xl border p-3 text-center text-[10px] font-bold sm:h-52 sm:w-[137px]", !project.draft.posterArtId ? "border-gold bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/55")}
               >
                 <div className="mb-2 text-2xl">★</div>
                 MAIN CHARACTER
@@ -98,7 +98,7 @@ export default function Ship({
                   key={option.id}
                   type="button"
                   onClick={() => onPosterChoice(option.id)}
-                  className={cn("relative h-24 w-[76px] shrink-0 overflow-hidden rounded-lg border", project.draft.posterArtId === option.id ? "border-gold ring-1 ring-gold" : "border-line")}
+                  className={cn("relative h-44 w-[116px] shrink-0 overflow-hidden rounded-xl border sm:h-52 sm:w-[137px]", project.draft.posterArtId === option.id ? "border-gold ring-2 ring-gold/70" : "border-line")}
                   title={option.genres.join(" / ") + " generic key art"}
                 >
                   <img src={assetPath(option.img)} alt="Generic poster option" className="absolute inset-0 h-full w-full object-cover" />
