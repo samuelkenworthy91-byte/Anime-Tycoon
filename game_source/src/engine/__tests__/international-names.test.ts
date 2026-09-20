@@ -27,6 +27,12 @@ describe("international person names", () => {
     expect(female.endsWith(lastCountry.surnames[0])).toBe(true);
   });
 
+  it("provides a real neutral-name pool for visually ambiguous workers", () => {
+    expect(data.neutralFirstNames.length).toBeGreaterThanOrEqual(100);
+    const neutral = internationalNameForSeed("neutral", "worker:ambiguous");
+    expect(data.neutralFirstNames.some((name) => neutral.startsWith(`${name} `))).toBe(true);
+  });
+
   it("keeps catalog character billing stable for the same id and gender", () => {
     expect(internationalNameForSeed("female", "cast:test_hero")).toBe(internationalNameForSeed("female", "cast:test_hero"));
     expect(internationalNameForSeed("male", "cast:test_hero")).not.toBe("");
