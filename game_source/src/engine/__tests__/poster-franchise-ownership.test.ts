@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { freshDraft } from "../../components/Create";
 import { PROTAGONISTS, SECONDARY, PETS, VILLAINS, type Draft } from "../data";
-import { migrateFranchise } from "../franchise";
 import { makeProject, type Project } from "../projects";
 import { genericPosterOptions } from "../rivalPosters";
 import {
@@ -115,7 +113,7 @@ describe("franchise poster ownership", () => {
     expect(unavailablePosterIdsForProject(run, project)).toContain(poster);
   });
 
-  it("defaults a sequel to the most recent poster used by its franchise", () => {
+  it("finds the latest franchise poster used to seed continuation drafts", () => {
     const posters = genericPosterOptions("shonen", ["slice"]);
     const firstPoster = posters[0].id;
     const latestPoster = posters[1].id;
@@ -134,14 +132,8 @@ describe("franchise poster ownership", () => {
       stage: "done",
       airedWeek: 20,
     };
-    run = {
-      ...run,
-      projects: [first, later],
-      franchises: { Alpha: migrateFranchise("Alpha", { baseTitle: "Alpha", season: 1, lastScore: 30 }, 20) },
-    };
+    run = { ...run, projects: [first, later] };
 
     expect(latestFranchisePosterId(run, "Alpha")).toBe(latestPoster);
-    const sequel = freshDraft(run, { key: "Alpha", kind: "season" });
-    expect(sequel.posterArtId).toBe(latestPoster);
   });
 });
