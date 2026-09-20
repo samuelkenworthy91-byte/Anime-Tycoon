@@ -46,7 +46,10 @@ const STUDIO_META = {
 };
 
 fs.mkdirSync(path.dirname(MAP_OUT), { recursive: true });
-fs.rmSync(IMPORTED_DIR, { recursive: true, force: true });
+/* Do not clear the whole imported directory: it also contains the canonical
+   shared_industry_####.png original-show expansion. The legacy 160 files are
+   overwritten in place below; manifest membership, not directory emptiness,
+   determines what is live. */
 fs.mkdirSync(IMPORTED_DIR, { recursive: true });
 
 function sourceName(n) {
