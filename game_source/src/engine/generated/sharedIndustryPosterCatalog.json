@@ -1,0 +1,3684 @@
+{
+  "schema": 1,
+  "notes": "Canonical metadata for the Sep 19 2026 shared-industry original-show poster batch. Core 1-96 follows the approved MASTER LIST order; 97-120 follows STR-01..STR-24; 121-153 extends the strange-combo pool with additional experimental fits; 154-213 is two complete non-human passes across the 30 normal genres.",
+  "posters": [
+    {
+      "n": 1,
+      "id": "shared_industry_0001",
+      "img": "rival-posters/imported/shared_industry_0001.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 2,
+      "id": "shared_industry_0002",
+      "img": "rival-posters/imported/shared_industry_0002.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 3,
+      "id": "shared_industry_0003",
+      "img": "rival-posters/imported/shared_industry_0003.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 4,
+      "id": "shared_industry_0004",
+      "img": "rival-posters/imported/shared_industry_0004.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 5,
+      "id": "shared_industry_0005",
+      "img": "rival-posters/imported/shared_industry_0005.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 6,
+      "id": "shared_industry_0006",
+      "img": "rival-posters/imported/shared_industry_0006.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 7,
+      "id": "shared_industry_0007",
+      "img": "rival-posters/imported/shared_industry_0007.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 8,
+      "id": "shared_industry_0008",
+      "img": "rival-posters/imported/shared_industry_0008.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 9,
+      "id": "shared_industry_0009",
+      "img": "rival-posters/imported/shared_industry_0009.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 10,
+      "id": "shared_industry_0010",
+      "img": "rival-posters/imported/shared_industry_0010.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 11,
+      "id": "shared_industry_0011",
+      "img": "rival-posters/imported/shared_industry_0011.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "martial"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 12,
+      "id": "shared_industry_0012",
+      "img": "rival-posters/imported/shared_industry_0012.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "martial"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 13,
+      "id": "shared_industry_0013",
+      "img": "rival-posters/imported/shared_industry_0013.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 14,
+      "id": "shared_industry_0014",
+      "img": "rival-posters/imported/shared_industry_0014.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 15,
+      "id": "shared_industry_0015",
+      "img": "rival-posters/imported/shared_industry_0015.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 16,
+      "id": "shared_industry_0016",
+      "img": "rival-posters/imported/shared_industry_0016.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 17,
+      "id": "shared_industry_0017",
+      "img": "rival-posters/imported/shared_industry_0017.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 18,
+      "id": "shared_industry_0018",
+      "img": "rival-posters/imported/shared_industry_0018.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 19,
+      "id": "shared_industry_0019",
+      "img": "rival-posters/imported/shared_industry_0019.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 20,
+      "id": "shared_industry_0020",
+      "img": "rival-posters/imported/shared_industry_0020.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 21,
+      "id": "shared_industry_0021",
+      "img": "rival-posters/imported/shared_industry_0021.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 22,
+      "id": "shared_industry_0022",
+      "img": "rival-posters/imported/shared_industry_0022.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 23,
+      "id": "shared_industry_0023",
+      "img": "rival-posters/imported/shared_industry_0023.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 24,
+      "id": "shared_industry_0024",
+      "img": "rival-posters/imported/shared_industry_0024.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 25,
+      "id": "shared_industry_0025",
+      "img": "rival-posters/imported/shared_industry_0025.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 26,
+      "id": "shared_industry_0026",
+      "img": "rival-posters/imported/shared_industry_0026.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 27,
+      "id": "shared_industry_0027",
+      "img": "rival-posters/imported/shared_industry_0027.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 28,
+      "id": "shared_industry_0028",
+      "img": "rival-posters/imported/shared_industry_0028.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 29,
+      "id": "shared_industry_0029",
+      "img": "rival-posters/imported/shared_industry_0029.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 30,
+      "id": "shared_industry_0030",
+      "img": "rival-posters/imported/shared_industry_0030.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 31,
+      "id": "shared_industry_0031",
+      "img": "rival-posters/imported/shared_industry_0031.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 32,
+      "id": "shared_industry_0032",
+      "img": "rival-posters/imported/shared_industry_0032.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 33,
+      "id": "shared_industry_0033",
+      "img": "rival-posters/imported/shared_industry_0033.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 34,
+      "id": "shared_industry_0034",
+      "img": "rival-posters/imported/shared_industry_0034.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 35,
+      "id": "shared_industry_0035",
+      "img": "rival-posters/imported/shared_industry_0035.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "pirate"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 36,
+      "id": "shared_industry_0036",
+      "img": "rival-posters/imported/shared_industry_0036.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "pirate"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 37,
+      "id": "shared_industry_0037",
+      "img": "rival-posters/imported/shared_industry_0037.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 38,
+      "id": "shared_industry_0038",
+      "img": "rival-posters/imported/shared_industry_0038.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 39,
+      "id": "shared_industry_0039",
+      "img": "rival-posters/imported/shared_industry_0039.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 40,
+      "id": "shared_industry_0040",
+      "img": "rival-posters/imported/shared_industry_0040.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 41,
+      "id": "shared_industry_0041",
+      "img": "rival-posters/imported/shared_industry_0041.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 42,
+      "id": "shared_industry_0042",
+      "img": "rival-posters/imported/shared_industry_0042.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 43,
+      "id": "shared_industry_0043",
+      "img": "rival-posters/imported/shared_industry_0043.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 44,
+      "id": "shared_industry_0044",
+      "img": "rival-posters/imported/shared_industry_0044.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 45,
+      "id": "shared_industry_0045",
+      "img": "rival-posters/imported/shared_industry_0045.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 46,
+      "id": "shared_industry_0046",
+      "img": "rival-posters/imported/shared_industry_0046.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 47,
+      "id": "shared_industry_0047",
+      "img": "rival-posters/imported/shared_industry_0047.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 48,
+      "id": "shared_industry_0048",
+      "img": "rival-posters/imported/shared_industry_0048.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 49,
+      "id": "shared_industry_0049",
+      "img": "rival-posters/imported/shared_industry_0049.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 50,
+      "id": "shared_industry_0050",
+      "img": "rival-posters/imported/shared_industry_0050.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 51,
+      "id": "shared_industry_0051",
+      "img": "rival-posters/imported/shared_industry_0051.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 52,
+      "id": "shared_industry_0052",
+      "img": "rival-posters/imported/shared_industry_0052.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 53,
+      "id": "shared_industry_0053",
+      "img": "rival-posters/imported/shared_industry_0053.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 54,
+      "id": "shared_industry_0054",
+      "img": "rival-posters/imported/shared_industry_0054.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 55,
+      "id": "shared_industry_0055",
+      "img": "rival-posters/imported/shared_industry_0055.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 56,
+      "id": "shared_industry_0056",
+      "img": "rival-posters/imported/shared_industry_0056.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 57,
+      "id": "shared_industry_0057",
+      "img": "rival-posters/imported/shared_industry_0057.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 58,
+      "id": "shared_industry_0058",
+      "img": "rival-posters/imported/shared_industry_0058.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 59,
+      "id": "shared_industry_0059",
+      "img": "rival-posters/imported/shared_industry_0059.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "male"
+    },
+    {
+      "n": 60,
+      "id": "shared_industry_0060",
+      "img": "rival-posters/imported/shared_industry_0060.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-core",
+      "variant": "female"
+    },
+    {
+      "n": 61,
+      "id": "shared_industry_0061",
+      "img": "rival-posters/imported/shared_industry_0061.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 62,
+      "id": "shared_industry_0062",
+      "img": "rival-posters/imported/shared_industry_0062.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 63,
+      "id": "shared_industry_0063",
+      "img": "rival-posters/imported/shared_industry_0063.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 64,
+      "id": "shared_industry_0064",
+      "img": "rival-posters/imported/shared_industry_0064.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 65,
+      "id": "shared_industry_0065",
+      "img": "rival-posters/imported/shared_industry_0065.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 66,
+      "id": "shared_industry_0066",
+      "img": "rival-posters/imported/shared_industry_0066.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 67,
+      "id": "shared_industry_0067",
+      "img": "rival-posters/imported/shared_industry_0067.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 68,
+      "id": "shared_industry_0068",
+      "img": "rival-posters/imported/shared_industry_0068.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 69,
+      "id": "shared_industry_0069",
+      "img": "rival-posters/imported/shared_industry_0069.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 70,
+      "id": "shared_industry_0070",
+      "img": "rival-posters/imported/shared_industry_0070.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 71,
+      "id": "shared_industry_0071",
+      "img": "rival-posters/imported/shared_industry_0071.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 72,
+      "id": "shared_industry_0072",
+      "img": "rival-posters/imported/shared_industry_0072.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 73,
+      "id": "shared_industry_0073",
+      "img": "rival-posters/imported/shared_industry_0073.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 74,
+      "id": "shared_industry_0074",
+      "img": "rival-posters/imported/shared_industry_0074.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 75,
+      "id": "shared_industry_0075",
+      "img": "rival-posters/imported/shared_industry_0075.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 76,
+      "id": "shared_industry_0076",
+      "img": "rival-posters/imported/shared_industry_0076.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 77,
+      "id": "shared_industry_0077",
+      "img": "rival-posters/imported/shared_industry_0077.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 78,
+      "id": "shared_industry_0078",
+      "img": "rival-posters/imported/shared_industry_0078.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 79,
+      "id": "shared_industry_0079",
+      "img": "rival-posters/imported/shared_industry_0079.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 80,
+      "id": "shared_industry_0080",
+      "img": "rival-posters/imported/shared_industry_0080.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 81,
+      "id": "shared_industry_0081",
+      "img": "rival-posters/imported/shared_industry_0081.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 82,
+      "id": "shared_industry_0082",
+      "img": "rival-posters/imported/shared_industry_0082.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 83,
+      "id": "shared_industry_0083",
+      "img": "rival-posters/imported/shared_industry_0083.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 84,
+      "id": "shared_industry_0084",
+      "img": "rival-posters/imported/shared_industry_0084.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 85,
+      "id": "shared_industry_0085",
+      "img": "rival-posters/imported/shared_industry_0085.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 86,
+      "id": "shared_industry_0086",
+      "img": "rival-posters/imported/shared_industry_0086.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 87,
+      "id": "shared_industry_0087",
+      "img": "rival-posters/imported/shared_industry_0087.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 88,
+      "id": "shared_industry_0088",
+      "img": "rival-posters/imported/shared_industry_0088.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 89,
+      "id": "shared_industry_0089",
+      "img": "rival-posters/imported/shared_industry_0089.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 90,
+      "id": "shared_industry_0090",
+      "img": "rival-posters/imported/shared_industry_0090.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 91,
+      "id": "shared_industry_0091",
+      "img": "rival-posters/imported/shared_industry_0091.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 92,
+      "id": "shared_industry_0092",
+      "img": "rival-posters/imported/shared_industry_0092.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 93,
+      "id": "shared_industry_0093",
+      "img": "rival-posters/imported/shared_industry_0093.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 94,
+      "id": "shared_industry_0094",
+      "img": "rival-posters/imported/shared_industry_0094.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 95,
+      "id": "shared_industry_0095",
+      "img": "rival-posters/imported/shared_industry_0095.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "male-alt"
+    },
+    {
+      "n": 96,
+      "id": "shared_industry_0096",
+      "img": "rival-posters/imported/shared_industry_0096.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-alt",
+      "variant": "female-alt"
+    },
+    {
+      "n": 97,
+      "id": "shared_industry_0097",
+      "img": "rival-posters/imported/shared_industry_0097.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha",
+        "pirate"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-01"
+    },
+    {
+      "n": 98,
+      "id": "shared_industry_0098",
+      "img": "rival-posters/imported/shared_industry_0098.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-02"
+    },
+    {
+      "n": 99,
+      "id": "shared_industry_0099",
+      "img": "rival-posters/imported/shared_industry_0099.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-03"
+    },
+    {
+      "n": 100,
+      "id": "shared_industry_0100",
+      "img": "rival-posters/imported/shared_industry_0100.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-04"
+    },
+    {
+      "n": 101,
+      "id": "shared_industry_0101",
+      "img": "rival-posters/imported/shared_industry_0101.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-05"
+    },
+    {
+      "n": 102,
+      "id": "shared_industry_0102",
+      "img": "rival-posters/imported/shared_industry_0102.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-06"
+    },
+    {
+      "n": 103,
+      "id": "shared_industry_0103",
+      "img": "rival-posters/imported/shared_industry_0103.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military",
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-07"
+    },
+    {
+      "n": 104,
+      "id": "shared_industry_0104",
+      "img": "rival-posters/imported/shared_industry_0104.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports",
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-08"
+    },
+    {
+      "n": 105,
+      "id": "shared_industry_0105",
+      "img": "rival-posters/imported/shared_industry_0105.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-09"
+    },
+    {
+      "n": 106,
+      "id": "shared_industry_0106",
+      "img": "rival-posters/imported/shared_industry_0106.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-10"
+    },
+    {
+      "n": 107,
+      "id": "shared_industry_0107",
+      "img": "rival-posters/imported/shared_industry_0107.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-11"
+    },
+    {
+      "n": 108,
+      "id": "shared_industry_0108",
+      "img": "rival-posters/imported/shared_industry_0108.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-12"
+    },
+    {
+      "n": 109,
+      "id": "shared_industry_0109",
+      "img": "rival-posters/imported/shared_industry_0109.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai",
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-13"
+    },
+    {
+      "n": 110,
+      "id": "shared_industry_0110",
+      "img": "rival-posters/imported/shared_industry_0110.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-14"
+    },
+    {
+      "n": 111,
+      "id": "shared_industry_0111",
+      "img": "rival-posters/imported/shared_industry_0111.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "pirate",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-15"
+    },
+    {
+      "n": 112,
+      "id": "shared_industry_0112",
+      "img": "rival-posters/imported/shared_industry_0112.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-16"
+    },
+    {
+      "n": 113,
+      "id": "shared_industry_0113",
+      "img": "rival-posters/imported/shared_industry_0113.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival",
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-17"
+    },
+    {
+      "n": 114,
+      "id": "shared_industry_0114",
+      "img": "rival-posters/imported/shared_industry_0114.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology",
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-18"
+    },
+    {
+      "n": 115,
+      "id": "shared_industry_0115",
+      "img": "rival-posters/imported/shared_industry_0115.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-19"
+    },
+    {
+      "n": 116,
+      "id": "shared_industry_0116",
+      "img": "rival-posters/imported/shared_industry_0116.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-20"
+    },
+    {
+      "n": 117,
+      "id": "shared_industry_0117",
+      "img": "rival-posters/imported/shared_industry_0117.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-21"
+    },
+    {
+      "n": 118,
+      "id": "shared_industry_0118",
+      "img": "rival-posters/imported/shared_industry_0118.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia",
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-22"
+    },
+    {
+      "n": 119,
+      "id": "shared_industry_0119",
+      "img": "rival-posters/imported/shared_industry_0119.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy",
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-23"
+    },
+    {
+      "n": 120,
+      "id": "shared_industry_0120",
+      "img": "rival-posters/imported/shared_industry_0120.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "str-24"
+    },
+    {
+      "n": 121,
+      "id": "shared_industry_0121",
+      "img": "rival-posters/imported/shared_industry_0121.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 122,
+      "id": "shared_industry_0122",
+      "img": "rival-posters/imported/shared_industry_0122.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 123,
+      "id": "shared_industry_0123",
+      "img": "rival-posters/imported/shared_industry_0123.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 124,
+      "id": "shared_industry_0124",
+      "img": "rival-posters/imported/shared_industry_0124.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 125,
+      "id": "shared_industry_0125",
+      "img": "rival-posters/imported/shared_industry_0125.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "survival"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 126,
+      "id": "shared_industry_0126",
+      "img": "rival-posters/imported/shared_industry_0126.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 127,
+      "id": "shared_industry_0127",
+      "img": "rival-posters/imported/shared_industry_0127.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 128,
+      "id": "shared_industry_0128",
+      "img": "rival-posters/imported/shared_industry_0128.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 129,
+      "id": "shared_industry_0129",
+      "img": "rival-posters/imported/shared_industry_0129.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 130,
+      "id": "shared_industry_0130",
+      "img": "rival-posters/imported/shared_industry_0130.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports",
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 131,
+      "id": "shared_industry_0131",
+      "img": "rival-posters/imported/shared_industry_0131.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 132,
+      "id": "shared_industry_0132",
+      "img": "rival-posters/imported/shared_industry_0132.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "nordic"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 133,
+      "id": "shared_industry_0133",
+      "img": "rival-posters/imported/shared_industry_0133.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 134,
+      "id": "shared_industry_0134",
+      "img": "rival-posters/imported/shared_industry_0134.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 135,
+      "id": "shared_industry_0135",
+      "img": "rival-posters/imported/shared_industry_0135.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 136,
+      "id": "shared_industry_0136",
+      "img": "rival-posters/imported/shared_industry_0136.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 137,
+      "id": "shared_industry_0137",
+      "img": "rival-posters/imported/shared_industry_0137.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 138,
+      "id": "shared_industry_0138",
+      "img": "rival-posters/imported/shared_industry_0138.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 139,
+      "id": "shared_industry_0139",
+      "img": "rival-posters/imported/shared_industry_0139.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 140,
+      "id": "shared_industry_0140",
+      "img": "rival-posters/imported/shared_industry_0140.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 141,
+      "id": "shared_industry_0141",
+      "img": "rival-posters/imported/shared_industry_0141.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 142,
+      "id": "shared_industry_0142",
+      "img": "rival-posters/imported/shared_industry_0142.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 143,
+      "id": "shared_industry_0143",
+      "img": "rival-posters/imported/shared_industry_0143.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 144,
+      "id": "shared_industry_0144",
+      "img": "rival-posters/imported/shared_industry_0144.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 145,
+      "id": "shared_industry_0145",
+      "img": "rival-posters/imported/shared_industry_0145.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 146,
+      "id": "shared_industry_0146",
+      "img": "rival-posters/imported/shared_industry_0146.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 147,
+      "id": "shared_industry_0147",
+      "img": "rival-posters/imported/shared_industry_0147.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 148,
+      "id": "shared_industry_0148",
+      "img": "rival-posters/imported/shared_industry_0148.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 149,
+      "id": "shared_industry_0149",
+      "img": "rival-posters/imported/shared_industry_0149.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "mythology"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 150,
+      "id": "shared_industry_0150",
+      "img": "rival-posters/imported/shared_industry_0150.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime",
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 151,
+      "id": "shared_industry_0151",
+      "img": "rival-posters/imported/shared_industry_0151.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 152,
+      "id": "shared_industry_0152",
+      "img": "rival-posters/imported/shared_industry_0152.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 153,
+      "id": "shared_industry_0153",
+      "img": "rival-posters/imported/shared_industry_0153.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "strange-combo",
+      "variant": "extended"
+    },
+    {
+      "n": 154,
+      "id": "shared_industry_0154",
+      "img": "rival-posters/imported/shared_industry_0154.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 155,
+      "id": "shared_industry_0155",
+      "img": "rival-posters/imported/shared_industry_0155.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 156,
+      "id": "shared_industry_0156",
+      "img": "rival-posters/imported/shared_industry_0156.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 157,
+      "id": "shared_industry_0157",
+      "img": "rival-posters/imported/shared_industry_0157.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 158,
+      "id": "shared_industry_0158",
+      "img": "rival-posters/imported/shared_industry_0158.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 159,
+      "id": "shared_industry_0159",
+      "img": "rival-posters/imported/shared_industry_0159.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "martial"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 160,
+      "id": "shared_industry_0160",
+      "img": "rival-posters/imported/shared_industry_0160.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 161,
+      "id": "shared_industry_0161",
+      "img": "rival-posters/imported/shared_industry_0161.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 162,
+      "id": "shared_industry_0162",
+      "img": "rival-posters/imported/shared_industry_0162.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 163,
+      "id": "shared_industry_0163",
+      "img": "rival-posters/imported/shared_industry_0163.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 164,
+      "id": "shared_industry_0164",
+      "img": "rival-posters/imported/shared_industry_0164.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 165,
+      "id": "shared_industry_0165",
+      "img": "rival-posters/imported/shared_industry_0165.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 166,
+      "id": "shared_industry_0166",
+      "img": "rival-posters/imported/shared_industry_0166.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 167,
+      "id": "shared_industry_0167",
+      "img": "rival-posters/imported/shared_industry_0167.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 168,
+      "id": "shared_industry_0168",
+      "img": "rival-posters/imported/shared_industry_0168.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 169,
+      "id": "shared_industry_0169",
+      "img": "rival-posters/imported/shared_industry_0169.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 170,
+      "id": "shared_industry_0170",
+      "img": "rival-posters/imported/shared_industry_0170.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 171,
+      "id": "shared_industry_0171",
+      "img": "rival-posters/imported/shared_industry_0171.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "pirate"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 172,
+      "id": "shared_industry_0172",
+      "img": "rival-posters/imported/shared_industry_0172.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 173,
+      "id": "shared_industry_0173",
+      "img": "rival-posters/imported/shared_industry_0173.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 174,
+      "id": "shared_industry_0174",
+      "img": "rival-posters/imported/shared_industry_0174.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 175,
+      "id": "shared_industry_0175",
+      "img": "rival-posters/imported/shared_industry_0175.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 176,
+      "id": "shared_industry_0176",
+      "img": "rival-posters/imported/shared_industry_0176.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 177,
+      "id": "shared_industry_0177",
+      "img": "rival-posters/imported/shared_industry_0177.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 178,
+      "id": "shared_industry_0178",
+      "img": "rival-posters/imported/shared_industry_0178.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 179,
+      "id": "shared_industry_0179",
+      "img": "rival-posters/imported/shared_industry_0179.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 180,
+      "id": "shared_industry_0180",
+      "img": "rival-posters/imported/shared_industry_0180.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 181,
+      "id": "shared_industry_0181",
+      "img": "rival-posters/imported/shared_industry_0181.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 182,
+      "id": "shared_industry_0182",
+      "img": "rival-posters/imported/shared_industry_0182.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 183,
+      "id": "shared_industry_0183",
+      "img": "rival-posters/imported/shared_industry_0183.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "a"
+    },
+    {
+      "n": 184,
+      "id": "shared_industry_0184",
+      "img": "rival-posters/imported/shared_industry_0184.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 185,
+      "id": "shared_industry_0185",
+      "img": "rival-posters/imported/shared_industry_0185.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 186,
+      "id": "shared_industry_0186",
+      "img": "rival-posters/imported/shared_industry_0186.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 187,
+      "id": "shared_industry_0187",
+      "img": "rival-posters/imported/shared_industry_0187.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 188,
+      "id": "shared_industry_0188",
+      "img": "rival-posters/imported/shared_industry_0188.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 189,
+      "id": "shared_industry_0189",
+      "img": "rival-posters/imported/shared_industry_0189.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "martial"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 190,
+      "id": "shared_industry_0190",
+      "img": "rival-posters/imported/shared_industry_0190.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 191,
+      "id": "shared_industry_0191",
+      "img": "rival-posters/imported/shared_industry_0191.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "sports"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 192,
+      "id": "shared_industry_0192",
+      "img": "rival-posters/imported/shared_industry_0192.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 193,
+      "id": "shared_industry_0193",
+      "img": "rival-posters/imported/shared_industry_0193.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mystery"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 194,
+      "id": "shared_industry_0194",
+      "img": "rival-posters/imported/shared_industry_0194.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 195,
+      "id": "shared_industry_0195",
+      "img": "rival-posters/imported/shared_industry_0195.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 196,
+      "id": "shared_industry_0196",
+      "img": "rival-posters/imported/shared_industry_0196.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 197,
+      "id": "shared_industry_0197",
+      "img": "rival-posters/imported/shared_industry_0197.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "survival"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 198,
+      "id": "shared_industry_0198",
+      "img": "rival-posters/imported/shared_industry_0198.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 199,
+      "id": "shared_industry_0199",
+      "img": "rival-posters/imported/shared_industry_0199.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "military"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 200,
+      "id": "shared_industry_0200",
+      "img": "rival-posters/imported/shared_industry_0200.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "samurai"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 201,
+      "id": "shared_industry_0201",
+      "img": "rival-posters/imported/shared_industry_0201.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "pirate"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 202,
+      "id": "shared_industry_0202",
+      "img": "rival-posters/imported/shared_industry_0202.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 203,
+      "id": "shared_industry_0203",
+      "img": "rival-posters/imported/shared_industry_0203.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "comedy"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 204,
+      "id": "shared_industry_0204",
+      "img": "rival-posters/imported/shared_industry_0204.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "shinobi"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 205,
+      "id": "shared_industry_0205",
+      "img": "rival-posters/imported/shared_industry_0205.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cooking"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 206,
+      "id": "shared_industry_0206",
+      "img": "rival-posters/imported/shared_industry_0206.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "isekai"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 207,
+      "id": "shared_industry_0207",
+      "img": "rival-posters/imported/shared_industry_0207.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 208,
+      "id": "shared_industry_0208",
+      "img": "rival-posters/imported/shared_industry_0208.png",
+      "studio": "Toe-i Animation",
+      "persona": "blockbuster",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 209,
+      "id": "shared_industry_0209",
+      "img": "rival-posters/imported/shared_industry_0209.png",
+      "studio": "Kyo-Hani",
+      "persona": "prestige",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 210,
+      "id": "shared_industry_0210",
+      "img": "rival-posters/imported/shared_industry_0210.png",
+      "studio": "Sunnyrise",
+      "persona": "technical",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "crime"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 211,
+      "id": "shared_industry_0211",
+      "img": "rival-posters/imported/shared_industry_0211.png",
+      "studio": "Madcap House",
+      "persona": "volume",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 212,
+      "id": "shared_industry_0212",
+      "img": "rival-posters/imported/shared_industry_0212.png",
+      "studio": "Boneworks",
+      "persona": "experimental",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    },
+    {
+      "n": 213,
+      "id": "shared_industry_0213",
+      "img": "rival-posters/imported/shared_industry_0213.png",
+      "studio": "Turtle Line",
+      "persona": "idol",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "arabia"
+      ],
+      "family": null,
+      "sourceKind": "standard-nonhuman",
+      "variant": "b"
+    }
+  ]
+}
