@@ -1,0 +1,25 @@
+name: Export Handbook Live Data
+on:
+  push:
+    branches:
+      - chatgpt/handbook-live-export-20260920
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game_source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - run: npm ci
+      - run: npx vitest run scripts/export-handbook-data.test.ts --reporter=verbose
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anime-runner-handbook-live-data
+          path: game_source/handbook-live-data.json
+          if-no-files-found: error
