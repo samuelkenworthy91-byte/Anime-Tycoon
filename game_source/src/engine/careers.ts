@@ -371,9 +371,13 @@ export function ensureCareer(s: Staff, week: number): Staff {
     : s.look === AVRIL_WORKER_LOOK_INDEX || s.name === "Avril"
       ? "female"
       : workerLookNameGender(lookIndex);
-  const migratedName = (s.nameGenderVersion ?? 0) < 2 && s.name !== "Dante" && s.name !== "Avril"
-    ? internationalNameForSeed(visualGender, `worker:${s.id}:${lookIndex}`)
-    : s.name;
+  const generatedHireId = /^s\d+_/.test(s.id);
+  const migratedName = (s.nameGenderVersion ?? 0) < 2
+    && generatedHireId
+    && s.name !== "Dante"
+    && s.name !== "Avril"
+      ? internationalNameForSeed(visualGender, `worker:${s.id}:${lookIndex}`)
+      : s.name;
   const favGenre = s.favGenre ?? uniformGenreForSeed(idHash(s.id + "|fav-genre"));
   const specGenre = uniformGenreForSeed(idHash(s.id + "|spec-genre"));
   const savedLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(s.level || 1)));
