@@ -35,7 +35,7 @@ describe("worker sprite gender naming", () => {
   it("migrates an old mismatched worker name to the sprite judgement once", () => {
     const maleLook = WORKER_LOOKS.findIndex((look) => fileId(look.sprite) === 1);
     const old: Staff = {
-      id: "legacy_visual_name",
+      id: "s42_legacy_visual_name",
       name: "Sara Smith",
       role: "writer",
       story: 30,
