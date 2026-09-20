@@ -1,0 +1,27 @@
+name: Worker sprite audit pack
+on:
+  push:
+    branches: [fix/worker-gender-sprite-pass-2026-09-20]
+    paths: [".github/workflows/worker-sprite-audit-temp.yml"]
+permissions:
+  contents: read
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack worker sprites
+        run: |
+          mkdir worker-sprites
+          cp game_source/public/img/sprite-worker-* worker-sprites/
+          python - <<'PY'
+          import os, zipfile
+          with zipfile.ZipFile("worker-sprites.zip","w",zipfile.ZIP_DEFLATED) as z:
+              for name in sorted(os.listdir("worker-sprites")):
+                  z.write(os.path.join("worker-sprites",name), arcname=name)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worker-sprites
+          path: worker-sprites.zip
+          if-no-files-found: error
