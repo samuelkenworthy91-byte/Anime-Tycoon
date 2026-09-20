@@ -107,8 +107,10 @@ export interface Staff {
   id: string;
   name: string;
   role: StaffRole;
-  /** generated staff identity; first names are always drawn from the matching gender pool */
+  /** generated staff identity; first names are always drawn from the matching visual-gender pool */
   gender?: PersonNameGender;
+  /** migration marker for sprite-judged worker naming */
+  nameGenderVersion?: number;
   /** raw per-discipline skill 10..999; staffPoint() applies mastery diminishing returns */
   story: number;
   art: number;
@@ -991,6 +993,7 @@ export function rollCandidate(
     name: randomStaffName(rng, gender),
     role,
     gender,
+    nameGenderVersion: 2,
     story: role === "writer" ? main : off(),
     art: role === "animator" ? main : off(),
     sound: role === "composer" ? main : off(),
