@@ -2349,14 +2349,15 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
       rd += pulse.points;
     } else if (pulse.kind === "note") {
       const target = projects.find((project) => project.id === pulse.projectId);
-      const protectedNote = !!target && !target.milestone && (target.noteToRdUntilDay ?? -1) >= (r.day ?? r.week * 7) && (target.noteToRdConverted ?? 0) < 6;
-      if (protectedNote) {
+      const consultantActive = !!target && !target.milestone && (target.consultantUntilDay ?? -1) >= (r.day ?? r.week * 7);
+      const consultantConverts = consultantActive && roll() < 0.5;
+      if (consultantConverts) {
         rd += pulse.points;
         pulse.kind = "research";
         projects = projects.map((project) => project.id !== pulse.projectId ? project : ({
           ...project,
           rdGained: project.rdGained + pulse.points,
-          noteToRdConverted: (project.noteToRdConverted ?? 0) + pulse.points,
+          consultantConverted: (project.consultantConverted ?? 0) + pulse.points,
         }));
       } else {
         projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
