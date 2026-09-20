@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PROTAGONISTS, SECONDARY, PETS, VILLAINS, type Draft } from "../data";
 import { makeProject } from "../projects";
-import { initialRun, type RunState } from "../state";
+import { initialRun, tickStudioWorkPulse, type RunState } from "../state";
 import {
   BASE_INTERVENTIONS,
   INTERVENTIONS,
@@ -87,6 +87,47 @@ describe("Stage 5 production investment ladder", () => {
     expect(out.projects[0].interventions).toContain("animation_pass");
     expect(applyIntervention(out, p.id, "animation_pass::obsessive", () => 1)).toBeNull();
     expect(out.strategicSpend.at(-1)?.label).toContain("Extended");
+  });
+});
+
+describe("QoL2 timed production interventions", () => {
+  it("Executive Rush creates a 14-day double-output window without instant quality", () => {
+    const run = withProject("animation");
+    const before = { ...run.projects[0].points };
+    const out = applyIntervention(run, run.projects[0].id, "crunch", () => 1)!;
+    expect(out.projects[0].executiveRushUntilDay).toBe((run.day ?? run.week * 7) + 14);
+    expect(out.projects[0].points).toEqual(before);
+    expect(out.projects[0].issues).toBe(run.projects[0].issues);
+  });
+
+  it("Executive Rush duplicates ordinary visible project bubbles", () => {
+    const base = withProject("animation");
+    const rushed = applyIntervention(base, base.projects[0].id, "crunch", () => 1)!;
+    const originalRandom = Math.random;
+    Math.random = () => 0;
+    try {
+      const noRare = () => 0.99;
+      const normal = tickStudioWorkPulse(base, noRare).pulses.filter((p) => p.source === "project" && !p.kind);
+      const doubled = tickStudioWorkPulse(rushed, noRare).pulses.filter((p) => p.source === "project" && !p.kind);
+      expect(normal.length).toBeGreaterThan(0);
+      expect(doubled.length).toBe(normal.length * 2);
+    } finally {
+      Math.random = originalRandom;
+    }
+  });
+
+  it("Continuity Repair converts would-be notes into capped project R&D", () => {
+    let run = withProject("post");
+    run = applyIntervention(run, run.projects[0].id, "continuity", () => 1)!;
+    expect(run.projects[0].noteToRdUntilDay).toBe((run.day ?? run.week * 7) + 21);
+    const rdBefore = run.rd;
+    const issuesBefore = run.projects[0].issues;
+    let rareRoll = 0;
+    const out = tickStudioWorkPulse(run, () => rareRoll++ === 0 ? 0.5 : 0);
+    expect(out.pulses.some((p) => p.kind === "research")).toBe(true);
+    expect(out.run.rd).toBe(rdBefore + 1);
+    expect(out.run.projects[0].issues).toBe(issuesBefore);
+    expect(out.run.projects[0].noteToRdConverted).toBe(1);
   });
 });
 

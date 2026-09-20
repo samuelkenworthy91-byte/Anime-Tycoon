@@ -7,6 +7,7 @@ import {
   finalizeYear,
   initRivalWorld,
   planRivalYear,
+  reservePlayerPosters,
   rivalTalentAvailable,
   rivalTalentToStaff,
   studioRankScore,
@@ -78,6 +79,26 @@ describe("rival world creation", () => {
 });
 
 /* ---------------------------------------------------- weekly progress */
+describe("shared poster ownership", () => {
+  it("immediately reassigns unreleased rival art once the player claims it", () => {
+    const world = initRivalWorld(0);
+    const targetStudio = world.studios.find((s) => s.productions.some((p) => !!p.posterId))!;
+    const target = targetStudio.productions.find((p) => !!p.posterId)!;
+    const claimed = target.posterId!;
+    const next = reservePlayerPosters(world, [claimed], 0);
+    const replacement = next.studios.find((s) => s.id === targetStudio.id)!.productions.find((p) => p.id === target.id)!;
+    expect(replacement.posterId).not.toBe(claimed);
+  });
+
+  it("blocks claimed player art from newly planned rival slates", () => {
+    const world = initRivalWorld(0);
+    const claim = world.studios.flatMap((s) => s.productions).find((p) => !!p.posterId)?.posterId;
+    expect(claim).toBeTruthy();
+    const next = planRivalYear(world, 2, 48, { blockedPosterIds: [claim!] }).world;
+    expect(next.studios.flatMap((s) => s.productions).some((p) => p.posterId === claim)).toBe(false);
+  });
+});
+
 describe("rivals progress between years", () => {
   it("premieres shows, records releases, grows franchises", () => {
     const world = initRivalWorld(0);

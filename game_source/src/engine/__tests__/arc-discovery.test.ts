@@ -11,7 +11,7 @@ import {
   arcGenreFit,
   arcGenreKey,
 } from "../data";
-import { applyResearchCompletion, arcLockReason, initialRun, migrateRun } from "../state";
+import { GENRE_STUDY_FIRST_BATCH, applyResearchCompletion, arcLockReason, initialRun, migrateRun } from "../state";
 import { arcClashesFor } from "../creativeDiscovery";
 
 describe("creative discovery", () => {
@@ -71,9 +71,11 @@ describe("creative discovery", () => {
     for (const id of ARC_RESEARCH_UNLOCK_IDS) expect(arcLockReason(ARCS.find((arc) => arc.id === id)!, migrated)).toBeNull();
   });
 
-  it("keeps Genre Studies blueprint unlocks when research finishes live", () => {
+  it("starts live Genre Studies with the smaller QoL2 discovery batch", () => {
     const run = initialRun("Live Research", "steady");
     const completed = applyResearchCompletion(run, "genre_studies", "Genre Studies");
-    expect(completed.arcUnlocked).toEqual(expect.arrayContaining(ARC_RESEARCH_UNLOCK_IDS));
+    expect(Object.keys(completed.arcGenreKnowledge)).toHaveLength(GENRE_STUDY_FIRST_BATCH);
+    expect(completed.arcUnlocked.length).toBeGreaterThan(0);
+    expect(completed.arcUnlocked.length).toBeLessThanOrEqual(GENRE_STUDY_FIRST_BATCH);
   });
 });

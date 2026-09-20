@@ -112,6 +112,21 @@ describe("fan web commercial model", () => {
     expect(ten).toBeGreaterThan(0);
   });
 
+  it("makes critic criteria explicit and materially rewards direction, output and story structure", () => {
+    const good = makeDraft("fanweb");
+    const badDraft = { ...good.draft, sliders: [0, 0, 0] as [number, number, number], arcs: [] };
+    const common = {
+      issues: 0, hype: 70, research: [] as string[], showrunner: "steady", genreIdeal: IDEAL, genreRatio: RATIO,
+      comboLevel: 0, newCombo: false, comboDiscovered: true, castCombos: [] as string[], arcCombos: [] as string[],
+      studioTop: 0, reviewExpectation: 25, franchiseMult: 1, costs: 100_000, fanBase: 0,
+    };
+    const strong = computeResult({ ...common, draft: good.draft, points: good.points, rng: seededRng(44) });
+    const weak = computeResult({ ...common, draft: badDraft, points: { story: 25, art: 25, sound: 25 }, rng: seededRng(44) });
+    expect(strong.reviews.every((review) => (review.criteria ?? "").length > 20)).toBe(true);
+    expect(strong.quality).toBeGreaterThan(weak.quality + 3);
+    expect(strong.total).toBeGreaterThan(weak.total);
+  });
+
   it("commercial impact is capped at CULT CLASSIC for fan web — even for a mega-hit", () => {
     const huge = commercialTierOf("fanweb", 50_000_000);
     expect(huge.id).toBe("cult");

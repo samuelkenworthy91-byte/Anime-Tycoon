@@ -22,11 +22,12 @@ export default function StudioSlate({ run }: { run: RunState }) {
     <div className="rounded-xl border border-cyanx/25 bg-abyss/45 p-2.5">
       <button onClick={() => setOpen((v) => !v)} className="btn-press flex w-full items-center gap-2 text-left">
         <CalendarRange size={14} className="text-cyanx" />
-        <span className="font-display text-xs font-extrabold">STUDIO SLATE & BOTTLENECKS</span>
+        <span className="font-display text-xs font-extrabold">STUDIO SLATE & DEPARTMENT LOAD</span>
         <span className="ml-auto text-paper/40">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span>
       </button>
       {open && (
         <div className="mt-2 space-y-2">
+          <div className="rounded-lg border border-line/50 bg-panel2/35 px-2 py-1.5 text-[9px] text-paper/55">Departments only slow down when simultaneous productions demand more capacity than your staff/rooms can supply. The multiplier below is the exact schedule pace currently applied; severe Animation/Post overload can also create rework notes.</div>
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-5">
             {depts.map((d) => {
               const pct = Math.min(160, Math.round(d.utilization * 100));
@@ -35,6 +36,7 @@ export default function StudioSlate({ run }: { run: RunState }) {
                   <div className="flex items-center justify-between text-[9px] font-bold"><span>{d.label}</span><span className={d.overloaded ? "text-neon" : "text-mint"}>{pct}%</span></div>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink"><div className={cn("h-full rounded-full", d.overloaded ? "bg-neon" : "bg-mint")} style={{ width: `${Math.min(100, pct)}%` }} /></div>
                   <div className="mt-1 text-[8px] text-paper/45">{d.demand} demand / {d.capacity} cap</div>
+                  <div className={cn("mt-1 text-[8px] font-bold", d.overloaded ? "text-gold" : "text-mint")}>{d.overloaded ? `PACE ×${d.paceMult.toFixed(2)}${d.reworkRisk ? " · REWORK RISK" : ""}` : "PACE ×1.00 · CLEAR"}</div>
                 </div>
               );
             })}

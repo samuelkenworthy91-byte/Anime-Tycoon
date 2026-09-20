@@ -67,7 +67,7 @@ describe("merch research identity", () => {
     expect(r.desc).toContain("infrastructure");
   });
 
-  it("individual SKU research has been replaced by four paid infrastructure tiers", () => {
+  it("individual SKU research is replaced by infrastructure plus paid product-line development", () => {
     const retired = ["merch_plush", "merch_soundtrack", "merch_figures", "merch_apparel", "merch_collectors"];
     expect(RESEARCH.filter((x) => retired.includes(x.id))).toHaveLength(0);
     expect(MERCH_TIERS).toHaveLength(4);
@@ -75,12 +75,13 @@ describe("merch research identity", () => {
     expect(MERCH_TIERS.every((x) => x.upkeep > 0)).toBe(true);
   });
 
-  it("product families open by tier and the TCG lives in Fan Ecosystem tier 3", () => {
+  it("infrastructure tiers gate which individual product lines can be developed", () => {
     expect(MERCH_PRODUCTS.length).toBeGreaterThan(6);
     expect(merchProductById("tcg")?.tier).toBe(3);
     expect(merchProductById("mobile")?.tier).toBe(4);
     expect(merchBlock(warmFr(), merchProductById("tcg")!, 10, 99_000_000, 2)).toContain("Tier 3");
     expect(merchBlock(warmFr(), merchProductById("tcg")!, 10, 99_000_000, 3)).toBeNull();
+    expect(merchProductById("tcg")!.unlockCost).toBeGreaterThan(0);
   });
 
   it("Global Merch still builds on Merch Division rather than restoring SKU research", () => {

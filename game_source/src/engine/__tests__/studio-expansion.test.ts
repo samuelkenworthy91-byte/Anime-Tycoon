@@ -42,7 +42,7 @@ import {
   reviewLegacyRights,
   type OverseasRequest,
 } from "../overseas";
-import { toLegend } from "../careers";
+import { rollHirePool, toLegend } from "../careers";
 
 const draft = (): Draft => ({
   title: "A Creator's Journey",
@@ -514,7 +514,7 @@ describe("overseas editions, audiences and rights", () => {
     let r = signOverseas(released(), request(released()))!;
     const a = overseasOf(r).releases[0];
     r = advanceOverseasWeek({ ...r, week: a.opensWeek });
-    expect(r.payouts.reduce((sum, p) => sum + p.amount, 0)).toBe(a.receipts);
+    expect(r.payouts.reduce((sum, p) => sum + p.amount, 0)).toBe(a.receipts + a.catalogueReceipts);
     expect(r.payouts.reduce((sum, p) => sum + p.fans, 0)).toBe(a.fans);
     expect(advanceOverseasWeek(r).payouts).toEqual(r.payouts);
     expect(r.showsMade).toBe(0);
@@ -558,10 +558,16 @@ describe("overseas editions, audiences and rights", () => {
   it("settles receipts through the existing calendar and completes the contract", () => {
     let r = signOverseas(released(), request(released()))!;
     const a = overseasOf(r).releases[0];
-    r = advanceWeeks(r, a.endsWeek);
+    r = advanceWeeks(r, a.endsWeek + a.catalogueWeeks + 4);
     expect(overseasOf(r).releases[0].status).toBe("completed");
-    expect(expansionOf(r).accounts.project.receipts).toBe(a.receipts);
+    expect(expansionOf(r).accounts.project.receipts).toBe(a.receipts + a.catalogueReceipts);
     expect(r.payouts.filter((p) => p.sourceReleaseId === a.id)).toHaveLength(0);
     expect(r.showsMade).toBe(0);
+  });
+
+  it("recruitment pools always cover writer, animator and composer without duplicate looks", () => {
+    const pool = rollHirePool(12, 3, () => 0.42);
+    expect(pool.map((s) => s.role)).toEqual(["writer", "animator", "composer"]);
+    expect(new Set(pool.map((s) => s.look)).size).toBe(3);
   });
 });

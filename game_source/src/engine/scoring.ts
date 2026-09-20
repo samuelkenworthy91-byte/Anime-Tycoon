@@ -42,6 +42,8 @@ export interface Points {
 export interface Review {
   outlet: string;
   focus: string;
+  /** player-facing explanation of the evidence this outlet weights most */
+  criteria?: string;
   score: number; // out of 10
   quote: string;
 }
@@ -186,7 +188,7 @@ export const RAW_QUALITY_CEILING = 40;
 /** saturating point conversion (see production.ts) scaled into quality */
 export const POINT_QUALITY_SCALE = 0.55;
 /** soft-cap slope above quality 36 (keeps 10s rare, not impossible) */
-export const TOP_QUALITY_SLOPE = 0.15;
+export const TOP_QUALITY_SLOPE = 0.10;
 /** low/mid-range craft lift: 150→2.6, 450→4.4, 1200→6.4 — keeps the
  *  early career meaningful while staying far flatter than the old curve */
 export const CRAFT_LIFT = 2.6;
@@ -300,12 +302,14 @@ export function computeResult(opts: {
 
   const totalPts = points.story + points.art + points.sound;
 
-  /* ---- how well the point mix matches what the genre wants (GDT tech/design) */
+  /* ---- Story / Art / Sound distribution is a light genre flavour, not a quality gate.
+     Great work in one department should be allowed to compensate for a weaker one:
+     total production output matters far more than matching an "ideal" point ratio. */
   const mix: [number, number, number] = totalPts
     ? [points.story / totalPts, points.art / totalPts, points.sound / totalPts]
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
-  const ratioMatch = clamp(1.05 - drift * 0.85, 0.5, 1.05);
+  const ratioMatch = clamp(1.01 - drift * 0.12, 0.94, 1.01);
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -341,12 +345,15 @@ export function computeResult(opts: {
   const castingBase = castParts.reduce((sum, part) => sum + part.totalQuality, 0);
   const casting = castingBase;
   const zeroAffinityRoles = castParts.filter((part) => part.tier === 0).length;
-  const wrongTypeRoles = castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
+  const wrongTypeRoles = licensed ? 0 : castParts.filter((part) => !part.member.legacyPlaceholder && part.member.type !== draft.animeType).length;
   /* Bad casting now hurts the WHOLE production instead of merely missing a tiny bonus.
-     Four completely unsuitable roles can cut raw quality by roughly a third. */
-  const castFitMult = clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
+     Four completely unsuitable roles can cut raw quality by roughly a third.
+     Licensed adaptations use canonical source characters, so their internal
+     placeholder cast ids must never create type/affinity penalties. */
+  const castFitMult = licensed ? 1 : clamp(1 - zeroAffinityRoles * 0.075 - wrongTypeRoles * 0.035, 0.62, 1.02);
   const castSalesMultiplier = 1 + castParts.reduce((sum, part) => sum + part.salesBonus, 0);
   const publicTier = (part: typeof castParts[number]): 0 | 1 | 2 => {
+    if (licensed) return 0;
     if (castAffinityDiscovered.includes(part.member.id) && draft.genres.includes(part.member.hiddenAff)) return 2;
     return part.member.visibleAff.some((genre) => draft.genres.includes(genre)) ? 1 : 0;
   };
@@ -380,7 +387,7 @@ export function computeResult(opts: {
       arcsF += arc.antiF ?? -0.01;
     }
     /* arcs that shine with the right cast member */
-    if (arc.cast && arc.castQ) {
+    if (!licensed && arc.cast && arc.castQ) {
       const m = castOf(arc.cast);
       if (m && m.visibleAff.some((genre) => draft.genres.includes(genre))) {
         arcQ += arc.castQ;
@@ -470,17 +477,43 @@ export function computeResult(opts: {
      (36 → ~9.0, 40 → ~9.5). A 10 requires elite quality AND critic
      agreement — elite work lands 9s regularly, 10s occasionally. */
   const base = (quality <= 36 ? quality * 0.25 : 9 + (quality - 36) * TOP_QUALITY_SLOPE)
-    + expectationAdj + audienceAdj;
+    + expectationAdj + audienceAdj - 0.14;
+  /* Critics react more strongly to poor creative choices, while excellent
+     choices earn only a modest bonus so top reviews remain genuinely rare. */
+  const arcCriticAdj = clamp(arcQuality * 0.08 - 0.18, -0.65, 0.20);
+  const productionCriticAdj = clamp((pointScore - 9) * 0.04, -0.35, 0.18);
+  const overallDirectionAdj = clamp((sliderFitMult - 0.92) * 1.25, -0.45, 0.10);
   const reviews: Review[] = REVIEWERS.map((r) => {
     let s = base;
-    if (r.bias === "story") s += (perPhase[0] - 2) * 0.25 + (mix[0] - genreRatio[0]) * 2.5 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "hype") s += (hype / 100) * 0.55 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "harsh") s += -0.5 - issues * 0.12 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    if (r.bias === "tech") s += (mix[1] - genreRatio[1]) * 2.5 - issues * 0.18 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
-    s = Math.round(clamp(s, floor, 10));
+    let criteria = "";
+    if (r.bias === "story") {
+      criteria = "Writing · Story-direction slider · Arc structure · Overall execution";
+      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 0.45 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "hype") {
+      criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
+      s += (hype / 100) * 0.50 + overallDirectionAdj + clamp(arcsF * 1.35, -0.35, 0.35) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "harsh") {
+      criteria = "Overall execution · Production output · Editing notes · Professional polish";
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.98) * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    if (r.bias === "tech") {
+      criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
+      s += (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+    }
+    const calibrated = clamp(s, floor, 10);
+    /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
+       higher bar than ordinary rounding. Other bands use a slight conservative
+       threshold so strong work is not an automatic Hall of Fame. */
+    s = calibrated >= 9.92 ? 10 : Math.max(floor, Math.floor(calibrated + 0.43));
+    /* A numerical 10 is a critic calling the work effectively flawless.
+       Even after the raw score clears the 9.92 bar, that judgement is rare;
+       9/10 remains the normal result for excellent work. */
+    if (s === 10 && roll() >= 0.28) s = 9;
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
-    return { outlet: r.name, focus: r.focus, score: s, quote: pool[Math.floor(roll() * pool.length)] };
+    return { outlet: r.name, focus: r.focus, criteria, score: s, quote: pool[Math.floor(roll() * pool.length)] };
   });
 
   const total = reviews.reduce((a, r) => a + r.score, 0);
@@ -547,12 +580,12 @@ export function computeResult(opts: {
 
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
-    { label: `Genre focus match (${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)}` },
-    { label: "Direction sliders", pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)}` },
+    { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
+    { label: `Direction sliders (${Math.round(sliderFitMult * 100)}% fit)`, pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)} quality` },
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
       : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
-    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)}` },
+    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)} critic quality${arcCombosHit.length ? ` · ${arcCombosHit.length} synergy` : ""}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
     { label: `Genre combo ×${actualComboMult.toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)} quality` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
@@ -568,16 +601,16 @@ export function computeResult(opts: {
   if (arcClashesHit.length > 0)
     breakdown.push({ label: `Story clash: ${arcClashesHit.map((c) => c.name).join(", ")}`, pts: `×${arcStructureMult.toFixed(2)} quality` });
   const affNotes: string[] = [];
-  for (const m of [protag, sec, pet, vil]) {
+  if (!licensed) for (const m of [protag, sec, pet, vil]) {
     const visibleHit = m.visibleAff.filter((g) => draft.genres.includes(g));
     const knownHidden = castAffinityDiscovered.includes(m.id) && draft.genres.includes(m.hiddenAff) ? [m.hiddenAff] : [];
     const hit = [...new Set([...visibleHit, ...knownHidden])];
     if (hit.length) affNotes.push(`${m.name} ↔ ${hit.map((g) => `${GENRES.find((x) => x.id === g)!.label}${knownHidden.includes(g) ? " ✦" : ""}`).join("/")}`);
   }
   if (affNotes.length) breakdown.push({ label: "Known cast fit", pts: affNotes.join(" · ") });
-  if (castParts.some((part) => part.typeModifier === TYPE_MATCH_MULTIPLIER))
+  if (!licensed && castParts.some((part) => part.typeModifier === TYPE_MATCH_MULTIPLIER))
     breakdown.push({ label: "Anime Type casting", pts: "Matching traditions strengthen individual cast contributions" });
-  if (publicSalesMultiplier > 1)
+  if (!licensed && publicSalesMultiplier > 1)
     breakdown.push({ label: "Known Correct Cast commercial lift", pts: `×${publicSalesMultiplier.toFixed(3)} sales` });
   if (secretDiscovered) breakdown.push({ label: "Secret combo discovered!", pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
 

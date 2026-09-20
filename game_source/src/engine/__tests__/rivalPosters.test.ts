@@ -23,6 +23,7 @@ vi.mock("../generated/rivalPosterManifest.json", () => ({
 import {
   RIVAL_POSTERS,
   RIVAL_POSTER_SLOTS,
+  genericPosterOptions,
   pickRivalPoster,
   poolSize,
   rivalPosterById,
@@ -98,6 +99,23 @@ describe("pickRivalPoster", () => {
     const a = pickRivalPoster({ studio: "Sunnyrise", animeType: "shonen", genres: ["mecha"], rand: rnd0 });
     const b = pickRivalPoster({ studio: "Sunnyrise", animeType: "shonen", genres: ["mecha"], rand: rnd0 });
     expect(a!.id).toBe(b!.id);
+  });
+});
+
+describe("generic player poster choices", () => {
+  it("removes permanently claimed industry art from player and rival selection", () => {
+    const blocked = ["t1"];
+    expect(genericPosterOptions("shonen", ["mecha"], 6, blocked).some((p) => p.id === "t1")).toBe(false);
+    expect(pickRivalPoster({ studio: "Toe-i Frontier", animeType: "shonen", genres: ["mecha"], blocked, rand: () => 0 })?.id).not.toBe("t1");
+  });
+
+  it("is deterministic, anime-type safe and spread across studios", () => {
+    const a = genericPosterOptions("shonen", ["mecha", "military"], 6);
+    const b = genericPosterOptions("shonen", ["mecha", "military"], 6);
+    expect(a.map((poster) => poster.id)).toEqual(b.map((poster) => poster.id));
+    expect(a.length).toBeGreaterThan(0);
+    expect(a.every((poster) => poster.animeTypes.includes("shonen"))).toBe(true);
+    expect(new Set(a.map((poster) => poster.studio)).size).toBeGreaterThan(1);
   });
 });
 

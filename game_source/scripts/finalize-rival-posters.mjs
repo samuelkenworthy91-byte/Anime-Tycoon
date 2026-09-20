@@ -7,8 +7,10 @@
  *
  * The audited TSV catalog is authoritative for poster -> studio/type/genre/family
  * assignment. The six original Toe-i posters remain live; together with the 160
- * supplied posters this yields 166 live visuals and two reserve slots, exactly
- * 28 slots per rival studio / 168 total.
+ * supplied posters this yields the legacy 166 live visuals and two reserve
+ * slots (28 per rival studio / 168 base slots). The Sep 19 shared-industry
+ * original-show catalog is then appended so rerunning this finalizer cannot
+ * silently discard the expanded generic/rival poster pool.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -18,6 +20,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.dirname(HERE);
 const MANIFEST = path.join(ROOT, "src", "engine", "generated", "rivalPosterManifest.json");
 const CATALOG = path.join(ROOT, "src", "engine", "generated", "rivalPosterCatalog.tsv");
+const SHARED_CATALOG = path.join(ROOT, "src", "engine", "generated", "sharedIndustryPosterCatalog.json");
 const SOURCE_DIR = path.join(ROOT, "art_src", "rival", "external");
 const IMPORTED_DIR = path.join(ROOT, "public", "rival-posters", "imported");
 const MAP_OUT = path.join(ROOT, "docs", "rival-poster-import-map.csv");
@@ -43,7 +46,10 @@ const STUDIO_META = {
 };
 
 fs.mkdirSync(path.dirname(MAP_OUT), { recursive: true });
-fs.rmSync(IMPORTED_DIR, { recursive: true, force: true });
+/* Do not clear the whole imported directory: it also contains the canonical
+   shared_industry_####.png original-show expansion. The legacy 160 files are
+   overwritten in place below; manifest membership, not directory emptiness,
+   determines what is live. */
 fs.mkdirSync(IMPORTED_DIR, { recursive: true });
 
 function sourceName(n) {
@@ -168,21 +174,52 @@ for (const [studio, [prefix, persona]] of Object.entries(STUDIO_META)) {
   }
 }
 
+const basePosters = [...posters];
+if (basePosters.length !== 168) throw new Error(`Expected 168 legacy rival poster slots, got ${basePosters.length}`);
+
+const sharedCatalog = JSON.parse(fs.readFileSync(SHARED_CATALOG, "utf8"));
+const sharedRows = Array.isArray(sharedCatalog.posters) ? sharedCatalog.posters : [];
+if (sharedRows.length !== 213) throw new Error(`Expected 213 shared-industry posters, got ${sharedRows.length}`);
+
+const sharedPosters = sharedRows.map((row) => {
+  const runtime = {
+    id: row.id,
+    img: row.img,
+    studio: row.studio,
+    persona: row.persona,
+    animeTypes: row.animeTypes,
+    genres: row.genres,
+    family: row.family ?? null,
+  };
+  if (!STUDIO_META[runtime.studio]) throw new Error(`Unknown shared poster studio: ${runtime.studio}`);
+  if (!Array.isArray(runtime.animeTypes) || !runtime.animeTypes.length) throw new Error(`Shared poster ${runtime.id} has no anime types`);
+  if (!Array.isArray(runtime.genres) || !runtime.genres.length) throw new Error(`Shared poster ${runtime.id} has no genre tags`);
+  const asset = path.join(ROOT, "public", runtime.img);
+  if (!fs.existsSync(asset)) throw new Error(`Missing shared poster asset: ${runtime.img}`);
+  return runtime;
+});
+
+const allPosters = [...basePosters, ...sharedPosters];
+const ids = allPosters.map((p) => p.id);
+const imgs = allPosters.filter((p) => p.img).map((p) => p.img);
+if (new Set(ids).size !== ids.length) throw new Error("Poster IDs must stay globally unique");
+if (new Set(imgs).size !== imgs.length) throw new Error("Poster image paths must stay globally unique");
+
 const manifest = {
-  schema: 2,
-  capacity: { perStudio: 28, studios: 6, total: 168 },
-  generated: posters.filter((p) => !p.pending).length,
-  pending: posters.filter((p) => !!p.pending).length,
-  posters,
+  schema: 3,
+  capacity: { perStudio: 28, studios: 6, baseTotal: 168, sharedIndustry: sharedPosters.length, total: allPosters.length },
+  generated: allPosters.filter((p) => !p.pending).length,
+  pending: allPosters.filter((p) => !!p.pending).length,
+  posters: allPosters,
 };
 
-if (manifest.posters.length !== 168) throw new Error(`Expected 168 rival poster slots, got ${manifest.posters.length}`);
-if (manifest.generated !== 166 || manifest.pending !== 2) {
-  throw new Error(`Expected 166 generated / 2 pending, got ${manifest.generated}/${manifest.pending}`);
+if (manifest.posters.length !== 381) throw new Error(`Expected 381 total poster rows, got ${manifest.posters.length}`);
+if (manifest.generated !== 379 || manifest.pending !== 2) {
+  throw new Error(`Expected 379 generated / 2 pending, got ${manifest.generated}/${manifest.pending}`);
 }
 for (const studio of Object.keys(STUDIO_META)) {
-  const all = manifest.posters.filter((p) => p.studio === studio);
-  if (all.length !== 28) throw new Error(`${studio}: expected 28 total slots, got ${all.length}`);
+  const base = basePosters.filter((p) => p.studio === studio);
+  if (base.length !== 28) throw new Error(`${studio}: expected 28 legacy base slots, got ${base.length}`);
 }
 
 fs.writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`);
@@ -220,11 +257,12 @@ if (create.includes(oldLabel)) {
 
 fs.writeFileSync(CREATE, create);
 
-console.log(`Rival posters: ${manifest.generated}/${manifest.posters.length} live, ${manifest.pending} pending.`);
+console.log(`Rival posters: ${manifest.generated}/${manifest.posters.length} live, ${manifest.pending} pending (includes ${sharedPosters.length} shared-industry originals).`);
 for (const studio of Object.keys(STUDIO_META)) {
-  const live = manifest.posters.filter((p) => p.studio === studio && !p.pending).length;
-  const pending = manifest.posters.filter((p) => p.studio === studio && p.pending).length;
-  console.log(`  ${studio}: ${live} live + ${pending} reserve = 28`);
+  const baseLive = basePosters.filter((p) => p.studio === studio && !p.pending).length;
+  const basePending = basePosters.filter((p) => p.studio === studio && p.pending).length;
+  const shared = sharedPosters.filter((p) => p.studio === studio).length;
+  console.log(`  ${studio}: ${baseLive} base live + ${basePending} reserve + ${shared} shared`);
 }
 console.log(`Imported ${POSTER_COUNT} individual supplied PNG posters using the audited catalog.`);
 console.log("KNOWN FITS: contextual to the first selected genre and adds the learned partner.");

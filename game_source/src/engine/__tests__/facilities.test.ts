@@ -235,12 +235,12 @@ describe("facility bonuses", () => {
     expect(stam(c, "busy")).toBe(stam(plain, "busy") + 2); // −1 drain/wk × 2
   });
 
-  it("archive room generates weekly RD and multiplies sprint RD", () => {
+  it("archive room generates 5 RD per fortnight and multiplies sprint RD", () => {
     const r = richRun();
-    const a = buyFacility(r, "archive")!; // tier 1: +1/wk, ×1.25
+    const a = buyFacility(r, "archive")!; // tier 1: +5/fortnight, ×1.25
     const spentRd = facilityDef("archive").tiers[0].rd;
     const after = advanceWeeks(a, 4);
-    expect(after.rd).toBe(r.rd - spentRd + 4);
+    expect(after.rd).toBe(r.rd - spentRd + 10);
 
     let withProj = startProject(a, draft())!;
     const id = withProj.projects[0].id;

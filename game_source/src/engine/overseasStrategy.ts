@@ -317,8 +317,9 @@ export function regionalForecast(r: RunState, a: RegionalRelease) {
     radius = researched ? 3 : 8;
   const low = clamp(center - radius, 5, 95),
     high = clamp(center + radius, 5, 95);
+  const committedReceipts = a.receipts + a.catalogueReceipts;
   const receiptAt = (score: number) =>
-    (a.receipts * (0.2 + score / 125)) / (0.2 + a.reception / 125);
+    (committedReceipts * (0.2 + score / 125)) / (0.2 + a.reception / 125);
   return {
     reception: [low, high],
     receipts: [
@@ -396,7 +397,7 @@ export function advanceOverseasStrategy(r: RunState): RunState {
   for (const a of o.releases)
     if (a.status === "completed" && !settled.includes(a.id)) {
       const key = regionalKey(a.territory, a.distributor),
-        change = a.receipts >= a.cost && a.reception >= 50 ? 6 : -4;
+        change = a.receipts + a.catalogueReceipts >= a.cost && a.reception >= 50 ? 6 : -4;
       relationships[key] = clamp((relationships[key] ?? 50) + change, 0, 100);
       settled.push(a.id);
       history = [

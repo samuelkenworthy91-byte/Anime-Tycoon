@@ -18,6 +18,7 @@ import {
   marketMult,
   negotiationChance,
   partnerById,
+  partnerCommercialMult,
   pruneReleases,
   repAdvanceMult,
   repLabel,
@@ -37,10 +38,13 @@ import {
   negotiateCommission,
   releaseProject,
   resolveMarketEvent,
+  selfFundedGreenlightCost,
+  selfFundedStartupMult,
   startProject,
   type RunState,
 } from "../state";
 import { initRivalWorld } from "../rivals";
+import { projectUpfront } from "../projects";
 
 /* ------------------------------------------------------------ helpers */
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -213,6 +217,16 @@ describe("market multipliers", () => {
     expect(attentionMult(10)).toBe(0.65); // anti-snowball floor
   });
 
+  it("partner relationships create a bounded commercial network multiplier", () => {
+    const low = Object.fromEntries(PARTNERS.map((p) => [p.id, 20]));
+    const neutral = Object.fromEntries(PARTNERS.map((p) => [p.id, REP_START]));
+    const high = Object.fromEntries(PARTNERS.map((p) => [p.id, 90]));
+    expect(partnerCommercialMult(low)).toBeLessThan(1);
+    expect(partnerCommercialMult(neutral)).toBeCloseTo(1, 5);
+    expect(partnerCommercialMult(high)).toBeGreaterThan(1);
+    expect(partnerCommercialMult(high)).toBeLessThanOrEqual(1.22);
+  });
+
   it("marketMultiplierFor reflects airing rivals and licensing boosts", () => {
     const base = readyRun();
     const p = base.projects[0];
@@ -282,7 +296,7 @@ describe("starting a commissioned project", () => {
     const r = richRun({ commissions: [com()] });
     const selfFunded = startProject(r, draft())!;
     const next = startProject(r, draft(), com())!;
-    expect(next.cash - selfFunded.cash).toBe(com().advance); // advance lands on top
+    expect(next.cash).toBe(r.cash - projectUpfront(draft()) + com().advance); // commission bypasses startup surcharge
     const p = next.projects[0];
     expect(p.commission?.partnerId).toBe("ntv8");
     expect(p.commission?.share).toBe(0.5);
@@ -303,6 +317,42 @@ describe("starting a commissioned project", () => {
     const base = startProject(r, draft())!.projects[0];
     const hyped = startProject(r, draft(), com({ hypeBonus: 10 }))!.projects[0];
     expect(hyped.hype).toBe(base.hype + 10);
+  });
+});
+
+describe("early commission bridge", () => {
+  it("makes the first three self-funded originals progressively less expensive, then normal", () => {
+    const r = richRun();
+    const d = draft();
+    expect(selfFundedStartupMult(r, d)).toBe(1.4);
+    const p1 = startProject(r, d)!;
+    expect(selfFundedStartupMult(p1, d)).toBe(1.25);
+    const after1 = { ...p1, projects: p1.projects.map((project) => ({ ...project, stage: "done" as const })) };
+    const p2 = startProject(after1, { ...d, title: "Second" })!;
+    expect(selfFundedStartupMult(p2, d)).toBe(1.1);
+    const after2 = { ...p2, projects: p2.projects.map((project) => ({ ...project, stage: "done" as const })) };
+    const p3 = startProject(after2, { ...d, title: "Third" })!;
+    expect(selfFundedStartupMult(p3, d)).toBe(1);
+  });
+
+  it("lets a commission use a locked genre and permanently unlocks it only after on-time success", () => {
+    const locked = "sports" as const;
+    let r = richRun({ genresUnlocked: ["mecha"] });
+    const brief = com({ genre: locked, minQuality: 0, maxWeeks: 20 });
+    r = startProject(r, draft({ genres: [locked] }), brief)!;
+    expect(r.genresUnlocked).not.toContain(locked);
+    r = { ...r, projects: r.projects.map((p) => ({ ...p, stage: "ready" as const })) };
+    const out = releaseProject(r, r.projects[0].id, { spent: 0, hype: 50 })!;
+    expect(out.run.genresUnlocked).toContain(locked);
+  });
+
+  it("does not unlock the commissioned genre when delivery is late", () => {
+    const locked = "sports" as const;
+    let r = richRun({ genresUnlocked: ["mecha"] });
+    r = startProject(r, draft({ genres: [locked] }), com({ genre: locked, minQuality: 0, maxWeeks: 1 }))!;
+    r = { ...r, week: r.week + 10, day: r.day + 70, projects: r.projects.map((p) => ({ ...p, stage: "ready" as const })) };
+    const out = releaseProject(r, r.projects[0].id, { spent: 0, hype: 50 })!;
+    expect(out.run.genresUnlocked).not.toContain(locked);
   });
 });
 

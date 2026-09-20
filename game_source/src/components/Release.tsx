@@ -313,6 +313,7 @@ export default function Release({
                               </div>
                               <div className="min-w-0">
                                 <div className="text-[10px] font-extrabold tracking-wider text-paper/75">{r.outlet}</div>
+                                <div className="mt-0.5 text-[8px] font-bold uppercase tracking-wide text-gold/70">{r.criteria ?? r.focus}</div>
                                 <div className="mt-1 text-[11px] italic leading-snug text-paper/60">“{quote}”</div>
                               </div>
                             </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, ChevronLeft, Megaphone, Rocket, Scissors, Target } from "lucide-react";
+import { AlertTriangle, Check, ChevronLeft, Image, Megaphone, Rocket, Scissors, Target } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { POINT_COLOR, POINT_LABEL, formatGBP, type PointType } from "../engine/data";
@@ -15,6 +15,8 @@ import {
 } from "../engine/marketing";
 import { campaignForecastAccess, specialisationProjectEffects } from "../engine/specialisation";
 import { cn } from "../utils/cn";
+import { genericPosterOptions } from "../engine/rivalPosters";
+import { assetPath } from "../utils/assetPath";
 
 /** Release prep: choose a small strategic campaign mix, then air — or delay. */
 export default function Ship({
@@ -23,6 +25,7 @@ export default function Ship({
   onAir,
   onSell,
   onShelve,
+  onPosterChoice,
   onBack,
 }: {
   run: RunState;
@@ -30,6 +33,7 @@ export default function Ship({
   onAir: (spent: number, hype: number) => void;
   onSell: (offerId: string) => void;
   onShelve: () => void;
+  onPosterChoice: (posterArtId?: string) => void;
   onBack: () => void;
 }) {
   const [spent, setSpent] = useState(0);
@@ -37,6 +41,7 @@ export default function Ship({
   const [bought, setBought] = useState<string[]>([]);
   const [confirmSale, setConfirmSale] = useState<string | null>(null);
   const saleOffers = showSaleOffers(run, project.id);
+  const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, 6, run.playerPosterClaims ?? []);
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
@@ -69,6 +74,40 @@ export default function Ship({
           <h2 className="font-display text-2xl font-extrabold md:text-3xl">BUILD THE LAUNCH</h2>
           <p className="mt-1 text-xs text-paper/60">Choose up to {MAX_STRATEGIC_CAMPAIGNS} campaigns. Marketing changes reach and opening demand — never the review-quality score.</p>
         </div>
+
+        {!project.draft.licensedIpId && (
+          <div className="ink-card mt-3 p-3">
+            <div className="flex items-center gap-2">
+              <Image size={14} className="text-cyanx" />
+              <div>
+                <div className="text-[10px] font-black tracking-widest text-cyanx">KEY VISUAL</div>
+                <div className="text-[9px] text-paper/45">Choose from the same industry poster pool rivals use. Once your studio releases with one, rivals can never use it again.</div>
+              </div>
+            </div>
+            <div className="nice-scroll mt-2 flex gap-2 overflow-x-auto pb-1">
+              <button
+                type="button"
+                onClick={() => onPosterChoice(undefined)}
+                className={cn("h-24 w-[76px] shrink-0 rounded-lg border p-2 text-center text-[9px] font-bold", !project.draft.posterArtId ? "border-gold bg-gold/10 text-gold" : "border-line bg-panel2 text-paper/55")}
+              >
+                <div className="mb-2 text-2xl">★</div>
+                MAIN CHARACTER
+              </button>
+              {genericPosters.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onPosterChoice(option.id)}
+                  className={cn("relative h-24 w-[76px] shrink-0 overflow-hidden rounded-lg border", project.draft.posterArtId === option.id ? "border-gold ring-1 ring-gold" : "border-line")}
+                  title={option.genres.join(" / ") + " generic key art"}
+                >
+                  <img src={assetPath(option.img)} alt="Generic poster option" className="absolute inset-0 h-full w-full object-cover" />
+                  {project.draft.posterArtId === option.id && <div className="absolute right-1 top-1 rounded bg-gold px-1 text-[8px] font-black text-ink">✓</div>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="ink-card mt-3 grid grid-cols-3 gap-2 p-3 text-center">
           {(["story", "art", "sound"] as PointType[]).map((t) => (

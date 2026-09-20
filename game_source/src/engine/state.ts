@@ -63,6 +63,7 @@ import {
   pickPoacher,
   planRivalYear,
   removeRivalTalent,
+  reservePlayerPosters,
   rivalTalentById,
   rivalTalentToStaff,
   rollRivalryEvents,
@@ -151,6 +152,7 @@ import {
   marketMult,
   negotiationChance,
   partnerById,
+  partnerCommercialMult,
   pruneReleases,
   saturationOf,
   rollCommission,
@@ -354,6 +356,8 @@ export interface RunState {
   payouts: Payout[];
   /** the persistent rival-studios simulation */
   rivalWorld: RivalWorld;
+  /** shared industry poster assets permanently claimed by player releases */
+  playerPosterClaims?: string[];
   /** the player's releases this calendar year (for the ceremony) */
   yearShows: AwardNominee[];
   /** results of the most recent awards ceremony */
@@ -411,7 +415,7 @@ export interface RunState {
   revBoostUntil: number;
   /** auction calendar, adaptation contracts and studio-wide discovered story blueprints */
   ipMarket: IPMarketState;
-  /** Year-5+ fan-decided cultural canon. Exactly three slots can ever be filled. */
+  /** Year-3+ March-selected cultural canon. Exactly three studios can hold one monument each. */
   bigThree: BigThreeState;
   /** one-off strategic spending is recorded for finance/history UI */
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
@@ -478,7 +482,7 @@ export function unlockFormat(r: RunState, medium: MediumId): RunState | null {
   };
 }
 
-/** twelve-year career — after this the studio enters Dynasty Mode */
+/** twenty-five-year career — after this the studio enters Dynasty Mode */
 export const MAX_WEEKS = CAREER_WEEKS;
 export const START_CASH = 90_000;
 export { AIR_WEEKS }; // re-exported for screens that read the broadcast length
@@ -532,6 +536,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     awards: 0,
     payouts: [],
     rivalWorld: initRivalWorld(0),
+    playerPosterClaims: [],
     yearShows: [],
     awardsCeremony: null,
     incomeThisWeek: 0,
@@ -780,6 +785,42 @@ export const merchUpkeep = (r: Pick<RunState, "capitalProjects">): number => {
   return tier ? MERCH_TIERS[tier - 1].upkeep : 0;
 };
 
+export const MERCH_PRODUCT_PROJECT_PREFIX = "merch_product_";
+export const merchProductProjectId = (productId: string) => `${MERCH_PRODUCT_PROJECT_PREFIX}${productId}`;
+
+export function merchProductUnlocked(r: Pick<RunState, "capitalProjects">, productId: string): boolean {
+  return r.capitalProjects.includes(merchProductProjectId(productId));
+}
+
+export function merchProductUnlockBlock(r: RunState, productId: string): string | null {
+  const product = merchProductById(productId);
+  if (!product) return "Unknown product line";
+  if (merchProductUnlocked(r, productId)) return "Product line already developed";
+  const tier = merchTierOf(r);
+  if (tier < product.tier) return `Requires Merch Tier ${product.tier}: ${MERCH_TIERS[product.tier - 1].name}`;
+  if (r.cash < product.unlockCost) return `Needs £${product.unlockCost.toLocaleString("en-GB")} to develop`;
+  return null;
+}
+
+export function unlockMerchProduct(r: RunState, productId: string): RunState | null {
+  const product = merchProductById(productId);
+  if (!product || merchProductUnlockBlock(r, productId)) return null;
+  const projectId = merchProductProjectId(productId);
+  return {
+    ...r,
+    cash: r.cash - product.unlockCost,
+    capitalProjects: [...r.capitalProjects, projectId],
+    strategicSpend: [
+      ...r.strategicSpend,
+      { id: `merch_product_${r.week}_${product.id}`, label: `Merch product development: ${product.label}`, amount: product.unlockCost, week: r.week },
+    ],
+    notices: [
+      ...r.notices,
+      `🛍 PRODUCT LINE READY — ${product.label} developed for £${product.unlockCost.toLocaleString("en-GB")}. It can now be launched by eligible franchises.`,
+    ].slice(-40),
+  };
+}
+
 export const commercialUpkeep = (r: Pick<RunState, "capitalProjects">): number =>
   merchUpkeep(r) + overseasUpkeep(r);
 
@@ -990,7 +1031,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       sound: baseFx.pointMult.sound * spm.sound * dynFx.pointMult * managementMult,
     },
     speed: baseFx.speed + dynFx.speed,
-    rdWeekly: baseFx.rdWeekly + dynFx.rdWeekly,
+    rdWeekly: dynFx.rdWeekly,
+    rdFortnightly: baseFx.rdFortnightly,
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
@@ -1114,8 +1156,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       researchJobs = keep;
     }
 
-    /* the archive room quietly files away research */
+    /* Dynasty archives can still pay weekly; the dedicated R&D room now pays
+       in visible fortnightly 5-point steps. */
     rd += fx.rdWeekly;
+    if (w % 2 === 0) rd += fx.rdFortnightly;
 
     /* ------- colleagues who work together grow bonds ------- */
     for (const p of projects) {
@@ -1244,7 +1288,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     {
       const airingGenres = new Set<GenreId>();
       for (const p of projects) if (p.stage === "airing") p.draft.genres.forEach((g) => airingGenres.add(g));
-      const rivalTick = tickRivalWeek(rivalWorld, w, { playerAiringGenres: airingGenres });
+      const rivalTick = tickRivalWeek(rivalWorld, w, { playerAiringGenres: airingGenres, blockedPosterIds: r.playerPosterClaims ?? [] });
       rivalWorld = rivalTick.world;
       notices.push(...rivalTick.notices);
       recentReleases = [...pruneReleases(recentReleases, w), ...rivalTick.releaseRecords];
@@ -1481,7 +1525,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       rivalWorld = fy.world;
       notices.push(...fy.notices);
       const pressure = industryPressure({ week: w, cash, fans, awards, hits: r.hits, bestScore: r.bestScore, showsMade: r.showsMade, playerRank: rivalWorld.playerRank });
-      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0) });
+      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0), blockedPosterIds: r.playerPosterClaims ?? [] });
       rivalWorld = py.world;
       notices.push(...py.notices);
       if (pressure.level >= 1) notices.push(`📈 INDUSTRY PRESSURE ${pressure.level.toFixed(1)}/6 · ${pressure.band.toUpperCase()} — next year rivals gain +${pressure.rivalBoost.toFixed(1)} quality pressure.`);
@@ -1542,10 +1586,27 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
 
 /** how many major productions this office can run at once */
 export const projectCapacity = (r: RunState) =>
-  OFFICES[r.officeLevel].projects + (r.dynasty ? dynastyFX(r).extraProjects : 0);
+  OFFICES[r.officeLevel].projects + (r.dynasty ? dynastyFX(r).extraProjects : 0) + (r.capitalProjects.includes("second_campus") ? 1 : 0);
 
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
+
+export const SELF_FUNDED_STARTUP_MULTS = [1.40, 1.25, 1.10] as const;
+
+/** New studios pay one-off setup inefficiency on their first three original,
+ * fully self-funded productions. Commissions, licensed IP and continuations
+ * bypass it, making early commissioned work a meaningful bridge. */
+export function selfFundedStartupMult(r: Pick<RunState, "projects">, d: Draft): number {
+  if (d.licensedIpId || d.continuation || d.franchiseKey) return 1;
+  const prior = r.projects.filter((project) =>
+    !project.commission && !project.draft.licensedIpId && !project.draft.continuation && !project.draft.franchiseKey
+  ).length;
+  return SELF_FUNDED_STARTUP_MULTS[prior] ?? 1;
+}
+
+export function selfFundedGreenlightCost(r: Pick<RunState, "projects">, d: Draft): number {
+  return Math.round(projectUpfront(d) * selfFundedStartupMult(r, d));
+}
 
 export interface SoldCastRight { franchiseKey: string; title: string; buyer: string; }
 
@@ -1563,7 +1624,7 @@ export function soldCastRights(r: Pick<RunState, "franchises">): Record<string, 
 /** null = a new project can be greenlit; otherwise the blocking reason.
     Covers capacity, cash, and every continuation rule so the UI can say
     WHY a show can't start instead of silently swallowing the click. */
-export function startBlockReason(r: RunState, d?: Draft): string | null {
+export function startBlockReason(r: RunState, d?: Draft, commission?: Commission): string | null {
   const active = activeProjects(r.projects).length;
   const cap = projectCapacity(r);
   if (active >= cap)
@@ -1599,12 +1660,13 @@ export function startBlockReason(r: RunState, d?: Draft): string | null {
       if (selected.requiresSequelRights && !contract.sequelRights) return "Negotiate sequel rights first";
     }
   }
-  if (d && r.cash < projectUpfront(d)) return "Not enough cash for the greenlight payment";
+  const greenlightRequired = d ? (commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d)) : 0;
+  if (d && r.cash + (commission?.advance ?? 0) < greenlightRequired) return "Not enough cash for the greenlight payment";
   if (d?.continuation) {
     const fr = d.franchiseKey ? r.franchises[d.franchiseKey] : undefined;
     if (!fr) return "This franchise doesn't exist any more";
     const fee = continuationDef(d.continuation)?.fee ?? 0;
-    if (fee > 0 && r.cash < projectUpfront(d) + fee)
+    if (fee > 0 && r.cash + (commission?.advance ?? 0) < greenlightRequired + fee)
       return `Not enough cash — the rights fee alone is £${fee.toLocaleString("en-GB")}`;
     const block = continuationBlock(fr, d.continuation, {
       week: r.week,
@@ -1650,7 +1712,9 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
     if (r.cash + (commission?.advance ?? 0) < projectUpfront(d) + contFee) return null;
   }
 
-  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player" };
+  const greenlightCost = commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d);
+  const startupMult = commission ? 1 : selfFundedStartupMult(r, d);
+  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost };
   const decisionQuality = decisionReleaseQualityBonus(r, d);
   if (decisionQuality.length) {
     for (const bonus of decisionQuality) p = { ...p, points: { ...p.points, [bonus.point]: p.points[bonus.point] + bonus.amount } };
@@ -1667,6 +1731,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       commission: {
         partnerId: commission.partnerId,
         partnerName: partner.name,
+        genre: commission.genre,
         advance: commission.advance,
         share: commission.share,
         minQuality: commission.minQuality,
@@ -1680,7 +1745,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   r = { ...r, overseas: { ...overseasOf(r), profiles: { ...overseasOf(r).profiles, [p.id]: defaultContent(p) } } };
   return {
     ...r,
-    cash: r.cash - projectUpfront(d) - contFee + (commission?.advance ?? 0),
+    cash: r.cash - greenlightCost - contFee + (commission?.advance ?? 0),
     projects: [...r.projects, p],
     commissions: commission ? r.commissions.filter((c) => c.id !== commission.id) : r.commissions,
     decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "releaseQuality" && modifierMatchesDraft(m, d, r.week)),
@@ -1692,7 +1757,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days. Total budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -1720,7 +1785,35 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
   const already = !!p?.staffIds.includes(staffId);
   const op = !already ? staffOperationReason(r, staffId) : null;
   if (op) return { ...r, notices: [...r.notices, `${r.staff.find((s) => s.id === staffId)?.name ?? "That employee"} is unavailable — ${op}.`] };
-  return { ...r, projects: toggleAssign(r.projects, projectId, staffId) };
+  const toggled = toggleAssign(r.projects, projectId, staffId);
+  return {
+    ...r,
+    projects: toggled.map((project) =>
+      project.id === projectId && already && project.creativeLeadId === staffId
+        ? { ...project, creativeLeadId: undefined }
+        : project
+    ),
+  };
+}
+
+/** Any running production can name one assigned employee as its overall creator.
+ * This is intentionally separate from passion-project departmental promises. */
+export function appointProjectLead(r: RunState, projectId: string, staffId: string | null): RunState | null {
+  const p = projectById(r, projectId);
+  if (!p || ["airing", "done", "shelved"].includes(p.stage)) return null;
+  if (staffId !== null && (!p.staffIds.includes(staffId) || !r.staff.some((staff) => staff.id === staffId))) return null;
+  return {
+    ...r,
+    projects: r.projects.map((project) =>
+      project.id === projectId ? { ...project, creativeLeadId: staffId ?? undefined } : project
+    ),
+  };
+}
+
+export function creatorFollowingMult(staff: Pick<Staff, "creatorFans"> | null | undefined): number {
+  const following = Math.max(0, staff?.creatorFans ?? 0);
+  if (!following) return 1;
+  return 1 + Math.min(0.30, Math.log10(1 + following) * 0.05);
 }
 
 export function startContractAssignment(r: RunState, contract: Contract, staffIds: string[], showrunner = false): RunState | null {
@@ -1913,8 +2006,12 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
 
   if (researchId === "narrative_analytics") {
     const firstPass = !carrier.research.includes("narrative_analytics");
+    const knownBefore = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => carrier.arcCombos.includes(id)).length;
+    const passIndex = firstPass ? 0 : completedProgressivePasses(knownBefore, "narrative");
+    const batchSize = progressiveResearchBatch(passIndex, "narrative");
     const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
-    const discoveries = firstPass ? ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id)) : unknown.slice(0, NARRATIVE_STUDY_BATCH);
+    const curated = ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id));
+    const discoveries = [...curated, ...unknown.filter((id) => !curated.includes(id))].slice(0, batchSize);
     arcCombos = [...new Set([...carrier.arcCombos, ...discoveries])];
     arcKnowledge = { ...carrier.arcKnowledge };
     for (const id of discoveries) {
@@ -1926,11 +2023,15 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   if (researchId === "genre_studies") {
     const firstPass = !carrier.research.includes("genre_studies");
     arcGenreKnowledge = { ...carrier.arcGenreKnowledge };
+    const knownBefore = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;
+    const passIndex = firstPass ? 0 : completedProgressivePasses(knownBefore, "genre");
+    const batchSize = progressiveResearchBatch(passIndex, "genre");
     const unknown = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) <= 0);
-    const discoveries = firstPass ? ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key)) : unknown.slice(0, GENRE_STUDY_BATCH);
+    const curated = ARC_RESEARCH_GENRE_KEYS.filter((key) => unknown.includes(key));
+    const discoveries = [...curated, ...unknown.filter((key) => !curated.includes(key))].slice(0, batchSize);
     for (const key of discoveries) arcGenreKnowledge[key] = Math.max(1, arcGenreKnowledge[key] ?? 0);
     const discoveredArcIds = discoveries.map((key) => key.slice(0, key.lastIndexOf("|")));
-    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...(firstPass ? ARC_RESEARCH_UNLOCK_IDS : []), ...discoveredArcIds])];
+    arcUnlocked = [...new Set([...carrier.arcUnlocked, ...discoveredArcIds])];
     const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (arcGenreKnowledge[key] ?? 0) > 0).length;
     notices.push(firstPass
       ? `📚 Genre Studies establishes the studio's first curated Quick Picks and maps ${discoveries.length} useful relationships.`
@@ -2204,6 +2305,18 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     }
   }
 
+  /* Executive Rush duplicates normal production bubbles — including the showrunner —
+     while leaving contracts/research/note bubbles untouched. */
+  const nowDay = r.day ?? r.week * 7;
+  const rushCopies = pulses
+    .filter((pulse) => {
+      if (pulse.kind || pulse.source !== "project" || !pulse.projectId) return false;
+      const project = r.projects.find((candidate) => candidate.id === pulse.projectId);
+      return !!project && (project.executiveRushUntilDay ?? -1) >= nowDay;
+    })
+    .map((pulse, index) => ({ ...pulse, nonce: pulse.nonce + 10_000 + index }));
+  pulses.push(...rushCopies);
+
   /* ---- rare project-wide outcomes on the active production ---- */
   const production = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
   if (production) {
@@ -2212,7 +2325,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const name = face?.name ?? `${r.studio} showrunner`;
     if (roll() < PROJECT_RESEARCH_PULSE_CHANCE) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "research" });
-    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * specialisationProjectEffects(r, production.draft).issueChanceMult * (r.showrunner === "steady" ? 0.75 : 1)) {
+    } else if (roll() < PROJECT_NOTE_PULSE_CHANCE * ((production.executiveRushUntilDay ?? -1) >= nowDay ? 2 : 1) * specialisationProjectEffects(r, production.draft).issueChanceMult * (r.showrunner === "steady" ? 0.75 : 1)) {
       pulses.push({ actorId, name, type: "story", points: 1, nonce: Date.now() + 600 + pulses.length, source: "project", projectId: production.id, kind: "note" });
     }
   }
@@ -2232,7 +2345,19 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
     if (pulse.kind === "research") {
       rd += pulse.points;
     } else if (pulse.kind === "note") {
-      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
+      const target = projects.find((project) => project.id === pulse.projectId);
+      const protectedNote = !!target && !target.milestone && (target.noteToRdUntilDay ?? -1) >= (r.day ?? r.week * 7) && (target.noteToRdConverted ?? 0) < 6;
+      if (protectedNote) {
+        rd += pulse.points;
+        pulse.kind = "research";
+        projects = projects.map((project) => project.id !== pulse.projectId ? project : ({
+          ...project,
+          rdGained: project.rdGained + pulse.points,
+          noteToRdConverted: (project.noteToRdConverted ?? 0) + pulse.points,
+        }));
+      } else {
+        projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
+      }
     } else if (pulse.source === "project" && pulse.projectId) {
       projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } }));
     } else if (pulse.source === "contract" && pulse.jobId) {
@@ -2333,8 +2458,13 @@ export function tickEditWorkPulse(r: RunState, projectId: string): { run: RunSta
   for (const st of sampled) {
     if (left <= 0) break;
     const type = chooseDiscipline(st);
-    const rolled = percentileSkillOutput(contributionEffectiveSkill(r, st, type, true));
-    const points = Math.min(left, rolled);
+    const effectiveSkill = contributionEffectiveSkill(r, st, type, true);
+    const rolled = percentileSkillOutput(effectiveSkill);
+    /* Editing is deliberate assigned work, not an ambient inspiration check:
+       a genuinely capable editor should never spend a whole visible pulse doing
+       nothing. Low-skill staff can still whiff; 75+ effective skill guarantees
+       at least one note is resolved. */
+    const points = Math.min(left, Math.max(effectiveSkill >= 75 ? 1 : 0, rolled));
     if (points <= 0) continue;
     left -= points;
     pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: "edit", projectId });
@@ -2656,6 +2786,10 @@ export function releaseProject(
 ): { run: RunState; result: ShowResult } | null {
   const p0 = projectById(r, projectId);
   if (!p0 || (p0.stage !== "ready" && p0.stage !== "shelved")) return null;
+  if (p0.draft.posterArtId) {
+    const claims = [...new Set([...(r.playerPosterClaims ?? []), p0.draft.posterArtId])];
+    r = { ...r, playerPosterClaims: claims, rivalWorld: reservePlayerPosters(r.rivalWorld, claims, r.week) };
+  }
   const p: Project = { ...p0, spent: p0.spent + extra.spent, hype: extra.hype };
   let result = previewResult({ ...r, cash: r.cash - extra.spent }, p);
   const draft = p.draft;
@@ -2679,6 +2813,38 @@ export function releaseProject(
     });
   }
 
+  const productionLead = p.creativeLeadId ? r.staff.find((staff) => staff.id === p.creativeLeadId) : undefined;
+  const leadAudienceMult = creatorFollowingMult(productionLead);
+  if (productionLead && leadAudienceMult > 1.001) {
+    result = {
+      ...result,
+      fans: Math.round(result.fans * leadAudienceMult),
+      breakdown: [
+        ...result.breakdown,
+        { label: `${productionLead.name} creator following`, pts: `×${leadAudienceMult.toFixed(2)} fan gain` },
+      ],
+    };
+  }
+
+  const relationshipCommercialMult = partnerCommercialMult(r.partners ?? {});
+  if (Math.abs(relationshipCommercialMult - 1) >= 0.005) {
+    result = {
+      ...result,
+      revenue: Math.round(result.revenue * relationshipCommercialMult),
+      breakdown: [
+        ...result.breakdown,
+        { label: "Partner distribution network", pts: `×${relationshipCommercialMult.toFixed(2)} sales` },
+      ],
+    };
+  }
+  if (r.capitalProjects.includes("studio_streaming")) {
+    result = {
+      ...result,
+      revenue: Math.round(result.revenue * 1.08),
+      breakdown: [...result.breakdown, { label: "Owned streaming service", pts: "×1.08 domestic revenue" }],
+    };
+  }
+
   if (p.shelvedWeek !== undefined) {
     const before = result.revenue;
     result = {
@@ -2692,6 +2858,7 @@ export function releaseProject(
   /* ---- the deal: the commissioner takes their cut, judges the work ---- */
   const deal = p.commission;
   let bonusCash = 0;
+  let commissionSucceeded = false;
   let partners = r.partners ?? {};
   if (deal) {
     const cut = Math.round(result.revenue * deal.share);
@@ -2707,6 +2874,7 @@ export function releaseProject(
     let rep = partners[deal.partnerId] ?? REP_START;
     if (result.total >= deal.minQuality) {
       rep += REP_DELIVERED;
+      commissionSucceeded = !late && !!deal.genre;
       if (result.total >= deal.minQuality + 6) {
         rep += REP_EXCELLENT;
         bonusCash = deal.bonus;
@@ -2811,6 +2979,10 @@ export function releaseProject(
         : `${deal.partnerName} is furious: “${draft.title}” scored ${result.total}/40, below the contracted ${deal.minQuality}/40.`
     );
     if (Math.max(r.day ?? r.week * 7, r.week * 7) > (deal.deadlineDay ?? deal.deadlineWeek * 7)) notices.push(`${deal.partnerName} logs the late delivery. They will remember.`);
+    if (commissionSucceeded && deal.genre && !r.genresUnlocked.includes(deal.genre)) {
+      const learnedGenre = GENRES.find((genre) => genre.id === deal.genre)?.label ?? deal.genre;
+      notices.push(`📚 COMMISSION BREAKTHROUGH — successful delivery teaches the studio ${learnedGenre}. The genre is now permanently available for original productions.`);
+    }
   }
   if (result.hallOfFame) notices.push(`“${draft.title}” enters the HALL OF FAME!`);
   for (const breakthrough of breakthroughs) {
@@ -2907,6 +3079,9 @@ export function releaseProject(
     totalRevenue: r.totalRevenue + result.revenue,
     showsMade: r.showsMade + 1,
     hits: r.hits + (result.tier === "hit" || result.hallOfFame ? 1 : 0),
+    genresUnlocked: commissionSucceeded && deal?.genre && !r.genresUnlocked.includes(deal.genre)
+      ? [...r.genresUnlocked, deal.genre]
+      : r.genresUnlocked,
     bestScore: Math.max(r.bestScore, result.total),
     comboLevels: { ...r.comboLevels, [ck]: Math.min(5, (r.comboLevels[ck] ?? 0) + 1) },
     genreKnowledge: draft.genres.reduce((acc, genre) => {
@@ -2956,10 +3131,23 @@ export function releaseProject(
         nx = recordShow(nx, draft.title, result.total, r.week, draft.genres);
         nx = moraleDelta(nx, moraleSwing);
         const creatorXp = creatorVisionEffectsForProject(r.expansion?.promises, p, nx.id).xpMult;
-        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp);
+        const isProductionLead = p.creativeLeadId === nx.id;
+        const leadCareerMult = isProductionLead ? 1.6 * (r.capitalProjects.includes("creator_academy") ? 1.2 : 1) : 1;
+        const g = gainXp(nx, xp * moraleXpMultiplier(nx) * creatorXp * leadCareerMult);
+        let careerStaff = g.staff;
+        if (isProductionLead) {
+          const beforeFollowing = Math.max(0, careerStaff.creatorFans ?? 0);
+          const academyFollowingMult = r.capitalProjects.includes("creator_academy") ? 1.2 : 1;
+          const followingGain = Math.max(25, Math.round(Math.max(0, result.fans) * (0.12 + result.total / 250) * academyFollowingMult));
+          const creatorFans = beforeFollowing + followingGain;
+          careerStaff = { ...careerStaff, creatorFans };
+          const milestones = [1_000, 10_000, 100_000, 1_000_000];
+          const crossed = milestones.find((milestone) => beforeFollowing < milestone && creatorFans >= milestone);
+          if (crossed) notices.push(`⭐ ${careerStaff.name}'s reputation as a creator passes ${crossed.toLocaleString("en-GB")} personal followers.`);
+        }
         if (g.levelsGained > 0)
-          notices.push(`${g.staff.name} is promoted to ${levelTitle(g.staff.level)} (Lv ${g.staff.level})!`);
-        return g.staff;
+          notices.push(`${careerStaff.name} is promoted to ${levelTitle(careerStaff.level)} (Lv ${careerStaff.level})!`);
+        return careerStaff;
       });
     })(),
     /* the awards slate keeps REAL production data. Licensed adaptations enter
@@ -3013,7 +3201,7 @@ export function showSaleOffers(r:RunState,projectId:string):ShowSaleOffer[] {
   const trackRecord=Math.max(.28,Math.min(1.25,.28+r.showsMade*.055+r.bestScore/58+Math.min(.28,r.fans/180_000)));
   const assetValue=p.spent*.28+points*720+p.hype*1_050+(fr?.popularity??0)*1_550+Math.max(0,r.bestScore-20)*5_000;
   const value=Math.max(20_000,assetValue*(mediumFactor[p.draft.medium]??.7)*marketFactor*trackRecord);
-  const dealmaker=1;
+  const dealmaker=partnerCommercialMult(r.partners ?? {});
   const networks=[{id:"network:kousei",name:"Kousei Broadcast Network"},{id:"network:streamline",name:"Streamline Media"}];
   const offers:ShowSaleOffer[]=networks.map((buyer,i)=>({id:`sale:${projectId}:${buyer.id}`,buyerType:"network",buyerId:buyer.id,buyerName:buyer.name,cash:Math.max(10_000,Math.round(value*(.72+stableDealNumber(projectId+buyer.id)*.28)*dealmaker/5000)*5000),creatorFans:Math.max(50,Math.round((p.hype*7+points*1.2)*(i?0.09:0.07))),awardRisk:false}));
   const rival=[...r.rivalWorld.studios].filter(x=>x.status!=="collapsed").map(st=>({st,fit:st.preferred.filter(g=>p.draft.genres.includes(g)).length+st.specialist.filter(g=>p.draft.genres.includes(g)).length})).sort((a,b)=>b.fit-a.fit||b.st.reputation-a.st.reputation)[0];
@@ -3251,8 +3439,29 @@ export const undiscoveredProfileIds = (r: Pick<RunState, "castAffinityDiscovered
 export const allCastProfiled = (r: Pick<RunState, "castAffinityDiscovered">): boolean =>
   undiscoveredProfileIds(r).length === 0;
 
-export const GENRE_STUDY_BATCH = 30;
-export const NARRATIVE_STUDY_BATCH = 10;
+export const GENRE_STUDY_FIRST_BATCH = 6;
+export const NARRATIVE_STUDY_FIRST_BATCH = 6;
+export const GENRE_STUDY_BATCH_STEP = 4;
+export const NARRATIVE_STUDY_BATCH_STEP = 3;
+export const GENRE_STUDY_BATCH_CAP = 30;
+export const NARRATIVE_STUDY_BATCH_CAP = 18;
+
+const progressiveResearchBatch = (passIndex: number, kind: "genre" | "narrative") => {
+  const base = kind === "genre" ? GENRE_STUDY_FIRST_BATCH : NARRATIVE_STUDY_FIRST_BATCH;
+  const step = kind === "genre" ? GENRE_STUDY_BATCH_STEP : NARRATIVE_STUDY_BATCH_STEP;
+  const cap = kind === "genre" ? GENRE_STUDY_BATCH_CAP : NARRATIVE_STUDY_BATCH_CAP;
+  return Math.min(cap, base + Math.max(0, passIndex) * step);
+};
+
+const completedProgressivePasses = (known: number, kind: "genre" | "narrative") => {
+  let total = 0;
+  let passes = 0;
+  while (total < known && passes < 100) {
+    total += progressiveResearchBatch(passes, kind);
+    passes += 1;
+  }
+  return passes;
+};
 
 export function researchProgressLabel(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): string | null {
   if (id === "genre_studies") {
@@ -3270,11 +3479,11 @@ function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledg
   if (!r.research.includes(id)) return 0;
   if (id === "genre_studies") {
     const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
-    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_GENRE_KEYS.length) / GENRE_STUDY_BATCH);
+    return Math.max(1, completedProgressivePasses(known, "genre"));
   }
   if (id === "narrative_analytics") {
     const known = ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos.includes(comboId)).length;
-    return 1 + Math.floor(Math.max(0, known - ARC_RESEARCH_COMBOS.length) / NARRATIVE_STUDY_BATCH);
+    return Math.max(1, completedProgressivePasses(known, "narrative"));
   }
   return 0;
 }
@@ -3609,16 +3818,19 @@ export function resolveMarketEvent(r: RunState, eventId: string, accept: boolean
 /* ============================ franchising ops ============================ */
 
 /** launch a merchandise line for an IP: pay now, royalties arrive weekly.
- *  Every product requires Merch Division + its own dedicated research —
- *  the existing cost / popularity / pedigree / cooldown gates are unchanged. */
+ *  Every product requires Merch Division, the right infrastructure tier and its
+ *  own paid product-line development before the normal launch gates apply. */
 export function launchMerch(r: RunState, franchiseKey: string, productId: string): RunState | null {
   const fr = r.franchises[franchiseKey];
   const product = merchProductById(productId);
   if (!fr || !product) return null;
   const tier = merchTierOf(r);
+  if (!merchProductUnlocked(r, product.id)) return null;
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
-  const total = Math.round(merchReturn(fr, product) * merchDecisionMult);
+  const relationshipMult = partnerCommercialMult(r.partners ?? {});
+  const manufacturingMult = r.capitalProjects.includes("merch_factory") ? 1.18 : 1;
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {
@@ -3645,7 +3857,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     franchises: { ...r.franchises, [franchiseKey]: next },
     notices: [
       ...r.notices,
-      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · partner network ×${relationshipMult.toFixed(2)}${manufacturingMult > 1 ? " · in-house manufacturing ×1.18" : ""}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
     ].slice(-40),
   };
 }

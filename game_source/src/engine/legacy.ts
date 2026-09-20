@@ -1,7 +1,7 @@
 /* ============================================================================
- *  LEGACY & DYNASTY — the late game beyond the twelve-year career.
+ *  LEGACY & DYNASTY — the late game beyond the twenty-five-year career.
  *
- *  Year 12 ends the CAMPAIGN, not the studio. The retrospective here scores
+ *  Year 25 ends the CAMPAIGN, not the studio. The retrospective here scores
  *  the career against the whole industry, hands out a rank, and opens the
  *  door to Dynasty Mode: an endless run where the industry gets stronger
  *  around you, long-serving staff mentor the next generation, and money
@@ -401,7 +401,7 @@ export interface CareerEvaluation {
   history: CareerHistory;
 }
 
-/** score the twelve-year career across nine categories and produce the
+/** score the twenty-five-year career across nine categories and produce the
  *  retrospective history the studio deserves. Pure and deterministic. */
 export function runCareerEvaluation(run: RunState): CareerEvaluation {
   const entries = Object.values(run.franchises).flatMap((f) => f.entries);
