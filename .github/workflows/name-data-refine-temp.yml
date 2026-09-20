@@ -19,7 +19,7 @@ jobs:
           ref: fix/posters-rd-names-2026-09-20
           fetch-depth: 0
 
-      - name: Rebuild strict-gender 50-country pool
+      - name: Rebuild gender-locked 50-country pool
         run: |
           python - <<'PY'
           import csv, io, json, re, urllib.request
@@ -32,6 +32,13 @@ jobs:
 
           given=list(csv.DictReader(io.StringIO(dl("given-name-frequency.csv"))))
           surnames=list(csv.DictReader(io.StringIO(dl("surname-frequency.csv"))))
+          gender_rows=list(csv.DictReader(io.StringIO(dl("name-gender-inference.csv"))))
+          inference={}
+          for row in gender_rows:
+              try:
+                  inference[row["name_id"]] = (float(row["p_male"]), float(row["p_female"]))
+              except Exception:
+                  pass
 
           preferred=["GB","IE","US","CA","AU","NZ","FR","DE","ES","IT","PT","NL","BE","SE","NO","DK","FI","PL","CZ","AT","CH","GR","RO","HU","BR","MX","AR","CO","CL","PE","ZA","NG","GH","KE","EG","MA","TR","IL","SA","AE","IN","PK","BD","JP","KR","CN","TW","PH","ID","MY","SG","TH","VN"]
           latin=re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿĀ-ž]")
@@ -46,11 +53,25 @@ jobs:
               if not usable(name): continue
               code=row["country_code"].strip()
               country[code]=row["country_name"].strip()
-              gender=(row.get("gender") or "").strip()
-              if gender not in ("M","F"): continue
+              tag=(row.get("gender") or "").strip()
+              pm,pf=inference.get(row.get("name_id",""),(0.5,0.5))
+              bucket=None
+              if tag=="M":
+                  bucket="male"
+              elif tag=="F":
+                  bucket="female"
+              elif tag=="M;F" or tag=="F;M":
+                  if pm>=0.70:
+                      bucket="male"
+                  elif pf>=0.70:
+                      bucket="female"
+                  else:
+                      continue
+              else:
+                  continue
               try: count=int(row["count"])
               except: count=0
-              g[code]["male" if gender=="M" else "female"].append((count,name))
+              g[code][bucket].append((count,name))
 
           sn=defaultdict(list)
           for row in surnames:
@@ -83,19 +104,20 @@ jobs:
                   selected.append(eligible[code]); used.add(code)
               if len(selected)==50: break
           if len(selected)!=50:
-              raise SystemExit(f"Only {len(selected)} countries have 100 strict M, 100 strict F and 100 surnames; eligible={sorted(eligible)}")
+              raise SystemExit(f"Only {len(selected)} countries qualify; eligible={sorted(eligible)}")
 
           payload={
             "source":{"name":"Onomaverse Names Datasets","version":"v2026.06","url":"https://onomaverse.com/datasets","license":"CC BY 4.0","attribution":"Names data from Onomaverse (https://onomaverse.com/datasets), licensed CC BY 4.0."},
             "countryCount":50,
             "perCountry":{"male":100,"female":100,"surnames":100},
-            "genderRule":"First names use only source rows tagged exclusively M or exclusively F; M;F rows are excluded.",
+            "genderRule":"First names are locked to source gender. M;F names are only assigned when Onomaverse global inference is >=70% for that gender; ambiguous names are excluded.",
             "countries":selected
           }
           with open("game_source/src/engine/generated/internationalNames.json","w",encoding="utf-8") as f:
               json.dump(payload,f,ensure_ascii=False,separators=(",",":")); f.write("\n")
           print("Selected", ",".join(c["code"] for c in selected))
-          print("First country female sample", selected[0]["female"][:10])
+          print("GB male", next(c for c in selected if c["code"]=="GB")["male"][:10])
+          print("GB female", next(c for c in selected if c["code"]=="GB")["female"][:10])
           PY
 
       - name: Validate
@@ -105,7 +127,7 @@ jobs:
           p=json.load(open("game_source/src/engine/generated/internationalNames.json",encoding="utf-8"))
           assert len(p["countries"])==50
           assert all(len(c["male"])==100 and len(c["female"])==100 and len(c["surnames"])==100 for c in p["countries"])
-          assert "David" not in p["countries"][0]["female"][:20]
+          assert "David" not in p["countries"][0]["female"][:50]
           print("Validated strict-gender pool")
           PY
 
