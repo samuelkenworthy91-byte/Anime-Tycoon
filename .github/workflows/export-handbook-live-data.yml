@@ -17,9 +17,9 @@ jobs:
           cache: npm
           cache-dependency-path: game_source/package-lock.json
       - run: npm ci
-      - run: npx vitest run scripts/export-handbook-data.test.ts --reporter=verbose
+      - run: npx vitest run scripts/export-handbook-data.test.ts scripts/export-handbook-arcs.test.ts --reporter=verbose
       - uses: actions/upload-artifact@v4
         with:
           name: anime-runner-handbook-live-data
-          path: game_source/handbook-live-data.json
+          path: |\n            game_source/handbook-live-data.json\n            game_source/handbook-arc-data.json
           if-no-files-found: error
