@@ -1,4 +1,5 @@
 name: QoL Mix Balance Validation
+# temporary PR validation for QoL pass 2
 
 on:
   pull_request:
