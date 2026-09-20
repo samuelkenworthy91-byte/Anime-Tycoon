@@ -13,6 +13,18 @@ on:
       - game_source/src/engine/__tests__/shared-industry-posters.test.ts
       - game_source/scripts/finalize-rival-posters.mjs
       - .github/workflows/qol-poster-validation-temp.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - game_source/public/rival-posters/**
+      - game_source/src/engine/generated/rivalPosterManifest.json
+      - game_source/src/engine/generated/sharedIndustryPosterCatalog.json
+      - game_source/src/engine/rivalPosters.ts
+      - game_source/src/engine/__tests__/rivalPosters.test.ts
+      - game_source/src/engine/__tests__/shared-industry-posters.test.ts
+      - game_source/scripts/finalize-rival-posters.mjs
+      - .github/workflows/qol-poster-validation-temp.yml
 
 jobs:
   validate:
