@@ -49,3 +49,25 @@ export const randomCharacterName = (
   gender: string | undefined | null,
   rng: () => number = Math.random,
 ) => randomInternationalName(personGender(gender, rng), rng);
+
+function seededNameRng(seed: string): () => number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return () => {
+    h += 0x6d2b79f5;
+    let t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Stable randomized billing for catalog characters: reloads keep the same
+ * person while different cast IDs spread across the 50-country name pool. */
+export function internationalNameForSeed(gender: string | undefined | null, seed: string): string {
+  const rng = seededNameRng(seed);
+  return randomInternationalName(personGender(gender, rng), rng);
+}
