@@ -1,4 +1,6 @@
 import type { AudienceId, Draft, GenreId, MediumId } from "./data";
+import type { AudienceProfile } from "./audienceSegments";
+import { combinedPublicityFit, publicityAudienceFit } from "./publicity";
 
 export interface StrategicCampaign {
   id: string;
@@ -150,10 +152,12 @@ export function strategicCampaignHype(
   campaign: StrategicCampaign,
   draft: Draft,
   marketingHypeMult: number,
-  capitalProjects: readonly string[] = []
+  capitalProjects: readonly string[] = [],
+  audienceProfile?: AudienceProfile,
 ): number {
+  const fit = combinedPublicityFit(campaignFit(campaign, draft), publicityAudienceFit(audienceProfile, campaign.id));
   return Math.max(
     1,
-    Math.round(campaign.hype * campaignFit(campaign, draft) * marketingHypeMult * capitalCampaignMultiplier(campaign, capitalProjects))
+    Math.round(campaign.hype * fit * marketingHypeMult * capitalCampaignMultiplier(campaign, capitalProjects))
   );
 }
