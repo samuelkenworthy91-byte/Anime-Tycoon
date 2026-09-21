@@ -112,6 +112,7 @@ import DynastyPanel from "./Dynasty";
 import { type Commission } from "../engine/market";
 import { scrapProject } from "../engine/projectActions";
 import { cn } from "../utils/cn";
+import { RESEARCH_TRACKS, MAX_RESEARCH_TRACK_LEVEL, nextTrackMilestone, researchTrackLevel } from "../engine/researchTracks";
 import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
@@ -734,61 +735,77 @@ export default function Office({
               </>;
             })()}
           </div>
-          {(["tech", "merch"] as const).map((section) => {
-            const items = RESEARCH.filter((u) => (u.section ?? "tech") === section);
-            if (!items.length) return null;
-            return (
-              <Fragment key={section}>
-                <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">
-                  {section === "tech" ? "STUDIO TECH" : "MERCHANDISING OPERATIONS"}
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {items.map((u) => {
-                    const owned = run.research.includes(u.id);
-                    const pending = run.researchJobs.find((j) => j.researchId === u.id);
-                    const block = researchBlockReason(run, u.id);
-                    const displayResearch = experimentalStudyPresentation(u, owned);
-                    const progress = researchProgressLabel(run, u.id);
-                    const complete = !!block?.startsWith("COMPLETE —");
-                    const currentCost = researchProjectCost(run, u.id, u.rd);
-                    return (
-                      <div key={u.id} className={cn("ink-card p-3", owned && !u.repeatable && "border-mint/50", (block === "ALL CAST PROFILED — every hidden affinity is known" || complete) && "border-gold/50 bg-gold/5")}>
-                        <div className="flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-viol" />
-                          <span className="font-display text-sm font-extrabold">{displayResearch.name}</span>
-                          {u.repeatable && (
-                            <span className="ml-auto rounded bg-panel3 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyanx">REPEATABLE</span>
-                          )}
-                        </div>
-                        <div className="mt-0.5 text-[11px] text-paper/55">{displayResearch.desc}</div>
-                        {progress && <div className="mt-1 text-[9px] font-bold tracking-wider text-cyanx">{progress} · NEXT RUN {currentCost} RD</div>}
-                        {u.requires && !run.research.includes(u.requires) && (
-                          <div className="mt-1 text-[10px] font-bold text-gold">
-                            🔒 Requires {RESEARCH.find((x) => x.id === u.requires)?.name}
-                          </div>
-                        )}
-                        <div className="mt-2">
-                          {owned && !u.repeatable ? (
-                            <span className="text-xs font-bold text-mint">RESEARCHED ✓</span>
-                          ) : pending ? (
-                            <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, Math.ceil((pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7)))} DAYS</span>
-                          ) : block === "ALL CAST PROFILED — every hidden affinity is known" ? (
-                            <span className="text-xs font-bold text-gold">⭐ ALL CAST PROFILED ✓</span>
-                          ) : complete ? (
-                            <span className="text-xs font-bold text-gold">⭐ RESEARCH COMPLETE ✓</span>
-                          ) : (
-                            <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(u.id, u.rd)}>
-                              {u.repeatable && owned ? "RUN AGAIN" : "START"} · {currentCost} RD
-                            </Btn>
-                          )}
-                        </div>
+          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO DISCIPLINES</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {RESEARCH_TRACKS.map((track) => {
+              const level = researchTrackLevel(run, track.id);
+              const next = nextTrackMilestone(track, level);
+              const def = RESEARCH.find((item) => item.id === track.researchId)!;
+              const pending = run.researchJobs.find((job) => job.researchId === track.researchId);
+              const block = researchBlockReason(run, track.researchId);
+              const currentCost = researchProjectCost(run, track.researchId, def.rd);
+              return (
+                <div key={track.id} className={cn("ink-card p-3", level >= MAX_RESEARCH_TRACK_LEVEL && "border-gold/50 bg-gold/5")}>
+                  <div className="flex items-start gap-2">
+                    <Sparkles size={13} className="mt-0.5 text-viol" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-display text-sm font-extrabold">{track.name}</span>
+                        <span className="ml-auto rounded border border-line px-1.5 py-0.5 text-[8px] font-black text-cyanx">LV {level}/{MAX_RESEARCH_TRACK_LEVEL}</span>
                       </div>
-                    );
-                  })}
+                      <div className="mt-0.5 text-[10px] text-paper/50">{track.blurb}</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-abyss"><div className="h-full rounded-full bg-viol" style={{width:`${Math.round(level / MAX_RESEARCH_TRACK_LEVEL * 100)}%`}} /></div>
+                  <div className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
+                    <div className="text-[8px] font-black tracking-wider text-paper/40">{next ? `NEXT MILESTONE · LV ${next.level}` : "DISCIPLINE COMPLETE"}</div>
+                    <div className="mt-0.5 text-[10px] font-bold text-paper/75">{next?.label ?? "Institutional mastery"}</div>
+                    <div className="text-[9px] text-paper/45">{next?.effect ?? "No further milestone unlocks."}</div>
+                  </div>
+                  <div className="mt-2">
+                    {pending ? (
+                      <div className="text-[10px] font-bold text-cyanx">IN RESEARCH · {Math.max(0, Math.ceil((pending.completesDay ?? pending.completesWeek * 7) - (run.day ?? run.week * 7)))} DAYS</div>
+                    ) : level >= MAX_RESEARCH_TRACK_LEVEL ? (
+                      <div className="text-[10px] font-bold text-gold">MASTERED ✓</div>
+                    ) : (
+                      <Btn variant="gold" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(track.researchId, def.rd)}>
+                        DEEPEN DISCIPLINE · {currentCost} RD
+                      </Btn>
+                    )}
+                  </div>
                 </div>
-              </Fragment>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO KNOWLEDGE STUDIES</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {RESEARCH.filter((u) => ["genre_studies", "narrative_analytics", "talent_analysis"].includes(u.id)).map((u) => {
+              const owned = run.research.includes(u.id);
+              const pending = run.researchJobs.find((j) => j.researchId === u.id);
+              const block = researchBlockReason(run, u.id);
+              const displayResearch = experimentalStudyPresentation(u, owned);
+              const progress = researchProgressLabel(run, u.id);
+              const complete = !!block?.startsWith("COMPLETE —");
+              const currentCost = researchProjectCost(run, u.id, u.rd);
+              return (
+                <div key={u.id} className={cn("ink-card p-3", complete && "border-gold/50 bg-gold/5")}>
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-cyanx" />
+                    <span className="font-display text-sm font-extrabold">{displayResearch.name}</span>
+                    <span className="ml-auto rounded bg-panel3 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyanx">KNOWLEDGE</span>
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-paper/55">{displayResearch.desc}</div>
+                  {progress && <div className="mt-1 text-[9px] font-bold tracking-wider text-cyanx">{progress} · NEXT RUN {currentCost} RD</div>}
+                  <div className="mt-2">
+                    {pending ? <span className="text-xs font-bold text-cyanx">IN RESEARCH · {Math.max(0, Math.ceil((pending.completesDay ?? pending.completesWeek*7) - (run.day ?? run.week*7)))} DAYS</span>
+                      : complete || block === "ALL CAST PROFILED — every hidden affinity is known" ? <span className="text-xs font-bold text-gold">COMPLETE ✓</span>
+                      : <Btn variant="cyan" className="!px-3 !py-1.5 text-xs" disabled={!!block} onClick={() => research(u.id, u.rd)}>STUDY · {currentCost} RD</Btn>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">GENRE LICENCES</div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
