@@ -52,6 +52,7 @@ import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject } from "./creatorVision";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
+import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { merchAudienceFit, publicityAudienceFit } from "./publicity";
 import {
   bumpRivalry,
@@ -1074,6 +1075,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let dynasty = r.dynasty ?? null;
   const heads = r.heads ?? {};
   let market = r.market ?? initMarket();
+  let industryMovements = [...(r.industryMovements ?? [])];
   let recentReleases = [...(r.recentReleases ?? [])];
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
@@ -1416,6 +1418,9 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const drift = driftMarket(market);
       market = drift.market;
       notices.push(...drift.notices);
+      const movementTick = tickIndustryMovements(industryMovements, w, market, recentReleases, GENRES.map((g) => g.id));
+      industryMovements = movementTick.movements;
+      notices.push(...movementTick.notices);
     }
 
     /* commissioners refresh their briefs */
@@ -1590,7 +1595,11 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       rivalWorld = fy.world;
       notices.push(...fy.notices);
       const pressure = industryPressure({ week: w, cash, fans, awards, hits: r.hits, bestScore: r.bestScore, showsMade: r.showsMade, playerRank: rivalWorld.playerRank });
-      const py = planRivalYear(rivalWorld, year + 1, w, { qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0), blockedPosterIds: r.playerPosterClaims ?? [] });
+      const py = planRivalYear(rivalWorld, year + 1, w, {
+        qualityBoost: pressure.rivalBoost + (r.dynasty ? dynastyDifficulty(r).rivalBoost : 0),
+        blockedPosterIds: r.playerPosterClaims ?? [],
+        trendGenres: trendGenreBias(industryMovements, w),
+      });
       rivalWorld = py.world;
       notices.push(...py.notices);
       if (pressure.level >= 1) notices.push(`📈 INDUSTRY PRESSURE ${pressure.level.toFixed(1)}/6 · ${pressure.band.toUpperCase()} — next year rivals gain +${pressure.rivalBoost.toFixed(1)} quality pressure.`);
@@ -1634,6 +1643,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     legends,
     dynasty,
     market,
+    industryMovements,
     recentReleases,
     commissions,
     marketEvents,
@@ -2767,6 +2777,7 @@ export function marketMultiplierFor(r: RunState, p: Project): number {
   return (
     Math.round(
       marketMult(r.market ?? initMarket(), r.recentReleases ?? [], p.draft, r.week) *
+        movementSalesMultiplier(r.industryMovements ?? [], p.draft, r.week) *
         attentionMult(othersAiring) *
         boost *
         decisionReleaseSalesMult(r, p.draft) *
