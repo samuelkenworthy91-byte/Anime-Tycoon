@@ -76,6 +76,8 @@ import { CONTINUATIONS, continuationDef, expectedScore, type Franchise } from ".
 import { type ContinuationPlan } from "./Library";
 import { visionAlignment } from "../engine/creatorVision";
 import { randomAnimeTitle } from "../engine/titleGenerator";
+import { creationKnowledgeSummary } from "../engine/reviewDiagnostics";
+import { genreTargetFor } from "../engine/genreTargets";
 import { internationalNameForSeed } from "../engine/internationalNames";
 
 import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
@@ -872,6 +874,33 @@ export default function Create({
                   </span>
                 )}
               </div>
+              {d.genres.length > 0 && (() => {
+                const knowledge = creationKnowledgeSummary(d.genres, run.genreKnowledge);
+                const target = genreTargetFor(d.genres);
+                const word = (value: number) => value < 34 ? "LOW" : value > 66 ? "HIGH" : "MODERATE";
+                return (
+                  <div className="rounded-xl border border-cyanx/35 bg-cyanx/5 p-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[9px] font-extrabold tracking-[0.18em] text-cyanx">STUDIO KNOWLEDGE · {knowledge.label}</div>
+                      <span className="rounded border border-line px-1.5 py-0.5 text-[8px] text-paper/45">Lv {knowledge.value}/12</span>
+                    </div>
+                    <div className="mt-1 text-[9px] text-paper/55">{knowledge.detail}</div>
+                    {knowledge.band !== "UNKNOWN" && (
+                      <div className="mt-2 grid grid-cols-3 gap-1.5">
+                        {target.ideal.map((value, i) => (
+                          <div key={i} className="rounded-lg border border-line bg-panel2/60 p-1.5 text-center">
+                            <div className="text-[7px] font-black tracking-wider text-paper/35">{["DEVELOPMENT","VISUALS","SOUND"][i]}</div>
+                            <div className="mt-0.5 text-[9px] font-extrabold text-paper/75">
+                              {knowledge.band === "MASTERED" ? `${Math.max(0,Math.round(value-6))}–${Math.min(100,Math.round(value+6))}` : word(value)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* KNOWN FITS — quick picks from the studio's own proven pairings */}
               {!commission && !plan && knownPairings.length > 0 && (
                 <div className="rounded-xl border border-mint/30 bg-mint/5 p-2.5" title="Quick picks from pairings your studio has already shipped and learned.">
