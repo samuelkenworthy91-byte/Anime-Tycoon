@@ -61,3 +61,16 @@ export const PUBLICITY_CONTEXT_LABEL: Record<PublicityContext, string> = {
   franchise: "FRANCHISE",
   international: "INTERNATIONAL",
 };
+
+
+export function internationalAudienceFit(profile: AudienceProfile | undefined, segment: string): number {
+  if (!profile) return 1;
+  const mapped: AudienceSegmentId[] =
+    segment === "source" ? ["core"] :
+    segment === "animation" ? ["core", "collectors"] :
+    segment === "characters" ? ["online", "core"] :
+    segment === "mainstream" ? ["casual"] :
+    segment === "family" ? ["casual", "collectors"] :
+    ["prestige", "core"];
+  return fit(profile, mapped);
+}
