@@ -54,6 +54,7 @@ import { creatorVisionEffectsForProject } from "./creatorVision";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
+import { recordHeadToHeadMemories, recordRivalMemory } from "./rivalMemories";
 import { merchAudienceFit, publicityAudienceFit } from "./publicity";
 import {
   bumpRivalry,
@@ -3271,6 +3272,7 @@ export function releaseProject(
   let expanded = finishExpansionProduction(run, { ...p, result });
   expanded = recordAudienceProfile(expanded, projectId, fkey, draft, result);
   expanded = recordRelationshipRelease(expanded, p.staffIds, draft.title, result.total);
+  expanded = recordHeadToHeadMemories(expanded, draft.title, draft.genres, result.total);
   if (bonusCash) expanded = settleProjectReceipt(expanded, {week:r.week,amount:bonusCash,fans:0,label:"Commission quality bonus",sourceProjectId:projectId,sourceReleaseId:"commission-bonus"});
   return { run: expanded, result };
 }
@@ -3716,7 +3718,7 @@ export function hireRivalTalent(r: RunState, talentId: string): RunState | null 
   const staff = rivalTalentToStaff(t, r.week);
   const studioName = r.rivalWorld.studios.find((s) => s.id === t.studioId)?.name ?? "a rival studio";
   const compensation = Math.round(terms.askingPrice * 0.35);
-  return {
+  const next = {
     ...r,
     cash: r.cash - terms.askingPrice,
     staff: [...r.staff, staff],
@@ -3726,6 +3728,7 @@ export function hireRivalTalent(r: RunState, talentId: string): RunState | null 
       `🤝 ${t.name} (Lv${t.level} ${staff.role}) leaves ${studioName}: £${terms.askingPrice.toLocaleString("en-GB")} buyout/signing package after their employer counter-offer. ${studioName} will recruit a replacement.`,
     ],
   };
+  return recordRivalMemory(next, t.studioId, "poach", `You poached ${t.name}; ${studioName} paid the sporting price but remembers it.`, 6);
 }
 
 /** the current standings — player + rivals, sorted by shared score */
