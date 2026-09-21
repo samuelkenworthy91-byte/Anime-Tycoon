@@ -51,7 +51,8 @@ import {
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject } from "./creatorVision";
-import { recordAudienceProfile } from "./audienceSegments";
+import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
+import { merchAudienceFit, publicityAudienceFit } from "./publicity";
 import {
   bumpRivalry,
   computeRankings,
@@ -432,6 +433,8 @@ export interface RunState {
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
   capitalProjects: string[];
   staffContracts: Record<string, { expiresWeek: number; bonus: number; exclusive: boolean }>;
+  /** One consequential consumer-products bet per franchise at a time. */
+  activeMerchBets?: Record<string, { productId: string; label: string; startedWeek: number; endsWeek: number; projectedReturn: number; audienceFit: number }>;
 }
 
 /** null = arc is pickable; otherwise a human-readable reason it's locked */
@@ -901,13 +904,16 @@ export function runFranchiseCampaign(r: RunState, franchiseKey: string, campaign
   const fr = r.franchises[franchiseKey];
   const campaign = FRANCHISE_CAMPAIGNS.find((x) => x.id === campaignId);
   if (!fr || !campaign || franchiseCampaignBlock(fr, campaign, r.week, r.cash)) return null;
-  const next = applyFranchiseCampaign(fr, campaign, r.week);
+  const baseNext = applyFranchiseCampaign(fr, campaign, r.week);
+  const audienceFit = publicityAudienceFit(franchiseAudienceProfile(r, franchiseKey) ?? undefined, campaign.id);
+  const gainedPopularity = Math.max(1, Math.round(campaign.popularity * audienceFit));
+  const next = { ...baseNext, popularity: Math.min(100, fr.popularity + gainedPopularity) };
   return {
     ...r,
     cash: r.cash - campaign.cost,
     franchises: { ...r.franchises, [franchiseKey]: next },
     strategicSpend: [...r.strategicSpend, { id: `franchise_campaign_${r.week}_${franchiseKey}_${campaign.id}`, label: `${fr.baseTitle}: ${campaign.label}`, amount: campaign.cost, week: r.week }],
-    notices: [...r.notices, `📣 ${campaign.label} for “${fr.baseTitle}”: +${campaign.popularity} popularity, +${campaign.fatigue} fatigue, attention held for ${campaign.freezeWeeks} weeks.`].slice(-40),
+    notices: [...r.notices, `📣 ${campaign.label} for “${fr.baseTitle}”: +${gainedPopularity} popularity (audience fit ×${audienceFit.toFixed(2)}), +${campaign.fatigue} fatigue, attention held for ${campaign.freezeWeeks} weeks.`].slice(-40),
   };
 }
 
@@ -3889,13 +3895,16 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const fr = r.franchises[franchiseKey];
   const product = merchProductById(productId);
   if (!fr || !product) return null;
+  const activeBet = r.activeMerchBets?.[franchiseKey];
+  if (activeBet && activeBet.endsWeek > r.week) return null;
   const tier = merchTierOf(r);
   if (!merchProductUnlocked(r, product.id)) return null;
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
   const merchDecisionMult = decisionMerchMult(r);
   const relationshipMult = partnerCommercialMult(r.partners ?? {});
   const manufacturingMult = r.capitalProjects.includes("merch_factory") ? 1.18 : 1;
-  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult);
+  const audienceFit = merchAudienceFit(franchiseAudienceProfile(r, franchiseKey) ?? undefined, product.id);
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult * audienceFit);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {
@@ -3920,9 +3929,13 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     payouts,
     decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "merch" && m.expiresWeek >= r.week && m.uses > 0),
     franchises: { ...r.franchises, [franchiseKey]: next },
+    activeMerchBets: {
+      ...(r.activeMerchBets ?? {}),
+      [franchiseKey]: { productId: product.id, label: product.label, startedWeek: r.week, endsWeek: r.week + product.weeks, projectedReturn: total, audienceFit },
+    },
     notices: [
       ...r.notices,
-      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · partner network ×${relationshipMult.toFixed(2)}${manufacturingMult > 1 ? " · in-house manufacturing ×1.18" : ""}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
+      `${product.label} launched for “${fr.baseTitle}”: −£${product.cost.toLocaleString("en-GB")} now, ≈£${total.toLocaleString("en-GB")} over ${product.weeks} weeks · audience fit ×${audienceFit.toFixed(2)} · partner network ×${relationshipMult.toFixed(2)}${manufacturingMult > 1 ? " · in-house manufacturing ×1.18" : ""}${product.id === "tcg" ? ` · TCG attention +${product.popularityGain ?? 0} popularity / +${product.fatigueAdd ?? 0} fatigue` : ""}.`,
     ].slice(-40),
   };
 }
