@@ -200,6 +200,14 @@ import {
   type DynastyState,
 } from "./legacy";
 import { tickDelegated } from "./automation";
+import {
+  MAX_RESEARCH_TRACK_LEVEL,
+  completeResearchTrack,
+  researchTrackForResearchId,
+  researchTrackLevel,
+  trackSkillMultiplier,
+  type ResearchTrackId,
+} from "./researchTracks";
 import { projectLoadMap } from "./capacity";
 import {
   contractWeeklyOutput,
@@ -317,6 +325,8 @@ export interface RunState {
   recruitmentAdRefreshes: number;
   recruitmentAdMonth: number;
   research: string[];
+  /** Five player-facing institutional R&D disciplines. Old technology ids remain milestone flags. */
+  researchTrackLevels?: Partial<Record<ResearchTrackId, number>>;
   genresUnlocked: GenreId[];
   mediumsUnlocked: string[];
   comboLevels: Record<string, number>;
@@ -509,6 +519,7 @@ export function initialRun(studio: string, showrunner: string): RunState {
     recruitmentAdRefreshes: 0,
     recruitmentAdMonth: 0,
     research: [],
+    researchTrackLevels: {},
     genresUnlocked: ["slice", "fantasy"],
     /* every career starts as a tiny fan creator on an open video platform —
        no TV licence, no streaming deal, no theatrical release */
@@ -2031,6 +2042,7 @@ export function startTestAudience(r: RunState): RunState | null {
 /** the shared carrier every research-completion path reads/writes */
 interface ResearchCarrier {
   research: string[];
+  researchTrackLevels?: Partial<Record<ResearchTrackId, number>>;
   arcCombos: string[];
   arcUnlocked: string[];
   arcKnowledge: Record<string, number>;
@@ -2048,6 +2060,9 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   name: string,
   rand: () => number = Math.random
 ): T {
+  const discipline = researchTrackForResearchId(researchId);
+  if (discipline) return completeResearchTrack(carrier, discipline.id);
+
   const research = carrier.research.includes(researchId)
     ? carrier.research
     : researchId === TALENT_ANALYSIS_ID
@@ -2241,9 +2256,12 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
   if (r.research.includes("pipeline")) effective *= 1.12;
   if (type === "story" && r.research.includes("storyboard")) effective *= 1.15;
   if (type === "art" && r.research.includes("mocap")) effective *= 1.12;
+  const craftDiscipline: ResearchTrackId = type === "story" ? "writing" : type === "art" ? "animation" : "sound";
+  effective *= trackSkillMultiplier(researchTrackLevel(r, craftDiscipline));
   if (editing) {
     effective *= 1 + fx.issueFix * 0.15;
     if (r.research.includes("qa")) effective *= 1.15;
+    effective *= trackSkillMultiplier(researchTrackLevel(r, "production"));
   }
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
@@ -2258,6 +2276,8 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   if (r.research.includes("pipeline")) skill *= 1.12;
   if (type === "story" && r.research.includes("storyboard")) skill *= 1.15;
   if (type === "art" && r.research.includes("mocap")) skill *= 1.12;
+  const craftDiscipline: ResearchTrackId = type === "story" ? "writing" : type === "art" ? "animation" : "sound";
+  skill *= trackSkillMultiplier(researchTrackLevel(r, craftDiscipline));
   skill *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
   if (project) skill *= specialisationProjectEffects(r, project.draft).outputMult;
   if (r.showrunner === "steady") skill *= 1.5;
@@ -3515,7 +3535,9 @@ export function researchProgressLabel(r: Pick<RunState, "research" | "arcGenreKn
   return null;
 }
 
-function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos">, id: string): number {
+function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledge" | "arcCombos" | "researchTrackLevels">, id: string): number {
+  const discipline = researchTrackForResearchId(id);
+  if (discipline) return researchTrackLevel(r, discipline.id);
   if (!r.research.includes(id)) return 0;
   if (id === "genre_studies") {
     const known = ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length;
@@ -3550,6 +3572,8 @@ export function researchBlockReason(r: RunState, id: string): string | null {
   if (id === TALENT_ANALYSIS_ID && allCastProfiled(r)) return "ALL CAST PROFILED — every hidden affinity is known";
   if (id === "genre_studies" && ARC_RESEARCH_ALL_GENRE_KEYS.every((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0)) return "COMPLETE — every standard arc/genre relationship is understood";
   if (id === "narrative_analytics" && ARC_RESEARCH_ALL_COMBO_IDS.every((comboId) => r.arcCombos.includes(comboId))) return "COMPLETE — every standard story structure is understood";
+  const discipline = researchTrackForResearchId(id);
+  if (discipline && researchTrackLevel(r, discipline.id) >= MAX_RESEARCH_TRACK_LEVEL) return `COMPLETE — ${discipline.name} is fully developed`;
   const effectiveRdCost = researchProjectCost(r, id, def.rd);
   if (r.rd < effectiveRdCost) return `Needs ${effectiveRdCost} research data (you have ${r.rd})`;
   return null;
