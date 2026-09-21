@@ -82,6 +82,7 @@ import { signStaffContract } from "../engine/spending";
 import { showrunnerStats } from "../engine/studioOps";
 import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";
 import { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
+import { formalizeMentorship, relationshipRecord } from "../engine/staffRelationships";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -311,14 +312,23 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
             <div>
               <div className="text-[8px] font-bold tracking-[0.2em] text-paper/40">RELATIONSHIPS</div>
               <div className="mt-1 space-y-0.5">
-                {bondsWith.map(({ other, bond }) => (
-                  <div key={other.id} className="flex items-center gap-1.5 text-[9px]">
-                    <Handshake size={9} style={{ color: BOND_COLOR[bond!.kind] }} />
-                    <b style={{ color: BOND_COLOR[bond!.kind] }}>{BOND_LABEL[bond!.kind]}</b>
-                    <span className="text-paper/60">with {other.name.split(" ")[0]}</span>
-                    <span className="ml-auto text-paper/40">{bond!.desc}</span>
-                  </div>
-                ))}
+                {bondsWith.map(({ other, bond }) => {
+                  const history = relationshipRecord(run, s.id, other.id);
+                  const canMentor = s.level > other.level && !history?.formalMentorId;
+                  return (
+                    <div key={other.id} className="rounded-md border border-line/50 bg-panel2/35 p-1.5 text-[9px]">
+                      <div className="flex items-center gap-1.5">
+                        <Handshake size={9} style={{ color: BOND_COLOR[bond!.kind] }} />
+                        <b style={{ color: BOND_COLOR[bond!.kind] }}>{history?.goldenPair ? "GOLDEN PAIR" : BOND_LABEL[bond!.kind]}</b>
+                        <span className="text-paper/60">with {other.name.split(" ")[0]}</span>
+                        {history?.formalMentorId === s.id && <span className="ml-auto text-gold">MENTORING</span>}
+                        {history?.formalMenteeId === s.id && <span className="ml-auto text-gold">MENTEE</span>}
+                      </div>
+                      {history && <div className="mt-0.5 text-[8px] text-paper/40">{history.sharedReleases} shared releases · {history.acclaimedReleases} hits · best {history.bestScore || "—"}/40{history.bestTitle ? ` “${history.bestTitle}”` : ""}</div>}
+                      {canMentor && <button className="btn-press mt-1 rounded border border-gold/30 px-1.5 py-0.5 text-[8px] font-black text-gold" onClick={() => setRun((r) => formalizeMentorship(r, s.id, other.id) ?? r)}><GraduationCap size={8} className="mr-1 inline"/>FORMAL MENTORSHIP</button>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
