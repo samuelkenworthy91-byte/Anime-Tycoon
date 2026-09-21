@@ -26,6 +26,7 @@ import {
 import { campaignPressureFor, hireRivalTalent, rivalTalentPoachTerms, studioRankings, type RunState } from "../engine/state";
 import StudioIdentity from "./StudioIdentity";
 import { activeIndustryMovements, movementLabel, movementPhase } from "../engine/industryTrends";
+import { rivalMemoriesFor } from "../engine/rivalMemories";
 import { cn } from "../utils/cn";
 
 const genreLabel = (id: string) => GENRES.find((g) => g.id === id)?.label ?? id;
@@ -97,6 +98,7 @@ function StudioCard({ studio, run }: { studio: RivalStudio; run: RunState }) {
   const p = PERSONAS[studio.persona];
   const upcoming = studio.productions.filter((pr) => pr.week > run.week).sort((a, b) => a.week - b.week);
   const recent = studio.releases.slice(-5).reverse();
+  const memories = rivalMemoriesFor(run, studio.id).slice(0, 3);
 
   return (
     <div className={cn("ink-card p-3", open && "border-cyanx/40")}>
@@ -193,6 +195,19 @@ function StudioCard({ studio, run }: { studio: RivalStudio; run: RunState }) {
                   <span key={f.key} className="ink-chip px-1.5 py-0.5 text-[9px] font-bold text-viol">
                     {f.baseTitle} · S{f.season} · {f.popularity}%
                   </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {memories.length > 0 && (
+            <div>
+              <div className="text-[8px] font-bold tracking-[0.2em] text-paper/40">WHAT THEY REMEMBER</div>
+              <div className="mt-1 space-y-1">
+                {memories.map((memory) => (
+                  <div key={memory.id} className="rounded-md border border-viol/20 bg-viol/5 px-2 py-1 text-[9px] text-paper/60">
+                    <span className="mr-1 font-black text-viol">Y{Math.floor(memory.week / 48) + 1}</span>{memory.text}
+                  </div>
                 ))}
               </div>
             </div>
