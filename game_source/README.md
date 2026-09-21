@@ -17,8 +17,8 @@ can poach their notables back), drift up and down a shared ranking table, build
 rivalries with you, and — rarely — decline, restructure, get acquired, collapse
 and return under new management.
 
-Year 12 ends the campaign — not the studio. A career retrospective scores the
-twelve years into a rank (Failed Studio → Anime Empire), then the save opens
+Year 25 ends the campaign — not the studio. A career retrospective scores the
+twenty-five years into a rank (Failed Studio → Anime Empire), then the save opens
 into **Dynasty Mode**: an endless run where the industry gets hungrier, staff
 retire into mentoring legacies, enormous empire investments sink your money, and
 the all-time industry records are fought over against the rivals.
@@ -51,7 +51,7 @@ each other are all hidden until you ship and read the post-release breakdown.
 
 ## Time
 
-Office time now has 0× / 1× / 4× / 12× controls. Important milestones, completed contracts/training/research, crises and dangerous cash forecasts automatically stop the clock. At 1×, one in-game day ≈ 2 real minutes. Seven days =
+Office time now has 0× / 1× / 4× / 12× / 30× controls. Important milestones, completed contracts/training/research, crises and dangerous cash forecasts automatically stop the clock. At 1×, one in-game day ≈ 2 real minutes. Seven days =
 one week: wages/rent are charged every 4 weeks and show revenue lands over a
 12-week broadcast — a slow build, a decisive peak, then a long tail of
 re-runs and word of mouth, like the Game Dev Tycoon sales chart.

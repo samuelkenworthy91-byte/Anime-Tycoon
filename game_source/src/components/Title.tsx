@@ -4,7 +4,7 @@ import { Btn } from "../fx/fx";
 import { sfx, primeAudio } from "../engine/audio";
 import { getScores, newestSave, slotLabel, type SlotId, type ScoreEntry } from "../engine/storage";
 import SaveSlots from "./SaveSlots";
-import { PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel, type Showrunner } from "../engine/data";
+import { CAREER_YEARS, PROTAGONISTS, SHOWRUNNERS, randomTitle, formatNum, formatGBP, dateLabel, type Showrunner } from "../engine/data";
 import { showrunnerStats } from "../engine/studioOps";
 type ShowrunnerId = Showrunner["id"];
 import { cn } from "../utils/cn";
@@ -121,7 +121,7 @@ export default function Title({
             <Sparkles size={13} className="text-gold" />
           </div>
           <div className="mt-1.5 text-[10px] font-bold tracking-[0.2em] text-paper/60">
-            EIGHT YEARS · £90,000 · ONE BEDROOM STUDIO
+            {CAREER_YEARS} YEARS · £90,000 · ONE BEDROOM STUDIO
           </div>
         </div>
 
