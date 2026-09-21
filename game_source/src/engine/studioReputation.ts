@@ -45,7 +45,7 @@ export function studioReputationTraits(run: RunState): StudioReputationTrait[] {
   const cults = Object.values(run.franchises).filter((franchise) => franchise.cult).length;
   const legends = run.legends?.length ?? 0;
   const totalMerch = Object.values(run.franchises).reduce((sum, franchise) => sum + (franchise.merchValue ?? 0), 0);
-  const overseasDepth = Object.keys(run.overseas?.regionalStrength ?? {}).length || Object.keys(run.overseas?.territories ?? {}).length || 0;
+  const overseasDepth = Object.values(run.overseas?.recognition ?? {}).filter((value) => (value ?? 0) > 0).length;
 
   traits.push({
     id: "hit_factory", label: "Mainstream Hit Factory",
