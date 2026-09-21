@@ -66,6 +66,7 @@ const STAGE_COLOR: Record<string, string> = {
 function ProjectCard({
   p,
   run,
+  setRun,
   onAssign,
   onMilestone,
   onShip,
@@ -74,12 +75,14 @@ function ProjectCard({
   onResume,
   onScrap,
   onContinueSeason,
+  onLicensed,
   onIntervention,
   onAppointPromise,
   onAppointLead,
 }: {
   p: Project;
   run: RunState;
+  setRun: (fn: (r: RunState) => RunState) => void;
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
@@ -89,6 +92,7 @@ function ProjectCard({
   onScrap: (projectId: string) => void;
   /** jump straight into creating this IP's next season while it's still on air */
   onContinueSeason?: (franchiseKey: string) => void;
+  onLicensed?: (ipId: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
   onAppointLead: (projectId: string, staffId: string | null) => void;
@@ -636,7 +640,13 @@ export default function ProjectsPanel({
 
   return (
     <div className="space-y-2.5">
-      <StudioSlate run={run} />
+      <StudioSlate
+        run={run}
+        setRun={setRun}
+        onOriginal={onNewShow}
+        onFranchise={(key) => onContinueSeason?.(key)}
+        onLicensed={(ipId) => onLicensed?.(ipId)}
+      />
       {quickSequels.length > 0 && onContinueSeason && <section className="rounded-xl border border-gold/30 bg-gold/5 p-2.5"><div className="text-[9px] font-black tracking-[0.22em] text-gold">TRUE SEQUELS READY</div><div className="mt-1 text-[9px] text-paper/45">Only the latest eligible state of each series appears here. Reboots, spin-offs and sold properties stay in the Library.</div><div className="mt-2 space-y-1.5">{quickSequels.map((fr)=>{const latest=fr.entries[fr.entries.length-1];const ago=Math.max(0,run.week-fr.lastEntryWeek);return <div key={fr.key} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/60 p-2"><div className="min-w-0 flex-1"><b className="block truncate text-xs">{fr.baseTitle}</b><div className="text-[9px] text-paper/45">Latest: {latest?.title??fr.baseTitle} · {ago} week{ago===1?"":"s"} ago · {fr.lastScore}/40</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" onClick={()=>onContinueSeason(fr.key)}>SEASON {fr.season+1}</Btn></div>})}</div></section>}
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold tracking-[0.25em] text-paper/45">
