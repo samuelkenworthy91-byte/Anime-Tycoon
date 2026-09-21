@@ -47,7 +47,7 @@ import {
 import Portrait from "./Portrait";
 import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
-import { INTERVENTIONS, interventionBlock, interventionQuote } from "../engine/spending";
+import { BASE_INTERVENTIONS, INVESTMENT_TIERS, interventionBlock, interventionInvestmentKey, interventionQuote } from "../engine/spending";
 import { expansionOf } from "../engine/studioExpansion";
 
 const STAGE_COLOR: Record<string, string> = {
@@ -300,11 +300,39 @@ function ProjectCard({
       {inPipeline && (
         <details className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
           <summary className="cursor-pointer text-[10px] font-black tracking-widest text-gold">PAID PRODUCTION INTERVENTIONS</summary>
-          <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
-            {INTERVENTIONS.map((d) => {
-              const block = interventionBlock(run, p, d);
-              const quote = interventionQuote(run, d, "standard", p.draft);
-              return <button key={d.id} disabled={!!block} title={block ?? d.description} onClick={() => onIntervention(p.id, d.id)} className={cn("rounded-lg border p-2 text-left text-[9px]", block ? "border-line/40 opacity-35" : "border-gold/35 bg-gold/5 hover:border-gold")}><b className="block text-paper">{d.name}</b><span className="text-gold">−{formatGBPShort(quote?.cost ?? d.cost)}</span><span className="ml-1 text-paper/40">{block ?? d.description}</span></button>;
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {BASE_INTERVENTIONS.map((d) => {
+              const standardBlock = interventionBlock(run, p, d);
+              const tiers = d.scalable ? INVESTMENT_TIERS.filter((tier) => tier.id !== "obsessive") : INVESTMENT_TIERS.slice(0, 1);
+              return (
+                <div key={d.id} className={cn("rounded-lg border p-2", standardBlock ? "border-line/40 opacity-50" : "border-gold/30 bg-gold/5")}>
+                  <div className="text-[10px] font-extrabold text-paper">{d.name}</div>
+                  <div className="mt-0.5 text-[8px] text-paper/45">{standardBlock ?? d.description}</div>
+                  {!standardBlock && (
+                    <div className="mt-2 grid grid-cols-3 gap-1">
+                      {tiers.map((tier) => {
+                        const key = interventionInvestmentKey(d.id, tier.id);
+                        const tierDef = { ...d, id: key, baseId: d.id, investmentTier: tier.id };
+                        const block = interventionBlock(run, p, tierDef);
+                        const quote = interventionQuote(run, d, tier.id, p.draft);
+                        return (
+                          <button
+                            key={tier.id}
+                            type="button"
+                            disabled={!!block}
+                            title={block ?? tier.description}
+                            onClick={() => onIntervention(p.id, key)}
+                            className={cn("btn-press rounded-md border px-1.5 py-1 text-center", block ? "border-line/30 text-paper/25" : "border-gold/30 bg-ink/35 hover:border-gold")}
+                          >
+                            <div className="text-[7px] font-black tracking-wide text-paper/55">{tier.name.toUpperCase()}</div>
+                            <div className="text-[9px] font-extrabold text-gold">−{formatGBPShort(quote?.cost ?? d.cost)}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
             })}
           </div>
         </details>
