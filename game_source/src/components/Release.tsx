@@ -17,6 +17,8 @@ import { TIERS, type ShowResult } from "../engine/scoring";
 import { AIR_WEEKS } from "../engine/state";
 import { arcClashById, genreReleaseEffect } from "../engine/creativeDiscovery";
 import { careerYearForWeek, contextualReviewQuote } from "../engine/reviewNarrative";
+import { diagnoseRelease, reviewEvidenceFor } from "../engine/reviewDiagnostics";
+import type { GenreId } from "../engine/data";
 import Poster from "./Poster";
 import { cn } from "../utils/cn";
 
@@ -45,6 +47,7 @@ export default function Release({
   studio,
   careerWeek = 0,
   showsMadeBefore = 0,
+  genreKnowledge = {},
   onContinue,
 }: {
   draft: Draft;
@@ -52,6 +55,7 @@ export default function Release({
   studio: string;
   careerWeek?: number;
   showsMadeBefore?: number;
+  genreKnowledge?: Partial<Record<GenreId, number>>;
   onContinue: () => void;
 }) {
   /*
@@ -73,6 +77,7 @@ export default function Release({
   const shownUnits = result.sales.slice(0, salesWeek).reduce((a, b) => a + b, 0);
   const shownRevenue = Math.round(shownUnits * 2.6);
   const careerYear = careerYearForWeek(careerWeek);
+  const diagnosis = useMemo(() => diagnoseRelease(draft, result, genreKnowledge), [draft, result, genreKnowledge]);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {
     const rows: DiscoveryCard[] = [];
@@ -315,6 +320,14 @@ export default function Release({
                                 <div className="text-[10px] font-extrabold tracking-wider text-paper/75">{r.outlet}</div>
                                 <div className="mt-0.5 text-[8px] font-bold uppercase tracking-wide text-gold/70">{r.criteria ?? r.focus}</div>
                                 <div className="mt-1 text-[11px] italic leading-snug text-paper/60">“{quote}”</div>
+                                {(() => {
+                                  const evidence = reviewEvidenceFor(r.criteria, diagnosis);
+                                  return evidence ? (
+                                    <div className={cn("mt-1.5 rounded-md border px-2 py-1 text-[8px] font-bold", evidence.tone === "concern" ? "border-neon/30 bg-neon/5 text-neon2" : evidence.tone === "strength" ? "border-mint/30 bg-mint/5 text-mint" : "border-gold/25 bg-gold/5 text-gold")}>
+                                      {evidence.headline}
+                                    </div>
+                                  ) : null;
+                                })()}
                               </div>
                             </div>
                           ) : <div className="flex h-full items-center justify-center text-[9px] tracking-[0.3em] text-paper/30">EMBARGOED</div>}
@@ -340,6 +353,33 @@ export default function Release({
                 </div>
               )}
             </div>
+
+            {verdictVisible && (
+              <section className="anim-up mx-auto mt-4 w-full max-w-5xl rounded-2xl border border-cyanx/30 bg-cyanx/5 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="font-display text-sm font-extrabold text-cyanx">WHAT WE LEARNED</div>
+                  <span className="rounded border border-line px-1.5 py-0.5 text-[8px] font-black text-paper/45">{diagnosis.knowledge} KNOWLEDGE</span>
+                </div>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  <div>
+                    {diagnosis.strengths.slice(0, 2).map((d) => (
+                      <div key={d.id} className="mb-1 rounded-lg border border-mint/25 bg-mint/5 p-2">
+                        <div className="text-[9px] font-extrabold text-mint">✓ {d.headline}</div>
+                        <div className="mt-0.5 text-[9px] text-paper/50">{d.detail}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    {[...diagnosis.concerns, ...diagnosis.lessons].slice(0, 2).map((d) => (
+                      <div key={d.id} className="mb-1 rounded-lg border border-gold/25 bg-gold/5 p-2">
+                        <div className={cn("text-[9px] font-extrabold", d.tone === "concern" ? "text-neon2" : "text-gold")}>{d.tone === "concern" ? "!" : "→"} {d.headline}</div>
+                        <div className="mt-0.5 text-[9px] text-paper/50">{d.detail}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
 
             {businessVisible && (
               <section className="anim-up mx-auto mt-6 w-full max-w-5xl border-t border-line/40 pt-5">
