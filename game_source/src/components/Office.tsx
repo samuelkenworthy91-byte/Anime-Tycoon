@@ -631,6 +631,7 @@ export default function Office({
           {run.officeLevel >= AUTO_MIN_OFFICE && <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("auto-manage")} /></div>}
           <ProjectsPanel
             run={run}
+            setRun={setRun}
             onAppointPromise={(projectId, promiseId) => {
               sfx.click();
               setRun((r) => {
@@ -668,6 +669,10 @@ export default function Office({
             onContinueSeason={(key) => {
               setModal(null);
               onContinue({ key, kind: "season" });
+            }}
+            onLicensed={(ipId) => {
+              setModal(null);
+              onLicensed(ipId);
             }}
             onIntervention={(projectId, interventionId) => {
               sfx.cash();
