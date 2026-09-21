@@ -44,6 +44,8 @@ import { buyMerchInfrastructure, franchiseSaleBlock, launchMerch, merchProductUn
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 import SellerAuctionCeremony from "./SellerAuctionCeremony";
+import { AUDIENCE_SEGMENT_LABELS, franchiseAudienceProfile, type AudienceSegmentId } from "../engine/audienceSegments";
+import { merchAudienceFit, publicityAudienceFit, publicityFitLabel } from "../engine/publicity";
 
 /* ------------------------------------------------------------------ plan */
 export interface ContinuationPlan {
@@ -237,6 +239,9 @@ export default function LibraryPanel({
   const merchTier = merchTierOf(run);
   const currentMerchTier = merchTier ? MERCH_TIERS[merchTier - 1] : null;
   const nextMerchTier = MERCH_TIERS[merchTier] ?? null;
+  const audienceProfile = franchiseAudienceProfile(run, fr.key);
+  const activeMerchBet = run.activeMerchBets?.[fr.key];
+  const merchBetActive = !!activeMerchBet && activeMerchBet.endsWeek > run.week;
 
   const doMerch = (productId: string) => {
     sfx.fanfare();
@@ -301,6 +306,17 @@ export default function LibraryPanel({
           <Stat k="ZEITGEIST" v={`${zeitgeist} · ${zeitgeistLabel(fr)}`} accent={zeitgeist >= 70 ? "#5ef0c0" : zeitgeist >= 50 ? "#ffd166" : "#ff9d5e"} />
           <Stat k="LAST ENTRY" v={dateLabel(fr.lastEntryWeek)} />
         </div>
+
+        {audienceProfile && (
+          <div className="mt-2 rounded-lg border border-cyanx/25 bg-cyanx/5 p-2">
+            <div className="flex items-center justify-between text-[8px] font-black tracking-wider text-paper/40"><span>FRANCHISE AUDIENCE</span><span className="text-cyanx">{AUDIENCE_SEGMENT_LABELS[audienceProfile.dominant].toUpperCase()}</span></div>
+            <div className="mt-1 grid grid-cols-5 gap-1">
+              {(["core","casual","online","prestige","collectors"] as AudienceSegmentId[]).map((id) => (
+                <div key={id} className="rounded bg-panel2/60 p-1 text-center"><b className="block text-[10px]">{audienceProfile[id]}%</b><span className="text-[6px] leading-none text-paper/35">{AUDIENCE_SEGMENT_LABELS[id]}</span></div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-2 space-y-1">
           <div className="flex items-center gap-2">
@@ -443,7 +459,7 @@ export default function LibraryPanel({
           {/* ---------------------------------------------- zeitgeist campaigns */}
           <div>
             <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-              <Flame size={11} /> KEEP IN THE ZEITGEIST
+              <Flame size={11} /> PUBLICITY · FRANCHISE
             </div>
             <div className="mb-2 text-[9px] text-paper/45">
               Promotion can keep a franchise commercially hot around a release, but every push adds fatigue. The strongest long-run strategy is to peak near launch rather than stay saturated forever.
@@ -453,7 +469,7 @@ export default function LibraryPanel({
                 const block = franchiseCampaignBlock(fr, campaign, run.week, run.cash);
                 return (
                   <div key={campaign.id} className={cn("rounded-md border p-2", block ? "border-paper/10 bg-paper/5 opacity-60" : "border-gold/25 bg-gold/5")}>
-                    <div className="text-[11px] font-bold">{campaign.label}</div>
+                    <div className="flex items-center gap-1"><div className="text-[11px] font-bold">{campaign.label}</div>{audienceProfile && <span className="ml-auto rounded border border-cyanx/25 px-1 py-px text-[7px] font-black text-cyanx">{publicityFitLabel(publicityAudienceFit(audienceProfile, campaign.id))} ×{publicityAudienceFit(audienceProfile, campaign.id).toFixed(2)}</span>}</div>
                     <div className="text-[9px] text-paper/45">{campaign.description}</div>
                     <div className="mt-1 text-[9px] text-paper/60">
                       −{formatGBPShort(campaign.cost)} · +{campaign.popularity} Pop · +{campaign.fatigue} Fatigue · hold {campaign.freezeWeeks} wk
@@ -476,7 +492,7 @@ export default function LibraryPanel({
             </div>
             <div className="mb-2 rounded-md border border-gold/20 bg-gold/5 p-2 text-[9px] text-paper/55">
               {currentMerchTier
-                ? <><b className="text-gold">{currentMerchTier.name}</b> · {formatGBPShort(currentMerchTier.upkeep)}/week upkeep. Infrastructure sets the ceiling; each product line is developed separately.</>
+                ? <><b className="text-gold">{currentMerchTier.name}</b> · {formatGBPShort(currentMerchTier.upkeep)}/week upkeep. Infrastructure sets the ceiling; develop product families globally, then make one major franchise bet at a time.</>
                 : <><b>NO MERCH OPERATION</b> · Research Merch Division, then invest in Domestic Merch.</>}
               {nextMerchTier && (
                 <div className="mt-1.5">
@@ -493,11 +509,19 @@ export default function LibraryPanel({
                 </div>
               )}
             </div>
+            {merchBetActive && activeMerchBet && (
+              <div className="mb-2 rounded-lg border border-gold/40 bg-gold/10 p-2">
+                <div className="text-[9px] font-black tracking-wider text-gold">ACTIVE MERCH BET · {activeMerchBet.label.toUpperCase()}</div>
+                <div className="mt-0.5 text-[9px] text-paper/55">Projected ≈{formatGBPShort(activeMerchBet.projectedReturn)} · audience fit ×{activeMerchBet.audienceFit.toFixed(2)} · {activeMerchBet.endsWeek - run.week} weeks remaining. New franchise merch waits until this run finishes.</div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-1.5">
               {MERCH_PRODUCTS.map((p) => {
                 const developed = merchProductUnlocked(run, p.id);
                 const developBlock = developed ? null : merchProductUnlockBlock(run, p.id);
-                const block = developed ? merchBlock(fr, p, run.week, run.cash, merchTier) : "Develop this product line first";
+                const nativeBlock = developed ? merchBlock(fr, p, run.week, run.cash, merchTier) : "Develop this product line first";
+                const block = merchBetActive ? `Finish current merch bet first (${activeMerchBet!.endsWeek - run.week} wk)` : nativeBlock;
+                const audienceFit = merchAudienceFit(audienceProfile ?? undefined, p.id);
                 const ret = merchReturn(fr, p);
                 return (
                   <div key={p.id} className={cn("rounded-md border p-2", developed && !block ? "border-mint/30 bg-mint/5" : "border-paper/10 bg-paper/5")}>
@@ -509,7 +533,7 @@ export default function LibraryPanel({
                     </div>
                     <div className="text-[9px] text-paper/45">{p.desc}</div>
                     <div className="mt-1 text-[9px] text-paper/60">
-                      −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(ret)}</b> / {p.weeks} wk
+                      −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(Math.round(ret * audienceFit))}</b> / {p.weeks} wk · audience ×{audienceFit.toFixed(2)}
                     </div>
                     {(p.popularityGain || p.fatigueAdd) && (
                       <div className="text-[9px] text-gold/70">+{p.popularityGain ?? 0} Pop · +{p.fatigueAdd ?? 0} Fatigue{p.freezeWeeks ? ` · attention held ${p.freezeWeeks} wk` : ""}</div>
