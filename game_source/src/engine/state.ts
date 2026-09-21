@@ -53,6 +53,7 @@ import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject } from "./creatorVision";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
+import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
 import { merchAudienceFit, publicityAudienceFit } from "./publicity";
 import {
   bumpRivalry,
@@ -1070,6 +1071,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   /* staff, relationships and events evolve week by week */
   let staffArr = r.staff.map((x) => ensureCareer(x, r.week));
   let bonds = { ...(r.bonds ?? {}) };
+  let staffRelationships = [...(r.staffRelationships ?? [])];
   let events = [...(r.staffEvents ?? [])];
   let legends = [...(r.legends ?? [])];
   let dynasty = r.dynasty ?? null;
@@ -1110,7 +1112,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     const creator = creatorVisionEffectsForProject(r.expansion?.promises, p, st.id);
     return {
       ...base,
-      out: base.out * signature.outputMult * creator.outputMult,
+      out: base.out * signature.outputMult * creator.outputMult * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id)),
       pace: base.pace * signature.paceMult,
       xpMult: base.xpMult * creator.xpMult,
     };
@@ -1237,6 +1239,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           bonds[k] = (bonds[k] ?? 0) + 1;
         }
     }
+    staffRelationships = syncRelationshipHistory(staffRelationships, staffArr, bonds, w);
 
     /* ------- stamina, morale and experience, person by person ------- */
     {
@@ -1264,7 +1267,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
           const m = mods(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)));
-          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner));
+          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner) * relationshipXpMultiplier({ staffRelationships }, nx.id));
           nx = g.staff;
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
@@ -1639,6 +1642,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     fansThisWeek,
     staff: staffArr,
     bonds,
+    staffRelationships,
     staffEvents: events,
     legends,
     dynasty,
@@ -3266,6 +3270,7 @@ export function releaseProject(
 
   let expanded = finishExpansionProduction(run, { ...p, result });
   expanded = recordAudienceProfile(expanded, projectId, fkey, draft, result);
+  expanded = recordRelationshipRelease(expanded, p.staffIds, draft.title, result.total);
   if (bonusCash) expanded = settleProjectReceipt(expanded, {week:r.week,amount:bonusCash,fans:0,label:"Commission quality bonus",sourceProjectId:projectId,sourceReleaseId:"commission-bonus"});
   return { run: expanded, result };
 }
