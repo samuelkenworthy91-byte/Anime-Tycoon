@@ -205,6 +205,7 @@ import {
   type DynastyState,
 } from "./legacy";
 import { tickDelegated } from "./automation";
+import { canDelegateRoutineProduction } from "./careerEras";
 import {
   MAX_RESEARCH_TRACK_LEVEL,
   completeResearchTrack,
@@ -436,6 +437,8 @@ export interface RunState {
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
   capitalProjects: string[];
   staffContracts: Record<string, { expiresWeek: number; bonus: number; exclusive: boolean }>;
+  /** Major-studio era QoL: routine projects default to Auto Manage once a real team is assigned. */
+  executiveDelegation?: boolean;
   /** One consequential consumer-products bet per franchise at a time. */
   activeMerchBets?: Record<string, { productId: string; label: string; startedWeek: number; endsWeek: number; projectedReturn: number; audienceFit: number }>;
 }
@@ -1868,11 +1871,23 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
   const toggled = toggleAssign(r.projects, projectId, staffId);
   return {
     ...r,
-    projects: toggled.map((project) =>
-      project.id === projectId && already && project.creativeLeadId === staffId
+    projects: toggled.map((project) => {
+      if (project.id !== projectId) return project;
+      let next = already && project.creativeLeadId === staffId
         ? { ...project, creativeLeadId: undefined }
-        : project
-    ),
+        : project;
+      if (
+        !already &&
+        r.executiveDelegation &&
+        canDelegateRoutineProduction(r.week) &&
+        r.officeLevel >= 2 &&
+        next.staffIds.length >= 2 &&
+        !next.auto
+      ) {
+        next = { ...next, auto: { headSlot: r.heads.production ? "production" : null, startedWeek: r.week, intervention: false } };
+      }
+      return next;
+    }),
   };
 }
 
