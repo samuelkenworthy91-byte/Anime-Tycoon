@@ -51,6 +51,7 @@ import {
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject } from "./creatorVision";
+import { recordAudienceProfile } from "./audienceSegments";
 import {
   bumpRivalry,
   computeRankings,
@@ -3247,6 +3248,7 @@ export function releaseProject(
   });
 
   let expanded = finishExpansionProduction(run, { ...p, result });
+  expanded = recordAudienceProfile(expanded, projectId, fkey, draft, result);
   if (bonusCash) expanded = settleProjectReceipt(expanded, {week:r.week,amount:bonusCash,fans:0,label:"Commission quality bonus",sourceProjectId:projectId,sourceReleaseId:"commission-bonus"});
   return { run: expanded, result };
 }
