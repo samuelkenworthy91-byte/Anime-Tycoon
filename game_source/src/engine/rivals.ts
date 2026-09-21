@@ -696,7 +696,8 @@ function planStudioYear(
   yearStartWeek: number,
   boost = 0,
   usedTitles = new Set<string>(),
-  blockedPosterIds: readonly string[] = []
+  blockedPosterIds: readonly string[] = [],
+  trendGenres: readonly GenreId[] = []
 ): { productions: RivalProduction[]; posterRecent: string[]; franchises: RivalFranchise[] } {
   const empty = { productions: [], posterRecent: studio.posterRecent ?? [], franchises: studio.franchises };
   if (studio.status === "collapsed") return empty;
@@ -746,7 +747,7 @@ function planStudioYear(
       licensedIpId = fr.licensedIpId ?? null;
     } else {
       kind = "original";
-      genres = pickGenres(studio);
+      genres = pickGenres(studio, trendGenres);
       animeType = studio.persona === "idol" || studio.persona === "prestige" ? "shojo" : Math.random() < 0.5 ? "shonen" : "shojo";
       title = uniqueTitle(makeOriginalTitle(genres, animeType), usedTitles);
       franchiseKey = null;
@@ -794,8 +795,14 @@ function maybeContinue(studio: RivalStudio): RivalFranchise | null {
   return [...warm].sort((a, b) => b.popularity - a.popularity)[0];
 }
 
-function pickGenres(studio: RivalStudio): GenreId[] {
-  const primary = pick(studio.preferred);
+function pickGenres(studio: RivalStudio, trendGenres: readonly GenreId[] = []): GenreId[] {
+  const preferredTrend = trendGenres.filter((genre) => studio.preferred.includes(genre));
+  const outsideTrend = trendGenres.filter((genre) => !studio.preferred.includes(genre));
+  const primary = preferredTrend.length && Math.random() < 0.38
+    ? pick(preferredTrend)
+    : outsideTrend.length && Math.random() < 0.10
+      ? pick(outsideTrend)
+      : pick(studio.preferred);
   const genres = [primary];
   if (Math.random() < 0.4) {
     const other = studio.preferred.filter((g) => g !== primary);
@@ -917,7 +924,7 @@ function yearTransition(studio: RivalStudio, year: number): { studio: RivalStudi
   return { studio: st, notice: null };
 }
 
-export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number; blockedPosterIds?: readonly string[] }): { world: RivalWorld; notices: string[] } {
+export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: number, opts?: { qualityBoost?: number; blockedPosterIds?: readonly string[]; trendGenres?: readonly GenreId[] }): { world: RivalWorld; notices: string[] } {
   const notices: string[] = [];
   const boost = opts?.qualityBoost ?? 0;
   const usedTitles = new Set(
@@ -930,7 +937,7 @@ export function planRivalYear(world: RivalWorld, year: number, yearStartWeek: nu
     const t = yearTransition(st, year);
     if (t.notice) notices.push(t.notice);
     const next = t.studio;
-    const slate = planStudioYear(next, year, yearStartWeek, boost, usedTitles, opts?.blockedPosterIds ?? []);
+    const slate = planStudioYear(next, year, yearStartWeek, boost, usedTitles, opts?.blockedPosterIds ?? [], opts?.trendGenres ?? []);
     return { ...next, productions: slate.productions, posterRecent: slate.posterRecent, franchises: slate.franchises };
   });
   return { world: { ...world, studios, year, yearStartWeek }, notices };
