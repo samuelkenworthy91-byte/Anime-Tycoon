@@ -20,6 +20,7 @@ import { careerYearForWeek, contextualReviewQuote } from "../engine/reviewNarrat
 import { diagnoseRelease, reviewEvidenceFor } from "../engine/reviewDiagnostics";
 import type { GenreId } from "../engine/data";
 import Poster from "./Poster";
+import { AUDIENCE_SEGMENT_LABELS, audienceProfileForRelease, type AudienceSegmentId } from "../engine/audienceSegments";
 import { cn } from "../utils/cn";
 
 const AUTO_MS = [850, 1150, 1050, 1550, 850, 850, 850, 850, 1550, 1650];
@@ -78,6 +79,7 @@ export default function Release({
   const shownRevenue = Math.round(shownUnits * 2.6);
   const careerYear = careerYearForWeek(careerWeek);
   const diagnosis = useMemo(() => diagnoseRelease(draft, result, genreKnowledge), [draft, result, genreKnowledge]);
+  const audienceProfile = useMemo(() => audienceProfileForRelease(draft, result), [draft, result]);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {
     const rows: DiscoveryCard[] = [];
@@ -393,6 +395,19 @@ export default function Release({
                   <Stat icon={<Flame size={15} className="text-neon" />} v={`+${formatNum(result.fans)}`} k="NEW FANS" cls="text-neon2" />
                   <Stat icon={net >= 0 ? <TrendingUp size={15} className="text-mint" /> : <TrendingDown size={15} className="text-neon" />} v={`${net >= 0 ? "+" : ""}${formatGBP(net)}`} k="PROFIT" cls={net >= 0 ? "text-mint" : "text-neon"} />
                   <Stat icon={<Database size={15} className="text-viol" />} v={`+${result.rd}`} k="RESEARCH" cls="text-viol" />
+                </div>
+
+                <div className="mt-3 rounded-2xl border border-cyanx/25 bg-cyanx/5 p-3">
+                  <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-[0.3em] text-paper/45">WHO FOUND THIS SHOW</span><span className="text-[8px] font-black text-cyanx">{AUDIENCE_SEGMENT_LABELS[audienceProfile.dominant].toUpperCase()}</span></div>
+                  <div className="mt-2 grid grid-cols-5 gap-1">
+                    {(["core","casual","online","prestige","collectors"] as AudienceSegmentId[]).map((id) => (
+                      <div key={id} className="rounded-lg border border-line bg-panel2/55 p-1.5 text-center">
+                        <div className="font-display text-sm font-extrabold text-paper">{audienceProfile[id]}%</div>
+                        <div className="mt-0.5 text-[7px] leading-tight text-paper/40">{AUDIENCE_SEGMENT_LABELS[id]}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1.5 text-[8px] text-paper/40">Audience composition is not five currencies: it describes who your existing fans are, and now drives publicity, merchandising and overseas fit.</div>
                 </div>
 
                 <div className="mt-3 rounded-2xl border border-line/60 bg-panel2/70 p-3">
