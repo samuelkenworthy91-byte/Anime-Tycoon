@@ -15,6 +15,7 @@ import {
   studioSpecialisationProfile,
 } from "../engine/specialisation";
 import { cn } from "../utils/cn";
+import { studioReputationTraits } from "../engine/studioReputation";
 
 const rankLabel = {
   none: "UNDECLARED",
@@ -33,6 +34,7 @@ export default function StudioIdentity({
   setRun: (fn: (r: RunState) => RunState) => void;
 }) {
   const profile = studioSpecialisationProfile(run);
+  const reputation = studioReputationTraits(run);
   const benefits = specialisationBenefits(run);
   const primaryReady = run.officeLevel >= PRIMARY_SPECIALISATION_MIN_OFFICE;
   const unlocked = GENRES.filter((genre) => run.genresUnlocked.includes(genre.id));
@@ -53,16 +55,32 @@ export default function StudioIdentity({
 
   return (
     <div className="space-y-3">
+      <div className="rounded-xl border border-cyanx/35 bg-cyanx/[.06] p-3">
+        <div className="text-[9px] font-black tracking-[0.22em] text-cyanx">INDUSTRY REPUTATION · EARNED, NOT CHOSEN</div>
+        {reputation.length === 0 ? (
+          <div className="mt-1 text-[10px] text-paper/50">The industry has not seen enough of your work to put the studio in a box yet.</div>
+        ) : (
+          <div className="mt-2 grid gap-1.5 sm:grid-cols-3">
+            {reputation.map((trait) => (
+              <div key={trait.id} className="rounded-lg border border-line bg-panel2/55 p-2">
+                <div className="text-[10px] font-extrabold text-cyanx">{trait.label.toUpperCase()}</div>
+                <div className="mt-0.5 text-[8px] leading-relaxed text-paper/50">{trait.description}</div>
+                <div className="mt-1 text-[7px] font-bold text-paper/35">{trait.evidence}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="rounded-xl border border-gold/35 bg-gold/[.06] p-3">
         <div className="flex items-start gap-2">
           <Target size={18} className="mt-0.5 shrink-0 text-gold" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="font-display text-base font-extrabold text-gold">STUDIO IDENTITY</div>
+              <div className="font-display text-base font-extrabold text-gold">HOUSE SPECIALISATION</div>
               <span className="rounded border border-gold/35 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-gold">{rankLabel[profile.rank]}</span>
             </div>
             <div className="mt-1 text-[10px] leading-relaxed text-paper/55">
-              Commit to a house genre instead of becoming universally safe. Your signature work gets stronger production output, faster pacing, better intervention economics and sharper forecasts. Work outside your speciality stays possible, but becomes slightly costlier and more volatile.
+              Choose a house genre to build exceptional institutional expertise. Signature work gets stronger production output, faster pacing, better intervention economics and sharper forecasts. Work outside the house remains fully viable: specialisation adds strengths rather than punishing experimentation.
             </div>
             <div className="mt-1 text-[9px] font-bold text-cyanx">Licensed adaptations use their real underlying genres here — exactly the same rule as original productions.</div>
           </div>
@@ -136,7 +154,7 @@ export default function StudioIdentity({
                 <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signatureOutputPct}% OUTPUT</b><div className="text-[7px] text-paper/40">signature productions</div></div>
                 <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signaturePacePct}% PACE</b><div className="text-[7px] text-paper/40">signature productions</div></div>
                 <div className="rounded-lg border border-gold/25 bg-gold/5 p-2"><b className="text-[10px] text-gold">−{benefits.signatureInterventionDiscountPct}% RESCUE COST</b><div className="text-[7px] text-paper/40">+{benefits.signatureInterventionEffectPct}% intervention effect</div></div>
-                <div className="rounded-lg border border-neon/20 bg-neon/[.04] p-2"><b className="text-[10px] text-neon">OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">−{benefits.outsideOutputPenaltyPct}% output · −{benefits.outsidePacePenaltyPct}% pace · +{benefits.outsideInterventionPremiumPct}% rescue cost</div></div>
+                <div className="rounded-lg border border-cyanx/20 bg-cyanx/[.04] p-2"><b className="text-[10px] text-cyanx">OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">No blanket penalty. Experiment freely; you simply do not receive the house-speciality bonuses.</div></div>
               </div>
               {profile.rankLevel >= 2 && <div className="mt-2 text-[8px] font-bold text-cyanx"><Check size={9} className="mr-1 inline"/>Your recruitment ads now attract genre-aligned specialists.</div>}
             </div>
