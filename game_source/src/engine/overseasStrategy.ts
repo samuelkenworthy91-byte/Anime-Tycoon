@@ -13,6 +13,7 @@ import {
   type SegmentId,
 } from "./overseas";
 import { expansionOf } from "./studioExpansion";
+import { internationalAudienceFit } from "./publicity";
 export interface RegionalStudy {
   key: string;
   week: number;
@@ -175,11 +176,14 @@ export function regionalMarketFactor(
     rivals.reduce((s, p) => s + p.strength, 0),
   );
   const sponsored = active && strategyOf(r).sponsorships.includes(event.id);
+  const audienceFit = internationalAudienceFit(r.audienceProfiles?.[q.projectId]?.profile, q.segment);
   return {
     mult:
       (1 + (active ? event.effect : 0) + (sponsored ? 0.12 : 0)) *
-      (1 - pressure),
+      (1 - pressure) *
+      audienceFit,
     reasons: [
+      ...(Math.abs(audienceFit - 1) >= 0.04 ? [`Established fandom fit ×${audienceFit.toFixed(2)} for this audience.`] : []),
       ...(active ? [event.title + " supports this audience."] : []),
       ...(sponsored ? ["Your regional event sponsorship supports reach."] : []),
       ...(rivals.length
