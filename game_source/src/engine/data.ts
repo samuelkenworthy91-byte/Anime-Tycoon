@@ -573,6 +573,11 @@ export interface ResearchItem {
   requires?: string;
 }
 export const RESEARCH: ResearchItem[] = [
+  { id: "discipline_writing", name: "Writing & Development", rd: 26, repeatable: true, desc: "Deepen the studio's writing and development discipline. Milestones unlock automatically as the track levels." },
+  { id: "discipline_animation", name: "Animation & Art", rd: 28, repeatable: true, desc: "Deepen the studio's animation and art discipline. Milestones unlock automatically as the track levels." },
+  { id: "discipline_sound", name: "Sound & Performance", rd: 24, repeatable: true, desc: "Deepen the studio's sound, music and performance discipline." },
+  { id: "discipline_production", name: "Production & QA", rd: 30, repeatable: true, desc: "Deepen the studio's production, scheduling and QA discipline. Milestones unlock automatically as the track levels." },
+  { id: "discipline_business", name: "Business & Audience", rd: 32, repeatable: true, desc: "Deepen commercial, audience, localisation and talent-analysis capability. Milestones unlock automatically as the track levels." },
   { id: "storyboard", name: "Storyboard Method", rd: 20, desc: "Story contribution checks gain +15% effective skill." },
   { id: "pipeline", name: "Digital Pipeline", rd: 28, desc: "All live contribution checks gain +12% effective skill." },
   { id: "qa", name: "Editing Room", rd: 24, desc: "Editing note-clear checks gain +15% effective skill and production issues are reduced." },
