@@ -25,6 +25,7 @@ import {
 } from "../engine/rivals";
 import { campaignPressureFor, hireRivalTalent, rivalTalentPoachTerms, studioRankings, type RunState } from "../engine/state";
 import StudioIdentity from "./StudioIdentity";
+import { activeIndustryMovements, movementLabel, movementPhase } from "../engine/industryTrends";
 import { cn } from "../utils/cn";
 
 const genreLabel = (id: string) => GENRES.find((g) => g.id === id)?.label ?? id;
@@ -283,6 +284,7 @@ export default function RivalsPanel({
   const [tab, setTab] = useState<"identity" | "rankings" | "studios" | "talent">("rankings");
   const entries = studioRankings(run);
   const pressure = campaignPressureFor(run);
+  const movements = activeIndustryMovements(run);
 
   return (
     <div className="space-y-2 text-[12px]">
@@ -293,6 +295,21 @@ export default function RivalsPanel({
         </div>
         <div className="mt-0.5 text-[9px] text-paper/45">Success attracts competition: next-year rival pressure +{pressure.rivalBoost.toFixed(1)} · payroll ×{pressure.salaryMult.toFixed(2)} · parallel productions suffer management strain.</div>
       </div>
+      {movements.length > 0 && (
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          {movements.map((movement) => {
+            const label = movement.genre ? genreLabel(movement.genre) : undefined;
+            const phase = movementPhase(movement, run.week);
+            return (
+              <div key={movement.id} className="rounded-lg border border-cyanx/25 bg-cyanx/5 p-2">
+                <div className="text-[8px] font-black tracking-[0.18em] text-cyanx">CULTURAL MOVEMENT · {phase.toUpperCase()}</div>
+                <div className="mt-0.5 font-display text-xs font-extrabold">{movementLabel(movement, label)}</div>
+                <div className="mt-0.5 text-[8px] text-paper/45">{movement.endsWeek - run.week} weeks remain · affects commercial demand, never critic quality.</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className="mb-2 flex gap-1">
         {(
           [
