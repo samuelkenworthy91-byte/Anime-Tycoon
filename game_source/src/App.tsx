@@ -836,6 +836,7 @@ export default function App() {
             studio={run.studio}
             careerWeek={run.week}
             showsMadeBefore={Math.max(0, run.showsMade - 1)}
+            genreKnowledge={run.genreKnowledge}
             onContinue={continueFromRelease}
           />
         )}
