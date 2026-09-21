@@ -49,6 +49,7 @@ import StudioSlate from "./StudioSlate";
 import { cn } from "../utils/cn";
 import { BASE_INTERVENTIONS, INVESTMENT_TIERS, interventionBlock, interventionInvestmentKey, interventionQuote } from "../engine/spending";
 import { expansionOf } from "../engine/studioExpansion";
+import { canDelegateRoutineProduction, careerEraForWeek } from "../engine/careerEras";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -637,6 +638,8 @@ export default function ProjectsPanel({
     .filter((fr) => !continuationBlock(fr, "season", { week: run.week, franchiseCount: Object.keys(run.franchises).length, officeLevel: run.officeLevel, projects: run.projects }))
     .sort((a, b) => b.lastEntryWeek - a.lastEntryWeek || b.lastScore - a.lastScore);
   const fc = forecastWeek(run);
+  const era = careerEraForWeek(run.week);
+  const executiveReady = canDelegateRoutineProduction(run.week) && run.officeLevel >= AUTO_MIN_OFFICE;
 
   return (
     <div className="space-y-2.5">
@@ -647,6 +650,24 @@ export default function ProjectsPanel({
         onFranchise={(key) => onContinueSeason?.(key)}
         onLicensed={(ipId) => onLicensed?.(ipId)}
       />
+      <section className="rounded-xl border border-cyanx/25 bg-cyanx/5 p-2.5">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-[8px] font-black tracking-[0.22em] text-cyanx">YEAR {Math.floor(run.week / 48) + 1} · {era.name.toUpperCase()}</div>
+            <div className="mt-0.5 text-[9px] text-paper/50">{era.managementFocus}</div>
+          </div>
+          {executiveReady && (
+            <button
+              type="button"
+              onClick={() => setRun((r) => ({ ...r, executiveDelegation: !r.executiveDelegation, notices: [...r.notices, !r.executiveDelegation ? "🧭 Executive delegation enabled: projects default to Auto Manage once two staff are assigned." : "🧭 Executive delegation disabled: new projects remain hands-on."].slice(-40) }))}
+              className={cn("btn-press min-h-10 rounded-lg border px-2 text-[8px] font-black", run.executiveDelegation ? "border-mint/50 bg-mint/10 text-mint" : "border-line text-paper/50")}
+            >
+              EXECUTIVE DELEGATION {run.executiveDelegation ? "ON" : "OFF"}
+            </button>
+          )}
+        </div>
+        {executiveReady && <div className="mt-1 text-[8px] text-paper/40">This changes attention, not strategy: you still choose the show, team, interventions and release. Routine milestone sprints can run under the Production Head/team until a crisis needs you.</div>}
+      </section>
       {quickSequels.length > 0 && onContinueSeason && <section className="rounded-xl border border-gold/30 bg-gold/5 p-2.5"><div className="text-[9px] font-black tracking-[0.22em] text-gold">TRUE SEQUELS READY</div><div className="mt-1 text-[9px] text-paper/45">Only the latest eligible state of each series appears here. Reboots, spin-offs and sold properties stay in the Library.</div><div className="mt-2 space-y-1.5">{quickSequels.map((fr)=>{const latest=fr.entries[fr.entries.length-1];const ago=Math.max(0,run.week-fr.lastEntryWeek);return <div key={fr.key} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/60 p-2"><div className="min-w-0 flex-1"><b className="block truncate text-xs">{fr.baseTitle}</b><div className="text-[9px] text-paper/45">Latest: {latest?.title??fr.baseTitle} · {ago} week{ago===1?"":"s"} ago · {fr.lastScore}/40</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" onClick={()=>onContinueSeason(fr.key)}>SEASON {fr.season+1}</Btn></div>})}</div></section>}
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold tracking-[0.25em] text-paper/45">
