@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - depth-clarity-overhaul
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
@@ -24,10 +25,10 @@ jobs:
   publish-dist:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout current branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Import promised-lead crown icon
@@ -123,6 +124,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'runtime, promised-lead icon and dist already current'
           else
-            git commit -m 'Import promised-lead project icon'
-            git push origin HEAD:main
+            git commit -m 'Refresh GitHack dist for current branch'
+            git push origin HEAD:${{ github.ref_name }}
           fi
