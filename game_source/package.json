@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "content:prepare": "node scripts/prepare-vampire-grimdark.mjs && node scripts/prepare-genre30.mjs && node scripts/generate-content-v3-runtime.mjs && node scripts/verify-cast-wiring.mjs",
+    "content:prepare": "node scripts/materialize-title-art.mjs && node scripts/prepare-vampire-grimdark.mjs && node scripts/prepare-genre30.mjs && node scripts/generate-content-v3-runtime.mjs && node scripts/verify-cast-wiring.mjs",
     "predev": "npm run content:prepare",
     "dev": "vite",
     "prebuild": "npm run content:prepare",
@@ -49,6 +49,10 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
+    "@tailwindcss/vite": "4.1.17",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "@tailwindcss/vite": "4.1.17",
     "@types/node": "22.19.17",
     "@types/react": "19.2.7",
