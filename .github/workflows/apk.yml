@@ -1,5 +1,5 @@
 name: Build Android APK
-# Fresh-build trigger: main and active playtest branches. Work runtime fix rebuild.
+# Fresh-build trigger: main and active playtest branches. Rooms state runtime fix rebuild.
 
 on:
   workflow_dispatch:
