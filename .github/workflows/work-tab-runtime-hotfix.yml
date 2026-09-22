@@ -29,7 +29,6 @@ jobs:
 
           p = Path('game_source/src/components/Projects.tsx')
           s = p.read_text()
-
           replacements = [
             (
               '''export default function ProjectsPanel({\n  run,\n  onAssign,''',
@@ -49,23 +48,14 @@ jobs:
             ),
           ]
           for old, new in replacements:
-            assert old in s, f'ProjectsPanel anchor not found: {old[:50]!r}'
-            s = s.replace(old, new, 1)
+            if old in s:
+              s = s.replace(old, new, 1)
+            else:
+              assert new in s, f'ProjectsPanel anchor missing in both old and fixed form: {old[:50]!r}'
           p.write_text(s)
 
           t = Path('game_source/src/engine/__tests__/studio-slate-compat.test.ts')
-          ts = t.read_text()
-          if 'import ProjectsPanel from "../../components/Projects";' not in ts:
-            ts = ts.replace(
-              'import StudioSlate from "../../components/StudioSlate";',
-              'import StudioSlate from "../../components/StudioSlate";\nimport ProjectsPanel from "../../components/Projects";'
-            )
-          if 'renders the complete Work panel without undefined prop references' not in ts:
-            insert = '''\n  it("renders the complete Work panel without undefined prop references", () => {\n    const run = initialRun("Work Runtime", "steady");\n    expect(() => renderToStaticMarkup(createElement(ProjectsPanel, {\n      run,\n      setRun: () => {},\n      onAssign: () => {},\n      onMilestone: () => {},\n      onShip: () => {},\n      onNewShow: () => {},\n      onDelegate: () => {},\n      onTakeOver: () => {},\n      onResume: () => {},\n      onScrap: () => {},\n      onContinueSeason: () => {},\n      onLicensed: () => {},\n      onIntervention: () => {},\n      onAppointPromise: () => {},\n      onAppointLead: () => {},\n    }))).not.toThrow();\n  });\n'''
-            marker = '\n});\n'
-            assert marker in ts, 'test closing marker missing'
-            ts = ts.rsplit(marker, 1)[0] + insert + marker
-          t.write_text(ts)
+          t.write_text('''import { createElement } from "react";\nimport { renderToStaticMarkup } from "react-dom/server";\nimport { describe, expect, it } from "vitest";\nimport StudioSlate from "../../components/StudioSlate";\nimport { initialRun, type RunState } from "../state";\n\nfunction installBrowserStorage() {\n  const store = new Map<string, string>();\n  Object.defineProperty(globalThis, "localStorage", {\n    configurable: true,\n    value: {\n      getItem: (key: string) => store.get(key) ?? null,\n      setItem: (key: string, value: string) => { store.set(key, String(value)); },\n      removeItem: (key: string) => { store.delete(key); },\n      clear: () => { store.clear(); },\n    },\n  });\n}\n\ndescribe("Work / StudioSlate runtime compatibility", () => {\n  it("opens Slate without crashing when optional/newer collections are absent", () => {\n    const fresh = initialRun("Legacy Work Save", "steady");\n    const legacy = {\n      ...fresh,\n      ipMarket: undefined,\n      contractJobs: undefined,\n      trainingJobs: undefined,\n      researchJobs: undefined,\n      slatePlans: undefined,\n    } as unknown as RunState;\n\n    expect(() => renderToStaticMarkup(createElement(StudioSlate, {\n      run: legacy,\n      setRun: () => {},\n      onOriginal: () => {},\n    }))).not.toThrow();\n  });\n\n  it("renders the complete Work panel without undefined prop references", async () => {\n    installBrowserStorage();\n    const { default: ProjectsPanel } = await import("../../components/Projects");\n    const run = initialRun("Work Runtime", "steady");\n    expect(() => renderToStaticMarkup(createElement(ProjectsPanel, {\n      run,\n      setRun: () => {},\n      onAssign: () => {},\n      onMilestone: () => {},\n      onShip: () => {},\n      onNewShow: () => {},\n      onDelegate: () => {},\n      onTakeOver: () => {},\n      onResume: () => {},\n      onScrap: () => {},\n      onContinueSeason: () => {},\n      onLicensed: () => {},\n      onIntervention: () => {},\n      onAppointPromise: () => {},\n      onAppointLead: () => {},\n    }))).not.toThrow();\n  });\n});\n''')
           PY
       - name: Install dependencies
         working-directory: game_source
