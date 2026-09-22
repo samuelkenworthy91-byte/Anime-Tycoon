@@ -73,15 +73,15 @@ unzip -l game_source/android/app/build/outputs/apk/debug/app-debug.apk \
 The game autosaves to `localStorage` after every change while a career is in
 progress, and **CONTINUE** appears on the title screen when a save exists.
 Bankruptcy is the only way a studio dies — that retires the save. Reaching the
-end of the twelve-year campaign opens a **career retrospective** (rank, history
-and timeline) and then continues into **Dynasty Mode**; the save is *not*
-deleted or retired at Year 12, so a dynasty save stays resumable indefinitely.
+end of the 25-year campaign opens a **career retrospective** (rank, history
+and timeline). That result is the formal ending; the same save can then continue
+into an optional **Post-Career Sandbox** and remains resumable indefinitely.
 The Hall of Fame score table is stored separately and is never cleared by
 starting a new run.
 
-## Late game — Dynasty Mode
+## After Year 25 — Post-Career Sandbox
 
-Year 12 ends the *campaign*, not the studio:
+Year 25 ends the *career*, not the studio:
 
 - **Career retrospective** — a nine-category scoring of total revenue, fanbase,
   awards, best show, franchises, studio rank, staff developed, rival performance
@@ -89,10 +89,10 @@ Year 12 ends the *campaign*, not the studio:
   Regular → Major Studio → Legendary Studio → Anime Empire*.
 - **Career history** — biggest hit, biggest flop, longest franchise, favourite
   staff member, most profitable IP, awards, highest rival and a studio timeline.
-- **Dynasty Mode** — play indefinitely after Year 12. The industry gets
+- **Post-Career Sandbox** — play indefinitely after Year 25. The industry gets
   progressively hungrier: higher staff salaries, a rising audience bar,
   stronger rival greenlights, faster franchise fatigue and slower rest.
-- **Empire investments** — six enormous optional money sinks (second production
+- **Post-career investments** — six enormous optional money sinks (second production
   building, animation campus, international marketing, render farm, museum &
   archive, talent academy), each a permanent studio-wide buff.
 - **Legacy staff** — long-serving greats retire, mentor a junior in their role,
