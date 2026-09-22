@@ -24,14 +24,13 @@ export default function DynastyPanel({ run, onBuy }: { run: RunState; onBuy: (id
       <div className="rounded-xl border border-gold/40 bg-gold/10 p-3">
         <div className="flex items-center gap-2">
           <Crown size={16} className="text-gold" />
-          <span className="font-display text-base font-extrabold text-gold">STUDIO DYNASTY</span>
+          <span className="font-display text-base font-extrabold text-gold">POST-CAREER SANDBOX</span>
           <span className="ml-auto rounded-lg border border-gold/50 bg-ink/40 px-2 py-0.5 font-display text-xs font-extrabold text-gold">
-            YEAR {y + 1} OF EMPIRE
+            SANDBOX YEAR {y + 1}
           </span>
         </div>
         <p className="mt-1 text-[11px] text-paper/60">
-          The campaign ended, but the studio endures. The industry gets hungrier every year — wages climb, the audience
-          expects more, rivals sharpen their craft, and your franchises tire faster. Spend big to stay on top.
+          The formal 25-year career is complete, but this studio can keep running. The industry gets hungrier every sandbox year — wages climb, audiences expect more, rivals sharpen their craft, and franchises tire faster.
         </p>
       </div>
 
@@ -47,7 +46,7 @@ export default function DynastyPanel({ run, onBuy }: { run: RunState; onBuy: (id
       {/* ------------------------------------------------ investments */}
       <div>
         <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-gold">
-          <Building2 size={14} /> EMPIRE INVESTMENTS
+          <Building2 size={14} /> POST-CAREER INVESTMENTS
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {DYNASTY_INVESTMENTS.map((d) => (
