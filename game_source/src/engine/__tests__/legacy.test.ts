@@ -161,10 +161,10 @@ describe("career evaluation", () => {
 describe("dynasty investments", () => {
   const dynastyRun = () => beginDynastyMode(richRun({ week: CAREER_WEEKS, cash: 100_000_000 }));
 
-  it("starts with no bonuses and requires dynasty mode to buy", () => {
+  it("starts with no bonuses and requires the post-career sandbox to buy", () => {
     const pre = richRun({ week: CAREER_WEEKS });
     expect(dynastyFX(pre)).toEqual(NO_DYNASTY);
-    expect(investmentBlockReason(pre, "campus")).toBe("Requires Dynasty Mode");
+    expect(investmentBlockReason(pre, "campus")).toBe("Requires Post-Career Sandbox");
     expect(pre.dynasty).toBeNull();
   });
 
