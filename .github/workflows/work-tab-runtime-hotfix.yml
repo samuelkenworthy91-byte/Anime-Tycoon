@@ -30,73 +30,41 @@ jobs:
           p = Path('game_source/src/components/Projects.tsx')
           s = p.read_text()
 
-          old = '''export default function ProjectsPanel({
-            run,
-            onAssign,'''
-          new = '''export default function ProjectsPanel({
-            run,
-            setRun,
-            onAssign,'''
-          assert old in s, 'ProjectsPanel destructuring anchor not found'
-          s = s.replace(old, new, 1)
-
-          old = '''  onScrap,
-            onContinueSeason,
-            onIntervention,'''
-          new = '''  onScrap,
-            onContinueSeason,
-            onLicensed,
-            onIntervention,'''
-          assert old in s, 'ProjectsPanel onLicensed destructuring anchor not found'
-          s = s.replace(old, new, 1)
-
-          old = '''  run: RunState;
-            onAssign: (projectId: string, staffId: string) => void;'''
-          new = '''  run: RunState;
-            setRun: (fn: (r: RunState) => RunState) => void;
-            onAssign: (projectId: string, staffId: string) => void;'''
-          assert old in s, 'ProjectsPanel setRun type anchor not found'
-          s = s.replace(old, new, 1)
-
-          old = '''  /** greenlight the next season of an IP straight from its airing card */
-            onContinueSeason?: (franchiseKey: string) => void;
-            onIntervention: (projectId: string, interventionId: string) => void;'''
-          new = '''  /** greenlight the next season of an IP straight from its airing card */
-            onContinueSeason?: (franchiseKey: string) => void;
-            onLicensed?: (ipId: string) => void;
-            onIntervention: (projectId: string, interventionId: string) => void;'''
-          assert old in s, 'ProjectsPanel onLicensed type anchor not found'
-          s = s.replace(old, new, 1)
-
-          old = '''          p={p}
-            run={run}
-            onAssign={onAssign}'''
-          new = '''          p={p}
-            run={run}
-            setRun={setRun}
-            onAssign={onAssign}'''
-          assert old in s, 'ProjectCard setRun prop anchor not found'
-          s = s.replace(old, new, 1)
-
-          old = '''          onScrap={onScrap}
-            onContinueSeason={onContinueSeason}
-            onIntervention={onIntervention}'''
-          new = '''          onScrap={onScrap}
-            onContinueSeason={onContinueSeason}
-            onLicensed={onLicensed}
-            onIntervention={onIntervention}'''
-          assert old in s, 'ProjectCard onLicensed prop anchor not found'
-          s = s.replace(old, new, 1)
-
+          replacements = [
+            (
+              '''export default function ProjectsPanel({\n  run,\n  onAssign,''',
+              '''export default function ProjectsPanel({\n  run,\n  setRun,\n  onAssign,'''
+            ),
+            (
+              '''  onScrap,\n  onContinueSeason,\n  onIntervention,''',
+              '''  onScrap,\n  onContinueSeason,\n  onLicensed,\n  onIntervention,'''
+            ),
+            (
+              '''  run: RunState;\n  onAssign: (projectId: string, staffId: string) => void;''',
+              '''  run: RunState;\n  setRun: (fn: (r: RunState) => RunState) => void;\n  onAssign: (projectId: string, staffId: string) => void;'''
+            ),
+            (
+              '''  /** greenlight the next season of an IP straight from its airing card */\n  onContinueSeason?: (franchiseKey: string) => void;\n  onIntervention: (projectId: string, interventionId: string) => void;''',
+              '''  /** greenlight the next season of an IP straight from its airing card */\n  onContinueSeason?: (franchiseKey: string) => void;\n  onLicensed?: (ipId: string) => void;\n  onIntervention: (projectId: string, interventionId: string) => void;'''
+            ),
+          ]
+          for old, new in replacements:
+            assert old in s, f'ProjectsPanel anchor not found: {old[:50]!r}'
+            s = s.replace(old, new, 1)
           p.write_text(s)
 
           t = Path('game_source/src/engine/__tests__/studio-slate-compat.test.ts')
           ts = t.read_text()
-          ts = ts.replace('import StudioSlate from "../../components/StudioSlate";', 'import StudioSlate from "../../components/StudioSlate";\nimport ProjectsPanel from "../../components/Projects";')
-          insert = '''\n  it("renders the complete Work panel without undefined prop references", () => {\n    const run = initialRun("Work Runtime", "steady");\n    expect(() => renderToStaticMarkup(createElement(ProjectsPanel, {\n      run,\n      setRun: () => {},\n      onAssign: () => {},\n      onMilestone: () => {},\n      onShip: () => {},\n      onNewShow: () => {},\n      onDelegate: () => {},\n      onTakeOver: () => {},\n      onResume: () => {},\n      onScrap: () => {},\n      onContinueSeason: () => {},\n      onLicensed: () => {},\n      onIntervention: () => {},\n      onAppointPromise: () => {},\n      onAppointLead: () => {},\n    }))).not.toThrow();\n  });\n'''
-          marker = '\n});\n'
-          assert marker in ts, 'test closing marker missing'
-          ts = ts.rsplit(marker, 1)[0] + insert + marker
+          if 'import ProjectsPanel from "../../components/Projects";' not in ts:
+            ts = ts.replace(
+              'import StudioSlate from "../../components/StudioSlate";',
+              'import StudioSlate from "../../components/StudioSlate";\nimport ProjectsPanel from "../../components/Projects";'
+            )
+          if 'renders the complete Work panel without undefined prop references' not in ts:
+            insert = '''\n  it("renders the complete Work panel without undefined prop references", () => {\n    const run = initialRun("Work Runtime", "steady");\n    expect(() => renderToStaticMarkup(createElement(ProjectsPanel, {\n      run,\n      setRun: () => {},\n      onAssign: () => {},\n      onMilestone: () => {},\n      onShip: () => {},\n      onNewShow: () => {},\n      onDelegate: () => {},\n      onTakeOver: () => {},\n      onResume: () => {},\n      onScrap: () => {},\n      onContinueSeason: () => {},\n      onLicensed: () => {},\n      onIntervention: () => {},\n      onAppointPromise: () => {},\n      onAppointLead: () => {},\n    }))).not.toThrow();\n  });\n'''
+            marker = '\n});\n'
+            assert marker in ts, 'test closing marker missing'
+            ts = ts.rsplit(marker, 1)[0] + insert + marker
           t.write_text(ts)
           PY
       - name: Install dependencies
