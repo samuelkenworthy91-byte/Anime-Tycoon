@@ -34,7 +34,7 @@ import { cn } from "../utils/cn";
 type ShowrunnerId = Showrunner["id"];
 type TitleView = "menu" | "setup" | "load" | "settings" | "credits" | "scores" | "quit";
 
-const TITLE_ART = "img/title-london.jpg";
+const TITLE_ART = "img/title-london.webp";
 
 export function HighScoreTable({ highlight }: { highlight?: number }) {
   const [scores] = useState<ScoreEntry[]>(() => getScores());
