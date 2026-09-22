@@ -113,13 +113,20 @@ function resolvedTier(d: InterventionDef, tierId: InvestmentTierId): InvestmentT
   return d.investmentTier && tierId === "standard" ? d.investmentTier : tierId;
 }
 
-function capabilityForSpendLabel(label: string): ProductionCapabilityId | null {
+function capabilityForSpendLabel(label: unknown): ProductionCapabilityId | null {
+  if (typeof label !== "string") return null;
   const def = BASE_INTERVENTIONS.find((d) => d.capability && label.startsWith(d.name));
   return def?.capability ?? null;
 }
 
 export function capabilitySpend(run: Pick<RunState, "strategicSpend">, id: ProductionCapabilityId): number {
-  return (run.strategicSpend ?? []).reduce((sum, spend) => capabilityForSpendLabel(spend.label) === id ? sum + Math.max(0, spend.amount) : sum, 0);
+  const history = Array.isArray(run.strategicSpend) ? run.strategicSpend : [];
+  return history.reduce((sum, spend) => {
+    if (!spend || typeof spend !== "object") return sum;
+    if (capabilityForSpendLabel((spend as { label?: unknown }).label) !== id) return sum;
+    const amount = (spend as { amount?: unknown }).amount;
+    return sum + (typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, amount) : 0);
+  }, 0);
 }
 
 export function capabilityLevelFromSpend(spend: number): number {

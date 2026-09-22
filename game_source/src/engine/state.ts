@@ -169,6 +169,7 @@ import {
 } from "./market";
 import {
   MAX_TIER,
+  FACILITY_DEFS,
   facilityDef,
   facilityFX,
   facilityUpkeep,
@@ -596,6 +597,37 @@ export function initialRun(studio: string, showrunner: string): RunState {
   };
 }
 
+function migrateFacilities(raw: unknown): Facilities {
+  const next: Facilities = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return next;
+  for (const def of FACILITY_DEFS) {
+    const value = (raw as Record<string, unknown>)[def.id];
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    const tier = Math.max(0, Math.min(def.tiers.length, Math.floor(value)));
+    if (tier > 0) next[def.id] = tier;
+  }
+  return next;
+}
+
+function migrateStrategicSpend(raw: unknown, fallbackWeek: number): RunState["strategicSpend"] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((entry, index) => {
+    if (!entry || typeof entry !== "object") return [];
+    const value = entry as Record<string, unknown>;
+    const label = typeof value.label === "string" ? value.label.trim() : "";
+    if (!label) return [];
+    const week = typeof value.week === "number" && Number.isFinite(value.week)
+      ? Math.max(0, Math.floor(value.week))
+      : Math.max(0, Math.floor(fallbackWeek));
+    const amount = typeof value.amount === "number" && Number.isFinite(value.amount) ? value.amount : 0;
+    const id = typeof value.id === "string" && value.id.trim()
+      ? value.id
+      : `legacy_spend_${week}_${index}`;
+    const projectId = typeof value.projectId === "string" && value.projectId.trim() ? value.projectId : undefined;
+    return [{ id, label: label.slice(0, 160), amount, week, ...(projectId ? { projectId } : {}) }];
+  });
+}
+
 /** bring an older save up to the current shape (additive, non-destructive) */
 export function migrateRun(raw: unknown): RunState {
   const r = raw as RunState;
@@ -675,7 +707,7 @@ export function migrateRun(raw: unknown): RunState {
           };
         })
       : [],
-    facilities: r.facilities && typeof r.facilities === "object" ? r.facilities : {},
+    facilities: migrateFacilities((r as { facilities?: unknown }).facilities),
     bonds: r.bonds && typeof r.bonds === "object" ? r.bonds : {},
     heads: r.heads && typeof r.heads === "object" ? r.heads : {},
     staffEvents: Array.isArray(r.staffEvents) ? r.staffEvents : [],
@@ -719,7 +751,7 @@ export function migrateRun(raw: unknown): RunState {
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     ipMarket: migrateIPMarket((r as { ipMarket?: unknown }).ipMarket, r.week ?? 0),
     bigThree: migrateBigThreeState((r as { bigThree?: unknown }).bigThree),
-    strategicSpend: Array.isArray(r.strategicSpend) ? r.strategicSpend : [],
+    strategicSpend: migrateStrategicSpend((r as { strategicSpend?: unknown }).strategicSpend, r.week ?? 0),
     capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
     staffContracts: r.staffContracts && typeof r.staffContracts === "object" ? r.staffContracts : {},
     recruitmentAdRefreshes: typeof r.recruitmentAdRefreshes === "number" ? Math.max(0, Math.floor(r.recruitmentAdRefreshes)) : 0,

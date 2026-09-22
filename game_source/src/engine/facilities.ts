@@ -234,21 +234,28 @@ export const FACILITY_DEFS: FacilityDef[] = [
 export const facilityDef = (id: FacilityId): FacilityDef => FACILITY_DEFS.find((f) => f.id === id)!;
 export const MAX_TIER = 3;
 
-export const slotsUsed = (fac: Facilities): number => Object.values(fac).filter((t) => (t ?? 0) > 0).length;
+export const slotsUsed = (fac: Facilities | undefined): number => Object.values(fac ?? {}).filter((t) => typeof t === "number" && Number.isFinite(t) && t > 0).length;
 
-export function nextTier(fac: Facilities, id: FacilityId): { tier: number; cost: number; rd: number } | null {
-  const cur = fac[id] ?? 0;
+export function nextTier(fac: Facilities | undefined, id: FacilityId): { tier: number; cost: number; rd: number } | null {
   const def = facilityDef(id);
+  const raw = fac?.[id] ?? 0;
+  const cur = typeof raw === "number" && Number.isFinite(raw)
+    ? Math.max(0, Math.min(def.tiers.length, Math.floor(raw)))
+    : 0;
   if (cur >= def.tiers.length) return null;
   const t = def.tiers[cur];
   return { tier: cur + 1, cost: t.cost, rd: t.rd };
 }
 
-export function facilityUpkeep(fac: Facilities): number {
+export function facilityUpkeep(fac: Facilities | undefined): number {
   let sum = 0;
-  for (const [id, tier] of Object.entries(fac) as [FacilityId, number][]) {
-    if (!tier) continue;
-    sum += facilityDef(id).tiers[tier - 1].upkeep;
+  for (const [idRaw, tierRaw] of Object.entries(fac ?? {})) {
+    const def = FACILITY_DEFS.find((room) => room.id === idRaw);
+    if (!def || typeof tierRaw !== "number" || !Number.isFinite(tierRaw)) continue;
+    const tier = Math.max(0, Math.min(def.tiers.length, Math.floor(tierRaw)));
+    if (tier <= 0) continue;
+    const row = def.tiers[tier - 1];
+    if (row) sum += row.upkeep;
   }
   return sum;
 }
@@ -304,7 +311,13 @@ export const NO_FX: FacilityFX = {
 export function facilityFX(fac: Facilities | undefined): FacilityFX {
   const fx: FacilityFX = { ...NO_FX, pointMult: { ...NO_FX.pointMult } };
   if (!fac) return fx;
-  const tier = (id: FacilityId) => fac[id] ?? 0;
+  const tier = (id: FacilityId) => {
+    const def = facilityDef(id);
+    const raw = fac[id] ?? 0;
+    return typeof raw === "number" && Number.isFinite(raw)
+      ? Math.max(0, Math.min(def.tiers.length, Math.floor(raw)))
+      : 0;
+  };
 
   const w = tier("writers");
   if (w) fx.pointMult.story *= [1.15, 1.3, 1.5][w - 1];

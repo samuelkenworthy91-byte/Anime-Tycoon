@@ -45,9 +45,13 @@ function FacilityCard({
   run: RunState;
   onBuy: (id: FacilityDef["id"]) => void;
 }) {
-  const tier = run.facilities[def.id] ?? 0;
+  const facilities = run.facilities ?? {};
+  const rawTier = facilities[def.id] ?? 0;
+  const tier = typeof rawTier === "number" && Number.isFinite(rawTier)
+    ? Math.max(0, Math.min(def.tiers.length, Math.floor(rawTier)))
+    : 0;
   const owned = tier > 0;
-  const nx = nextTier(run.facilities, def.id);
+  const nx = nextTier(facilities, def.id);
   const block = nx ? facilityBlockReason(run, def.id) : "Already at maximum tier";
   const [open, setOpen] = useState(false);
 
@@ -135,11 +139,18 @@ export default function FacilitiesPanel({
   run: RunState;
   onBuy: (id: FacilityDef["id"]) => void;
 }) {
-  const used = slotsUsed(run.facilities);
+  const facilities = run.facilities ?? {};
+  const used = slotsUsed(facilities);
   const total = officeSlots(run);
-  const upkeep = facilityUpkeep(run.facilities);
-  const owned = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
-  const buildable = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) === 0);
+  const upkeep = facilityUpkeep(facilities);
+  const owned = FACILITY_DEFS.filter((d) => {
+    const tier = facilities[d.id];
+    return typeof tier === "number" && Number.isFinite(tier) && tier > 0;
+  });
+  const buildable = FACILITY_DEFS.filter((d) => {
+    const tier = facilities[d.id];
+    return !(typeof tier === "number" && Number.isFinite(tier) && tier > 0);
+  });
   const capabilities = productionCapabilities(run);
 
   return (
