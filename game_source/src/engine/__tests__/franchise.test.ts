@@ -349,12 +349,17 @@ describe("merchandising", () => {
     expect(merchReturn(fr, product)).toBeGreaterThan(product.cost);
   });
 
-  it("the same line cannot be spammed before its cooldown", () => {
+  it("one consequential merch bet runs per franchise, while product cooldowns still persist", () => {
     const fr = mkFr({ popularity: 70 });
     let r = richRun({ franchises: { IP: fr } });
     r = launchMerch(r, "IP", "plush")!;
     expect(launchMerch(r, "IP", "plush")).toBeNull();
-    expect(launchMerch(r, "IP", "ost")).toBeTruthy();
+    expect(launchMerch(r, "IP", "ost")).toBeNull();
+
+    const betEnd = r.activeMerchBets!.IP.endsWeek;
+    r = { ...r, week: betEnd };
+    expect(launchMerch(r, "IP", "plush")).toBeNull(); // line-specific cooldown remains
+    expect(launchMerch(r, "IP", "ost")).toBeTruthy(); // a new strategic bet can begin
   });
 
   it("tier gates and franchise pedigree stop premium products arriving too early", () => {
