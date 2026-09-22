@@ -61,6 +61,37 @@ export function trendGenreBias(movements: readonly IndustryMovement[], week: num
   return [...new Set(out)];
 }
 
+function deterministicHash(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function seededMovementRng(seed: number): () => number {
+  let x = seed || 0x9e3779b9;
+  return () => {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    return (x >>> 0) / 0x1_0000_0000;
+  };
+}
+
+function movementRngSeed(week: number, market: MarketState, recentReleases: ReleaseRecord[]): number {
+  const heat = Object.entries(market.genres)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([genre, value]) => `${genre}:${value}`)
+    .join("|");
+  const releaseSignal = recentReleases
+    .slice(-24)
+    .map((release) => `${release.genre}:${release.week}:${release.weight}`)
+    .join("|");
+  return deterministicHash(`${week}|${heat}|${releaseSignal}`);
+}
+
 function strongestGenre(market: MarketState): GenreId | null {
   const rows = Object.entries(market.genres) as [GenreId, number][];
   return rows.sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
@@ -81,8 +112,9 @@ export function tickIndustryMovements(
   market: MarketState,
   recentReleases: ReleaseRecord[],
   genres: readonly GenreId[],
-  rng: () => number = Math.random,
+  rng?: () => number,
 ): { movements: IndustryMovement[]; notices: string[] } {
+  const random = rng ?? seededMovementRng(movementRngSeed(week, market, recentReleases));
   let movements = (current ?? []).filter((movement) => movement.endsWeek > week);
   const notices: string[] = [];
   if (week % 12 !== 0) return { movements, notices };
@@ -92,20 +124,20 @@ export function tickIndustryMovements(
     if (movement.endsWeek - 24 === week) notices.push("📉 A long-running industry movement is beginning to cool.");
   }
 
-  if (movements.length >= 2 || rng() >= 0.34) return { movements, notices };
+  if (movements.length >= 2 || random() >= 0.34) return { movements, notices };
 
   const flooded = mostFloodedGenre(recentReleases, week, genres);
   const hot = strongestGenre(market);
   let kind: IndustryMovementKind;
   let genre: GenreId | undefined;
-  const roll = rng();
+  const roll = random();
   if (flooded && roll < 0.34) { kind = "fatigue"; genre = flooded; }
   else if (hot && (market.genres[hot] ?? 0) >= 1 && roll < 0.72) { kind = "revival"; genre = hot; }
   else if (roll < 0.87) kind = "streaming";
   else kind = "prestige";
 
   if (genre && movements.some((movement) => movement.genre === genre)) return { movements, notices };
-  const duration = 84 + Math.floor(rng() * 49);
+  const duration = 84 + Math.floor(random() * 49);
   const movement: IndustryMovement = {
     id: `movement:${week}:${kind}:${genre ?? "all"}`,
     kind,
