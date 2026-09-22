@@ -31,6 +31,28 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
+      - name: Restore approved London title artwork
+        working-directory: game_source
+        run: |
+          if [ -d public/img/title-london-b64 ]; then
+            echo 'Rebuilding approved London title artwork from committed chunks.'
+            cat public/img/title-london-b64/{0..7}.txt | tr -d '\n\r ' | base64 --decode > public/img/title-london.webp
+            python - <<'PY'
+          from pathlib import Path
+          image = Path('public/img/title-london.webp')
+          data = image.read_bytes()
+          if not data.startswith(b'RIFF') or b'WEBP' not in data[:16]:
+              raise SystemExit('Rebuilt title artwork is not a valid WEBP file')
+          if len(data) < 40000:
+              raise SystemExit(f'Rebuilt title artwork is unexpectedly small: {len(data)} bytes')
+          title = Path('src/components/Title.tsx')
+          source = title.read_text()
+          source = source.replace('img/title-london.jpg', 'img/title-london.webp')
+          title.write_text(source)
+          print(f'London title artwork restored: {len(data)} bytes')
+          PY
+          fi
+
       - name: Import promised-lead crown icon
         working-directory: game_source
         run: |
@@ -83,7 +105,7 @@ jobs:
         working-directory: game_source
         run: npm run build
 
-      - name: Verify compiled GitHack bundle contains Genre 30
+      - name: Verify compiled GitHack bundle contains Genre 30 and London title
         working-directory: game_source
         run: |
           node --input-type=module <<'NODE'
@@ -102,7 +124,12 @@ jobs:
             if (!html.includes(id)) throw new Error(`Compiled browser bundle missing genre id: ${id}`);
             if (!html.includes(label)) throw new Error(`Compiled browser bundle missing genre label: ${label}`);
           }
-          console.log('Verified compiled browser bundle contains Vampire, Grimdark and all five Genre 30 expansion genres.');
+          if (fs.existsSync('public/img/title-london-b64')) {
+            if (!html.includes('title-london.webp')) throw new Error('Compiled browser bundle is not wired to the approved London title artwork.');
+            const titleBytes = fs.readFileSync('dist/img/title-london.webp');
+            if (!titleBytes.subarray(0, 4).equals(Buffer.from('RIFF'))) throw new Error('Compiled London title asset is invalid.');
+          }
+          console.log('Verified compiled browser bundle contains Genre 30 and the approved London title artwork.');
           NODE
 
       - name: Commit refreshed runtime and dist
@@ -110,6 +137,8 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -f \
+            game_source/src/components/Title.tsx \
+            game_source/public/img/title-london.webp \
             game_source/src/components/Projects.tsx \
             game_source/src/components/Create.tsx \
             game_source/src/engine/castDisplayOrder.ts \
@@ -122,7 +151,7 @@ jobs:
             game_source/docs/content-v3/CAST_V3_TYPE_PAIR_COVERAGE.csv \
             game_source/dist
           if git diff --cached --quiet; then
-            echo 'runtime, promised-lead icon and dist already current'
+            echo 'runtime, London title artwork and dist already current'
           else
             git commit -m 'Refresh GitHack dist for current branch'
             git push origin HEAD:${{ github.ref_name }}
