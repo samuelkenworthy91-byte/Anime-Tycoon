@@ -103,16 +103,16 @@ describe("studio signature-genre specialisation", () => {
     expect(original.outputMult).toBeGreaterThan(1);
   });
 
-  it("keeps outside-genre work viable but slower, riskier and more intervention-expensive", () => {
+  it("rewards house expertise without imposing a blanket penalty on experimentation", () => {
     const run = withFantasyHistory([27, 28, 22, 23]);
     const house = specialisationProjectEffects(run, draft(["fantasy"]));
     const outside = specialisationProjectEffects(run, draft(["slice"]));
     expect(house.outputMult).toBeGreaterThan(1);
     expect(house.paceMult).toBeGreaterThan(1);
-    expect(outside.outputMult).toBeLessThan(1);
-    expect(outside.paceMult).toBeLessThan(1);
-    expect(outside.interventionCostMult).toBeGreaterThan(1);
-    expect(outside.issueChanceMult).toBeGreaterThan(1);
+    expect(outside.outputMult).toBe(1);
+    expect(outside.paceMult).toBe(1);
+    expect(outside.interventionCostMult).toBe(1);
+    expect(outside.issueChanceMult).toBe(1);
   });
 
   it("feeds specialisation into live worker output rather than adding a flat review bonus", () => {
