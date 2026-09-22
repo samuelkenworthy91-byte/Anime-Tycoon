@@ -7,13 +7,14 @@ import type { RunState } from "../engine/state";
 import {
   QUARTER_WEEKS,
   addSlatePlan,
+  armSlatePlan,
   careerCalendarYear,
   plansForQuarter,
   quarterIndexForWeek,
   quarterStartWeek,
   removeSlatePlan,
   slateQuarterWarnings,
-  updateSlatePlan,
+  slatePreparation,
   type SlateImportance,
   type SlatePlan,
   type SlatePlanKind,
@@ -97,7 +98,7 @@ export default function StudioSlate({
   };
 
   const startPlan = (plan: SlatePlan) => {
-    setRun((r) => updateSlatePlan(r, plan.id, { status: "setup" }));
+    setRun((r) => armSlatePlan(r, plan.id));
     if (plan.kind === "franchise" && plan.franchiseKey && onFranchise) onFranchise(plan.franchiseKey);
     else if (plan.kind === "licensed" && plan.licensedIpId && onLicensed) onLicensed(plan.licensedIpId);
     else onOriginal();
@@ -150,7 +151,7 @@ export default function StudioSlate({
 
           <div className="space-y-1.5 sm:hidden">
             {plans.length === 0 && <div className="rounded-lg border border-dashed border-line p-3 text-center text-[9px] text-paper/35">No future greenlights planned in this quarter.</div>}
-            {plans.map((plan)=><div key={plan.id} className="rounded-lg border border-line bg-panel2/55 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="truncate text-[10px] font-bold">{plan.title}</div><div className="text-[8px] text-paper/40">{dateLabel(plan.targetWeek)} · {plan.kind.toUpperCase()} · {importanceLabel[plan.importance]}</div></div><button className="p-2 text-paper/35" onClick={()=>setRun((r)=>removeSlatePlan(r,plan.id))}><Trash2 size={12}/></button></div><button onClick={()=>startPlan(plan)} className="btn-press mt-1.5 min-h-10 w-full rounded-md border border-gold/35 bg-gold/5 text-[9px] font-black text-gold">START SETUP</button></div>)}
+            {plans.map((plan)=>{ const prep=slatePreparation(plan,run.week); return <div key={plan.id} className="rounded-lg border border-line bg-panel2/55 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="truncate text-[10px] font-bold">{plan.title}</div><div className="text-[8px] text-paper/40">{dateLabel(plan.targetWeek)} · {plan.kind.toUpperCase()} · {importanceLabel[plan.importance]}</div></div><button className="p-2 text-paper/35" onClick={()=>setRun((r)=>removeSlatePlan(r,plan.id))}><Trash2 size={12}/></button></div><div className={cn("mt-1 rounded px-1.5 py-1 text-[8px] font-bold",prep.ready?"bg-mint/10 text-mint":"bg-panel3 text-paper/40")}>{prep.ready ? `PREPARED · +${prep.hypeBonus} starting hype · −${Math.round(prep.burnDiscount*100)}% weekly burn${prep.deadlineBufferWeeks?" · +1 wk buffer":""}` : `PLANNING · ${prep.weeksPlanned}/4 weeks banked before preparation bonuses activate`}</div><button onClick={()=>startPlan(plan)} className="btn-press mt-1.5 min-h-10 w-full rounded-md border border-gold/35 bg-gold/5 text-[9px] font-black text-gold">START SETUP</button></div>})}
           </div>
 
           <div className="nice-scroll hidden overflow-x-auto sm:block">
@@ -165,7 +166,7 @@ export default function StudioSlate({
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-line/50 bg-panel2/35 px-2 py-1.5 text-[8px] text-paper/45">Plans are executive intent, not phantom projects: START SETUP hands off to the normal Original, Franchise or Licensed creation flow. On mobile the quarter is a card list; the dense timeline only appears on larger screens.</div>
+          <div className="rounded-lg border border-line/50 bg-panel2/35 px-2 py-1.5 text-[8px] text-paper/45">Planning now pays off: leave a show on the Slate for at least 4 weeks before START SETUP to earn preparation. Supporting / Standard / Tentpole plans gain progressively more starting hype and lower weekly burn; larger plans also create more quarter pressure.</div>
         </div>
       )}
     </div>

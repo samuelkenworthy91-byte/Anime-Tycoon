@@ -216,6 +216,8 @@ export interface Project {
   airedWeek: number | null;
   /** the deal financing this show — null/undefined = fully self-funded */
   commission?: ProjectCommission | null;
+  /** advance planning earned from the Studio Slate before this project was greenlit */
+  slatePrep?: { planId: string; importance: "supporting" | "standard" | "tentpole"; weeksPlanned: number; hypeBonus: number; burnDiscount: number; deadlineBufferWeeks: number };
   /** small spontaneous polish win rolled as the edit bay hands off to marketing */
   lastMinuteBoost?: { type: PointType; points: number } | null;
   /** production automation (engine/automation.ts) — null = fully manual */
@@ -693,6 +695,10 @@ export interface ScoringContext {
   fans: number;
   /** dynasty-era audience expectations — mildly raises the review bar */
   audienceBar?: number;
+  /** House Specialty multiplies Story / Art / Sound equally before review scoring. */
+  specialisationScoreMult?: number;
+  /** Every Business & Audience level improves shipped-release economics. */
+  businessMult?: number;
   castAffinityDiscovered?: string[];
 }
 
@@ -708,10 +714,16 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   const comboLevel = ctx.comboLevels[key] ?? 0;
   const comboKnown = (key in ctx.comboLevels) || secretComboResearched(ctx.research, key);
   const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
+  const houseScoreMult = ctx.specialisationScoreMult ?? 1;
+  const scoredPoints: Points = {
+    story: p.points.story * houseScoreMult,
+    art: p.points.art * houseScoreMult,
+    sound: p.points.sound * houseScoreMult,
+  };
 
   const res = computeResult({
     draft: d,
-    points: p.points,
+    points: scoredPoints,
     issues: p.issues,
     hype: p.hype,
     research: ctx.research,
@@ -733,6 +745,23 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   });
 
   let out = res;
+
+  if (Math.abs(houseScoreMult - 1) > 0.001) {
+    out = {
+      ...out,
+      breakdown: [...out.breakdown, { label: houseScoreMult > 1 ? "House genre expertise" : "Outside house specialty", pts: `×${houseScoreMult.toFixed(3)} Story · Art · Sound` }],
+    };
+  }
+
+  const business = ctx.businessMult ?? 1;
+  if (business > 1.001) {
+    out = {
+      ...out,
+      revenue: Math.round(out.revenue * business),
+      fans: Math.round(out.fans * (1 + (business - 1) * 0.5)),
+      breakdown: [...out.breakdown, { label: "Business & Audience discipline", pts: `×${business.toFixed(2)} release revenue` }],
+    };
+  }
 
   /* the market pays what the market pays — reviews are unaffected */
   const mkt = ctx.marketMult ?? 1;

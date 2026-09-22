@@ -4,7 +4,7 @@ import type { RunState } from "./state";
 export type StudioSpecialisationRank = "none" | "studio" | "authority" | "institution";
 export type ForecastAccess = "hidden" | "band" | "exact";
 
-export const PRIMARY_SPECIALISATION_MIN_OFFICE = 1;
+export const PRIMARY_SPECIALISATION_MIN_OFFICE = 0;
 export const SECONDARY_SPECIALISATION_MIN_OFFICE = 3;
 export const SECONDARY_SPECIALISATION_CASH = 2_500_000;
 export const SECONDARY_SPECIALISATION_RD = 450;
@@ -139,6 +139,8 @@ interface RankEffects {
   signatureInterventionEffect: number;
   signatureRisk: number;
   signatureIssueChance: number;
+  signatureScore: number;
+  outsideScore: number;
   outsideOutput: number;
   outsidePace: number;
   outsideInterventionCost: number;
@@ -154,6 +156,8 @@ const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
     signatureInterventionEffect: 1.04,
     signatureRisk: 0.95,
     signatureIssueChance: 0.95,
+    signatureScore: 1.04,
+    outsideScore: 0.98,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -167,6 +171,8 @@ const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
     signatureInterventionEffect: 1.08,
     signatureRisk: 0.90,
     signatureIssueChance: 0.90,
+    signatureScore: 1.07,
+    outsideScore: 0.975,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -180,6 +186,8 @@ const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
     signatureInterventionEffect: 1.12,
     signatureRisk: 0.85,
     signatureIssueChance: 0.85,
+    signatureScore: 1.10,
+    outsideScore: 0.97,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -199,6 +207,8 @@ export interface SpecialisationProjectEffects {
   interventionEffectMult: number;
   interventionRiskMult: number;
   issueChanceMult: number;
+  /** direct multiplier applied equally to Story / Art / Sound at review scoring */
+  scoreMult: number;
 }
 
 export function specialisationProjectEffects(
@@ -218,6 +228,7 @@ export function specialisationProjectEffects(
       interventionEffectMult: 1,
       interventionRiskMult: 1,
       issueChanceMult: 1,
+      scoreMult: 1,
     };
   }
   const signature = draft.genres.includes(profile.primary) || (!!profile.secondary && draft.genres.includes(profile.secondary));
@@ -234,6 +245,7 @@ export function specialisationProjectEffects(
         interventionEffectMult: fx.signatureInterventionEffect,
         interventionRiskMult: fx.signatureRisk,
         issueChanceMult: fx.signatureIssueChance,
+        scoreMult: fx.signatureScore,
       }
     : {
         active: true,
@@ -246,6 +258,7 @@ export function specialisationProjectEffects(
         interventionEffectMult: 1,
         interventionRiskMult: fx.outsideRisk,
         issueChanceMult: fx.outsideIssueChance,
+        scoreMult: fx.outsideScore,
       };
 }
 
@@ -259,6 +272,8 @@ export function specialisationBenefits(run: Pick<RunState, "strategicSpend" | "f
     signaturePacePct: Math.round((fx.signaturePace - 1) * 100),
     signatureInterventionDiscountPct: Math.round((1 - fx.signatureInterventionCost) * 100),
     signatureInterventionEffectPct: Math.round((fx.signatureInterventionEffect - 1) * 100),
+    signatureScorePct: Math.round((fx.signatureScore - 1) * 100),
+    outsideScorePenaltyPct: Math.round((1 - fx.outsideScore) * 1000) / 10,
     outsideOutputPenaltyPct: Math.round((1 - fx.outsideOutput) * 100),
     outsidePacePenaltyPct: Math.round((1 - fx.outsidePace) * 100),
     outsideInterventionPremiumPct: Math.round((fx.outsideInterventionCost - 1) * 100),
@@ -311,7 +326,7 @@ export function choosePrimarySpecialisation(run: RunState, genre: GenreId): RunS
     ],
     notices: [
       ...run.notices,
-      `🎯 STUDIO IDENTITY LOCKED: ${genreLabel(genre)} is now your Signature Genre. Productions containing it gain house expertise; work outside it becomes less predictable.`,
+      `🎯 HOUSE SPECIALTY LOCKED: ${genreLabel(genre)} shows gain Story, Art and Sound scoring expertise. Shows without it take only a small house-focus penalty.`,
     ].slice(-40),
   };
 }

@@ -80,7 +80,7 @@ export default function StudioIdentity({
               <span className="rounded border border-gold/35 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-gold">{rankLabel[profile.rank]}</span>
             </div>
             <div className="mt-1 text-[10px] leading-relaxed text-paper/55">
-              Choose a house genre to build exceptional institutional expertise. Signature work gets stronger production output, faster pacing, better intervention economics and sharper forecasts. Work outside the house remains fully viable: specialisation adds strengths rather than punishing experimentation.
+              Choose a house genre to build exceptional institutional expertise. Signature work gets stronger production output, faster pacing, better intervention economics, sharper forecasts and a direct Story / Art / Sound scoring lift. Work outside the house remains viable, but carries a small scoring penalty because the studio is operating away from its strongest identity.
             </div>
             <div className="mt-1 text-[9px] font-bold text-cyanx">Licensed adaptations use their real underlying genres here — exactly the same rule as original productions.</div>
           </div>
@@ -154,7 +154,7 @@ export default function StudioIdentity({
                 <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signatureOutputPct}% OUTPUT</b><div className="text-[7px] text-paper/40">signature productions</div></div>
                 <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signaturePacePct}% PACE</b><div className="text-[7px] text-paper/40">signature productions</div></div>
                 <div className="rounded-lg border border-gold/25 bg-gold/5 p-2"><b className="text-[10px] text-gold">−{benefits.signatureInterventionDiscountPct}% RESCUE COST</b><div className="text-[7px] text-paper/40">+{benefits.signatureInterventionEffectPct}% intervention effect</div></div>
-                <div className="rounded-lg border border-cyanx/20 bg-cyanx/[.04] p-2"><b className="text-[10px] text-cyanx">OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">No blanket penalty. Experiment freely; you simply do not receive the house-speciality bonuses.</div></div>
+                <div className="rounded-lg border border-neon/20 bg-neon/[.04] p-2"><b className="text-[10px] text-neon">OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">Small all-craft scoring penalty only. Production pace, rescue cost and issue risk are not broadly punished.</div></div>
               </div>
               {profile.rankLevel >= 2 && <div className="mt-2 text-[8px] font-bold text-cyanx"><Check size={9} className="mr-1 inline"/>Your recruitment ads now attract genre-aligned specialists.</div>}
             </div>

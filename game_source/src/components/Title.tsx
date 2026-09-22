@@ -111,6 +111,7 @@ function Hotspot({
       className={cn(
         "absolute z-10 rounded-2xl bg-transparent transition duration-150",
         "hover:bg-white/[0.06] hover:shadow-[0_0_28px_rgba(61,225,255,.18)]",
+        "active:translate-y-[2px] active:scale-[0.985] active:bg-black/30 active:shadow-[inset_0_5px_14px_rgba(0,0,0,.65)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyanx focus-visible:ring-offset-2 focus-visible:ring-offset-black/50",
         className
       )}
@@ -143,6 +144,14 @@ export default function Title({
       return;
     }
     setView("setup");
+  };
+
+  const quickStart = () => {
+    const generatedStudio = `Studio ${randomTitle().split(" ")[0]}`;
+    const selected = SHOWRUNNERS[Math.floor(Math.random() * SHOWRUNNERS.length)] ?? SHOWRUNNERS[0];
+    primeAudio();
+    sfx.select();
+    onStart(generatedStudio, selected.id);
   };
 
   useEffect(() => {
@@ -234,6 +243,14 @@ export default function Title({
                 className="left-[53.4%] top-[71.6%] h-[4.2%] w-[13.5%] rounded-xl"
                 onClick={requestQuit}
               />
+              <button
+                type="button"
+                onClick={quickStart}
+                className="btn-press absolute left-[24%] top-[77.1%] z-20 flex min-h-[44px] w-[52%] items-center justify-center gap-2 rounded-xl border border-cyanx/55 bg-[#07101d]/85 px-3 py-2 text-center shadow-[0_0_22px_rgba(61,225,255,.18)] backdrop-blur-sm transition active:translate-y-[2px] active:scale-[0.98] active:border-cyanx/30 active:bg-black/70 active:shadow-[inset_0_5px_14px_rgba(0,0,0,.7)]"
+              >
+                <Zap size={15} className="shrink-0 text-cyanx" />
+                <span><b className="block font-display text-[10px] tracking-wider text-cyanx">QUICK START</b><span className="block text-[7px] text-paper/55">Random studio · random showrunner</span></span>
+              </button>
             </>
           )}
         </div>

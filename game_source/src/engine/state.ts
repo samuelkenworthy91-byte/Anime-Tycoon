@@ -213,9 +213,12 @@ import {
   researchTrackForResearchId,
   researchTrackLevel,
   trackSkillMultiplier,
+  productionTrackProjectMultiplier,
+  businessTrackRevenueMultiplier,
   type ResearchTrackId,
 } from "./researchTracks";
 import { projectLoadMap } from "./capacity";
+import { consumeArmedSlatePlan } from "./slate";
 import {
   contractWeeklyOutput,
   showrunnerBubbleOutput,
@@ -1832,7 +1835,20 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
 
   const greenlightCost = commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d);
   const startupMult = commission ? 1 : selfFundedStartupMult(r, d);
+  const slated = commission ? { run: r, preparation: null } : consumeArmedSlatePlan(r, d);
+  r = slated.run;
   let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost };
+  if (slated.preparation?.ready) {
+    const prep = slated.preparation;
+    p = {
+      ...p,
+      hype: p.hype + prep.hypeBonus,
+      weeklyBurn: Math.max(1, Math.round(p.weeklyBurn * (1 - prep.burnDiscount))),
+      deadlineWeek: p.deadlineWeek + prep.deadlineBufferWeeks,
+      deadlineDay: (p.deadlineDay ?? p.deadlineWeek * 7) + prep.deadlineBufferWeeks * 7,
+      slatePrep: { planId: prep.planId, importance: prep.importance, weeksPlanned: prep.weeksPlanned, hypeBonus: prep.hypeBonus, burnDiscount: prep.burnDiscount, deadlineBufferWeeks: prep.deadlineBufferWeeks },
+    };
+  }
   const decisionQuality = decisionReleaseQualityBonus(r, d);
   if (decisionQuality.length) {
     for (const bonus of decisionQuality) p = { ...p, points: { ...p.points, [bonus.point]: p.points[bonus.point] + bonus.amount } };
@@ -1875,7 +1891,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${p.slatePrep ? ` Slate preparation: +${p.slatePrep.hypeBonus} hype, −${Math.round(p.slatePrep.burnDiscount * 100)}% weekly burn${p.slatePrep.deadlineBufferWeeks ? ", +1 week buffer" : ""}.` : ""}${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -2320,6 +2336,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= personMod(st, project, team, { bonds: r.bonds ?? {} }).out;
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
+    effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -2351,7 +2368,10 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   const craftDiscipline: ResearchTrackId = type === "story" ? "writing" : type === "art" ? "animation" : "sound";
   skill *= trackSkillMultiplier(researchTrackLevel(r, craftDiscipline));
   skill *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
-  if (project) skill *= specialisationProjectEffects(r, project.draft).outputMult;
+  if (project) {
+    skill *= specialisationProjectEffects(r, project.draft).outputMult;
+    skill *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+  }
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
 }
@@ -2859,6 +2879,8 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     franchises: r.franchises,
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r) + campaignPressureFor(r).audienceBar,
+    specialisationScoreMult: specialisationProjectEffects(r, d).scoreMult,
+    businessMult: businessTrackRevenueMultiplier(researchTrackLevel(r, "business")),
     castAffinityDiscovered: r.castAffinityDiscovered,
   });
   const decisionFanMult = decisionReleaseFansMult(r, d);

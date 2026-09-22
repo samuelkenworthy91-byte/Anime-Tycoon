@@ -76,10 +76,8 @@ describe("studio signature-genre specialisation", () => {
     expect(studioSpecialisationProfile(migrated).primary).toBeNull();
   });
 
-  it("unlocks primary specialisation at Studio 2 and makes the choice permanent", () => {
+  it("lets a new studio choose one permanent research specialty", () => {
     let run = initialRun("House", "steady");
-    expect(choosePrimarySpecialisation(run, "fantasy")).toBeNull();
-    run.officeLevel = 1;
     run = choosePrimarySpecialisation(run, "fantasy")!;
     expect(studioSpecialisationProfile(run).primary).toBe("fantasy");
     expect(choosePrimarySpecialisation(run, "slice")).toBeNull();
@@ -103,12 +101,17 @@ describe("studio signature-genre specialisation", () => {
     expect(original.outputMult).toBeGreaterThan(1);
   });
 
-  it("rewards house expertise without imposing a blanket penalty on experimentation", () => {
+  it("boosts all scoring in-house and applies only a minor scoring penalty outside it", () => {
     const run = withFantasyHistory([27, 28, 22, 23]);
     const house = specialisationProjectEffects(run, draft(["fantasy"]));
+    const combo = specialisationProjectEffects(run, draft(["fantasy", "horror"]));
     const outside = specialisationProjectEffects(run, draft(["slice"]));
     expect(house.outputMult).toBeGreaterThan(1);
     expect(house.paceMult).toBeGreaterThan(1);
+    expect(house.scoreMult).toBeGreaterThan(1);
+    expect(combo.scoreMult).toBe(house.scoreMult);
+    expect(outside.scoreMult).toBeLessThan(1);
+    expect(outside.scoreMult).toBeGreaterThanOrEqual(0.97);
     expect(outside.outputMult).toBe(1);
     expect(outside.paceMult).toBe(1);
     expect(outside.interventionCostMult).toBe(1);

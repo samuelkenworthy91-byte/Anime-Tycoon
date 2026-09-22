@@ -113,6 +113,7 @@ import { type Commission } from "../engine/market";
 import { scrapProject } from "../engine/projectActions";
 import { cn } from "../utils/cn";
 import { RESEARCH_TRACKS, MAX_RESEARCH_TRACK_LEVEL, nextTrackMilestone, researchTrackLevel } from "../engine/researchTracks";
+import { choosePrimarySpecialisation, specialisationBenefits, studioSpecialisationProfile } from "../engine/specialisation";
 import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
@@ -782,6 +783,17 @@ export default function Office({
               );
             })}
           </div>
+
+          <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">HOUSE GENRE SPECIALTY</div>
+          {(() => {
+            const profile = studioSpecialisationProfile(run);
+            const benefits = specialisationBenefits(run);
+            if (profile.primary) {
+              const genre = GENRES.find((g) => g.id === profile.primary);
+              return <div className="rounded-xl border border-gold/45 bg-gold/5 p-3"><div className="flex items-center gap-2"><Star size={15} className="text-gold"/><div className="font-display text-sm font-extrabold">{genre?.label ?? profile.primary} HOUSE</div><span className="ml-auto rounded bg-gold/10 px-2 py-0.5 text-[8px] font-black text-gold">{profile.rank.toUpperCase()}</span></div><div className="mt-1 text-[10px] text-paper/55">Any show containing <b className="text-paper">{genre?.label ?? profile.primary}</b> — alone or in a two-genre combination — gains <b className="text-mint">+{benefits?.signatureScorePct ?? 0}% to Story, Art and Sound scoring</b>. Shows without it take only a <b className="text-neon">−{benefits?.outsideScorePenaltyPct ?? 0}% scoring penalty</b>.</div><div className="mt-1 text-[9px] text-paper/35">House expertise strengthens as successful signature releases move Studio → Authority → Institution.</div></div>;
+            }
+            return <div className="rounded-xl border border-gold/35 bg-gold/5 p-3"><div className="text-[10px] font-bold text-gold">CHOOSE ONE PERMANENT HOUSE SPECIALTY</div><div className="mt-1 text-[9px] text-paper/50">This is your studio's creative identity. It gives a real scoring edge to every show containing that genre, with a small penalty when you work completely outside it.</div><div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">{GENRES.filter((g)=>run.genresUnlocked.includes(g.id)).map((g)=>{const Icon=g.icon;return <button key={g.id} className="btn-press min-h-11 rounded-lg border border-line bg-panel2 px-2 text-left hover:border-gold" onClick={()=>{const next=choosePrimarySpecialisation(run,g.id);if(next){sfx.fanfare();setRun(()=>next);}}}><div className="flex items-center gap-1.5"><Icon size={13} style={{color:g.color}}/><b className="text-[10px]">{g.label}</b></div></button>})}</div></div>;
+          })()}
 
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO KNOWLEDGE STUDIES</div>
           <div className="grid gap-2 sm:grid-cols-2">
