@@ -11,6 +11,7 @@ export interface ScoreEntry {
 }
 
 const KEY = "kirameki.scores.v1";
+const CONTEXT_TUTORIAL_KEY = "kirameki.context-tutorials.v1";
 const MAX = 8;
 
 export function getScores(): ScoreEntry[] {
@@ -140,6 +141,11 @@ export function newestSave(): { id: SlotId; save: SaveGame } | null {
 /** wipe every slot — used when a career ends or a new one begins */
 export function clearAllSaves(): void {
   SLOT_IDS.forEach(clearSlot);
+  try {
+    localStorage.removeItem(CONTEXT_TUTORIAL_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function saveAgeLabel(savedAt: number): string {
