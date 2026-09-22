@@ -35,3 +35,12 @@ export const markTutorialSeen = (run: RunState, id: TutorialId): RunState =>
   tutorialSeen(run, id)
     ? run
     : { ...run, tutorialsSeen: [...(run.tutorialsSeen ?? []), id] };
+
+/*
+ * Several newer systems live on screens that pre-date the shared tutorial
+ * state. Load a tiny browser-only helper that watches for those real screen
+ * headings, opens the guide on first sight and supplies a replay button.
+ */
+if (typeof window !== "undefined") {
+  void import("../components/ContextTutorialExtras");
+}
