@@ -17,11 +17,11 @@ can poach their notables back), drift up and down a shared ranking table, build
 rivalries with you, and — rarely — decline, restructure, get acquired, collapse
 and return under new management.
 
-Year 25 ends the campaign — not the studio. A career retrospective scores the
-twenty-five years into a rank (Failed Studio → Anime Empire), then the save opens
-into **Dynasty Mode**: an endless run where the industry gets hungrier, staff
-retire into mentoring legacies, enormous empire investments sink your money, and
-the all-time industry records are fought over against the rivals.
+Year 25 ends the formal career — not the studio. A career retrospective scores the
+twenty-five years into a rank (Failed Studio → Anime Empire). After that ending,
+the same save can optionally continue in **Post-Career Sandbox**: the industry gets
+hungrier, staff retire into mentoring legacies, huge late-game investments remain
+available, and all-time industry records continue against the rivals.
 
 ## Run the game
 
@@ -119,11 +119,11 @@ the `kirameki-studio-apk` artifact.
 - `src/engine/` — data (cast, genres, arcs), rivals (persistent rival studios,
   rankings, rivalries, poaching), state (calendar, payouts, awards), scoring
   (reviews, revenue, combos, chemistry), legacy (career evaluation, dynasty
-  difficulty, empire investments, mentoring, industry records)
+  difficulty, post-career investments, mentoring, industry records)
 - `src/components/` — Title, Office (animated GDS-style scene + management),
   Create (planning + casting), Produce / ProductionFloor (bubble mini-game),
-  ContractJob, Release (premiere), Retrospective (year-12 evaluation),
-  Dynasty (empire investments/records/legacies), GameOver
+  ContractJob, Release (premiere), Retrospective (Year-25 evaluation),
+  Dynasty (post-career sandbox investments/records/legacies), GameOver
 - `public/img/` — environment art and character sheets (2x2 portrait grids)
 - `src/engine/poster.ts` + `src/components/Poster.tsx` — the key-visual
   poster system. `posterDesign(draft)` is the pure design function: it picks
