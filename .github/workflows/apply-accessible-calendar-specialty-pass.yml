@@ -1,0 +1,53 @@
+name: Apply accessible Slate and specialty pass
+
+on:
+  push:
+    branches:
+      - depth-clarity-overhaul
+    paths:
+      - "game_source/scripts/apply-accessible-calendar-specialty-pass.mjs"
+      - ".github/workflows/apply-accessible-calendar-specialty-pass.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout overhaul branch
+        uses: actions/checkout@v4
+        with:
+          ref: depth-clarity-overhaul
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Apply exact source changes
+        run: node game_source/scripts/apply-accessible-calendar-specialty-pass.mjs
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Run full tests
+        working-directory: game_source
+        run: npm test
+
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Commit validated source changes and remove one-shot hook
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm game_source/scripts/apply-accessible-calendar-specialty-pass.mjs .github/workflows/apply-accessible-calendar-specialty-pass.yml
+          git add -A
+          git commit -m 'Playtest pass: accessible calendar and high-stakes house specialty'
+          git push origin HEAD:depth-clarity-overhaul
