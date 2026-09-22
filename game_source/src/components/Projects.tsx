@@ -595,6 +595,7 @@ function ProjectCard({
 /* ----------------------------------------------------------- panel */
 export default function ProjectsPanel({
   run,
+  setRun,
   onAssign,
   onMilestone,
   onShip,
@@ -604,11 +605,13 @@ export default function ProjectsPanel({
   onResume,
   onScrap,
   onContinueSeason,
+  onLicensed,
   onIntervention,
   onAppointPromise,
   onAppointLead,
 }: {
   run: RunState;
+  setRun: (fn: (r: RunState) => RunState) => void;
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
@@ -619,6 +622,7 @@ export default function ProjectsPanel({
   onScrap: (projectId: string) => void;
   /** greenlight the next season of an IP straight from its airing card */
   onContinueSeason?: (franchiseKey: string) => void;
+  onLicensed?: (ipId: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
   onAppointLead: (projectId: string, staffId: string | null) => void;
