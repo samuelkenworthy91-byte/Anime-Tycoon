@@ -92,17 +92,18 @@ const GUIDES: Record<TutorialId, Guide> = {
   },
   "studio-knowledge": {
     eyebrow: "R&D", title: "RESEARCH & STUDIO KNOWLEDGE",
-    intro: "There are two kinds of research: improve the studio itself, and learn more about what works.",
+    intro: "Research does two jobs: make the studio permanently better, and teach you what works.",
     steps: [
-      { title: "1 · FIVE BIG RESEARCH AREAS", body: "Writing, Animation, Sound, Production and Business level up separately. Old tiny permanent upgrades now unlock automatically as milestones.", preview: "disciplines", callout: "Look at NEXT MILESTONE to see what you are working towards." },
-      { title: "2 · KNOWLEDGE REVEALS ANSWERS", body: "Genre Studies and Narrative Analytics slowly uncover combinations, arcs and production preferences. Staff research reveals Potential as words rather than exact numbers.", preview: "knowledge", callout: "More knowledge means clearer advice next time you create a show." },
+      { title: "1 · EVERY LEVEL GIVES YOU SOMETHING", body: "Writing, Animation, Sound, Production and Business each have eight levels. There are no empty levels: every one has a named gain and a permanent mechanical improvement.", preview: "disciplines", callout: "The glowing NEXT reward is what your next level gives you." },
+      { title: "2 · CHOOSE A HOUSE SPECIALTY", body: "Studio Knowledge is also where you choose the genre your studio wants to become famous for. Combinations count as long as your specialty is one of the genres.", preview: "reputation", callout: "This is a real commitment: the bonus can grow to +25%, while outside-house work can fall to −10%." },
+      { title: "3 · KNOWLEDGE REVEALS ANSWERS", body: "Genre Studies and Narrative Analytics uncover combinations, arcs and production preferences. Staff research reveals Potential as useful words rather than exact hidden numbers.", preview: "knowledge", callout: "More knowledge means clearer advice next time you create a show." },
     ],
   },
   "auto-manage": {
     eyebrow: "PROJECTS", title: "PLANNING & DELEGATION",
     intro: "As the studio gets bigger, your job changes from clicking every task to deciding what deserves your attention.",
     steps: [
-      { title: "1 · THE SLATE IS YOUR FUTURE CALENDAR", body: "Use PLAN to put future Originals, Franchises or Licensed projects on a quarter before you actually start them.", preview: "slate", callout: "Warnings mean the quarter may be too crowded; they do not forbid the plan." },
+      { title: "1 · THE SLATE IS YOUR PRODUCTION CALENDAR", body: "Open the calendar to see active and planned shows blocked out by Development, Animation, Sound, Post, Marketing and Release. You choose a release window; the game draws the stages for you.", preview: "slate", callout: "Solid blocks are active. Dashed blocks are planned estimates." },
       { title: "2 · LATER CAREER ERAS EXPECT MORE DELEGATION", body: "Founding is hands-on. Major Studio and later eras are about managing a portfolio, not babysitting every routine sprint.", preview: "era", callout: "The game is not taking choices away; it is letting you skip routine clicks." },
       { title: "3 · AUTO MANAGE HANDLES ROUTINE WORK", body: "Auto Manage lets your team run normal production. Quick Pick chooses sensible available workers for contract jobs.", preview: "automation", callout: "You still make the important decisions when something goes wrong." },
     ],
@@ -114,10 +115,11 @@ const GUIDES: Record<TutorialId, Guide> = {
   },
   "slate-planning": {
     eyebrow: "PLANNING", title: "THE STUDIO SLATE",
-    intro: "This is simply your future calendar. It helps you avoid trying to make too much at once.",
+    intro: "This is your simple production calendar. You choose when you want a show out; the studio estimates the work backwards.",
     steps: [
-      { title: "PUT FUTURE SHOWS ON THE CALENDAR", body: "Tap PLAN and choose an Original, Franchise or Licensed project. This does not start production yet.", preview: "slate", callout: "Think of it as writing a show on the wall planner." },
-      { title: "WATCH THE WARNINGS", body: "If a quarter is too crowded, the Slate tells you before you commit the money and staff.", preview: "slate", callout: "A warning means 'this could be painful', not 'you are forbidden'." },
+      { title: "1 · COLOURS SHOW THE PRODUCTION", body: "Development, Pre-production, Animation, Sound, Post, Marketing and Release each have their own colour. You do not manually draw the blocks.", preview: "slate", callout: "Pick a release window and the calendar does the scheduling maths." },
+      { title: "2 · LOOK FOR THE WARNING CARDS", body: "The calendar points out animation crunch, cash risk, audience clashes, rival releases, expiring rights and useful market windows before you commit.", preview: "slate", callout: "Warnings explain a risk; they never forbid your plan." },
+      { title: "3 · PLANNING PAYS", body: "A show moves from IMPROVISED to PREPARED, READY, LOCKED and LONG LEAD the longer it stays on the Slate. Better preparation cuts weekly burn, adds starting hype and can give deadline safety.", preview: "slate", callout: "You can still make an unplanned show whenever you want." },
     ],
   },
   "review-diagnosis": {
@@ -130,10 +132,10 @@ const GUIDES: Record<TutorialId, Guide> = {
   },
   "research-disciplines": {
     eyebrow: "R&D", title: "THE FIVE RESEARCH AREAS",
-    intro: "You no longer buy dozens of tiny permanent upgrades. You level five big areas instead.",
+    intro: "Five clear disciplines replace a pile of tiny upgrades — and every paid level now matters.",
     steps: [
-      { title: "LEVEL THE AREA YOU CARE ABOUT", body: "Writing, Animation, Sound, Production and Business each level up separately.", preview: "disciplines", callout: "Old-style upgrades now unlock automatically as milestones." },
-      { title: "LOOK AT THE NEXT MILESTONE", body: "Each card tells you the next useful thing that will unlock.", preview: "disciplines", callout: "Genre and story research still sits separately under Studio Knowledge." },
+      { title: "1 · THERE ARE NO EMPTY LEVELS", body: "Every level from 1 to 8 has a named reward. Writing, Animation and Sound also gain +2% craft strength per level; Production and Business get their own permanent gains.", preview: "disciplines", callout: "If you buy a level, you always get an immediate improvement." },
+      { title: "2 · FOLLOW THE NEXT REWARD", body: "Each research card shows your current level and the next named gain, so you always know what you are working toward.", preview: "disciplines", callout: "Choose the area that solves the problem your studio actually has." },
     ],
   },
   "publicity-audience": {
@@ -174,11 +176,11 @@ const GUIDES: Record<TutorialId, Guide> = {
     steps: [{ title: "LOOK AT 'WHAT THEY REMEMBER'", body: "Poaching their talent or releasing directly against them creates a history entry on their studio card.", preview: "rival-memory", callout: "This explains why a rival relationship becomes hotter over time." }],
   },
   "studio-reputation": {
-    eyebrow: "IDENTITY", title: "SPECIALISATION VS REPUTATION",
-    intro: "These are two different things. You CHOOSE your House Specialisation. You EARN your Industry Reputation.",
+    eyebrow: "IDENTITY", title: "HOUSE SPECIALTY VS REPUTATION",
+    intro: "These are different. You CHOOSE your House Specialty. You EARN your Industry Reputation from what you actually do.",
     steps: [
-      { title: "HOUSE SPECIALISATION = YOUR CHOICE", body: "Pick a genre you want the studio to become especially good at. Other genres are still completely viable.", preview: "reputation", callout: "Specialising gives a bonus; it no longer punishes experimentation." },
-      { title: "INDUSTRY REPUTATION = WHAT YOU ACTUALLY DID", body: "If you make lots of franchises, prestige hits, cult shows or global releases, the industry starts describing you that way.", preview: "reputation", callout: "You do not pick these labels from a menu." },
+      { title: "1 · HOUSE SPECIALTY = YOUR BIG CREATIVE BET", body: "Pick one genre. Pure shows and any two-genre combination containing it count as house work.", preview: "reputation", callout: "Genre Studio: +8% / −3%. Authority: +15% / −6%. Institution: +25% / −10%." },
+      { title: "2 · REPUTATION = WHAT PEOPLE THINK YOU ARE", body: "Hit Factory, Auteur Studio, Franchise Machine and other reputation labels appear from your real career choices. You do not pick them from a menu.", preview: "reputation", callout: "Specialty is your plan. Reputation is your history." },
     ],
   },
   "career-era-delegation": {

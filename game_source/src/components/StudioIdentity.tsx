@@ -41,7 +41,7 @@ export default function StudioIdentity({
 
   const pickPrimary = (genreId: (typeof GENRES)[number]["id"]) => {
     const label = genreName(genreId);
-    if (!window.confirm(`MAKE ${String(label).toUpperCase()} YOUR SIGNATURE GENRE?\n\nThis is a permanent studio identity choice. Productions containing it become your house speciality; productions outside it become slightly less efficient and less predictable.`)) return;
+    if (!window.confirm(`MAKE ${String(label).toUpperCase()} YOUR SIGNATURE GENRE?\n\nThis is a permanent creative commitment. Any production containing this genre counts as house work — even a genre combination. House scoring grows from +8% to +25%; work without it can eventually take a −10% all-craft penalty.`)) return;
     sfx.fanfare();
     setRun((state) => choosePrimarySpecialisation(state, genreId) ?? state);
   };
@@ -80,7 +80,7 @@ export default function StudioIdentity({
               <span className="rounded border border-gold/35 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-gold">{rankLabel[profile.rank]}</span>
             </div>
             <div className="mt-1 text-[10px] leading-relaxed text-paper/55">
-              Choose a house genre to build exceptional institutional expertise. Signature work gets stronger production output, faster pacing, better intervention economics, sharper forecasts and a direct Story / Art / Sound scoring lift. Work outside the house remains viable, but carries a small scoring penalty because the studio is operating away from its strongest identity.
+              Choose the genre your studio wants to become famous for. Any show containing it — including a two-genre combination — counts as house work. The scoring swing is deliberately meaningful: +8% at Genre Studio, +15% at Authority and +25% at Institution; shows without your specialty take −3%, −6% or −10% respectively. Operational bonuses stay modest so the creative identity is the main reward.
             </div>
             <div className="mt-1 text-[9px] font-bold text-cyanx">Licensed adaptations use their real underlying genres here — exactly the same rule as original productions.</div>
           </div>
@@ -151,10 +151,10 @@ export default function StudioIdentity({
             <div className="ink-card p-3">
               <div className="text-[8px] font-black tracking-[0.2em] text-gold">CURRENT HOUSE EFFECT</div>
               <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-                <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signatureOutputPct}% OUTPUT</b><div className="text-[7px] text-paper/40">signature productions</div></div>
+                <div className="rounded-lg border border-mint/35 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signatureScorePct}% STORY / ART / SOUND</b><div className="text-[7px] text-paper/40">every release containing your specialty</div></div>
                 <div className="rounded-lg border border-mint/25 bg-mint/5 p-2"><b className="text-[10px] text-mint">+{benefits.signaturePacePct}% PACE</b><div className="text-[7px] text-paper/40">signature productions</div></div>
                 <div className="rounded-lg border border-gold/25 bg-gold/5 p-2"><b className="text-[10px] text-gold">−{benefits.signatureInterventionDiscountPct}% RESCUE COST</b><div className="text-[7px] text-paper/40">+{benefits.signatureInterventionEffectPct}% intervention effect</div></div>
-                <div className="rounded-lg border border-neon/20 bg-neon/[.04] p-2"><b className="text-[10px] text-neon">OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">Small all-craft scoring penalty only. Production pace, rescue cost and issue risk are not broadly punished.</div></div>
+                <div className="rounded-lg border border-neon/30 bg-neon/[.04] p-2"><b className="text-[10px] text-neon">−{benefits.outsideScorePenaltyPct}% OUTSIDE HOUSE</b><div className="text-[7px] text-paper/40">Story / Art / Sound when neither genre is your specialty</div></div>
               </div>
               {profile.rankLevel >= 2 && <div className="mt-2 text-[8px] font-bold text-cyanx"><Check size={9} className="mr-1 inline"/>Your recruitment ads now attract genre-aligned specialists.</div>}
             </div>

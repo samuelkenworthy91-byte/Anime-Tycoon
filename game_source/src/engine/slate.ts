@@ -1,4 +1,4 @@
-import { WEEKS_PER_YEAR, type Draft } from "./data";
+import { WEEKS_PER_YEAR, type Draft, type GenreId } from "./data";
 import type { RunState } from "./state";
 
 export type SlatePlanKind = "original" | "franchise" | "licensed";
@@ -12,6 +12,8 @@ export interface SlatePlan {
   importance: SlateImportance;
   franchiseKey?: string;
   licensedIpId?: string;
+  /** rough creative direction for calendar forecasts; creation can still change it */
+  genres?: GenreId[];
   createdWeek: number;
   status: "planned" | "setup";
 }
@@ -69,21 +71,46 @@ export interface SlatePreparation {
   planId: string;
   importance: SlateImportance;
   weeksPlanned: number;
+  effectiveWeeks: number;
   ready: boolean;
+  label: "IMPROVISED" | "PREPARED" | "READY" | "LOCKED" | "LONG LEAD";
   hypeBonus: number;
   burnDiscount: number;
   deadlineBufferWeeks: number;
 }
 
-export function slatePreparation(plan: SlatePlan, nowWeek: number): SlatePreparation {
+/** Advance planning now matters progressively rather than flipping one binary
+ * switch. Elliot Mercer accelerates every slate; Freja accelerates franchise
+ * planning specifically. */
+export function slatePreparation(plan: SlatePlan, nowWeek: number, showrunner?: string): SlatePreparation {
   const weeksPlanned = Math.max(0, nowWeek - plan.createdWeek);
-  const ready = weeksPlanned >= SLATE_PREP_MIN_WEEKS;
-  const values = plan.importance === "tentpole"
-    ? { hypeBonus: 10, burnDiscount: 0.08, deadlineBufferWeeks: 1 }
-    : plan.importance === "standard"
-      ? { hypeBonus: 7, burnDiscount: 0.06, deadlineBufferWeeks: 1 }
-      : { hypeBonus: 4, burnDiscount: 0.04, deadlineBufferWeeks: 0 };
-  return { planId: plan.id, importance: plan.importance, weeksPlanned, ready, hypeBonus: ready ? values.hypeBonus : 0, burnDiscount: ready ? values.burnDiscount : 0, deadlineBufferWeeks: ready ? values.deadlineBufferWeeks : 0 };
+  const speed = showrunner === "operations" || (showrunner === "franchise" && plan.kind === "franchise") ? 1.25 : 1;
+  const effectiveWeeks = Math.max(0, Math.round(weeksPlanned * speed));
+  const importanceHype = plan.importance === "tentpole" ? 2 : plan.importance === "standard" ? 1 : 0;
+  let label: SlatePreparation["label"] = "IMPROVISED";
+  let hypeBonus = 0;
+  let burnDiscount = 0;
+  let deadlineBufferWeeks = 0;
+  if (effectiveWeeks >= 20) {
+    label = "LONG LEAD"; hypeBonus = 8 + importanceHype; burnDiscount = 0.08; deadlineBufferWeeks = 2;
+  } else if (effectiveWeeks >= 12) {
+    label = "LOCKED"; hypeBonus = 6 + importanceHype; burnDiscount = 0.07; deadlineBufferWeeks = 1;
+  } else if (effectiveWeeks >= 8) {
+    label = "READY"; hypeBonus = 4 + importanceHype; burnDiscount = 0.05;
+  } else if (effectiveWeeks >= 4) {
+    label = "PREPARED"; hypeBonus = 2 + importanceHype; burnDiscount = 0.03;
+  }
+  return {
+    planId: plan.id,
+    importance: plan.importance,
+    weeksPlanned,
+    effectiveWeeks,
+    ready: effectiveWeeks >= SLATE_PREP_MIN_WEEKS,
+    label,
+    hypeBonus,
+    burnDiscount,
+    deadlineBufferWeeks,
+  };
 }
 
 export function armSlatePlan(run: RunState, id: string): RunState {
@@ -101,7 +128,7 @@ export function consumeArmedSlatePlan(run: RunState, draft: Draft): { run: RunSt
   if (!id) return { run, preparation: null };
   const plan = (run.slatePlans ?? []).find((candidate) => candidate.id === id);
   if (!plan || !planMatchesDraft(plan, draft)) return { run: { ...run, activeSlateSetupPlanId: undefined }, preparation: null };
-  const preparation = slatePreparation(plan, run.week);
+  const preparation = slatePreparation(plan, run.week, run.showrunner);
   return {
     run: { ...run, slatePlans: (run.slatePlans ?? []).filter((candidate) => candidate.id !== id), activeSlateSetupPlanId: undefined },
     preparation,

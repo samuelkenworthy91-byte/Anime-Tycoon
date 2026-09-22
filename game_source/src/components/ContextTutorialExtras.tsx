@@ -7,13 +7,13 @@ import type { TutorialId } from "../engine/tutorials";
 const CONTEXT_TUTORIAL_KEY = "kirameki.context-tutorials.v1";
 
 const FIRST_SIGHT: readonly { id: TutorialId; marker: string }[] = [
-  { id: "slate-planning", marker: "STUDIO SLATE & DEPARTMENT LOAD" },
+  { id: "slate-planning", marker: "STUDIO SLATE" },
   { id: "staff-relationships", marker: "RELATIONSHIPS" },
   { id: "career-era-delegation", marker: "EXECUTIVE DELEGATION" },
 ] as const;
 
 const REPLAY_CONTEXTS: readonly { id: TutorialId; marker: string; label: string }[] = [
-  { id: "slate-planning", marker: "STUDIO SLATE & DEPARTMENT LOAD", label: "SLATE" },
+  { id: "slate-planning", marker: "STUDIO SLATE", label: "SLATE" },
   { id: "review-diagnosis", marker: "WHAT WE LEARNED", label: "REVIEWS" },
   { id: "research-disciplines", marker: "STUDIO DISCIPLINES", label: "R&D" },
   { id: "publicity-audience", marker: "PUBLICITY · LAUNCH", label: "PUBLICITY" },
