@@ -1,0 +1,46 @@
+name: Apply Depth & Clarity Work/RD Hotfix
+
+on:
+  push:
+    branches:
+      - depth-clarity-overhaul
+    paths:
+      - "game_source/scripts/apply-work-rd-hotfix.mjs"
+      - ".github/workflows/apply-depth-hotfix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply-hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: depth-clarity-overhaul
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply source hotfix
+        working-directory: game_source
+        run: node scripts/apply-work-rd-hotfix.mjs
+
+      - name: Commit hotfix if needed
+        run: |
+          if git diff --quiet; then
+            echo "Hotfix already applied."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/src/components/StudioSlate.tsx \
+                  game_source/src/engine/state.ts \
+                  game_source/src/engine/__tests__/research-scaling.test.ts \
+                  game_source/src/engine/__tests__/studio-slate-compat.test.ts
+          git commit -m "Fix Work tab and rebalance discovery research"
+          git push origin HEAD:depth-clarity-overhaul
