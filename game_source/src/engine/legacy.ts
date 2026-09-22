@@ -3,7 +3,7 @@
  *
  *  Year 25 ends the CAMPAIGN, not the studio. The retrospective here scores
  *  the career against the whole industry, hands out a rank, and opens the
- *  door to Dynasty Mode: an endless run where the industry gets stronger
+ *  door to an optional Post-Career Sandbox, where the industry gets stronger
  *  around you, long-serving staff mentor the next generation, and money
  *  finds its way into enormous optional investments and industry records.
  *
@@ -188,7 +188,7 @@ export function dynastyFX(run: RunState): DynastyFX {
 
 /** null = the investment can be bought; otherwise a blocking reason */
 export function investmentBlockReason(run: RunState, id: string): string | null {
-  if (!run.dynasty) return "Requires Dynasty Mode";
+  if (!run.dynasty) return "Requires Post-Career Sandbox";
   if ((run.dynasty.investments ?? []).some((i) => i.id === id)) return "Already owned";
   const def = investmentDef(id);
   if (!def) return "Unknown investment";
@@ -353,7 +353,7 @@ export interface CareerRank {
 export const CAREER_RANKS: CareerRank[] = [
   { id: "failed", label: "Failed Studio", color: "#ff5e5e", blurb: "The doors closed early, and the industry barely noticed." },
   { id: "cult", label: "Cult Studio", color: "#a78bfa", blurb: "A few diehard fans will defend you forever. The accountants won't." },
-  { id: "regular", label: "Industry Regular", color: "#3be1ff", blurb: "A dependable house that shipped real shows for twelve years." },
+  { id: "regular", label: "Industry Regular", color: "#3be1ff", blurb: "A dependable house that shipped real shows for twenty-five years." },
   { id: "major", label: "Major Studio", color: "#5ef0c0", blurb: "A name the whole industry watches. Hits, fans and franchises." },
   { id: "legendary", label: "Legendary Studio", color: "#ffd166", blurb: "Your run changed what anime means to a generation." },
   { id: "empire", label: "Anime Empire", color: "#ff8fc7", blurb: "The industry orbits you. Records fall, rivals kneel, legends retire here." },
@@ -575,7 +575,7 @@ export function runCareerEvaluation(run: RunState): CareerEvaluation {
 
 /* -------------------------------------------------------------- dynasty on */
 
-/** flip the campaign into Dynasty Mode — the save lives on, indefinitely */
+/** open the optional post-career sandbox — the completed save lives on indefinitely */
 export function beginDynastyMode(run: RunState): RunState {
   if (run.dynasty) return run;
   const dynasty: DynastyState = {
@@ -589,7 +589,7 @@ export function beginDynastyMode(run: RunState): RunState {
     dynasty,
     notices: [
       ...run.notices,
-      "🏯 DYNASTY MODE — the campaign is over, but the studio endures. The industry only gets hungrier.",
+      "🏯 POST-CAREER SANDBOX — the 25-year career is complete, but the studio endures. The industry only gets hungrier.",
     ],
   };
 }
