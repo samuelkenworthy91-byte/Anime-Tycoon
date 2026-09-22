@@ -3600,6 +3600,33 @@ export function researchProjectCost(r: RunState, id: string, fallbackRd?: number
   const def = RESEARCH.find((x) => x.id === id);
   const base = fallbackRd ?? def?.rd ?? 0;
   const repeats = repeatResearchRunIndex(r, id);
+
+  // Discovery studies are deliberately almost free at the start so a new studio
+  // can learn by experimenting. Costs then curve upward with actual discovery
+  // progress: final Genre Studies passes approach 200 RD and final Narrative /
+  // Arc Combo passes approach 300 RD. The first four passes are 2, 4, 8, 12.
+  if (id === "genre_studies" || id === "narrative_analytics") {
+    const genreStudy = id === "genre_studies";
+    const known = genreStudy
+      ? ARC_RESEARCH_ALL_GENRE_KEYS.filter((key) => (r.arcGenreKnowledge?.[key] ?? 0) > 0).length
+      : ARC_RESEARCH_ALL_COMBO_IDS.filter((comboId) => r.arcCombos?.includes(comboId)).length;
+    const total = genreStudy ? ARC_RESEARCH_ALL_GENRE_KEYS.length : ARC_RESEARCH_ALL_COMBO_IDS.length;
+    const batch = genreStudy ? GENRE_STUDY_FIRST_BATCH : NARRATIVE_STUDY_FIRST_BATCH;
+    const ceiling = genreStudy ? 200 : 300;
+    const early = [2, 4, 8, 12] as const;
+    let rawCost: number;
+    if (repeats < early.length) {
+      rawCost = early[repeats];
+    } else if (total - known <= batch) {
+      rawCost = ceiling;
+    } else {
+      const progress = Math.max(0, Math.min(1, known / Math.max(1, total - batch)));
+      const curved = 12 + (ceiling - 12) * Math.pow(progress, 1.8);
+      rawCost = Math.min(ceiling, Math.max(12, Math.round(curved / 2) * 2));
+    }
+    return researchRdCost(rawCost, r.showrunner);
+  }
+
   return researchRdCost(Math.round(base * (1 + repeats * 0.5)), r.showrunner);
 }
 

@@ -57,12 +57,18 @@ export default function StudioSlate({
   const cols = useMemo(() => quarterColumns(year, quarter), [year, quarter]);
   const start = cols[0];
   const end = cols[cols.length - 1];
-  const depts = departmentStatuses(run.projects, run.staff, run.facilities, run.research);
-  const active = run.projects.filter((p) => p.stage !== "done" && p.stage !== "airing");
+  const projects = run.projects ?? [];
+  const staff = run.staff ?? [];
+  const research = run.research ?? [];
+  const contractJobs = run.contractJobs ?? [];
+  const trainingJobs = run.trainingJobs ?? [];
+  const researchJobs = run.researchJobs ?? [];
+  const depts = departmentStatuses(projects, staff, run.facilities, research);
+  const active = projects.filter((p) => p.stage !== "done" && p.stage !== "airing");
   const plans = plansForQuarter(run, year, quarter);
   const warnings = slateQuarterWarnings(run, year, quarter);
-  const franchises = Object.values(run.franchises).filter((fr) => !fr.soldTo);
-  const ownedIps = Object.values(run.ipMarket.owned)
+  const franchises = Object.values(run.franchises ?? {}).filter((fr) => !fr.soldTo);
+  const ownedIps = Object.values(run.ipMarket?.owned ?? {})
     .filter((contract) => contract.expiresWeek > run.week)
     .map((contract) => ({ contract, ip: ipById(contract.ipId) }))
     .filter((row) => !!row.ip);
@@ -153,9 +159,9 @@ export default function StudioSlate({
               <div className="mt-1 space-y-1">
                 {active.map((p: Project) => <div key={p.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-paper/70">{p.draft.title}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border text-center text-[7px] leading-5",w>=run.week&&w<=p.deadlineWeek?"border-cyanx/35 bg-cyanx/15 text-cyanx":w===p.deadlineWeek?"border-gold/50 bg-gold/10 text-gold":"border-line/20 bg-panel2/10")}>{w>=run.week&&w<=p.deadlineWeek?STAGE_LABEL[p.stage].slice(0,4).toUpperCase():""}</div>)}</div>)}
                 {plans.map((plan)=><div key={plan.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="flex items-center gap-1 truncate text-[9px] font-bold text-gold"><span className="truncate">{plan.title}</span><button className="ml-auto text-paper/30" onClick={()=>setRun((r)=>removeSlatePlan(r,plan.id))}><Trash2 size={9}/></button></div>{cols.map((w)=><button key={w} onClick={()=>w===plan.targetWeek&&startPlan(plan)} className={cn("h-5 rounded border text-center text-[7px] leading-5",w===plan.targetWeek?"border-gold/50 bg-gold/15 text-gold":"border-line/20 bg-panel2/10")}>{w===plan.targetWeek?importanceLabel[plan.importance].slice(0,4):""}</button>)}</div>)}
-                {run.contractJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-gold"><Briefcase size={9} className="mr-1 inline"/>{j.contract.name}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=Math.max(run.week,j.startWeek)&&w<=j.dueWeek?"border-gold/30 bg-gold/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
-                {run.trainingJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-mint"><GraduationCap size={9} className="mr-1 inline"/>{j.staffName}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=j.startWeek&&w<=j.completesWeek?"border-mint/30 bg-mint/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
-                {run.researchJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-viol"><Microscope size={9} className="mr-1 inline"/>{j.name}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=j.startWeek&&w<=j.completesWeek?"border-viol/30 bg-viol/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
+                {contractJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-gold"><Briefcase size={9} className="mr-1 inline"/>{j.contract.name}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=Math.max(run.week,j.startWeek)&&w<=j.dueWeek?"border-gold/30 bg-gold/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
+                {trainingJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-mint"><GraduationCap size={9} className="mr-1 inline"/>{j.staffName}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=j.startWeek&&w<=j.completesWeek?"border-mint/30 bg-mint/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
+                {researchJobs.map((j)=><div key={j.id} className="grid grid-cols-[150px_repeat(12,minmax(46px,1fr))] gap-1"><div className="truncate text-[9px] font-bold text-viol"><Microscope size={9} className="mr-1 inline"/>{j.name}</div>{cols.map((w)=><div key={w} className={cn("h-5 rounded border",w>=j.startWeek&&w<=j.completesWeek?"border-viol/30 bg-viol/10":"border-line/20 bg-panel2/10")}/>)}</div>)}
               </div>
             </div>
           </div>
