@@ -1384,7 +1384,7 @@ export function formatNum(n: number): string {
 }
 
 /* -------------------------------------------------------------- calendar */
-/** the length of the career campaign — after this the studio enters Dynasty Mode */
+/** the formal 25-year career length — after this the player may enter the optional post-career sandbox */
 export const WEEKS_PER_YEAR = 48;
 export const CAREER_YEARS = 25;
 export const CAREER_WEEKS = WEEKS_PER_YEAR * CAREER_YEARS;
