@@ -1,0 +1,32 @@
+name: Apply Slate V3 specialisation pass
+
+on:
+  push:
+    branches:
+      - depth-clarity-overhaul
+    paths:
+      - "game_source/scripts/apply-slate-v3-specialisation-pass.mjs"
+      - ".github/workflows/apply-slate-v3-specialisation-pass.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: depth-clarity-overhaul
+          fetch-depth: 0
+      - name: Apply integration patch
+        run: node game_source/scripts/apply-slate-v3-specialisation-pass.mjs
+      - name: Commit source changes and remove one-shot hook
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm game_source/scripts/apply-slate-v3-specialisation-pass.mjs .github/workflows/apply-slate-v3-specialisation-pass.yml
+          git add -A
+          git commit -m 'Slate V3: visual calendar, readiness and stronger house identity'
+          git pull --rebase origin depth-clarity-overhaul
+          git push origin HEAD:depth-clarity-overhaul
