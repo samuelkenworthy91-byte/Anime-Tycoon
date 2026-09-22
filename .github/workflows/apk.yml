@@ -1,11 +1,12 @@
 name: Build Android APK
-# Fresh-build trigger: latest main after three-click audit integration.
+# Fresh-build trigger: main and active playtest branches.
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - depth-clarity-overhaul
       - arena/01a0615b-anime-tycoon
       - arena/01a0759f-anime-tycoon
       - work/final-awards-rival-posters
@@ -62,17 +63,22 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Rename final APK
-        run: cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
+        run: |
+          if [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Playtest.apk
+          else
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: anime-runner-main-playtest-apk
-          path: Anime-Runner-Main-Playtest.apk
+          name: anime-runner-${{ github.ref_name }}-playtest-apk
+          path: Anime-Runner-*-Playtest.apk
           if-no-files-found: error
           retention-days: 14
 
-      - name: Publish direct GitHub final APK
+      - name: Publish direct GitHub main APK
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -86,3 +92,18 @@ jobs:
             --target "$BUILT_SHA" \
             --title 'Anime Runner Main Playtest' \
             --notes "Android debug APK built from main at ${BUILT_SHA}."
+
+      - name: Publish direct GitHub Depth & Clarity APK
+        if: github.ref == 'refs/heads/depth-clarity-overhaul'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='depth-clarity-playtest'
+          APK='Anime-Runner-Depth-Clarity-Playtest.apk'
+          BUILT_SHA="$(git rev-parse HEAD)"
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target "$BUILT_SHA" \
+            --title 'Anime Runner — Depth & Clarity Playtest' \
+            --notes "Android debug APK built from depth-clarity-overhaul at ${BUILT_SHA}. Includes the approved neon title-screen artwork and onboarding overhaul."
