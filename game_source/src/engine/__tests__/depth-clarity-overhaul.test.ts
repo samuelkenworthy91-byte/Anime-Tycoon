@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  CAREER_WEEKS,
+  CAREER_YEARS,
   PETS,
   PROTAGONISTS,
   SECONDARY,
@@ -31,6 +33,9 @@ import {
   type StaffRelationshipRecord,
 } from "../staffRelationships";
 import { initialRun } from "../state";
+import { createFranchise } from "../franchise";
+import { studioReputationTraits } from "../studioReputation";
+import { careerEraForWeek } from "../careerEras";
 import { bondKey } from "../careers";
 
 const makeDraft = (genres: GenreId[] = ["monster_taming"]): Draft => ({
@@ -146,5 +151,50 @@ describe("Depth & Clarity staff relationships", () => {
     expect(relationship.acclaimedReleases).toBe(3);
     expect(relationship.goldenPair).toBe(true);
     expect(relationship.bestTitle).toBe("Hit Three");
+  });
+});
+
+
+describe("Depth & Clarity earned studio reputation", () => {
+  it("derives a franchise-machine reputation from the career the player actually built", () => {
+    let run = initialRun("Reputation Test", "steady");
+    const d = makeDraft(["fantasy"]);
+    const franchise = createFranchise(
+      "House Line",
+      d,
+      {
+        protag: d.protag,
+        protagName: d.protagName,
+        secondary: d.secondary,
+        secondaryName: "S",
+        pet: d.pet,
+        petName: "P",
+        villain: d.villain,
+        villainName: "V",
+      },
+      { total: 28, revenue: 500_000, fans: 20_000, hallOfFame: false },
+      4,
+    );
+    franchise.entries.push(
+      { kind: "season", title: "House Line S2", score: 29, revenue: 600_000, fans: 25_000, week: 52, animeType: "shonen" },
+      { kind: "season", title: "House Line S3", score: 30, revenue: 700_000, fans: 30_000, week: 100, animeType: "shonen" },
+    );
+    franchise.totalRevenue = 1_800_000;
+    franchise.lifetimeFans = 75_000;
+    franchise.bestScore = 30;
+    franchise.lastScore = 30;
+    franchise.lastEntryWeek = 100;
+    franchise.season = 3;
+    run = { ...run, franchises: { house: franchise }, showsMade: 3, hits: 3 };
+    expect(studioReputationTraits(run).map((trait) => trait.id)).toContain("franchise_machine");
+  });
+});
+
+describe("Depth & Clarity formal career boundary", () => {
+  it("ends the scored career after exactly 25 years and then becomes sandbox", () => {
+    expect(CAREER_YEARS).toBe(25);
+    expect(CAREER_WEEKS).toBe(25 * 48);
+    expect(careerEraForWeek(CAREER_WEEKS - 1).id).toBe("legacy");
+    expect(careerEraForWeek(CAREER_WEEKS).id).toBe("sandbox");
   });
 });
