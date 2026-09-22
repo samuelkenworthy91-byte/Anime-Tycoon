@@ -48,25 +48,45 @@ describe("playtest research progression", () => {
 });
 
 describe("prepared Studio Slate", () => {
-  it("requires genuine advance planning before bonuses activate", () => {
+  it("grows through meaningful readiness tiers", () => {
     let run = initialRun("Slate House", "steady");
-    run = addSlatePlan(run, { kind: "original", title: "Future Show", targetWeek: 12, importance: "standard" });
+    run = addSlatePlan(run, { kind: "original", title: "Future Show", targetWeek: 30, importance: "standard", genres: ["mecha"] });
     const plan = run.slatePlans![0];
-    expect(slatePreparation(plan, 3).ready).toBe(false);
+    expect(slatePreparation(plan, 3).label).toBe("IMPROVISED");
     const prepared = slatePreparation(plan, 4);
     expect(prepared.ready).toBe(true);
-    expect(prepared.hypeBonus).toBe(7);
-    expect(prepared.burnDiscount).toBeCloseTo(0.06);
+    expect(prepared.label).toBe("PREPARED");
+    expect(prepared.hypeBonus).toBe(3);
+    expect(prepared.burnDiscount).toBeCloseTo(0.03);
+    expect(slatePreparation(plan, 8).label).toBe("READY");
+    expect(slatePreparation(plan, 12).label).toBe("LOCKED");
+    const longLead = slatePreparation(plan, 20);
+    expect(longLead.label).toBe("LONG LEAD");
+    expect(longLead.burnDiscount).toBeCloseTo(0.08);
+    expect(longLead.deadlineBufferWeeks).toBe(2);
+  });
+
+  it("accelerates planning for Elliot and Freja in their niches", () => {
+    let run = initialRun("Slate House", "steady");
+    run = addSlatePlan(run, { kind: "original", title: "Original", targetWeek: 20, importance: "standard" });
+    const original = run.slatePlans![0];
+    expect(slatePreparation(original, 3, "steady").label).toBe("IMPROVISED");
+    expect(slatePreparation(original, 3, "operations").label).toBe("PREPARED");
+
+    run = addSlatePlan(run, { kind: "franchise", title: "Season Two", targetWeek: 20, importance: "standard", franchiseKey: "f1" });
+    const franchise = run.slatePlans![1];
+    expect(slatePreparation(franchise, 3, "franchise").label).toBe("PREPARED");
   });
 
   it("arms the chosen plan and consumes it only for a matching setup", () => {
     let run = initialRun("Slate House", "steady");
-    run = addSlatePlan(run, { kind: "original", title: "Future Show", targetWeek: 12, importance: "tentpole" });
+    run = addSlatePlan(run, { kind: "original", title: "Future Show", targetWeek: 28, importance: "tentpole", genres: ["mecha"] });
     const plan = run.slatePlans![0];
-    run.week = 6;
+    run.week = 20;
     run = armSlatePlan(run, plan.id);
     const consumed = consumeArmedSlatePlan(run, draft());
     expect(consumed.preparation?.ready).toBe(true);
+    expect(consumed.preparation?.label).toBe("LONG LEAD");
     expect(consumed.preparation?.hypeBonus).toBe(10);
     expect(consumed.run.slatePlans).toHaveLength(0);
     expect(consumed.run.activeSlateSetupPlanId).toBeUndefined();
