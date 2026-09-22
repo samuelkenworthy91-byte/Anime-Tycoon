@@ -5,6 +5,7 @@ on:
     branches:
       - work/midgame-endgame-systems-pass
       - work/zeitgeist-commercial-events-pass
+      - depth-clarity-overhaul
   workflow_dispatch:
 
 permissions:
