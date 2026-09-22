@@ -1,4 +1,23 @@
-import { AlertTriangle, BookOpen, ChevronLeft, ChevronRight, Crown, Gavel, Globe2, Hammer, HelpCircle, Trophy, X, Zap } from "lucide-react";
+import {
+  AlertTriangle,
+  BookOpen,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  Gavel,
+  Globe2,
+  Hammer,
+  HelpCircle,
+  Megaphone,
+  Package,
+  Sparkles,
+  Swords,
+  Trophy,
+  Users,
+  X,
+  Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import type { TutorialId } from "../engine/tutorials";
 import { cn } from "../utils/cn";
@@ -9,96 +28,194 @@ type PreviewId =
   | "rights-appraise" | "rights-own" | "rights-adapt"
   | "debt-clock" | "debt-recover" | "debt-shutdown"
   | "dynasty-pressure" | "dynasty-invest" | "dynasty-legacy"
-  | "franchise" | "knowledge" | "automation" | "capability";
+  | "franchise" | "knowledge" | "automation" | "capability"
+  | "slate" | "review" | "disciplines" | "publicity" | "merch"
+  | "movement" | "relationships" | "rival-memory" | "reputation" | "era";
 
 type Step = { title: string; body: string; preview: PreviewId; callout: string };
 type Guide = { eyebrow: string; title: string; intro: string; steps: Step[] };
 
 const GUIDES: Record<TutorialId, Guide> = {
   "passion-projects": {
-    eyebrow: "CREATOR AMBITIONS", title: "HOW PASSION PROJECTS WORK",
-    intro: "A passion project is a promise to a member of staff. You can fund their idea, accept the brief, then honour it from the project itself without hunting through menus.",
+    eyebrow: "CREATOR AMBITIONS", title: "PASSION PROJECTS",
+    intro: "A staff member has an idea they care about. You decide whether to promise them a real chance to lead it.",
     steps: [
-      { title: "1 · DECIDE ON THE PITCH", body: "In Ambitions, fund development if you want more information, or accept the leadership brief immediately. Declining makes no promise.", preview: "pitch", callout: "Accepting creates a 48-week leadership promise." },
-      { title: "2 · PUT THEM ON THE SHOW", body: "Once you greenlight a matching original show, the Project Board surfaces the promise. Assign and name them lead in one action if there is room.", preview: "project-lead", callout: "You do not need to return to Studio Culture." },
-      { title: "3 · THE PROMISE FOLLOWS PRODUCTION", body: "The relevant Story, Animation or Sound Rush also shows the promised lead. If you missed the early appointment they can still earn it at 60% department participation.", preview: "rush-lead", callout: "Release the qualifying original show before the deadline." },
+      { title: "1 · CHOOSE WHETHER TO PROMISE IT", body: "Accepting the brief makes a real promise. Funding development just gives you more information first.", preview: "pitch", callout: "Do not accept unless you are happy to make the show within the deadline." },
+      { title: "2 · PUT THEM ON THE SHOW", body: "When you make the right original show, the Project Board reminds you who was promised the lead role.", preview: "project-lead", callout: "Use the highlighted button to assign them and make them lead in one go." },
+      { title: "3 · THE PROMISE FOLLOWS THE PROJECT", body: "If you missed the early appointment, the matching Production Rush can still show the promised creator.", preview: "rush-lead", callout: "Release the qualifying show before the promise expires." },
     ],
   },
   "overseas-markets": {
     eyebrow: "GLOBAL RELEASES", title: "OVERSEAS MARKETS",
-    intro: "International releases are title-specific. Pick a finished show, shape it for a territory, then decide whether the commercial terms are worth signing.",
+    intro: "You can release a finished anime in other regions. Different places want different things.",
     steps: [
-      { title: "1 · CHOOSE TITLE + TERRITORY", body: "Start with a released show and the market you want to enter. Each territory has different audience size, sensitivity and genre appetite.", preview: "overseas-title", callout: "A strong domestic show is not automatically a perfect overseas fit." },
-      { title: "2 · SHAPE THE RELEASE", body: "Choose the audience segment, edition and content profile. Adaptation can protect reach but may cost money, time or creator goodwill.", preview: "overseas-shape", callout: "The forecast updates as you change the package." },
-      { title: "3 · REVIEW, THEN SIGN", body: "Compare distributor terms, projected reach and localisation costs. Sign only when the package fits your goals; the market remembers previous releases.", preview: "overseas-sign", callout: "Overseas decisions affect money, fans and long-term regional strength." },
+      { title: "1 · PICK A SHOW AND A PLACE", body: "Choose which finished anime you want to sell overseas, then choose the territory.", preview: "overseas-title", callout: "A domestic hit is not automatically a perfect fit everywhere." },
+      { title: "2 · SHAPE THE RELEASE", body: "Choose who you are aiming at and how much localisation or editing you want to do.", preview: "overseas-shape", callout: "The forecast changes when you change the package." },
+      { title: "3 · CHECK THE DEAL", body: "Look at expected reach, costs and the distributor cut before signing.", preview: "overseas-sign", callout: "You can walk away from a bad overseas deal." },
     ],
   },
   "rights-market": {
-    eyebrow: "LICENSED IP", title: "RIGHTS MARKET & LICENSED ADAPTATIONS",
-    intro: "Licensed IP is a full lifecycle: judge the property, win the rights, manage the contract, then adapt it using the same genre craft your studio has learned on original shows.",
+    eyebrow: "LICENSED IP", title: "BUYING & USING LICENSED IP",
+    intro: "Licensed IP gives you a famous property, but it also gives you rules, royalties and expectations.",
     steps: [
-      { title: "1 · APPRAISE BEFORE YOU BID", body: "Auctions hide some risk. The Data Lab reveals more about difficulty, merch, royalties and creator control. Bid only when the property still makes sense at the live price.", preview: "rights-appraise", callout: "Walking away is a valid strategic choice." },
-      { title: "2 · RIGHTS HAVE TERMS", body: "Royalty, expiry, sequel, merch and international rights all matter. The Owned IP card always shows time remaining and when the manual renewal window opens; the Legal Desk improves negotiations and renewal prices.", preview: "rights-own", callout: "The manual extension window opens 24 weeks before expiry; warning starts 12 weeks out." },
-      { title: "3 · CONTINUE OR REBOOT", body: "Licensed shows use canonical characters and the IP's real genre-combination slider fit. After an adaptation, choose Continue Series for a true follow-up or Reboot Property when the previous version needs a clean restart.", preview: "rights-adapt", callout: "A famous IP can make money while still damaging reputation if the adaptation is poor." },
+      { title: "1 · APPRAISE BEFORE BIDDING", body: "Research can reveal hidden difficulty, royalties and merchandising potential before you spend big.", preview: "rights-appraise", callout: "A famous name can still be a bad deal." },
+      { title: "2 · CHECK WHAT YOU ACTUALLY BOUGHT", body: "Rights can include or exclude sequels, merchandise and international releases. The contract card tells you.", preview: "rights-own", callout: "Watch the expiry date too." },
+      { title: "3 · CONTINUE OR REBOOT", body: "After an adaptation, continue a good version or reboot a bad one instead of getting stuck.", preview: "rights-adapt", callout: "Licensed shows still need good production choices." },
     ],
   },
   "financial-distress": {
     eyebrow: "CASHFLOW WARNING", title: "YOUR STUDIO IS IN DEBT",
-    intro: "Negative cash is survivable for a short time, but the shutdown clock keeps running until you return to £0 or above.",
+    intro: "Going below £0 does not kill the studio immediately, but the clock starts ticking.",
     steps: [
-      { title: "1 · THE CLOCK STARTS IMMEDIATELY", body: "Every completed week below £0 adds to the same insolvency streak. Returning to £0 or above clears the streak completely.", preview: "debt-clock", callout: "Watch the cash forecast, not just today's balance." },
-      { title: "2 · ONE MONTH = FINAL NOTICE", body: "After four consecutive negative weeks the landlord gives one final month to recover. Contracts, selling a completed master, shelving spend and cutting commitments can buy time.", preview: "debt-recover", callout: "The reprieve is the second half of the eight-week clock, not extra debt capacity." },
-      { title: "3 · TWO MONTHS = SHUTDOWN", body: "Eight consecutive weeks below £0 terminates the lease and ends the run. Any recovery to £0+ before then resets the danger.", preview: "debt-shutdown", callout: "Do not let the studio drift through several negative weeks at high speed." },
+      { title: "1 · WEEK 1: DANGER STARTS", body: "Every full week below £0 adds to the same debt streak.", preview: "debt-clock", callout: "Getting back to £0 or above resets the streak." },
+      { title: "2 · WEEK 4: FINAL NOTICE", body: "After one month below £0 you get a final month to recover.", preview: "debt-recover", callout: "Contracts, sales and cutting spend can save the studio." },
+      { title: "3 · WEEK 8: SHUTDOWN", body: "Eight straight negative weeks ends the run.", preview: "debt-shutdown", callout: "Do not leave the game on high speed while deeply in debt." },
     ],
   },
   "dynasty-mode": {
     eyebrow: "POST-CAREER", title: "POST-CAREER SANDBOX",
-    intro: "The 25-year career is complete. Continuing is optional and turns the same save into an endless sandbox with escalating industry pressure.",
+    intro: "Your 25-year career score is finished. Continuing is optional and becomes an endless sandbox.",
     steps: [
-      { title: "1 · THE WORLD GETS HARDER", body: "Each dynasty year increases salary pressure, audience expectations, rival craft and franchise fatigue while recovery becomes less forgiving.", preview: "dynasty-pressure", callout: "Old winning formulas gradually need more investment and better execution." },
-      { title: "2 · BUILD AN EMPIRE", body: "Permanent Dynasty investments help a mature studio absorb the new pressure. They are expensive by design and reward long-term cash reserves.", preview: "dynasty-invest", callout: "Treat empire projects as strategic infrastructure, not impulse purchases." },
-      { title: "3 · PEOPLE BECOME LEGACY", body: "Long-serving staff eventually retire and can leave permanent mentoring legacies. Industry records continue to refresh every year.", preview: "dynasty-legacy", callout: "The sandbox is about sustaining a mature studio after the formal ending, not extending the career score forever." },
+      { title: "1 · THE WORLD KEEPS GETTING HARDER", body: "Salaries, rival quality and audience expectations keep rising after the formal ending.", preview: "dynasty-pressure", callout: "Your career score is already locked in." },
+      { title: "2 · BIG LATE-GAME INVESTMENTS", body: "Very expensive permanent upgrades give a mature studio somewhere useful to spend its money.", preview: "dynasty-invest", callout: "These are optional sandbox goals, not required career objectives." },
+      { title: "3 · STAFF BECOME LEGENDS", body: "Veterans can retire and leave mentoring legacies while industry records continue.", preview: "dynasty-legacy", callout: "Sandbox is about sustaining the studio, not extending the official career." },
     ],
   },
   "franchise-library": {
     eyebrow: "SERIES MANAGEMENT", title: "FRANCHISE LIBRARY",
-    intro: "The Work screen is now deliberately clean: it only quick-surfaces the most recent controlled entry in a series when that property is eligible for a true sequel. Everything more complicated lives here in the Library.",
-    steps: [{ title: "SEQUEL QUICK ROUTE VS LIBRARY", body: "Use Work for a straightforward next season. Use the Library for reboots, prequels, spin-offs and other continuation choices. Sold rights disappear from the Work shortcut, and the latest entry shows how many weeks ago it aired.", preview: "franchise", callout: "If a weak adaptation blocks a true sequel, reboot it from the Library instead of abandoning the IP." }],
+    intro: "The Work screen only shows the easiest next sequel. The Library is where you do the complicated franchise stuff.",
+    steps: [{ title: "SEQUELS HERE, REBOOTS THERE", body: "Use Work for the obvious next season. Use the Library for reboots, prequels, spin-offs and older entries.", preview: "franchise", callout: "If a bad sequel blocks the series, try a reboot from the Library." }],
   },
   "studio-knowledge": {
     eyebrow: "R&D KNOWLEDGE", title: "STUDIO KNOWLEDGE",
-    intro: "Anime Runner does not reveal every perfect answer up front. Your studio learns by releasing work, researching and running test audiences.",
-    steps: [{ title: "KNOWLEDGE KEEPS DEEPENING", body: "Genre Studies and Narrative Analytics can be researched repeatedly at increasing cost until every standard arc relationship and combo effect is understood. Staff Appraisal reveals descriptive Potential bands for employees; later Talent Scouting extends those bands to candidates. Exact Potential numbers stay hidden.", preview: "knowledge", callout: "The research card shows progress toward complete knowledge instead of disappearing after one study." }],
+    intro: "The game does not tell you every perfect answer immediately. Your studio learns over time.",
+    steps: [{ title: "RESEARCH REVEALS MORE", body: "Genre Studies and Narrative Analytics slowly uncover which combinations, arcs and approaches work. Staff research reveals Potential as words rather than exact numbers.", preview: "knowledge", callout: "More knowledge means clearer advice next time you create a show." }],
   },
   "auto-manage": {
     eyebrow: "PRODUCTION DELEGATION", title: "AUTO MANAGE & QUICK PICKS",
-    intro: "Larger studios can delegate repetitive work without making every management decision manually.",
-    steps: [{ title: "DELEGATE, THEN INTERVENE", body: "Project Auto Manage hands production sprints to your team, but crises can still require a decision. Contract Jobs have a separate Quick Pick: it chooses the smallest currently available team projected to hit the deadline, or the strongest available three-seat team if nobody can make it. It never pulls busy staff off another assignment.", preview: "automation", callout: "Automation saves attention, not risk; Quick Pick is a deadline-aware staffing shortcut." }],
+    intro: "Bigger studios do not need you to click every small production task yourself.",
+    steps: [{ title: "LET THE TEAM HANDLE ROUTINE WORK", body: "Auto Manage lets your staff run normal production. Quick Pick chooses sensible available workers for contract jobs.", preview: "automation", callout: "You still make the important decisions when something goes wrong." }],
   },
   "production-capability": {
-    eyebrow: "PERMANENT CRAFT", title: "PRODUCTION CAPABILITY & FINISHED MASTERS",
-    intro: "Paid interventions can build permanent studio know-how, while finished masters can now be held back without continuing to consume production capacity.",
-    steps: [{ title: "INVEST OR SHELVE", body: "Writing, animation, retake, sound and polish interventions feed permanent capability tracks. Separately, Release Prep can SHELVE MASTER: hype immediately falls to zero, staff and production capacity are freed, and quality is preserved. Releasing the shelved master later starts from zero hype and applies the commercial sales penalty, not a review-quality penalty.", preview: "capability", callout: "Shelving stops production burn; it is a release-timing trade-off, not a quality downgrade." }],
+    eyebrow: "PERMANENT CRAFT", title: "CAPABILITY & SHELVED MASTERS",
+    intro: "Some production spending improves the studio permanently, and a finished show can be held back without taking up production space.",
+    steps: [{ title: "INVEST OR SHELVE", body: "Interventions can build permanent capability. Shelving a finished show frees staff and capacity but wipes its launch hype.", preview: "capability", callout: "Shelving hurts sales momentum, not review quality." }],
+  },
+  "slate-planning": {
+    eyebrow: "PLANNING", title: "THE STUDIO SLATE",
+    intro: "This is simply your future calendar. It helps you avoid trying to make too much at once.",
+    steps: [
+      { title: "1 · PUT FUTURE SHOWS ON THE CALENDAR", body: "Tap PLAN and choose an Original, Franchise or Licensed project. This does not start production yet.", preview: "slate", callout: "Think of it as writing a show on the wall planner." },
+      { title: "2 · WATCH THE WARNINGS", body: "If a quarter is too crowded, the Slate tells you before you commit the money and staff.", preview: "slate", callout: "A warning means 'this could be painful', not 'you are forbidden'." },
+    ],
+  },
+  "review-diagnosis": {
+    eyebrow: "REVIEWS", title: "WHY DID MY SHOW SCORE THAT?",
+    intro: "Reviews now tell you what actually helped or hurt instead of only giving you four numbers.",
+    steps: [
+      { title: "1 · READ THE HIGHLIGHT UNDER EACH CRITIC", body: "Each critic points at a real cause: story balance, direction, editing, casting or something else.", preview: "review", callout: "Red means a real problem. Green means something you got right." },
+      { title: "2 · USE 'WHAT WE LEARNED'", body: "The bottom summary turns the release into advice for your next anime.", preview: "review", callout: "As studio knowledge improves, the advice becomes more specific." },
+    ],
+  },
+  "research-disciplines": {
+    eyebrow: "R&D", title: "THE FIVE RESEARCH AREAS",
+    intro: "You no longer buy dozens of tiny permanent upgrades. You level five big areas instead.",
+    steps: [
+      { title: "LEVEL THE AREA YOU CARE ABOUT", body: "Writing, Animation, Sound, Production and Business each level up separately.", preview: "disciplines", callout: "Old-style upgrades now unlock automatically as milestones." },
+      { title: "LOOK AT THE NEXT MILESTONE", body: "Each card tells you the next useful thing that will unlock.", preview: "disciplines", callout: "Genre and story research still sits separately under Studio Knowledge." },
+    ],
+  },
+  "publicity-audience": {
+    eyebrow: "FANS & MARKETING", title: "WHO LIKES THIS ANIME?",
+    intro: "Audience types are NOT five new currencies. They simply describe what kind of fans this anime attracts.",
+    steps: [
+      { title: "1 · CHECK THE FAN MIX", body: "Core Fans, Casual Viewers, Online Fandom, Prestige Audience and Collectors show who is most interested.", preview: "publicity", callout: "You do not spend these numbers." },
+      { title: "2 · MATCH PUBLICITY TO THE FANS", body: "Campaigns now show whether they fit the audience you actually built.", preview: "publicity", callout: "A Character Spotlight is much better when Online Fandom is strong." },
+    ],
+  },
+  "merch-bets": {
+    eyebrow: "MERCH", title: "ONE BIG MERCH BET",
+    intro: "Instead of clicking every product, each franchise makes one important merchandise push at a time.",
+    steps: [
+      { title: "PICK THE PRODUCT THAT FITS YOUR FANS", body: "The card shows cost, expected return and audience fit. Collector-heavy fandoms are better for figures and cards.", preview: "merch", callout: "A bigger projected return usually means the product matches the fandom better." },
+      { title: "LET THE BET RUN", body: "While one big merch push is active, that franchise cannot start another one.", preview: "merch", callout: "Other franchises can still run their own merch bets." },
+    ],
+  },
+  "industry-movements": {
+    eyebrow: "INDUSTRY", title: "LONG-TERM TRENDS",
+    intro: "Sometimes the whole anime market moves in one direction for several seasons.",
+    steps: [
+      { title: "WATCH FOR REVIVALS AND FATIGUE", body: "A Mecha Revival can lift mecha sales. Mecha Fatigue can hurt them. Streaming and prestige waves can also appear.", preview: "movement", callout: "These change SALES, not whether critics think the anime is good." },
+      { title: "RIVALS NOTICE TOO", body: "Rival studios may chase a booming genre, so popular trends can also become crowded.", preview: "movement", callout: "Booming does not mean guaranteed success." },
+    ],
+  },
+  "staff-relationships": {
+    eyebrow: "PEOPLE", title: "STAFF RELATIONSHIPS",
+    intro: "Staff now remember who they have worked with instead of relationships being a hidden one-off bonus.",
+    steps: [
+      { title: "GOLDEN PAIRS", body: "A strong partnership that keeps making good shows can become a Golden Pair and work especially well together.", preview: "relationships", callout: "Keep successful pairs together when it makes sense." },
+      { title: "MENTORSHIP", body: "A senior creator can formally mentor a less experienced creator and speed up their growth.", preview: "relationships", callout: "Mentoring is about developing the junior, not creating another loyalty bar." },
+    ],
+  },
+  "rival-memories": {
+    eyebrow: "RIVALS", title: "RIVALS REMEMBER YOU",
+    intro: "Rivalry is no longer only a number. Studios remember specific things you did to them.",
+    steps: [
+      { title: "LOOK AT 'WHAT THEY REMEMBER'", body: "Poaching their talent or releasing directly against them creates a history entry on their studio card.", preview: "rival-memory", callout: "This explains why a rival relationship becomes hotter over time." },
+    ],
+  },
+  "studio-reputation": {
+    eyebrow: "IDENTITY", title: "SPECIALISATION VS REPUTATION",
+    intro: "These are two different things. You CHOOSE your House Specialisation. You EARN your Industry Reputation.",
+    steps: [
+      { title: "HOUSE SPECIALISATION = YOUR CHOICE", body: "Pick a genre you want the studio to become especially good at. Other genres are still completely viable.", preview: "reputation", callout: "Specialising gives a bonus; it no longer punishes experimentation." },
+      { title: "INDUSTRY REPUTATION = WHAT YOU ACTUALLY DID", body: "If you make lots of franchises, prestige hits, cult shows or global releases, the industry starts describing you that way.", preview: "reputation", callout: "You do not pick these labels from a menu." },
+    ],
+  },
+  "career-era-delegation": {
+    eyebrow: "GROWTH", title: "YOUR JOB CHANGES AS THE STUDIO GROWS",
+    intro: "Year 1 should feel hands-on. A major studio should not make you babysit every normal task forever.",
+    steps: [
+      { title: "CAREER ERAS CHANGE THE FOCUS", body: "Founding is about survival. Later eras focus more on slates, franchises, international growth and legacy.", preview: "era", callout: "The game still uses the same systems; your level of attention changes." },
+      { title: "EXECUTIVE DELEGATION", body: "From the Major Studio era you can turn this on. Once a real team is assigned, routine projects default to Auto Manage.", preview: "era", callout: "You still choose the project, team, rescues and release." },
+    ],
   },
 };
 
 function MiniButton({ children, hot = false }: { children: React.ReactNode; hot?: boolean }) {
-  return <div className={cn("rounded-md border px-2 py-1 text-[8px] font-extrabold", hot ? "border-gold bg-gold/15 text-gold" : "border-line bg-panel2 text-paper/55")}>{children}</div>;
+  return <div className={cn("rounded-md border px-2 py-1 text-[8px] font-extrabold", hot ? "border-gold bg-gold/15 text-gold ring-2 ring-gold/55 shadow-[0_0_18px_rgba(255,209,102,.22)]" : "border-line bg-panel2 text-paper/45")}>{children}</div>;
 }
+
+function Spotlight({ children, label = "LOOK HERE", tone = "gold" }: { children: React.ReactNode; label?: string; tone?: "gold" | "cyan" | "mint" }) {
+  const cls = tone === "cyan" ? "border-cyanx/70 ring-cyanx/50 text-cyanx" : tone === "mint" ? "border-mint/70 ring-mint/50 text-mint" : "border-gold/70 ring-gold/50 text-gold";
+  return <div className={cn("relative rounded-xl border bg-panel2/90 p-2 ring-2 shadow-[0_0_24px_rgba(255,255,255,.06)]", cls)}><div className="absolute -right-1 -top-2 rounded-full bg-ink px-1.5 py-0.5 text-[7px] font-black tracking-wider">← {label}</div>{children}</div>;
+}
+
 function Frame({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return <div className="overflow-hidden rounded-2xl border border-paper/15 bg-ink shadow-[0_16px_45px_rgba(0,0,0,.45)]"><div className="flex items-center gap-1.5 border-b border-line bg-panel2/95 px-3 py-2 text-[8px] font-extrabold tracking-[0.2em] text-paper/45">{icon}{title}</div><div className="min-h-44 space-y-2 p-3">{children}</div></div>;
 }
+
 function ScreenPreview({ kind }: { kind: PreviewId }) {
-  if (kind === "pitch") return <Frame title="STUDIO CULTURE · AMBITIONS"><div className="rounded-xl border border-viol/40 bg-viol/10 p-2"><b className="text-[10px]">MAYA · ORIGINAL HORROR</b><div className="mt-2 flex flex-wrap gap-1"><MiniButton>FUND DEVELOPMENT</MiniButton><MiniButton hot>ACCEPT LEADERSHIP BRIEF</MiniButton><MiniButton>DECLINE</MiniButton></div></div></Frame>;
-  if (kind === "project-lead" || kind === "rush-lead") return <Frame title={kind === "project-lead" ? "PROJECT BOARD" : "PRODUCTION RUSH"} icon={<Crown size={10}/>}><div className="rounded-xl border border-viol/50 bg-viol/10 p-2"><b className="text-[9px] text-gold">PROMISED WRITING LEAD</b><div className="mt-1 text-[8px] text-paper/55">Maya · {kind === "rush-lead" ? "64" : "0"}% department participation</div><div className="mt-2"><MiniButton hot>{kind === "rush-lead" ? "NAME MAYA WRITING LEAD" : "ASSIGN + NAME MAYA WRITING LEAD"}</MiniButton></div></div></Frame>;
-  if (kind.startsWith("overseas-")) return <Frame title="OVERSEAS MARKETS" icon={<Globe2 size={10}/>}><div className="whitespace-pre-line rounded border border-gold/40 bg-gold/5 p-2 text-[8px]">{kind === "overseas-title" ? "TITLE · Moonlit Circuit\nTERRITORY · Aurora Federation" : kind === "overseas-shape" ? "Audience · Teens\nEdition · Localised dub\nContent profile · Moderate edits" : "Projected reach · 1.4M\nLocalisation · £48,000\nDistributor share · 32%"}</div>{kind === "overseas-sign" && <MiniButton hot>SIGN OVERSEAS RELEASE</MiniButton>}</Frame>;
-  if (kind.startsWith("rights-")) return <Frame title="RIGHTS MARKET" icon={<Gavel size={10}/>}><div className="whitespace-pre-line rounded-xl border border-gold/40 bg-gold/5 p-2 text-[8px]">{kind === "rights-appraise" ? "Difficulty ??? · Merch ??? · Royalty ???\nAPPRAISE · 3 RD" : kind === "rights-own" ? "Royalty 18% · 31 weeks remaining\nRENEWAL WINDOW OPENS IN 7 WEEKS\n✓ SEQUEL · □ MERCH · □ INTL" : "CONTINUE SERIES / REBOOT PROPERTY\nGENRE FIT STILL APPLIES\nHidden blueprint: undiscovered"}</div><MiniButton hot>{kind === "rights-appraise" ? "ENTER AUCTION" : kind === "rights-own" ? "EXTEND / NEGOTIATE" : "GREENLIGHT ADAPTATION"}</MiniButton></Frame>;
-  if (kind.startsWith("debt-")) return <Frame title="FINANCIAL DISTRESS" icon={<AlertTriangle size={10}/>}><div className="grid grid-cols-3 gap-1 text-center text-[8px]"><div className="rounded border border-neon/40 p-2">W1<br/>DEBT</div><div className="rounded border border-gold/40 p-2">W4<br/>FINAL NOTICE</div><div className="rounded border border-neon/60 p-2">W8<br/>SHUTDOWN</div></div><div className="rounded border border-line bg-panel2 p-2 text-[8px]">{kind === "debt-clock" ? "£0+ resets the streak" : kind === "debt-recover" ? "Recover through income, sales or lower spend" : "Eight consecutive negative weeks ends the run"}</div></Frame>;
-  if (kind.startsWith("dynasty-")) return <Frame title="POST-CAREER SANDBOX" icon={<Trophy size={10}/>}><div className="rounded border border-gold/40 bg-gold/5 p-2 text-[8px]">{kind === "dynasty-pressure" ? "Salaries ↑ · Audience bar ↑ · Rivals ↑ · Fatigue ↑" : kind === "dynasty-invest" ? "POST-CAREER INVESTMENTS · Permanent infrastructure" : "LEGACY OF LEGENDS · Veterans mentor the next generation"}</div></Frame>;
-  if (kind === "franchise") return <Frame title="FRANCHISE LIBRARY"><div className="text-[8px]">WORK QUICK PICK · TRUE SEQUEL READY</div><div className="text-[8px]">LIBRARY · REBOOT / PREQUEL / SPIN-OFF</div><div className="rounded border border-neon/30 p-2 text-[8px]">Latest entry · aired 18 weeks ago</div></Frame>;
-  if (kind === "knowledge") return <Frame title="STUDIO KNOWLEDGE" icon={<BookOpen size={10}/>}><div className="rounded border border-line bg-panel2 p-2 text-[8px]">GENRE STUDIES · 214 / 630 RELATIONSHIPS<br/>NARRATIVE ANALYTICS · 18 / 42 STRUCTURES<br/>STAFF APPRAISAL · POTENTIAL BANDS</div><div className="text-[8px] text-paper/45">Repeat studies until standard knowledge is complete.</div></Frame>;
-  if (kind === "automation") return <Frame title="PROJECTS & JOBS" icon={<Zap size={10}/>}><MiniButton hot>AUTO MANAGE PROJECT</MiniButton><MiniButton hot>JOB · QUICK PICK</MiniButton><div className="rounded border border-neon/40 p-2 text-[8px]">Quick Pick uses available staff and checks the deadline.</div></Frame>;
-  return <Frame title="CAPABILITY & SHELVED MASTERS" icon={<Hammer size={10}/>}><div className="rounded border border-cyanx/30 p-2 text-[8px]">FINAL POLISH · LV2<br/>SHELVED MASTER · HYPE 0<br/>QUALITY PRESERVED · CAPACITY FREE</div></Frame>;
+  if (kind === "pitch") return <Frame title="STUDIO CULTURE · AMBITIONS"><Spotlight><b className="text-[10px]">MAYA · ORIGINAL HORROR</b><div className="mt-2 flex flex-wrap gap-1"><MiniButton>FUND DEVELOPMENT</MiniButton><MiniButton hot>ACCEPT LEADERSHIP BRIEF</MiniButton><MiniButton>DECLINE</MiniButton></div></Spotlight></Frame>;
+  if (kind === "project-lead" || kind === "rush-lead") return <Frame title={kind === "project-lead" ? "PROJECT BOARD" : "PRODUCTION RUSH"} icon={<Crown size={10}/>}><Spotlight><b className="text-[9px] text-gold">PROMISED WRITING LEAD</b><div className="mt-1 text-[8px] text-paper/55">Maya · {kind === "rush-lead" ? "64" : "0"}% participation</div><div className="mt-2"><MiniButton hot>{kind === "rush-lead" ? "NAME MAYA WRITING LEAD" : "ASSIGN + NAME MAYA WRITING LEAD"}</MiniButton></div></Spotlight></Frame>;
+  if (kind.startsWith("overseas-")) return <Frame title="OVERSEAS MARKETS" icon={<Globe2 size={10}/>}><Spotlight tone="cyan"><div className="whitespace-pre-line text-[8px]">{kind === "overseas-title" ? "TITLE · Moonlit Circuit\nTERRITORY · Aurora Federation" : kind === "overseas-shape" ? "Audience · Teens\nEdition · Localised dub\nContent profile · Moderate edits" : "Projected reach · 1.4M\nLocalisation · £48,000\nDistributor share · 32%"}</div></Spotlight>{kind === "overseas-sign" && <MiniButton hot>SIGN OVERSEAS RELEASE</MiniButton>}</Frame>;
+  if (kind.startsWith("rights-")) return <Frame title="RIGHTS MARKET" icon={<Gavel size={10}/>}><Spotlight><div className="whitespace-pre-line text-[8px]">{kind === "rights-appraise" ? "Difficulty ??? · Merch ??? · Royalty ???\nAPPRAISE · 3 RD" : kind === "rights-own" ? "Royalty 18% · 31 weeks remaining\n✓ SEQUEL · □ MERCH · □ INTL" : "CONTINUE SERIES / REBOOT PROPERTY\nGENRE FIT STILL APPLIES"}</div></Spotlight><MiniButton hot>{kind === "rights-appraise" ? "ENTER AUCTION" : kind === "rights-own" ? "EXTEND / NEGOTIATE" : "GREENLIGHT ADAPTATION"}</MiniButton></Frame>;
+  if (kind.startsWith("debt-")) return <Frame title="FINANCIAL DISTRESS" icon={<AlertTriangle size={10}/>}><Spotlight><div className="grid grid-cols-3 gap-1 text-center text-[8px]"><div>W1<br/>DEBT</div><div>W4<br/>FINAL NOTICE</div><div>W8<br/>SHUTDOWN</div></div></Spotlight></Frame>;
+  if (kind.startsWith("dynasty-")) return <Frame title="POST-CAREER SANDBOX" icon={<Trophy size={10}/>}><Spotlight><div className="text-[8px]">{kind === "dynasty-pressure" ? "Salaries ↑ · Audience bar ↑ · Rivals ↑ · Fatigue ↑" : kind === "dynasty-invest" ? "POST-CAREER INVESTMENTS · Permanent infrastructure" : "LEGACY OF LEGENDS · Veterans mentor the next generation"}</div></Spotlight></Frame>;
+  if (kind === "franchise") return <Frame title="FRANCHISE LIBRARY"><div className="text-[8px] text-paper/35">WORK QUICK PICK · TRUE SEQUEL READY</div><Spotlight><div className="text-[8px]">LIBRARY · REBOOT / PREQUEL / SPIN-OFF</div></Spotlight></Frame>;
+  if (kind === "knowledge") return <Frame title="STUDIO KNOWLEDGE" icon={<BookOpen size={10}/>}><Spotlight tone="cyan"><div className="text-[8px]">GENRE STUDIES · 214 / 630<br/>NARRATIVE ANALYTICS · 18 / 42<br/>STAFF APPRAISAL · POTENTIAL BANDS</div></Spotlight></Frame>;
+  if (kind === "automation") return <Frame title="PROJECTS & JOBS" icon={<Zap size={10}/>}><Spotlight><MiniButton hot>AUTO MANAGE PROJECT</MiniButton><div className="mt-1"><MiniButton hot>JOB · QUICK PICK</MiniButton></div></Spotlight></Frame>;
+  if (kind === "capability") return <Frame title="CAPABILITY & SHELVED MASTERS" icon={<Hammer size={10}/>}><Spotlight tone="cyan"><div className="text-[8px]">FINAL POLISH · LV2<br/>SHELVED MASTER · HYPE 0<br/>QUALITY PRESERVED · CAPACITY FREE</div></Spotlight></Frame>;
+  if (kind === "slate") return <Frame title="STUDIO SLATE · YEAR 6 Q2" icon={<CalendarRange size={10}/>}><div className="grid grid-cols-3 gap-1 text-[7px] text-paper/35"><div>APR</div><div>MAY</div><div>JUN</div></div><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>Moon Witch S3</b><span className="text-gold">TENTPOLE</span></div><div className="mt-1 text-[7px] text-paper/45">Target · May</div></Spotlight><Spotlight label="WARNING" tone="gold"><div className="text-[8px]">⚠ Planned slate pressure 7 exceeds safe load 5</div></Spotlight><MiniButton hot>+ PLAN PROJECT</MiniButton></Frame>;
+  if (kind === "review") return <Frame title="PREMIERE REVIEWS" icon={<Sparkles size={10}/>}><div className="rounded-lg border border-line bg-panel2/50 p-2 text-[8px] text-paper/40">CRITIC · 7/10<br/>“Strong ideas, uneven finish.”</div><Spotlight label="THIS IS WHY"><b className="text-[8px] text-neon2">! Editing notes materially hurt the finish</b><div className="mt-1 text-[7px] text-paper/45">7 unresolved notes reached release.</div></Spotlight><Spotlight label="USE NEXT TIME" tone="cyan"><b className="text-[8px] text-cyanx">WHAT WE LEARNED</b><div className="mt-1 text-[7px]">✓ Animation emphasis was well judged<br/>→ Story could use more support</div></Spotlight></Frame>;
+  if (kind === "disciplines") return <Frame title="R&D · STUDIO DISCIPLINES" icon={<BookOpen size={10}/>}><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>PRODUCTION & QA</b><b className="text-cyanx">LV 3/8</b></div><div className="mt-1 h-1.5 rounded bg-abyss"><div className="h-full w-3/8 rounded bg-viol" /></div><div className="mt-2 text-[7px] text-paper/45">NEXT MILESTONE · LV4</div><div className="text-[8px] font-bold">Auto-Cleanup</div></Spotlight><div className="grid grid-cols-2 gap-1 text-[7px] text-paper/35"><div>Writing & Development</div><div>Animation & Art</div><div>Sound & Performance</div><div>Business & Audience</div></div></Frame>;
+  if (kind === "publicity") return <Frame title="PUBLICITY · LAUNCH" icon={<Megaphone size={10}/>}><Spotlight tone="cyan"><div className="grid grid-cols-5 gap-1 text-center text-[7px]"><div>Core<br/><b>18%</b></div><div>Casual<br/><b>16%</b></div><div className="text-cyanx">Online<br/><b>34%</b></div><div>Prestige<br/><b>12%</b></div><div>Collectors<br/><b>20%</b></div></div><div className="mt-1 text-[7px] text-paper/40">These are fan types, not currencies.</div></Spotlight><Spotlight label="GOOD MATCH"><div className="flex items-center justify-between text-[8px]"><b>Character Spotlight</b><span className="text-mint">AUDIENCE EXCELLENT ×1.20</span></div></Spotlight></Frame>;
+  if (kind === "merch") return <Frame title="FRANCHISE MERCH" icon={<Package size={10}/>}><Spotlight><div className="flex justify-between text-[8px]"><b>SCALE FIGURES</b><span className="text-mint">≈£1.4m</span></div><div className="mt-1 text-[7px] text-paper/45">Cost £380k · 18 weeks · audience ×1.24</div><MiniButton hot>START MERCH BET</MiniButton></Spotlight><div className="rounded-lg border border-line p-2 text-[7px] text-paper/35">One active bet per franchise at a time.</div></Frame>;
+  if (kind === "movement") return <Frame title="INDUSTRY" icon={<Sparkles size={10}/>}><Spotlight tone="cyan"><div className="text-[7px] font-black text-cyanx">CULTURAL MOVEMENT · BOOM</div><div className="mt-1 text-[11px] font-black">THE MECHA REVIVAL</div><div className="mt-1 text-[7px] text-paper/45">68 weeks remain · affects commercial demand, not critic quality</div></Spotlight><div className="text-[7px] text-paper/35">Rivals may chase the same trend.</div></Frame>;
+  if (kind === "relationships") return <Frame title="CREW · RELATIONSHIPS" icon={<Users size={10}/>}><Spotlight><div className="text-[8px] font-black text-gold">GOLDEN PAIR · MAYA + REN</div><div className="text-[7px] text-paper/45">6 shared releases · 4 hits · best 35/40</div></Spotlight><Spotlight label="OPTION"><div className="text-[8px]">SENIOR CREATOR → JUNIOR CREATOR</div><MiniButton hot>FORMAL MENTORSHIP</MiniButton></Spotlight></Frame>;
+  if (kind === "rival-memory") return <Frame title="RIVAL STUDIO" icon={<Swords size={10}/>}><div className="text-[9px] font-black">SUNNYRISE</div><Spotlight label="THEY REMEMBER"><div className="text-[8px]">Y7 · You poached Akira Tanaka.</div><div className="mt-1 text-[8px]">Y8 · “Steel Dawn” beat “Red Orbit” head-to-head 34–31.</div></Spotlight></Frame>;
+  if (kind === "reputation") return <Frame title="HOUSE SPECIALISATION & REPUTATION" icon={<Crown size={10}/>}><Spotlight label="YOU CHOOSE THIS"><div className="text-[7px] text-paper/40">HOUSE SPECIALISATION</div><div className="text-[9px] font-black">MECHA · AUTHORITY</div><div className="text-[7px] text-paper/45">Bonus in signature work. No outside-genre penalty.</div></Spotlight><Spotlight label="YOU EARN THIS" tone="cyan"><div className="text-[7px] text-paper/40">INDUSTRY REPUTATION</div><div className="text-[9px] font-black text-cyanx">FRANCHISE MACHINE</div><div className="text-[7px] text-paper/45">Earned from what your studio actually does.</div></Spotlight></Frame>;
+  return <Frame title="PROJECTS · MAJOR STUDIO ERA" icon={<Crown size={10}/>}><div className="text-[7px] text-cyanx">YEAR 9 · MAJOR STUDIO ERA</div><div className="text-[8px] text-paper/45">Focus: slate planning, delegation and prestige projects</div><Spotlight><MiniButton hot>EXECUTIVE DELEGATION · ON</MiniButton><div className="mt-1 text-[7px] text-paper/45">Routine projects default to Auto Manage after a real team is assigned.</div></Spotlight></Frame>;
 }
 
 export function TutorialHelpButton({ onClick, label = "HOW THIS WORKS" }: { onClick: () => void; label?: string }) {
@@ -109,6 +226,23 @@ export default function FirstSeenTutorial({ id, open, onDismiss, priority = "sta
   const [step, setStep] = useState(0);
   useEffect(() => { if (open) setStep(0); }, [open, id]);
   if (!open) return null;
-  const guide = GUIDES[id]; const item = guide.steps[step]; const last = step === guide.steps.length - 1;
-  return <div className={cn("fixed inset-0 flex items-end justify-center bg-abyss/88 p-2 backdrop-blur-md sm:items-center sm:p-4", priority === "auction" ? "z-[140]" : "z-[90]")} role="dialog" aria-modal="true" aria-label={guide.title}><div className="nice-scroll anim-pop max-h-[96dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-cyanx/35 bg-panel shadow-[0_24px_90px_rgba(0,0,0,.7)]"><div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line bg-panel/95 p-4 backdrop-blur-md"><div className="min-w-0 flex-1"><div className="text-[9px] font-black tracking-[0.3em] text-cyanx">FIRST-TIME GUIDE · {guide.eyebrow}</div><h2 className="mt-1 font-display text-2xl font-extrabold">{guide.title}</h2></div><button type="button" onClick={onDismiss} className="btn-press rounded-lg border border-line p-2 text-paper/45" aria-label="Close tutorial"><X size={16}/></button></div><div className="space-y-4 p-4">{step === 0 && <p className="text-xs leading-relaxed text-paper/65">{guide.intro}</p>}<ScreenPreview kind={item.preview}/><div className="rounded-2xl border border-line bg-panel2/70 p-3"><div className="font-display text-sm font-extrabold">{item.title}</div><p className="mt-1 text-xs leading-relaxed text-paper/65">{item.body}</p><div className="mt-2 rounded-lg border border-gold/30 bg-gold/5 px-2.5 py-2 text-[10px] font-bold text-gold">TIP · {item.callout}</div></div>{guide.steps.length > 1 && <div className="flex items-center justify-center gap-1.5">{guide.steps.map((_,i)=><span key={i} className={cn("h-1.5 rounded-full transition-all",i===step?"w-7 bg-cyanx":"w-2 bg-paper/20")}/>)}</div>}<div className="flex gap-2"><button type="button" disabled={step===0} onClick={()=>setStep(n=>Math.max(0,n-1))} className="btn-press min-h-11 rounded-xl border border-line px-3 text-xs font-bold text-paper/60 disabled:opacity-25"><ChevronLeft size={15}/></button><button type="button" onClick={()=>last?onDismiss():setStep(n=>n+1)} className="btn-press flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyanx/60 bg-cyanx/15 px-3 text-xs font-extrabold text-cyanx">{last?"GOT IT":"NEXT"}{!last&&<ChevronRight size={15}/>}</button></div><p className="text-center text-[9px] text-paper/35">This guide appears automatically once per save. Use HOW THIS WORKS on the relevant page to replay it at any time.</p></div></div></div>;
+  const guide = GUIDES[id];
+  const item = guide.steps[step];
+  const last = step === guide.steps.length - 1;
+  return <div className={cn("fixed inset-0 flex items-end justify-center bg-abyss/88 p-2 backdrop-blur-md sm:items-center sm:p-4", priority === "auction" ? "z-[140]" : "z-[90]")} role="dialog" aria-modal="true" aria-label={guide.title}>
+    <div className="nice-scroll anim-pop max-h-[96dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-cyanx/35 bg-panel shadow-[0_24px_90px_rgba(0,0,0,.7)]">
+      <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line bg-panel/95 p-4 backdrop-blur-md">
+        <div className="min-w-0 flex-1"><div className="text-[9px] font-black tracking-[0.3em] text-cyanx">FIRST-TIME GUIDE · {guide.eyebrow}</div><h2 className="mt-1 font-display text-2xl font-extrabold">{guide.title}</h2></div>
+        <button type="button" onClick={onDismiss} className="btn-press rounded-lg border border-line p-2 text-paper/45" aria-label="Close tutorial"><X size={16}/></button>
+      </div>
+      <div className="space-y-4 p-4">
+        {step === 0 && <p className="text-xs leading-relaxed text-paper/65">{guide.intro}</p>}
+        <ScreenPreview kind={item.preview}/>
+        <div className="rounded-2xl border border-line bg-panel2/70 p-3"><div className="font-display text-sm font-extrabold">{item.title}</div><p className="mt-1 text-xs leading-relaxed text-paper/65">{item.body}</p><div className="mt-2 rounded-lg border border-gold/30 bg-gold/5 px-2.5 py-2 text-[10px] font-bold text-gold">TIP · {item.callout}</div></div>
+        {guide.steps.length > 1 && <div className="flex items-center justify-center gap-1.5">{guide.steps.map((_,i)=><span key={i} className={cn("h-1.5 rounded-full transition-all",i===step?"w-7 bg-cyanx":"w-2 bg-paper/20")}/>)}</div>}
+        <div className="flex gap-2"><button type="button" disabled={step===0} onClick={()=>setStep(n=>Math.max(0,n-1))} className="btn-press min-h-11 rounded-xl border border-line px-3 text-xs font-bold text-paper/60 disabled:opacity-25"><ChevronLeft size={15}/></button><button type="button" onClick={()=>last?onDismiss():setStep(n=>n+1)} className="btn-press flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyanx/60 bg-cyanx/15 px-3 text-xs font-extrabold text-cyanx">{last?"GOT IT":"NEXT"}{!last&&<ChevronRight size={15}/>}</button></div>
+        <p className="text-center text-[9px] text-paper/35">This appears once automatically. Use HOW THIS WORKS on the relevant screen to replay it later.</p>
+      </div>
+    </div>
+  </div>;
 }
