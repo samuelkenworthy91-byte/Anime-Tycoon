@@ -9,7 +9,17 @@ export type TutorialId =
   | "franchise-library"
   | "studio-knowledge"
   | "auto-manage"
-  | "production-capability";
+  | "production-capability"
+  | "slate-planning"
+  | "review-diagnosis"
+  | "research-disciplines"
+  | "publicity-audience"
+  | "merch-bets"
+  | "industry-movements"
+  | "staff-relationships"
+  | "rival-memories"
+  | "studio-reputation"
+  | "career-era-delegation";
 
 declare module "./state" {
   interface RunState {
