@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import type { TutorialId } from "../engine/tutorials";
 import { cn } from "../utils/cn";
 
@@ -84,17 +85,27 @@ const GUIDES: Record<TutorialId, Guide> = {
   "franchise-library": {
     eyebrow: "SERIES MANAGEMENT", title: "FRANCHISE LIBRARY",
     intro: "The Work screen only shows the easiest next sequel. The Library is where you do the complicated franchise stuff.",
-    steps: [{ title: "SEQUELS HERE, REBOOTS THERE", body: "Use Work for the obvious next season. Use the Library for reboots, prequels, spin-offs and older entries.", preview: "franchise", callout: "If a bad sequel blocks the series, try a reboot from the Library." }],
+    steps: [
+      { title: "1 · SEQUELS HERE, REBOOTS THERE", body: "Use Work for the obvious next season. Use the Library for reboots, prequels, spin-offs and older entries.", preview: "franchise", callout: "If a bad sequel blocks the series, try a reboot from the Library." },
+      { title: "2 · MERCH LIVES WITH THE FRANCHISE", body: "When merchandising unlocks, open the franchise to make a product bet based on the fans it actually has.", preview: "merch", callout: "You only run one major merch bet per franchise at a time." },
+    ],
   },
   "studio-knowledge": {
-    eyebrow: "R&D KNOWLEDGE", title: "STUDIO KNOWLEDGE",
-    intro: "The game does not tell you every perfect answer immediately. Your studio learns over time.",
-    steps: [{ title: "RESEARCH REVEALS MORE", body: "Genre Studies and Narrative Analytics slowly uncover which combinations, arcs and approaches work. Staff research reveals Potential as words rather than exact numbers.", preview: "knowledge", callout: "More knowledge means clearer advice next time you create a show." }],
+    eyebrow: "R&D", title: "RESEARCH & STUDIO KNOWLEDGE",
+    intro: "There are two kinds of research: improve the studio itself, and learn more about what works.",
+    steps: [
+      { title: "1 · FIVE BIG RESEARCH AREAS", body: "Writing, Animation, Sound, Production and Business level up separately. Old tiny permanent upgrades now unlock automatically as milestones.", preview: "disciplines", callout: "Look at NEXT MILESTONE to see what you are working towards." },
+      { title: "2 · KNOWLEDGE REVEALS ANSWERS", body: "Genre Studies and Narrative Analytics slowly uncover combinations, arcs and production preferences. Staff research reveals Potential as words rather than exact numbers.", preview: "knowledge", callout: "More knowledge means clearer advice next time you create a show." },
+    ],
   },
   "auto-manage": {
-    eyebrow: "PRODUCTION DELEGATION", title: "AUTO MANAGE & QUICK PICKS",
-    intro: "Bigger studios do not need you to click every small production task yourself.",
-    steps: [{ title: "LET THE TEAM HANDLE ROUTINE WORK", body: "Auto Manage lets your staff run normal production. Quick Pick chooses sensible available workers for contract jobs.", preview: "automation", callout: "You still make the important decisions when something goes wrong." }],
+    eyebrow: "PROJECTS", title: "PLANNING & DELEGATION",
+    intro: "As the studio gets bigger, your job changes from clicking every task to deciding what deserves your attention.",
+    steps: [
+      { title: "1 · THE SLATE IS YOUR FUTURE CALENDAR", body: "Use PLAN to put future Originals, Franchises or Licensed projects on a quarter before you actually start them.", preview: "slate", callout: "Warnings mean the quarter may be too crowded; they do not forbid the plan." },
+      { title: "2 · LATER CAREER ERAS EXPECT MORE DELEGATION", body: "Founding is hands-on. Major Studio and later eras are about managing a portfolio, not babysitting every routine sprint.", preview: "era", callout: "The game is not taking choices away; it is letting you skip routine clicks." },
+      { title: "3 · AUTO MANAGE HANDLES ROUTINE WORK", body: "Auto Manage lets your team run normal production. Quick Pick chooses sensible available workers for contract jobs.", preview: "automation", callout: "You still make the important decisions when something goes wrong." },
+    ],
   },
   "production-capability": {
     eyebrow: "PERMANENT CRAFT", title: "CAPABILITY & SHELVED MASTERS",
@@ -105,8 +116,8 @@ const GUIDES: Record<TutorialId, Guide> = {
     eyebrow: "PLANNING", title: "THE STUDIO SLATE",
     intro: "This is simply your future calendar. It helps you avoid trying to make too much at once.",
     steps: [
-      { title: "1 · PUT FUTURE SHOWS ON THE CALENDAR", body: "Tap PLAN and choose an Original, Franchise or Licensed project. This does not start production yet.", preview: "slate", callout: "Think of it as writing a show on the wall planner." },
-      { title: "2 · WATCH THE WARNINGS", body: "If a quarter is too crowded, the Slate tells you before you commit the money and staff.", preview: "slate", callout: "A warning means 'this could be painful', not 'you are forbidden'." },
+      { title: "PUT FUTURE SHOWS ON THE CALENDAR", body: "Tap PLAN and choose an Original, Franchise or Licensed project. This does not start production yet.", preview: "slate", callout: "Think of it as writing a show on the wall planner." },
+      { title: "WATCH THE WARNINGS", body: "If a quarter is too crowded, the Slate tells you before you commit the money and staff.", preview: "slate", callout: "A warning means 'this could be painful', not 'you are forbidden'." },
     ],
   },
   "review-diagnosis": {
@@ -130,7 +141,7 @@ const GUIDES: Record<TutorialId, Guide> = {
     intro: "Audience types are NOT five new currencies. They simply describe what kind of fans this anime attracts.",
     steps: [
       { title: "1 · CHECK THE FAN MIX", body: "Core Fans, Casual Viewers, Online Fandom, Prestige Audience and Collectors show who is most interested.", preview: "publicity", callout: "You do not spend these numbers." },
-      { title: "2 · MATCH PUBLICITY TO THE FANS", body: "Campaigns now show whether they fit the audience you actually built.", preview: "publicity", callout: "A Character Spotlight is much better when Online Fandom is strong." },
+      { title: "2 · MATCH PUBLICITY TO THE FANS", body: "Campaigns show whether they fit the audience you actually built.", preview: "publicity", callout: "A Character Spotlight is much better when Online Fandom is strong." },
     ],
   },
   "merch-bets": {
@@ -145,13 +156,13 @@ const GUIDES: Record<TutorialId, Guide> = {
     eyebrow: "INDUSTRY", title: "LONG-TERM TRENDS",
     intro: "Sometimes the whole anime market moves in one direction for several seasons.",
     steps: [
-      { title: "WATCH FOR REVIVALS AND FATIGUE", body: "A Mecha Revival can lift mecha sales. Mecha Fatigue can hurt them. Streaming and prestige waves can also appear.", preview: "movement", callout: "These change SALES, not whether critics think the anime is good." },
-      { title: "RIVALS NOTICE TOO", body: "Rival studios may chase a booming genre, so popular trends can also become crowded.", preview: "movement", callout: "Booming does not mean guaranteed success." },
+      { title: "1 · WATCH FOR REVIVALS AND FATIGUE", body: "A Mecha Revival can lift mecha sales. Mecha Fatigue can hurt them. Streaming and prestige waves can also appear.", preview: "movement", callout: "These change SALES, not whether critics think the anime is good." },
+      { title: "2 · RIVALS NOTICE TOO", body: "Rival studios may chase a booming genre, so popular trends can also become crowded.", preview: "movement", callout: "Booming does not mean guaranteed success." },
     ],
   },
   "staff-relationships": {
     eyebrow: "PEOPLE", title: "STAFF RELATIONSHIPS",
-    intro: "Staff now remember who they have worked with instead of relationships being a hidden one-off bonus.",
+    intro: "Staff remember who they have worked with instead of relationships being a hidden one-off bonus.",
     steps: [
       { title: "GOLDEN PAIRS", body: "A strong partnership that keeps making good shows can become a Golden Pair and work especially well together.", preview: "relationships", callout: "Keep successful pairs together when it makes sense." },
       { title: "MENTORSHIP", body: "A senior creator can formally mentor a less experienced creator and speed up their growth.", preview: "relationships", callout: "Mentoring is about developing the junior, not creating another loyalty bar." },
@@ -160,9 +171,7 @@ const GUIDES: Record<TutorialId, Guide> = {
   "rival-memories": {
     eyebrow: "RIVALS", title: "RIVALS REMEMBER YOU",
     intro: "Rivalry is no longer only a number. Studios remember specific things you did to them.",
-    steps: [
-      { title: "LOOK AT 'WHAT THEY REMEMBER'", body: "Poaching their talent or releasing directly against them creates a history entry on their studio card.", preview: "rival-memory", callout: "This explains why a rival relationship becomes hotter over time." },
-    ],
+    steps: [{ title: "LOOK AT 'WHAT THEY REMEMBER'", body: "Poaching their talent or releasing directly against them creates a history entry on their studio card.", preview: "rival-memory", callout: "This explains why a rival relationship becomes hotter over time." }],
   },
   "studio-reputation": {
     eyebrow: "IDENTITY", title: "SPECIALISATION VS REPUTATION",
@@ -206,9 +215,9 @@ function ScreenPreview({ kind }: { kind: PreviewId }) {
   if (kind === "knowledge") return <Frame title="STUDIO KNOWLEDGE" icon={<BookOpen size={10}/>}><Spotlight tone="cyan"><div className="text-[8px]">GENRE STUDIES · 214 / 630<br/>NARRATIVE ANALYTICS · 18 / 42<br/>STAFF APPRAISAL · POTENTIAL BANDS</div></Spotlight></Frame>;
   if (kind === "automation") return <Frame title="PROJECTS & JOBS" icon={<Zap size={10}/>}><Spotlight><MiniButton hot>AUTO MANAGE PROJECT</MiniButton><div className="mt-1"><MiniButton hot>JOB · QUICK PICK</MiniButton></div></Spotlight></Frame>;
   if (kind === "capability") return <Frame title="CAPABILITY & SHELVED MASTERS" icon={<Hammer size={10}/>}><Spotlight tone="cyan"><div className="text-[8px]">FINAL POLISH · LV2<br/>SHELVED MASTER · HYPE 0<br/>QUALITY PRESERVED · CAPACITY FREE</div></Spotlight></Frame>;
-  if (kind === "slate") return <Frame title="STUDIO SLATE · YEAR 6 Q2" icon={<CalendarRange size={10}/>}><div className="grid grid-cols-3 gap-1 text-[7px] text-paper/35"><div>APR</div><div>MAY</div><div>JUN</div></div><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>Moon Witch S3</b><span className="text-gold">TENTPOLE</span></div><div className="mt-1 text-[7px] text-paper/45">Target · May</div></Spotlight><Spotlight label="WARNING" tone="gold"><div className="text-[8px]">⚠ Planned slate pressure 7 exceeds safe load 5</div></Spotlight><MiniButton hot>+ PLAN PROJECT</MiniButton></Frame>;
+  if (kind === "slate") return <Frame title="STUDIO SLATE · YEAR 6 Q2" icon={<CalendarRange size={10}/>}><div className="grid grid-cols-3 gap-1 text-[7px] text-paper/35"><div>APR</div><div>MAY</div><div>JUN</div></div><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>Moon Witch S3</b><span className="text-gold">TENTPOLE</span></div><div className="mt-1 text-[7px] text-paper/45">Target · May</div></Spotlight><Spotlight label="WARNING"><div className="text-[8px]">⚠ Planned slate pressure 7 exceeds safe load 5</div></Spotlight><MiniButton hot>+ PLAN PROJECT</MiniButton></Frame>;
   if (kind === "review") return <Frame title="PREMIERE REVIEWS" icon={<Sparkles size={10}/>}><div className="rounded-lg border border-line bg-panel2/50 p-2 text-[8px] text-paper/40">CRITIC · 7/10<br/>“Strong ideas, uneven finish.”</div><Spotlight label="THIS IS WHY"><b className="text-[8px] text-neon2">! Editing notes materially hurt the finish</b><div className="mt-1 text-[7px] text-paper/45">7 unresolved notes reached release.</div></Spotlight><Spotlight label="USE NEXT TIME" tone="cyan"><b className="text-[8px] text-cyanx">WHAT WE LEARNED</b><div className="mt-1 text-[7px]">✓ Animation emphasis was well judged<br/>→ Story could use more support</div></Spotlight></Frame>;
-  if (kind === "disciplines") return <Frame title="R&D · STUDIO DISCIPLINES" icon={<BookOpen size={10}/>}><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>PRODUCTION & QA</b><b className="text-cyanx">LV 3/8</b></div><div className="mt-1 h-1.5 rounded bg-abyss"><div className="h-full w-3/8 rounded bg-viol" /></div><div className="mt-2 text-[7px] text-paper/45">NEXT MILESTONE · LV4</div><div className="text-[8px] font-bold">Auto-Cleanup</div></Spotlight><div className="grid grid-cols-2 gap-1 text-[7px] text-paper/35"><div>Writing & Development</div><div>Animation & Art</div><div>Sound & Performance</div><div>Business & Audience</div></div></Frame>;
+  if (kind === "disciplines") return <Frame title="R&D · STUDIO DISCIPLINES" icon={<BookOpen size={10}/>}><Spotlight tone="cyan"><div className="flex items-center justify-between text-[8px]"><b>PRODUCTION & QA</b><b className="text-cyanx">LV 3/8</b></div><div className="mt-2 text-[7px] text-paper/45">NEXT MILESTONE · LV4</div><div className="text-[8px] font-bold">Auto-Cleanup</div></Spotlight><div className="grid grid-cols-2 gap-1 text-[7px] text-paper/35"><div>Writing & Development</div><div>Animation & Art</div><div>Sound & Performance</div><div>Business & Audience</div></div></Frame>;
   if (kind === "publicity") return <Frame title="PUBLICITY · LAUNCH" icon={<Megaphone size={10}/>}><Spotlight tone="cyan"><div className="grid grid-cols-5 gap-1 text-center text-[7px]"><div>Core<br/><b>18%</b></div><div>Casual<br/><b>16%</b></div><div className="text-cyanx">Online<br/><b>34%</b></div><div>Prestige<br/><b>12%</b></div><div>Collectors<br/><b>20%</b></div></div><div className="mt-1 text-[7px] text-paper/40">These are fan types, not currencies.</div></Spotlight><Spotlight label="GOOD MATCH"><div className="flex items-center justify-between text-[8px]"><b>Character Spotlight</b><span className="text-mint">AUDIENCE EXCELLENT ×1.20</span></div></Spotlight></Frame>;
   if (kind === "merch") return <Frame title="FRANCHISE MERCH" icon={<Package size={10}/>}><Spotlight><div className="flex justify-between text-[8px]"><b>SCALE FIGURES</b><span className="text-mint">≈£1.4m</span></div><div className="mt-1 text-[7px] text-paper/45">Cost £380k · 18 weeks · audience ×1.24</div><MiniButton hot>START MERCH BET</MiniButton></Spotlight><div className="rounded-lg border border-line p-2 text-[7px] text-paper/35">One active bet per franchise at a time.</div></Frame>;
   if (kind === "movement") return <Frame title="INDUSTRY" icon={<Sparkles size={10}/>}><Spotlight tone="cyan"><div className="text-[7px] font-black text-cyanx">CULTURAL MOVEMENT · BOOM</div><div className="mt-1 text-[11px] font-black">THE MECHA REVIVAL</div><div className="mt-1 text-[7px] text-paper/45">68 weeks remain · affects commercial demand, not critic quality</div></Spotlight><div className="text-[7px] text-paper/35">Rivals may chase the same trend.</div></Frame>;
@@ -229,7 +238,7 @@ export default function FirstSeenTutorial({ id, open, onDismiss, priority = "sta
   const guide = GUIDES[id];
   const item = guide.steps[step];
   const last = step === guide.steps.length - 1;
-  return <div className={cn("fixed inset-0 flex items-end justify-center bg-abyss/88 p-2 backdrop-blur-md sm:items-center sm:p-4", priority === "auction" ? "z-[140]" : "z-[90]")} role="dialog" aria-modal="true" aria-label={guide.title}>
+  return <div data-first-seen-tutorial="true" className={cn("fixed inset-0 flex items-end justify-center bg-abyss/88 p-2 backdrop-blur-md sm:items-center sm:p-4", priority === "auction" ? "z-[140]" : "z-[90]")} role="dialog" aria-modal="true" aria-label={guide.title}>
     <div className="nice-scroll anim-pop max-h-[96dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-cyanx/35 bg-panel shadow-[0_24px_90px_rgba(0,0,0,.7)]">
       <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line bg-panel/95 p-4 backdrop-blur-md">
         <div className="min-w-0 flex-1"><div className="text-[9px] font-black tracking-[0.3em] text-cyanx">FIRST-TIME GUIDE · {guide.eyebrow}</div><h2 className="mt-1 font-display text-2xl font-extrabold">{guide.title}</h2></div>
@@ -246,3 +255,80 @@ export default function FirstSeenTutorial({ id, open, onDismiss, priority = "sta
     </div>
   </div>;
 }
+
+/*
+ * New Depth & Clarity systems appear on several screens that pre-date the
+ * tutorial host. Rather than coupling every screen to tutorial state, this
+ * tiny observer waits for the real player-facing heading to enter the DOM and
+ * then opens the matching screenshot-style guide once. Existing contextual
+ * tutorials still use RunState; this ledger is reset when a new career wipes
+ * save slots (see storage.ts).
+ */
+const CONTEXT_TUTORIAL_KEY = "kirameki.context-tutorials.v1";
+const AUTO_CONTEXTS: readonly { id: TutorialId; marker: string }[] = [
+  { id: "review-diagnosis", marker: "WHAT WE LEARNED" },
+  { id: "publicity-audience", marker: "PUBLICITY · LAUNCH" },
+  { id: "merch-bets", marker: "MERCHANDISING · TIER" },
+  { id: "industry-movements", marker: "CULTURAL MOVEMENT ·" },
+  { id: "rival-memories", marker: "WHAT THEY REMEMBER" },
+  { id: "studio-reputation", marker: "INDUSTRY REPUTATION · EARNED, NOT CHOSEN" },
+  { id: "staff-relationships", marker: "GOLDEN PAIR" },
+  { id: "staff-relationships", marker: "FORMAL MENTORSHIP" },
+] as const;
+
+function contextSeen(): Set<TutorialId> {
+  try {
+    const raw = localStorage.getItem(CONTEXT_TUTORIAL_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markContextSeen(id: TutorialId) {
+  try {
+    const seen = contextSeen();
+    seen.add(id);
+    localStorage.setItem(CONTEXT_TUTORIAL_KEY, JSON.stringify([...seen]));
+  } catch {
+    /* private mode / quota: tutorial still closes for this render */
+  }
+}
+
+function ContextTutorialHost() {
+  const [tutorial, setTutorial] = useState<TutorialId | null>(null);
+  const [revision, setRevision] = useState(0);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => setRevision((n) => n + 1));
+    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+    const timer = window.setInterval(() => setRevision((n) => n + 1), 900);
+    return () => { observer.disconnect(); window.clearInterval(timer); };
+  }, []);
+
+  useEffect(() => {
+    if (tutorial) return;
+    if (document.querySelector('[data-first-seen-tutorial="true"]')) return;
+    const text = document.body.innerText || "";
+    const seen = contextSeen();
+    const hit = AUTO_CONTEXTS.find((entry) => !seen.has(entry.id) && text.includes(entry.marker));
+    if (hit) setTutorial(hit.id);
+  }, [revision, tutorial]);
+
+  if (!tutorial) return null;
+  return <FirstSeenTutorial id={tutorial} open onDismiss={() => { markContextSeen(tutorial); setTutorial(null); setRevision((n) => n + 1); }} />;
+}
+
+let contextHostMounted = false;
+function mountContextTutorialHost() {
+  if (contextHostMounted || typeof document === "undefined") return;
+  if (!document.body) { window.setTimeout(mountContextTutorialHost, 20); return; }
+  contextHostMounted = true;
+  const node = document.createElement("div");
+  node.id = "anime-runner-context-tutorial-host";
+  document.body.appendChild(node);
+  createRoot(node).render(<ContextTutorialHost />);
+}
+
+if (typeof window !== "undefined") window.setTimeout(mountContextTutorialHost, 0);
