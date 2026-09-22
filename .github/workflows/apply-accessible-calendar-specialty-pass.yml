@@ -29,7 +29,11 @@ jobs:
           cache-dependency-path: game_source/package-lock.json
 
       - name: Apply exact source changes
-        run: node game_source/scripts/apply-accessible-calendar-specialty-pass.mjs
+        run: |
+          # The compressed one-shot patch executes from /tmp and expects /src to
+          # be the game's source root. Point that temporary path at this checkout.
+          sudo ln -s "$GITHUB_WORKSPACE/game_source/src" /src
+          node game_source/scripts/apply-accessible-calendar-specialty-pass.mjs
 
       - name: Install dependencies
         working-directory: game_source
