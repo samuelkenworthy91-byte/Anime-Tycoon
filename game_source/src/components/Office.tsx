@@ -1014,7 +1014,7 @@ export default function Office({
 
       {/* --------------------------------------------------------- DYNASTY */}
       {modal === "dynasty" && (
-        <Modal title="STUDIO DYNASTY" onClose={() => setModal(null)}>
+        <Modal title="POST-CAREER SANDBOX" onClose={() => setModal(null)}>
           <div className="mb-2 flex justify-end"><TutorialHelpButton onClick={() => setTutorial("dynasty-mode")} /></div>
           <DynastyPanel
             run={run}
