@@ -29,20 +29,13 @@ import {
   type Showrunner,
 } from "../engine/data";
 import { showrunnerStats } from "../engine/studioOps";
+import { randomQuickShowrunnerId, randomQuickStudioName } from "../engine/quickStart";
 import { cn } from "../utils/cn";
 
 type ShowrunnerId = Showrunner["id"];
 type TitleView = "menu" | "setup" | "load" | "settings" | "credits" | "scores" | "quit";
 
 const TITLE_ART = "img/title-london.webp";
-
-const QUICK_STUDIO_PREFIX = ["Neon", "Moonrise", "Copper", "Blue Hour", "Paper", "Northstar", "Velvet", "Electric", "Lantern", "Silver"] as const;
-const QUICK_STUDIO_SUFFIX = ["Works", "Pictures", "House", "Animation", "Studio", "Frame", "Films", "Collective", "Motion", "Works"] as const;
-export const randomQuickStudioName = (rng: () => number = Math.random) =>
-  `${QUICK_STUDIO_PREFIX[Math.floor(rng() * QUICK_STUDIO_PREFIX.length)]} ${QUICK_STUDIO_SUFFIX[Math.floor(rng() * QUICK_STUDIO_SUFFIX.length)]}`;
-
-export const randomQuickShowrunnerId = (rng: () => number = Math.random): ShowrunnerId =>
-  (SHOWRUNNERS[Math.floor(rng() * SHOWRUNNERS.length)] ?? SHOWRUNNERS[0]).id;
 
 export function HighScoreTable({ highlight }: { highlight?: number }) {
   const [scores] = useState<ScoreEntry[]>(() => getScores());
