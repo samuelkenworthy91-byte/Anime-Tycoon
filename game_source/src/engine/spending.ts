@@ -197,7 +197,7 @@ export interface InterventionQuote {
   boosts: string[];
 }
 
-export function interventionQuote(run: RunState, d0: InterventionDef, tierId: InvestmentTierId = "standard", draft?: Project["draft"]): InterventionQuote | null {
+export function interventionQuote(run: RunState, d0: InterventionDef, tierId: InvestmentTierId = "standard", draft?: Project["draft"], project?: Pick<Project, "interventions">): InterventionQuote | null {
   const d = baseIntervention(d0);
   const useTier = resolvedTier(d0, tierId);
   const tier = tierById(useTier);
@@ -216,7 +216,9 @@ export function interventionQuote(run: RunState, d0: InterventionDef, tierId: In
     tier,
     cost: (() => {
       const baseCost = useTier === "standard" ? d.cost : round5k(d.cost * tier.costMult);
-      const mult = signature?.interventionCostMult ?? 1;
+      const rushUses = d.id === "crunch" ? (project?.interventions ?? []).filter((id) => id === "crunch").length : 0;
+      const repeatMult = d.id === "crunch" ? Math.pow(2, rushUses) : 1;
+      const mult = (signature?.interventionCostMult ?? 1) * repeatMult;
       return Math.abs(mult - 1) < .001 ? baseCost : round5k(baseCost * mult);
     })(),
     points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult * signatureEffectMult)),
@@ -233,13 +235,13 @@ export function interventionBlock(run: RunState, p: Project, d0: InterventionDef
   const d = baseIntervention(d0);
   const useTier = resolvedTier(d0, tierId);
   const tier = tierById(useTier);
-  const quote = interventionQuote(run, d, useTier, p.draft);
+  const quote = interventionQuote(run, d, useTier, p.draft, p);
   if (!quote) return d.scalable ? "Unavailable investment tier" : "This is a single-scale emergency action";
   if (p.stage === "airing" || p.stage === "done") return "Already released";
   if (!d.stages.includes(p.stage)) return `Only during ${d.stages.join("/")}`;
   if (run.officeLevel < tier.minOffice) return `${tier.name} investment requires studio level ${tier.minOffice + 1}`;
   if (run.cash < quote.cost) return "Not enough cash";
-  if ((p.interventions ?? []).includes(d.id)) return "Already used on this production";
+  if (d.id !== "crunch" && (p.interventions ?? []).includes(d.id)) return "Already used on this production";
   return null;
 }
 
@@ -248,7 +250,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
   const d = BASE_INTERVENTIONS.find((x) => x.id === parsed.id);
   const p = run.projects.find((x) => x.id === projectId);
   if (!d || !p || interventionBlock(run, p, d, parsed.tier)) return null;
-  const quote = interventionQuote(run, d, parsed.tier, p.draft)!;
+  const quote = interventionQuote(run, d, parsed.tier, p.draft, p)!;
   const success = rng() >= quote.risk;
   const point = d.point ?? (["story", "art", "sound"] as PointType[])[Math.floor(rng() * 3)];
   const gain = success ? quote.points : Math.round(quote.points * .25);
@@ -263,7 +265,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
     deadlineWeek: p.deadlineWeek + Math.ceil(quote.days / 7),
     spent: p.spent + quote.cost,
     interventions: [...(p.interventions ?? []), d.id],
-    ...(d.id === "crunch" ? { executiveRushUntilDay: nowDay + 14 } : {}),
+    ...(d.id === "crunch" ? { executiveRushUntilDay: Math.max(nowDay, p.executiveRushUntilDay ?? nowDay) + 14 } : {}),
     ...(d.id === "consultant" ? { consultantUntilDay: nowDay + 14, consultantConverted: 0 } : {}),
   };
   const label = d.scalable ? `${d.name} · ${quote.tier.name}` : d.name;
@@ -277,7 +279,7 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
     quote.issueDelta < 0 ? `${Math.abs(quote.issueDelta)} note${Math.abs(quote.issueDelta) === 1 ? "" : "s"} repaired` : quote.issueDelta > 0 ? `+${quote.issueDelta} rework note${quote.issueDelta === 1 ? "" : "s"}` : null,
     quote.hype !== 0 ? `${quote.hype > 0 ? "+" : ""}${quote.hype} hype` : null,
     quote.days > 0 ? `+${quote.days} schedule days` : null,
-    d.id === "crunch" ? "14 days ×2 production bubbles · ×2 note risk" : null,
+    d.id === "crunch" ? `14 more days ×2 production bubbles · ×2 note risk · next Rush doubles in price` : null,
     d.id === "consultant" ? "14 days: every new error has a 50/50 chance to become R&D" : null,
   ].filter(Boolean).join(" · ");
   return {
