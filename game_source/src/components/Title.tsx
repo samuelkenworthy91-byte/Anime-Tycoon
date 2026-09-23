@@ -36,6 +36,11 @@ type TitleView = "menu" | "setup" | "load" | "settings" | "credits" | "scores" |
 
 const TITLE_ART = "img/title-london.webp";
 
+const QUICK_STUDIO_PREFIX = ["Neon", "Moonrise", "Copper", "Blue Hour", "Paper", "Northstar", "Velvet", "Electric", "Lantern", "Silver"] as const;
+const QUICK_STUDIO_SUFFIX = ["Works", "Pictures", "House", "Animation", "Studio", "Frame", "Films", "Collective", "Motion", "Works"] as const;
+const randomQuickStudioName = () =>
+  `${QUICK_STUDIO_PREFIX[Math.floor(Math.random() * QUICK_STUDIO_PREFIX.length)]} ${QUICK_STUDIO_SUFFIX[Math.floor(Math.random() * QUICK_STUDIO_SUFFIX.length)]}`;
+
 export function HighScoreTable({ highlight }: { highlight?: number }) {
   const [scores] = useState<ScoreEntry[]>(() => getScores());
   if (!scores.length) {
@@ -147,7 +152,7 @@ export default function Title({
   };
 
   const quickStart = () => {
-    const generatedStudio = `Studio ${randomTitle().split(" ")[0]}`;
+    const generatedStudio = randomQuickStudioName();
     const selected = SHOWRUNNERS[Math.floor(Math.random() * SHOWRUNNERS.length)] ?? SHOWRUNNERS[0];
     primeAudio();
     sfx.select();
