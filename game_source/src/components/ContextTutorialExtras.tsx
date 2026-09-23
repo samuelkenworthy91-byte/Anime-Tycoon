@@ -10,6 +10,7 @@ const FIRST_SIGHT: readonly { id: TutorialId; marker: string }[] = [
   { id: "slate-planning", marker: "STUDIO SLATE" },
   { id: "staff-relationships", marker: "RELATIONSHIPS" },
   { id: "career-era-delegation", marker: "EXECUTIVE DELEGATION" },
+  { id: "full-delegation", marker: "Live desk contributions run at 80%" },
 ] as const;
 
 const REPLAY_CONTEXTS: readonly { id: TutorialId; marker: string; label: string }[] = [
@@ -23,6 +24,7 @@ const REPLAY_CONTEXTS: readonly { id: TutorialId; marker: string; label: string 
   { id: "rival-memories", marker: "WHAT THEY REMEMBER", label: "RIVALS" },
   { id: "studio-reputation", marker: "INDUSTRY REPUTATION · EARNED, NOT CHOSEN", label: "REPUTATION" },
   { id: "career-era-delegation", marker: "EXECUTIVE DELEGATION", label: "DELEGATION" },
+  { id: "full-delegation", marker: "FULL DELEGATION · CREATOR-LED ORIGINAL", label: "FULL DELEGATION" },
 ] as const;
 
 function readSeen(): Set<TutorialId> {
