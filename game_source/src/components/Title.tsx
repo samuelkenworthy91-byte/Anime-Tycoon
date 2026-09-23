@@ -38,8 +38,11 @@ const TITLE_ART = "img/title-london.webp";
 
 const QUICK_STUDIO_PREFIX = ["Neon", "Moonrise", "Copper", "Blue Hour", "Paper", "Northstar", "Velvet", "Electric", "Lantern", "Silver"] as const;
 const QUICK_STUDIO_SUFFIX = ["Works", "Pictures", "House", "Animation", "Studio", "Frame", "Films", "Collective", "Motion", "Works"] as const;
-const randomQuickStudioName = () =>
-  `${QUICK_STUDIO_PREFIX[Math.floor(Math.random() * QUICK_STUDIO_PREFIX.length)]} ${QUICK_STUDIO_SUFFIX[Math.floor(Math.random() * QUICK_STUDIO_SUFFIX.length)]}`;
+export const randomQuickStudioName = (rng: () => number = Math.random) =>
+  `${QUICK_STUDIO_PREFIX[Math.floor(rng() * QUICK_STUDIO_PREFIX.length)]} ${QUICK_STUDIO_SUFFIX[Math.floor(rng() * QUICK_STUDIO_SUFFIX.length)]}`;
+
+export const randomQuickShowrunnerId = (rng: () => number = Math.random): ShowrunnerId =>
+  (SHOWRUNNERS[Math.floor(rng() * SHOWRUNNERS.length)] ?? SHOWRUNNERS[0]).id;
 
 export function HighScoreTable({ highlight }: { highlight?: number }) {
   const [scores] = useState<ScoreEntry[]>(() => getScores());
@@ -153,10 +156,10 @@ export default function Title({
 
   const quickStart = () => {
     const generatedStudio = randomQuickStudioName();
-    const selected = SHOWRUNNERS[Math.floor(Math.random() * SHOWRUNNERS.length)] ?? SHOWRUNNERS[0];
+    const selectedId = randomQuickShowrunnerId();
     primeAudio();
     sfx.select();
-    onStart(generatedStudio, selected.id);
+    onStart(generatedStudio, selectedId);
   };
 
   useEffect(() => {
