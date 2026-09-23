@@ -187,6 +187,7 @@ import {
   activeProjects,
   applyMilestoneOutcome,
   projectOfStaff,
+  TEAM_MAX,
   type StaffModFn,
   assignedStaffIds,
   computeProjectResult,
