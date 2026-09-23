@@ -308,7 +308,7 @@ export default function StudioSlateV3({
                     <button
                       key={index}
                       onClick={() => setQuarter(index)}
-                      className={cn("btn-press min-h-10 rounded-lg border text-[10px] font-black", quarter === index ? "border-cyanx bg-cyanx/15 text-cyanx" : "border-line/70 text-paper/45")}
+                      className={cn("btn-press min-h-11 rounded-lg border text-[10px] font-black", quarter === index ? "border-cyanx bg-cyanx/15 text-cyanx" : "border-line/70 text-paper/45")}
                     >
                       Q{index + 1}
                     </button>
