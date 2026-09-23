@@ -1955,7 +1955,9 @@ export function startFullyDelegatedProject(
     unlocked,
     director,
   );
-  const genres = [vision.primaryGenre, ...(vision.secondaryGenre ? [vision.secondaryGenre] : [])].slice(0, 2);
+  const candidatePair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
+  const learnedPair = candidatePair.length === 2 && (r.comboLevels[comboKey(candidatePair)] ?? 0) > 0;
+  const genres = learnedPair ? candidatePair : [vision.primaryGenre];
 
   const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
   const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
