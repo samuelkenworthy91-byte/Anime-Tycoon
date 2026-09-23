@@ -159,8 +159,9 @@ def main():
         report["checks"].append({"projects": assert_no_horizontal_overflow(driver, "projects")})
         report["screenshots"].append(save_shot(driver, "02-projects-slate-card"))
 
-        open_button = click_text(driver, wait, "OPEN PRODUCTION CALENDAR")
+        open_button = wait.until(lambda d: visible_buttons(d, "OPEN PRODUCTION CALENDAR")[0] if visible_buttons(d, "OPEN PRODUCTION CALENDAR") else False)
         assert_touch_target(driver, open_button, "Open Production Calendar", 40)
+        click_text(driver, wait, "OPEN PRODUCTION CALENDAR")
         wait.until(lambda d: "PRODUCTION CALENDAR" in (d.find_element(By.TAG_NAME, "body").text or ""))
         report["checks"].append({"calendar": assert_no_horizontal_overflow(driver, "calendar")})
         report["screenshots"].append(save_shot(driver, "03-calendar"))
@@ -181,8 +182,9 @@ def main():
         q1.click()
         wait.until(lambda d: "Q1 ·" in (d.find_element(By.TAG_NAME, "body").text or ""))
 
-        plan_button = click_text(driver, wait, "PLAN A SHOW")
+        plan_button = wait.until(lambda d: visible_buttons(d, "PLAN A SHOW")[0] if visible_buttons(d, "PLAN A SHOW") else False)
         assert_touch_target(driver, plan_button, "Plan A Show", 44)
+        click_text(driver, wait, "PLAN A SHOW")
         wait.until(lambda d: visible_buttons(d, "ADD TO CALENDAR"))
         report["checks"].append({"planner": assert_no_horizontal_overflow(driver, "planner")})
         report["screenshots"].append(save_shot(driver, "04-plan-a-show"))
@@ -193,8 +195,9 @@ def main():
                 raise AssertionError(f"Planner missing {label} choice")
             assert_touch_target(driver, matches[0], f"Planner {label}", 40)
 
-        add_button = click_text(driver, wait, "ADD TO CALENDAR")
+        add_button = wait.until(lambda d: visible_buttons(d, "ADD TO CALENDAR")[0] if visible_buttons(d, "ADD TO CALENDAR") else False)
         assert_touch_target(driver, add_button, "Add to Calendar", 44)
+        click_text(driver, wait, "ADD TO CALENDAR")
         wait.until(lambda d: visible_buttons(d, "EDIT PLAN") and visible_buttons(d, "GREENLIGHT / SET UP"))
         report["checks"].append({"plannedCard": assert_no_horizontal_overflow(driver, "planned card")})
 
