@@ -30,7 +30,7 @@ import {
   type PointType,
   type Staff,
 } from "../engine/data";
-import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, type RunState } from "../engine/state";
+import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, startFullyDelegatedProject, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
 import { HEAD_TITLES, levelTitle, type HeadSlot } from "../engine/careers";
 import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
@@ -460,11 +460,13 @@ function ProjectCard({
               <div className="flex items-center gap-2">
                 <Zap size={13} className={auto.intervention ? "text-neon" : "text-viol"} />
                 <span className={cn("text-[10px] font-extrabold tracking-wider", auto.intervention ? "text-neon" : "text-viol")}>
-                  {auto.intervention ? "⚠ PRODUCTION CRISIS" : "AUTO MANAGE"}
+                  {auto.intervention ? "⚠ PRODUCTION CRISIS" : auto.mode === "full" ? "FULL DELEGATION" : "AUTO MANAGE"}
                 </span>
                 {!auto.intervention && (
                   <span className="truncate text-[10px] text-paper/60">
-                    {auto.headSlot ? `${HEAD_TITLES[auto.headSlot]}` : "crew-led"}
+                    {auto.mode === "full" && auto.directorStaffId
+                      ? run.staff.find((staff) => staff.id === auto.directorStaffId)?.name ?? "creator-led"
+                      : auto.headSlot ? `${HEAD_TITLES[auto.headSlot]}` : "crew-led"}
                   </span>
                 )}
               </div>
@@ -541,7 +543,7 @@ function ProjectCard({
                   {autoBlock && <div className="text-[9px] italic text-paper/40">{autoBlock}</div>}
                   {!autoBlock && (
                     <div className="text-[9px] text-paper/45">
-                      Delegated sprints run ~70% as well as a hands-on one. You can always TAKE OVER later.
+                      Auto Manage handles milestone sprints competently but below a strong hands-on run. You can always TAKE OVER later.
                     </div>
                   )}
                 </div>
@@ -627,6 +629,7 @@ export default function ProjectsPanel({
   onAppointPromise: (projectId: string, promiseId: string) => void;
   onAppointLead: (projectId: string, staffId: string | null) => void;
 }) {
+  const [fullDelegateOpen, setFullDelegateOpen] = useState(false);
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
   const airing = run.projects.filter((p) => p.stage === "airing");
@@ -671,6 +674,52 @@ export default function ProjectsPanel({
           )}
         </div>
         {executiveReady && <div className="mt-1 text-[8px] text-paper/40">This changes attention, not strategy: you still choose the show, team, interventions and release. Routine milestone sprints can run under the Production Head/team until a crisis needs you.</div>}
+      </section>
+      <section className="rounded-xl border border-viol/30 bg-viol/[0.05] p-2.5">
+        <button
+          type="button"
+          onClick={() => setFullDelegateOpen((value) => !value)}
+          className="btn-press flex min-h-11 w-full items-center gap-2 text-left"
+        >
+          <UserRound size={14} className="text-viol" />
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-[11px] font-extrabold text-viol">FULL DELEGATION · CREATOR-LED ORIGINAL</div>
+            <div className="text-[8px] text-paper/45">Pick one employee. They name the show, choose genre/cast/arcs/direction, assemble a crew and run the production.</div>
+          </div>
+          <span className="text-paper/40">{fullDelegateOpen ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}</span>
+        </button>
+        {fullDelegateOpen && (
+          <div className="mt-2 space-y-1.5">
+            <div className="rounded-lg border border-viol/25 bg-ink/35 px-2 py-1.5 text-[9px] text-paper/55">
+              Their choices aim for a solid show, not the mathematical optimum. Live desk contributions run at <b className="text-viol">80%</b> strength while delegated. You can TAKE OVER from the project card at any time.
+            </div>
+            {run.staff.map((staff) => {
+              const busy = staffOperationReason(run, staff.id) || projectOfStaff(run.projects, staff.id)?.draft.title;
+              const noSlot = active.length >= cap;
+              return (
+                <button
+                  key={staff.id}
+                  type="button"
+                  disabled={!!busy || noSlot}
+                  onClick={() => {
+                    sfx.select();
+                    setRun((current) => startFullyDelegatedProject(current, staff.id) ?? current);
+                    setFullDelegateOpen(false);
+                  }}
+                  className={cn("btn-press flex min-h-11 w-full items-center gap-2 rounded-lg border px-2 text-left", busy || noSlot ? "border-line/40 opacity-40" : "border-viol/35 bg-panel2/60 hover:border-viol")}
+                >
+                  <Portrait img={workerLook(staff).portrait} name={staff.name} alt={staff.name} className="h-8 w-8 rounded-lg border border-line bg-panel3" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[10px] font-bold">{staff.name}</div>
+                    <div className="text-[8px] text-paper/45">{ROLE_LABEL[staff.role]} · Lv {staff.level}{staff.favGenre ? ` · prefers ${staff.favGenre}` : ""}</div>
+                  </div>
+                  <span className="text-[8px] font-black text-viol">{noSlot ? "NO SLOT" : busy ? "BUSY" : "DELEGATE"}</span>
+                </button>
+              );
+            })}
+            {run.staff.length === 0 && <div className="text-[9px] text-paper/40">Hire at least one employee before delegating a whole production.</div>}
+          </div>
+        )}
       </section>
       {quickSequels.length > 0 && onContinueSeason && <section className="rounded-xl border border-gold/30 bg-gold/5 p-2.5"><div className="text-[9px] font-black tracking-[0.22em] text-gold">TRUE SEQUELS READY</div><div className="mt-1 text-[9px] text-paper/45">Only the latest eligible state of each series appears here. Reboots, spin-offs and sold properties stay in the Library.</div><div className="mt-2 space-y-1.5">{quickSequels.map((fr)=>{const latest=fr.entries[fr.entries.length-1];const ago=Math.max(0,run.week-fr.lastEntryWeek);return <div key={fr.key} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/60 p-2"><div className="min-w-0 flex-1"><b className="block truncate text-xs">{fr.baseTitle}</b><div className="text-[9px] text-paper/45">Latest: {latest?.title??fr.baseTitle} · {ago} week{ago===1?"":"s"} ago · {fr.lastScore}/40</div></div><Btn variant="gold" className="!px-2 !py-1 text-[9px]" onClick={()=>onContinueSeason(fr.key)}>SEASON {fr.season+1}</Btn></div>})}</div></section>}
       <div className="flex items-center gap-2">
