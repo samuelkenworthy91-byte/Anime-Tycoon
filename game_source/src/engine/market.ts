@@ -519,7 +519,7 @@ export const REP_START = 45;
 export const REP_DELIVERED = 8; // met the quality bar
 export const REP_EXCELLENT = 4; // extra, beat it by 6+
 export const REP_MISSED_QUALITY = -10;
-export const REP_LATE = -8;
+export const REP_LATE = -15;
 
 export function repLabel(rep: number): string {
   if (rep >= 80) return "beloved";
