@@ -68,7 +68,7 @@ import {
   type SlotId,
 } from "../engine/data";
 import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
-import { arcLockReason, formatLockReason, latestFranchisePosterId, selfFundedGreenlightCost, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
+import { arcLockReason, formatLockReason, latestFranchisePosterId, selfFundedGreenlightCost, selfFundedQualityMult, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -317,6 +317,7 @@ export default function Create({
   const cost = draftCost(d);
   const weeks = draftWeeks(d);
   const startupMult = commission ? 1 : selfFundedStartupMult(run, d);
+  const rookieQualityMult = commission ? 1 : selfFundedQualityMult(run, d);
   const dueAtGreenlight = commission ? projectUpfront(d) : selfFundedGreenlightCost(run, d);
   /** Commission advances count when deciding affordability; self-funded starts carry the early-studio premium. */
   const greenlightBlock = startBlockReason(run, d, commission);
@@ -1565,6 +1566,12 @@ export default function Create({
                   <Row k="TOTAL BUDGET" v={formatGBP(cost)} money />
                   <Row k={startupMult > 1 ? `DUE AT GREENLIGHT · STARTUP ×${startupMult.toFixed(2)}` : "DUE AT GREENLIGHT (40%)"} v={formatGBP(dueAtGreenlight)} money big />
                   <div className="text-[10px] text-paper/40">The rest burns weekly while the show is in production.</div>
+                  {rookieQualityMult < 1 && (
+                    <div className="mt-2 rounded-xl border border-neon/40 bg-neon/[0.06] px-2.5 py-2 text-[10px] leading-relaxed text-paper/60">
+                      <b className="text-neon">ROOKIE STUDIO · ×{rookieQualityMult.toFixed(2)} QUALITY EFFICIENCY</b><br/>
+                      Your first self-funded originals are harder. This affects Story, Art and Sound. Commissioned work, licensed IP and established continuations bypass this learning penalty.
+                    </div>
+                  )}
                   {plan && planFr && planDef && expectation !== null && (
                     <>
                       <div className="my-2 border-t border-line/60" />
