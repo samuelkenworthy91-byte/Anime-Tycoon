@@ -8,7 +8,8 @@ import {
   trackSkillMultiplier,
 } from "../researchTracks";
 import { addSlatePlan, armSlatePlan, consumeArmedSlatePlan, slatePreparation } from "../slate";
-import { contributionEffectiveSkill, initialRun, startFullyDelegatedProject } from "../state";
+import { advanceWeeks, contributionEffectiveSkill, initialRun, startFullyDelegatedProject } from "../state";
+import { seededRng } from "../scoring";
 
 const draft = (): Draft => ({
   title: "Prepared Original",
@@ -130,4 +131,40 @@ describe("full creator delegation", () => {
     const handsOnSkill = contributionEffectiveSkill(handsOnRun, handsOnRun.staff[0], "story");
     expect(delegatedSkill / handsOnSkill).toBeCloseTo(0.8, 5);
   });
-});
+
+
+  it("can carry a project all the way to READY without mandatory player intervention", () => {
+    let run = initialRun("Delegation Completion House", "steady");
+    const crew = run.candidates.slice(0, 4).map((candidate, index) => ({
+      ...candidate,
+      id: `delegation_finish_${index}`,
+      favGenre: run.genresUnlocked[index % run.genresUnlocked.length],
+      stamina: 100,
+      joinedWeek: 0,
+    }));
+    run = { ...run, cash: 3_000_000, staff: crew, candidates: [] };
+    const rng = seededRng(9001);
+    const delegated = startFullyDelegatedProject(run, crew[0].id, rng);
+    expect(delegated).toBeTruthy();
+    run = delegated!;
+    const projectId = run.projects.at(-1)!.id;
+
+    const originalRandom = Math.random;
+    Math.random = seededRng(9002);
+    try {
+      let reachedReady = false;
+      for (let i = 0; i < 90; i += 1) {
+        run = advanceWeeks(run, 1);
+        const project = run.projects.find((item) => item.id === projectId);
+        expect(project).toBeTruthy();
+        if (project!.stage === "ready" || project!.stage === "airing" || project!.stage === "done") {
+          reachedReady = true;
+          break;
+        }
+        expect(project!.auto?.intervention).not.toBe(true);
+      }
+      expect(reachedReady).toBe(true);
+    } finally {
+      Math.random = originalRandom;
+    }
+  });});
