@@ -1,0 +1,77 @@
+name: Pixel 9a Slate Smoke
+
+on:
+  push:
+    branches:
+      - depth-clarity-overhaul
+    paths:
+      - "game_source/src/**"
+      - "game_source/public/**"
+      - "game_source/scripts/pixel9a-slate-smoke.py"
+      - "game_source/package.json"
+      - "game_source/package-lock.json"
+      - "game_source/vite.config.*"
+      - ".github/workflows/pixel9a-slate-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pixel9a-slate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout depth & clarity branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install app dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
+
+      - name: Install Selenium
+        run: python3 -m pip install --disable-pip-version-check selenium==4.35.0
+
+      - name: Verify Chrome tooling
+        run: |
+          google-chrome --version || chromium --version
+          chromedriver --version || true
+
+      - name: Serve production build
+        run: |
+          python3 -m http.server 4173 --directory game_source/dist > /tmp/anime-runner-http.log 2>&1 &
+          echo $! > /tmp/anime-runner-http.pid
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/anime-runner-http.log
+          exit 1
+
+      - name: Run Pixel 9a portrait Slate playtest
+        env:
+          ANIME_RUNNER_URL: http://127.0.0.1:4173
+          SMOKE_ARTIFACT_DIR: artifacts/pixel9a-slate
+        run: python3 game_source/scripts/pixel9a-slate-smoke.py
+
+      - name: Upload Pixel screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel9a-slate-smoke
+          path: artifacts/pixel9a-slate
+          if-no-files-found: warn
+          retention-days: 14
