@@ -216,10 +216,13 @@ export function interventionQuote(run: RunState, d0: InterventionDef, tierId: In
     tier,
     cost: (() => {
       const baseCost = useTier === "standard" ? d.cost : round5k(d.cost * tier.costMult);
-      const rushUses = d.id === "crunch" ? (project?.interventions ?? []).filter((id) => id === "crunch").length : 0;
-      const repeatMult = d.id === "crunch" ? Math.pow(2, rushUses) : 1;
-      const mult = (signature?.interventionCostMult ?? 1) * repeatMult;
-      return Math.abs(mult - 1) < .001 ? baseCost : round5k(baseCost * mult);
+      const houseMult = signature?.interventionCostMult ?? 1;
+      const adjustedBase = Math.abs(houseMult - 1) < .001 ? baseCost : round5k(baseCost * houseMult);
+      if (d.id === "crunch") {
+        const rushUses = (project?.interventions ?? []).filter((id) => id === "crunch").length;
+        return adjustedBase * Math.pow(2, rushUses);
+      }
+      return adjustedBase;
     })(),
     points: Math.max(0, Math.round(tuned.points * tier.pointMult * capabilityMult * signatureEffectMult)),
     issueDelta: scaleSigned(tuned.issueDelta, tier.repairMult * postRepairMult * (tuned.issueDelta < 0 ? signatureEffectMult : 1)),
