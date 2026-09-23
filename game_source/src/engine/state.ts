@@ -1852,13 +1852,32 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
   let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost, ...(rookieSoloMult < 1 ? { rookieSoloMult } : {}) };
   if (slated.preparation?.ready) {
     const prep = slated.preparation;
+    const pacedPlan = Object.fromEntries(Object.entries(p.plan).map(([stage, weeks]) => [
+      stage,
+      Math.max(1, Math.ceil(Number(weeks) * (1 - prep.paceBonus))),
+    ]));
+    const pacedWeeks = Object.values(pacedPlan).reduce((sum, weeks) => sum + Number(weeks), 0);
+    const earliestDeadline = r.week + pacedWeeks;
+    const plannedDeadline = Math.max(earliestDeadline, prep.targetWeek);
     p = {
       ...p,
+      plan: pacedPlan,
       hype: p.hype + prep.hypeBonus,
       weeklyBurn: Math.max(1, Math.round(p.weeklyBurn * (1 - prep.burnDiscount))),
-      deadlineWeek: p.deadlineWeek + prep.deadlineBufferWeeks,
-      deadlineDay: (p.deadlineDay ?? p.deadlineWeek * 7) + prep.deadlineBufferWeeks * 7,
-      slatePrep: { planId: prep.planId, importance: prep.importance, weeksPlanned: prep.weeksPlanned, hypeBonus: prep.hypeBonus, burnDiscount: prep.burnDiscount, deadlineBufferWeeks: prep.deadlineBufferWeeks },
+      deadlineWeek: plannedDeadline + prep.deadlineBufferWeeks,
+      deadlineDay: (r.day ?? r.week * 7) + (plannedDeadline - r.week + prep.deadlineBufferWeeks) * 7,
+      slatePrep: {
+        planId: prep.planId,
+        importance: prep.importance,
+        weeksPlanned: prep.weeksPlanned,
+        label: prep.label,
+        hypeBonus: prep.hypeBonus,
+        burnDiscount: prep.burnDiscount,
+        paceBonus: prep.paceBonus,
+        issueChanceMult: prep.issueChanceMult,
+        deadlineBufferWeeks: prep.deadlineBufferWeeks,
+        targetWeek: prep.targetWeek,
+      },
     };
   }
   const decisionQuality = decisionReleaseQualityBonus(r, d);
@@ -1903,7 +1922,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${p.slatePrep ? ` Slate preparation: +${p.slatePrep.hypeBonus} hype, −${Math.round(p.slatePrep.burnDiscount * 100)}% weekly burn${p.slatePrep.deadlineBufferWeeks ? ", +1 week buffer" : ""}.` : ""}${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""}${rookieSoloMult < 1 ? ` Rookie-studio quality efficiency ×${rookieSoloMult.toFixed(2)} applies to this solo original.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${p.slatePrep ? ` Slate preparation (${p.slatePrep.label ?? "PREPARED"}): +${p.slatePrep.hypeBonus} hype, −${Math.round(p.slatePrep.burnDiscount * 100)}% weekly burn${p.slatePrep.paceBonus ? `, +${Math.round(p.slatePrep.paceBonus * 100)}% production pace` : ""}${(p.slatePrep.issueChanceMult ?? 1) < 1 ? `, −${Math.round((1 - (p.slatePrep.issueChanceMult ?? 1)) * 100)}% overload-note risk` : ""}${p.slatePrep.deadlineBufferWeeks ? `, +${p.slatePrep.deadlineBufferWeeks} week safety buffer` : ""}.` : ""}${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""}${rookieSoloMult < 1 ? ` Rookie-studio quality efficiency ×${rookieSoloMult.toFixed(2)} applies to this solo original.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
