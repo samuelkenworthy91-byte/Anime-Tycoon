@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PETS, PROTAGONISTS, SECONDARY, VILLAINS, type Draft } from "../data";
+import { PETS, PROTAGONISTS, SECONDARY, VILLAINS, castById, type Draft } from "../data";
 import {
   MAX_RESEARCH_TRACK_LEVEL,
   RESEARCH_TRACKS,
@@ -8,7 +8,7 @@ import {
   trackSkillMultiplier,
 } from "../researchTracks";
 import { addSlatePlan, armSlatePlan, consumeArmedSlatePlan, slatePreparation } from "../slate";
-import { initialRun } from "../state";
+import { contributionEffectiveSkill, initialRun, startFullyDelegatedProject } from "../state";
 
 const draft = (): Draft => ({
   title: "Prepared Original",
@@ -58,12 +58,20 @@ describe("prepared Studio Slate", () => {
     expect(prepared.label).toBe("PREPARED");
     expect(prepared.hypeBonus).toBe(3);
     expect(prepared.burnDiscount).toBeCloseTo(0.03);
-    expect(slatePreparation(plan, 8).label).toBe("READY");
-    expect(slatePreparation(plan, 12).label).toBe("LOCKED");
+    const ready = slatePreparation(plan, 8);
+    expect(ready.label).toBe("READY");
+    expect(ready.paceBonus).toBeCloseTo(0.03);
+    const locked = slatePreparation(plan, 12);
+    expect(locked.label).toBe("LOCKED");
+    expect(locked.paceBonus).toBeCloseTo(0.05);
+    expect(locked.issueChanceMult).toBeCloseTo(0.90);
     const longLead = slatePreparation(plan, 20);
     expect(longLead.label).toBe("LONG LEAD");
     expect(longLead.burnDiscount).toBeCloseTo(0.08);
+    expect(longLead.paceBonus).toBeCloseTo(0.05);
+    expect(longLead.issueChanceMult).toBeCloseTo(0.85);
     expect(longLead.deadlineBufferWeeks).toBe(2);
+    expect(longLead.targetWeek).toBe(30);
   });
 
   it("accelerates planning for Elliot and Freja in their niches", () => {
@@ -90,5 +98,36 @@ describe("prepared Studio Slate", () => {
     expect(consumed.preparation?.hypeBonus).toBe(10);
     expect(consumed.run.slatePlans).toHaveLength(0);
     expect(consumed.run.activeSlateSetupPlanId).toBeUndefined();
+  });
+});
+
+
+describe("full creator delegation", () => {
+  it("lets one named employee originate and run a competent original at 80% live contribution strength", () => {
+    let run = initialRun("Delegation House", "steady");
+    const director = { ...run.candidates[0], id: "director_test", favGenre: run.genresUnlocked[0], stamina: 100 };
+    run = { ...run, cash: 2_000_000, staff: [director], candidates: [] };
+    const delegated = startFullyDelegatedProject(run, director.id, () => 0.2);
+    expect(delegated).toBeTruthy();
+    const project = delegated!.projects.at(-1)!;
+    expect(project.auto?.mode).toBe("full");
+    expect(project.auto?.directorStaffId).toBe(director.id);
+    expect(project.creativeLeadId).toBe(director.id);
+    expect(project.staffIds).toContain(director.id);
+    expect(project.draft.genres.every((genre) => delegated!.genresUnlocked.includes(genre))).toBe(true);
+    expect(castById(project.draft.protag).type).toBe(project.draft.animeType);
+    expect(castById(project.draft.secondary).type).toBe(project.draft.animeType);
+    expect(castById(project.draft.pet).type).toBe(project.draft.animeType);
+    expect(castById(project.draft.villain).type).toBe(project.draft.animeType);
+
+    const delegatedSkill = contributionEffectiveSkill(delegated!, delegated!.staff[0], "story");
+    const handsOnRun = {
+      ...delegated!,
+      projects: delegated!.projects.map((item) => item.id === project.id
+        ? { ...item, auto: { ...item.auto!, mode: "milestones" as const } }
+        : item),
+    };
+    const handsOnSkill = contributionEffectiveSkill(handsOnRun, handsOnRun.staff[0], "story");
+    expect(delegatedSkill / handsOnSkill).toBeCloseTo(0.8, 5);
   });
 });
