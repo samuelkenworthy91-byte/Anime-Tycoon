@@ -302,7 +302,7 @@ export default function StudioSlateV3({
                         <CalendarCells tentative weeks={weeks} stageForWeek={(week) => slateStageAtWeek(plan, week)?.stage ?? null} />
                         <div className={cn("mt-1.5 rounded-lg px-2 py-1.5 text-[8px] font-bold", prep.ready ? "bg-mint/8 text-mint" : "bg-panel2 text-paper/40")}>
                           {prep.label} · {prep.weeksPlanned} week{prep.weeksPlanned === 1 ? "" : "s"} planned{prep.effectiveWeeks !== prep.weeksPlanned ? ` (${prep.effectiveWeeks} effective with ${run.showrunner === "operations" ? "Line Producer" : "Franchise Architect"})` : ""}
-                          {prep.ready ? ` · +${prep.hypeBonus} hype · −${Math.round(prep.burnDiscount * 100)}% weekly burn${prep.deadlineBufferWeeks ? ` · +${prep.deadlineBufferWeeks} wk safety buffer` : ""}` : " · no planning bonus yet"}
+                          {prep.ready ? ` · +${prep.hypeBonus} hype · −${Math.round(prep.burnDiscount * 100)}% burn${prep.paceBonus ? ` · +${Math.round(prep.paceBonus * 100)}% pace` : ""}${prep.issueChanceMult < 1 ? ` · −${Math.round((1 - prep.issueChanceMult) * 100)}% overload-note risk` : ""}${prep.deadlineBufferWeeks ? ` · +${prep.deadlineBufferWeeks} wk buffer` : ""}` : " · no planning bonus yet"}
                         </div>
                         <div className="mt-1.5 grid grid-cols-[1fr_auto_auto] gap-1">
                           <button onClick={() => startPlan(plan)} className="btn-press min-h-10 rounded-lg border border-gold/45 bg-gold/8 px-2 text-[8px] font-black text-gold">GREENLIGHT / SET UP</button>
@@ -341,7 +341,7 @@ export default function StudioSlateV3({
               )}
 
               <div className="rounded-xl border border-line/60 bg-panel2/35 p-2.5 text-[8px] leading-relaxed text-paper/45">
-                <b className="text-paper/65">How to read this:</b> solid blocks are active productions; dashed blocks are estimates for planned shows. You only choose a release window — the calendar works backwards to show Development, Animation, Sound, Post and Marketing. Moving a plan is always allowed.
+                <b className="text-paper/65">How to read this:</b> solid blocks are active productions; dashed blocks are estimates for planned shows. You only choose a release window — the calendar works backwards to show Development, Pre-production, Animation, Sound, Post/QA and Publicity. Leave a plan on the Slate before greenlighting it to bank Readiness; moving a plan is always allowed.
               </div>
             </div>
           </div>
