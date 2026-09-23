@@ -763,6 +763,18 @@ export default function Office({
                     </div>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-abyss"><div className="h-full rounded-full bg-viol" style={{width:`${Math.round(level / MAX_RESEARCH_TRACK_LEVEL * 100)}%`}} /></div>
+                  <div className="mt-2 grid grid-cols-4 gap-1">
+                    {track.milestones.map((milestone) => {
+                      const done = milestone.level <= level;
+                      const nextUp = milestone.level === level + 1;
+                      return (
+                        <div key={milestone.level} title={milestone.effect} className={cn("min-h-10 rounded-md border px-1 py-1 text-center", done ? "border-mint/35 bg-mint/8" : nextUp ? "border-gold/55 bg-gold/8" : "border-line/50 bg-panel2/40")}>
+                          <div className={cn("text-[7px] font-black", done ? "text-mint" : nextUp ? "text-gold" : "text-paper/25")}>LV{milestone.level}{done ? " ✓" : ""}</div>
+                          <div className={cn("mt-0.5 line-clamp-2 text-[7px] leading-tight", done ? "text-paper/60" : nextUp ? "font-bold text-paper/75" : "text-paper/30")}>{milestone.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
                   <div className="mt-2 rounded-lg border border-line bg-panel2/50 p-2">
                     <div className="text-[8px] font-black tracking-wider text-paper/40">{next ? `NEXT MILESTONE · LV ${next.level}` : "DISCIPLINE COMPLETE"}</div>
                     <div className="mt-0.5 text-[10px] font-bold text-paper/75">{next?.label ?? "Institutional mastery"}</div>
