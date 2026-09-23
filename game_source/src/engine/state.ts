@@ -1498,10 +1498,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
-    /* High-stakes decisions are deliberately rare: about 2–3 per year.
-       Ambient events carry most world texture without interrupting play. */
+    /* Studio life should keep surprising the player. Roughly four consequential
+       decisions can surface per year, but never stack on top of one another. */
     studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
-    if (w % 12 === 6 && studioEvents.length === 0 && Math.random() < 0.65) {
+    if (w % 8 === 4 && studioEvents.length === 0 && Math.random() < 0.72) {
       const sev = rollStudioEvent(w, {
         crew: staffArr.map((s) => ({
           id: s.id,
