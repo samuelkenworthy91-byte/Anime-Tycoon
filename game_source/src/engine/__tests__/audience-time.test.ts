@@ -84,10 +84,12 @@ describe("repeatable test audience", () => {
     let r = releaseReady();
     const contract = { id:"clock", name:"Deadline", type:"story" as const, target:99, weeks:1, pay:1000, rd:3 };
     r = { ...r, contractJobs:[{ id:"job", contract, staffIds:[r.staff[0].id], startWeek:0, dueWeek:1, startDay:0, dueDay:1, progress:0 }] };
+    const cashBefore = r.cash;
     r = startTestAudience(r)!;
     r = { ...r, day:1 };
     r = tickStudioDay(r).run;
     expect(r.contractJobs).toHaveLength(0);
-    expect(r.notices.some((n)=>n.includes("Contract missed"))).toBe(true);
+    expect(r.cash).toBeLessThan(cashBefore);
+    expect(r.notices.some((n)=>n.includes("DEADLINE MISSED"))).toBe(true);
   });
 });
