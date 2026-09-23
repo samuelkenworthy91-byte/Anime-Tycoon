@@ -111,7 +111,8 @@ describe("studio signature-genre specialisation", () => {
     expect(house.scoreMult).toBeGreaterThan(1);
     expect(combo.scoreMult).toBe(house.scoreMult);
     expect(outside.scoreMult).toBeLessThan(1);
-    expect(house.scoreMult).toBeCloseTo(1.15);\n    expect(outside.scoreMult).toBeCloseTo(0.94);
+    expect(house.scoreMult).toBeCloseTo(1.15);
+    expect(outside.scoreMult).toBeCloseTo(0.94);
     expect(outside.outputMult).toBe(1);
     expect(outside.paceMult).toBe(1);
     expect(outside.interventionCostMult).toBe(1);
