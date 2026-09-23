@@ -100,31 +100,50 @@ function stageShort(stage: SlateCalendarStage | null) {
   return "R";
 }
 
-function CalendarCells({ weeks, stageForWeek, tentative = false }: {
+function CalendarStrip({ weeks, stageForWeek, tentative = false }: {
   weeks: number[];
   stageForWeek: (week: number) => SlateCalendarStage | null;
   tentative?: boolean;
 }) {
+  const segments = weeks.reduce<{ stage: SlateCalendarStage | null; start: number; length: number }[]>((out, week, index) => {
+    const stage = stageForWeek(week);
+    const previous = out[out.length - 1];
+    if (previous && previous.stage === stage) previous.length += 1;
+    else out.push({ stage, start: index, length: 1 });
+    return out;
+  }, []);
+
   return (
-    <div className="grid grid-cols-12 gap-[2px]">
-      {weeks.map((week) => {
-        const stage = stageForWeek(week);
-        return (
-          <div
-            key={week}
-            title={stage ? `${dateLabel(week)} · ${stage}` : dateLabel(week)}
-            className={cn(
-              "flex h-7 items-center justify-center rounded-[4px] border text-[7px] font-black",
-              stage ? stageStyle[stage] : "border-line/25 bg-panel2/20 text-paper/15",
-              tentative && stage && "border-dashed opacity-80",
-            )}
-          >
-            {stageShort(stage)}
-          </div>
-        );
-      })}
+    <div
+      className="grid min-h-9 grid-cols-12 gap-[2px] rounded-lg bg-ink/35 p-[2px]"
+      aria-label="Twelve week production strip"
+    >
+      {segments.map((segment) => (
+        <div
+          key={`${segment.start}:${segment.stage ?? "empty"}`}
+          title={segment.stage
+            ? `${dateLabel(weeks[segment.start])}–${dateLabel(weeks[segment.start + segment.length - 1])} · ${segment.stage}`
+            : `${dateLabel(weeks[segment.start])}–${dateLabel(weeks[segment.start + segment.length - 1])}`}
+          style={{ gridColumn: `${segment.start + 1} / span ${segment.length}` }}
+          className={cn(
+            "flex min-h-8 items-center justify-center rounded-md border px-1 text-[9px] font-black",
+            segment.stage ? stageStyle[segment.stage] : "border-line/20 bg-panel2/15 text-paper/15",
+            tentative && segment.stage && "border-dashed opacity-85",
+          )}
+        >
+          {segment.stage ? stageShort(segment.stage) : ""}
+        </div>
+      ))}
     </div>
   );
+}
+
+function readinessSummary(label: ReturnType<typeof slatePreparation>["label"]) {
+  if (label === "IMPROVISED") return "No planning bonus yet";
+  if (label === "PREPARED") return "Small cost saving";
+  if (label === "READY") return "Cheaper · faster";
+  if (label === "LOCKED") return "Cheaper · faster · fewer problems";
+  return "Best planning · safer schedule";
 }
 
 export default function StudioSlateV3({
@@ -146,6 +165,7 @@ export default function StudioSlateV3({
   const [year, setYear] = useState(nowYear);
   const [quarter, setQuarter] = useState(nowQuarter);
   const [planning, setPlanning] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [kind, setKind] = useState<SlatePlanKind>("original");
   const [importance, setImportance] = useState<SlateImportance>("standard");
   const [property, setProperty] = useState("");
@@ -183,6 +203,25 @@ export default function StudioSlateV3({
     setCalendarOpen(true);
   };
 
+  const resetPlanner = () => {
+    setPlanning(false);
+    setEditingPlanId(null);
+    setProperty("");
+    setGenre("");
+  };
+
+  const beginEdit = (plan: SlatePlan) => {
+    setEditingPlanId(plan.id);
+    setKind(plan.kind);
+    setImportance(plan.importance);
+    setProperty(plan.franchiseKey ?? plan.licensedIpId ?? "");
+    setGenre(plan.kind === "original" ? plan.genres?.[0] ?? "" : "");
+    const offset = Math.max(1, Math.min(11, plan.targetWeek - quarterStart));
+    setReleaseOffset((releaseOffsets.reduce((best, candidate) =>
+      Math.abs(candidate - offset) < Math.abs(best - offset) ? candidate : best, releaseOffsets[0])));
+    setPlanning(true);
+  };
+
   const addPlan = () => {
     if (kind !== "original" && !property) return;
     const chosenFranchise = kind === "franchise" ? franchises.find((item) => item.key === property) : undefined;
@@ -193,7 +232,7 @@ export default function StudioSlateV3({
         ? (chosenIpRow?.ip?.genres ?? []).slice(0, 2)
         : genre ? [genre] : [];
     const targetWeek = Math.max(run.week + 1, quarterStart + releaseOffset);
-    setRun((state) => addSlatePlan(state, {
+    const patch = {
       kind,
       title: kind === "original"
         ? genre
@@ -205,10 +244,11 @@ export default function StudioSlateV3({
       franchiseKey: chosenFranchise?.key,
       licensedIpId: chosenIpRow?.ip?.id,
       genres: inheritedGenres,
-    }));
-    setPlanning(false);
-    setProperty("");
-    setGenre("");
+    };
+    setRun((state) => editingPlanId
+      ? updateSlatePlan(state, editingPlanId, patch)
+      : addSlatePlan(state, patch));
+    resetPlanner();
   };
 
   const startPlan = (plan: SlatePlan) => {
