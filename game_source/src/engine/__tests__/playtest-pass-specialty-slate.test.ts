@@ -167,4 +167,5 @@ describe("full creator delegation", () => {
     } finally {
       Math.random = originalRandom;
     }
-  });});
+  });
+});
