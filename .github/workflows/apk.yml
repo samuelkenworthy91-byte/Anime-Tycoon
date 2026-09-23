@@ -65,7 +65,7 @@ jobs:
       - name: Rename final APK
         run: |
           if [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
-            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Playtest.apk
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Final-Playtest.apk
           else
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
           fi
@@ -99,11 +99,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG='depth-clarity-playtest'
-          APK='Anime-Runner-Depth-Clarity-Playtest.apk'
+          APK='Anime-Runner-Depth-Clarity-Final-Playtest.apk'
           BUILT_SHA="$(git rev-parse HEAD)"
           gh release delete "$TAG" --cleanup-tag -y || true
           gh release create "$TAG" \
             "$APK" \
             --target "$BUILT_SHA" \
-            --title 'Anime Runner — Depth & Clarity Playtest' \
-            --notes "Android debug APK built from depth-clarity-overhaul at ${BUILT_SHA}. Includes the approved neon title-screen artwork and onboarding overhaul."
+            --title 'Anime Runner — Depth & Clarity Final Playtest' \
+            --notes "Final validated Android playtest APK built from depth-clarity-overhaul at ${BUILT_SHA}. Depth & Clarity final validation, production web build and Pixel 9a Slate smoke are green. Main remains untouched."
