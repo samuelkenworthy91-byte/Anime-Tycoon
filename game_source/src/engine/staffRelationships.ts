@@ -106,8 +106,14 @@ export function formalizeMentorship(run: RunState, mentorId: string, menteeId: s
   };
 }
 
-export function relationshipXpMultiplier(run: Pick<RunState, "staffRelationships">, staffId: string): number {
-  return run.staffRelationships?.some((record) => record.formalMenteeId === staffId) ? 1.12 : 1;
+export function relationshipXpMultiplier(
+  run: Pick<RunState, "staffRelationships">,
+  staffId: string,
+  showrunner = "",
+): number {
+  const formallyMentored = run.staffRelationships?.some((record) => record.formalMenteeId === staffId);
+  if (!formallyMentored) return 1;
+  return showrunner === "mentor" ? 1.20 : 1.12;
 }
 
 export function goldenPairMultiplier(
