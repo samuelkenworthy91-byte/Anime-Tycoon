@@ -1,7 +1,11 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { Draft, Staff } from "../data";
 import { makeProject } from "../projects";
 import { rollStudioEvent, resolveStudioEvent, type StudioEvent } from "../events";
+import { resolveAdvancedDecision, type AdvancedDecisionEvent } from "../decisionEvents";
 import { initialRun, type RunState } from "../state";
 
 const draft = (over: Partial<Draft> = {}): Draft => ({
@@ -46,6 +50,7 @@ const run = (): RunState => ({
 });
 
 const active = [{ id: "p1", title: "Event Show", stage: "animation", hype: 20, issues: 1 }];
+const here = dirname(fileURLToPath(import.meta.url));
 
 /* ------------------------------------------------------------ rolling */
 describe("rollStudioEvent", () => {
@@ -117,5 +122,43 @@ describe("resolveStudioEvent", () => {
     const out = resolveStudioEvent({ ...r, projects: [p], fans: 20_000, studioEvents: [be] }, "sev2", "double")!;
     expect(out.fans).toBe(14_000);
     expect(out.projects[0].hype).toBe(13);
+  });
+});
+
+
+/* ------------------------------------------------ hidden outcomes */
+describe("hidden event outcomes", () => {
+  it("keeps exact consequence copy out of the pre-choice UI", () => {
+    const source = readFileSync(resolve(here, "../../components/DecisionEventOverlay.tsx"), "utf8");
+    expect(source).not.toContain("{choice.effect}");
+    expect(source).toContain("YOUR DECISION:");
+    expect(source).toContain("MAKE THE CALL");
+  });
+
+  it("applies staff consequences only after an advanced decision resolves", () => {
+    const base = run();
+    const event: AdvancedDecisionEvent = {
+      id: "dec_staff_test",
+      kind: "decision",
+      week: 10,
+      expiresWeek: 13,
+      headline: "STAFF TEST",
+      category: "STAFF",
+      text: "A staff choice needs an answer.",
+      choices: [{ id: "push", label: "PUSH THEM", effect: "morale −5" }],
+      payload: {
+        template: "staff_test",
+        effects: { push: [{ type: "staffMorale", staffIds: ["a"], amount: -5 }] },
+      },
+    };
+    const out = resolveAdvancedDecision({ ...base, studioEvents: [event] }, event, "push")!;
+    expect(out.staff.find((member) => member.id === "a")?.morale).toBe(65);
+    expect(out.studioEvents).toHaveLength(0);
+  });
+
+  it("keeps a broad event deck instead of recycling a tiny handful of templates", () => {
+    const source = readFileSync(resolve(here, "../decisionEvents.ts"), "utf8");
+    const templates = [...source.matchAll(/make\(week,\s*"([^"]+)"/g)].map((match) => match[1]);
+    expect(new Set(templates).size).toBeGreaterThanOrEqual(35);
   });
 });
