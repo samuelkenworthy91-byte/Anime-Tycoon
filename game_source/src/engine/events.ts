@@ -25,6 +25,11 @@ export type StudioEventKind =
   | "castpopular"
   | "backlash"
   | "convention"
+  | "powercut"
+  | "fan_subtitles"
+  | "festival_offer"
+  | "celebrity"
+  | "equipment_failure"
   | "decision";
 
 export interface EventChoice {
@@ -67,7 +72,7 @@ export function rollStudioEvent(week: number, ctx: StudioEventContext): StudioEv
     if (advanced) return advanced as StudioEvent;
   }
   const kinds: StudioEventKind[] = [];
-  if (ctx.active.length > 0) kinds.push("viral", "leak", "backlash", "castpopular", "convention");
+  if (ctx.active.length > 0) kinds.push("viral", "leak", "backlash", "castpopular", "convention", "powercut", "fan_subtitles", "festival_offer", "celebrity", "equipment_failure");
   if (ctx.crew.length >= 1) kinds.push("incredible");
   if (ctx.crew.length >= 2) kinds.push("argument");
   if (kinds.length === 0) return null;
@@ -176,6 +181,76 @@ export function rollStudioEvent(week: number, ctx: StudioEventContext): StudioEv
           { id: "cast", label: "SEND THE FULL CAST", effect: "−£30,000 · +12 hype · +4,000 fans" },
           { id: "teaser", label: "SEND A TEASER REEL", effect: "−£10,000 · +5 hype" },
           { id: "skip", label: "SKIP THIS YEAR", effect: "no cost · no reward" },
+        ],
+      };
+    case "powercut":
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 2,
+        projectId: project?.id,
+        text: `A transformer blows during work on ${title}. The studio is dark, render machines are down and the backup battery is already screaming.`,
+        choices: [
+          { id: "generator", label: "HIRE INDUSTRIAL GENERATORS", effect: "−£45,000 · −1 production note" },
+          { id: "remote", label: "SEND EVERYONE HOME TO WORK REMOTELY", effect: "−3 hype · +2 production notes" },
+          { id: "pause", label: "SHUT DOWN UNTIL POWER RETURNS", effect: "−5 hype · +2 morale to the crew" },
+        ],
+      };
+    case "fan_subtitles":
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 3,
+        projectId: project?.id,
+        text: `A volunteer fan group has subtitled clips from ${title} into six languages. Their work is surprisingly good, but nobody asked permission.`,
+        choices: [
+          { id: "hire", label: "HIRE THE GROUP PROPERLY", effect: "−£12,000 · +2,500 fans · +4 hype" },
+          { id: "embrace", label: "THANK THEM AND LET IT SPREAD", effect: "+1,500 fans · +6 hype · +1 production note" },
+          { id: "legal", label: "SEND A TAKEDOWN NOTICE", effect: "−£20,000 · −3,000 fans" },
+        ],
+      };
+    case "festival_offer":
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 3,
+        projectId: project?.id,
+        text: `A respected festival offers ${title} an unfinished-work slot. It could create serious prestige, but the cut is not ready for strangers.`,
+        choices: [
+          { id: "rough", label: "SEND THE ROUGH CUT", effect: "+9 hype · +3 production notes" },
+          { id: "polish", label: "FUND A FESTIVAL POLISH PASS", effect: "−£35,000 · +4 Story · +4 Art · −1 production note" },
+          { id: "decline", label: "DECLINE AND PROTECT THE SHOW", effect: "no immediate numerical change" },
+        ],
+      };
+    case "celebrity":
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 3,
+        projectId: project?.id,
+        text: `A major celebrity posts that they are obsessed with ${title}. Their agent says a cameo is possible if you move immediately.`,
+        choices: [
+          { id: "cameo", label: "BOOK THE CAMEO", effect: "−£60,000 · +12 hype · +8,000 fans · +2 production notes" },
+          { id: "quote", label: "USE THE QUOTE IN MARKETING", effect: "+6 hype · +2,000 fans" },
+          { id: "quiet", label: "DO NOTHING AND ENJOY THE BUZZ", effect: "+2 hype" },
+        ],
+      };
+    case "equipment_failure":
+      return {
+        id,
+        kind,
+        week,
+        expiresWeek: week + 2,
+        projectId: project?.id,
+        text: `A core production server fails while ${title} is mid-pipeline. The backups exist, but recovering cleanly will cost money or time.`,
+        choices: [
+          { id: "replace", label: "REPLACE THE SERVER TODAY", effect: "−£55,000 · −2 production notes" },
+          { id: "repair", label: "PATCH IT AND KEEP MOVING", effect: "−£18,000 · +2 production notes" },
+          { id: "limp", label: "WORK AROUND IT", effect: "−5 hype · +4 production notes" },
         ],
       };
   }
@@ -344,6 +419,80 @@ export function resolveStudioEvent(run: RunState, eventId: string, choiceId: str
         notices.push(`A teaser reel plays to a packed hall (${c}) — +5 hype.`);
       } else {
         notices.push(`You skip the convention and keep your head down.`);
+      }
+      break;
+    }
+    case "powercut": {
+      if (choiceId === "generator") {
+        const cost = spend(45_000);
+        patchProject((p) => ({ ...p, issues: Math.max(0, p.issues - 1) }));
+        notices.push(`Generators keep the studio alive (${cost}); the emergency response even clears one production note.`);
+      } else if (choiceId === "remote") {
+        patchProject((p) => ({ ...p, hype: Math.max(0, p.hype - 3), issues: p.issues + 2 }));
+        notices.push(`Remote work keeps things moving, but coordination slips: −3 hype, +2 notes.`);
+      } else {
+        const ids = new Set(proj?.staffIds ?? []);
+        staff = staff.map((s) => ids.has(s.id) ? moraleDelta(s, 2) : s);
+        patchProject((p) => ({ ...p, hype: Math.max(0, p.hype - 5) }));
+        notices.push(`You shut down safely. The crew recover (+2 morale), but momentum cools (−5 hype).`);
+      }
+      break;
+    }
+    case "fan_subtitles": {
+      if (choiceId === "hire") {
+        spend(12_000); fans += 2_500;
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 4) }));
+        notices.push(`You hire the fan translators: −£12,000, +2,500 fans and +4 hype.`);
+      } else if (choiceId === "embrace") {
+        fans += 1_500;
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 6), issues: p.issues + 1 }));
+        notices.push(`The unofficial translations spread: +1,500 fans, +6 hype, +1 note to clean up.`);
+      } else {
+        spend(20_000); fans = Math.max(0, fans - 3_000);
+        notices.push(`The takedown works, but the fandom hates it: −£20,000 and −3,000 fans.`);
+      }
+      break;
+    }
+    case "festival_offer": {
+      if (choiceId === "rough") {
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 9), issues: p.issues + 3 }));
+        notices.push(`The rough cut gets people talking: +9 hype, but +3 notes come back with it.`);
+      } else if (choiceId === "polish") {
+        spend(35_000);
+        patchProject((p) => addPoints(addPoints({ ...p, issues: Math.max(0, p.issues - 1) }, "story", 4), "art", 4));
+        notices.push(`The festival polish costs £35,000: +4 Story, +4 Art and one note repaired.`);
+      } else {
+        notices.push(`You decline the unfinished-work slot and keep the production private.`);
+      }
+      break;
+    }
+    case "celebrity": {
+      if (choiceId === "cameo") {
+        spend(60_000); fans += 8_000;
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 12), issues: p.issues + 2 }));
+        notices.push(`The celebrity cameo lands: −£60,000, +12 hype, +8,000 fans and +2 notes.`);
+      } else if (choiceId === "quote") {
+        fans += 2_000;
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 6) }));
+        notices.push(`The endorsement goes on every trailer: +6 hype and +2,000 fans.`);
+      } else {
+        patchProject((p) => ({ ...p, hype: Math.min(100, p.hype + 2) }));
+        notices.push(`You leave the moment alone and still bank +2 hype.`);
+      }
+      break;
+    }
+    case "equipment_failure": {
+      if (choiceId === "replace") {
+        spend(55_000);
+        patchProject((p) => ({ ...p, issues: Math.max(0, p.issues - 2) }));
+        notices.push(`The replacement server costs £55,000 and clears two notes during recovery.`);
+      } else if (choiceId === "repair") {
+        spend(18_000);
+        patchProject((p) => ({ ...p, issues: p.issues + 2 }));
+        notices.push(`The cheap repair works for now: −£18,000, +2 production notes.`);
+      } else {
+        patchProject((p) => ({ ...p, hype: Math.max(0, p.hype - 5), issues: p.issues + 4 }));
+        notices.push(`The workaround hurts: −5 hype and +4 production notes.`);
       }
       break;
     }
