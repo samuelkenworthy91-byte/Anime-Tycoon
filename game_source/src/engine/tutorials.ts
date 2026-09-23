@@ -19,7 +19,8 @@ export type TutorialId =
   | "staff-relationships"
   | "rival-memories"
   | "studio-reputation"
-  | "career-era-delegation"\n  | "full-delegation";
+  | "career-era-delegation"
+  | "full-delegation";
 
 declare module "./state" {
   interface RunState {
