@@ -1330,7 +1330,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           if (dm !== 0) nx = moraleDelta(nx, dm);
           /* experience from doing the work */
           const m = mods(nx, proj, staffArr.filter((x) => proj.staffIds.includes(x.id)));
-          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner) * relationshipXpMultiplier({ staffRelationships }, nx.id));
+          const g = gainXp(nx, WEEKLY_XP * m.xpMult * dynFx.xpMult * weeklyWorkXpMult(r.showrunner) * relationshipXpMultiplier({ staffRelationships }, nx.id, r.showrunner));
           nx = g.staff;
           if (g.levelsGained > 0)
             notices.push(`${nx.name} is promoted to ${levelTitle(nx.level)} (Lv ${nx.level})!`);
