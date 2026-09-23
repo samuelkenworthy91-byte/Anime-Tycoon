@@ -706,6 +706,8 @@ export interface ScoringContext {
   /** Every Business & Audience level improves shipped-release economics. */
   businessMult?: number;
   castAffinityDiscovered?: string[];
+  /** deterministic reviewer/sales rolls for balance tests; normal gameplay omits this */
+  rng?: () => number;
 }
 
 /** compute the review result for a project from its accumulated state */
@@ -750,6 +752,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     fanBase: ctx.fans,
     audienceBar: ctx.audienceBar,
     castAffinityDiscovered: ctx.castAffinityDiscovered,
+    rng: ctx.rng,
   });
 
   let out = res;
