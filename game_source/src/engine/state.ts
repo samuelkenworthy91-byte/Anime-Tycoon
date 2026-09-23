@@ -1216,9 +1216,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
           });
           notices.push(`✅ Contract delivered: ${job.contract.name} (+£${contractPay.toLocaleString("en-GB")}, +${job.contract.rd} RD).`);
         } else if (w >= job.dueWeek) {
-          const consolation = Math.max(1, Math.round(job.contract.rd / 3));
-          rd += consolation;
-          notices.push(`❌ Contract missed: ${job.contract.name} — ${progress}/${job.contract.target} progress (+${consolation} RD learned).`);
+          const penalty = Math.max(5_000, Math.round(job.contract.pay * 0.30 / 1_000) * 1_000);
+          cash -= penalty;
+          staffArr = staffArr.map((s) => job.staffIds.includes(s.id) ? moraleDelta(s, -5) : s);
+          notices.push(`❌ CONTRACT DEADLINE MISSED: ${job.contract.name} — ${progress}/${job.contract.target}. Client penalty −£${penalty.toLocaleString("en-GB")} and assigned crew morale −5.`);
         } else {
           keep.push({ ...job, progress, liveProgressThisWeek: 0 });
         }
@@ -1712,7 +1713,8 @@ export const projectCapacity = (r: RunState) =>
 export const projectById = (r: RunState, id: string): Project | null =>
   r.projects.find((p) => p.id === id) ?? null;
 
-export const SELF_FUNDED_STARTUP_MULTS = [1.40, 1.25, 1.10] as const;
+export const SELF_FUNDED_STARTUP_MULTS = [1.65, 1.40, 1.20] as const;
+export const SELF_FUNDED_QUALITY_MULTS = [0.84, 0.91, 0.96] as const;
 
 /** New studios pay one-off setup inefficiency on their first three original,
  * fully self-funded productions. Commissions, licensed IP and continuations
@@ -1723,6 +1725,14 @@ export function selfFundedStartupMult(r: Pick<RunState, "projects">, d: Draft): 
     !project.commission && !project.draft.licensedIpId && !project.draft.continuation && !project.draft.franchiseKey
   ).length;
   return SELF_FUNDED_STARTUP_MULTS[prior] ?? 1;
+}
+
+export function selfFundedQualityMult(r: Pick<RunState, "projects">, d: Draft): number {
+  if (d.licensedIpId || d.continuation || d.franchiseKey) return 1;
+  const prior = r.projects.filter((project) =>
+    !project.commission && !project.draft.licensedIpId && !project.draft.continuation && !project.draft.franchiseKey
+  ).length;
+  return SELF_FUNDED_QUALITY_MULTS[prior] ?? 1;
 }
 
 export function selfFundedGreenlightCost(r: Pick<RunState, "projects">, d: Draft): number {
@@ -1835,9 +1845,10 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
 
   const greenlightCost = commission ? projectUpfront(d) : selfFundedGreenlightCost(r, d);
   const startupMult = commission ? 1 : selfFundedStartupMult(r, d);
+  const rookieSoloMult = commission ? 1 : selfFundedQualityMult(r, d);
   const slated = commission ? { run: r, preparation: null } : consumeArmedSlatePlan(r, d);
   r = slated.run;
-  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost };
+  let p: Project = { ...makeProject(d, r.week, r.day ?? r.week * 7), distributionOwner: "player", spent: greenlightCost, ...(rookieSoloMult < 1 ? { rookieSoloMult } : {}) };
   if (slated.preparation?.ready) {
     const prep = slated.preparation;
     p = {
@@ -1891,7 +1902,7 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
       ...r.notices,
       commission && partner
         ? `“${d.title}” commissioned by ${partner.name}: +£${commission.advance.toLocaleString("en-GB")} advance, they take ${Math.round(commission.share * 100)}% · deliver ${commission.minQuality}/40 within ${commission.maxWeeks * 7} days.`
-        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${p.slatePrep ? ` Slate preparation: +${p.slatePrep.hypeBonus} hype, −${Math.round(p.slatePrep.burnDiscount * 100)}% weekly burn${p.slatePrep.deadlineBufferWeeks ? ", +1 week buffer" : ""}.` : ""}${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
+        : `“${d.title}” ${d.licensedIpId ? "licensed adaptation " : ""}greenlit — target release in ${Math.max(0, (p.deadlineDay ?? p.deadlineWeek * 7) - (r.day ?? r.week * 7))} days.${p.slatePrep ? ` Slate preparation: +${p.slatePrep.hypeBonus} hype, −${Math.round(p.slatePrep.burnDiscount * 100)}% weekly burn${p.slatePrep.deadlineBufferWeeks ? ", +1 week buffer" : ""}.` : ""}${startupMult > 1 ? ` Early self-funding setup ×${startupMult.toFixed(2)} raised today’s greenlight payment.` : ""}${rookieSoloMult < 1 ? ` Rookie-studio quality efficiency ×${rookieSoloMult.toFixed(2)} applies to this solo original.` : ""} Total production budget ≈ £${draftCost(d).toLocaleString("en-GB")}.`,
     ],
   };
 }
@@ -2227,17 +2238,20 @@ function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; 
   if ((nx.contractJobs ?? []).length) {
     const keep: ContractAssignment[] = [];
     let rd = nx.rd;
+    let cash = nx.cash;
+    let staff = nx.staff;
     const notices = [...nx.notices];
     for (const job of nx.contractJobs) {
       const dueDay = job.dueDay ?? job.dueWeek * 7;
       if ((nx.day ?? nx.week * 7) >= dueDay && job.progress < job.contract.target) {
-        const consolation = Math.max(1, Math.round(job.contract.rd / 3));
-        rd += consolation;
+        const penalty = Math.max(5_000, Math.round(job.contract.pay * 0.30 / 1_000) * 1_000);
+        cash -= penalty;
+        staff = staff.map((s) => job.staffIds.includes(s.id) ? moraleDelta(s, -5) : s);
         attention = true;
-        notices.push(`❌ Contract missed: ${job.contract.name} — ${job.progress}/${job.contract.target} progress (+${consolation} RD learned).`);
+        notices.push(`❌ CONTRACT DEADLINE MISSED: ${job.contract.name} — ${job.progress}/${job.contract.target}. Client penalty −£${penalty.toLocaleString("en-GB")} and assigned crew morale −5.`);
       } else keep.push(job);
     }
-    nx = { ...nx, contractJobs: keep, rd, notices };
+    nx = { ...nx, contractJobs: keep, rd, cash, staff, notices };
   }
 
   /* courses and technology can finish on any day instead of waiting for Sunday. */
