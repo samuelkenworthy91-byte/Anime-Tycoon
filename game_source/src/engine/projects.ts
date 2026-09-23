@@ -240,6 +240,10 @@ export interface Project {
 export interface AutoState {
   /** which department head the project is delegated to (null = team-led) */
   headSlot: "writer" | "animator" | "composer" | "production" | null;
+  /** milestones = player designed the show; full = named employee designed and runs it */
+  mode?: "milestones" | "full";
+  /** creator who owns a fully delegated original */
+  directorStaffId?: string;
   startedWeek: number;
   /** a crisis has paused automation — the player is being asked to step in */
   intervention: boolean;
