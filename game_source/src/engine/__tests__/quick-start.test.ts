@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SHOWRUNNERS } from "../data";
-import { randomQuickShowrunnerId, randomQuickStudioName } from "../../components/Title";
+import { randomQuickShowrunnerId, randomQuickStudioName } from "../quickStart";
 
 describe("Quick Start", () => {
   it("generates proper studio names rather than placeholder-style labels", () => {
