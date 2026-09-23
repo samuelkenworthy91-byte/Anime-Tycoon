@@ -72,12 +72,15 @@ describe("Depth & Clarity showrunner trio", () => {
     expect(studioSpecialisationProfile({ ...specialist, showrunner: "vision" }).rank).toBe("studio");
     expect(studioSpecialisationProfile({ ...specialist, showrunner: "auteur" }).rank).toBe("authority");
 
-    const normalSignature = specialisationProjectEffects({ ...specialist, showrunner: "vision" }, { genres: ["slice"] });
-    const auteurSignature = specialisationProjectEffects({ ...specialist, showrunner: "auteur" }, { genres: ["slice"] });
+    // Isolate House Style's scoring effect at the same Studio rank. The
+    // three-release fixture above deliberately promotes Jimmy to Authority.
+    const sameRank = { ...specialist, franchises: {} };
+    const normalSignature = specialisationProjectEffects({ ...sameRank, showrunner: "vision" }, { genres: ["slice"] });
+    const auteurSignature = specialisationProjectEffects({ ...sameRank, showrunner: "auteur" }, { genres: ["slice"] });
     expect(auteurSignature.scoreMult - normalSignature.scoreMult).toBeCloseTo(0.02);
 
-    const normalOutside = specialisationProjectEffects({ ...specialist, showrunner: "vision" }, { genres: ["fantasy"] });
-    const auteurOutside = specialisationProjectEffects({ ...specialist, showrunner: "auteur" }, { genres: ["fantasy"] });
+    const normalOutside = specialisationProjectEffects({ ...sameRank, showrunner: "vision" }, { genres: ["fantasy"] });
+    const auteurOutside = specialisationProjectEffects({ ...sameRank, showrunner: "auteur" }, { genres: ["fantasy"] });
     expect(1 - auteurOutside.scoreMult).toBeCloseTo((1 - normalOutside.scoreMult) / 2);
   });
 
