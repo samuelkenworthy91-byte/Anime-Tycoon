@@ -7,6 +7,7 @@ import { studioProduction, gainXp, WEEKLY_XP } from "../careers";
 import { makeProject } from "../projects";
 import { createFranchise, recordContinuation } from "../franchise";
 import { researchWeeks } from "../studioOps";
+import { relationshipXpMultiplier } from "../staffRelationships";
 
 const draft: Draft = { title: "Test IP", medium: "fanweb", budget: "standard", scope: "standard", slot: "web", animeType: "shonen", genres: ["slice"], audience: "teens", protag: "kai", protagName: "Kai", secondary: "none", pet: "none", villain: "none", arcs: [], sliders: [50, 50, 50], season: 1 };
 afterEach(() => vi.restoreAllMocks());
@@ -73,6 +74,26 @@ describe("showrunner expansion", () => {
     const expected = gainXp(worker, Math.max(1, WEEKLY_XP - 1) * 1.25).staff;
     expect(advanceWeeks(active, 1).staff[0].xp).toBe(expected.xp);
   });
+
+  it("makes Amara's formal mentorship stronger than the standard mentorship bonus", () => {
+    const relationships = [{
+      key: "mentor~mentee",
+      staffIds: ["mentor", "mentee"] as [string, string],
+      kind: "mentorship" as const,
+      formedWeek: 1,
+      lastActiveWeek: 1,
+      sharedReleases: 0,
+      acclaimedReleases: 0,
+      bestScore: 0,
+      goldenPair: false,
+      formalMentorId: "mentor",
+      formalMenteeId: "mentee",
+    }];
+    expect(relationshipXpMultiplier({ staffRelationships: relationships }, "mentee", "vision")).toBe(1.12);
+    expect(relationshipXpMultiplier({ staffRelationships: relationships }, "mentee", "mentor")).toBe(1.20);
+    expect(relationshipXpMultiplier({ staffRelationships: relationships }, "mentor", "mentor")).toBe(1);
+  });
+
 
   it("Freja's fatigue multiplier applies only to newly added continuation fatigue", () => {
     const result = { total: 28, revenue: 500000, fans: 40000, hallOfFame: false };
