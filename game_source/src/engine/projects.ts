@@ -218,6 +218,8 @@ export interface Project {
   commission?: ProjectCommission | null;
   /** advance planning earned from the Studio Slate before this project was greenlit */
   slatePrep?: { planId: string; importance: "supporting" | "standard" | "tentpole"; weeksPlanned: number; hypeBonus: number; burnDiscount: number; deadlineBufferWeeks: number };
+  /** first few fully self-funded originals suffer rookie-studio inefficiency at final scoring */
+  rookieSoloMult?: number;
   /** small spontaneous polish win rolled as the edit bay hands off to marketing */
   lastMinuteBoost?: { type: PointType; points: number } | null;
   /** production automation (engine/automation.ts) — null = fully manual */
@@ -715,10 +717,12 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   const comboKnown = (key in ctx.comboLevels) || secretComboResearched(ctx.research, key);
   const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
   const houseScoreMult = ctx.specialisationScoreMult ?? 1;
+  const rookieSoloMult = p.rookieSoloMult ?? 1;
+  const qualityMult = houseScoreMult * rookieSoloMult;
   const scoredPoints: Points = {
-    story: p.points.story * houseScoreMult,
-    art: p.points.art * houseScoreMult,
-    sound: p.points.sound * houseScoreMult,
+    story: p.points.story * qualityMult,
+    art: p.points.art * qualityMult,
+    sound: p.points.sound * qualityMult,
   };
 
   const res = computeResult({
@@ -750,6 +754,12 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     out = {
       ...out,
       breakdown: [...out.breakdown, { label: houseScoreMult > 1 ? "House genre expertise" : "Outside house specialty", pts: `×${houseScoreMult.toFixed(3)} Story · Art · Sound` }],
+    };
+  }
+  if (rookieSoloMult < 0.999) {
+    out = {
+      ...out,
+      breakdown: [...out.breakdown, { label: "Rookie self-funded production", pts: `×${rookieSoloMult.toFixed(2)} Story · Art · Sound` }],
     };
   }
 
