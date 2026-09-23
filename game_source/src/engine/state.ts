@@ -1196,7 +1196,21 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     }
 
     /* delegated projects run their own milestone sprints automatically */
-    const dlg = tickDelegated(r, projects, staffArr, w, fx);
+    const dlg = tickDelegated(
+      {
+        ...r,
+        cash,
+        rd,
+        week: w,
+        day: Math.max(r.day ?? r.week * 7, w * 7),
+        projects,
+        staff: staffArr,
+      },
+      projects,
+      staffArr,
+      w,
+      fx,
+    );
     projects = dlg.projects;
     staffArr = dlg.staff;
     rd += dlg.rd;
