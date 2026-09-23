@@ -100,6 +100,21 @@ describe("QoL2 timed production interventions", () => {
     expect(out.projects[0].issues).toBe(run.projects[0].issues);
   });
 
+  it("Executive Rush can repeat indefinitely and doubles in price each time", () => {
+    const run = withProject("animation");
+    const project = run.projects[0];
+    const first = interventionQuote(run, def("crunch"), "standard", project.draft, project)!;
+    const once = applyIntervention(run, project.id, "crunch", () => 1)!;
+    expect(interventionBlock(once, once.projects[0], def("crunch"))).toBeNull();
+    const second = interventionQuote(once, def("crunch"), "standard", once.projects[0].draft, once.projects[0])!;
+    expect(second.cost).toBe(first.cost * 2);
+    const twice = applyIntervention(once, project.id, "crunch", () => 1)!;
+    const third = interventionQuote(twice, def("crunch"), "standard", twice.projects[0].draft, twice.projects[0])!;
+    expect(third.cost).toBe(first.cost * 4);
+    expect(twice.projects[0].executiveRushUntilDay).toBe((run.day ?? run.week * 7) + 28);
+    expect(twice.projects[0].interventions?.filter((id) => id === "crunch")).toHaveLength(2);
+  });
+
   it("Executive Rush duplicates ordinary visible project bubbles", () => {
     const base = withProject("animation");
     const rushed = applyIntervention(base, base.projects[0].id, "crunch", () => 1)!;
