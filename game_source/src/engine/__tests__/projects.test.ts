@@ -122,7 +122,7 @@ describe("capacity", () => {
     const r0 = richRun();
     const d = draft();
     const r1 = startProject(r0, d)!;
-    expect(r0.cash - r1.cash).toBe(Math.round(draftCost(d) * 0.4 * 1.4));
+    expect(r0.cash - r1.cash).toBe(Math.round(draftCost(d) * 0.4 * 1.65));
   });
 });
 
