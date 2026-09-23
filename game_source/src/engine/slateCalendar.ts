@@ -100,23 +100,27 @@ export function slateCalendarWarnings(run: RunState, plans: readonly SlatePlan[]
         title: "TOO LATE FOR THIS WINDOW",
         body: `${plan.title} would need to have started ${run.week - startWeek} week${run.week - startWeek === 1 ? "" : "s"} ago to hit this release window at its planned scale. Move the release later or reduce its importance.`,
       });
-    } else if (startWeek - run.week <= 2) {
+    } else if (startWeek - run.week <= (run.showrunner === "planner" ? 4 : 2)) {
+      const plannerEarly = run.showrunner === "planner" && startWeek - run.week > 2;
       warnings.push({
         id: `tight-plan:${plan.id}`,
         severity: "caution",
-        title: "GREENLIGHT SOON",
-        body: `${plan.title}'s estimated development starts in ${Math.max(0, startWeek - run.week)} week${startWeek - run.week === 1 ? "" : "s"}. Start setup soon if you want to keep this window.`,
+        title: plannerEarly ? "JEN: PLAN AHEAD" : "GREENLIGHT SOON",
+        body: `${plan.title}'s estimated development starts in ${Math.max(0, startWeek - run.week)} week${startWeek - run.week === 1 ? "" : "s"}.${plannerEarly ? " Jen is flagging the load early so you still have room to adjust." : " Start setup soon if you want to keep this window."}`,
       });
     }
   }
 
   const plannedCost = plans.reduce((sum, plan) => sum + SLATE_ESTIMATED_COST[plan.importance], 0);
-  if (plannedCost > Math.max(150_000, run.cash * 0.9)) {
+  const dangerCash = Math.max(150_000, run.cash * 0.9);
+  const earlyCash = Math.max(120_000, run.cash * 0.7);
+  if (plannedCost > dangerCash || (run.showrunner === "planner" && plannedCost > earlyCash)) {
+    const earlyOnly = run.showrunner === "planner" && plannedCost <= dangerCash;
     warnings.push({
       id: "cash-risk",
-      severity: "danger",
-      title: "CASH RISK",
-      body: `This slate roughly commits £${Math.round(plannedCost / 1000).toLocaleString()}k against £${Math.round(run.cash / 1000).toLocaleString()}k currently on hand.`,
+      severity: earlyOnly ? "caution" : "danger",
+      title: earlyOnly ? "JEN: CASH HEADROOM" : "CASH RISK",
+      body: `This slate roughly commits £${Math.round(plannedCost / 1000).toLocaleString()}k against £${Math.round(run.cash / 1000).toLocaleString()}k currently on hand.${earlyOnly ? " Jen is warning before this becomes a cash crisis." : ""}`,
     });
   }
 

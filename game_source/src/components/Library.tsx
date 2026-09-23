@@ -488,7 +488,7 @@ export default function LibraryPanel({
           {/* --------------------------------------------------------- merch */}
           <div>
             <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
-              <ShoppingBag size={11} /> MERCHANDISING · TIER {merchTier}/4 · FAN DEMAND ×{merchFanbaseMult(fr).toFixed(2)}
+              <ShoppingBag size={11} /> MERCHANDISING · TIER {merchTier}/4 · FAN DEMAND ×{merchFanbaseMult(fr).toFixed(2)}{run.showrunner === "audience" ? " · RYKA TARGETING" : ""}
             </div>
             <div className="mb-2 rounded-md border border-gold/20 bg-gold/5 p-2 text-[9px] text-paper/55">
               {currentMerchTier
@@ -533,7 +533,7 @@ export default function LibraryPanel({
                     </div>
                     <div className="text-[9px] text-paper/45">{p.desc}</div>
                     <div className="mt-1 text-[9px] text-paper/60">
-                      −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(Math.round(ret * audienceFit))}</b> / {p.weeks} wk · audience ×{audienceFit.toFixed(2)}
+                      −{formatGBPShort(p.cost)} → ≈<b className="text-mint">{formatGBPShort(Math.round(ret * audienceFit * (run.showrunner === "audience" && audienceFit >= 1.04 ? 1.15 : 1)))}</b> / {p.weeks} wk · audience ×{audienceFit.toFixed(2)}{run.showrunner === "audience" && audienceFit >= 1.04 ? " · Ryka ×1.15" : ""}
                     </div>
                     {(p.popularityGain || p.fatigueAdd) && (
                       <div className="text-[9px] text-gold/70">+{p.popularityGain ?? 0} Pop · +{p.fatigueAdd ?? 0} Fatigue{p.freezeWeeks ? ` · attention held ${p.freezeWeeks} wk` : ""}</div>

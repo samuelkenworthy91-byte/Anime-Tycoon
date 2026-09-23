@@ -61,7 +61,7 @@ import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegme
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
 import { recordHeadToHeadMemories, recordRivalMemory } from "./rivalMemories";
-import { merchAudienceFit, publicityAudienceFit } from "./publicity";
+import { audienceWhispererMerchMult, audienceWhispererPublicityMult, merchAudienceFit, publicityAudienceFit } from "./publicity";
 import {
   bumpRivalry,
   computeRankings,
@@ -954,7 +954,8 @@ export function runFranchiseCampaign(r: RunState, franchiseKey: string, campaign
   if (!fr || !campaign || franchiseCampaignBlock(fr, campaign, r.week, r.cash)) return null;
   const baseNext = applyFranchiseCampaign(fr, campaign, r.week);
   const audienceFit = publicityAudienceFit(franchiseAudienceProfile(r, franchiseKey) ?? undefined, campaign.id);
-  const gainedPopularity = Math.max(1, Math.round(campaign.popularity * audienceFit));
+  const targetingMult = audienceWhispererPublicityMult(r.showrunner, audienceFit);
+  const gainedPopularity = Math.max(1, Math.round(campaign.popularity * audienceFit * targetingMult));
   const next = { ...baseNext, popularity: Math.min(100, fr.popularity + gainedPopularity) };
   return {
     ...r,
@@ -4192,7 +4193,8 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const relationshipMult = partnerCommercialMult(r.partners ?? {});
   const manufacturingMult = r.capitalProjects.includes("merch_factory") ? 1.18 : 1;
   const audienceFit = merchAudienceFit(franchiseAudienceProfile(r, franchiseKey) ?? undefined, product.id);
-  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult * audienceFit);
+  const targetingMult = audienceWhispererMerchMult(r.showrunner, audienceFit);
+  const total = Math.round(merchReturn(fr, product) * merchDecisionMult * relationshipMult * manufacturingMult * audienceFit * targetingMult);
   const weekly = Math.floor(total / product.weeks);
   const payouts = [...r.payouts];
   for (let i = 1; i <= product.weeks; i++) {

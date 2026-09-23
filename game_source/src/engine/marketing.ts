@@ -1,6 +1,6 @@
 import type { AudienceId, Draft, GenreId, MediumId } from "./data";
 import type { AudienceProfile } from "./audienceSegments";
-import { combinedPublicityFit, publicityAudienceFit } from "./publicity";
+import { audienceWhispererPublicityMult, combinedPublicityFit, publicityAudienceFit } from "./publicity";
 
 export interface StrategicCampaign {
   id: string;
@@ -156,14 +156,16 @@ export function strategicCampaignHype(
   audienceProfile?: AudienceProfile,
   showrunner = "",
 ): number {
-  const fit = combinedPublicityFit(campaignFit(campaign, draft), publicityAudienceFit(audienceProfile, campaign.id));
+  const audienceFit = publicityAudienceFit(audienceProfile, campaign.id);
+  const fit = combinedPublicityFit(campaignFit(campaign, draft), audienceFit);
   /* Sana remains the Hype Machine rather than becoming an audience-research
      showrunner: she gets extra execution from campaigns that are already a
      GOOD/EXCELLENT match. She does not reveal audience composition, rescue a
      weak campaign or improve merchandise economics. */
   const matchedPublicityMult = showrunner === "marketer" && fit >= 1.04 ? 1.20 : 1;
+  const audienceExecutionMult = audienceWhispererPublicityMult(showrunner, audienceFit);
   return Math.max(
     1,
-    Math.round(campaign.hype * fit * marketingHypeMult * matchedPublicityMult * capitalCampaignMultiplier(campaign, capitalProjects))
+    Math.round(campaign.hype * fit * marketingHypeMult * matchedPublicityMult * audienceExecutionMult * capitalCampaignMultiplier(campaign, capitalProjects))
   );
 }

@@ -19,6 +19,9 @@ const IMPACT: Record<string, string> = {
   festival: "Experimental genre-pair synergy above neutral ×1.60",
   dealmaker: "Unknown direction targets are revealed as a ±10 range (20 points wide)",
   genre: "First production of an untried two-genre pairing: staff output and pace ×1.35",
+  planner: "Slate Readiness ×1.50 · release moves within ±3 weeks preserve banked planning · earlier cash/capacity warnings",
+  auteur: "Signature review multiplier +2 percentage points · outside-speciality penalty ×0.50 · House rank requirements advance faster",
+  audience: "Pre-release audience forecast · well-matched publicity ×1.15 · well-matched merch ×1.15 · weak targeting visible earlier",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {

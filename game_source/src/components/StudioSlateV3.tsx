@@ -22,6 +22,7 @@ import {
   quarterIndexForWeek,
   quarterStartWeek,
   removeSlatePlan,
+  rescheduleSlatePlan,
   slatePreparation,
   updateSlatePlan,
   type SlateImportance,
@@ -246,7 +247,7 @@ export default function StudioSlateV3({
       genres: inheritedGenres,
     };
     setRun((state) => editingPlanId
-      ? updateSlatePlan(state, editingPlanId, patch)
+      ? rescheduleSlatePlan(state, editingPlanId, targetWeek, patch)
       : addSlatePlan(state, patch));
     resetPlanner();
   };
@@ -381,13 +382,13 @@ export default function StudioSlateV3({
                         <CalendarStrip tentative weeks={weeks} stageForWeek={(week) => slateStageAtWeek(plan, week)?.stage ?? null} />
                         <div className={cn("mt-2 rounded-lg px-2 py-2 text-[9px] font-bold", prep.ready ? "bg-mint/8 text-mint" : "bg-panel2 text-paper/45")}>
                           <span className="font-black">{prep.label}</span> · {readinessSummary(prep.label)}
-                          <span className="ml-1 text-paper/35">({prep.weeksPlanned} wk planned)</span>
+                          <span className="ml-1 text-paper/35">({prep.weeksPlanned} wk planned{run.showrunner === "planner" ? ` · Jen counts ${prep.effectiveWeeks}` : ""})</span>
                         </div>
                         <div className="mt-2 grid grid-cols-2 gap-1.5">
                           <button onClick={() => startPlan(plan)} className="btn-press min-h-11 rounded-lg border border-gold/45 bg-gold/8 px-2 text-[9px] font-black text-gold">GREENLIGHT / SET UP</button>
                           <button onClick={() => beginEdit(plan)} className="btn-press min-h-11 rounded-lg border border-cyanx/35 bg-cyanx/5 px-2 text-[9px] font-black text-cyanx">EDIT PLAN</button>
-                          <button aria-label="Move one week earlier" onClick={() => setRun((state) => updateSlatePlan(state, plan.id, { targetWeek: Math.max(run.week + 1, plan.targetWeek - 1) }))} className="btn-press min-h-11 rounded-lg border border-line px-2 text-[9px] font-black text-paper/55">← 1 WEEK</button>
-                          <button aria-label="Move one week later" onClick={() => setRun((state) => updateSlatePlan(state, plan.id, { targetWeek: plan.targetWeek + 1 }))} className="btn-press min-h-11 rounded-lg border border-line px-2 text-[9px] font-black text-paper/55">1 WEEK →</button>
+                          <button aria-label="Move one week earlier" onClick={() => setRun((state) => rescheduleSlatePlan(state, plan.id, Math.max(run.week + 1, plan.targetWeek - 1)))} className="btn-press min-h-11 rounded-lg border border-line px-2 text-[9px] font-black text-paper/55">← 1 WEEK</button>
+                          <button aria-label="Move one week later" onClick={() => setRun((state) => rescheduleSlatePlan(state, plan.id, plan.targetWeek + 1))} className="btn-press min-h-11 rounded-lg border border-line px-2 text-[9px] font-black text-paper/55">1 WEEK →</button>
                         </div>
                       </div>
                     );

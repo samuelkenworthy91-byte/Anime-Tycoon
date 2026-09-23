@@ -56,6 +56,12 @@ export function combinedPublicityFit(baseFit: number, audienceFit: number): numb
   return Math.max(0.72, Math.min(1.42, baseFit * (0.82 + audienceFit * 0.18)));
 }
 
+export const audienceWhispererPublicityMult = (showrunner: string, audienceFit: number) =>
+  showrunner === "audience" && audienceFit >= 1.04 ? 1.15 : 1;
+
+export const audienceWhispererMerchMult = (showrunner: string, audienceFit: number) =>
+  showrunner === "audience" && audienceFit >= 1.04 ? 1.15 : 1;
+
 export const PUBLICITY_CONTEXT_LABEL: Record<PublicityContext, string> = {
   launch: "LAUNCH",
   franchise: "FRANCHISE",

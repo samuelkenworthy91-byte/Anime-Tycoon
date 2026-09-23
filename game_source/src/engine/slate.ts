@@ -62,6 +62,25 @@ export function updateSlatePlan(run: RunState, id: string, patch: Partial<SlateP
   return { ...run, slatePlans: (run.slatePlans ?? []).map((plan) => plan.id === id ? { ...plan, ...patch, id: plan.id } : plan) };
 }
 
+/** Moving a planned release normally burns one banked planning week per week
+ * moved. Jen Wailer can slide a release up to three weeks either way without
+ * disturbing the team's preparation. */
+export function rescheduleSlatePlan(
+  run: RunState,
+  id: string,
+  targetWeek: number,
+  patch: Partial<SlatePlan> = {},
+): RunState {
+  const plan = (run.slatePlans ?? []).find((candidate) => candidate.id === id);
+  if (!plan) return run;
+  const delta = Math.abs(targetWeek - plan.targetWeek);
+  const preserve = run.showrunner === "planner" && delta <= 3;
+  const createdWeek = preserve || delta === 0
+    ? plan.createdWeek
+    : Math.min(run.week, plan.createdWeek + delta);
+  return updateSlatePlan(run, id, { ...patch, targetWeek, createdWeek });
+}
+
 export function removeSlatePlan(run: RunState, id: string): RunState {
   return { ...run, slatePlans: (run.slatePlans ?? []).filter((plan) => plan.id !== id), activeSlateSetupPlanId: run.activeSlateSetupPlanId === id ? undefined : run.activeSlateSetupPlanId };
 }
@@ -87,7 +106,11 @@ export interface SlatePreparation {
  * planning specifically. */
 export function slatePreparation(plan: SlatePlan, nowWeek: number, showrunner?: string): SlatePreparation {
   const weeksPlanned = Math.max(0, nowWeek - plan.createdWeek);
-  const speed = showrunner === "operations" || (showrunner === "franchise" && plan.kind === "franchise") ? 1.25 : 1;
+  const speed = showrunner === "planner"
+    ? 1.50
+    : showrunner === "operations" || (showrunner === "franchise" && plan.kind === "franchise")
+      ? 1.25
+      : 1;
   const effectiveWeeks = Math.max(0, Math.round(weeksPlanned * speed));
   const importanceHype = plan.importance === "tentpole" ? 2 : plan.importance === "standard" ? 1 : 0;
   let label: SlatePreparation["label"] = "IMPROVISED";

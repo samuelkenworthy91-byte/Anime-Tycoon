@@ -28,6 +28,8 @@ interface ReleaseStat {
   hallOfFame: boolean;
 }
 
+type SpecialisationRun = Pick<RunState, "strategicSpend" | "franchises"> & Partial<Pick<RunState, "showrunner">>;
+
 export interface StudioSpecialisationProfile {
   primary: GenreId | null;
   secondary: GenreId | null;
@@ -75,7 +77,7 @@ function releaseStats(run: Pick<RunState, "franchises">, genre: GenreId, fromWee
 }
 
 export function studioSpecialisationProfile(
-  run: Pick<RunState, "strategicSpend" | "franchises">,
+  run: SpecialisationRun,
 ): StudioSpecialisationProfile {
   const primaryEntry = selectionEntry(run, PRIMARY_PREFIX);
   const secondaryEntry = selectionEntry(run, SECONDARY_PREFIX);
@@ -87,16 +89,22 @@ export function studioSpecialisationProfile(
   const hits = history.filter((entry) => entry.score >= 27).length;
   const masterpieces = history.filter((entry) => entry.hallOfFame).length;
 
+  const auteur = run.showrunner === "auteur";
+  const authorityReleases = auteur ? 3 : AUTHORITY_RELEASES;
+  const authorityHits = AUTHORITY_HITS;
+  const institutionReleases = auteur ? 6 : INSTITUTION_RELEASES;
+  const institutionHits = auteur ? 3 : INSTITUTION_HITS;
+
   let rank: StudioSpecialisationRank = primary ? "studio" : "none";
   let rankLevel: 0 | 1 | 2 | 3 = primary ? 1 : 0;
-  if (primary && releases >= AUTHORITY_RELEASES && hits >= AUTHORITY_HITS) {
+  if (primary && releases >= authorityReleases && hits >= authorityHits) {
     rank = "authority";
     rankLevel = 2;
   }
   if (
     primary &&
-    releases >= INSTITUTION_RELEASES &&
-    hits >= INSTITUTION_HITS &&
+    releases >= institutionReleases &&
+    hits >= institutionHits &&
     masterpieces >= INSTITUTION_MASTERPIECES
   ) {
     rank = "institution";
@@ -106,13 +114,13 @@ export function studioSpecialisationProfile(
   const nextRank = rankLevel === 0 ? "studio" : rankLevel === 1 ? "authority" : rankLevel === 2 ? "institution" : null;
   const nextRequirements = rankLevel === 1
     ? [
-        `${Math.min(releases, AUTHORITY_RELEASES)}/${AUTHORITY_RELEASES} signature releases`,
-        `${Math.min(hits, AUTHORITY_HITS)}/${AUTHORITY_HITS} hits (27+/40)`,
+        `${Math.min(releases, authorityReleases)}/${authorityReleases} signature releases`,
+        `${Math.min(hits, authorityHits)}/${authorityHits} hits (27+/40)`,
       ]
     : rankLevel === 2
       ? [
-          `${Math.min(releases, INSTITUTION_RELEASES)}/${INSTITUTION_RELEASES} signature releases`,
-          `${Math.min(hits, INSTITUTION_HITS)}/${INSTITUTION_HITS} hits (27+/40)`,
+          `${Math.min(releases, institutionReleases)}/${institutionReleases} signature releases`,
+          `${Math.min(hits, institutionHits)}/${institutionHits} hits (27+/40)`,
           `${Math.min(masterpieces, INSTITUTION_MASTERPIECES)}/${INSTITUTION_MASTERPIECES} Hall of Fame release (32+/40)`,
         ]
       : [];
@@ -212,7 +220,7 @@ export interface SpecialisationProjectEffects {
 }
 
 export function specialisationProjectEffects(
-  run: Pick<RunState, "strategicSpend" | "franchises">,
+  run: SpecialisationRun,
   draft: Pick<Draft, "genres">,
 ): SpecialisationProjectEffects {
   const profile = studioSpecialisationProfile(run);
@@ -233,6 +241,9 @@ export function specialisationProjectEffects(
   }
   const signature = draft.genres.includes(profile.primary) || (!!profile.secondary && draft.genres.includes(profile.secondary));
   const fx = RANK_EFFECTS[profile.rankLevel];
+  const auteur = run.showrunner === "auteur";
+  const signatureScore = fx.signatureScore + (auteur ? 0.02 : 0);
+  const outsideScore = auteur ? 1 - (1 - fx.outsideScore) / 2 : fx.outsideScore;
   return signature
     ? {
         active: true,
@@ -245,7 +256,7 @@ export function specialisationProjectEffects(
         interventionEffectMult: fx.signatureInterventionEffect,
         interventionRiskMult: fx.signatureRisk,
         issueChanceMult: fx.signatureIssueChance,
-        scoreMult: fx.signatureScore,
+        scoreMult: signatureScore,
       }
     : {
         active: true,
@@ -258,11 +269,11 @@ export function specialisationProjectEffects(
         interventionEffectMult: 1,
         interventionRiskMult: fx.outsideRisk,
         issueChanceMult: fx.outsideIssueChance,
-        scoreMult: fx.outsideScore,
+        scoreMult: outsideScore,
       };
 }
 
-export function specialisationBenefits(run: Pick<RunState, "strategicSpend" | "franchises">) {
+export function specialisationBenefits(run: SpecialisationRun) {
   const profile = studioSpecialisationProfile(run);
   if (!profile.primary || profile.rankLevel === 0) return null;
   const fx = RANK_EFFECTS[profile.rankLevel];
@@ -272,8 +283,8 @@ export function specialisationBenefits(run: Pick<RunState, "strategicSpend" | "f
     signaturePacePct: Math.round((fx.signaturePace - 1) * 100),
     signatureInterventionDiscountPct: Math.round((1 - fx.signatureInterventionCost) * 100),
     signatureInterventionEffectPct: Math.round((fx.signatureInterventionEffect - 1) * 100),
-    signatureScorePct: Math.round((fx.signatureScore - 1) * 100),
-    outsideScorePenaltyPct: Math.round((1 - fx.outsideScore) * 1000) / 10,
+    signatureScorePct: Math.round(((fx.signatureScore + (run.showrunner === "auteur" ? 0.02 : 0)) - 1) * 100),
+    outsideScorePenaltyPct: Math.round((1 - (run.showrunner === "auteur" ? 1 - (1 - fx.outsideScore) / 2 : fx.outsideScore)) * 1000) / 10,
     outsideOutputPenaltyPct: Math.round((1 - fx.outsideOutput) * 100),
     outsidePacePenaltyPct: Math.round((1 - fx.outsidePace) * 100),
     outsideInterventionPremiumPct: Math.round((fx.outsideInterventionCost - 1) * 100),
@@ -281,12 +292,15 @@ export function specialisationBenefits(run: Pick<RunState, "strategicSpend" | "f
 }
 
 export function campaignForecastAccess(
-  run: Pick<RunState, "strategicSpend" | "franchises">,
+  run: SpecialisationRun,
   draft: Pick<Draft, "genres">,
   dataLabTier: number,
 ): ForecastAccess {
   const profile = studioSpecialisationProfile(run);
-  if (!profile.primary) return dataLabTier > 0 ? "exact" : "hidden";
+  if (!profile.primary) {
+    if (dataLabTier > 0) return "exact";
+    return run.showrunner === "audience" ? "band" : "hidden";
+  }
   const effect = specialisationProjectEffects(run, draft);
   if (effect.signature) {
     if (profile.rankLevel >= 2) return "exact";
@@ -294,14 +308,14 @@ export function campaignForecastAccess(
   }
   if (dataLabTier >= 2) return "exact";
   if (dataLabTier >= 1) return "band";
-  return "hidden";
+  return run.showrunner === "audience" ? "band" : "hidden";
 }
 
 /** Authority studios attract at least one creator who already loves the house
  * genre. Institutions attract two; the second follows the secondary genre when
  * one has been established. Appearance uniqueness is untouched. */
 export function alignRecruitmentPool(
-  run: Pick<RunState, "strategicSpend" | "franchises">,
+  run: SpecialisationRun,
   candidates: Staff[],
 ): Staff[] {
   const profile = studioSpecialisationProfile(run);

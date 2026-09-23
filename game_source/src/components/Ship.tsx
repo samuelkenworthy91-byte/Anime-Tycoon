@@ -15,7 +15,7 @@ import {
 } from "../engine/marketing";
 import { campaignForecastAccess, specialisationProjectEffects } from "../engine/specialisation";
 import { cn } from "../utils/cn";
-import { franchiseAudienceProfile } from "../engine/audienceSegments";
+import { audienceProfileForDraft, franchiseAudienceProfile } from "../engine/audienceSegments";
 import { publicityAudienceFit, publicityFitLabel } from "../engine/publicity";
 import { genericPosterOptions, rivalPosterById } from "../engine/rivalPosters";
 import { assetPath } from "../utils/assetPath";
@@ -157,6 +157,7 @@ export default function Ship({
           <b className="text-paper">CAMPAIGN INTELLIGENCE</b>
           <span>Marketing Office T{mktTier}: hype ×{fx.hypeMult.toFixed(2)}, prices −{Math.round(fx.promoDiscount * 100)}%</span>
           {run.showrunner === "marketer" && <span className="font-bold text-gold">· SANA: GOOD/EXCELLENT campaign matches +20%</span>}
+          {run.showrunner === "audience" && <span className="font-bold text-cyanx">· RYKA: audience forecast · matched targeting +15%</span>}
           <span>·</span>
           <span className={forecastAccess === "exact" ? "text-cyanx" : forecastAccess === "band" ? "text-gold" : "text-paper/35"}>Data Lab T{dataTier}: {forecastAccess === "exact" ? "exact fit forecast" : forecastAccess === "band" ? "directional fit band" : "fit hidden"}</span>
           {houseEffect.active && <span className={houseEffect.signature ? "font-bold text-mint" : "font-bold text-neon"}>{houseEffect.signature ? `SIGNATURE · ${houseEffect.rank.toUpperCase()}` : "OUTSIDE SPECIALITY · LOWER CONFIDENCE"}</span>}
@@ -170,13 +171,14 @@ export default function Ship({
             const limitReached = bought.length >= MAX_STRATEGIC_CAMPAIGNS && !isBought;
             const cost = Math.round(campaign.cost * (1 - fx.promoDiscount));
             const fit = campaignFit(campaign, project.draft);
-            const audienceProfile = project.draft.franchiseKey ? franchiseAudienceProfile(run, project.draft.franchiseKey) ?? undefined : undefined;
+            const storedAudienceProfile = project.draft.franchiseKey ? franchiseAudienceProfile(run, project.draft.franchiseKey) ?? undefined : undefined;
+            const audienceProfile = storedAudienceProfile ?? (run.showrunner === "audience" ? audienceProfileForDraft(project.draft) : undefined);
             const audienceFit = publicityAudienceFit(audienceProfile, campaign.id);
             const hypeGain = strategicCampaignHype(campaign, project.draft, fx.hypeMult, run.capitalProjects, audienceProfile, run.showrunner);
             const afford = run.cash - spent >= cost;
             const capitalActive = !!campaign.capitalSynergy && run.capitalProjects.includes(campaign.capitalSynergy);
             const fitKnown = forecastAccess !== "hidden";
-            const audienceFitKnown = !!audienceProfile || run.facilities.data > 0;
+            const audienceFitKnown = !!audienceProfile || run.facilities.data > 0 || run.showrunner === "audience";
             const fitExact = forecastAccess === "exact";
             return (
               <div key={campaign.id} className={cn("ink-card p-3", isBought && "border-mint/60", capitalActive && "ring-1 ring-gold/20")}>

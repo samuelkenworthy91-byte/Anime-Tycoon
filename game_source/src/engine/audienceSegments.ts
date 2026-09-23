@@ -71,7 +71,7 @@ function normalize(scores: Record<AudienceSegmentId, number>): AudienceProfile {
   return { ...values, dominant };
 }
 
-export function audienceProfileForRelease(draft: Draft, result: Pick<ShowResult, "total" | "fans" | "commercial" | "chemMult">): AudienceProfile {
+function audienceScoresForDraft(draft: Draft): Record<AudienceSegmentId, number> {
   const scores: Record<AudienceSegmentId, number> = { core: 4, casual: 4, online: 4, prestige: 3, collectors: 3 };
   for (const genre of draft.genres) {
     const signal = genreSignals[genre] ?? {};
@@ -82,11 +82,22 @@ export function audienceProfileForRelease(draft: Draft, result: Pick<ShowResult,
   if (draft.audience === "adults") scores.prestige += 2;
   if (draft.medium === "fanweb" || draft.medium === "ona") scores.online += 3;
   if (draft.medium === "movie") { scores.prestige += 3; scores.casual += 1; }
+  if (draft.pet !== "none") scores.collectors += 1.5;
+  return scores;
+}
+
+/** Ryka can read the likely audience shape from the concept before release.
+ * This excludes quality/commercial-result signals that only exist after air. */
+export function audienceProfileForDraft(draft: Draft): AudienceProfile {
+  return normalize(audienceScoresForDraft(draft));
+}
+
+export function audienceProfileForRelease(draft: Draft, result: Pick<ShowResult, "total" | "fans" | "commercial" | "chemMult">): AudienceProfile {
+  const scores = audienceScoresForDraft(draft);
   if (result.total >= 32) scores.prestige += 3;
   if (result.total <= 18) scores.core += 1.5;
   if (result.commercial.index >= 4) scores.casual += 4;
   if (result.chemMult >= 1.08) scores.online += 1.5;
-  if (draft.pet !== "none") scores.collectors += 1.5;
   return normalize(scores);
 }
 
