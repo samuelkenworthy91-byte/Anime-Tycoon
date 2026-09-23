@@ -82,7 +82,7 @@ describe("delegation gating", () => {
     const r = run({ projects: [p] });
     const out = setDelegation(r, p.id, "writer")!;
     const np = out.projects.find((x) => x.id === p.id)!;
-    expect(np.auto).toEqual({ headSlot: "writer", startedWeek: r.week, intervention: false });
+    expect(np.auto).toEqual({ headSlot: "writer", mode: "milestones", startedWeek: r.week, intervention: false });
     expect(out.notices.some((n) => /head writer/i.test(n))).toBe(true);
   });
 
