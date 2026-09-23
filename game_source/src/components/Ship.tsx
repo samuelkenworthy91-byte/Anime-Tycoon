@@ -156,6 +156,7 @@ export default function Ship({
           <Target size={12} className="text-cyanx" />
           <b className="text-paper">CAMPAIGN INTELLIGENCE</b>
           <span>Marketing Office T{mktTier}: hype ×{fx.hypeMult.toFixed(2)}, prices −{Math.round(fx.promoDiscount * 100)}%</span>
+          {run.showrunner === "marketer" && <span className="font-bold text-gold">· SANA: GOOD/EXCELLENT campaign matches +20%</span>}
           <span>·</span>
           <span className={forecastAccess === "exact" ? "text-cyanx" : forecastAccess === "band" ? "text-gold" : "text-paper/35"}>Data Lab T{dataTier}: {forecastAccess === "exact" ? "exact fit forecast" : forecastAccess === "band" ? "directional fit band" : "fit hidden"}</span>
           {houseEffect.active && <span className={houseEffect.signature ? "font-bold text-mint" : "font-bold text-neon"}>{houseEffect.signature ? `SIGNATURE · ${houseEffect.rank.toUpperCase()}` : "OUTSIDE SPECIALITY · LOWER CONFIDENCE"}</span>}
@@ -171,7 +172,7 @@ export default function Ship({
             const fit = campaignFit(campaign, project.draft);
             const audienceProfile = project.draft.franchiseKey ? franchiseAudienceProfile(run, project.draft.franchiseKey) ?? undefined : undefined;
             const audienceFit = publicityAudienceFit(audienceProfile, campaign.id);
-            const hypeGain = strategicCampaignHype(campaign, project.draft, fx.hypeMult, run.capitalProjects, audienceProfile);
+            const hypeGain = strategicCampaignHype(campaign, project.draft, fx.hypeMult, run.capitalProjects, audienceProfile, run.showrunner);
             const afford = run.cash - spent >= cost;
             const capitalActive = !!campaign.capitalSynergy && run.capitalProjects.includes(campaign.capitalSynergy);
             const fitKnown = forecastAccess !== "hidden";
