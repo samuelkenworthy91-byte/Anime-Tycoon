@@ -1,0 +1,102 @@
+name: Depth & Clarity Final Validation
+
+on:
+  push:
+    branches:
+      - depth-clarity-overhaul
+    paths:
+      - "game_source/src/**"
+      - "game_source/public/**"
+      - "game_source/scripts/**"
+      - "game_source/package.json"
+      - "game_source/package-lock.json"
+      - ".github/workflows/depth-clarity-final-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout depth & clarity branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+
+      - name: Full npm test suite
+        working-directory: game_source
+        run: npm test
+
+      - name: Stage 8 and R&D progression audit
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/stage8-hardening.test.ts             src/engine/__tests__/research-scaling.test.ts             src/engine/__tests__/depth-clarity-overhaul.test.ts
+
+      - name: Awards and licensed IP focused tests
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/auction-awards.test.ts             src/engine/__tests__/award-nominations.test.ts             src/engine/__tests__/awards-polish.test.ts             src/engine/__tests__/ip-expansion.test.ts             src/engine/__tests__/shojo-licensed-ip.test.ts             src/engine/__tests__/annual-auction-hidden-arcs.test.ts
+
+      - name: Slate and specialisation tests
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/slate-v3-house-specialisation.test.ts             src/engine/__tests__/specialisation-balance-simulation.test.ts             src/engine/__tests__/studio-slate-compat.test.ts             src/engine/__tests__/studio-specialisation.test.ts
+
+      - name: Full Delegation and Executive Rush tests
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/automation.test.ts             src/engine/__tests__/playtest-pass-specialty-slate.test.ts             src/engine/__tests__/rush-edit-tuning.test.ts             src/engine/__tests__/production-investment.test.ts
+
+      - name: Hidden event outcomes and deadline tests
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/events.test.ts             src/engine/__tests__/decision-hardmode.test.ts             src/engine/__tests__/consequences-followup.test.ts             src/engine/__tests__/audience-time.test.ts             src/engine/__tests__/gameplay-pass-regressions.test.ts
+
+      - name: Rookie difficulty and Quick Start tests
+        working-directory: game_source
+        run: |
+          npx vitest run             src/engine/__tests__/difficulty.test.ts             src/engine/__tests__/early-reception.test.ts             src/engine/__tests__/title-generator.test.ts             src/engine/__tests__/depth-pass-stage1.test.ts
+
+      - name: Production web build
+        working-directory: game_source
+        run: npm run build
+
+      - name: Install Selenium
+        run: python3 -m pip install --disable-pip-version-check selenium==4.35.0
+
+      - name: Serve production build
+        run: |
+          python3 -m http.server 4173 --directory game_source/dist > /tmp/anime-runner-http.log 2>&1 &
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/anime-runner-http.log
+          exit 1
+
+      - name: Pixel 9a mobile browser smoke test
+        env:
+          ANIME_RUNNER_URL: http://127.0.0.1:4173
+          SMOKE_ARTIFACT_DIR: artifacts/pixel9a-slate
+        run: python3 game_source/scripts/pixel9a-slate-smoke.py
+
+      - name: Upload Pixel 9a screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: depth-clarity-final-pixel9a
+          path: artifacts/pixel9a-slate
+          if-no-files-found: warn
+          retention-days: 14
