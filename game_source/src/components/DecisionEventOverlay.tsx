@@ -21,6 +21,7 @@ function effectLine(effect: DecisionEffect): string {
     case "cash": return `Cash ${money(effect.amount)}`;
     case "fans": return `Fans ${signed(effect.amount)}`;
     case "rd": return `Research Data ${signed(effect.amount)}`;
+    case "staffMorale": return `Staff morale ${signed(effect.amount)} (${effect.staffIds.length})`;
     case "projectHype": return `Project hype ${signed(effect.amount)}`;
     case "projectIssues": return `Production notes ${signed(effect.amount)}`;
     case "projectPoints": return `${effect.point.toUpperCase()} quality ${signed(effect.amount)}`;
@@ -72,7 +73,7 @@ export default function DecisionEventOverlay({
             <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight text-paper sm:text-3xl">{headline}</h2>
             <p className="mt-3 text-[13px] leading-relaxed text-paper/80 sm:text-sm">{event.text}</p>
             <div className="mt-4 rounded-xl border border-viol/30 bg-viol/[0.06] px-3 py-2 text-[10px] font-bold leading-relaxed text-viol">
-              OUTCOME HIDDEN · Judge the situation, not a tooltip. You will see the real impact after you commit.
+              MAKE THE CALL · You’ll see what happened after you choose.
             </div>
             <div className="mt-4 space-y-2.5">
               {event.choices.map((choice, index) => (
@@ -97,8 +98,8 @@ export default function DecisionEventOverlay({
           </>
         ) : (
           <>
-            <div className="text-[10px] font-extrabold tracking-[0.28em] text-mint">DECISION MADE · RESULT</div>
-            <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight text-paper">{chosen?.label ?? "YOUR DECISION"}</h2>
+            <div className="text-[10px] font-extrabold tracking-[0.28em] text-mint">CONSEQUENCE</div>
+            <h2 className="mt-2 font-display text-2xl font-extrabold leading-tight text-paper">YOUR DECISION: {chosen?.label ?? "COMMITTED"}</h2>
             <p className="mt-2 text-[12px] leading-relaxed text-paper/60">This is what your choice changed:</p>
             <div className="mt-4 space-y-2">
               {impacts.map((line, index) => <div key={index} className="rounded-xl border border-mint/30 bg-mint/[0.06] px-3 py-2 text-[12px] font-bold text-mint">{line}</div>)}
