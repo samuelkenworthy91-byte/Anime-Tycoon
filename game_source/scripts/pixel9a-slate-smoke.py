@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
@@ -39,15 +39,23 @@ def click_text(driver, wait, phrase: str):
     def found(_):
         matches = visible_buttons(driver, phrase)
         return matches[0] if matches else False
-    element = wait.until(found)
-    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", element)
-    element.click()
-    return element
+    for _ in range(4):
+        element = wait.until(found)
+        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", element)
+        try:
+            element.click()
+            return element
+        except ElementClickInterceptedException:
+            dismiss_tutorials(driver, settle=0.35)
+    raise AssertionError(f"Could not click {phrase}: a blocking overlay remained")
 
 
-def dismiss_tutorials(driver):
-    # A fresh browser can surface several first-use explainers. They are not
-    # the target of this smoke test, so close them exactly as a player can.
+def dismiss_tutorials(driver, settle=0.0):
+    # A fresh browser can surface several first-use explainers. Some mount one
+    # React tick after the screen beneath them. Give those overlays a short
+    # chance to appear, then close them exactly as a player can.
+    if settle:
+        time.sleep(settle)
     for _ in range(12):
         closers = [
             el for el in driver.find_elements(By.CSS_SELECTOR, "button[aria-label='Close tutorial']")
@@ -146,8 +154,8 @@ def main():
         )
         assert_touch_target(driver, work_button, "Work/Projects dock button", 36)
         work_button.click()
-        dismiss_tutorials(driver)
         wait.until(lambda d: "STUDIO SLATE" in (d.find_element(By.TAG_NAME, "body").text or ""))
+        dismiss_tutorials(driver, settle=0.5)
         report["checks"].append({"projects": assert_no_horizontal_overflow(driver, "projects")})
         report["screenshots"].append(save_shot(driver, "02-projects-slate-card"))
 
