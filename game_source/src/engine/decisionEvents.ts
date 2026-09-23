@@ -728,11 +728,22 @@ export function rollAdvancedDecision(week: number, ctx: AdvancedDecisionContext)
   ];
 
   const recent = new Set((ctx.recentTemplates ?? []).slice(-8));
-  const all = makers.map((f) => f()).filter((x): x is AdvancedDecisionEvent => !!x);
-  const fresh = all.filter((event) => !recent.has(event.payload.template));
-  const pool = fresh.length ? fresh : all;
-  if (!pool.length) return null;
-  return pick(pool);
+  /* Pick lazily. Building the whole deck used to consume every factory's
+     random staff/project choices even though only one event was shown. That
+     made unrelated seeded simulations drift whenever the deck grew. Drawing
+     factories without replacement keeps eligible events random while only
+     rolling details for candidates we actually inspect. */
+  const remaining = [...makers];
+  let repeatedFallback: AdvancedDecisionEvent | null = null;
+  while (remaining.length) {
+    const index = Math.floor(Math.random() * remaining.length);
+    const [factory] = remaining.splice(index, 1);
+    const event = factory();
+    if (!event) continue;
+    repeatedFallback ??= event;
+    if (!recent.has(event.payload.template)) return event;
+  }
+  return repeatedFallback;
 }
 
 export function modifierMatchesDraft(m: DecisionModifier, d: Draft, week: number): boolean {
