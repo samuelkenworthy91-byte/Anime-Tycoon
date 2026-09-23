@@ -54,6 +54,18 @@ describe("strategic economy expansion", () => {
     expect(strategicCampaignHype(social, draft, 1, [])).toBeGreaterThan(strategicCampaignHype(social, { ...draft, genres: ["nordic"], audience: "adults" }, 1, []));
   });
 
+  it("rewards Sana for correctly matched publicity without rescuing a weak campaign", () => {
+    const social = STRATEGIC_CAMPAIGNS.find((x) => x.id === "social")!;
+    const matched = strategicCampaignHype(social, draft, 1, [], undefined, "marketer");
+    const matchedNormal = strategicCampaignHype(social, draft, 1, [], undefined, "steady");
+    expect(matched).toBeGreaterThan(matchedNormal);
+
+    const offBrief = { ...draft, genres: ["nordic"] as Draft["genres"], audience: "adults" as const };
+    expect(campaignFit(social, offBrief)).toBeLessThan(0.9);
+    expect(strategicCampaignHype(social, offBrief, 1, [], undefined, "marketer"))
+      .toBe(strategicCampaignHype(social, offBrief, 1, [], undefined, "steady"));
+  });
+
   it("lets a rival co-producer inject cash in exchange for a release share", () => {
     const run = initialRun("Test Studio", "steady");
     const project = makeProject(draft, 0, 0);
