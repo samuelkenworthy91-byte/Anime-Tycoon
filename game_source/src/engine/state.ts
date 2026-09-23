@@ -23,6 +23,7 @@ import {
   VILLAINS,
   arcGenreFit,
   comboKey,
+  comboMult,
   dateLabel,
   payoutLabelFor,
   PUN_TITLES,
@@ -1957,7 +1958,12 @@ export function startFullyDelegatedProject(
   );
   const candidatePair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
   const learnedPair = candidatePair.length === 2 && (r.comboLevels[comboKey(candidatePair)] ?? 0) > 0;
-  const genres = learnedPair ? candidatePair : [vision.primaryGenre];
+  /* Full Delegation is allowed to be imperfect, not self-sabotaging. A creator
+     may only commit to a two-genre pairing the studio has actually learned and
+     which is at least a Safe pairing. Unknown/risky pairs fall back to the
+     creator's primary genre instead of routinely producing nonsense. */
+  const sensiblePair = learnedPair && comboMult(candidatePair, true) >= 0.95;
+  const genres = sensiblePair ? candidatePair : [vision.primaryGenre];
 
   const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
   const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
