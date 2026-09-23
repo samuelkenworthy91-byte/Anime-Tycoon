@@ -271,6 +271,87 @@ function remainingWeeks(p: Project): number {
   return rem;
 }
 
+const FULL_DELEGATION_SCHEDULE_COST = 22_000;
+const FULL_DELEGATION_RUSH_BASE_COST = 18_000;
+const FULL_DELEGATION_RESCUE_RESERVE = 60_000;
+const RUSH_STAGES = new Set<Project["stage"]>(["animation", "sound", "post"]);
+const SCHEDULE_STAGES = new Set<Project["stage"]>(["concept", "preprod", "animation", "sound", "post"]);
+
+function delegatedOwner(auto: NonNullable<Project["auto"]>, staff: Staff[]): string {
+  return auto.directorStaffId
+    ? staff.find((member) => member.id === auto.directorStaffId)?.name ?? "The delegated creator"
+    : "The delegated creator";
+}
+
+/** A fully delegated creator is allowed to solve routine schedule pressure
+ * without turning Full Delegation into another inbox. Rescue spending is
+ * deliberately conservative: protect a cash reserve, extend once, and only
+ * rush when the project is already under deadline pressure. */
+function handleFullDelegationCrisis(
+  run: RunState,
+  project: Project,
+  crisis: Crisis,
+  staff: Staff[],
+  week: number,
+  availableCash: number,
+): { project: Project; cashDelta: number; notices: string[] } {
+  let p = project;
+  let cashDelta = 0;
+  const notices: string[] = [];
+  const auto = p.auto!;
+  const owner = delegatedOwner(auto, staff);
+  const reserve = Math.max(FULL_DELEGATION_RESCUE_RESERVE, Math.round(p.weeklyBurn * 4));
+  const canSpend = (cost: number) => availableCash + cashDelta - cost >= reserve;
+  const nowDay = Math.max(run.day ?? 0, week * 7);
+
+  if (crisis.id === "movie") {
+    p = { ...p, auto: { ...auto, warnedMovie: true } };
+    notices.push(`🎬 FULL DELEGATION: ${owner} handles the critical ${p.stage} review on “${p.draft.title}” without calling you in.`);
+    return { project: p, cashDelta, notices };
+  }
+
+  if (crisis.id === "deadline") {
+    const history = p.interventions ?? [];
+
+    if (
+      SCHEDULE_STAGES.has(p.stage) &&
+      !history.includes("schedule") &&
+      canSpend(FULL_DELEGATION_SCHEDULE_COST)
+    ) {
+      p = {
+        ...p,
+        deadlineWeek: p.deadlineWeek + 2,
+        deadlineDay: (p.deadlineDay ?? p.deadlineWeek * 7) + 14,
+        hype: Math.max(0, p.hype - 6),
+        spent: p.spent + FULL_DELEGATION_SCHEDULE_COST,
+        interventions: [...history, "schedule"],
+      };
+      cashDelta -= FULL_DELEGATION_SCHEDULE_COST;
+      notices.push(`🗓 FULL DELEGATION: ${owner} buys two more weeks for “${p.draft.title}” (−£${FULL_DELEGATION_SCHEDULE_COST.toLocaleString("en-GB")}, hype −6).`);
+    }
+
+    const rushHistory = p.interventions ?? [];
+    const rushUses = rushHistory.filter((id) => id === "crunch").length;
+    const rushCost = FULL_DELEGATION_RUSH_BASE_COST * Math.pow(2, rushUses);
+    const rushActive = (p.executiveRushUntilDay ?? -1) >= nowDay;
+    if (RUSH_STAGES.has(p.stage) && !rushActive && canSpend(rushCost)) {
+      p = {
+        ...p,
+        spent: p.spent + rushCost,
+        interventions: [...rushHistory, "crunch"],
+        executiveRushUntilDay: Math.max(nowDay, p.executiveRushUntilDay ?? nowDay) + 14,
+      };
+      cashDelta -= rushCost;
+      notices.push(`⚡ FULL DELEGATION: ${owner} calls an Executive Rush on “${p.draft.title}” (−£${rushCost.toLocaleString("en-GB")}). The next Rush will cost twice as much.`);
+    }
+  }
+
+  /* Issue-heavy creator-led projects keep moving rather than demanding a
+     mandatory player response. That imperfection is intentional: the creator
+     can still finish a rough show, while TAKE OVER remains available anytime. */
+  return { project: p, cashDelta, notices };
+}
+
 /* ----------------------------------------------------- weekly tick */
 export interface DelegatedTick {
   projects: Project[];
@@ -303,16 +384,26 @@ export function tickDelegated(
     if (p0.stage === "airing" || p0.stage === "done") return p0;
     let p: Project = p0;
 
-    /* crises pause automation and ask the player in */
+    /* AUTO MANAGE asks the player to intervene. FULL DELEGATION is a
+       different promise: the named creator handles routine crises themselves,
+       with conservative rescue spending, and keeps the show moving. */
     const crisis = crisisOf(p, week);
     if (crisis && !auto0.intervention) {
-      p = { ...p, auto: { ...auto0, intervention: true, warnedMovie: true } };
-      notices.push(`🚨 ${crisis.text}`);
-      return p;
+      if (auto0.mode === "full") {
+        const handled = handleFullDelegationCrisis(run, p, crisis, staff, week, run.cash + cash);
+        p = handled.project;
+        cash += handled.cashDelta;
+        notices.push(...handled.notices);
+      } else {
+        p = { ...p, auto: { ...auto0, intervention: true, warnedMovie: true } };
+        notices.push(`🚨 ${crisis.text}`);
+        return p;
+      }
     }
 
-    /* waiting milestone → run it automatically (unless the player is due) */
-    if (p.milestone && !auto0.intervention) {
+    /* waiting milestone → run it automatically unless an AUTO MANAGE crisis
+       has explicitly paused the project. */
+    if (p.milestone && !p.auto?.intervention) {
       const outcome = autoSprintOutcome(run, p, p.milestone, fx, staff);
       const before = p.rdGained;
       const folded = applyMilestoneOutcome(p, outcome);
