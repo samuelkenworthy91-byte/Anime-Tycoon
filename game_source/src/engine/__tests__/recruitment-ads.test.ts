@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DANTE_HIRE_CHANCE, AVRIL_HIRE_CHANCE, rollHire, rollHirePool } from "../careers";
-import { DANTE_WORKER_LOOK_INDEX, AVRIL_WORKER_LOOK_INDEX, RECENT_WORKER_LOOK_INDICES, STANDARD_WORKER_LOOK_INDICES } from "../data";
+import { DANTE_HIRE_CHANCE, AVRIL_HIRE_CHANCE, RECENT_WORKER_RECRUITMENT_WEIGHT, rollHire, rollHirePool } from "../careers";
+import { DANTE_WORKER_LOOK_INDEX, AVRIL_WORKER_LOOK_INDEX, STANDARD_WORKER_LOOK_INDICES } from "../data";
 import {
   RECRUITMENT_AD_BASE_COST,
   RECRUITMENT_AD_COST_STEP,
@@ -24,21 +24,28 @@ describe("recruitment adverts", () => {
     expect(pool.filter((candidate) => candidate.name === "Dante")).toHaveLength(1);
   });
 
-  it("reserves Dante/Avril while materially favouring the recent worker-art pool", () => {
+  it("reserves Dante/Avril while giving every ordinary worker look equal recruitment weight", () => {
     expect(DANTE_HIRE_CHANCE).toBe(0.01);
     expect(AVRIL_HIRE_CHANCE).toBe(0.01);
+    expect(RECENT_WORKER_RECRUITMENT_WEIGHT).toBe(0);
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(DANTE_WORKER_LOOK_INDEX);
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(AVRIL_WORKER_LOOK_INDEX);
-    let x = 0x9e3779b9;
-    const rng = () => {
-      x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
-      return (x >>> 0) / 4_294_967_296;
-    };
-    const recent = new Set(RECENT_WORKER_LOOK_INDICES);
-    const sample = Array.from({ length: 600 }, () => rollHire(0, rng))
-      .filter((candidate) => candidate.name !== "Dante" && candidate.name !== "Avril");
-    const recentRate = sample.filter((candidate) => recent.has(candidate.look ?? -1)).length / sample.length;
-    expect(recentRate).toBeGreaterThan(0.6);
+
+    // Drive the appearance draw through evenly-spaced buckets. rollHire consumes
+    // earlier RNG calls, so repeat each value enough times to reach every bucket.
+    const seen = new Set<number>();
+    for (let bucket = 0; bucket < STANDARD_WORKER_LOOK_INDICES.length; bucket += 1) {
+      let calls = 0;
+      const value = (bucket + 0.5) / STANDARD_WORKER_LOOK_INDICES.length;
+      const rng = () => {
+        calls += 1;
+        // Keep the special-hire roll outside Dante/Avril's 1% windows.
+        return calls % 8 === 0 ? 0.5 : value;
+      };
+      const candidate = rollHire(0, rng);
+      if (candidate.name !== "Dante" && candidate.name !== "Avril" && candidate.look !== undefined) seen.add(candidate.look);
+    }
+    expect([...seen].sort((a, b) => a - b)).toEqual([...STANDARD_WORKER_LOOK_INDICES]);
   });
 
   it("increases the price for each refresh during the same month", () => {

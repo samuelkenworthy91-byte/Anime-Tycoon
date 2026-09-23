@@ -16,6 +16,8 @@ describe("worker sprite gender naming", () => {
       27:"male",28:"neutral",29:"neutral",30:"male",31:"female",
       32:"male",33:"male",34:"female",35:"female",36:"female",
       37:"male",38:"female",39:"male",40:"female",41:"male",42:"female",
+      43:"female",44:"female",45:"female",46:"female",47:"female",
+      48:"male",49:"male",50:"male",51:"male",52:"male",
     };
     expect(WORKER_LOOK_GENDERS).toHaveLength(WORKER_LOOKS.length);
     WORKER_LOOKS.forEach((look, index) => {

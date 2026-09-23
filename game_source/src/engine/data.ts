@@ -916,6 +916,7 @@ export interface WorkerLook {
 const BASE_WORKER_LOOK_IDS = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27] as const;
 const NEW_WORKER_LOOK_IDS = [28, 29, 30, 31] as const;
 const WORKER_EXPANSION_LOOK_IDS = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42] as const;
+const WORKER_2026_09_LOOK_IDS = [43, 44, 45, 46, 47, 48, 49, 50, 51, 52] as const;
 export const WORKER_LOOKS: WorkerLook[] = [
   ...BASE_WORKER_LOOK_IDS.map((n) => ({
     sprite: `img/sprite-worker-${n}.png`,
@@ -931,6 +932,10 @@ export const WORKER_LOOKS: WorkerLook[] = [
     sprite: `img/sprite-worker-${n}.webp`,
     portrait: `img/portrait-worker-${n}.webp`,
   })),
+  ...WORKER_2026_09_LOOK_IDS.map((n) => ({
+    sprite: `img/sprite-worker-${n}.webp`,
+    portrait: `img/portrait-worker-${n}.webp`,
+  })),
 ];
 
 /** Visual name-gender judgement from the actual shipped full-body sprites.
@@ -941,6 +946,7 @@ const WORKER_LOOK_FILE_IDS = [
   ...NEW_WORKER_LOOK_IDS,
   32,
   ...WORKER_EXPANSION_LOOK_IDS,
+  ...WORKER_2026_09_LOOK_IDS,
 ] as const;
 const WORKER_NAME_GENDER_BY_FILE: Record<number, PersonNameGender> = {
   1: "male", 2: "female", 3: "male", 4: "female", 5: "male",
@@ -952,6 +958,8 @@ const WORKER_NAME_GENDER_BY_FILE: Record<number, PersonNameGender> = {
   32: "male", 33: "male", 34: "female", 35: "female", 36: "female",
   37: "male", 38: "female", 39: "male", 40: "female", 41: "male",
   42: "female",
+  43: "female", 44: "female", 45: "female", 46: "female", 47: "female",
+  48: "male", 49: "male", 50: "male", 51: "male", 52: "male",
 };
 export const WORKER_LOOK_GENDERS: PersonNameGender[] = WORKER_LOOK_FILE_IDS.map(
   (fileId) => WORKER_NAME_GENDER_BY_FILE[fileId] ?? "neutral",
@@ -966,7 +974,8 @@ export const AVRIL_WORKER_LOOK_INDEX = 33;
 export const STANDARD_WORKER_LOOK_INDICES = WORKER_LOOKS
   .map((_, index) => index)
   .filter((index) => index !== DANTE_WORKER_LOOK_INDEX && index !== AVRIL_WORKER_LOOK_INDEX);
-/** QoL2: recent painted worker batches are deliberately more visible in recruitment. */
+/** Kept as a useful grouping for UI/tests. Recruitment no longer gives this
+ * group extra probability: every ordinary worker look has equal weight. */
 export const RECENT_WORKER_LOOK_INDICES = STANDARD_WORKER_LOOK_INDICES
   .filter((index) => index >= BASE_WORKER_LOOK_IDS.length);
 export const STANDARD_WORKER_LOOK_COUNT = STANDARD_WORKER_LOOK_INDICES.length;
@@ -991,7 +1000,9 @@ export function rollCandidate(
   const main = Math.round(34 + rng() * 34 + tier);
   const off = () => Math.round(12 + rng() * 30 + tier * 0.5);
   const id = `s${++staffId}_${Date.now()}${Math.floor(rng() * 999)}`;
-  const look = STANDARD_WORKER_LOOK_INDICES[(staffId + Math.floor(rng() * 3)) % STANDARD_WORKER_LOOK_COUNT];
+  const look = STANDARD_WORKER_LOOK_INDICES[
+    Math.min(STANDARD_WORKER_LOOK_COUNT - 1, Math.floor(rng() * STANDARD_WORKER_LOOK_COUNT))
+  ];
   const gender = workerLookNameGender(look);
   const s: Staff = {
     id,

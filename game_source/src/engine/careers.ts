@@ -2,7 +2,6 @@ import {
   AVRIL_WORKER_LOOK_INDEX,
   DANTE_WORKER_LOOK_INDEX,
   GENRES,
-  RECENT_WORKER_LOOK_INDICES,
   ROLE_POINT,
   STANDARD_WORKER_LOOK_INDICES,
   STAFF_STAT_CAP,
@@ -473,8 +472,9 @@ export function applyAvrilEasterEgg(s: Staff, week: number): Staff {
   };
 }
 
-/** roll a fresh candidate with a full personality */
-export const RECENT_WORKER_RECRUITMENT_WEIGHT = 0.65;
+/** Legacy export retained for compatibility. Recent artwork no longer receives
+ * a recruitment boost: ordinary appearances are sampled uniformly. */
+export const RECENT_WORKER_RECRUITMENT_WEIGHT = 0;
 
 export function rollHire(
   week: number,
@@ -483,11 +483,7 @@ export function rollHire(
   roleOverride?: StaffRole,
 ): Staff {
   const rolled = rollCandidate(week, roleOverride, rng);
-  const availableStandard = STANDARD_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
-  const availableRecent = RECENT_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
-  const appearancePool = availableRecent.length && rng() < RECENT_WORKER_RECRUITMENT_WEIGHT
-    ? availableRecent
-    : availableStandard;
+  const appearancePool = STANDARD_WORKER_LOOK_INDICES.filter((look) => !excludedLooks.has(look));
   const standardLook = appearancePool.length
     ? appearancePool[Math.min(appearancePool.length - 1, Math.floor(rng() * appearancePool.length))]
     : rolled.look;

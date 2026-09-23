@@ -43,7 +43,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("worker art expansion and special hires", () => {
   it("wires every committed sprite and portrait path", () => {
-    for (let id = 28; id <= 42; id += 1) {
+    for (let id = 28; id <= 52; id += 1) {
       for (const kind of ["sprite", "portrait"] as const) {
         const rel = `img/${kind}-worker-${id}.webp`;
         const abs = path.resolve(process.cwd(), "public", rel);
@@ -59,8 +59,12 @@ describe("worker art expansion and special hires", () => {
       sprite: "img/sprite-worker-32.webp",
       portrait: "img/portrait-worker-32.webp",
     });
-    expect(WORKER_LOOKS.slice(31)).toEqual(Array.from({ length: 10 }, (_, offset) => {
+    expect(WORKER_LOOKS.slice(31, 41)).toEqual(Array.from({ length: 10 }, (_, offset) => {
       const id = 33 + offset;
+      return { sprite: `img/sprite-worker-${id}.webp`, portrait: `img/portrait-worker-${id}.webp` };
+    }));
+    expect(WORKER_LOOKS.slice(41)).toEqual(Array.from({ length: 10 }, (_, offset) => {
+      const id = 43 + offset;
       return { sprite: `img/sprite-worker-${id}.webp`, portrait: `img/portrait-worker-${id}.webp` };
     }));
   });
@@ -84,14 +88,26 @@ describe("worker art expansion and special hires", () => {
   it("rolls every ordinary new look while excluding both special-hire looks", () => {
     expect(DANTE_WORKER_LOOK_INDEX).toBe(30);
     expect(AVRIL_WORKER_LOOK_INDEX).toBe(33);
-    expect(STANDARD_WORKER_LOOK_COUNT).toBe(39);
+    expect(STANDARD_WORKER_LOOK_COUNT).toBe(49);
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(DANTE_WORKER_LOOK_INDEX);
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(AVRIL_WORKER_LOOK_INDEX);
-    expect(STANDARD_WORKER_LOOK_INDICES.filter((index) => index >= 31)).toEqual([31, 32, 34, 35, 36, 37, 38, 39, 40]);
+    expect(STANDARD_WORKER_LOOK_INDICES.filter((index) => index >= 31)).toEqual([
+      31, 32, 34, 35, 36, 37, 38, 39, 40,
+      41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+    ]);
 
-    vi.spyOn(Math, "random").mockReturnValue(0);
-    const rolled = new Set(Array.from({ length: STANDARD_WORKER_LOOK_COUNT }, (_, week) => rollCandidate(week).look));
-    expect([...rolled].sort((a, b) => (a ?? -1) - (b ?? -1))).toEqual([...STANDARD_WORKER_LOOK_INDICES]);
+    const rolled = new Set<number>();
+    for (let bucket = 0; bucket < STANDARD_WORKER_LOOK_COUNT; bucket += 1) {
+      let calls = 0;
+      const bucketValue = (bucket + 0.5) / STANDARD_WORKER_LOOK_COUNT;
+      const rng = () => {
+        calls += 1;
+        return calls === 6 ? bucketValue : 0.5;
+      };
+      const look = rollCandidate(bucket, undefined, rng).look;
+      if (look !== undefined) rolled.add(look);
+    }
+    expect([...rolled].sort((a, b) => a - b)).toEqual([...STANDARD_WORKER_LOOK_INDICES]);
   });
 
   it("gives Dante and Avril separate exact one-percent hire windows", () => {
