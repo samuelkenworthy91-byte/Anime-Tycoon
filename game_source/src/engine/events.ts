@@ -4,11 +4,11 @@
  *  Unlike commission offers (which live on the market screen and answer
  *  yes/no), these are genuine dilemmas: 2–3 responses, each with a real
  *  trade-off in cash, hype, issues, morale or fans. They are rolled on a
- *  slow, irregular cadence (roughly once every couple of months, never
- *  two at once) so they feel like an occasion instead of a nagging popup.
+ *  irregular cadence (roughly four consequential decisions per game-year,
+ *  never two at once) so they feel important instead of becoming popup spam.
  *
- *  Every effect is concrete and stated on the button — no "+5% and a
- *  thumbs up" here. The player picks the price they're willing to pay.
+ *  Choice buttons describe only the response. Mechanical consequences stay
+ *  hidden until the player commits, then the outcome screen reveals them.
  * ==================================================================== */
 
 import { moraleDelta, moraleOf } from "./careers";
@@ -35,7 +35,7 @@ export type StudioEventKind =
 export interface EventChoice {
   id: string;
   label: string;
-  /** what this response costs you, in plain words */
+  /** post-choice consequence copy; never render this before the player commits */
   effect: string;
 }
 
