@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { FORMAT_ORDER, MEDIUMS, type Draft, type MediumId, type SlotId } from "../data";
 import { rollHire } from "../careers";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
+import { seededRng } from "../scoring";
 import {
   advanceWeeks,
   applyMilestone,
@@ -113,6 +114,13 @@ const botHire = (r: RunState): RunState => {
 };
 
 function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } {
+  /* Keep the QA career reproducible. This test used to call itself seeded
+     while every system still read Math.random, so unrelated event-deck changes
+     could make a 12-year staff assertion randomly pass or fail. */
+  const seed = [...seedLabel].reduce((value, ch) => ((value * 33) ^ ch.charCodeAt(0)) >>> 0, 0x51a7e);
+  const originalRandom = Math.random;
+  Math.random = seededRng(seed);
+  try {
   /* the sim measures the 12-year economy, so the studio starts as an
      established one that has already climbed the format ladder (the ladder
      itself is covered by format-progression.test.ts) */
@@ -134,6 +142,9 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
         if (res) r = res.run;
       }
     }
+    /* An established studio hires before spending the week's production
+       budget; otherwise the bot can greenlight itself into a no-staff career. */
+    r = botHire(r);
     /* greenlight up to capacity when the budget allows it */
     let guard = 0;
     while (guard++ < 4) {
@@ -150,9 +161,9 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
       const unlocked = unlockFormat(r, medium);
       if (unlocked) r = unlocked;
     }
-    /* keep teams staffed and staff hired */
+    /* keep teams staffed; hiring already happened before greenlight so
+       production budget cannot starve the recruitment step. */
     r = botAssign(r);
-    r = botHire(r);
     r = botContract(r);
     /* A real player sees ~40 work-check cycles in a seven-day week at 1x.
        Simulate those visible contributions explicitly before the calendar tick. */
@@ -170,6 +181,9 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
     }
   }
   return { run: r, maxLevelSeen };
+  } finally {
+    Math.random = originalRandom;
+  }
 }
 
 describe("long-run simulation", () => {
