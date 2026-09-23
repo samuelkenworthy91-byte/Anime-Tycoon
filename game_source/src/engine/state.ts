@@ -17,6 +17,10 @@ import {
   AIR_WEEKS,
   castById,
   CAST_V2,
+  PETS,
+  PROTAGONISTS,
+  SECONDARY,
+  VILLAINS,
   arcGenreFit,
   comboKey,
   dateLabel,
@@ -1955,12 +1959,13 @@ export function startFullyDelegatedProject(
   const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
   const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
   const castPick = (role: "protag" | "secondary" | "pet" | "villain", preferredId?: string) => {
-    const preferred = preferredId ? castById(preferredId) : undefined;
-    if (preferred && preferred.role === role && preferred.type === animeType && preferred.visibleAff.some((g) => genres.includes(g))) return preferred;
-    const fitting = CAST_V2.filter((member) => member.role === role && member.type === animeType && member.visibleAff.some((g) => genres.includes(g)));
-    const typed = fitting.length ? fitting : CAST_V2.filter((member) => member.role === role && member.type === animeType);
-    const pool = typed.length ? typed : CAST_V2.filter((member) => member.role === role);
-    return pool[Math.floor(rng() * pool.length)] ?? castById(preferredId ?? "");
+    const activePool = role === "protag" ? PROTAGONISTS : role === "secondary" ? SECONDARY : role === "pet" ? PETS : VILLAINS;
+    const preferred = preferredId ? activePool.find((member) => member.id === preferredId) : undefined;
+    if (preferred && preferred.type === animeType && preferred.visibleAff.some((g) => genres.includes(g))) return preferred;
+    const fitting = activePool.filter((member) => member.type === animeType && member.visibleAff.some((g) => genres.includes(g)));
+    const typed = fitting.length ? fitting : activePool.filter((member) => member.type === animeType);
+    const pool = typed.length ? typed : activePool;
+    return pool[Math.floor(rng() * pool.length)] ?? pool[0];
   };
 
   const protag = castPick("protag", vision.cast.protag);
