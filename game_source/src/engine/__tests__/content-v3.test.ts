@@ -42,8 +42,8 @@ describe("V3/V5 content integration after catalog rebuild", () => {
     expect(CAST_V2.filter(isCastingActive).every((member) => member.epithet && member.epithet.split(/\s+/).length >= 2)).toBe(true);
   });
 
-  it("preserves the existing worker looks and appends the ten-worker expansion", () => {
-    expect(WORKER_LOOKS).toHaveLength(41);
+  it("preserves the existing worker looks and appends both ten-worker expansions", () => {
+    expect(WORKER_LOOKS).toHaveLength(51);
     expect(WORKER_LOOKS[14].sprite).toContain("sprite-worker-16.png");
     expect(WORKER_LOOKS[15].sprite).toContain("sprite-worker-17.png");
     expect(WORKER_LOOKS[21].sprite).toContain("sprite-worker-23.png");
@@ -54,6 +54,8 @@ describe("V3/V5 content integration after catalog rebuild", () => {
     expect(WORKER_LOOKS[30].sprite).toContain("sprite-worker-32.webp");
     expect(WORKER_LOOKS[31].sprite).toContain("sprite-worker-33.webp");
     expect(WORKER_LOOKS[40].sprite).toContain("sprite-worker-42.webp");
+    expect(WORKER_LOOKS[41].sprite).toContain("sprite-worker-43.webp");
+    expect(WORKER_LOOKS[50].sprite).toContain("sprite-worker-52.webp");
   });
 
   it("loads unique arcs and valid combo references", () => {
