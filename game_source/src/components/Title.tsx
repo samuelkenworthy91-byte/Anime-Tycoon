@@ -206,10 +206,16 @@ export default function Title({
         <div className="relative h-full shrink-0" style={{ aspectRatio: "720 / 1279" }}>
           <img
             src={TITLE_ART}
-            alt="Anime Runner — Build your studio. Make the next big hit."
+            alt="Anime Runner — Build your studio. Make the shows. Leave a legacy."
             className="pointer-events-none h-full w-full select-none object-cover"
             draggable={false}
           />
+
+          {view === "menu" && (
+            <div className="pointer-events-none absolute left-[12%] top-[29.0%] z-20 flex w-[76%] items-center justify-center rounded-full border border-cyanx/25 bg-[#07101d]/92 px-2 py-1 text-center shadow-[0_0_20px_rgba(61,225,255,.14)] backdrop-blur-md">
+              <span className="font-display text-[8px] font-extrabold tracking-[0.12em] text-paper/90">BUILD YOUR STUDIO · MAKE THE SHOWS · LEAVE A LEGACY</span>
+            </div>
+          )}
 
           {view === "menu" && (
             <>
