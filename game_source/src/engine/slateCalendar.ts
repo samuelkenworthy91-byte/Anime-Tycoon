@@ -91,6 +91,25 @@ export function slateCalendarWarnings(run: RunState, plans: readonly SlatePlan[]
   const warnings: SlateCalendarWarning[] = [];
   if (!plans.length) return warnings;
 
+  for (const plan of plans) {
+    const startWeek = slateEstimatedStartWeek(plan);
+    if (startWeek < run.week) {
+      warnings.push({
+        id: `late-plan:${plan.id}`,
+        severity: "danger",
+        title: "TOO LATE FOR THIS WINDOW",
+        body: `${plan.title} would need to have started ${run.week - startWeek} week${run.week - startWeek === 1 ? "" : "s"} ago to hit this release window at its planned scale. Move the release later or reduce its importance.`,
+      });
+    } else if (startWeek - run.week <= 2) {
+      warnings.push({
+        id: `tight-plan:${plan.id}`,
+        severity: "caution",
+        title: "GREENLIGHT SOON",
+        body: `${plan.title}'s estimated development starts in ${Math.max(0, startWeek - run.week)} week${startWeek - run.week === 1 ? "" : "s"}. Start setup soon if you want to keep this window.`,
+      });
+    }
+  }
+
   const plannedCost = plans.reduce((sum, plan) => sum + SLATE_ESTIMATED_COST[plan.importance], 0);
   if (plannedCost > Math.max(150_000, run.cash * 0.9)) {
     warnings.push({
