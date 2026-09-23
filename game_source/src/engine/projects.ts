@@ -217,7 +217,7 @@ export interface Project {
   /** the deal financing this show — null/undefined = fully self-funded */
   commission?: ProjectCommission | null;
   /** advance planning earned from the Studio Slate before this project was greenlit */
-  slatePrep?: { planId: string; importance: "supporting" | "standard" | "tentpole"; weeksPlanned: number; hypeBonus: number; burnDiscount: number; deadlineBufferWeeks: number };
+  slatePrep?: { planId: string; importance: "supporting" | "standard" | "tentpole"; weeksPlanned: number; label?: string; hypeBonus: number; burnDiscount: number; paceBonus?: number; issueChanceMult?: number; deadlineBufferWeeks: number; targetWeek?: number };
   /** first few fully self-funded originals suffer rookie-studio inefficiency at final scoring */
   rookieSoloMult?: number;
   /** small spontaneous polish win rolled as the edit bay hands off to marketing */
@@ -496,7 +496,7 @@ export function tickProjectsWeek(
         p.progress += teamSpeed(p, team, fx, mods, studio) * load;
         /* sustained over-capacity creates rework instead of making a fifth simultaneous
            prestige show free. */
-        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
+        if (load < 0.72 && week % 2 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1) * (p.slatePrep?.issueChanceMult ?? 1)) p.issues += 1;
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
@@ -574,7 +574,7 @@ export function tickProjectsDay(
       } else {
         const load = departmentLoad[p.id] ?? 1;
         p.progress += (teamSpeed(p, team, fx, mods, studio) * load) / 7;
-        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1)) p.issues += 1;
+        if (load < 0.72 && day % 14 === 0 && (p.stage === "animation" || p.stage === "post") && Math.random() < (studio.issueChanceMult ?? 1) * (p.slatePrep?.issueChanceMult ?? 1)) p.issues += 1;
         if (p.progress >= plan) {
           const gate = STAGE_GATE[p.stage];
           if (gate && !p.milestonesDone.includes(gate)) {
