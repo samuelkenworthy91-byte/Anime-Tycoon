@@ -319,7 +319,7 @@ function ProjectCard({
                         const key = interventionInvestmentKey(d.id, tier.id);
                         const tierDef = { ...d, id: key, baseId: d.id, investmentTier: tier.id };
                         const block = interventionBlock(run, p, tierDef);
-                        const quote = interventionQuote(run, d, tier.id, p.draft);
+                        const quote = interventionQuote(run, d, tier.id, p.draft, p);
                         return (
                           <button
                             key={tier.id}
@@ -330,7 +330,7 @@ function ProjectCard({
                             className={cn("btn-press rounded-md border px-1.5 py-1 text-center", block ? "border-line/30 text-paper/25" : "border-gold/30 bg-ink/35 hover:border-gold")}
                           >
                             <div className="text-[7px] font-black tracking-wide text-paper/55">{tier.name.toUpperCase()}</div>
-                            <div className="text-[9px] font-extrabold text-gold">−{formatGBPShort(quote?.cost ?? d.cost)}</div>
+                            <div className="text-[9px] font-extrabold text-gold">−{formatGBPShort(quote?.cost ?? d.cost)}</div>{d.id === "crunch" && <div className="mt-0.5 text-[7px] font-bold text-neon">PRICE DOUBLES EACH USE</div>}
                           </button>
                         );
                       })}
