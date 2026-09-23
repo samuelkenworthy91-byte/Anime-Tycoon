@@ -147,6 +147,67 @@ describe("crisis detection", () => {
 });
 
 /* -------------------------------------------------------- weekly tick */
+describe("Full Delegation crisis handling", () => {
+  it("keeps Full Delegation moving through deadline pressure and can buy schedule plus Executive Rush", () => {
+    const r = run({ week: 12, day: 84, cash: 1_000_000 });
+    const p = proj({
+      stage: "animation",
+      progress: 0,
+      deadlineWeek: 13,
+      deadlineDay: 91,
+      hype: 20,
+      interventions: [],
+      auto: { headSlot: null, mode: "full", directorStaffId: "a", startedWeek: 0, intervention: false },
+    });
+    const tick = tickDelegated(r, [p], r.staff, 12, facilityFX({}));
+    const next = tick.projects[0];
+    expect(next.auto?.intervention).toBe(false);
+    expect(next.deadlineWeek).toBe(15);
+    expect(next.hype).toBe(14);
+    expect(next.interventions).toEqual(expect.arrayContaining(["schedule", "crunch"]));
+    expect(next.executiveRushUntilDay).toBe(98);
+    expect(tick.cash).toBe(-40_000);
+    expect(tick.notices.some((notice) => /Executive Rush/i.test(notice))).toBe(true);
+  });
+
+  it("doubles the delegated creator's repeat Rush cost exactly", () => {
+    const r = run({ week: 20, day: 140, cash: 1_000_000 });
+    const p = proj({
+      stage: "sound",
+      progress: 0,
+      deadlineWeek: 20,
+      deadlineDay: 140,
+      hype: 10,
+      interventions: ["schedule", "crunch"],
+      executiveRushUntilDay: 120,
+      auto: { headSlot: null, mode: "full", directorStaffId: "a", startedWeek: 0, intervention: false },
+    });
+    const tick = tickDelegated(r, [p], r.staff, 20, facilityFX({}));
+    expect(tick.projects[0].interventions?.filter((id) => id === "crunch")).toHaveLength(2);
+    expect(tick.cash).toBe(-36_000);
+  });
+
+  it("does not force a player intervention for issue pressure on a fully delegated show", () => {
+    const r = run({ week: 12 });
+    const p = proj({
+      stage: "post",
+      issues: 10,
+      deadlineWeek: 100,
+      auto: { headSlot: null, mode: "full", directorStaffId: "a", startedWeek: 0, intervention: false },
+    });
+    const tick = tickDelegated(r, [p], r.staff, 12, facilityFX({}));
+    expect(tick.projects[0].auto?.intervention).toBe(false);
+  });
+
+  it.each(["concept", "animation", "post", "ready"] as const)("TAKE OVER works during %s", (stage) => {
+    const r = run();
+    const p = proj({ stage, auto: { headSlot: null, mode: "full", directorStaffId: "a", startedWeek: 0, intervention: false } });
+    const out = takeOver({ ...r, projects: [p] }, p.id);
+    expect(out.projects[0].stage).toBe(stage);
+    expect(out.projects[0].auto).toBeNull();
+  });
+});
+
 describe("tickDelegated", () => {
   it("runs a waiting milestone automatically and opens the next stage", () => {
     const r = run();
