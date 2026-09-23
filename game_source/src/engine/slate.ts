@@ -76,7 +76,10 @@ export interface SlatePreparation {
   label: "IMPROVISED" | "PREPARED" | "READY" | "LOCKED" | "LONG LEAD";
   hypeBonus: number;
   burnDiscount: number;
+  paceBonus: number;
+  issueChanceMult: number;
   deadlineBufferWeeks: number;
+  targetWeek: number;
 }
 
 /** Advance planning now matters progressively rather than flipping one binary
@@ -90,13 +93,15 @@ export function slatePreparation(plan: SlatePlan, nowWeek: number, showrunner?: 
   let label: SlatePreparation["label"] = "IMPROVISED";
   let hypeBonus = 0;
   let burnDiscount = 0;
+  let paceBonus = 0;
+  let issueChanceMult = 1;
   let deadlineBufferWeeks = 0;
   if (effectiveWeeks >= 20) {
-    label = "LONG LEAD"; hypeBonus = 8 + importanceHype; burnDiscount = 0.08; deadlineBufferWeeks = 2;
+    label = "LONG LEAD"; hypeBonus = 8 + importanceHype; burnDiscount = 0.08; paceBonus = 0.05; issueChanceMult = 0.85; deadlineBufferWeeks = 2;
   } else if (effectiveWeeks >= 12) {
-    label = "LOCKED"; hypeBonus = 6 + importanceHype; burnDiscount = 0.07; deadlineBufferWeeks = 1;
+    label = "LOCKED"; hypeBonus = 6 + importanceHype; burnDiscount = 0.07; paceBonus = 0.05; issueChanceMult = 0.90; deadlineBufferWeeks = 1;
   } else if (effectiveWeeks >= 8) {
-    label = "READY"; hypeBonus = 4 + importanceHype; burnDiscount = 0.05;
+    label = "READY"; hypeBonus = 4 + importanceHype; burnDiscount = 0.05; paceBonus = 0.03;
   } else if (effectiveWeeks >= 4) {
     label = "PREPARED"; hypeBonus = 2 + importanceHype; burnDiscount = 0.03;
   }
@@ -109,7 +114,10 @@ export function slatePreparation(plan: SlatePlan, nowWeek: number, showrunner?: 
     label,
     hypeBonus,
     burnDiscount,
+    paceBonus,
+    issueChanceMult,
     deadlineBufferWeeks,
+    targetWeek: plan.targetWeek,
   };
 }
 
