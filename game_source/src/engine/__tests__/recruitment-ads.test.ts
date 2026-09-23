@@ -31,21 +31,24 @@ describe("recruitment adverts", () => {
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(DANTE_WORKER_LOOK_INDEX);
     expect(STANDARD_WORKER_LOOK_INDICES).not.toContain(AVRIL_WORKER_LOOK_INDEX);
 
-    // Drive the appearance draw through evenly-spaced buckets. rollHire consumes
-    // earlier RNG calls, so repeat each value enough times to reach every bucket.
-    const seen = new Set<number>();
-    for (let bucket = 0; bucket < STANDARD_WORKER_LOOK_INDICES.length; bucket += 1) {
-      let calls = 0;
-      const value = (bucket + 0.5) / STANDARD_WORKER_LOOK_INDICES.length;
-      const rng = () => {
-        calls += 1;
-        // Keep the special-hire roll outside Dante/Avril's 1% windows.
-        return calls % 8 === 0 ? 0.5 : value;
-      };
+    let x = 0x6d2b79f5;
+    const rng = () => {
+      x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+      return (x >>> 0) / 4_294_967_296;
+    };
+    const counts = new Map(STANDARD_WORKER_LOOK_INDICES.map((look) => [look, 0]));
+    for (let i = 0; i < 12_000; i += 1) {
       const candidate = rollHire(0, rng);
-      if (candidate.name !== "Dante" && candidate.name !== "Avril" && candidate.look !== undefined) seen.add(candidate.look);
+      if (candidate.name === "Dante" || candidate.name === "Avril" || candidate.look === undefined) continue;
+      counts.set(candidate.look, (counts.get(candidate.look) ?? 0) + 1);
     }
-    expect([...seen].sort((a, b) => a - b)).toEqual([...STANDARD_WORKER_LOOK_INDICES]);
+    const values = [...counts.values()];
+    expect(values.every((count) => count > 0)).toBe(true);
+    const mean = values.reduce((sum, count) => sum + count, 0) / values.length;
+    // Deterministic broad tolerance: catches the former 65% recent-art bias
+    // while avoiding a flaky pseudo-random exact-frequency assertion.
+    expect(Math.min(...values)).toBeGreaterThan(mean * 0.65);
+    expect(Math.max(...values)).toBeLessThan(mean * 1.35);
   });
 
   it("increases the price for each refresh during the same month", () => {

@@ -96,15 +96,14 @@ describe("worker art expansion and special hires", () => {
       41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
     ]);
 
+    let x = 0x12345678;
+    const rng = () => {
+      x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+      return (x >>> 0) / 4_294_967_296;
+    };
     const rolled = new Set<number>();
-    for (let bucket = 0; bucket < STANDARD_WORKER_LOOK_COUNT; bucket += 1) {
-      let calls = 0;
-      const bucketValue = (bucket + 0.5) / STANDARD_WORKER_LOOK_COUNT;
-      const rng = () => {
-        calls += 1;
-        return calls === 6 ? bucketValue : 0.5;
-      };
-      const look = rollCandidate(bucket, undefined, rng).look;
+    for (let i = 0; i < 10_000; i += 1) {
+      const look = rollCandidate(i, undefined, rng).look;
       if (look !== undefined) rolled.add(look);
     }
     expect([...rolled].sort((a, b) => a - b)).toEqual([...STANDARD_WORKER_LOOK_INDICES]);
