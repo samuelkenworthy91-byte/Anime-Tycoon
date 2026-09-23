@@ -1,3 +1,4 @@
+import { moraleDelta } from "./careers";
 import { GENRES, MEDIUMS, type AudienceId, type Draft, type GenreId, type MediumId, type PointType } from "./data";
 import type { RunState } from "./state";
 
@@ -28,6 +29,7 @@ export type DecisionEffect =
   | { type: "cash"; amount: number }
   | { type: "fans"; amount: number }
   | { type: "rd"; amount: number }
+  | { type: "staffMorale"; staffIds: string[]; amount: number }
   | { type: "projectHype"; projectId: string; amount: number }
   | { type: "projectIssues"; projectId: string; amount: number }
   | { type: "projectPoints"; projectId: string; point: PointType; amount: number }
@@ -316,6 +318,402 @@ export function rollAdvancedDecision(week: number, ctx: AdvancedDecisionContext)
         { id: "refuse", label: "REFUSE OUTSIDE MONEY", effect: "+1,500 fans", effects: [{ type: "fans", amount: 1_500 }] },
       ]),
 
+    () => active && ctx.crew.length ? (() => {
+      const animator = ctx.crew.find((member) => member.role.toLowerCase().includes("anim")) ?? pick(ctx.crew);
+      return make(week, "key_animator_injury", "A KEY CREW MEMBER IS OUT", "PRODUCTION",
+        `${animator.name} has been signed off unexpectedly while “${active.title}” is in ${active.stage}. The work can move, but somebody has to absorb the gap.`, [
+          { id: "cover", label: "BRING IN EMERGENCY COVER", effect: "−£38,000 · +1 production note", effects: [
+            { type: "cash", amount: -38_000 }, { type: "projectIssues", projectId: active.id, amount: 1 },
+          ] },
+          { id: "protect", label: "PROTECT THEIR RECOVERY", effect: "+3 production notes · team morale +3", effects: [
+            { type: "projectIssues", projectId: active.id, amount: 3 }, { type: "staffMorale", staffIds: [animator.id], amount: 3 },
+          ] },
+          { id: "push", label: "ASK THEM TO FINISH THE SCENE", effect: "+4 Art · morale −10", effects: [
+            { type: "projectPoints", projectId: active.id, point: "art", amount: 4 }, { type: "staffMorale", staffIds: [animator.id], amount: -10 },
+          ] },
+        ]);
+    })() : null,
+
+    () => active ? make(week, "corrupted_files", "THE MASTER FILES ARE CORRUPTED", "PRODUCTION / CRISIS",
+      `A storage fault hits “${active.title}”. The backups are usable, but not everything survived cleanly.`, [
+        { id: "restore", label: "PAY FOR FORENSIC RECOVERY", effect: "−£48,000 · −3 production notes", effects: [
+          { type: "cash", amount: -48_000 }, { type: "projectIssues", projectId: active.id, amount: -3 },
+        ] },
+        { id: "rebuild", label: "REBUILD THE LOST WORK", effect: "+4 production notes · +2 Art", effects: [
+          { type: "projectIssues", projectId: active.id, amount: 4 }, { type: "projectPoints", projectId: active.id, point: "art", amount: 2 },
+        ] },
+        { id: "cut", label: "CUT THE DAMAGED MATERIAL", effect: "−4 hype · −2 Story", effects: [
+          { type: "projectHype", projectId: active.id, amount: -4 }, { type: "projectPoints", projectId: active.id, point: "story", amount: -2 },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "unexpected_scene", "ONE SCENE IS FAR BETTER THAN PLANNED", "PRODUCTION",
+      `A small sequence in “${active.title}” has become the scene everyone in the studio is talking about. It was never meant to be a centrepiece.`, [
+        { id: "expand", label: "REBUILD THE EPISODE AROUND IT", effect: "+7 Art · +5 Story · +4 production notes", effects: [
+          { type: "projectPoints", projectId: active.id, point: "art", amount: 7 }, { type: "projectPoints", projectId: active.id, point: "story", amount: 5 }, { type: "projectIssues", projectId: active.id, amount: 4 },
+        ] },
+        { id: "trailer", label: "SAVE IT FOR THE TRAILER", effect: "+9 hype", effects: [{ type: "projectHype", projectId: active.id, amount: 9 }] },
+        { id: "leave", label: "LEAVE THE HAPPY ACCIDENT ALONE", effect: "+3 Art", effects: [{ type: "projectPoints", projectId: active.id, point: "art", amount: 3 }] },
+      ]) : null,
+
+    () => active && ctx.crew.length >= 2 ? (() => {
+      const first = pick(ctx.crew);
+      const otherPool = ctx.crew.filter((member) => member.id !== first.id);
+      const second = pick(otherPool);
+      return make(week, "creator_disagreement", "THE CREATIVE LEADS HAVE STOPPED AGREEING", "STAFF / PRODUCTION",
+        `${first.name} and ${second.name} want completely different versions of “${active.title}”. The disagreement is now slowing actual work.`, [
+          { id: "choose", label: `BACK ${first.name.toUpperCase()}`, effect: "+4 Story · other morale −8", effects: [
+            { type: "projectPoints", projectId: active.id, point: "story", amount: 4 }, { type: "staffMorale", staffIds: [second.id], amount: -8 },
+          ] },
+          { id: "merge", label: "FORCE A COMPROMISE", effect: "+2 Story · +2 production notes · morale −3 ×2", effects: [
+            { type: "projectPoints", projectId: active.id, point: "story", amount: 2 }, { type: "projectIssues", projectId: active.id, amount: 2 }, { type: "staffMorale", staffIds: [first.id, second.id], amount: -3 },
+          ] },
+          { id: "screen", label: "TEST BOTH VERSIONS INTERNALLY", effect: "−£18,000 · +5 Story", effects: [
+            { type: "cash", amount: -18_000 }, { type: "projectPoints", projectId: active.id, point: "story", amount: 5 },
+          ] },
+        ]);
+    })() : null,
+
+    () => active ? make(week, "voice_unavailable", "THE LEAD VOICE IS UNAVAILABLE", "PRODUCTION",
+      `A lead performer cannot make the next recording block for “${active.title}”. The delivery calendar will not move itself.`, [
+        { id: "wait", label: "WAIT FOR THEM", effect: "+3 production notes · −2 hype", effects: [
+          { type: "projectIssues", projectId: active.id, amount: 3 }, { type: "projectHype", projectId: active.id, amount: -2 },
+        ] },
+        { id: "replace", label: "RECAST THE ROLE", effect: "−£28,000 · +2 Sound · −3 hype", effects: [
+          { type: "cash", amount: -28_000 }, { type: "projectPoints", projectId: active.id, point: "sound", amount: 2 }, { type: "projectHype", projectId: active.id, amount: -3 },
+        ] },
+        { id: "remote", label: "RECORD REMOTELY", effect: "−£9,000 · +1 production note", effects: [
+          { type: "cash", amount: -9_000 }, { type: "projectIssues", projectId: active.id, amount: 1 },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "outsourced_disaster", "THE OUTSOURCE PACKAGE CAME BACK WRONG", "PRODUCTION / CRISIS",
+      `An outside studio returns a block of work for “${active.title}” that does not match the approved designs. The deadline is close.`, [
+        { id: "redo", label: "MAKE THEM REDO IT", effect: "+4 production notes · +2 Art", effects: [
+          { type: "projectIssues", projectId: active.id, amount: 4 }, { type: "projectPoints", projectId: active.id, point: "art", amount: 2 },
+        ] },
+        { id: "internal", label: "PULL IT BACK IN-HOUSE", effect: "−£42,000 · +4 Art · +2 production notes", effects: [
+          { type: "cash", amount: -42_000 }, { type: "projectPoints", projectId: active.id, point: "art", amount: 4 }, { type: "projectIssues", projectId: active.id, amount: 2 },
+        ] },
+        { id: "air", label: "USE WHAT THEY SENT", effect: "−5 Art · +3 hype", effects: [
+          { type: "projectPoints", projectId: active.id, point: "art", amount: -5 }, { type: "projectHype", projectId: active.id, amount: 3 },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "network_note", "THE NETWORK WANTS A SAFER CUT", "BUSINESS / PRODUCTION",
+      `The broadcaster likes “${active.title}” but wants several sharp edges softened before transmission.`, [
+        { id: "comply", label: "MAKE THE CHANGES", effect: "+£45,000 · −4 Story · +5 hype", effects: [
+          { type: "cash", amount: 45_000 }, { type: "projectPoints", projectId: active.id, point: "story", amount: -4 }, { type: "projectHype", projectId: active.id, amount: 5 },
+        ] },
+        { id: "partial", label: "GIVE THEM ONE CHANGE", effect: "+£18,000 · −1 Story · +2 hype", effects: [
+          { type: "cash", amount: 18_000 }, { type: "projectPoints", projectId: active.id, point: "story", amount: -1 }, { type: "projectHype", projectId: active.id, amount: 2 },
+        ] },
+        { id: "refuse", label: "DELIVER YOUR CUT", effect: "−4 hype · +2,500 fans", effects: [
+          { type: "projectHype", projectId: active.id, amount: -4 }, { type: "fans", amount: 2_500 },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "soundtrack_replacement", "THE MAIN THEME ISN'T WORKING", "PRODUCTION",
+      `A late screening of “${active.title}” exposes a problem: the music is fighting the scene instead of carrying it.`, [
+        { id: "replace", label: "COMMISSION A NEW THEME", effect: "−£32,000 · +7 Sound · +2 production notes", effects: [
+          { type: "cash", amount: -32_000 }, { type: "projectPoints", projectId: active.id, point: "sound", amount: 7 }, { type: "projectIssues", projectId: active.id, amount: 2 },
+        ] },
+        { id: "recut", label: "RECUT AROUND THE EXISTING MUSIC", effect: "+3 Sound · +3 Story · +3 production notes", effects: [
+          { type: "projectPoints", projectId: active.id, point: "sound", amount: 3 }, { type: "projectPoints", projectId: active.id, point: "story", amount: 3 }, { type: "projectIssues", projectId: active.id, amount: 3 },
+        ] },
+        { id: "ship", label: "SHIP THE CURRENT MIX", effect: "−4 Sound", effects: [{ type: "projectPoints", projectId: active.id, point: "sound", amount: -4 }] },
+      ]) : null,
+
+    () => active ? make(week, "schedule_domino", "ONE DELAY IS HITTING EVERYTHING", "PRODUCTION / SCHEDULE",
+      `A missed hand-off on “${active.title}” is now threatening the next departments in the chain.`, [
+        { id: "overtime", label: "AUTHORISE OVERTIME", effect: "−£24,000 · −2 production notes · team morale −4", effects: [
+          { type: "cash", amount: -24_000 }, { type: "projectIssues", projectId: active.id, amount: -2 }, { type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: -4 },
+        ] },
+        { id: "triage", label: "TRIAGE THE IMPORTANT SHOTS", effect: "−2 Art · −1 production note", effects: [
+          { type: "projectPoints", projectId: active.id, point: "art", amount: -2 }, { type: "projectIssues", projectId: active.id, amount: -1 },
+        ] },
+        { id: "absorb", label: "LET THE SCHEDULE SLIP", effect: "+4 production notes · team morale +2", effects: [
+          { type: "projectIssues", projectId: active.id, amount: 4 }, { type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: 2 },
+        ] },
+      ]) : null,
+
+    () => ctx.crew.length >= 2 ? (() => {
+      const first = pick(ctx.crew);
+      const second = pick(ctx.crew.filter((member) => member.id !== first.id));
+      return make(week, "staff_friendship", "TWO STAFF HAVE BECOME A REAL TEAM", "STAFF",
+        `${first.name} and ${second.name} have started solving problems together without being asked. Other people have noticed.`, [
+          { id: "pair", label: "MAKE THEM AN OFFICIAL PAIR", effect: "morale +7 ×2 · +5 RD", effects: [
+            { type: "staffMorale", staffIds: [first.id, second.id], amount: 7 }, { type: "rd", amount: 5 },
+          ] },
+          { id: "spread", label: "ASK THEM TO SHARE THEIR PROCESS", effect: "team morale +3", effects: [
+            { type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: 3 },
+          ] },
+          { id: "leave", label: "LET IT DEVELOP NATURALLY", effect: "morale +4 ×2", effects: [
+            { type: "staffMorale", staffIds: [first.id, second.id], amount: 4 },
+          ] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length ? (() => {
+      const member = pick(ctx.crew);
+      return make(week, "family_emergency", "A STAFF MEMBER NEEDS TO GO HOME", "STAFF",
+        `${member.name} has a family emergency and asks to step away immediately. They do not know exactly when they will be fully focused again.`, [
+          { id: "cover", label: "TELL THEM FAMILY COMES FIRST", effect: "morale +10 · active project +2 notes", effects: [
+            { type: "staffMorale", staffIds: [member.id], amount: 10 }, ...(active ? [{ type: "projectIssues" as const, projectId: active.id, amount: 2 }] : []),
+          ] },
+          { id: "paid", label: "ARRANGE PAID COVER", effect: "−£20,000 · morale +6", effects: [
+            { type: "cash", amount: -20_000 }, { type: "staffMorale", staffIds: [member.id], amount: 6 },
+          ] },
+          { id: "deadline", label: "ASK THEM TO FINISH THE DEADLINE FIRST", effect: "morale −12 · active project −1 note", effects: [
+            { type: "staffMorale", staffIds: [member.id], amount: -12 }, ...(active ? [{ type: "projectIssues" as const, projectId: active.id, amount: -1 }] : []),
+          ] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length ? (() => {
+      const member = pick(ctx.crew);
+      return make(week, "outside_offer", "A RIVAL WANTS TO BORROW YOUR STAFF", "STAFF / BUSINESS",
+        `${member.name} has been offered a prestigious outside job. They want to take it without leaving your studio.`, [
+          { id: "allow", label: "LET THEM TAKE IT", effect: "+£25,000 · morale +8 · active project +2 notes", effects: [
+            { type: "cash", amount: 25_000 }, { type: "staffMorale", staffIds: [member.id], amount: 8 }, ...(active ? [{ type: "projectIssues" as const, projectId: active.id, amount: 2 }] : []),
+          ] },
+          { id: "match", label: "KEEP THEIR FOCUS HERE", effect: "−£18,000 · morale +4", effects: [
+            { type: "cash", amount: -18_000 }, { type: "staffMorale", staffIds: [member.id], amount: 4 },
+          ] },
+          { id: "refuse", label: "BLOCK THE OUTSIDE WORK", effect: "morale −9", effects: [{ type: "staffMorale", staffIds: [member.id], amount: -9 }] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length ? (() => {
+      const member = pick(ctx.crew);
+      return make(week, "public_criticism", "A STAFF MEMBER CRITICISES THE STUDIO", "STAFF / PR",
+        `${member.name} gives an interview and says management is making the studio less creative. The quote is spreading fast.`, [
+          { id: "talk", label: "HANDLE IT PRIVATELY", effect: "morale +3 · −2,000 fans", effects: [
+            { type: "staffMorale", staffIds: [member.id], amount: 3 }, { type: "fans", amount: -2_000 },
+          ] },
+          { id: "agree", label: "PUBLICLY AGREE AND CHANGE COURSE", effect: "+4,000 fans · team morale +3", effects: [
+            { type: "fans", amount: 4_000 }, { type: "staffMorale", staffIds: ctx.crew.map((worker) => worker.id), amount: 3 },
+          ] },
+          { id: "discipline", label: "DISCIPLINE THEM", effect: "morale −14 · +1,500 fans", effects: [
+            { type: "staffMorale", staffIds: [member.id], amount: -14 }, { type: "fans", amount: 1_500 },
+          ] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length >= 2 ? (() => {
+      const veteran = [...ctx.crew].sort((a, b) => b.level - a.level)[0];
+      const junior = [...ctx.crew].sort((a, b) => a.level - b.level).find((member) => member.id !== veteran.id)!;
+      return make(week, "shadow_veteran", "A JUNIOR ASKS TO SHADOW A VETERAN", "STAFF / DEVELOPMENT",
+        `${junior.name} wants to shadow ${veteran.name} closely for the next production cycle. It will slow the veteran down, but the learning could stick.`, [
+          { id: "yes", label: "PAIR THEM UP", effect: "junior morale +9 · veteran morale −3 · +8 RD", effects: [
+            { type: "staffMorale", staffIds: [junior.id], amount: 9 }, { type: "staffMorale", staffIds: [veteran.id], amount: -3 }, { type: "rd", amount: 8 },
+          ] },
+          { id: "light", label: "ONE DAY A WEEK", effect: "morale +4 ×2 · +3 RD", effects: [
+            { type: "staffMorale", staffIds: [junior.id, veteran.id], amount: 4 }, { type: "rd", amount: 3 },
+          ] },
+          { id: "no", label: "KEEP THEM ON SEPARATE WORK", effect: "junior morale −5", effects: [{ type: "staffMorale", staffIds: [junior.id], amount: -5 }] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length ? (() => {
+      const member = pick(ctx.crew);
+      return make(week, "credit_demand", "A CREATOR WANTS MORE CREDIT", "STAFF / OWNERSHIP",
+        `${member.name} says their contribution is being undersold and wants a more prominent creator credit on the next release.`, [
+          { id: "grant", label: "GIVE THEM THE CREDIT", effect: "morale +12 · next release fans ×1.05", effects: [
+            { type: "staffMorale", staffIds: [member.id], amount: 12 }, { type: "modifier", modifier: { kind: "releaseFans", label: `${member.name} creator credit`, expiresWeek: week + 14, uses: 1, mult: 1.05 } },
+          ] },
+          { id: "bonus", label: "OFFER MONEY INSTEAD", effect: "−£22,000 · morale +5", effects: [
+            { type: "cash", amount: -22_000 }, { type: "staffMorale", staffIds: [member.id], amount: 5 },
+          ] },
+          { id: "deny", label: "KEEP THE CURRENT CREDITS", effect: "morale −10", effects: [{ type: "staffMorale", staffIds: [member.id], amount: -10 }] },
+        ]);
+    })() : null,
+
+    () => ctx.crew.length && active ? (() => {
+      const member = pick(ctx.crew);
+      const craft: PointType = member.role.toLowerCase().includes("anim") ? "art" : member.role.toLowerCase().includes("sound") || member.role.toLowerCase().includes("music") ? "sound" : "story";
+      return make(week, "prodigy_moment", "SOMEBODY JUST LEVELLED UP IN FRONT OF YOU", "STAFF / PRODUCTION",
+        `${member.name} solves a problem on “${active.title}” that the senior team had been stuck on all week.`, [
+          { id: "lead", label: "GIVE THEM THE SCENE", effect: `+${8} ${craft.toUpperCase()} · morale +8 · +2 notes`, effects: [
+            { type: "projectPoints", projectId: active.id, point: craft, amount: 8 }, { type: "staffMorale", staffIds: [member.id], amount: 8 }, { type: "projectIssues", projectId: active.id, amount: 2 },
+          ] },
+          { id: "share", label: "MAKE IT A TEAM LESSON", effect: "+5 RD · team morale +2", effects: [
+            { type: "rd", amount: 5 }, { type: "staffMorale", staffIds: ctx.crew.map((worker) => worker.id), amount: 2 },
+          ] },
+          { id: "quiet", label: "BANK THE FIX AND MOVE ON", effect: `+3 ${craft.toUpperCase()}`, effects: [{ type: "projectPoints", projectId: active.id, point: craft, amount: 3 }] },
+        ]);
+    })() : null,
+
+    () => make(week, "streamer_bidding_war", "TWO PLATFORMS WANT YOUR NEXT SHOW", "BUSINESS / DISTRIBUTION",
+      `Competing streamers are trying to lock down your next release before either knows what the other has offered.`, [
+        { id: "cash", label: "TAKE THE BIG UP-FRONT DEAL", effect: "+£150,000 · next release sales ×0.86", effects: [
+          { type: "cash", amount: 150_000 }, { type: "modifier", modifier: { kind: "releaseSales", label: "Rich exclusivity deal", expiresWeek: week + 16, uses: 1, mult: 0.86 } },
+        ] },
+        { id: "reach", label: "TAKE THE GLOBAL REACH DEAL", effect: "+£45,000 · next release fans ×1.32", effects: [
+          { type: "cash", amount: 45_000 }, { type: "modifier", modifier: { kind: "releaseFans", label: "Global platform push", expiresWeek: week + 16, uses: 1, mult: 1.32 } },
+        ] },
+        { id: "play", label: "KEEP BOTH TALKING", effect: "50/50: +£95,000 or both walk", effects: [
+          { type: "cash", amount: Math.random() < 0.5 ? 95_000 : 0 },
+        ] },
+      ]),
+
+    () => active ? make(week, "advertiser_backlash", "AN ADVERTISER WANTS DISTANCE", "BUSINESS / PR",
+      `A major advertiser says the online argument around “${active.title}” is becoming bad for their brand.`, [
+        { id: "edit", label: "MAKE A CLEANER CAMPAIGN", effect: "+£35,000 · −5 hype · −2,000 fans", effects: [
+          { type: "cash", amount: 35_000 }, { type: "projectHype", projectId: active.id, amount: -5 }, { type: "fans", amount: -2_000 },
+        ] },
+        { id: "replace", label: "FIND A DIFFERENT SPONSOR", effect: "−£18,000 · +2 hype", effects: [
+          { type: "cash", amount: -18_000 }, { type: "projectHype", projectId: active.id, amount: 2 },
+        ] },
+        { id: "walk", label: "DROP THE ADVERTISER", effect: "+3,500 fans · −£20,000", effects: [
+          { type: "fans", amount: 3_500 }, { type: "cash", amount: -20_000 },
+        ] },
+      ]) : null,
+
+    () => make(week, "distributor_collapse", "A DISTRIBUTOR HAS COLLAPSED", "BUSINESS / CRISIS",
+      `A distributor used across the industry has stopped paying invoices. Everyone is scrambling for replacement capacity.`, [
+        { id: "reserve", label: "BUY REPLACEMENT CAPACITY NOW", effect: "−£52,000 · next release sales ×1.10", effects: [
+          { type: "cash", amount: -52_000 }, { type: "modifier", modifier: { kind: "releaseSales", label: "Secured replacement distribution", expiresWeek: week + 18, uses: 1, mult: 1.10 } },
+        ] },
+        { id: "wait", label: "WAIT FOR THE MARKET TO SETTLE", effect: "next release sales ×0.91", effects: [
+          { type: "modifier", modifier: { kind: "releaseSales", label: "Distribution bottleneck", expiresWeek: week + 12, uses: 1, mult: 0.91 } },
+        ] },
+        { id: "direct", label: "GO DIRECT TO THE AUDIENCE", effect: "next release sales ×0.96 · fans ×1.12", effects: [
+          { type: "modifier", modifier: { kind: "releaseSales", label: "Direct distribution", expiresWeek: week + 12, uses: 1, mult: 0.96 } },
+          { type: "modifier", modifier: { kind: "releaseFans", label: "Direct audience push", expiresWeek: week + 12, uses: 1, mult: 1.12 } },
+        ] },
+      ]),
+
+    () => active ? make(week, "piracy_spike", "PIRACY IS SPIKING BEFORE RELEASE", "FANDOM / BUSINESS",
+      `Watermarked material from “${active.title}” is appearing on pirate sites faster than takedowns can keep up.`, [
+        { id: "legal", label: "FUND A TAKEDOWN WAVE", effect: "−£30,000 · −2 hype · next release sales ×1.06", effects: [
+          { type: "cash", amount: -30_000 }, { type: "projectHype", projectId: active.id, amount: -2 }, { type: "modifier", modifier: { kind: "releaseSales", label: "Anti-piracy enforcement", expiresWeek: week + 10, uses: 1, mult: 1.06 } },
+        ] },
+        { id: "convert", label: "RELEASE AN OFFICIAL FREE PREVIEW", effect: "+8 hype · next release fans ×1.10", effects: [
+          { type: "projectHype", projectId: active.id, amount: 8 }, { type: "modifier", modifier: { kind: "releaseFans", label: "Official preview conversion", expiresWeek: week + 10, uses: 1, mult: 1.10 } },
+        ] },
+        { id: "ignore", label: "FOCUS ON THE PAYING AUDIENCE", effect: "next release sales ×0.94", effects: [
+          { type: "modifier", modifier: { kind: "releaseSales", label: "Piracy leakage", expiresWeek: week + 10, uses: 1, mult: 0.94 } },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "international_censorship", "AN OVERSEAS MARKET WANTS CUTS", "BUSINESS / INTERNATIONAL",
+      `A major overseas buyer will carry “${active.title}”, but only if you alter material they consider unacceptable.`, [
+        { id: "cut", label: "MAKE A LOCAL EDIT", effect: "−£22,000 · +£70,000 · −2 Story", effects: [
+          { type: "cash", amount: 48_000 }, { type: "projectPoints", projectId: active.id, point: "story", amount: -2 },
+        ] },
+        { id: "refuse", label: "KEEP THE ORIGINAL CUT", effect: "+2,500 fans", effects: [{ type: "fans", amount: 2_500 }] },
+        { id: "delay", label: "NEGOTIATE A DIFFERENT EDIT", effect: "+2 production notes · +£30,000", effects: [
+          { type: "projectIssues", projectId: active.id, amount: 2 }, { type: "cash", amount: 30_000 },
+        ] },
+      ]) : null,
+
+    () => active ? make(week, "shipping_war", "THE FANDOM IS FIGHTING OVER A PAIRING", "FANDOM",
+      `A relationship in “${active.title}” has split the fandom into camps. Every official post is becoming a battlefield.`, [
+        { id: "tease", label: "TEASE BOTH SIDES", effect: "+10 hype · +3 production notes", effects: [
+          { type: "projectHype", projectId: active.id, amount: 10 }, { type: "projectIssues", projectId: active.id, amount: 3 },
+        ] },
+        { id: "canon", label: "MAKE THE INTENTION CLEAR", effect: "+5 Story · −4 hype", effects: [
+          { type: "projectPoints", projectId: active.id, point: "story", amount: 5 }, { type: "projectHype", projectId: active.id, amount: -4 },
+        ] },
+        { id: "ignore", label: "STOP FEEDING IT", effect: "−2 hype · +1,500 fans", effects: [
+          { type: "projectHype", projectId: active.id, amount: -2 }, { type: "fans", amount: 1_500 },
+        ] },
+      ]) : null,
+
+    () => fr ? make(week, "cult_following", "AN OLD SHOW HAS FOUND A NEW AUDIENCE", "FANDOM / FRANCHISE",
+      `Clips from “${fr.title}” are suddenly everywhere again. New viewers are treating it like a discovery nobody else knows about.`, [
+        { id: "feed", label: "FEED THE CULT FOLLOWING", effect: "−£15,000 · popularity +10 · +4,000 fans", effects: [
+          { type: "cash", amount: -15_000 }, { type: "franchisePopularity", franchiseKey: fr.key, amount: 10 }, { type: "fans", amount: 4_000 },
+        ] },
+        { id: "merch", label: "DROP A LIMITED MERCH RUN", effect: "next merch launch ×1.30 · popularity +4", effects: [
+          { type: "modifier", modifier: { kind: "merch", label: `${fr.title} cult revival`, expiresWeek: week + 12, uses: 1, mult: 1.30 } }, { type: "franchisePopularity", franchiseKey: fr.key, amount: 4 },
+        ] },
+        { id: "leave", label: "LET THE FANS OWN IT", effect: "+2,500 fans", effects: [{ type: "fans", amount: 2_500 }] },
+      ]) : null,
+
+    () => active ? make(week, "review_bombing", "THE SHOW IS BEING REVIEW-BOMBED", "FANDOM / PR",
+      `Thousands of new ratings for “${active.title}” appeared in a few hours, many from accounts that have never watched it.`, [
+        { id: "platform", label: "PRESS THE PLATFORM TO ACT", effect: "−£12,000 · +2 hype", effects: [
+          { type: "cash", amount: -12_000 }, { type: "projectHype", projectId: active.id, amount: 2 },
+        ] },
+        { id: "fans", label: "ASK FANS NOT TO RETALIATE", effect: "+3,500 fans · −2 hype", effects: [
+          { type: "fans", amount: 3_500 }, { type: "projectHype", projectId: active.id, amount: -2 },
+        ] },
+        { id: "fight", label: "TURN IT INTO A PUBLIC FIGHT", effect: "+8 hype · −5,000 fans", effects: [
+          { type: "projectHype", projectId: active.id, amount: 8 }, { type: "fans", amount: -5_000 },
+        ] },
+      ]) : null,
+
+    () => make(week, "genre_bubble", "ONE GENRE IS SUDDENLY EVERYWHERE", "INDUSTRY",
+      `${g1} shows are selling faster than broadcasters can commission them. Nobody agrees whether this is the start of a cycle or the top of one.`, [
+        { id: "chase", label: "CHASE THE BOOM", effect: `${g1} market heat +0.7 · next matching opportunity stronger`, effects: [{ type: "marketGenre", genre: hot1, amount: 0.7 }] },
+        { id: "counter", label: "PROGRAM AGAINST THE TREND", effect: `${g1} heat −0.4 · +5 RD`, effects: [{ type: "marketGenre", genre: hot1, amount: -0.4 }, { type: "rd", amount: 5 }] },
+        { id: "watch", label: "WAIT FOR MORE DATA", effect: "no immediate numerical change", effects: [] },
+      ]),
+
+    () => make(week, "genre_fatigue", "AUDIENCES ARE GETTING TIRED OF A TREND", "INDUSTRY",
+      `The latest tracking says ${g1} viewers are becoming much harder to impress. Buyers have not stopped ordering it yet.`, [
+        { id: "exit", label: "GET OUT BEFORE EVERYONE ELSE", effect: `${g1} heat −0.8 · +4 RD`, effects: [{ type: "marketGenre", genre: hot1, amount: -0.8 }, { type: "rd", amount: 4 }] },
+        { id: "quality", label: "BET ON QUALITY BEATING FATIGUE", effect: "next production +5 Story", effects: [
+          { type: "modifier", modifier: { kind: "releaseQuality", label: "Quality-over-trend development", expiresWeek: week + 12, uses: 1, flat: 5, pointType: "story" } },
+        ] },
+        { id: "double", label: "DOUBLE DOWN WHILE BUYERS STILL PAY", effect: `${g1} heat +0.3 · next release sales ×0.95`, effects: [
+          { type: "marketGenre", genre: hot1, amount: 0.3 }, { type: "modifier", modifier: { kind: "releaseSales", label: "Late-cycle genre bet", expiresWeek: week + 12, uses: 1, mult: 0.95 } },
+        ] },
+      ]),
+
+    () => make(week, "famous_creator_available", "A FAMOUS CREATOR IS BETWEEN PROJECTS", "INDUSTRY / TALENT",
+      `A respected creator has unexpectedly become available for a short development engagement. Several studios are already calling.`, [
+        { id: "book", label: "BOOK THE DEVELOPMENT WEEK", effect: "−£75,000 · next production +7 Story · +4 Art", effects: [
+          { type: "cash", amount: -75_000 },
+          { type: "modifier", modifier: { kind: "releaseQuality", label: "Guest creator story pass", expiresWeek: week + 14, uses: 1, flat: 7, pointType: "story" } },
+          { type: "modifier", modifier: { kind: "releaseQuality", label: "Guest creator visual pass", expiresWeek: week + 14, uses: 1, flat: 4, pointType: "art" } },
+        ] },
+        { id: "talk", label: "PAY FOR A HALF-DAY REVIEW", effect: "−£18,000 · +7 RD", effects: [{ type: "cash", amount: -18_000 }, { type: "rd", amount: 7 }] },
+        { id: "pass", label: "LET A RIVAL HAVE THEM", effect: "no immediate numerical change", effects: [] },
+      ]),
+
+    () => make(week, "studio_closure", "A RIVAL STUDIO HAS CLOSED", "INDUSTRY",
+      `A respected mid-sized studio has shut its doors. Talent, equipment and unfinished business are suddenly loose in the market.`, [
+        { id: "talent", label: "MOVE FIRST ON THE TALENT", effect: "−£35,000 · team morale +3 · +8 RD", effects: [
+          { type: "cash", amount: -35_000 }, { type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: 3 }, { type: "rd", amount: 8 },
+        ] },
+        { id: "assets", label: "BUY THEIR PIPELINE ASSETS", effect: "−£55,000 · next R&D 25% faster", effects: [
+          { type: "cash", amount: -55_000 }, { type: "modifier", modifier: { kind: "researchSpeed", label: "Acquired studio pipeline", expiresWeek: week + 18, uses: 1, mult: 0.75 } },
+        ] },
+        { id: "wait", label: "DO NOTHING", effect: "+2,000 fans", effects: [{ type: "fans", amount: 2_000 }] },
+      ]),
+
+    () => make(week, "broadcaster_strategy", "A BROADCASTER IS CHANGING STRATEGY", "INDUSTRY / BUSINESS",
+      `One of the biggest buyers is cutting broad slates and wants fewer, louder shows with clearer audiences.`, [
+        { id: "pitch", label: "RESHAPE YOUR NEXT PITCH", effect: "−£12,000 · next release sales ×1.12", effects: [
+          { type: "cash", amount: -12_000 }, { type: "modifier", modifier: { kind: "releaseSales", label: "Broadcaster-aligned pitch", expiresWeek: week + 14, uses: 1, mult: 1.12 } },
+        ] },
+        { id: "audience", label: "LEAN INTO A CLEAR AUDIENCE", effect: "next release fans ×1.14", effects: [
+          { type: "modifier", modifier: { kind: "releaseFans", label: "Clear audience positioning", expiresWeek: week + 14, uses: 1, mult: 1.14 } },
+        ] },
+        { id: "ignore", label: "KEEP YOUR OWN SLATE", effect: "+3 RD", effects: [{ type: "rd", amount: 3 }] },
+      ]),
+
+    () => make(week, "archive_discovery", "THE ARCHIVE TEAM FOUND SOMETHING USEFUL", "R&D / TECHNOLOGY",
+      `Old production materials reveal a discarded workflow that solves a problem the modern pipeline has been fighting for years.`, [
+        { id: "restore", label: "RESTORE THE WORKFLOW", effect: "−£16,000 · +10 RD · next R&D 15% faster", effects: [
+          { type: "cash", amount: -16_000 }, { type: "rd", amount: 10 }, { type: "modifier", modifier: { kind: "researchSpeed", label: "Recovered archive workflow", expiresWeek: week + 16, uses: 1, mult: 0.85 } },
+        ] },
+        { id: "study", label: "DOCUMENT IT FIRST", effect: "+14 RD", effects: [{ type: "rd", amount: 14 }] },
+        { id: "leave", label: "LEAVE THE OLD SYSTEM BURIED", effect: "no immediate numerical change", effects: [] },
+      ]),
+
+    () => make(week, "failed_experiment", "THE EXPERIMENT DID NOT WORK", "R&D / TECHNOLOGY",
+      `A prototype pipeline test has produced unusable output. The team can salvage the learning, hide the failure, or spend more to fix it properly.`, [
+        { id: "learn", label: "PUBLISH THE FAILURE INTERNALLY", effect: "+10 RD · team morale +2", effects: [
+          { type: "rd", amount: 10 }, { type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: 2 },
+        ] },
+        { id: "fix", label: "FUND ANOTHER ITERATION", effect: "−£40,000 · +18 RD", effects: [{ type: "cash", amount: -40_000 }, { type: "rd", amount: 18 }] },
+        { id: "bury", label: "BURY IT", effect: "team morale −4", effects: [{ type: "staffMorale", staffIds: ctx.crew.map((member) => member.id), amount: -4 }] },
+      ]),
+
     () => active ? make(week, "quality_bet", "ONE MORE PASS?", "QUALITY CONTROL",
       `The team believes “${active.title}” can still improve before marketing locks the campaign, but reopening the work could create fresh problems.`, [
         { id: "all", label: "AUTHORISE A FULL POLISH PASS", effect: "−£45,000 · +4 Story · +4 Art · +4 Sound · +4 issues", effects: [
@@ -394,6 +792,10 @@ function applyEffect(run: RunState, effect: DecisionEffect, eventId: string, wee
     case "cash": return { ...run, cash: run.cash + effect.amount };
     case "fans": return { ...run, fans: Math.max(0, run.fans + effect.amount) };
     case "rd": return { ...run, rd: Math.max(0, run.rd + effect.amount) };
+    case "staffMorale": {
+      const ids = new Set(effect.staffIds);
+      return { ...run, staff: run.staff.map((member) => ids.has(member.id) ? moraleDelta(member, effect.amount) : member) };
+    }
     case "projectHype": return { ...run, projects: run.projects.map((p) => p.id === effect.projectId ? { ...p, hype: clamp(p.hype + effect.amount, 0, 100) } : p) };
     case "projectIssues": return { ...run, projects: run.projects.map((p) => p.id === effect.projectId ? { ...p, issues: Math.max(0, p.issues + effect.amount) } : p) };
     case "projectPoints": return { ...run, projects: run.projects.map((p) => p.id === effect.projectId ? { ...p, points: { ...p.points, [effect.point]: p.points[effect.point] + effect.amount } } : p) };
