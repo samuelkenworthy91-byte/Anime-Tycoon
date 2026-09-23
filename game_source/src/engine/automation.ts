@@ -81,7 +81,7 @@ export function setDelegation(
     ...run,
     projects: run.projects.map((x) =>
       x.id === projectId
-        ? { ...x, auto: { headSlot, startedWeek: run.week, intervention: false } }
+        ? { ...x, auto: { headSlot, mode: "milestones", startedWeek: run.week, intervention: false } }
         : x
     ),
     notices: [
@@ -319,8 +319,9 @@ export function tickDelegated(
       rd += folded.rdGained - before;
       cash -= outcome.spent;
       p.staffIds.forEach((id) => staminaSpent.add(id));
+      const owner = auto0.mode === "full" && auto0.directorStaffId ? staff.find((s) => s.id === auto0.directorStaffId)?.name : null;
       notices.push(
-        `⚙️ “${p.draft.title}”: ${MILESTONE_LABEL[p.milestone]} handled by ${auto0.headSlot ? HEAD_TITLES[auto0.headSlot] : "the crew"} (+${folded.rdGained - before} RD).`
+        `⚙️ “${p.draft.title}”: ${MILESTONE_LABEL[p.milestone]} handled by ${owner ?? (auto0.headSlot ? HEAD_TITLES[auto0.headSlot] : "the crew")} (+${folded.rdGained - before} RD).`
       );
       p = folded;
     }
