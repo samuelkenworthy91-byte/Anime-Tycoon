@@ -26,6 +26,7 @@ import {
   ROLE_POINT,
   STAFF_STAT_CAP,
   staffPoint,
+  slotForMedium,
   rollContract,
   type Contract,
   type AnimeType,
@@ -50,7 +51,7 @@ import {
 } from "./castV2Migration";
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
-import { creatorVisionEffectsForProject } from "./creatorVision";
+import { creatorVisionEffectsForProject, generateCreatorVision } from "./creatorVision";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
@@ -1908,6 +1909,113 @@ export function startProject(r: RunState, d: Draft, commission?: Commission): Ru
 }
 
 /** work outside major productions also occupies staff. */
+/** Hand a whole original to one named creator. They choose title, genres, cast,
+ * arcs and direction, then the existing automation engine runs the production.
+ * Choices are deliberately competent rather than optimal. */
+export function startFullyDelegatedProject(
+  r: RunState,
+  staffId: string,
+  rng: () => number = Math.random,
+): RunState | null {
+  const director = r.staff.find((s) => s.id === staffId);
+  if (!director || staffBusyReason(r, staffId)) return null;
+  if (activeProjects(r.projects).length >= projectCapacity(r)) return null;
+
+  const unlocked = r.genresUnlocked.length ? r.genresUnlocked : GENRES.slice(0, 2).map((g) => g.id);
+  const primary = director.favGenre && unlocked.includes(director.favGenre)
+    ? director.favGenre
+    : unlocked[Math.floor(rng() * unlocked.length)] ?? unlocked[0];
+  const vision = generateCreatorVision(
+    `full-delegation:${r.week}:${director.id}:${Math.floor(rng() * 1_000_000)}`,
+    primary,
+    unlocked,
+    director,
+  );
+  const genres = [vision.primaryGenre, ...(vision.secondaryGenre ? [vision.secondaryGenre] : [])].slice(0, 2);
+
+  const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
+  const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
+  const castPick = (role: "protag" | "secondary" | "pet" | "villain", preferredId?: string) => {
+    const preferred = preferredId ? castById(preferredId) : undefined;
+    if (preferred && preferred.role === role && preferred.type === animeType && preferred.visibleAff.some((g) => genres.includes(g))) return preferred;
+    const fitting = CAST_V2.filter((member) => member.role === role && member.type === animeType && member.visibleAff.some((g) => genres.includes(g)));
+    const typed = fitting.length ? fitting : CAST_V2.filter((member) => member.role === role && member.type === animeType);
+    const pool = typed.length ? typed : CAST_V2.filter((member) => member.role === role);
+    return pool[Math.floor(rng() * pool.length)] ?? castById(preferredId ?? "");
+  };
+
+  const protag = castPick("protag", vision.cast.protag);
+  const secondary = castPick("secondary", vision.cast.secondary);
+  const pet = castPick("pet", vision.cast.pet);
+  const villain = castPick("villain", vision.cast.villain);
+
+  const unlockedArcs = ARCS.filter((arc) => !arc.franchiseOnly && !arcLockReason(arc, r));
+  const arcIds = [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
+  for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
+    if (arcIds.length >= 3) break;
+    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+  }
+  for (const arc of unlockedArcs) {
+    if (arcIds.length >= 3) break;
+    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+  }
+
+  const mediumPool = r.mediumsUnlocked.filter((id) => id !== "movie" || r.officeLevel >= 1) as Draft["medium"][];
+  const medium: Draft["medium"] = r.cash < 250_000 && mediumPool.includes("fanweb")
+    ? "fanweb"
+    : mediumPool[Math.floor(rng() * Math.max(1, mediumPool.length))] ?? "fanweb";
+  const budget: Draft["budget"] = r.cash < 500_000 ? "indie" : r.officeLevel >= 2 && r.cash > 2_000_000 && rng() < 0.18 ? "blockbuster" : "standard";
+  const scope: NonNullable<Draft["scope"]> = r.officeLevel >= 2 && r.cash > 1_200_000 && rng() < 0.25 ? "extended" : r.officeLevel === 0 && rng() < 0.45 ? "short" : "standard";
+  const slot: Draft["slot"] = slotForMedium(medium, r.cash > 900_000 ? "prime" : r.cash > 350_000 ? "evening" : "midnight");
+
+  const draft: Draft = {
+    title: vision.title,
+    medium,
+    budget,
+    scope,
+    slot,
+    animeType,
+    genres,
+    audience: vision.audience,
+    protag: protag.id,
+    protagName: protag.name,
+    secondary: secondary.id,
+    secondaryName: secondary.name,
+    pet: pet.id,
+    petName: pet.name,
+    villain: villain.id,
+    villainName: villain.name,
+    arcs: arcIds,
+    sliders: vision.sliders,
+    season: 1,
+  };
+
+  const started = startProject(r, draft);
+  if (!started) return null;
+  const project = started.projects[started.projects.length - 1];
+  if (!project) return started;
+
+  const free = r.staff
+    .filter((s) => !staffBusyReason(r, s.id))
+    .sort((a, b) => (b.story + b.art + b.sound + b.level * 8) - (a.story + a.art + a.sound + a.level * 8));
+  const crewTarget = Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
+  const crewIds = [director.id, ...free.filter((s) => s.id !== director.id).map((s) => s.id)].slice(0, crewTarget);
+
+  return {
+    ...started,
+    projects: started.projects.map((p) => p.id !== project.id ? p : {
+      ...p,
+      staffIds: crewIds,
+      creativeLeadId: director.id,
+      auto: { headSlot: null, mode: "full", directorStaffId: director.id, startedWeek: r.week, intervention: false },
+    }),
+    notices: [
+      ...started.notices,
+      `🎬 FULL DELEGATION: ${director.name} pitches “${draft.title}” (${genres.map((g) => GENRES.find((x) => x.id === g)?.label ?? g).join(" × ")}), chooses the cast/arcs/direction and runs production. Live contribution checks operate at 80% strength until you TAKE OVER.`,
+    ].slice(-40),
+  };
+}
+
 export function staffOperationReason(r: RunState, staffId: string): string | null {
   const expansionReason = expansionBusyReason(r, staffId);
   if (expansionReason) return expansionReason;
@@ -2351,6 +2459,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    if (project.auto?.mode === "full") effective *= 0.80;
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
