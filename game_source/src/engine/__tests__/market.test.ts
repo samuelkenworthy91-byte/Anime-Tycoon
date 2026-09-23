@@ -39,6 +39,7 @@ import {
   releaseProject,
   resolveMarketEvent,
   selfFundedGreenlightCost,
+  selfFundedQualityMult,
   selfFundedStartupMult,
   startProject,
   type RunState,
@@ -321,18 +322,23 @@ describe("starting a commissioned project", () => {
 });
 
 describe("early commission bridge", () => {
-  it("makes the first three self-funded originals progressively less expensive, then normal", () => {
+  it("makes the first three self-funded originals expensive and less efficient, then normal", () => {
     const r = richRun();
     const d = draft();
-    expect(selfFundedStartupMult(r, d)).toBe(1.4);
+    expect(selfFundedStartupMult(r, d)).toBe(1.65);
+    expect(selfFundedQualityMult(r, d)).toBe(0.84);
     const p1 = startProject(r, d)!;
-    expect(selfFundedStartupMult(p1, d)).toBe(1.25);
+    expect(p1.projects[0].rookieSoloMult).toBe(0.84);
+    expect(selfFundedStartupMult(p1, d)).toBe(1.4);
+    expect(selfFundedQualityMult(p1, d)).toBe(0.91);
     const after1 = { ...p1, projects: p1.projects.map((project) => ({ ...project, stage: "done" as const })) };
     const p2 = startProject(after1, { ...d, title: "Second" })!;
-    expect(selfFundedStartupMult(p2, d)).toBe(1.1);
+    expect(selfFundedStartupMult(p2, d)).toBe(1.2);
+    expect(selfFundedQualityMult(p2, d)).toBe(0.96);
     const after2 = { ...p2, projects: p2.projects.map((project) => ({ ...project, stage: "done" as const })) };
     const p3 = startProject(after2, { ...d, title: "Third" })!;
     expect(selfFundedStartupMult(p3, d)).toBe(1);
+    expect(selfFundedQualityMult(p3, d)).toBe(1);
   });
 
   it("lets a commission use a locked genre and permanently unlocks it only after on-time success", () => {
