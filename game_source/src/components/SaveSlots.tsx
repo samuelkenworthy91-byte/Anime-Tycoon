@@ -22,9 +22,10 @@ function SlotRow({
   index: number;
 }) {
   const auto = id === "auto";
-  /* you can always load a full slot; you can save to anything except the
-     autosave slot, which the game owns */
-  const disabled = mode === "load" ? !save : auto;
+  const archive = id === "legacy";
+  /* Autosave and the completed-career archive are game-owned. The archive is
+     loadable/deletable, but normal saves can never overwrite it. */
+  const disabled = mode === "load" ? !save : auto || archive;
 
   return (
     <div
@@ -54,12 +55,13 @@ function SlotRow({
           <span
             className={cn(
               "font-display shrink-0 text-[11px] font-extrabold tracking-[0.22em]",
-              auto ? "text-cyanx" : save ? "text-gold" : "text-paper/45"
+              auto ? "text-cyanx" : archive ? "text-viol" : save ? "text-gold" : "text-paper/45"
             )}
           >
             {slotLabel(id)}
           </span>
           {auto && <Sparkles size={11} className="shrink-0 text-cyanx/70" />}
+          {archive && <Sparkles size={11} className="shrink-0 text-viol/80" />}
           {save && (
             <span className="ml-auto shrink-0 text-[10px] text-paper/40">
               {saveAgeLabel(save.savedAt)}

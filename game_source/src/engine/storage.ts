@@ -55,11 +55,14 @@ export function clearScores() {
  * nominees, rival craft + poster ids, merch research gates). Old careers are
  * NOT migrated — per the project rule they reset to a clean fresh career. */
 export const SAVE_VERSION = 5;
-export type SlotId = "auto" | "1" | "2" | "3";
-export const SLOT_IDS: SlotId[] = ["auto", "1", "2", "3"];
+export type SlotId = "auto" | "1" | "2" | "3" | "legacy";
+export const ACTIVE_SLOT_IDS: SlotId[] = ["auto", "1", "2", "3"];
+export const SLOT_IDS: SlotId[] = [...ACTIVE_SLOT_IDS, "legacy"];
 
 export function slotLabel(id: SlotId): string {
-  return id === "auto" ? "AUTOSAVE" : `SLOT ${id}`;
+  if (id === "auto") return "AUTOSAVE";
+  if (id === "legacy") return "CAREER ARCHIVE";
+  return `SLOT ${id}`;
 }
 
 const slotKey = (id: SlotId, version = SAVE_VERSION) => `kirameki.save.v${version}.${id}`;
@@ -131,16 +134,17 @@ export function hasAnySave(): boolean {
 /** the save CONTINUE should resume: the most recently written slot */
 export function newestSave(): { id: SlotId; save: SaveGame } | null {
   let best: { id: SlotId; save: SaveGame } | null = null;
-  for (const id of SLOT_IDS) {
+  for (const id of ACTIVE_SLOT_IDS) {
     const save = loadSlot(id);
     if (save && (!best || save.savedAt > best.save.savedAt)) best = { id, save };
   }
   return best;
 }
 
-/** wipe every slot — used when a career ends or a new one begins */
+/** Wipe active-career slots while preserving a completed NG+ archive.
+ * The archive can still be deleted explicitly from LOAD GAME. */
 export function clearAllSaves(): void {
-  SLOT_IDS.forEach(clearSlot);
+  ACTIVE_SLOT_IDS.forEach(clearSlot);
   try {
     localStorage.removeItem(CONTEXT_TUTORIAL_KEY);
   } catch {

@@ -61,6 +61,8 @@ import BigThreeReveal from "./components/BigThreeReveal";
 import StaffRequestOverlay, { nextStaffRequestId } from "./components/StaffRequestOverlay";
 import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
 import { contractQuickPicks } from "./engine/contractQuickPick";
+import { createNewGamePlusRun } from "./engine/newGamePlus";
+import type { Showrunner } from "./engine/data";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -335,6 +337,32 @@ export default function App() {
     setPaused(false);
     setScreen("title");
   }, []);
+
+  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"]) => {
+    if (!run) return;
+    const completed = snapshot();
+    if (completed) saveSlot("legacy", completed);
+    primeAudio();
+    sfx.fanfare();
+    const next = createNewGamePlusRun(run, studio, showrunner);
+    setMeta({ studio, showrunner });
+    setRun(next);
+    seenCeremonyYear.current = 0;
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
+    setContract(null);
+    setContPlan(null);
+    setLicensedIpId(null);
+    setAuctionId(null);
+    setPaused(false);
+    setTimeSpeed(1);
+    dayAccRef.current = 0;
+    dayCountRef.current = 0;
+    setClockDay(0);
+    setClockPhase(0);
+    setScreen("office");
+  }, [run, snapshot]);
 
   /** from the retrospective: the campaign ends, the save lives on */
   const continueDynasty = useCallback(() => {
@@ -804,7 +832,7 @@ export default function App() {
           />
         )}
         {screen === "retrospective" && run && (
-          <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />
+          <Retrospective run={run} onContinue={continueDynasty} onNewGamePlus={startNewGamePlus} onTitle={quitToTitle} />
         )}
         {screen === "gameover" && run && (
           <GameOver run={run} onRestart={restart} onTitle={quitToTitle} />
