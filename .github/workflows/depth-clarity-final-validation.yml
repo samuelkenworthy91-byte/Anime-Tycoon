@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - depth-clarity-overhaul
+      - player-value-variety-pass
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
