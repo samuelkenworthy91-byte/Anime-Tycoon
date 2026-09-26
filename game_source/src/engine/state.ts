@@ -1521,10 +1521,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
-    /* Studio life should keep surprising the player. Roughly four consequential
-       decisions can surface per year, but never stack on top of one another. */
+    /* Major decisions are frequent enough to make each year feel eventful,
+       but still never stack: about six consequential calls per 48-week year. */
     studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
-    if (w % 8 === 4 && studioEvents.length === 0 && Math.random() < 0.72) {
+    if (w % 7 === 3 && studioEvents.length === 0 && Math.random() < 0.90) {
       const sev = rollStudioEvent(w, {
         crew: staffArr.map((s) => ({
           id: s.id,
