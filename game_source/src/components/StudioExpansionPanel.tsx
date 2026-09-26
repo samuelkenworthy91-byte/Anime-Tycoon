@@ -31,6 +31,9 @@ import {
   OVERSEAS_TIERS,
   overseasTierOf,
   buyOverseasInfrastructure,
+  overseasPresetRequest,
+  overseasCareerSummary,
+  type OverseasPresetId,
   type OverseasRequest,
   type ContentProfile,
 } from "../engine/overseas";
@@ -320,6 +323,7 @@ function OverseasPanel(props: Props) {
   const { run } = props,
     o = overseasOf(run),
     { message, act } = useRunAction(props);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [q, setQ] = useState<OverseasRequest>({
     projectId:
       run.projects.find((p) => p.result)?.id ?? run.projects[0]?.id ?? "",
@@ -343,6 +347,22 @@ function OverseasPanel(props: Props) {
       act((r) => setContentProfile(r, p.id, { ...profile, [key]: value }));
   };
   const infrastructureTier = overseasTierOf(run);
+  const summary = overseasCareerSummary(run);
+  const quickQuote = (territory: OverseasRequest["territory"], preset: OverseasPresetId) => {
+    const request = overseasPresetRequest(run, q.projectId, territory, preset);
+    return request ? { request, quote: quoteOverseas(run, request) } : null;
+  };
+  const quickSign = (territory: OverseasRequest["territory"], preset: OverseasPresetId) => {
+    const request = overseasPresetRequest(run, q.projectId, territory, preset);
+    if (!request) return;
+    const quote = quoteOverseas(run, request);
+    if (quote.block || !quote.release) {
+      setMessage(quote.block ?? "That overseas launch is unavailable.");
+      return;
+    }
+    setQ(request);
+    act((r) => signOverseas(r, request), `Signed ${TERRITORIES.find((t) => t.id === territory)?.name ?? "overseas"} launch.`);
+  };
   const nextInfrastructure = OVERSEAS_TIERS[infrastructureTier] ?? null;
   const currentInfrastructure = infrastructureTier ? OVERSEAS_TIERS[infrastructureTier - 1] : null;
   return (
@@ -368,10 +388,55 @@ function OverseasPanel(props: Props) {
         )}
         {run.officeLevel < 1 && <p className="text-xs text-paper/45">Requires the Anime Runner Building (Studio 2).</p>}
       </div>
-      <p>
-        Three fictional territories contain different mixtures of viewers.
-        Choose an edition and audience; overseas reception is separate from the
-        original anime's critic score.
+      <div className="ink-card p-3">
+        <div className="text-[10px] font-black tracking-widest text-cyanx">OVERSEAS BUSINESS SO FAR</div>
+        <div className="mt-2 grid grid-cols-3 gap-2 text-center text-[10px]">
+          <div className="rounded-lg bg-panel2 p-2"><b className="block text-sm text-mint">{formatGBP(summary.studioReceipts)}</b><span className="text-paper/40">studio receipts</span></div>
+          <div className="rounded-lg bg-panel2 p-2"><b className="block text-sm text-gold">{summary.fans.toLocaleString("en-GB")}</b><span className="text-paper/40">fans gained</span></div>
+          <div className="rounded-lg bg-panel2 p-2"><b className="block text-sm text-cyanx">{summary.signed}</b><span className="text-paper/40">releases signed</span></div>
+        </div>
+      </div>
+      <Select
+        label="Finished anime to take overseas"
+        value={q.projectId}
+        onChange={(v) => setQ({ ...q, projectId: v })}
+        options={[
+          { value: "", label: "Choose production" },
+          ...run.projects.filter((project) => !!project.result).map((project) => ({
+            value: project.id,
+            label: project.draft.title,
+          })),
+        ]}
+      />
+      <div className="grid gap-2">
+        {TERRITORIES.map((territory) => {
+          const recommended = quickQuote(territory.id, "recommended");
+          const rel = recommended?.quote.release;
+          const block = recommended?.quote.block;
+          const fanbase = summary.recognition[territory.id] ?? 0;
+          return (
+            <div key={territory.id} className="ink-card p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div><b className="text-sm">{territory.name}</b><div className="text-[9px] text-paper/45">Likes {territory.genres.map(genreName).join(" · ")} · regional fanbase {fanbase.toLocaleString("en-GB")}</div></div>
+                {rel && <div className="text-right text-[9px]"><b className={rel.reception >= 65 ? "text-mint" : rel.reception >= 50 ? "text-gold" : "text-neon"}>{rel.reception >= 65 ? "GOOD FIT" : rel.reception >= 50 ? "POSSIBLE" : "RISKY"}</b><div className="text-paper/40">~{rel.reception}/100</div></div>}
+              </div>
+              {rel && <div className="mt-2 rounded-lg border border-line bg-panel2/55 p-2 text-[9px] text-paper/55">Recommended: {EDITIONS.find((edition) => edition.id === rel.edition)?.name} + {DISTRIBUTORS.find((dist) => dist.id === rel.distributor)?.name} · cost {formatGBP(rel.cost)} · studio receipts ≈ {formatGBP(rel.receipts + rel.catalogueReceipts)}</div>}
+              {block && <div className="mt-2 text-[9px] text-paper/40">{block}</div>}
+              <div className="mt-2 grid grid-cols-3 gap-1.5">
+                {(["cheap","recommended","maximum"] as OverseasPresetId[]).map((preset) => {
+                  const info = quickQuote(territory.id, preset);
+                  const disabled = !info?.quote.release || !!info.quote.block;
+                  return <button key={preset} className={button + (preset === "recommended" ? " border-cyanx/50 text-cyanx" : "")} disabled={disabled} onClick={() => quickSign(territory.id, preset)}>{preset === "cheap" ? "CHEAP EXPORT" : preset === "recommended" ? "RECOMMENDED" : "MAX PUSH"}</button>;
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <button className={button + " w-full"} onClick={() => setShowAdvanced((value) => !value)}>{showAdvanced ? "HIDE ADVANCED DEAL BUILDER" : "ADVANCED CUSTOM DEAL"}</button>
+      {showAdvanced && <>
+      <p className="text-xs text-paper/50">
+        Advanced mode exposes the full audience, distributor, edition and campaign model. You do not need this screen to make overseas worthwhile.
       </p>
       <Select
         label="Production"
@@ -535,6 +600,7 @@ function OverseasPanel(props: Props) {
       >
         SIGN AND SCHEDULE RELEASE
       </button>
+      </>}
       {p?.result && !p.distributionOwner && !o.reviews[p.id] && (
         <button
           className={button}

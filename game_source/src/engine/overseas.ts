@@ -234,6 +234,59 @@ export interface OverseasRequest {
   edition: EditionKind;
   campaign: 0 | 75000 | 250000;
 }
+
+export type OverseasPresetId = "cheap" | "recommended" | "maximum";
+
+/** Player-facing preset builder. The detailed contract model remains intact,
+ * but the default path no longer asks the player to understand seven controls. */
+export function overseasPresetRequest(
+  r: RunState,
+  projectId: string,
+  territory: TerritoryId,
+  preset: OverseasPresetId,
+): OverseasRequest | null {
+  const p = r.projects.find((project) => project.id === projectId);
+  const t = TERRITORIES.find((candidate) => candidate.id === territory);
+  if (!p || !t) return null;
+  const tier = overseasTierOf(r);
+  const segment = (Object.entries(t.mix) as [SegmentId, number][])
+    .sort((a, b) => b[1] - a[1])[0]?.[0] ?? "mainstream";
+
+  if (preset === "cheap" || tier <= 1) {
+    return { projectId, territory, distributor: "specialist", segment, audience: p.draft.audience, edition: "subtitles", campaign: 0 };
+  }
+  if (preset === "recommended") {
+    return {
+      projectId,
+      territory,
+      distributor: "streamer",
+      segment,
+      audience: p.draft.audience,
+      edition: tier >= 3 ? "premium" : "dub",
+      campaign: 75_000,
+    };
+  }
+  return {
+    projectId,
+    territory,
+    distributor: tier >= 3 ? "streamer" : "specialist",
+    segment,
+    audience: p.draft.audience,
+    edition: tier >= 3 ? "premium" : "dub",
+    campaign: tier >= 3 ? 250_000 : 75_000,
+  };
+}
+
+export function overseasCareerSummary(r: RunState) {
+  const o = overseasOf(r);
+  const releases = o.releases;
+  return {
+    signed: releases.length,
+    studioReceipts: releases.reduce((sum, release) => sum + release.receipts + release.catalogueReceipts, 0),
+    fans: releases.reduce((sum, release) => sum + Math.max(0, release.fans), 0),
+    recognition: { ...o.recognition },
+  };
+}
 export interface RegionalRelease extends OverseasRequest {
   modelReception?: number;
   packageId?: string;
@@ -603,7 +656,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
         a.endsWeek > opensWeek,
     ).length;
   const campaign = q.campaign === 250000 ? 1.35 : q.campaign === 75000 ? 1.15 : 1,
-    recognition = 1 + Math.min(0.15, (o.recognition[t.id] ?? 0) / 100000);
+    recognition = 1 + Math.min(0.35, (o.recognition[t.id] ?? 0) / 75_000);
   const viewers = Math.floor(
     Math.min(
       remaining,
@@ -615,7 +668,7 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
         (1 + competition * 0.15),
     ),
   );
-  const infrastructureRevenue = [0, 1, 1.08, 1.22, 1.40][infrastructureTier] ?? 1;
+  const infrastructureRevenue = [0, 1.05, 1.18, 1.35, 1.55][infrastructureTier] ?? 1;
   const networkRevenue = r.capitalProjects.includes("distribution_network") ? 1.18 : 1;
   const gross = Math.round(viewers * d.perViewer * infrastructureRevenue * networkRevenue),
     distributorCut = Math.round(gross * terms.share);
@@ -624,13 +677,13 @@ export function quoteOverseas(r: RunState, q: OverseasRequest): RegionalQuote {
       : 0,
     royalty = Math.round((gross - distributorCut) * clamp(royaltyRate, 0, 1));
   const receipts = Math.max(0, gross - distributorCut - royalty),
-    catalogueTierMult = ([0, 0.75, 0.90, 1.05, 1.20][infrastructureTier] ?? 1)
+    catalogueTierMult = ([0, 0.90, 1.05, 1.20, 1.40][infrastructureTier] ?? 1)
       * (r.capitalProjects.includes("localisation_campus") ? 1.10 : 1)
       * (r.capitalProjects.includes("studio_streaming") ? 1.15 : 1),
     catalogueReceipts = Math.max(0, Math.round(receipts * d.catalogueRate * catalogueTierMult)),
     fans =
       reception.score >= 50
-        ? Math.floor((viewers * (reception.score - 45)) / 1000)
+        ? Math.floor((viewers * (reception.score - 45)) / 650)
         : -Math.min(o.recognition[t.id] ?? 0, Math.floor(viewers * 0.02));
   const localisationCost = reused ? 0 : Math.round(e.cost * (r.capitalProjects.includes("localisation_campus") ? 0.75 : 1));
   const cost = localisationCost + d.fee + q.campaign;
@@ -777,7 +830,7 @@ export function advanceOverseasWeek(r: RunState): RunState {
       totalRevenue += a.receipts + a.catalogueReceipts;
       recognition[a.territory] = Math.max(
         0,
-        (recognition[a.territory] ?? 0) + a.fans,
+        (recognition[a.territory] ?? 0) + Math.max(a.fans, Math.floor(a.viewers * 0.01)),
       );
       const p = r.projects.find((p) => p.id === a.projectId),
         key = p?.draft.franchiseKey ?? p?.draft.title,

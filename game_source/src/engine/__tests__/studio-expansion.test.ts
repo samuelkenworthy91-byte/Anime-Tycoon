@@ -40,6 +40,8 @@ import {
   distributionBlock,
   regionalReception,
   reviewLegacyRights,
+  overseasPresetRequest,
+  overseasCareerSummary,
   type OverseasRequest,
 } from "../overseas";
 import { rollHirePool, toLegend } from "../careers";
@@ -569,5 +571,28 @@ describe("overseas editions, audiences and rights", () => {
     const pool = rollHirePool(12, 3, () => 0.42);
     expect(pool.map((s) => s.role)).toEqual(["writer", "animator", "composer"]);
     expect(new Set(pool.map((s) => s.look)).size).toBe(3);
+  });
+});
+
+
+describe("overseas quick launch presets", () => {
+  it("turns a territory into a valid one-click launch shape and scales with infrastructure", () => {
+    const r = richRun();
+    const project = r.projects[0];
+    const low = overseasPresetRequest({ ...r, capitalProjects: ["overseas_tier_1"] }, project.id, "aurora", "recommended")!;
+    expect(low.edition).toBe("subtitles");
+    expect(low.campaign).toBe(0);
+
+    const high = overseasPresetRequest({ ...r, capitalProjects: ["overseas_tier_4"] }, project.id, "aurora", "maximum")!;
+    expect(high.edition).toBe("premium");
+    expect(high.campaign).toBe(250000);
+  });
+
+  it("summarises overseas money and fandom for a player-facing value readout", () => {
+    const r = richRun();
+    const summary = overseasCareerSummary(r);
+    expect(summary.signed).toBeGreaterThanOrEqual(0);
+    expect(summary.studioReceipts).toBeGreaterThanOrEqual(0);
+    expect(summary.fans).toBeGreaterThanOrEqual(0);
   });
 });
