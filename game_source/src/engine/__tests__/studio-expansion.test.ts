@@ -577,7 +577,7 @@ describe("overseas editions, audiences and rights", () => {
 
 describe("overseas quick launch presets", () => {
   it("turns a territory into a valid one-click launch shape and scales with infrastructure", () => {
-    const r = richRun();
+    const r = released();
     const project = r.projects[0];
     const low = overseasPresetRequest({ ...r, capitalProjects: ["overseas_tier_1"] }, project.id, "aurora", "recommended")!;
     expect(low.edition).toBe("subtitles");
@@ -589,7 +589,7 @@ describe("overseas quick launch presets", () => {
   });
 
   it("summarises overseas money and fandom for a player-facing value readout", () => {
-    const r = richRun();
+    const r = released();
     const summary = overseasCareerSummary(r);
     expect(summary.signed).toBeGreaterThanOrEqual(0);
     expect(summary.studioReceipts).toBeGreaterThanOrEqual(0);
