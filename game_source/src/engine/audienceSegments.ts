@@ -134,6 +134,16 @@ export function audienceSegmentDemand(profile: AudienceProfile | undefined, segm
   return Math.max(0.75, Math.min(1.35, 0.75 + profile[segment] / 50));
 }
 
+export function boostAudienceProfile(
+  profile: AudienceProfile | undefined,
+  targets: AudienceSegmentId[],
+  amount: number,
+): AudienceProfile | undefined {
+  if (!profile || !targets.length || amount <= 0) return profile;
+  const scores = Object.fromEntries(ids.map((id) => [id, profile[id] + (targets.includes(id) ? amount : 0)])) as Record<AudienceSegmentId, number>;
+  return normalize(scores);
+}
+
 export function franchiseAudienceProfile(run: Pick<RunState, "franchiseAudienceProfiles">, franchiseKey: string): AudienceProfile | null {
   return run.franchiseAudienceProfiles?.[franchiseKey] ?? null;
 }

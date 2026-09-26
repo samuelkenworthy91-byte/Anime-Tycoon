@@ -272,6 +272,7 @@ import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
 import { trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
+import { advanceFanProjects } from "./fanProjects";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -1130,6 +1131,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
   let studioEvents = [...(r.studioEvents ?? [])];
+  let fanProjects = r.fanProjects;
+  let franchiseAudienceProfiles = { ...(r.franchiseAudienceProfiles ?? {}) };
   rivalWorld = { ...rivalWorld, studios: rivalWorld.studios.map((s) => ({ ...s, talent: [...s.talent] })) };
   let partners = { ...(r.partners ?? {}) };
   let franchises = { ...(r.franchises ?? {}) };
@@ -1480,6 +1483,23 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
+    const fanTick = advanceFanProjects({
+      ...r,
+      week: w,
+      cash,
+      fans,
+      franchises,
+      fanProjects,
+      franchiseAudienceProfiles,
+      notices: [],
+    });
+    cash = fanTick.cash;
+    fans = fanTick.fans;
+    franchises = fanTick.franchises;
+    fanProjects = fanTick.fanProjects;
+    franchiseAudienceProfiles = { ...(fanTick.franchiseAudienceProfiles ?? {}) };
+    notices.push(...fanTick.notices);
+
     /* the market breathes every season */
     if (w % 12 === 0) {
       const drift = driftMarket(market);
@@ -1718,6 +1738,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     marketEvents,
     studioEvents,
     franchises,
+    fanProjects,
+    franchiseAudienceProfiles,
     partners,
     ipMarket,
     notices: notices.slice(-40),
