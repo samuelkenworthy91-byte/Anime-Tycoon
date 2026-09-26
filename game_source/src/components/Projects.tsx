@@ -31,7 +31,7 @@ import {
   type Staff,
 } from "../engine/data";
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, startFullyDelegatedProject, type RunState } from "../engine/state";
-import { AUTO_MIN_OFFICE, delegationBlockReason } from "../engine/automation";
+import { AUTO_MIN_OFFICE, delegationBlockReason, fullDelegationOutlook } from "../engine/automation";
 import { HEAD_TITLES, levelTitle, type HeadSlot } from "../engine/careers";
 import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
 import {
@@ -691,11 +691,13 @@ export default function ProjectsPanel({
         {fullDelegateOpen && (
           <div className="mt-2 space-y-1.5">
             <div className="rounded-lg border border-viol/25 bg-ink/35 px-2 py-1.5 text-[9px] text-paper/55">
-              Their choices aim for a solid show, not the mathematical optimum. Live desk contributions run at <b className="text-viol">80%</b> strength while delegated. You can TAKE OVER from the project card at any time.
+              Delegation now protects basic competence rather than deliberately tanking quality. Live craft runs at <b className="text-viol">95%</b>; manual play still has the higher ceiling because you control every intervention and optimisation.
             </div>
             {run.staff.map((staff) => {
               const busy = staffOperationReason(run, staff.id) || projectOfStaff(run.projects, staff.id)?.draft.title;
               const noSlot = active.length >= cap;
+              const support = run.staff.filter((member) => member.id === staff.id || (!staffOperationReason(run, member.id) && !projectOfStaff(run.projects, member.id)));
+              const outlook = fullDelegationOutlook(staff, support, run.officeLevel);
               return (
                 <button
                   key={staff.id}
@@ -712,6 +714,7 @@ export default function ProjectsPanel({
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[10px] font-bold">{staff.name}</div>
                     <div className="text-[8px] text-paper/45">{ROLE_LABEL[staff.role]} · Lv {staff.level}{staff.favGenre ? ` · prefers ${staff.favGenre}` : ""}</div>
+                    {!busy && !noSlot && <div className="text-[8px] text-paper/55"><b className={outlook.label === "STRONG" ? "text-mint" : outlook.label === "SOLID" ? "text-gold" : "text-neon"}>{outlook.label}</b> · {outlook.detail}</div>}
                   </div>
                   <span className="text-[8px] font-black text-viol">{noSlot ? "NO SLOT" : busy ? "BUSY" : "DELEGATE"}</span>
                 </button>

@@ -127,6 +127,15 @@ describe("sprint quality", () => {
     const q = sprintQuality(r, { ...p, auto }, "story", facilityFX({}), r.staff);
     expect(q.points).toBeLessThanOrEqual(150);
   });
+
+  it("gives a properly staffed Full Delegation project a competence floor and fewer routine notes", () => {
+    const r = run();
+    const p = proj();
+    const generic = sprintQuality(r, { ...p, auto: { headSlot: null, startedWeek: 0, intervention: false } }, "story", facilityFX({}), r.staff);
+    const full = sprintQuality(r, { ...p, auto: { headSlot: null, mode: "full", directorStaffId: "a", startedWeek: 0, intervention: false } }, "story", facilityFX({}), r.staff);
+    expect(full.points).toBeGreaterThanOrEqual(generic.points);
+    expect(full.issues).toBeLessThanOrEqual(generic.issues);
+  });
 });
 
 /* ------------------------------------------------------------ crisis */

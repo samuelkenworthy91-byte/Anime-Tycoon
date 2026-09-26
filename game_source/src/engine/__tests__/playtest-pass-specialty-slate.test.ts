@@ -104,7 +104,7 @@ describe("prepared Studio Slate", () => {
 
 
 describe("full creator delegation", () => {
-  it("lets one named employee originate and run a competent original at 80% live contribution strength", () => {
+  it("lets one named employee originate and run a competent original at 95% live contribution strength", () => {
     let run = initialRun("Delegation House", "steady");
     const director = { ...run.candidates[0], id: "director_test", favGenre: run.genresUnlocked[0], stamina: 100 };
     run = { ...run, cash: 2_000_000, staff: [director], candidates: [] };
@@ -129,7 +129,7 @@ describe("full creator delegation", () => {
         : item),
     };
     const handsOnSkill = contributionEffectiveSkill(handsOnRun, handsOnRun.staff[0], "story");
-    expect(delegatedSkill / handsOnSkill).toBeCloseTo(0.8, 5);
+    expect(delegatedSkill / handsOnSkill).toBeCloseTo(0.95, 5);
   });
 
 

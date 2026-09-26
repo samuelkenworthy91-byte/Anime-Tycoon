@@ -53,6 +53,33 @@ const MILESTONE_FOCUS: Record<MilestoneId, PointType | null> = {
   edit: null,
 };
 
+export type FullDelegationOutlook = "RISKY" | "SOLID" | "STRONG";
+
+/** A plain-language pre-greenlight read. It is intentionally broad: delegation
+ * should communicate whether the creator has enough support without leaking a
+ * predicted review score. */
+export function fullDelegationOutlook(
+  director: Staff,
+  availableCrew: Staff[],
+  officeLevel: number,
+): { label: FullDelegationOutlook; detail: string } {
+  const directorCraft = Math.max(staffPoint(director, "story"), staffPoint(director, "art"), staffPoint(director, "sound"));
+  const support = availableCrew
+    .filter((staff) => staff.id !== director.id)
+    .map((staff) => Math.max(staffPoint(staff, "story"), staffPoint(staff, "art"), staffPoint(staff, "sound")))
+    .sort((a, b) => b - a)
+    .slice(0, Math.max(1, Math.min(3, officeLevel + 1)));
+  const supportAverage = support.length ? support.reduce((sum, value) => sum + value, 0) / support.length : 0;
+  const score = directorCraft * 0.58 + supportAverage * 0.28 + support.length * 5 + officeLevel * 3;
+  const label: FullDelegationOutlook = score >= 78 ? "STRONG" : score >= 54 ? "SOLID" : "RISKY";
+  const detail = support.length >= 2
+    ? `${support.length + 1}-person creator team · established support`
+    : support.length === 1
+      ? "Two-person creator team · thin support"
+      : "Creator working almost alone";
+  return { label, detail };
+}
+
 /* --------------------------------------------------------- gating */
 /** null = can delegate; otherwise a human-readable reason it can't */
 export function delegationBlockReason(run: RunState, p: Project): string | null {
@@ -146,6 +173,10 @@ export function sprintQuality(
     : undefined;
   const headSkill = head ? staffPoint(head, ROLE_POINT[head.role]) : 0;
   const headMatches = focus !== null && head !== undefined && ROLE_POINT[head.role] === focus;
+  const fullDirector = p.auto?.mode === "full" && p.auto.directorStaffId
+    ? staff.find((member) => member.id === p.auto!.directorStaffId)
+    : undefined;
+  const creatorSkill = fullDirector && focus ? staffPoint(fullDirector, focus) : 0;
 
   const teamSkill = focus !== null
     ? team.reduce((a, s) => a + staffPoint(s, focus as PointType), 0)
@@ -159,17 +190,26 @@ export function sprintQuality(
   /* points: team + head, shaped by facilities, morale and difficulty.
      The 0.62 ceiling keeps a delegated sprint below a well-played manual
      one (manual floor points + lead-specialist bonus run higher). */
+  const fullMode = p.auto?.mode === "full";
   const base = 10 + teamSkill * 0.34;
   const headBonus = headSkill * 0.4 * (headMatches ? 1 : 0.55);
+  const creatorBonus = fullMode ? creatorSkill * 0.26 : 0;
+  const fullCompetence = fullMode && focus
+    ? 24 + creatorSkill * 0.30 + Math.min(4, team.length) * 4
+    : 0;
+  const calculated = Math.round(((base + headBonus + creatorBonus) * facMult * morale) / risk);
   const points = focus
-    ? Math.min(150, Math.round(((base + headBonus) * facMult * morale) / risk))
+    ? Math.min(150, Math.max(fullCompetence, calculated))
     : 0;
 
-  /* issues: harder projects and thin teams introduce problems */
-  const issues = focus ? Math.max(0, Math.round(1 + risk * 1.6 - team.length * 0.45)) : 0;
+  /* Full Delegation sacrifices optimisation/control, not baseline competence.
+     A properly staffed creator-led production therefore creates fewer routine
+     notes than generic automation while still retaining risk on thin teams. */
+  const issueBase = Math.round(1 + risk * 1.6 - team.length * 0.45);
+  const issues = focus ? Math.max(0, issueBase - (fullMode && team.length >= 3 ? 1 : 0)) : 0;
   const squashed = focus
     ? 0
-    : Math.round(1 + team.length * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix);
+    : Math.round(1 + team.length * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix + (fullMode ? 2 : 0));
 
   const rdGained = focus ? Math.round(2 + team.length * 0.6) : 0;
   const spent = 2_000 + team.length * 600 + (p.draft.budget === "blockbuster" ? 2_500 : 0);

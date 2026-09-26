@@ -2043,11 +2043,24 @@ export function startFullyDelegatedProject(
   const project = started.projects[started.projects.length - 1];
   if (!project) return started;
 
-  const free = r.staff
-    .filter((s) => !staffBusyReason(r, s.id))
-    .sort((a, b) => (b.story + b.art + b.sound + b.level * 8) - (a.story + a.art + a.sound + a.level * 8));
+  const free = r.staff.filter((s) => !staffBusyReason(r, s.id) && s.id !== director.id);
   const crewTarget = Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
-  const crewIds = [director.id, ...free.filter((s) => s.id !== director.id).map((s) => s.id)].slice(0, crewTarget);
+  const chosen = new Set<string>([director.id]);
+  /* Creator-led shows build a functional miniature studio first: cover missing
+     disciplines, then use any spare seat on the strongest remaining worker. */
+  for (const role of ["writer", "animator", "composer"] as const) {
+    if (chosen.size >= crewTarget) break;
+    if (r.staff.some((member) => chosen.has(member.id) && member.role === role)) continue;
+    const specialist = free
+      .filter((member) => member.role === role && !chosen.has(member.id))
+      .sort((a, b) => staffMain(b) - staffMain(a))[0];
+    if (specialist) chosen.add(specialist.id);
+  }
+  for (const member of [...free].sort((a, b) => (b.story + b.art + b.sound + b.level * 8) - (a.story + a.art + a.sound + a.level * 8))) {
+    if (chosen.size >= crewTarget) break;
+    chosen.add(member.id);
+  }
+  const crewIds = [...chosen];
 
   return {
     ...started,
@@ -2059,7 +2072,7 @@ export function startFullyDelegatedProject(
     }),
     notices: [
       ...started.notices,
-      `🎬 FULL DELEGATION: ${director.name} pitches “${draft.title}” (${genres.map((g) => GENRES.find((x) => x.id === g)?.label ?? g).join(" × ")}), chooses the cast/arcs/direction and runs production. Live contribution checks operate at 80% strength until you TAKE OVER.`,
+      `🎬 FULL DELEGATION: ${director.name} pitches “${draft.title}” (${genres.map((g) => GENRES.find((x) => x.id === g)?.label ?? g).join(" × ")}), chooses the cast/arcs/direction and runs production. Delegation preserves 95% live craft while the creator handles routine production decisions.`,
     ].slice(-40),
   };
 }
@@ -2507,7 +2520,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
-    if (project.auto?.mode === "full") effective *= 0.80;
+    if (project.auto?.mode === "full") effective *= 0.95;
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
