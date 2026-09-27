@@ -70,7 +70,7 @@ export const criticsIgnoreBalance = (showrunner: string) => showrunner === WHO_N
 export const criticalDarlingReviewBonus = (showrunner: string) => showrunner === CRITICAL_DARLING_ID ? 0.40 : 0;
 export const cleanMasterQualityMult = (showrunner: string, issues: number) => showrunner === FINISHER_ID && issues === 0 ? 1.05 : 1;
 export const slothFinalQualityMult = (showrunner: string) => showrunner === "sloth" ? 1.09 : 1;
-export const slothCriticPolishBonus = (showrunner: string) => showrunner === "sloth" ? 0.30 : 0;
+export const slothCriticPolishBonus = (showrunner: string) => showrunner === "sloth" ? 0.35 : 0;
 
 export interface Over9000Charge {
   charge: number;
