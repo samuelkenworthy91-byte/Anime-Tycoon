@@ -150,6 +150,9 @@ type CareerResult = {
   avgReview: number;
   bestScore: number;
   playerBigThree: number;
+  cashYear5: number;
+  cashYear12: number;
+  levelEnd: number;
 };
 
 function playCareer(showrunner: string, seedLabel: string): CareerResult {
@@ -168,6 +171,8 @@ function playCareer(showrunner: string, seedLabel: string): CareerResult {
     let greenlit = 0;
     let reviewSum = 0;
     let reviewCount = 0;
+    let cashYear5 = r.cash;
+    let cashYear12 = r.cash;
 
     for (let w = 0; w < WEEKS; w++) {
       for (const p of [...r.projects]) {
@@ -217,6 +222,8 @@ function playCareer(showrunner: string, seedLabel: string): CareerResult {
       r = botContract(r);
       for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;
       r = advanceWeeks(r, 1);
+      if (w + 1 === 5 * 48) cashYear5 = r.cash;
+      if (w + 1 === 12 * 48) cashYear12 = r.cash;
     }
 
     return {
@@ -230,6 +237,9 @@ function playCareer(showrunner: string, seedLabel: string): CareerResult {
       avgReview: reviewCount ? reviewSum / reviewCount : 0,
       bestScore: r.bestScore,
       playerBigThree: r.bigThree.slots.filter((slot) => slot.player).length,
+      cashYear5,
+      cashYear12,
+      levelEnd: r.showrunnerCareer.level,
     };
   } finally {
     Math.random = originalRandom;
@@ -256,6 +266,9 @@ simDescribe("25-year showrunner comparison", () => {
         avgReview: Math.round(avg("avgReview") * 100) / 100,
         bestScore: Math.round(avg("bestScore") * 10) / 10,
         playerBigThree: Math.round(avg("playerBigThree") * 10) / 10,
+        cashYear5: Math.round(avg("cashYear5")),
+        cashYear12: Math.round(avg("cashYear12")),
+        levelEnd: Math.round(avg("levelEnd") * 10) / 10,
       };
     });
 
