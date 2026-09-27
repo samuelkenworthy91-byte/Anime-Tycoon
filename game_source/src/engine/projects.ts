@@ -430,7 +430,7 @@ export function teamSpeed(
   studio: StudioMod = NO_STUDIO
 ): number {
   const raw = rawTeamCapacity(p, team, fx, mods, studio);
-  const cap = studio.ignoreScheduleCap ? 2.25 : SCHEDULE_SPEED_CAP;
+  const cap = studio.ignoreScheduleCap ? 1.85 : SCHEDULE_SPEED_CAP;
   return Math.min(cap, raw);
 }
 
