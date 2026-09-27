@@ -1,0 +1,39 @@
+name: Showrunner 24 Simulation
+# tuned pass
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - showrunner-24-sim-2026-09-27
+      - showrunner-24-tune-2026-09-27
+      - showrunner-24-tune2-2026-09-27
+      - showrunner-24-tune3-2026-09-27
+      - showrunner-24-final-polish-2026-09-27
+      - showrunner-24-final-tweak-2026-09-27
+    paths:
+      - "game_source/src/engine/**"
+      - ".github/workflows/showrunner-24-sim.yml"
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run normal regression suite
+        working-directory: game_source
+        run: npm test
+      - name: Run 25-year showrunner simulation
+        working-directory: game_source
+        env:
+          SHOWRUNNER_24_SIM: "1"
+        run: npx vitest run src/engine/__tests__/showrunner-24-long-sim.test.ts --reporter=verbose

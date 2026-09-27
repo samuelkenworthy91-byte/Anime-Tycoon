@@ -312,9 +312,11 @@ export function recognisePlayerBigThreeRelease(inputRun: RunState, release: BigT
     ...run,
     bigThree: {
       ...run.bigThree,
-      candidates: [...run.bigThree.candidates, candidate]
-        .sort((a, b) => b.culturalScore - a.culturalScore || b.score - a.score)
-        .slice(0, 24),
+      candidates: (() => {
+        const ranked = [...run.bigThree.candidates, candidate]
+          .sort((a, b) => b.culturalScore - a.culturalScore || b.score - a.score);
+        return run.showrunner === "over9000" ? ranked : ranked.slice(0, 24);
+      })(),
     },
     notices: run.bigThree.introduced
       ? [...run.notices, `🌠 BIG THREE WATCH — “${candidate.title}” has entered the March conversation.`].slice(-40)
@@ -535,10 +537,12 @@ function selectMarchCandidates(run: RunState, pool0: BigThreeSlot[]): BigThreeSl
 
   while (run.bigThree.slots.length + selected.length < BIG_THREE_MAX_SLOTS) {
     const slotIndex = run.bigThree.slots.length + selected.length;
-    const eligible = pool.filter((candidate) =>
-      !usedStudios.has(candidate.originalStudioId) &&
-      !selected.some((pick) => pick.sourceId === candidate.sourceId)
-    );
+    const playerSlots = run.bigThree.slots.filter((slot) => slot.player).length + selected.filter((slot) => slot.player).length;
+    const eligible = pool.filter((candidate) => {
+      const superhumanPlayerAllowance = run.showrunner === "over9000" && candidate.player && playerSlots < 2;
+      return (superhumanPlayerAllowance || !usedStudios.has(candidate.originalStudioId)) &&
+        !selected.some((pick) => pick.sourceId === candidate.sourceId);
+    });
     if (!eligible.length) break;
 
     eligible.sort((a, b) =>
@@ -549,7 +553,8 @@ function selectMarchCandidates(run: RunState, pool0: BigThreeSlot[]): BigThreeSl
     );
     const pick = eligible[0];
     selected.push(pick);
-    usedStudios.add(pick.originalStudioId);
+    const playerSlotsAfterPick = run.bigThree.slots.filter((slot) => slot.player).length + selected.filter((slot) => slot.player).length;
+    if (!(run.showrunner === "over9000" && pick.player && playerSlotsAfterPick < 2)) usedStudios.add(pick.originalStudioId);
   }
 
   return selected;

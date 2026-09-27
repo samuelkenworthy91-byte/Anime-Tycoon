@@ -46,8 +46,8 @@ function ambientRng(studio: string, week: number): () => number {
 /** Ambient texture deliberately uses its own deterministic stream so adding
  * flavour events cannot perturb production, hiring or rival simulation RNG. */
 export function ambientEventOccurs(studio: string, week: number): boolean {
-  if (week < 12 || week % 4 !== 2) return false;
-  return ambientRng(studio, week)() < 0.65;
+  if (week < 6 || week % 3 !== 1) return false;
+  return ambientRng(studio, week)() < 0.82;
 }
 
 export function rollAmbientEvent(ctx: AmbientEventContext, rng: () => number = ambientRng(ctx.studio, ctx.week)): AmbientEventOutcome | null {
@@ -67,6 +67,10 @@ export function rollAmbientEvent(ctx: AmbientEventContext, rng: () => number = a
     () => hot ? { id: "celebrity-shirt", text: `📸 A celebrity is photographed wearing “${hot.baseTitle}” merchandise. +5 popularity, +3 fatigue.`, franchise: { key: hot.key, popularity: 5, fatigue: 3 } } : null,
     () => hot ? { id: "school-club-craze", text: `🏫 “${hot.baseTitle}” unexpectedly catches on with school clubs. +4,000 fans, +2 popularity.`, fansDelta: 4_000, franchise: { key: hot.key, popularity: 2 } } : null,
     () => hot ? { id: "fandom-row", text: `💢 A shipping argument consumes the “${hot.baseTitle}” fandom for a week. −2 popularity, +3 fatigue.`, franchise: { key: hot.key, popularity: -2, fatigue: 3 } } : null,
+    () => hot ? { id: "fan-wiki", text: `📚 Fans finish an absurdly detailed “${hot.baseTitle}” wiki. +2 popularity, +800 fans.`, fansDelta: 800, franchise: { key: hot.key, popularity: 2 } } : null,
+    () => hot ? { id: "cosplay-wave", text: `🧵 A “${hot.baseTitle}” cosplay trend takes over convention feeds. +3 popularity, +2 fatigue, +1,500 fans.`, fansDelta: 1_500, franchise: { key: hot.key, popularity: 3, fatigue: 2 } } : null,
+    () => hot ? { id: "soundtrack-return", text: `💿 A track from “${hot.baseTitle}” unexpectedly re-enters playlists. +2 popularity, +1,100 fans.`, fansDelta: 1_100, franchise: { key: hot.key, popularity: 2 } } : null,
+    () => hot ? { id: "charity-stream", text: `❤️ Fans use “${hot.baseTitle}” for a charity stream marathon. +2,000 fans, +1 popularity.`, fansDelta: 2_000, franchise: { key: hot.key, popularity: 1 } } : null,
 
     () => active ? { id: "great-cut", text: `✨ A sequence from “${active.title}” is passed around internally as the week's standout work. +3 hype.`, project: { id: active.id, hype: 3 } } : null,
     () => active ? { id: "render-failure", text: `🖥 A render/storage failure hits “${active.title}”. Emergency replacement parts cost ${money(18_000)} and add a rework note.`, cashDelta: -18_000, project: { id: active.id, issues: 1 } } : null,
@@ -74,9 +78,14 @@ export function rollAmbientEvent(ctx: AmbientEventContext, rng: () => number = a
     () => active ? { id: "trailer-flat", text: `😶 The latest “${active.title}” promo lands flat. −3 hype.`, project: { id: active.id, hype: -3 } } : null,
     () => active ? { id: "supplier-refund", text: `📦 A supplier misses a delivery on “${active.title}” and refunds ${money(12_000)}. +${money(12_000)}.`, cashDelta: 12_000 } : null,
     () => active ? { id: "insurance", text: `🧾 A production insurance claim clears faster than expected. +${money(25_000)}.`, cashDelta: 25_000 } : null,
+    () => active ? { id: "animator-clip", text: `✏️ A rough animation clip from “${active.title}” leaks with the artists' blessing and fans love it. +3 hype.`, project: { id: active.id, hype: 3 } } : null,
+    () => active ? { id: "table-read", text: `🎭 A photo from the “${active.title}” table read makes the project feel real to fans. +2 hype.`, project: { id: active.id, hype: 2 } } : null,
+    () => active ? { id: "minor-rewrite", text: `📝 A small continuity snag is caught before it spreads on “${active.title}”. +1 production note, but the team is glad it was found early.`, project: { id: active.id, issues: 1 } } : null,
 
     () => staff ? { id: "staff-lecture", text: `🎓 ${staff.name} gives a guest lecture and the studio gains a little industry goodwill. +750 fans.`, fansDelta: 750 } : null,
     () => staff ? { id: "staff-interview", text: `🎤 ${staff.name} gives a thoughtful trade interview. +1,000 fans.`, fansDelta: 1_000 } : null,
+    () => staff ? { id: "staff-reel", text: `🎞 ${staff.name}'s old demo reel resurfaces and gets shared by young creators. +900 fans.`, fansDelta: 900 } : null,
+    () => staff ? { id: "staff-podcast", text: `🎧 ${staff.name} appears on a niche industry podcast. The episode quietly finds an audience. +1,200 fans.`, fansDelta: 1_200 } : null,
     () => staff && staff.stamina < 35 ? { id: "staff-sick-day", text: `🤒 ${staff.name} takes an ordinary sick day. No decision required; the studio absorbs ${money(2_000)} in cover costs.`, cashDelta: -2_000 } : null,
 
     () => ctx.merchTier >= 1 && hot ? { id: "merch-reorder", text: `🛍 Retailers place an unexpected reorder for “${hot.baseTitle}” goods. +${money(45_000)}.`, cashDelta: 45_000 } : null,

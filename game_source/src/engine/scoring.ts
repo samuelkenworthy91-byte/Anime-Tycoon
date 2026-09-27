@@ -30,9 +30,9 @@ import {
   reviewExpectationAdjustment,
 } from "./production";
 import { genreTargetFor } from "./genreTargets";
-import { fanBaseSalesMultiplier } from "./difficulty";
+import { FANBASE_SALES_CAP, fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
-import { contrarianComboMult, narrativeMomentumFanMult, storyStructureMult } from "./showrunnerPerks";
+import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothCriticPolishBonus, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
 
 export interface Points {
   story: number;
@@ -277,6 +277,10 @@ export function computeResult(opts: {
   audienceBar?: number;
   /** knowledge affects explanation only; never affinity mechanics */
   castAffinityDiscovered?: string[];
+  /** Optional competence floor used by quality-first Full Delegation. */
+  qualityFloor?: number;
+  /** Optional fanbase-sales ceiling; normal studios use ×1.80. */
+  salesCap?: number;
   /** deterministic reviewer RNG (tests); default Math.random */
   rng?: () => number;
 }): ShowResult {
@@ -300,6 +304,8 @@ export function computeResult(opts: {
     fanBase,
     audienceBar,
     castAffinityDiscovered = [],
+    qualityFloor,
+    salesCap,
     rng,
   } = opts;
   const roll = rng ?? Math.random;
@@ -314,6 +320,8 @@ export function computeResult(opts: {
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
   const ratioMatch = clamp(1.01 - drift * 0.12, 0.94, 1.01);
+  const ignoreDepartmentBalance = criticsIgnoreBalance(showrunner);
+  const reviewRatioMatch = ignoreDepartmentBalance ? 1 : ratioMatch;
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -442,7 +450,7 @@ export function computeResult(opts: {
     : totalPts;
   const craft = CRAFT_LIFT * Math.log(1 + scopeNormalisedPts / CRAFT_LIFT_DIVISOR);
   let raw = RAW_QUALITY_BASE
-    + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * ratioMatch * budgetFactor
+    + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * reviewRatioMatch * budgetFactor
     + sliderPart * SLIDER_QUALITY_SCALE
     + casting
     + arcQuality
@@ -473,7 +481,8 @@ export function computeResult(opts: {
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
 
   const chemFactor = 1 + (chemMult - 1) * CHEM_QUALITY_WEIGHT;
-  const quality = clamp(raw * chemFactor, RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
+  const calculatedQuality = raw * chemFactor * cleanMasterQualityMult(showrunner, issues) * slothFinalQualityMult(showrunner);
+  const quality = clamp(Math.max(calculatedQuality, qualityFloor ?? RAW_QUALITY_FLOOR), RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
 
   /* ---- four critics, each out of 10.
      Absolute quality provides most of the score; the studio's all-time
@@ -482,7 +491,7 @@ export function computeResult(opts: {
      without ever poisoning future releases. */
   /* Hard mode has a humane critic floor: disastrous work bottoms out around 4/10,
      but getting above that now demands correct direction, pairing and casting. */
-  const floor = 4;
+  const floor = showrunner === "vision" ? 5 : 4;
   const expectationAdj = reviewExpectationAdjustment(reviewExpectation);
   const audienceAdj = -Math.max(0, audienceBar ?? 0) * 0.07;
   /* absolute-quality mapping with a soft cap above quality 36
@@ -500,7 +509,7 @@ export function computeResult(opts: {
     let criteria = "";
     if (r.bias === "story") {
       criteria = "Writing · Story-direction slider · Arc structure · Overall execution";
-      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 0.45 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (perPhase[0] - 2) * 0.35 + (ignoreDepartmentBalance ? 0 : (mix[0] - genreRatio[0]) * 0.45) + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "hype") {
       criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
@@ -508,12 +517,13 @@ export function computeResult(opts: {
     }
     if (r.bias === "harsh") {
       criteria = "Overall execution · Production output · Editing notes · Professional polish";
-      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.98) * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ignoreDepartmentBalance ? 0 : (ratioMatch - 0.98) * 0.20) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "tech") {
       criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
-      s += (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (ignoreDepartmentBalance ? 0 : (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35) + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
+    s += criticalDarlingReviewBonus(showrunner) + slothCriticPolishBonus(showrunner);
     const calibrated = clamp(s, floor, 10);
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
        higher bar than ordinary rounding. Other bands use a slight conservative
@@ -559,7 +569,7 @@ export function computeResult(opts: {
     franchiseMult *
     merch *
     local *
-    fanBaseSalesMultiplier(fanBase);
+    fanBaseSalesMultiplier(fanBase, salesCap ?? FANBASE_SALES_CAP);
 
   /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
@@ -592,7 +602,9 @@ export function computeResult(opts: {
 
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
-    { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
+    ignoreDepartmentBalance
+      ? { label: "Department balance", pts: "Ignored by Who Needs Balance?" }
+      : { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
     { label: `Direction sliders (${Math.round(sliderFitMult * 100)}% fit)`, pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)} quality` },
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
@@ -644,6 +656,20 @@ export function computeResult(opts: {
     breakdown.push({ label: "Sana Kobayashi · Buzz Engine", pts: `+10 opening hype · final hype ${Math.ceil(hype)} · marketing gains ×1.50` });
   if (showrunner === "steady")
     breakdown.push({ label: "Genji Ashida · Steady Hand", pts: `staff contribution ×1.50 · note chance ×0.75 · ${issues} unresolved note${issues === 1 ? "" : "s"}` });
+  if (showrunner === "vision")
+    breakdown.push({ label: "Akari Natsume · Vision", pts: "critic floor 5/10" });
+  if (showrunner === "finisher")
+    breakdown.push({ label: "The Finisher · Final Cut", pts: issues === 0 ? "clean master ×1.05 final quality · editing ×1.35" : "editing ×1.35 · clean-master quality bonus missed" });
+  if (showrunner === "critical")
+    breakdown.push({ label: "Critical Darling · Critical Language", pts: "+0.40 internal score for every critic before rounding" });
+  if (showrunner === "ensemble")
+    breakdown.push({ label: "Ensemble Director · Greater Than the Sum", pts: "staff contribution +15% per represented Writer / Animator / Composer role" });
+  if (showrunner === "darkness")
+    breakdown.push({ label: "Prince of Darkness", pts: "dark alignment modifies live production output; bright genres apply the mirrored penalty" });
+  if (showrunner === "dawn")
+    breakdown.push({ label: "Brighter Than the Dawn", pts: "bright alignment modifies live production output; dark genres apply the mirrored penalty" });
+  if (showrunner === "unbalanced")
+    breakdown.push({ label: "Who Needs Balance?", pts: "Story / Art / Sound target-balance penalties ignored" });
 
   return {
     reviews,

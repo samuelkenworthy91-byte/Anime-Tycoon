@@ -43,6 +43,8 @@ export default function Ship({
   const [bought, setBought] = useState<string[]>([]);
   const [confirmSale, setConfirmSale] = useState<string | null>(null);
   const [posterBrowserOpen, setPosterBrowserOpen] = useState(false);
+  const [posterBrowserStage, setPosterBrowserStage] = useState<"genres" | "grid" | "preview">("genres");
+  const [posterGenre, setPosterGenre] = useState<string | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const saleOffers = showSaleOffers(run, project.id);
@@ -50,19 +52,37 @@ export default function Ship({
   const genericPosters = project.draft.licensedIpId ? [] : genericPosterOptions(project.draft.animeType, project.draft.genres, undefined, unavailablePosterIds);
   const selectedPoster = project.draft.posterArtId ? rivalPosterById(project.draft.posterArtId) : null;
   const posterConflict = !!project.draft.posterArtId && unavailablePosterIds.includes(project.draft.posterArtId);
-  const safePosterIndex = genericPosters.length ? Math.min(posterIndex, genericPosters.length - 1) : 0;
-  const browserPoster = genericPosters[safePosterIndex] ?? null;
+  const posterGenres = Array.from(new Set(genericPosters.flatMap((poster) => poster.genres))).sort((a, b) => {
+    const aProjectGenre = project.draft.genres.indexOf(a);
+    const bProjectGenre = project.draft.genres.indexOf(b);
+    if (aProjectGenre >= 0 && bProjectGenre >= 0) return aProjectGenre - bProjectGenre;
+    if (aProjectGenre >= 0) return -1;
+    if (bProjectGenre >= 0) return 1;
+    return a.localeCompare(b);
+  });
+  const genrePosters = posterGenre ? genericPosters.filter((poster) => poster.genres.includes(posterGenre)) : [];
+  const safePosterIndex = genrePosters.length ? Math.min(posterIndex, genrePosters.length - 1) : 0;
+  const browserPoster = genrePosters[safePosterIndex] ?? null;
 
   const openPosterBrowser = () => {
-    const selectedIndex = project.draft.posterArtId
-      ? genericPosters.findIndex((poster) => poster.id === project.draft.posterArtId)
-      : -1;
-    setPosterIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setPosterBrowserStage("genres");
+    setPosterGenre(null);
+    setPosterIndex(0);
     setPosterBrowserOpen(true);
   };
+  const openPosterGenre = (genre: string) => {
+    setPosterGenre(genre);
+    setPosterIndex(0);
+    setPosterBrowserStage("grid");
+  };
+  const openPosterPreview = (posterId: string) => {
+    const index = genrePosters.findIndex((poster) => poster.id === posterId);
+    setPosterIndex(index >= 0 ? index : 0);
+    setPosterBrowserStage("preview");
+  };
   const movePoster = (delta: number) => {
-    if (!genericPosters.length) return;
-    setPosterIndex((current) => (current + delta + genericPosters.length) % genericPosters.length);
+    if (!genrePosters.length) return;
+    setPosterIndex((current) => (current + delta + genrePosters.length) % genrePosters.length);
   };
 
   const totalPts = project.points.story + project.points.art + project.points.sound;
@@ -123,7 +143,7 @@ export default function Ship({
               )}
               <div className="min-w-0 text-[10px] text-paper/55">
                 <div className="font-bold text-paper">{selectedPoster ? "Franchise key art selected" : "Main-character key visual selected"}</div>
-                <div className="mt-1">{project.draft.continuation && selectedPoster ? "Inherited from the previous franchise entry unless you change it." : "Tap Browse Posters for a full-screen flick-through gallery."}</div>
+                <div className="mt-1">{project.draft.continuation && selectedPoster ? "Inherited from the previous franchise entry unless you change it." : "Browse by genre, pick from small thumbnails, then enlarge a poster before confirming it."}</div>
                 {posterConflict && <div className="mt-2 rounded-lg border border-neon/50 bg-neon/10 p-2 font-bold text-neon">This poster has since been claimed by another franchise. Choose another poster or Main Character before airing.</div>}
                 {selectedPoster && <button type="button" onClick={() => onPosterChoice(undefined)} className="mt-2 rounded border border-line px-2 py-1 text-[9px] font-bold text-paper/60">USE MAIN CHARACTER INSTEAD</button>}
               </div>
@@ -230,8 +250,12 @@ export default function Ship({
       {posterBrowserOpen && !project.draft.licensedIpId && (
         <div
           className="fixed inset-0 z-[120] flex flex-col bg-abyss px-3 pb-4 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur-xl"
-          onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
+          onTouchStart={(event) => {
+            if (posterBrowserStage !== "preview") return;
+            touchStartX.current = event.touches[0]?.clientX ?? null;
+          }}
           onTouchEnd={(event) => {
+            if (posterBrowserStage !== "preview") return;
             const start = touchStartX.current;
             const endX = event.changedTouches[0]?.clientX ?? null;
             touchStartX.current = null;
@@ -240,42 +264,138 @@ export default function Ship({
           }}
         >
           <div className="flex items-center gap-2 py-2">
+            {posterBrowserStage !== "genres" && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (posterBrowserStage === "preview") setPosterBrowserStage("grid");
+                  else {
+                    setPosterGenre(null);
+                    setPosterBrowserStage("genres");
+                  }
+                }}
+                className="btn-press rounded-lg border border-line bg-panel2 p-2 text-paper/70"
+                aria-label={posterBrowserStage === "preview" ? "Back to poster thumbnails" : "Back to poster genres"}
+              >
+                <ChevronLeft size={18} />
+              </button>
+            )}
             <div className="min-w-0 flex-1">
-              <div className="text-[9px] font-black tracking-[0.25em] text-cyanx">POSTER BROWSER</div>
-              <div className="truncate text-xs font-bold">{project.draft.title}</div>
+              <div className="text-[9px] font-black tracking-[0.25em] text-cyanx">
+                {posterBrowserStage === "genres" ? "POSTER GENRES" : posterBrowserStage === "grid" ? "POSTER THUMBNAILS" : "POSTER PREVIEW"}
+              </div>
+              <div className="truncate text-xs font-bold">
+                {posterBrowserStage === "genres" ? project.draft.title : posterGenre ?? project.draft.title}
+              </div>
             </div>
-            <div className="text-[9px] font-bold text-paper/45">{genericPosters.length ? (safePosterIndex + 1) + " / " + genericPosters.length : "NO AVAILABLE POSTERS"}</div>
+            {posterBrowserStage === "grid" && <div className="text-[9px] font-bold text-paper/45">{genrePosters.length} POSTERS</div>}
+            {posterBrowserStage === "preview" && <div className="text-[9px] font-bold text-paper/45">{genrePosters.length ? (safePosterIndex + 1) + " / " + genrePosters.length : "NO POSTERS"}</div>}
             <button type="button" onClick={() => setPosterBrowserOpen(false)} className="btn-press rounded-lg border border-line bg-panel2 p-2 text-paper/70" aria-label="Close poster browser"><X size={18} /></button>
           </div>
 
-          <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-            {browserPoster ? (
-              <>
-                <button type="button" onClick={() => movePoster(-1)} className="absolute left-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Previous poster"><ChevronLeft size={24} /></button>
-                <div className="flex h-full w-full max-w-xl flex-col items-center justify-center px-10">
-                  <img src={assetPath(browserPoster.img)} alt="Poster preview" className="min-h-0 max-h-[72vh] w-auto max-w-full rounded-2xl border border-line object-contain shadow-2xl" />
-                  <div className="mt-2 text-center text-[9px] text-paper/50">
-                    {browserPoster.genres.join(" / ")} · {browserPoster.animeTypes.map((type) => type.toUpperCase()).join(" / ")}
-                  </div>
+          {posterBrowserStage === "genres" && (
+            <div className="nice-scroll mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col overflow-y-auto py-2">
+              <div className="mb-3">
+                <div className="font-display text-xl font-extrabold">CHOOSE A GENRE</div>
+                <div className="mt-1 text-[10px] text-paper/50">Open a genre to see its available posters as thumbnails. Posters tagged with more than one genre can appear in more than one section.</div>
+              </div>
+              {posterGenres.length ? (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {posterGenres.map((genre) => {
+                    const count = genericPosters.filter((poster) => poster.genres.includes(genre)).length;
+                    const projectGenre = project.draft.genres.includes(genre);
+                    const selectedInGenre = !!selectedPoster?.genres.includes(genre);
+                    return (
+                      <button
+                        key={genre}
+                        type="button"
+                        onClick={() => openPosterGenre(genre)}
+                        className={cn(
+                          "btn-press rounded-xl border bg-panel2/75 p-3 text-left",
+                          projectGenre ? "border-gold/60" : "border-line",
+                          selectedInGenre && "ring-1 ring-cyanx/60"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-display text-sm font-extrabold">{genre}</div>
+                          <ChevronRight size={15} className="mt-0.5 shrink-0 text-paper/40" />
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[9px] text-paper/45">
+                          <span>{count} poster{count === 1 ? "" : "s"}</span>
+                          {projectGenre && <span className="rounded border border-gold/40 px-1 py-0.5 text-gold">SHOW GENRE</span>}
+                          {selectedInGenre && <span className="rounded border border-cyanx/40 px-1 py-0.5 text-cyanx">SELECTED</span>}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                <button type="button" onClick={() => movePoster(1)} className="absolute right-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Next poster"><ChevronRight size={24} /></button>
-              </>
-            ) : (
-              <div className="text-center text-sm text-paper/50">Every poster is currently owned by another franchise.</div>
-            )}
-          </div>
+              ) : (
+                <div className="flex flex-1 items-center justify-center text-center text-sm text-paper/50">Every poster is currently owned by another franchise.</div>
+              )}
+              <div className="mt-auto pt-4">
+                <Btn variant="ghost" className="w-full" onClick={() => { onPosterChoice(undefined); setPosterBrowserOpen(false); }}>★ USE MAIN CHARACTER INSTEAD</Btn>
+              </div>
+            </div>
+          )}
 
-          <div className="mx-auto mt-2 flex w-full max-w-xl gap-2">
-            <Btn variant="ghost" className="flex-1" onClick={() => { onPosterChoice(undefined); setPosterBrowserOpen(false); }}>★ MAIN CHARACTER</Btn>
-            <Btn big variant="gold" className="flex-[1.4]" disabled={!browserPoster} onClick={() => {
-              if (!browserPoster) return;
-              onPosterChoice(browserPoster.id);
-              setPosterBrowserOpen(false);
-            }}>USE THIS POSTER</Btn>
-          </div>
-          <div className="mt-1 text-center text-[8px] text-paper/35">Swipe left/right or use the arrows. Genre and Anime Type affect ordering only — every unclaimed poster remains selectable.</div>
+          {posterBrowserStage === "grid" && (
+            <div className="nice-scroll mx-auto min-h-0 w-full max-w-4xl flex-1 overflow-y-auto py-2">
+              <div className="mb-2 text-[10px] text-paper/50">Tap a thumbnail to enlarge it. Nothing changes until you confirm from the preview.</div>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                {genrePosters.map((poster) => {
+                  const selected = poster.id === project.draft.posterArtId;
+                  return (
+                    <button
+                      key={poster.id}
+                      type="button"
+                      onClick={() => openPosterPreview(poster.id)}
+                      className={cn(
+                        "btn-press relative aspect-[2/3] overflow-hidden rounded-lg border bg-panel2",
+                        selected ? "border-gold ring-2 ring-gold/35" : "border-line"
+                      )}
+                    >
+                      <img src={assetPath(poster.img)} alt={`${posterGenre ?? "Genre"} poster thumbnail`} className="absolute inset-0 h-full w-full object-cover" />
+                      {selected && <div className="absolute inset-x-0 bottom-0 bg-ink/85 px-1 py-1 text-[7px] font-black tracking-wide text-gold">CURRENTLY SELECTED</div>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {posterBrowserStage === "preview" && (
+            <>
+              <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+                {browserPoster ? (
+                  <>
+                    <button type="button" onClick={() => movePoster(-1)} className="absolute left-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Previous poster"><ChevronLeft size={24} /></button>
+                    <div className="flex h-full w-full max-w-xl flex-col items-center justify-center px-10">
+                      <img src={assetPath(browserPoster.img)} alt="Poster preview" className="min-h-0 max-h-[70vh] w-auto max-w-full rounded-2xl border border-line object-contain shadow-2xl" />
+                      <div className="mt-2 text-center text-[9px] text-paper/50">
+                        {browserPoster.genres.join(" / ")} · {browserPoster.animeTypes.map((type) => type.toUpperCase()).join(" / ")}
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => movePoster(1)} className="absolute right-0 z-10 rounded-full border border-line bg-ink/85 p-2 text-paper/80" aria-label="Next poster"><ChevronRight size={24} /></button>
+                  </>
+                ) : (
+                  <div className="text-center text-sm text-paper/50">No posters are available in this genre.</div>
+                )}
+              </div>
+
+              <div className="mx-auto mt-2 flex w-full max-w-xl gap-2">
+                <Btn variant="ghost" className="flex-1" onClick={() => setPosterBrowserStage("grid")}><ChevronLeft size={15} /> THUMBNAILS</Btn>
+                <Btn big variant="gold" className="flex-[1.4]" disabled={!browserPoster} onClick={() => {
+                  if (!browserPoster) return;
+                  onPosterChoice(browserPoster.id);
+                  setPosterBrowserOpen(false);
+                }}><Check size={16} /> CONFIRM POSTER</Btn>
+              </div>
+              <div className="mt-1 text-center text-[8px] text-paper/35">Swipe left/right or use the arrows. Use the × to exit without changing your current choice.</div>
+            </>
+          )}
         </div>
       )}
+
     </div>
   );
 }

@@ -31,6 +31,7 @@ import {
   ROLE_POINT,
   STAFF_STAT_CAP,
   staffPoint,
+  staffMain,
   slotForMedium,
   rollContract,
   type Contract,
@@ -57,6 +58,7 @@ import {
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject, generateCreatorVision } from "./creatorVision";
+import { arcClashesFor } from "./creativeDiscovery";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
@@ -269,9 +271,10 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
-import { trailblazerProductionMult } from "./showrunnerPerks";
+import { over9000Charge, polarityProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
+import { advanceFanProjects } from "./fanProjects";
 
 export type { Franchise, EntryKind } from "./franchise";
 export type { AwardCeremony, AwardNominee, AwardCategory } from "./awards";
@@ -1012,7 +1015,9 @@ export function forecastWeek(r: RunState): WeekForecast {
     .filter((p) => p.week === w && p.amount !== 0)
     .map((p) => ({ label: p.label, amount: p.amount }));
   const income = payoutsDue.reduce((a, p) => a + p.amount, 0);
-  const burnMult = studioProduction(r.heads ?? {}, r.staff, r.showrunner).burnMult;
+  const baseBurnMult = studioProduction(r.heads ?? {}, r.staff, r.showrunner).burnMult;
+  const slothIdleForForecast = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
+  const burnMult = baseBurnMult * (slothIdleForForecast ? 0.5 : 1);
   const burn = activeProjects(r.projects).reduce((a, p) => a + Math.round(p.weeklyBurn * burnMult), 0);
   const lateFees = activeProjects(r.projects)
     .filter((p) => w > p.deadlineWeek)
@@ -1130,6 +1135,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let commissions = [...(r.commissions ?? [])];
   let marketEvents = [...(r.marketEvents ?? [])];
   let studioEvents = [...(r.studioEvents ?? [])];
+  let fanProjects = r.fanProjects;
+  let franchiseAudienceProfiles = { ...(r.franchiseAudienceProfiles ?? {}) };
   rivalWorld = { ...rivalWorld, studios: rivalWorld.studios.map((s) => ({ ...s, talent: [...s.talent] })) };
   let partners = { ...(r.partners ?? {}) };
   let franchises = { ...(r.franchises ?? {}) };
@@ -1153,15 +1160,34 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
-  const studio = { ...studioProduction(heads, staffArr, r.showrunner), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
+  const studioBase = studioProduction(heads, staffArr, r.showrunner);
+  const slothIdleStudio = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
+  const studio = {
+    ...studioBase,
+    burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
+    issueChanceMult: r.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : r.showrunner === "delegator" ? 0.60 : 1,
+    scheduleSpeedCap: over9000Charge(r.showrunner, r.showrunnerCareer.level).scheduleCap,
+  };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds });
     const signature = specialisationProjectEffects(r, p.draft);
     const creator = creatorVisionEffectsForProject(r.expansion?.promises, p, st.id);
+    const slothIdle = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
+    const delegated = r.showrunner === "delegator" && p.auto?.mode === "full";
+    const director = delegated && p.auto?.directorStaffId ? staffArr.find((member) => member.id === p.auto!.directorStaffId) : undefined;
+    const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * signature.outputMult * creator.outputMult * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id)),
-      pace: base.pace * signature.paceMult,
+      out: base.out
+        * signature.outputMult
+        * creator.outputMult
+        * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id))
+        * (slothIdle ? 2 : 1)
+        * (delegated ? (preferred ? 1.80 : 1.60) : 1),
+      pace: base.pace
+        * signature.paceMult
+        * (slothIdle ? 0.5 : 1)
+        * (delegated ? (preferred ? 1.04 : 1.00) : 1),
       xpMult: base.xpMult * creator.xpMult,
     };
   };
@@ -1480,6 +1506,23 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
+    const fanTick = advanceFanProjects({
+      ...r,
+      week: w,
+      cash,
+      fans,
+      franchises,
+      fanProjects,
+      franchiseAudienceProfiles,
+      notices: [],
+    });
+    cash = fanTick.cash;
+    fans = fanTick.fans;
+    franchises = fanTick.franchises;
+    fanProjects = fanTick.fanProjects;
+    franchiseAudienceProfiles = { ...(fanTick.franchiseAudienceProfiles ?? {}) };
+    notices.push(...fanTick.notices);
+
     /* the market breathes every season */
     if (w % 12 === 0) {
       const drift = driftMarket(market);
@@ -1521,10 +1564,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       }
     }
 
-    /* Studio life should keep surprising the player. Roughly four consequential
-       decisions can surface per year, but never stack on top of one another. */
+    /* Major decisions are frequent enough to make each year feel eventful,
+       but still never stack: about six consequential calls per 48-week year. */
     studioEvents = studioEvents.filter((e) => w <= e.expiresWeek);
-    if (w % 8 === 4 && studioEvents.length === 0 && Math.random() < 0.72) {
+    if (w % 7 === 3 && studioEvents.length === 0 && Math.random() < 0.90) {
       const sev = rollStudioEvent(w, {
         crew: staffArr.map((s) => ({
           id: s.id,
@@ -1718,6 +1761,8 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     marketEvents,
     studioEvents,
     franchises,
+    fanProjects,
+    franchiseAudienceProfiles,
     partners,
     ipMarket,
     notices: notices.slice(-40),
@@ -1971,23 +2016,42 @@ export function startFullyDelegatedProject(
     unlocked,
     director,
   );
-  const candidatePair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
-  const learnedPair = candidatePair.length === 2 && (r.comboLevels[comboKey(candidatePair)] ?? 0) > 0;
-  /* Full Delegation is allowed to be imperfect, not self-sabotaging. A creator
-     may only commit to a two-genre pairing the studio has actually learned and
-     which is at least a Safe pairing. Unknown/risky pairs fall back to the
-     creator's primary genre instead of routinely producing nonsense. */
-  const sensiblePair = learnedPair && comboMult(candidatePair, true) >= 0.95;
-  const genres = sensiblePair ? candidatePair : [vision.primaryGenre];
+  const delegatorRun = r.showrunner === "delegator";
+  const visionPair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
+  const learnedVisionPair = visionPair.length === 2 && (r.comboLevels[comboKey(visionPair)] ?? 0) > 0;
+  const sensibleVisionPair = learnedVisionPair && comboMult(visionPair, true) >= 0.95;
+  const knownPairs = unlocked
+    .filter((genre) => genre !== vision.primaryGenre)
+    .map((genre) => [vision.primaryGenre, genre] as GenreId[])
+    .filter((pair) => (r.comboLevels[comboKey(pair)] ?? 0) > 0 && comboMult(pair, true) >= 1)
+    .sort((a, b) =>
+      comboMult(b, true) - comboMult(a, true) ||
+      (r.comboLevels[comboKey(b)] ?? 0) - (r.comboLevels[comboKey(a)] ?? 0)
+    );
+  const genres = delegatorRun && knownPairs.length
+    ? knownPairs[0]
+    : sensibleVisionPair ? visionPair : [vision.primaryGenre];
 
+  const knownFit = (member: { id: string; type: AnimeType; visibleAff: GenreId[]; hiddenAff: GenreId }) =>
+    r.castAffinityDiscovered.includes(member.id) && genres.includes(member.hiddenAff)
+      ? 2
+      : member.visibleAff.some((g) => genres.includes(g)) ? 1 : 0;
   const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
-  const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
+  const typeKnownFit = (type: AnimeType) =>
+    [PROTAGONISTS, SECONDARY, PETS, VILLAINS].reduce((sum, pool) => {
+      const best = pool.filter((member) => member.type === type).reduce((m, member) => Math.max(m, knownFit(member)), 0);
+      return sum + best;
+    }, 0);
+  const animeType: AnimeType = delegatorRun
+    ? (typeKnownFit("shonen") >= typeKnownFit("shojo") ? "shonen" : "shojo")
+    : preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
   const castPick = (role: "protag" | "secondary" | "pet" | "villain", preferredId?: string) => {
     const activePool = role === "protag" ? PROTAGONISTS : role === "secondary" ? SECONDARY : role === "pet" ? PETS : VILLAINS;
     const preferred = preferredId ? activePool.find((member) => member.id === preferredId) : undefined;
-    if (preferred && preferred.type === animeType && preferred.visibleAff.some((g) => genres.includes(g))) return preferred;
-    const fitting = activePool.filter((member) => member.type === animeType && member.visibleAff.some((g) => genres.includes(g)));
-    const typed = fitting.length ? fitting : activePool.filter((member) => member.type === animeType);
+    if (preferred && preferred.type === animeType && knownFit(preferred) > 0) return preferred;
+    const typed = activePool.filter((member) => member.type === animeType);
+    const bestKnown = [...typed].sort((a, b) => knownFit(b) - knownFit(a));
+    if (bestKnown.length && knownFit(bestKnown[0]) > 0) return bestKnown[0];
     const pool = typed.length ? typed : activePool;
     return pool[Math.floor(rng() * pool.length)] ?? pool[0];
   };
@@ -1998,14 +2062,31 @@ export function startFullyDelegatedProject(
   const villain = castPick("villain", vision.cast.villain);
 
   const unlockedArcs = ARCS.filter((arc) => !arc.franchiseOnly && !arcLockReason(arc, r));
-  const arcIds = [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
-  for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
-    if (arcIds.length >= 3) break;
-    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+  const delegatorArcScore = (arc: Arc) =>
+    arc.q * 2 +
+    (arc.f ?? 0) * 30 +
+    genres.reduce((sum, genre) => sum + arcGenreFit(arc, genre).score * 4, 0);
+  const arcIds: string[] = delegatorRun ? [] : [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
+  if (delegatorRun) {
+    const ranked = [...unlockedArcs]
+      .filter((arc) => !(arc.anti ?? []).some((genre) => genres.includes(genre)))
+      .sort((a, b) => delegatorArcScore(b) - delegatorArcScore(a));
+    for (const arc of ranked) {
+      if (arcIds.length >= 4) break;
+      const trial = [...arcIds, arc.id];
+      const knownClash = arcClashesFor(trial).some((clash) => r.arcCombos.includes(clash.id));
+      if (!knownClash) arcIds.push(arc.id);
+    }
   }
-  for (const arc of unlockedArcs) {
-    if (arcIds.length >= 3) break;
-    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+  if (!delegatorRun) {
+    for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
+      if (arcIds.length >= 3) break;
+      if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+    }
+    for (const arc of unlockedArcs) {
+      if (arcIds.length >= 3) break;
+      if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+    }
   }
 
   const mediumPool = r.mediumsUnlocked.filter((id) => id !== "movie" || r.officeLevel >= 1) as Draft["medium"][];
@@ -2034,7 +2115,7 @@ export function startFullyDelegatedProject(
     villain: villain.id,
     villainName: villain.name,
     arcs: arcIds,
-    sliders: vision.sliders,
+    sliders: delegatorRun ? [...genreTargetFor(genres).ideal] as [number, number, number] : vision.sliders,
     season: 1,
   };
 
@@ -2043,11 +2124,26 @@ export function startFullyDelegatedProject(
   const project = started.projects[started.projects.length - 1];
   if (!project) return started;
 
-  const free = r.staff
-    .filter((s) => !staffBusyReason(r, s.id))
-    .sort((a, b) => (b.story + b.art + b.sound + b.level * 8) - (a.story + a.art + a.sound + a.level * 8));
-  const crewTarget = Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
-  const crewIds = [director.id, ...free.filter((s) => s.id !== director.id).map((s) => s.id)].slice(0, crewTarget);
+  const free = r.staff.filter((s) => !staffBusyReason(r, s.id) && s.id !== director.id);
+  const crewTarget = delegatorRun
+    ? Math.min(TEAM_MAX, Math.max(4, Math.min(5, r.officeLevel + 3)))
+    : Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
+  const chosen = new Set<string>([director.id]);
+  /* Creator-led shows build a functional miniature studio first: cover missing
+     disciplines, then use any spare seat on the strongest remaining worker. */
+  for (const role of ["writer", "animator", "composer"] as const) {
+    if (chosen.size >= crewTarget) break;
+    if (r.staff.some((member) => chosen.has(member.id) && member.role === role)) continue;
+    const specialist = free
+      .filter((member) => member.role === role && !chosen.has(member.id))
+      .sort((a, b) => staffMain(b) - staffMain(a))[0];
+    if (specialist) chosen.add(specialist.id);
+  }
+  for (const member of [...free].sort((a, b) => (b.story + b.art + b.sound + b.level * 8) - (a.story + a.art + a.sound + a.level * 8))) {
+    if (chosen.size >= crewTarget) break;
+    chosen.add(member.id);
+  }
+  const crewIds = [...chosen];
 
   return {
     ...started,
@@ -2059,7 +2155,7 @@ export function startFullyDelegatedProject(
     }),
     notices: [
       ...started.notices,
-      `🎬 FULL DELEGATION: ${director.name} pitches “${draft.title}” (${genres.map((g) => GENRES.find((x) => x.id === g)?.label ?? g).join(" × ")}), chooses the cast/arcs/direction and runs production. Live contribution checks operate at 80% strength until you TAKE OVER.`,
+      `🎬 FULL DELEGATION: ${director.name} pitches “${draft.title}” (${genres.map((g) => GENRES.find((x) => x.id === g)?.label ?? g).join(" × ")}), chooses the cast/arcs/direction and runs production. Delegation preserves 95% live craft while the creator handles routine production decisions.`,
     ].slice(-40),
   };
 }
@@ -2507,7 +2603,28 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
-    if (project.auto?.mode === "full") effective *= 0.80;
+    if (project.auto?.mode === "full") {
+      if (r.showrunner === "delegator") {
+        const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
+        const preferred = !!director?.favGenre && project.draft.genres.includes(director.favGenre);
+        effective *= preferred ? 1.55 : 1.35;
+      } else {
+        effective *= 0.95;
+      }
+    }
+    if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) effective *= 2;
+    if (r.showrunner === "over9000") effective *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
+    if (!editing) {
+      /* Project-identity perks belong on the live contribution path. Roxie's
+         schedule modifier already accelerates the calendar; this restores the
+         missing Story/Art/Sound output half of No Blueprint. */
+      effective *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
+      effective *= polarityProductionMult(r.showrunner, project.draft.genres);
+      if (r.showrunner === "ensemble") {
+        const represented = new Set(team.map((mate) => mate.role)).size;
+        effective *= 1 + Math.min(3, represented) * 0.15;
+      }
+    }
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -2522,6 +2639,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= 1 + fx.issueFix * 0.15;
     if (r.research.includes("qa")) effective *= 1.15;
     effective *= trackSkillMultiplier(researchTrackLevel(r, "production"));
+    if (r.showrunner === "finisher") effective *= 1.35;
   }
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
@@ -2542,8 +2660,11 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   if (project) {
     skill *= specialisationProjectEffects(r, project.draft).outputMult;
     skill *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    skill *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
+    skill *= polarityProductionMult(r.showrunner, project.draft.genres);
   }
   if (r.showrunner === "steady") skill *= 1.5;
+  if (r.showrunner === "over9000") skill *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
   return skill;
 }
 
@@ -2628,7 +2749,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const type = runnerJob.contract.type;
     const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
     if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "contract", jobId: runnerJob.id });
-  } else if (!runnerJob && Math.random() < 0.22) {
+  } else if (!runnerJob && r.showrunner !== "sloth" && Math.random() < 0.22) {
     const active = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
     if (active) {
       const skills = POINT_TYPES.map((type) => ({ type, skill: showrunnerEffectiveSkill(r, type, active) })).sort((a, b) => b.skill - a.skill);
@@ -2739,15 +2860,26 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
   }
 
-  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
+  const studioBase = studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner);
+  const slothIdleStudio = nx.showrunner === "sloth" && !(nx.contractJobs ?? []).some((job) => job.showrunner);
+  const studio = {
+    ...studioBase,
+    burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
+    issueChanceMult: nx.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : nx.showrunner === "delegator" ? 0.60 : 1,
+    scheduleSpeedCap: over9000Charge(nx.showrunner, nx.showrunnerCareer.level).scheduleCap,
+  };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds: nx.bonds ?? {} });
     const discovery = trailblazerProductionMult(nx.showrunner, p.draft.genres, nx.comboLevels ?? {});
     const signature = specialisationProjectEffects(nx, p.draft);
+    const slothIdle = nx.showrunner === "sloth" && !(nx.contractJobs ?? []).some((job) => job.showrunner);
+    const delegated = nx.showrunner === "delegator" && p.auto?.mode === "full";
+    const director = delegated && p.auto?.directorStaffId ? nx.staff.find((member) => member.id === p.auto!.directorStaffId) : undefined;
+    const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * discovery * signature.outputMult,
-      pace: base.pace * discovery * signature.paceMult,
+      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.80 : 1.60) : 1),
+      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.04 : 1.00) : 1),
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
@@ -3053,6 +3185,8 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     specialisationScoreMult: specialisationProjectEffects(r, d).scoreMult,
     businessMult: businessTrackRevenueMultiplier(researchTrackLevel(r, "business")),
     castAffinityDiscovered: r.castAffinityDiscovered,
+    showrunnerLevel: r.showrunnerCareer.level,
+    staff: r.staff,
   });
   const decisionFanMult = decisionReleaseFansMult(r, d);
   if (Math.abs(decisionFanMult - 1) > 0.001) {

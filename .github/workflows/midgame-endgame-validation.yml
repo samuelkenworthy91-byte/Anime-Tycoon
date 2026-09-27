@@ -6,6 +6,7 @@ on:
       - work/midgame-endgame-systems-pass
       - work/zeitgeist-commercial-events-pass
       - depth-clarity-overhaul
+      - player-value-variety-pass
   workflow_dispatch:
 
 permissions:

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Crown,
   Award,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
 import { runCareerEvaluation, type CareerCategory } from "../engine/legacy";
-import { CAREER_YEARS, formatGBP, formatNum, ROLE_LABEL } from "../engine/data";
+import { CAREER_YEARS, SHOWRUNNERS, formatGBP, formatNum, ROLE_LABEL, type Showrunner } from "../engine/data";
 import { studioReputationTraits } from "../engine/studioReputation";
 import { rivalMemoriesFor } from "../engine/rivalMemories";
 import type { RunState } from "../engine/state";
@@ -37,13 +37,21 @@ const CAT_ICONS: Record<string, React.ReactNode> = {
 export default function Retrospective({
   run,
   onContinue,
+  onNewGamePlus,
   onTitle,
 }: {
   run: RunState;
   onContinue: () => void;
+  onNewGamePlus: (studio: string, showrunner: Showrunner["id"]) => void;
   onTitle: () => void;
 }) {
   const ev = useMemo(() => runCareerEvaluation(run), [run]);
+  const [ngPlusOpen, setNgPlusOpen] = useState(false);
+  const [ngStudio, setNgStudio] = useState(`${run.studio} Next`);
+  const knownRunner = SHOWRUNNERS.some((runner) => runner.id === run.showrunner)
+    ? run.showrunner as Showrunner["id"]
+    : SHOWRUNNERS[0].id;
+  const [ngRunner, setNgRunner] = useState<Showrunner["id"]>(knownRunner);
   const h = ev.history;
   const reputation = useMemo(() => studioReputationTraits(run), [run]);
   const goldenPairs = (run.staffRelationships ?? []).filter((relationship) => relationship.goldenPair).sort((a,b)=>b.acclaimedReleases-a.acclaimedReleases);
@@ -206,16 +214,37 @@ export default function Retrospective({
         )}
 
         {/* ------------------------------------------------ actions */}
-        <div className="anim-up flex flex-col gap-2 pt-1 sm:flex-row" style={{ animationDelay: "260ms" }}>
-          <Btn big variant="primary" className="anim-ring flex-1" onClick={onContinue}>
-            <Play size={18} /> CONTINUE IN SANDBOX
+        <div className="anim-up grid gap-2 pt-1 sm:grid-cols-3" style={{ animationDelay: "260ms" }}>
+          <Btn big variant="primary" className="anim-ring" onClick={onContinue}>
+            <Play size={18} /> CONTINUE SANDBOX
+          </Btn>
+          <Btn big variant="gold" onClick={() => setNgPlusOpen((open) => !open)}>
+            <Star size={18} /> NEW GAME+
           </Btn>
           <Btn big variant="ghost" onClick={onTitle}>
             <Home size={18} /> TITLE
           </Btn>
         </div>
+        {ngPlusOpen && (
+          <div className="anim-up rounded-xl border border-gold/40 bg-gold/5 p-3">
+            <div className="text-[10px] font-black tracking-[0.25em] text-gold">NEW GAME+ · KNOWLEDGE LEGACY</div>
+            <div className="mt-1 text-[10px] leading-relaxed text-paper/55">
+              Start a genuinely fresh studio while keeping the information you learned: researched genres, known pairings, arc knowledge, cast chemistry/affinities and scouting knowledge. Cash, staff, IP, facilities, projects, awards and production-tech bonuses reset.
+            </div>
+            <label className="mt-3 block text-[9px] font-bold tracking-wider text-paper/45">NEW STUDIO NAME</label>
+            <input value={ngStudio} maxLength={26} onChange={(event) => setNgStudio(event.target.value.slice(0,26))} className="ink-input mt-1 w-full px-3 py-2 text-sm font-bold"/>
+            <label className="mt-3 block text-[9px] font-bold tracking-wider text-paper/45">FOUNDING SHOWRUNNER</label>
+            <select value={ngRunner} onChange={(event) => setNgRunner(event.target.value as Showrunner["id"])} className="ink-input mt-1 min-h-11 w-full px-3 py-2 text-sm font-bold">
+              {SHOWRUNNERS.map((runner)=><option key={runner.id} value={runner.id}>{runner.name} · {runner.title}</option>)}
+            </select>
+            <Btn big variant="gold" className="mt-3 w-full" onClick={() => onNewGamePlus(ngStudio.trim() || `${run.studio} Next`, ngRunner)}>
+              <Star size={18}/> START NEW GAME+ WITH KNOWLEDGE
+            </Btn>
+            <div className="mt-2 text-[9px] text-paper/40">Your completed career is copied to a protected CAREER ARCHIVE load slot first.</div>
+          </div>
+        )}
         <div className="pb-2 text-center text-[11px] text-paper/40">
-          The 25-year career is complete. Continue only if you want an endless post-career sandbox; this result remains your formal career legacy.
+          Sandbox keeps this empire. New Game+ starts again with knowledge, not wealth or infrastructure.
         </div>
       </div>
     </div>

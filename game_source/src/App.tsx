@@ -19,8 +19,6 @@ import {
   releaseProject,
   sellReadyProject,
   shelveReadyProject,
-  contractSelectionDailyOutputEstimate,
-  staffBusyReason,
   startBlockReason,
   startContractAssignment,
   startProject,
@@ -62,6 +60,9 @@ import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
 import BigThreeReveal from "./components/BigThreeReveal";
 import StaffRequestOverlay, { nextStaffRequestId } from "./components/StaffRequestOverlay";
 import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
+import { contractQuickPicks } from "./engine/contractQuickPick";
+import { createNewGamePlusRun } from "./engine/newGamePlus";
+import type { Showrunner } from "./engine/data";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
 
@@ -337,6 +338,32 @@ export default function App() {
     setScreen("title");
   }, []);
 
+  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"]) => {
+    if (!run) return;
+    const completed = snapshot();
+    if (completed) saveSlot("legacy", completed);
+    primeAudio();
+    sfx.fanfare();
+    const next = createNewGamePlusRun(run, studio, showrunner);
+    setMeta({ studio, showrunner });
+    setRun(next);
+    seenCeremonyYear.current = 0;
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
+    setContract(null);
+    setContPlan(null);
+    setLicensedIpId(null);
+    setAuctionId(null);
+    setPaused(false);
+    setTimeSpeed(1);
+    dayAccRef.current = 0;
+    dayCountRef.current = 0;
+    setClockDay(0);
+    setClockPhase(0);
+    setScreen("office");
+  }, [run, snapshot]);
+
   /** from the retrospective: the campaign ends, the save lives on */
   const continueDynasty = useCallback(() => {
     if (!run) return;
@@ -544,48 +571,12 @@ export default function App() {
 
   const quickBestContract = useCallback((c: Contract) => {
     if (!run) return;
-    const runnerBusy = run.contractJobs.some((job) => job.showrunner);
-    const available: ({ kind: "staff"; id: string } | { kind: "runner" })[] = run.staff
-      .filter((staff) => !staffBusyReason(run, staff.id))
-      .map((staff) => ({ kind: "staff" as const, id: staff.id }));
-    if (!runnerBusy) available.push({ kind: "runner" });
-
-    type Candidate = { staffIds: string[]; showrunner: boolean; rate: number; size: number; meets: boolean };
-    let best: Candidate | null = null;
-    const consider = (picked: typeof available) => {
-      const staffIds = picked
-        .filter((seat): seat is { kind: "staff"; id: string } => seat.kind === "staff")
-        .map((seat) => seat.id);
-      const showrunner = picked.some((seat) => seat.kind === "runner");
-      const rate = contractSelectionDailyOutputEstimate(run, c, staffIds, showrunner);
-      const candidate: Candidate = {
-        staffIds,
-        showrunner,
-        rate,
-        size: picked.length,
-        meets: rate * c.weeks * 7 >= c.target,
-      };
-      if (
-        !best ||
-        (candidate.meets && !best.meets) ||
-        (candidate.meets === best.meets && candidate.meets && candidate.size < best.size) ||
-        (candidate.meets === best.meets && (!candidate.meets || candidate.size === best.size) && candidate.rate > best.rate)
-      ) best = candidate;
-    };
-
-    for (let a = 0; a < available.length; a += 1) {
-      consider([available[a]]);
-      for (let b = a + 1; b < available.length; b += 1) {
-        consider([available[a], available[b]]);
-        for (let d = b + 1; d < available.length; d += 1) consider([available[a], available[b], available[d]]);
-      }
-    }
-
-    if (!best) {
+    const pick = contractQuickPicks(run, c).minimum;
+    if (!pick) {
       sfx.back();
       return;
     }
-    const next = startContractAssignment(run, c, best.staffIds, best.showrunner);
+    const next = startContractAssignment(run, c, pick.staffIds, pick.showrunner);
     if (!next) {
       sfx.back();
       return;
@@ -841,7 +832,7 @@ export default function App() {
           />
         )}
         {screen === "retrospective" && run && (
-          <Retrospective run={run} onContinue={continueDynasty} onTitle={quitToTitle} />
+          <Retrospective run={run} onContinue={continueDynasty} onNewGamePlus={startNewGamePlus} onTitle={quitToTitle} />
         )}
         {screen === "gameover" && run && (
           <GameOver run={run} onRestart={restart} onTitle={quitToTitle} />

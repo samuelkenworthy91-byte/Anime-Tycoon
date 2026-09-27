@@ -41,6 +41,7 @@ import {
 import { computeResult, type Points, type ShowResult } from "./scoring";
 import { genreTargetFor } from "./genreTargets";
 import { secretComboResearched } from "./creativeDiscovery";
+import { over9000Charge } from "./showrunnerPerks";
 import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
 
 /* ------------------------------------------------------------- costs */
@@ -392,6 +393,9 @@ export interface StudioMod {
   burnMult: number;
   /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
   issueChanceMult?: number;
+  /** Legacy boolean retained for old tests/saves; scheduleSpeedCap is authoritative. */
+  ignoreScheduleCap?: boolean;
+  scheduleSpeedCap?: number;
 }
 export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
 
@@ -426,7 +430,13 @@ export function teamSpeed(
   mods?: StaffModFn,
   studio: StudioMod = NO_STUDIO
 ): number {
-  return Math.min(SCHEDULE_SPEED_CAP, rawTeamCapacity(p, team, fx, mods, studio));
+  const raw = rawTeamCapacity(p, team, fx, mods, studio);
+  const requestedCap = studio.scheduleSpeedCap ?? (studio.ignoreScheduleCap ? 2.05 : SCHEDULE_SPEED_CAP);
+  if (requestedCap <= SCHEDULE_SPEED_CAP || raw <= SCHEDULE_SPEED_CAP) return Math.min(requestedCap, raw);
+  const headroom = requestedCap - SCHEDULE_SPEED_CAP;
+  const overflow = raw - SCHEDULE_SPEED_CAP;
+  const eased = SCHEDULE_SPEED_CAP + headroom * (1 - Math.exp(-overflow / Math.max(0.01, headroom)));
+  return Math.min(requestedCap, eased);
 }
 
 /** surplus capacity improves the work instead of deleting calendar time. */
@@ -706,6 +716,8 @@ export interface ScoringContext {
   /** Every Business & Audience level improves shipped-release economics. */
   businessMult?: number;
   castAffinityDiscovered?: string[];
+  showrunnerLevel?: number;
+  staff?: Staff[];
   /** deterministic reviewer/sales rolls for balance tests; normal gameplay omits this */
   rng?: () => number;
 }
@@ -724,7 +736,18 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
   const houseScoreMult = ctx.specialisationScoreMult ?? 1;
   const rookieSoloMult = p.rookieSoloMult ?? 1;
-  const qualityMult = houseScoreMult * rookieSoloMult;
+  const delegated = ctx.showrunner === "delegator" && p.auto?.mode === "full";
+  const delegatedScoreMult = delegated ? 1.10 : 1;
+  const crew = delegated ? (ctx.staff ?? []).filter((member) => p.staffIds.includes(member.id)) : [];
+  const director = delegated && p.auto?.directorStaffId ? crew.find((member) => member.id === p.auto!.directorStaffId) : undefined;
+  const directorCraft = director ? (director.story + director.art + director.sound) / 3 : 0;
+  const supportCraft = crew.length
+    ? crew.reduce((sum, member) => sum + Math.max(member.story, member.art, member.sound), 0) / crew.length
+    : 0;
+  const delegationQualityFloor = delegated
+    ? Math.min(39, Math.max(34, 31 + directorCraft / 35 + supportCraft / 55 + Math.min(5, crew.length) * 0.7))
+    : undefined;
+  const qualityMult = houseScoreMult * rookieSoloMult * delegatedScoreMult;
   const scoredPoints: Points = {
     story: p.points.story * qualityMult,
     art: p.points.art * qualityMult,
@@ -752,6 +775,8 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     fanBase: ctx.fans,
     audienceBar: ctx.audienceBar,
     castAffinityDiscovered: ctx.castAffinityDiscovered,
+    qualityFloor: delegationQualityFloor,
+    salesCap: over9000Charge(ctx.showrunner, ctx.showrunnerLevel ?? 1).salesCap,
     rng: ctx.rng,
   });
 
@@ -761,6 +786,12 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     out = {
       ...out,
       breakdown: [...out.breakdown, { label: houseScoreMult > 1 ? "House genre expertise" : "Outside house specialty", pts: `×${houseScoreMult.toFixed(3)} Story · Art · Sound` }],
+    };
+  }
+  if (delegatedScoreMult > 1.001) {
+    out = {
+      ...out,
+      breakdown: [...out.breakdown, { label: "Delegator · executive quality control", pts: `×1.10 craft · competence floor ${delegationQualityFloor?.toFixed(1) ?? "—"} quality` }],
     };
   }
   if (rookieSoloMult < 0.999) {

@@ -147,9 +147,15 @@ export const campaignSalaryMult = (input: IndustryPressureInput) => industryPres
  *   300k+     → approaches the ×1.80 ceiling
  */
 export const FANBASE_SALES_CAP = 1.8;
-export function fanBaseSalesMultiplier(fans: number): number {
+export function fanBaseSalesMultiplier(fans: number, requestedCap: number | boolean = FANBASE_SALES_CAP): number {
   const positive = Math.max(0, fans);
-  return Math.min(FANBASE_SALES_CAP, 1 + Math.log1p(positive / 75_000) * 0.5);
+  const raw = 1 + Math.log1p(positive / 75_000) * 0.5;
+  const cap = typeof requestedCap === "boolean" ? (requestedCap ? 2.30 : FANBASE_SALES_CAP) : Math.max(1, requestedCap);
+  if (cap <= FANBASE_SALES_CAP || raw <= FANBASE_SALES_CAP) return Math.min(cap, raw);
+  const headroom = cap - FANBASE_SALES_CAP;
+  const overflow = raw - FANBASE_SALES_CAP;
+  const eased = FANBASE_SALES_CAP + headroom * (1 - Math.exp(-overflow / Math.max(0.01, headroom)));
+  return Math.min(cap, eased);
 }
 
 /* ------------------------------------------------------ management strain */

@@ -46,6 +46,7 @@ import { cn } from "../utils/cn";
 import SellerAuctionCeremony from "./SellerAuctionCeremony";
 import { AUDIENCE_SEGMENT_LABELS, franchiseAudienceProfile, type AudienceSegmentId } from "../engine/audienceSegments";
 import { merchAudienceFit, publicityAudienceFit, publicityFitLabel } from "../engine/publicity";
+import { FAN_PROJECTS, fanProjectBlock, fanProjectCapacity, franchiseFandom, startFanProject } from "../engine/fanProjects";
 
 /* ------------------------------------------------------------------ plan */
 export interface ContinuationPlan {
@@ -242,6 +243,8 @@ export default function LibraryPanel({
   const audienceProfile = franchiseAudienceProfile(run, fr.key);
   const activeMerchBet = run.activeMerchBets?.[fr.key];
   const merchBetActive = !!activeMerchBet && activeMerchBet.endsWeek > run.week;
+  const activeFanProject = run.fanProjects?.active.find((job) => job.franchiseKey === fr.key);
+  const fandom = franchiseFandom(run, fr.key);
 
   const doMerch = (productId: string) => {
     sfx.fanfare();
@@ -456,6 +459,27 @@ export default function LibraryPanel({
 
       {!fr.soldTo && (
         <>
+          {/* ----------------------------------------------------- fan projects */}
+          <div className="rounded-xl border border-viol/30 bg-viol/[0.04] p-3">
+            <div className="flex items-center gap-2"><Heart size={12} className="text-viol"/><div className="text-[10px] font-black tracking-widest text-viol">FAN PROJECTS · {run.fanProjects?.active.length ?? 0}/{fanProjectCapacity(run)} ACTIVE</div></div>
+            <div className="mt-1 text-[9px] text-paper/45">Optional studio side-projects. They cost cash, grow particular fan communities and gently reshape the audience profile used by publicity and merchandise. They never improve review scores.</div>
+            <div className="mt-2 grid grid-cols-5 gap-1">
+              {(["core","casual","online","prestige","collectors"] as AudienceSegmentId[]).map((id)=><div key={id} className="rounded bg-panel2/70 p-1 text-center"><b className="block text-[10px]">{fandom[id] ?? 0}</b><span className="text-[6px] text-paper/35">{AUDIENCE_SEGMENT_LABELS[id]}</span></div>)}
+            </div>
+            {activeFanProject && (()=>{const def=FAN_PROJECTS.find((item)=>item.id===activeFanProject.defId);return <div className="mt-2 rounded-lg border border-viol/30 bg-viol/10 p-2 text-[9px]"><b className="text-viol">ACTIVE · {def?.name ?? activeFanProject.defId}</b><div className="text-paper/50">{Math.max(0,activeFanProject.endsWeek-run.week)} weeks remaining · final turnout can be normal, quiet or unexpectedly viral.</div></div>;})()}
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {FAN_PROJECTS.map((project)=>{
+                const block=fanProjectBlock(run,fr.key,project.id);
+                return <div key={project.id} className={cn("rounded-lg border p-2",block?"border-paper/10 bg-paper/[.03] opacity-60":"border-viol/25 bg-panel2/50")}>
+                  <div className="text-[10px] font-bold">{project.name}</div>
+                  <div className="text-[8px] text-paper/45">{project.description}</div>
+                  <div className="mt-1 text-[8px] text-paper/60">−{formatGBPShort(project.cost)} · {project.weeks} wk · {project.targets.map((id)=>AUDIENCE_SEGMENT_LABELS[id]).join(" + ")}</div>
+                  {block?<div className="mt-1 text-[8px] text-paper/35">{block}</div>:<Btn variant="ghost" className="mt-1 w-full !py-1 text-[9px]" onClick={()=>setRun((r)=>startFanProject(r,fr.key,project.id)??r)}>START</Btn>}
+                </div>;
+              })}
+            </div>
+          </div>
+
           {/* ---------------------------------------------- zeitgeist campaigns */}
           <div>
             <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-gold">
