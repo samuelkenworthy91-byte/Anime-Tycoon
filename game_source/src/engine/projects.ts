@@ -735,7 +735,8 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   const franchiseMult = ctx.franchiseMult ?? (d.franchiseKey ? 1 + 0.14 * (d.season - 1) : 1);
   const houseScoreMult = ctx.specialisationScoreMult ?? 1;
   const rookieSoloMult = p.rookieSoloMult ?? 1;
-  const qualityMult = houseScoreMult * rookieSoloMult;
+  const delegatedScoreMult = ctx.showrunner === "delegator" && p.auto?.mode === "full" ? 1.10 : 1;
+  const qualityMult = houseScoreMult * rookieSoloMult * delegatedScoreMult;
   const scoredPoints: Points = {
     story: p.points.story * qualityMult,
     art: p.points.art * qualityMult,
@@ -772,6 +773,12 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     out = {
       ...out,
       breakdown: [...out.breakdown, { label: houseScoreMult > 1 ? "House genre expertise" : "Outside house specialty", pts: `×${houseScoreMult.toFixed(3)} Story · Art · Sound` }],
+    };
+  }
+  if (delegatedScoreMult > 1.001) {
+    out = {
+      ...out,
+      breakdown: [...out.breakdown, { label: "Delegator · executive quality control", pts: "×1.10 Story · Art · Sound" }],
     };
   }
   if (rookieSoloMult < 0.999) {
