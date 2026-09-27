@@ -314,6 +314,8 @@ export function computeResult(opts: {
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
   const ratioMatch = clamp(1.01 - drift * 0.12, 0.94, 1.01);
+  const ignoreDepartmentBalance = showrunner === "unbalanced";
+  const reviewRatioMatch = ignoreDepartmentBalance ? 1 : ratioMatch;
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -442,7 +444,7 @@ export function computeResult(opts: {
     : totalPts;
   const craft = CRAFT_LIFT * Math.log(1 + scopeNormalisedPts / CRAFT_LIFT_DIVISOR);
   let raw = RAW_QUALITY_BASE
-    + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * ratioMatch * budgetFactor
+    + (pointScore * POINT_QUALITY_SCALE + craft) * PRODUCTION_CORE_CALIBRATION * reviewRatioMatch * budgetFactor
     + sliderPart * SLIDER_QUALITY_SCALE
     + casting
     + arcQuality
@@ -500,7 +502,7 @@ export function computeResult(opts: {
     let criteria = "";
     if (r.bias === "story") {
       criteria = "Writing · Story-direction slider · Arc structure · Overall execution";
-      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 0.45 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (perPhase[0] - 2) * 0.35 + (ignoreDepartmentBalance ? 0 : (mix[0] - genreRatio[0]) * 0.45) + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "hype") {
       criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
@@ -508,11 +510,11 @@ export function computeResult(opts: {
     }
     if (r.bias === "harsh") {
       criteria = "Overall execution · Production output · Editing notes · Professional polish";
-      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.98) * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ignoreDepartmentBalance ? 0 : (ratioMatch - 0.98) * 0.20) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "tech") {
       criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
-      s += (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (ignoreDepartmentBalance ? 0 : (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35) + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     const calibrated = clamp(s, floor, 10);
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
@@ -592,7 +594,9 @@ export function computeResult(opts: {
 
   const breakdown = [
     { label: `Development points (${Math.round(totalPts)})`, pts: `+${pointScore.toFixed(1)} (capped curve)` },
-    { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
+    ignoreDepartmentBalance
+      ? { label: "Department balance", pts: "Ignored by Who Needs Balance?" }
+      : { label: `Genre emphasis (minor influence · ${Math.round(ratioMatch * 100)}%)`, pts: `×${ratioMatch.toFixed(2)} quality` },
     { label: `Direction sliders (${Math.round(sliderFitMult * 100)}% fit)`, pts: `+${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)} quality` },
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
