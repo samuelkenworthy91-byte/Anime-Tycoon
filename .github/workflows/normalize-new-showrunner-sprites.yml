@@ -1,0 +1,36 @@
+name: Normalize New Showrunner Sprites
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "game_source/scripts/normalize-new-showrunner-sprites.py"
+      - ".github/workflows/normalize-new-showrunner-sprites.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Normalize nine new showrunner sprites
+        working-directory: game_source
+        run: python scripts/normalize-new-showrunner-sprites.py
+      - name: Commit normalized sprites
+        run: |
+          if git diff --quiet -- game_source/public/img/sprite-showrunner-*.webp; then
+            echo "No sprite changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game_source/public/img/sprite-showrunner-*.webp
+          git commit -m "Normalize new showrunner sprite scale"
+          git push
