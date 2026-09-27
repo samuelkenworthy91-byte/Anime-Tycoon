@@ -43,6 +43,11 @@ export const SHOWRUNNER_BASE_CRAFT: Record<string, Record<PointType, number>> = 
   planner: { story: 76, art: 72, sound: 74 },
   auteur: { story: 88, art: 84, sound: 72 },
   audience: { story: 78, art: 72, sound: 84 },
+  /* Test archetypes deliberately share Genji's starting craft so the lab
+     compares perk strength rather than hidden base-stat advantages. */
+  darkness: { story: 62, art: 88, sound: 58 },
+  dawn: { story: 62, art: 88, sound: 58 },
+  unbalanced: { story: 62, art: 88, sound: 58 },
 };
 
 const hash = (text: string) => {
