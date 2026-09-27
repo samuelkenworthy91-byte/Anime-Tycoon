@@ -745,7 +745,7 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     ? crew.reduce((sum, member) => sum + Math.max(member.story, member.art, member.sound), 0) / crew.length
     : 0;
   const delegationQualityFloor = delegated
-    ? Math.min(37.5, Math.max(32, 29 + directorCraft / 35 + supportCraft / 55 + Math.min(5, crew.length) * 0.7))
+    ? Math.min(39, Math.max(34, 31 + directorCraft / 35 + supportCraft / 55 + Math.min(5, crew.length) * 0.7))
     : undefined;
   const qualityMult = houseScoreMult * rookieSoloMult * delegatedScoreMult;
   const scoredPoints: Points = {
