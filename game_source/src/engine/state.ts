@@ -58,6 +58,7 @@ import {
 import { tierOf, type ShowResult, type TierKey } from "./scoring";
 import { REVIEW_EXPECTATION_SEED, nextReviewExpectation } from "./production";
 import { creatorVisionEffectsForProject, generateCreatorVision } from "./creatorVision";
+import { arcClashesFor } from "./creativeDiscovery";
 import { franchiseAudienceProfile, recordAudienceProfile } from "./audienceSegments";
 import { movementSalesMultiplier, tickIndustryMovements, trendGenreBias } from "./industryTrends";
 import { goldenPairMultiplier, recordRelationshipRelease, relationshipXpMultiplier, syncRelationshipHistory } from "./staffRelationships";
@@ -1164,7 +1165,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   const studio = {
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
-    issueChanceMult: r.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : 1,
+    issueChanceMult: r.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : r.showrunner === "delegator" ? 0.60 : 1,
     ignoreScheduleCap: r.showrunner === "over9000",
   };
   const mods: StaffModFn = (st, p, team) => {
@@ -1182,11 +1183,11 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         * creator.outputMult
         * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id))
         * (slothIdle ? 2 : 1)
-        * (delegated ? (preferred ? 1.55 : 1.35) : 1),
+        * (delegated ? (preferred ? 1.80 : 1.60) : 1),
       pace: base.pace
         * signature.paceMult
         * (slothIdle ? 0.5 : 1)
-        * (delegated ? (preferred ? 1.15 : 1.08) : 1),
+        * (delegated ? (preferred ? 1.08 : 1.03) : 1),
       xpMult: base.xpMult * creator.xpMult,
     };
   };
@@ -2015,23 +2016,37 @@ export function startFullyDelegatedProject(
     unlocked,
     director,
   );
-  const candidatePair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
-  const learnedPair = candidatePair.length === 2 && (r.comboLevels[comboKey(candidatePair)] ?? 0) > 0;
-  /* Full Delegation is allowed to be imperfect, not self-sabotaging. A creator
-     may only commit to a two-genre pairing the studio has actually learned and
-     which is at least a Safe pairing. Unknown/risky pairs fall back to the
-     creator's primary genre instead of routinely producing nonsense. */
-  const sensiblePair = learnedPair && comboMult(candidatePair, true) >= 0.95;
-  const genres = sensiblePair ? candidatePair : [vision.primaryGenre];
+  const delegatorRun = r.showrunner === "delegator";
+  const visionPair = vision.secondaryGenre ? [vision.primaryGenre, vision.secondaryGenre] as GenreId[] : [vision.primaryGenre] as GenreId[];
+  const learnedVisionPair = visionPair.length === 2 && (r.comboLevels[comboKey(visionPair)] ?? 0) > 0;
+  const sensibleVisionPair = learnedVisionPair && comboMult(visionPair, true) >= 0.95;
+  const knownPairs = unlocked
+    .filter((genre) => genre !== vision.primaryGenre)
+    .map((genre) => [vision.primaryGenre, genre] as GenreId[])
+    .filter((pair) => (r.comboLevels[comboKey(pair)] ?? 0) > 0 && comboMult(pair, true) >= 1)
+    .sort((a, b) =>
+      comboMult(b, true) - comboMult(a, true) ||
+      (r.comboLevels[comboKey(b)] ?? 0) - (r.comboLevels[comboKey(a)] ?? 0)
+    );
+  const genres = delegatorRun && knownPairs.length
+    ? knownPairs[0]
+    : sensibleVisionPair ? visionPair : [vision.primaryGenre];
 
+  const knownFit = (member: { id: string; type: AnimeType; visibleAff: GenreId[]; hiddenAff: GenreId }) =>
+    r.castAffinityDiscovered.includes(member.id) && genres.includes(member.hiddenAff)
+      ? 2
+      : member.visibleAff.some((g) => genres.includes(g)) ? 1 : 0;
   const preferredProtag = vision.cast.protag ? castById(vision.cast.protag) : undefined;
-  const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
+  const typeKnownFit = (type: AnimeType) =>
+    [PROTAGONISTS, SECONDARY, PETS, VILLAINS].reduce((sum, pool) => {
+      const best = pool.filter((member) => member.type === type).reduce((m, member) => Math.max(m, knownFit(member)), 0);
+      return sum + best;
+    }, 0);
+  const animeType: AnimeType = delegatorRun
+    ? (typeKnownFit("shonen") >= typeKnownFit("shojo") ? "shonen" : "shojo")
+    : preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
   const castPick = (role: "protag" | "secondary" | "pet" | "villain", preferredId?: string) => {
     const activePool = role === "protag" ? PROTAGONISTS : role === "secondary" ? SECONDARY : role === "pet" ? PETS : VILLAINS;
-    const knownFit = (member: (typeof activePool)[number]) =>
-      r.castAffinityDiscovered.includes(member.id) && genres.includes(member.hiddenAff)
-        ? 2
-        : member.visibleAff.some((g) => genres.includes(g)) ? 1 : 0;
     const preferred = preferredId ? activePool.find((member) => member.id === preferredId) : undefined;
     if (preferred && preferred.type === animeType && knownFit(preferred) > 0) return preferred;
     const typed = activePool.filter((member) => member.type === animeType);
@@ -2047,19 +2062,22 @@ export function startFullyDelegatedProject(
   const villain = castPick("villain", vision.cast.villain);
 
   const unlockedArcs = ARCS.filter((arc) => !arc.franchiseOnly && !arcLockReason(arc, r));
-  const delegatorRun = r.showrunner === "delegator";
-  const arcIds = delegatorRun
-    ? [...unlockedArcs]
-        .sort((a, b) => {
-          const score = (arc: Arc) =>
-            arc.q * 2 +
-            (arc.f ?? 0) * 30 +
-            genres.reduce((sum, genre) => sum + arcGenreFit(arc, genre).score * 3, 0);
-          return score(b) - score(a);
-        })
-        .slice(0, 4)
-        .map((arc) => arc.id)
-    : [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
+  const delegatorArcScore = (arc: Arc) =>
+    arc.q * 2 +
+    (arc.f ?? 0) * 30 +
+    genres.reduce((sum, genre) => sum + arcGenreFit(arc, genre).score * 4, 0);
+  const arcIds: string[] = delegatorRun ? [] : [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
+  if (delegatorRun) {
+    const ranked = [...unlockedArcs]
+      .filter((arc) => !(arc.anti ?? []).some((genre) => genres.includes(genre)))
+      .sort((a, b) => delegatorArcScore(b) - delegatorArcScore(a));
+    for (const arc of ranked) {
+      if (arcIds.length >= 4) break;
+      const trial = [...arcIds, arc.id];
+      const knownClash = arcClashesFor(trial).some((clash) => r.arcCombos.includes(clash.id));
+      if (!knownClash) arcIds.push(arc.id);
+    }
+  }
   if (!delegatorRun) {
     for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
       if (arcIds.length >= 3) break;
@@ -2107,7 +2125,9 @@ export function startFullyDelegatedProject(
   if (!project) return started;
 
   const free = r.staff.filter((s) => !staffBusyReason(r, s.id) && s.id !== director.id);
-  const crewTarget = Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
+  const crewTarget = delegatorRun
+    ? Math.min(TEAM_MAX, Math.max(4, Math.min(5, r.officeLevel + 3)))
+    : Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
   const chosen = new Set<string>([director.id]);
   /* Creator-led shows build a functional miniature studio first: cover missing
      disciplines, then use any spare seat on the strongest remaining worker. */
@@ -2843,7 +2863,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
   const studio = {
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
-    issueChanceMult: nx.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : 1,
+    issueChanceMult: nx.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : nx.showrunner === "delegator" ? 0.60 : 1,
     ignoreScheduleCap: nx.showrunner === "over9000",
   };
   const mods: StaffModFn = (st, p, team) => {
@@ -2856,8 +2876,8 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.55 : 1.35) : 1),
-      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.15 : 1.08) : 1),
+      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.80 : 1.60) : 1),
+      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.08 : 1.03) : 1),
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
