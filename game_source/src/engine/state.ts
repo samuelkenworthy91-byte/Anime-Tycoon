@@ -2028,10 +2028,15 @@ export function startFullyDelegatedProject(
   const animeType: AnimeType = preferredProtag?.type ?? (rng() < 0.5 ? "shonen" : "shojo");
   const castPick = (role: "protag" | "secondary" | "pet" | "villain", preferredId?: string) => {
     const activePool = role === "protag" ? PROTAGONISTS : role === "secondary" ? SECONDARY : role === "pet" ? PETS : VILLAINS;
+    const knownFit = (member: (typeof activePool)[number]) =>
+      r.castAffinityDiscovered.includes(member.id) && genres.includes(member.hiddenAff)
+        ? 2
+        : member.visibleAff.some((g) => genres.includes(g)) ? 1 : 0;
     const preferred = preferredId ? activePool.find((member) => member.id === preferredId) : undefined;
-    if (preferred && preferred.type === animeType && preferred.visibleAff.some((g) => genres.includes(g))) return preferred;
-    const fitting = activePool.filter((member) => member.type === animeType && member.visibleAff.some((g) => genres.includes(g)));
-    const typed = fitting.length ? fitting : activePool.filter((member) => member.type === animeType);
+    if (preferred && preferred.type === animeType && knownFit(preferred) > 0) return preferred;
+    const typed = activePool.filter((member) => member.type === animeType);
+    const bestKnown = [...typed].sort((a, b) => knownFit(b) - knownFit(a));
+    if (bestKnown.length && knownFit(bestKnown[0]) > 0) return bestKnown[0];
     const pool = typed.length ? typed : activePool;
     return pool[Math.floor(rng() * pool.length)] ?? pool[0];
   };
