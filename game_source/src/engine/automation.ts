@@ -199,10 +199,10 @@ export function sprintQuality(
     : 0;
   const delegator = run.showrunner === "delegator" && fullMode;
   const preferredCreator = delegator && !!fullDirector?.favGenre && p.draft.genres.includes(fullDirector.favGenre);
-  const delegationMult = delegator ? (preferredCreator ? 1.60 : 1.45) : 1;
+  const delegationMult = delegator ? (preferredCreator ? 1.85 : 1.65) : 1;
   const calculated = Math.round((((base + headBonus + creatorBonus) * facMult * morale) / risk) * delegationMult);
   const delegatedCompetence = Math.round(fullCompetence * delegationMult);
-  const pointCap = delegator ? (preferredCreator ? 240 : 210) : 150;
+  const pointCap = delegator ? (preferredCreator ? 300 : 260) : 150;
   const points = focus
     ? Math.min(pointCap, Math.max(delegatedCompetence, calculated))
     : 0;
@@ -212,11 +212,11 @@ export function sprintQuality(
      notes than generic automation while still retaining risk on thin teams. */
   const issueBase = Math.round(1 + risk * 1.6 - team.length * 0.45);
   const issues = focus
-    ? Math.max(0, issueBase - (fullMode && team.length >= 3 ? 1 : 0) - (delegator ? 1 : 0))
+    ? Math.max(0, issueBase - (fullMode && team.length >= 3 ? 1 : 0) - (delegator ? 2 : 0))
     : 0;
   const squashed = focus
     ? 0
-    : Math.round(1 + team.length * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix + (fullMode ? 2 : 0) + (delegator ? 2 : 0));
+    : Math.round(1 + team.length * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix + (fullMode ? 2 : 0) + (delegator ? 4 : 0));
 
   const rdGained = focus ? Math.round(2 + team.length * 0.6) : 0;
   const spent = 2_000 + team.length * 600 + (p.draft.budget === "blockbuster" ? 2_500 : 0);
