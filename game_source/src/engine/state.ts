@@ -1164,7 +1164,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   const studio = {
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
-    issueChanceMult: r.showrunner === "steady" ? 0.75 : 1,
+    issueChanceMult: r.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.50 : 1,
     ignoreScheduleCap: r.showrunner === "over9000",
   };
   const mods: StaffModFn = (st, p, team) => {
@@ -2843,7 +2843,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
   const studio = {
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
-    issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1,
+    issueChanceMult: nx.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.50 : 1,
     ignoreScheduleCap: nx.showrunner === "over9000",
   };
   const mods: StaffModFn = (st, p, team) => {
