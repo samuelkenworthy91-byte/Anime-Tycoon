@@ -49,6 +49,9 @@ export const SHOWRUNNER_BASE_CRAFT: Record<string, Record<PointType, number>> = 
   finisher: { story: 72, art: 82, sound: 78 },
   critical: { story: 90, art: 78, sound: 72 },
   ensemble: { story: 78, art: 78, sound: 78 },
+  sloth: { story: 84, art: 84, sound: 84 },
+  delegator: { story: 78, art: 78, sound: 78 },
+  over9000: { story: 74, art: 74, sound: 74 },
 };
 
 const hash = (text: string) => {
