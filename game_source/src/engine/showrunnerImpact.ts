@@ -24,7 +24,7 @@ const IMPACT: Record<string, string> = {
   audience: "Pre-release audience forecast · well-matched publicity ×1.15 · well-matched merch ×1.15 · weak targeting visible earlier",
   darkness: "Dark net alignment: one genre live output ×1.35 · two genres ×1.70 · bright opposition ×0.65 / ×0.30",
   dawn: "Bright net alignment: one genre live output ×1.35 · two genres ×1.70 · dark opposition ×0.65 / ×0.30",
-  unbalanced: "Story / Art / Sound target balance removed from raw-quality and critic-specific review calculations",
+  unbalanced: "100% of Story / Art / Sound target-balance penalties are ignored in raw quality and critic-specific review calculations",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
