@@ -82,6 +82,7 @@ import { cn } from "../utils/cn";
 import { signStaffContract } from "../engine/spending";
 import { showrunnerStats } from "../engine/studioOps";
 import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";
+import { over9000Charge } from "../engine/showrunnerPerks";
 import { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
 import { formalizeMentorship, relationshipRecord } from "../engine/staffRelationships";
 
@@ -465,6 +466,7 @@ export default function CrewPanel({
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
   const runnerName = run.showrunnerName?.trim() || runner.name;
   const runnerCraft = showrunnerStats(run.showrunner, run.showrunnerCareer);
+  const limitCharge = over9000Charge(run.showrunner, run.showrunnerCareer.level);
   const headSlots: HeadSlot[] = ["writer", "animator", "composer", "production"];
   const anyHeadUnlocked = run.officeLevel >= 2;
 
@@ -487,6 +489,12 @@ export default function CrewPanel({
           <div className="grid grid-cols-3 gap-1 text-center">{(["story","art","sound"] as PointType[]).map((t)=><div key={t} className="rounded-md bg-panel2 px-1.5 py-1"><div className="text-[7px] text-paper/35">{t.toUpperCase()}</div><div className="font-display text-sm font-extrabold" style={{color:POINT_COLOR[t]}}>{Math.round(runnerCraft[t])}</div></div>)}</div>
         </div>
         <div className="mt-2 text-[10px] leading-relaxed text-paper/60"><b className="text-gold">PERK:</b> {runner.perk}</div>
+        {run.showrunner === "over9000" && (
+          <div className="mt-2 rounded-lg border border-gold/30 bg-gold/5 px-2 py-1.5 text-[9px] text-paper/65">
+            <div className="font-extrabold text-gold">POWER CHARGE · {limitCharge.label.toUpperCase()} · {Math.round(limitCharge.charge * 100)}%</div>
+            <div>Production output ×{limitCharge.outputMult.toFixed(2)} · speed ceiling ×{limitCharge.scheduleCap.toFixed(2)} · fanbase-sales ceiling ×{limitCharge.salesCap.toFixed(2)}</div>
+          </div>
+        )}
         <div className="mt-1 text-[8px] text-paper/35">These Story/Art/Sound values are the exact numbers used when the showrunner personally leads a rush or contract seat. Releases now earn visible Showrunner XP and trigger a full level-up reveal.</div>
       </div>
 
