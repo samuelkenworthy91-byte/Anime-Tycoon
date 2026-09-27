@@ -28,9 +28,9 @@ const IMPACT: Record<string, string> = {
   finisher: "Editing contribution ×1.35 · zero unresolved notes multiplies final quality ×1.05",
   critical: "Every critic gains +0.40 internally before integer rounding, caps and rare-10 handling",
   ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
-  sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · production burn ×0.50 · note risk ×0.40 · final quality ×1.06 · no automatic showrunner project bubbles",
-  delegator: "Full Delegation live output ×1.35 (×1.55 preferred genre) · pace ×1.08 (×1.15 preferred) · auto milestones ×1.45/×1.60 · exact direction targets and stronger compatible arc selection",
-  over9000: "Superhuman ceilings replace normal limits: schedule ×1.85 instead of ×1.35 · fanbase sales ×2.20 instead of ×1.80 · up to 2 player Big Three places",
+  sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · production burn ×0.50 · note risk ×0.40 · final quality ×1.08 · critics +0.15 polish recognition · no automatic showrunner project bubbles",
+  delegator: "Full Delegation live output ×1.60 (×1.80 preferred genre) · pace ×1.03/×1.08 · auto milestones ×1.65/×1.85 · executive quality control ×1.10 · up to 5 crew · known-safe genre/cast/arc curation",
+  over9000: "Normal ×1.35 schedule and ×1.80 sales ceilings can overflow with diminishing efficiency toward superhuman ×2.05 / ×2.30 ceilings · up to 2 player Big Three places",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
