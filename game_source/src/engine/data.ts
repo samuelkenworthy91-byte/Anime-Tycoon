@@ -1049,7 +1049,7 @@ export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
 /* ------------------------------------------------------------- showrunners */
 export interface Showrunner {
-  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research" | "casting" | "festival" | "dealmaker" | "genre" | "planner" | "auteur" | "audience" | "darkness" | "dawn" | "unbalanced" | "finisher" | "critical" | "ensemble";
+  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research" | "casting" | "festival" | "dealmaker" | "genre" | "planner" | "auteur" | "audience" | "darkness" | "dawn" | "unbalanced" | "finisher" | "critical" | "ensemble" | "sloth" | "delegator" | "over9000";
   name: string;
   title: string;
   img: string;
@@ -1083,6 +1083,9 @@ export const SHOWRUNNERS: Showrunner[] = [
   { id: "finisher", name: "The Finisher", title: "The Post-Production Master", img: "img/portrait-showrunner-savant.webp", sprite: "img/sprite-showrunner-savant.webp", portrait: "img/portrait-showrunner-savant.webp", perk: "Final Cut — editing is 35% stronger and a release with zero unresolved notes gains 5% final quality.", artPending: true },
   { id: "critical", name: "Critical Darling", title: "The Critics’ Auteur", img: "img/portrait-showrunner-hype.webp", sprite: "img/sprite-showrunner-hype.webp", portrait: "img/portrait-showrunner-hype.webp", perk: "Critical Language — every critic adds +0.4 to their internal pre-rounding score before normal caps and rare-10 rules.", artPending: true },
   { id: "ensemble", name: "Ensemble Director", title: "The Team Builder", img: "img/portrait-showrunner-operations.png", sprite: "img/sprite-showrunner-operations.png", portrait: "img/portrait-showrunner-operations.png", perk: "Greater Than the Sum — project staff contribution gains 15% for each distinct Writer, Animator and Composer discipline represented, up to +45%.", artPending: true },
+  { id: "sloth", name: "The Sloth", title: "The Hands-Off Perfectionist", img: "img/portrait-showrunner-auteur.webp", sprite: "img/sprite-showrunner-auteur.webp", portrait: "img/portrait-showrunner-auteur.webp", perk: "Do Less, Better — while the showrunner is not assigned to a job, project staff output doubles but their project pace is halved; the showrunner does not add project bubbles.", artPending: true },
+  { id: "delegator", name: "The Delegator", title: "The Executive Producer", img: "img/portrait-showrunner-planner.webp", sprite: "img/sprite-showrunner-planner.webp", portrait: "img/portrait-showrunner-planner.webp", perk: "Trust the Team — fully delegated productions gain stronger live output, faster schedule progress and stronger automatic milestone work, with an extra boost when the creator works in a preferred genre.", artPending: true },
+  { id: "over9000", name: "Over 9000", title: "The Limit Breaker", img: "img/portrait-showrunner-trailblazer.webp", sprite: "img/sprite-showrunner-trailblazer.webp", portrait: "img/portrait-showrunner-trailblazer.webp", perk: "No Limits — selected soft ceilings are ignored: production can exceed the normal schedule cap, fanbase sales can exceed the normal income cap, and multiple player productions can compete for Big Three places. Structural safety limits remain.", artPending: true },
 ];
 
 /* --------------------------------------------------------------- reviewers */
