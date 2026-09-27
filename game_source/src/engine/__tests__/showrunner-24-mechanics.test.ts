@@ -5,7 +5,7 @@ import { fanBaseSalesMultiplier } from "../difficulty";
 import { sprintQuality } from "../automation";
 import { makeProject, teamSpeed } from "../projects";
 import { advanceBigThreeWeek, BIG_THREE_START_WEEK, recognisePlayerBigThreeRelease } from "../bigThree";
-import { contributionEffectiveSkill, initialRun } from "../state";
+import { contributionEffectiveSkill, forecastWeek, initialRun } from "../state";
 
 const draft = (title = "Probe", genres: Draft["genres"] = ["slice"]): Draft => ({
   title,
@@ -35,6 +35,7 @@ describe("24-showrunner experimental mechanics", () => {
     const sloth = { ...normal, showrunner: "sloth" as const };
     expect(contributionEffectiveSkill(sloth, worker, "art"))
       .toBeCloseTo(contributionEffectiveSkill(normal, worker, "art") * 2, 5);
+    expect(forecastWeek(sloth).burn).toBeCloseTo(forecastWeek(normal).burn * 0.5, -1);
   });
 
   it("The Delegator materially strengthens full-delegation milestone output, especially in the creator's preferred genre", () => {
@@ -55,7 +56,7 @@ describe("24-showrunner experimental mechanics", () => {
     const a = sprintQuality(normal, project, "story", facilityFX({}), staff);
     const b = sprintQuality(delegated, project, "story", facilityFX({}), staff);
     expect(b.points).toBeGreaterThan(a.points);
-    expect(b.points).toBeGreaterThanOrEqual(Math.round(a.points * 1.2));
+    expect(b.points).toBeGreaterThanOrEqual(Math.round(a.points * 1.4));
   });
 
   it("Over 9000 bypasses the ordinary schedule and fanbase-sales soft caps but keeps hard safety stops", () => {
@@ -75,11 +76,11 @@ describe("24-showrunner experimental mechanics", () => {
     const broken = teamSpeed(p, team, undefined, undefined, { speed: 0, burnMult: 1, ignoreScheduleCap: true });
     expect(capped).toBeLessThanOrEqual(1.35);
     expect(broken).toBeGreaterThan(1.35);
-    expect(broken).toBeLessThanOrEqual(4);
+    expect(broken).toBeLessThanOrEqual(2.75);
 
     expect(fanBaseSalesMultiplier(10_000_000)).toBeLessThanOrEqual(1.8);
     expect(fanBaseSalesMultiplier(10_000_000, true)).toBeGreaterThan(1.8);
-    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(4);
+    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(3);
   });
 
   it("Over 9000 can place multiple player productions into the Big Three while ordinary studios remain one-slot-per-studio", () => {
