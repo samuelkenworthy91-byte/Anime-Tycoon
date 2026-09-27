@@ -90,9 +90,14 @@ const botDraft = (r: RunState, i: number): Draft => {
 const botOutcome = (p: Project): MilestoneOutcome => {
   const team = p.staffIds.length;
   const power = 18 + team * 6;
-  return p.milestone === "edit"
-    ? { points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 2_000, rdGained: 2, squashed: Math.max(0, p.issues) }
-    : { points: { story: power, art: power, sound: power }, issues: 1, spent: 3_000, rdGained: 3 };
+  if (p.milestone === "edit") {
+    return { points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 2_000, rdGained: 2, squashed: Math.max(0, p.issues) };
+  }
+  const points = { story: 0, art: 0, sound: 0 };
+  if (p.milestone === "story") points.story = power;
+  if (p.milestone === "art") points.art = power;
+  if (p.milestone === "sound") points.sound = power;
+  return { points, issues: 1, spent: 3_000, rdGained: 3 };
 };
 
 const botAssign = (r: RunState): RunState => {
