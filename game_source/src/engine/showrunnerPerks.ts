@@ -5,6 +5,14 @@ export const HYPE_ARCHITECT_ID = "casting";
 export const CONTRARIAN_ID = "festival";
 export const PRODUCTION_SAVANT_ID = "dealmaker";
 export const TRAILBLAZER_ID = "genre";
+export const PRINCE_OF_DARKNESS_ID = "darkness";
+export const BRIGHTER_THAN_DAWN_ID = "dawn";
+export const WHO_NEEDS_BALANCE_ID = "unbalanced";
+
+const DARK_CORE: GenreId[] = ["grimdark", "vampire", "horror"];
+const LIGHT_CORE: GenreId[] = ["romance", "idol", "slice"];
+const DARK_SECONDARY: GenreId = "cosmic_horror";
+const LIGHT_SECONDARY: GenreId = "magical";
 
 export const storyStructureMult = (showrunner: string, value: number) =>
   showrunner === HYPE_ARCHITECT_ID && value > 0 ? value * 1.15 : value;
@@ -36,3 +44,29 @@ export function trailblazerProductionMult(showrunner: string, genres: GenreId[],
   if (showrunner !== TRAILBLAZER_ID || genres.length !== 2) return 1;
   return (comboLevels[comboKey(genres)] ?? 0) <= 0 ? 1.35 : 1;
 }
+
+
+/**
+ * TEST LAB ONLY.
+ * Core affinity is deliberately huge: x1.50, with the opposed family using
+ * the exact reciprocal so a dark/light crossover cancels back to neutral.
+ * One extra thematic genre sits at half-strength: x1.25 / x0.80.
+ */
+export function polarityProductionMult(showrunner: string, genres: GenreId[]): number {
+  const profile =
+    showrunner === PRINCE_OF_DARKNESS_ID
+      ? { fav: DARK_CORE, hate: LIGHT_CORE, secondaryFav: DARK_SECONDARY, secondaryHate: LIGHT_SECONDARY }
+      : showrunner === BRIGHTER_THAN_DAWN_ID
+        ? { fav: LIGHT_CORE, hate: DARK_CORE, secondaryFav: LIGHT_SECONDARY, secondaryHate: DARK_SECONDARY }
+        : null;
+  if (!profile) return 1;
+
+  let mult = 1;
+  if (genres.some((g) => profile.fav.includes(g))) mult *= 1.50;
+  if (genres.some((g) => profile.hate.includes(g))) mult /= 1.50;
+  if (genres.includes(profile.secondaryFav)) mult *= 1.25;
+  if (genres.includes(profile.secondaryHate)) mult /= 1.25;
+  return mult;
+}
+
+export const ignoresProductionBalance = (showrunner: string) => showrunner === WHO_NEEDS_BALANCE_ID;
