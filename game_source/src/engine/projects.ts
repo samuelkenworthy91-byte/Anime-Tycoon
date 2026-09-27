@@ -430,8 +430,14 @@ export function teamSpeed(
   studio: StudioMod = NO_STUDIO
 ): number {
   const raw = rawTeamCapacity(p, team, fx, mods, studio);
-  const cap = studio.ignoreScheduleCap ? 1.85 : SCHEDULE_SPEED_CAP;
-  return Math.min(cap, raw);
+  if (!studio.ignoreScheduleCap || raw <= SCHEDULE_SPEED_CAP) return Math.min(SCHEDULE_SPEED_CAP, raw);
+  const superhumanCap = 2.05;
+  const headroom = superhumanCap - SCHEDULE_SPEED_CAP;
+  const overflow = raw - SCHEDULE_SPEED_CAP;
+  /* Over 9000 can exceed the human ceiling, but each extra chunk of capacity
+     is harder to convert into calendar time as it approaches ×2.05. */
+  const eased = SCHEDULE_SPEED_CAP + headroom * (1 - Math.exp(-overflow / headroom));
+  return Math.min(superhumanCap, eased);
 }
 
 /** surplus capacity improves the work instead of deleting calendar time. */
