@@ -30,7 +30,7 @@ import {
   reviewExpectationAdjustment,
 } from "./production";
 import { genreTargetFor } from "./genreTargets";
-import { fanBaseSalesMultiplier } from "./difficulty";
+import { FANBASE_SALES_CAP, fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
 import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothCriticPolishBonus, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
 
@@ -277,6 +277,10 @@ export function computeResult(opts: {
   audienceBar?: number;
   /** knowledge affects explanation only; never affinity mechanics */
   castAffinityDiscovered?: string[];
+  /** Optional competence floor used by quality-first Full Delegation. */
+  qualityFloor?: number;
+  /** Optional fanbase-sales ceiling; normal studios use ×1.80. */
+  salesCap?: number;
   /** deterministic reviewer RNG (tests); default Math.random */
   rng?: () => number;
 }): ShowResult {
@@ -300,6 +304,8 @@ export function computeResult(opts: {
     fanBase,
     audienceBar,
     castAffinityDiscovered = [],
+    qualityFloor,
+    salesCap,
     rng,
   } = opts;
   const roll = rng ?? Math.random;
@@ -475,7 +481,8 @@ export function computeResult(opts: {
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
 
   const chemFactor = 1 + (chemMult - 1) * CHEM_QUALITY_WEIGHT;
-  const quality = clamp(raw * chemFactor * cleanMasterQualityMult(showrunner, issues) * slothFinalQualityMult(showrunner), RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
+  const calculatedQuality = raw * chemFactor * cleanMasterQualityMult(showrunner, issues) * slothFinalQualityMult(showrunner);
+  const quality = clamp(Math.max(calculatedQuality, qualityFloor ?? RAW_QUALITY_FLOOR), RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
 
   /* ---- four critics, each out of 10.
      Absolute quality provides most of the score; the studio's all-time
@@ -562,7 +569,7 @@ export function computeResult(opts: {
     franchiseMult *
     merch *
     local *
-    fanBaseSalesMultiplier(fanBase, showrunner === "over9000");
+    fanBaseSalesMultiplier(fanBase, salesCap ?? FANBASE_SALES_CAP);
 
   /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
