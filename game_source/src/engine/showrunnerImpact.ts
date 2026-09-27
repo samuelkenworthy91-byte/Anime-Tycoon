@@ -30,7 +30,7 @@ const IMPACT: Record<string, string> = {
   ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
   sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · production burn ×0.50 · no automatic showrunner project bubbles",
   delegator: "Full Delegation live output ×1.35 (×1.55 preferred genre) · pace ×1.08 (×1.15 preferred) · auto milestones ×1.45/×1.60 · exact direction targets and stronger compatible arc selection",
-  over9000: "Normal schedule and fanbase-sales caps are removed into diminishing overflow curves · player may occupy multiple Big Three slots · corruption-only safety stops remain",
+  over9000: "Normal ×1.35 schedule and ×1.80 fanbase-sales caps are removed into diminishing overflow curves · player may occupy multiple Big Three slots · corruption-only safety stops remain",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
