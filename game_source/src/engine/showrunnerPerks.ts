@@ -5,6 +5,30 @@ export const HYPE_ARCHITECT_ID = "casting";
 export const CONTRARIAN_ID = "festival";
 export const PRODUCTION_SAVANT_ID = "dealmaker";
 export const TRAILBLAZER_ID = "genre";
+export const PRINCE_OF_DARKNESS_ID = "darkness";
+export const BRIGHTER_THAN_DAWN_ID = "dawn";
+export const WHO_NEEDS_BALANCE_ID = "unbalanced";
+
+const DARK_GENRES = new Set<GenreId>(["grimdark", "vampire", "horror", "cosmic_horror"]);
+const BRIGHT_GENRES = new Set<GenreId>(["romance", "idol", "slice", "magical"]);
+
+/** Test-lab polarity perk. One net aligned genre is ±35% live output;
+ * two aligned genres double the swing to ±70%. Opposed+aligned pairings cancel. */
+export function polarityProductionMult(showrunner: string, genres: GenreId[]): number {
+  const aligned = showrunner === PRINCE_OF_DARKNESS_ID
+    ? DARK_GENRES
+    : showrunner === BRIGHTER_THAN_DAWN_ID
+      ? BRIGHT_GENRES
+      : null;
+  if (!aligned) return 1;
+  const opposed = showrunner === PRINCE_OF_DARKNESS_ID ? BRIGHT_GENRES : DARK_GENRES;
+  const net = genres.reduce((score, genre) => score + (aligned.has(genre) ? 1 : opposed.has(genre) ? -1 : 0), 0);
+  if (net >= 2) return 1.70;
+  if (net === 1) return 1.35;
+  if (net === -1) return 0.65;
+  if (net <= -2) return 0.30;
+  return 1;
+}
 
 export const storyStructureMult = (showrunner: string, value: number) =>
   showrunner === HYPE_ARCHITECT_ID && value > 0 ? value * 1.15 : value;
