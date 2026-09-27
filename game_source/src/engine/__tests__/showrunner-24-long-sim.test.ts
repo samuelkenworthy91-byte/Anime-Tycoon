@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FORMAT_ORDER, GENRES, MEDIUMS, type Draft, type MediumId, type SlotId } from "../data";
+import { ARCS, FORMAT_ORDER, GENRES, MEDIUMS, PETS, PROTAGONISTS, SECONDARY, SLOTS, VILLAINS, affinityTier, type CastMember, type CastRole, type Draft, type MediumId, type SlotId } from "../data";
+import { genreTargetFor } from "../genreTargets";
 import { rollHire } from "../careers";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
 import { seededRng } from "../scoring";
@@ -23,31 +24,61 @@ const WEEKS = YEARS * 48;
 const RUNNERS = ["steady", "operations", "dealmaker", "sloth", "delegator", "over9000"] as const;
 const SEEDS = ["A", "B", "C", "D", "E"];
 
+const pools: Record<CastRole, CastMember[]> = {
+  protag: PROTAGONISTS,
+  secondary: SECONDARY,
+  pet: PETS,
+  villain: VILLAINS,
+};
+
 const botDraft = (r: RunState, i: number): Draft => {
   const genres = r.genresUnlocked;
   const g = genres[i % genres.length];
   const unlocked = r.mediumsUnlocked.length ? r.mediumsUnlocked : ["fanweb"];
   const medium = unlocked[Math.floor(Math.random() * unlocked.length)] as MediumId;
   const budget = r.cash > 2_000_000 ? "blockbuster" : r.cash > 400_000 ? "standard" : "indie";
-  const slot: SlotId =
-    medium === "tv" || medium === "special"
-      ? (r.cash > 1_500_000 ? "prime" : r.cash > 300_000 ? "evening" : "midnight")
-      : (MEDIUMS[medium].slot ?? "stream");
+  const ideal = genreTargetFor([g]).ideal;
+  const slot = (Object.entries(SLOTS).find(([, def]) => def.best.includes(g))?.[0]
+    ?? (medium === "tv" || medium === "special" ? "evening" : (MEDIUMS[medium].slot ?? "stream"))) as SlotId;
+
+  const preferredLead = PROTAGONISTS.find((member) => affinityTier(member, [g]) === 2)
+    ?? PROTAGONISTS.find((member) => affinityTier(member, [g]) === 1)
+    ?? PROTAGONISTS[0];
+  const animeType = preferredLead.type;
+  const pick = (role: CastRole) =>
+    pools[role].find((member) => member.type === animeType && affinityTier(member, [g]) === 2)
+    ?? pools[role].find((member) => member.type === animeType && affinityTier(member, [g]) === 1)
+    ?? pools[role].find((member) => member.type === animeType)
+    ?? pools[role][0];
+
+  const protag = pick("protag");
+  const secondary = pick("secondary");
+  const pet = pick("pet");
+  const villain = pick("villain");
+  const arcPool = ARCS
+    .filter((arc) => !arc.franchiseOnly && !(arc.anti ?? []).includes(g))
+    .map((arc) => ({
+      id: arc.id,
+      score: arc.q + ((arc.syn ?? []).includes(g) ? (arc.synQ ?? 0) + 5 : 0) + (arc.f ?? 0) * 30,
+    }))
+    .sort((a, b) => b.score - a.score);
+  const arcs = arcPool.slice(0, 4).map((arc) => arc.id);
+
   return {
     title: `Sim Show ${i}`,
     medium,
     budget,
     slot,
-    animeType: "shonen",
+    animeType,
     genres: [g],
     audience: "teens",
-    protag: "hero",
-    protagName: "Aki",
-    secondary: "rival",
-    pet: "none",
-    villain: "warlord",
-    arcs: [],
-    sliders: [50, 50, 50],
+    protag: protag.id,
+    protagName: protag.name,
+    secondary: secondary.id,
+    pet: pet.id,
+    villain: villain.id,
+    arcs,
+    sliders: [...ideal] as [number, number, number],
     season: 1,
   };
 };
@@ -214,7 +245,7 @@ simDescribe("25-year showrunner comparison", () => {
       };
     });
 
-    console.log("SHOWRUNNER_24_SIM_RESULT=" + JSON.stringify(summary));
+    console.log("SHOWRUNNER_24_COMPETENT_SIM_RESULT=" + JSON.stringify(summary));
     for (const row of careers) {
       expect(Number.isFinite(row.cash)).toBe(true);
       expect(Number.isFinite(row.revenue)).toBe(true);
