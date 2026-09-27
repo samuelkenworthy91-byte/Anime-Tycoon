@@ -29,8 +29,8 @@ const IMPACT: Record<string, string> = {
   critical: "Every critic gains +0.40 internally before integer rounding, caps and rare-10 handling",
   ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
   sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · production burn ×0.50 · note risk ×0.40 · final quality ×1.09 · critics +0.35 polish recognition · no automatic showrunner project bubbles",
-  delegator: "Full Delegation live output ×1.60 (×1.80 preferred) · auto milestones ×1.65/×1.85 · up to 5 crew · known-safe curation · director/crew competence establishes a 32–37.5 quality floor before critics",
-  over9000: "Starts at 48/48/48 craft. Lv1 charge: output ×0.90 · speed cap ×1.20 · sales cap ×1.55. Charge grows from Lv5→45, reaching output ×1.15 · speed ×2.05 · sales ×2.30 · up to 2 Big Three places",
+  delegator: "Full Delegation live output ×1.60 (×1.80 preferred) · auto milestones ×1.65/×1.85 · up to 5 crew · known-safe curation · director/crew competence establishes a 34–39 quality floor before critics",
+  over9000: "Starts at 48/48/48 craft and ×0.90 output, but with slightly-superhuman ×1.42 speed / ×1.86 sales ceilings. Lv5→45 charge is back-loaded, eventually reaching ×1.15 output · ×2.05 speed · ×2.30 sales · up to 2 Big Three places",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
