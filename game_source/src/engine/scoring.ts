@@ -562,7 +562,7 @@ export function computeResult(opts: {
     franchiseMult *
     merch *
     local *
-    fanBaseSalesMultiplier(fanBase);
+    fanBaseSalesMultiplier(fanBase, showrunner === "over9000");
 
   /* Game Dev Tycoon bell curve: a slow build (early adopters), a decisive
      peak, then a long tail of re-runs and word of mouth. The gamma-ish
