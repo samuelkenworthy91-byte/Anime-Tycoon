@@ -150,7 +150,7 @@ export const FANBASE_SALES_CAP = 1.8;
 export function fanBaseSalesMultiplier(fans: number, ignoreSoftCap = false): number {
   const positive = Math.max(0, fans);
   const raw = 1 + Math.log1p(positive / 75_000) * 0.5;
-  const cap = ignoreSoftCap ? 2.50 : FANBASE_SALES_CAP;
+  const cap = ignoreSoftCap ? 2.20 : FANBASE_SALES_CAP;
   return Math.min(cap, raw);
 }
 
