@@ -1,0 +1,36 @@
+name: Showrunner Perk Lab
+
+on:
+  push:
+    branches:
+      - showrunner-perk-lab-2026-09-27
+    paths:
+      - "game_source/**"
+      - ".github/workflows/showrunner-perk-lab.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run full test suite and 25-year showrunner lab
+        working-directory: game_source
+        run: npm test -- --reporter=verbose
+      - name: Build production web app
+        working-directory: game_source
+        run: npm run build
