@@ -147,9 +147,12 @@ export const campaignSalaryMult = (input: IndustryPressureInput) => industryPres
  *   300k+     → approaches the ×1.80 ceiling
  */
 export const FANBASE_SALES_CAP = 1.8;
-export function fanBaseSalesMultiplier(fans: number): number {
+export function fanBaseSalesMultiplier(fans: number, ignoreSoftCap = false): number {
   const positive = Math.max(0, fans);
-  return Math.min(FANBASE_SALES_CAP, 1 + Math.log1p(positive / 75_000) * 0.5);
+  const raw = 1 + Math.log1p(positive / 75_000) * 0.5;
+  /* Over 9000 may break the economic soft ceiling, but a ×4 hard safety stop
+     prevents malformed imported saves from exploding currency into Infinity. */
+  return ignoreSoftCap ? Math.min(4, raw) : Math.min(FANBASE_SALES_CAP, raw);
 }
 
 /* ------------------------------------------------------ management strain */
