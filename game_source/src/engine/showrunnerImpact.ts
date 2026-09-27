@@ -28,6 +28,9 @@ const IMPACT: Record<string, string> = {
   finisher: "Editing contribution ×1.35 · zero unresolved notes multiplies final quality ×1.05",
   critical: "Every critic gains +0.40 internally before integer rounding, caps and rare-10 handling",
   ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
+  sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · no automatic showrunner project bubbles",
+  delegator: "Full Delegation live output ×1.20 instead of ×0.95 · pace ×1.20 · automated milestones ×1.25, rising further in the creator's favourite genre",
+  over9000: "Production schedule cap removed up to safety ×4 · fanbase sales cap removed up to safety ×4 · player may occupy multiple Big Three slots",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
