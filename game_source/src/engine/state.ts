@@ -269,7 +269,7 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
-import { trailblazerProductionMult } from "./showrunnerPerks";
+import { polarityProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
 import { advanceFanProjects } from "./fanProjects";
@@ -2543,6 +2543,17 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
     if (project.auto?.mode === "full") effective *= 0.95;
+    if (!editing) {
+      /* Project-identity perks belong on the live contribution path. Roxie's
+         schedule modifier already accelerates the calendar; this restores the
+         missing Story/Art/Sound output half of No Blueprint. */
+      effective *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
+      effective *= polarityProductionMult(r.showrunner, project.draft.genres);
+      if (r.showrunner === "ensemble") {
+        const represented = new Set(team.map((mate) => mate.role)).size;
+        effective *= 1 + Math.min(3, represented) * 0.15;
+      }
+    }
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -2557,6 +2568,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= 1 + fx.issueFix * 0.15;
     if (r.research.includes("qa")) effective *= 1.15;
     effective *= trackSkillMultiplier(researchTrackLevel(r, "production"));
+    if (r.showrunner === "finisher") effective *= 1.35;
   }
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
@@ -2577,6 +2589,8 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   if (project) {
     skill *= specialisationProjectEffects(r, project.draft).outputMult;
     skill *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    skill *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
+    skill *= polarityProductionMult(r.showrunner, project.draft.genres);
   }
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
