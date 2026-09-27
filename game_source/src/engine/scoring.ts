@@ -32,7 +32,7 @@ import {
 import { genreTargetFor } from "./genreTargets";
 import { fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
-import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
+import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothCriticPolishBonus, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
 
 export interface Points {
   story: number;
@@ -516,7 +516,7 @@ export function computeResult(opts: {
       criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
       s += (ignoreDepartmentBalance ? 0 : (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35) + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
-    s += criticalDarlingReviewBonus(showrunner);
+    s += criticalDarlingReviewBonus(showrunner) + slothCriticPolishBonus(showrunner);
     const calibrated = clamp(s, floor, 10);
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
        higher bar than ordinary rounding. Other bands use a slight conservative
