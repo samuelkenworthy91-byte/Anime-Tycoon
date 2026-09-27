@@ -3,6 +3,7 @@ import { type Draft, type Staff } from "../data";
 import { facilityFX } from "../facilities";
 import { fanBaseSalesMultiplier } from "../difficulty";
 import { sprintQuality } from "../automation";
+import { slothFinalQualityMult } from "../showrunnerPerks";
 import { makeProject, teamSpeed } from "../projects";
 import { advanceBigThreeWeek, BIG_THREE_START_WEEK, recognisePlayerBigThreeRelease } from "../bigThree";
 import { contributionEffectiveSkill, forecastWeek, initialRun } from "../state";
@@ -36,6 +37,8 @@ describe("24-showrunner experimental mechanics", () => {
     expect(contributionEffectiveSkill(sloth, worker, "art"))
       .toBeCloseTo(contributionEffectiveSkill(normal, worker, "art") * 2, 5);
     expect(forecastWeek(sloth).burn).toBeCloseTo(forecastWeek(normal).burn * 0.5, -1);
+    expect(slothFinalQualityMult("sloth")).toBeCloseTo(1.04);
+    expect(slothFinalQualityMult("steady")).toBe(1);
   });
 
   it("The Delegator materially strengthens full-delegation milestone output, especially in the creator's preferred genre", () => {
@@ -76,11 +79,11 @@ describe("24-showrunner experimental mechanics", () => {
     const broken = teamSpeed(p, team, undefined, undefined, { speed: 0, burnMult: 1, ignoreScheduleCap: true });
     expect(capped).toBeLessThanOrEqual(1.35);
     expect(broken).toBeGreaterThan(1.35);
-    expect(broken).toBeLessThanOrEqual(2.75);
+    expect(broken).toBeLessThanOrEqual(2.25);
 
     expect(fanBaseSalesMultiplier(10_000_000)).toBeLessThanOrEqual(1.8);
     expect(fanBaseSalesMultiplier(10_000_000, true)).toBeGreaterThan(1.8);
-    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(3);
+    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(2.5);
   });
 
   it("Over 9000 can place multiple player productions into the Big Three while ordinary studios remain one-slot-per-studio", () => {
@@ -105,6 +108,6 @@ describe("24-showrunner experimental mechanics", () => {
       return advanceBigThreeWeek(r);
     };
     expect(addThree(seed("producer")).bigThree.slots.filter((s) => s.player)).toHaveLength(1);
-    expect(addThree(seed("over9000")).bigThree.slots.filter((s) => s.player)).toHaveLength(3);
+    expect(addThree(seed("over9000")).bigThree.slots.filter((s) => s.player)).toHaveLength(2);
   });
 });
