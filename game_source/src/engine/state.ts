@@ -1187,7 +1187,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       pace: base.pace
         * signature.paceMult
         * (slothIdle ? 0.5 : 1)
-        * (delegated ? (preferred ? 1.08 : 1.03) : 1),
+        * (delegated ? (preferred ? 1.04 : 1.00) : 1),
       xpMult: base.xpMult * creator.xpMult,
     };
   };
@@ -2879,7 +2879,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return {
       ...base,
       out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.80 : 1.60) : 1),
-      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.08 : 1.03) : 1),
+      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.04 : 1.00) : 1),
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
