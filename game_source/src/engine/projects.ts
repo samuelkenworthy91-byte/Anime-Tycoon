@@ -392,6 +392,9 @@ export interface StudioMod {
   burnMult: number;
   /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
   issueChanceMult?: number;
+  /** Limit Breaker bypasses the normal schedule ceiling, but still retains a
+   * hard safety ceiling so corrupted stats cannot advance entire careers at once. */
+  ignoreScheduleCap?: boolean;
 }
 export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
 
@@ -426,7 +429,8 @@ export function teamSpeed(
   mods?: StaffModFn,
   studio: StudioMod = NO_STUDIO
 ): number {
-  return Math.min(SCHEDULE_SPEED_CAP, rawTeamCapacity(p, team, fx, mods, studio));
+  const raw = rawTeamCapacity(p, team, fx, mods, studio);
+  return studio.ignoreScheduleCap ? Math.min(4, raw) : Math.min(SCHEDULE_SPEED_CAP, raw);
 }
 
 /** surplus capacity improves the work instead of deleting calendar time. */
