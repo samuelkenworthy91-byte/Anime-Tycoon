@@ -197,9 +197,14 @@ export function sprintQuality(
   const fullCompetence = fullMode && focus
     ? 24 + creatorSkill * 0.30 + Math.min(4, team.length) * 4
     : 0;
-  const calculated = Math.round(((base + headBonus + creatorBonus) * facMult * morale) / risk);
+  const delegator = run.showrunner === "delegator" && fullMode;
+  const preferredCreator = delegator && !!fullDirector?.favGenre && p.draft.genres.includes(fullDirector.favGenre);
+  const delegationMult = delegator ? (preferredCreator ? 1.40 : 1.25) : 1;
+  const calculated = Math.round((((base + headBonus + creatorBonus) * facMult * morale) / risk) * delegationMult);
+  const delegatedCompetence = Math.round(fullCompetence * delegationMult);
+  const pointCap = delegator ? (preferredCreator ? 210 : 185) : 150;
   const points = focus
-    ? Math.min(150, Math.max(fullCompetence, calculated))
+    ? Math.min(pointCap, Math.max(delegatedCompetence, calculated))
     : 0;
 
   /* Full Delegation sacrifices optimisation/control, not baseline competence.
