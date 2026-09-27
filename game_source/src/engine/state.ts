@@ -1156,15 +1156,31 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
-  const studio = { ...studioProduction(heads, staffArr, r.showrunner), issueChanceMult: r.showrunner === "steady" ? 0.75 : 1 };
+  const studio = {
+    ...studioProduction(heads, staffArr, r.showrunner),
+    issueChanceMult: r.showrunner === "steady" ? 0.75 : 1,
+    ignoreScheduleCap: r.showrunner === "over9000",
+  };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds });
     const signature = specialisationProjectEffects(r, p.draft);
     const creator = creatorVisionEffectsForProject(r.expansion?.promises, p, st.id);
+    const slothIdle = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
+    const delegated = r.showrunner === "delegator" && p.auto?.mode === "full";
+    const director = delegated && p.auto?.directorStaffId ? staffArr.find((member) => member.id === p.auto!.directorStaffId) : undefined;
+    const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * signature.outputMult * creator.outputMult * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id)),
-      pace: base.pace * signature.paceMult,
+      out: base.out
+        * signature.outputMult
+        * creator.outputMult
+        * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id))
+        * (slothIdle ? 2 : 1)
+        * (delegated ? (preferred ? 1.15 : 1) : 1),
+      pace: base.pace
+        * signature.paceMult
+        * (slothIdle ? 0.5 : 1)
+        * (delegated ? (preferred ? 1.32 : 1.20) : 1),
       xpMult: base.xpMult * creator.xpMult,
     };
   };
@@ -2542,7 +2558,16 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
-    if (project.auto?.mode === "full") effective *= 0.95;
+    if (project.auto?.mode === "full") {
+      if (r.showrunner === "delegator") {
+        const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
+        const preferred = !!director?.favGenre && project.draft.genres.includes(director.favGenre);
+        effective *= preferred ? 1.38 : 1.20;
+      } else {
+        effective *= 0.95;
+      }
+    }
+    if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) effective *= 2;
     if (!editing) {
       /* Project-identity perks belong on the live contribution path. Roxie's
          schedule modifier already accelerates the calendar; this restores the
@@ -2677,7 +2702,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const type = runnerJob.contract.type;
     const points = showrunnerBubbleOutput(showrunnerEffectiveSkill(r, type));
     if (points > 0) pulses.push({ actorId: "showrunner", name: `${r.studio} showrunner`, type, points, nonce: Date.now() + 900 + pulses.length, source: "contract", jobId: runnerJob.id });
-  } else if (!runnerJob && Math.random() < 0.22) {
+  } else if (!runnerJob && r.showrunner !== "sloth" && Math.random() < 0.22) {
     const active = r.projects.find((pr) => !pr.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(pr.stage));
     if (active) {
       const skills = POINT_TYPES.map((type) => ({ type, skill: showrunnerEffectiveSkill(r, type, active) })).sort((a, b) => b.skill - a.skill);
@@ -2788,15 +2813,23 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
   }
 
-  const studio = { ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner), issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1 };
+  const studio = {
+    ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner),
+    issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1,
+    ignoreScheduleCap: nx.showrunner === "over9000",
+  };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds: nx.bonds ?? {} });
     const discovery = trailblazerProductionMult(nx.showrunner, p.draft.genres, nx.comboLevels ?? {});
     const signature = specialisationProjectEffects(nx, p.draft);
+    const slothIdle = nx.showrunner === "sloth" && !(nx.contractJobs ?? []).some((job) => job.showrunner);
+    const delegated = nx.showrunner === "delegator" && p.auto?.mode === "full";
+    const director = delegated && p.auto?.directorStaffId ? nx.staff.find((member) => member.id === p.auto!.directorStaffId) : undefined;
+    const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * discovery * signature.outputMult,
-      pace: base.pace * discovery * signature.paceMult,
+      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.15 : 1) : 1),
+      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.32 : 1.20) : 1),
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
