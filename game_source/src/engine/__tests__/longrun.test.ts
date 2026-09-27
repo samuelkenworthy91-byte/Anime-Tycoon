@@ -5,7 +5,7 @@
  *  shows instead of stagnating.
  * ==================================================================== */
 import { describe, expect, it } from "vitest";
-import { FORMAT_ORDER, MEDIUMS, type Draft, type MediumId, type SlotId } from "../data";
+import { FORMAT_ORDER, GENRES, MEDIUMS, type Draft, type GenreId, type MediumId, type SlotId } from "../data";
 import { rollHire } from "../careers";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
 import { seededRng } from "../scoring";
@@ -26,9 +26,11 @@ import {
 const YEARS = 12;
 const WEEKS = YEARS * 48;
 
-const botDraft = (r: RunState, i: number): Draft => {
-  const genres = r.genresUnlocked;
+const botDraft = (r: RunState, i: number, forcedGenrePool?: GenreId[]): Draft => {
+  const genres = forcedGenrePool?.length ? forcedGenrePool : r.genresUnlocked;
   const g = genres[i % genres.length];
+  const h = genres[(i * 7 + 3) % genres.length];
+  const draftGenres: GenreId[] = forcedGenrePool?.length && i % 3 === 0 && h !== g ? [g, h] : [g];
   /* the bot plays the real progression: only what the studio has unlocked */
   const unlocked = r.mediumsUnlocked.length ? r.mediumsUnlocked : ["fanweb"];
   const medium = unlocked[Math.floor(Math.random() * unlocked.length)] as MediumId;
@@ -43,7 +45,7 @@ const botDraft = (r: RunState, i: number): Draft => {
     budget,
     slot,
     animeType: "shonen",
-    genres: [g],
+    genres: draftGenres,
     audience: "teens",
     protag: "hero",
     protagName: "Aki",
@@ -56,13 +58,17 @@ const botDraft = (r: RunState, i: number): Draft => {
   };
 };
 
-const botOutcome = (p: Project): MilestoneOutcome => {
+const botOutcome = (p: Project, skewMix = false): MilestoneOutcome => {
   const team = p.staffIds.length;
   const power = 18 + team * 6;
   return p.milestone === "edit"
     ? { points: { story: 0, art: 0, sound: 0 }, issues: 0, spent: 2_000, rdGained: 2, squashed: Math.max(0, p.issues) }
     : {
-        points: { story: power, art: power, sound: power },
+        /* The lab's skew mode keeps total milestone output identical while
+           deliberately putting 70/20/10 into Story/Art/Sound. */
+        points: skewMix
+          ? { story: power * 2.1, art: power * 0.6, sound: power * 0.3 }
+          : { story: power, art: power, sound: power },
         issues: 1,
         spent: 3_000,
         rdGained: 3,
@@ -113,7 +119,21 @@ const botHire = (r: RunState): RunState => {
   return { ...r, cash, staff, candidates };
 };
 
-function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } {
+interface CareerOptions {
+  showrunner?: string;
+  years?: number;
+  genrePool?: GenreId[];
+  skewMix?: boolean;
+  unlockAllGenres?: boolean;
+}
+
+function playCareer(seedLabel: string, options: CareerOptions = {}): {
+  run: RunState;
+  maxLevelSeen: number;
+  averageScore: number;
+  hallOfFame: number;
+  releases: number;
+} {
   /* Keep the QA career reproducible. This test used to call itself seeded
      while every system still read Math.random, so unrelated event-deck changes
      could make a 12-year staff assertion randomly pass or fail. */
@@ -125,21 +145,33 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
      established one that has already climbed the format ladder (the ladder
      itself is covered by format-progression.test.ts) */
   let r: RunState = {
-    ...initialRun(`SIM ${seedLabel}`, "steady"),
+    ...initialRun(`SIM ${seedLabel}`, options.showrunner ?? "steady"),
     mediumsUnlocked: ["fanweb", "ona", "tv", "ova", "special", "movie"],
+    ...(options.unlockAllGenres ? { genresUnlocked: GENRES.map((genre) => genre.id) } : {}),
   };
   let greenlit = 0;
   let maxLevelSeen = Math.max(0, ...r.staff.map((s) => s.level));
-  for (let w = 0; w < WEEKS; w++) {
+  let scoreTotal = 0;
+  let hallOfFame = 0;
+  let releases = 0;
+  const weeks = (options.years ?? YEARS) * 48;
+  for (let w = 0; w < weeks; w++) {
     /* play pending milestones */
     for (const p of [...r.projects]) {
-      if (p.milestone) r = applyMilestone(r, p.id, botOutcome(p));
+      if (p.milestone) r = applyMilestone(r, p.id, botOutcome(p, options.skewMix));
     }
     /* release ready shows immediately */
     for (const p of [...r.projects]) {
       if (p.stage === "ready") {
         const res = releaseProject(r, p.id, { spent: 0, hype: 0 });
-        if (res) r = res.run;
+        if (res) {
+          r = res.run;
+          if (res.result) {
+            releases += 1;
+            scoreTotal += res.result.total;
+            if (res.result.hallOfFame) hallOfFame += 1;
+          }
+        }
       }
     }
     /* An established studio hires before spending the week's production
@@ -149,7 +181,7 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
     let guard = 0;
     while (guard++ < 4) {
       if (activeProjects(r.projects).length >= projectCapacity(r)) break;
-      const draft = botDraft(r, greenlit);
+      const draft = botDraft(r, greenlit, options.genrePool);
       if (r.cash < projectUpfront(draft) + 30_000) break;
       const next = startProject(r, draft);
       if (!next) break;
@@ -180,7 +212,13 @@ function playCareer(seedLabel: string): { run: RunState; maxLevelSeen: number } 
       );
     }
   }
-  return { run: r, maxLevelSeen };
+  return {
+    run: r,
+    maxLevelSeen,
+    averageScore: releases ? scoreTotal / releases : 0,
+    hallOfFame,
+    releases,
+  };
   } finally {
     Math.random = originalRandom;
   }
@@ -213,4 +251,60 @@ describe("long-run simulation", () => {
     const activeLate = r.rivalWorld.studios.filter((s) => s.productions.length > 0).length;
     expect(activeLate).toBeGreaterThan(0);
   }, 60_000);
+
+  it("logs a 25-year Genji comparison for the three experimental archetypes", () => {
+    const seeds = ["LAB-A", "LAB-B"];
+    const allGenres = GENRES.map((genre) => genre.id);
+    const dark: GenreId[] = ["grimdark", "vampire", "horror", "cosmic_horror"];
+    const bright: GenreId[] = ["romance", "idol", "slice", "magical"];
+
+    const aggregate = (showrunner: string, genrePool: GenreId[], skewMix = false) => {
+      const careers = seeds.map((seed) => playCareer(`${seed}-${showrunner}-${genrePool.join("-")}-${skewMix ? "skew" : "normal"}`, {
+        showrunner,
+        years: 25,
+        genrePool,
+        skewMix,
+        unlockAllGenres: true,
+      }));
+      return {
+        cash: Math.round(careers.reduce((sum, x) => sum + x.run.cash, 0) / careers.length),
+        revenue: Math.round(careers.reduce((sum, x) => sum + x.run.totalRevenue, 0) / careers.length),
+        fans: Math.round(careers.reduce((sum, x) => sum + x.run.fans, 0) / careers.length),
+        averageScore: Number((careers.reduce((sum, x) => sum + x.averageScore, 0) / careers.length).toFixed(2)),
+        hallOfFame: Number((careers.reduce((sum, x) => sum + x.hallOfFame, 0) / careers.length).toFixed(1)),
+        releases: Number((careers.reduce((sum, x) => sum + x.releases, 0) / careers.length).toFixed(1)),
+      };
+    };
+
+    const results = {
+      mixedPortfolio: {
+        genji: aggregate("steady", allGenres),
+        darkness: aggregate("darkness", allGenres),
+        dawn: aggregate("dawn", allGenres),
+        unbalanced: aggregate("unbalanced", allGenres),
+      },
+      darkSpecialist: {
+        genji: aggregate("steady", dark),
+        darkness: aggregate("darkness", dark),
+      },
+      brightSpecialist: {
+        genji: aggregate("steady", bright),
+        dawn: aggregate("dawn", bright),
+      },
+      deliberatelySkewedDepartments: {
+        genji: aggregate("steady", allGenres, true),
+        unbalanced: aggregate("unbalanced", allGenres, true),
+      },
+    };
+
+    // eslint-disable-next-line no-console
+    console.log("SHOWRUNNER_PERK_LAB_RESULTS=" + JSON.stringify(results));
+    for (const scenario of Object.values(results)) {
+      for (const result of Object.values(scenario)) {
+        expect(Number.isFinite(result.cash)).toBe(true);
+        expect(Number.isFinite(result.revenue)).toBe(true);
+        expect(result.releases).toBeGreaterThan(0);
+      }
+    }
+  }, 180_000);
 });
