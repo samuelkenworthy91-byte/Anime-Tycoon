@@ -182,7 +182,12 @@ function playCareer(showrunner: string, seedLabel: string): CareerResult {
       let guard = 0;
       while (guard++ < 4 && activeProjects(r.projects).length < projectCapacity(r)) {
         if (showrunner === "delegator") {
-          const director = r.staff.find((s) => !projectOfStaff(r.projects, s.id) && !r.contractJobs.some((j) => j.staffIds.includes(s.id)));
+          const director = r.staff
+            .filter((s) => !projectOfStaff(r.projects, s.id) && !r.contractJobs.some((j) => j.staffIds.includes(s.id)))
+            .sort((a, b) =>
+              (b.story + b.art + b.sound + b.level * 8) -
+              (a.story + a.art + a.sound + a.level * 8)
+            )[0];
           if (!director || r.cash < 45_000) break;
           const next = startFullyDelegatedProject(r, director.id, Math.random);
           if (!next) break;
