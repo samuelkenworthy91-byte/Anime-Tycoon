@@ -2664,6 +2664,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
     skill *= polarityProductionMult(r.showrunner, project.draft.genres);
   }
   if (r.showrunner === "steady") skill *= 1.5;
+  if (r.showrunner === "over9000") skill *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
   return skill;
 }
 
