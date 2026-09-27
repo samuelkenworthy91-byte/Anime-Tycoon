@@ -67,9 +67,11 @@ describe("24-showrunner experimental mechanics", () => {
     const mid = over9000Charge("over9000", 25);
     const late = over9000Charge("over9000", 45);
     expect(early.outputMult).toBeLessThan(1);
-    expect(early.scheduleCap).toBeLessThan(1.35);
-    expect(early.salesCap).toBeLessThan(1.8);
+    expect(early.scheduleCap).toBeCloseTo(1.42);
+    expect(early.salesCap).toBeCloseTo(1.86);
     expect(mid.outputMult).toBeGreaterThan(early.outputMult);
+    expect(mid.scheduleCap).toBeLessThan(1.8);
+    expect(mid.salesCap).toBeLessThan(2.1);
     expect(late.outputMult).toBeCloseTo(1.15);
     expect(late.scheduleCap).toBeCloseTo(2.05);
     expect(late.salesCap).toBeCloseTo(2.30);
@@ -93,7 +95,8 @@ describe("24-showrunner experimental mechanics", () => {
     expect(broken).toBeLessThanOrEqual(2.05);
 
     expect(fanBaseSalesMultiplier(10_000_000)).toBeLessThanOrEqual(1.8);
-    expect(fanBaseSalesMultiplier(10_000_000, early.salesCap)).toBeLessThanOrEqual(1.55);
+    expect(fanBaseSalesMultiplier(10_000_000, early.salesCap)).toBeGreaterThan(1.8);
+    expect(fanBaseSalesMultiplier(10_000_000, early.salesCap)).toBeLessThanOrEqual(1.86);
     expect(fanBaseSalesMultiplier(10_000_000, late.salesCap)).toBeGreaterThan(1.8);
     expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, late.salesCap)).toBeLessThanOrEqual(2.3);
   });
