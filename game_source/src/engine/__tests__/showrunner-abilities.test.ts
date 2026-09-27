@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ARC_COMBOS, SHOWRUNNERS, comboMult, type Draft } from "../data";
-import { contrarianComboMult, engineerEyeRange, narrativeMomentumFanMult, storyStructureMult, trailblazerProductionMult } from "../showrunnerPerks";
+import { contrarianComboMult, engineerEyeRange, narrativeMomentumFanMult, polarityProductionMult, storyStructureMult, trailblazerProductionMult } from "../showrunnerPerks";
 
 const draft = (arcs: string[] = []): Draft => ({
   title: "Test", medium: "fanweb", budget: "indie", scope: "short", slot: "web",
@@ -47,5 +47,16 @@ describe("new showrunner quartet", () => {
     expect(trailblazerProductionMult("genre", ["mecha", "romance"], {})).toBe(1.35);
     expect(trailblazerProductionMult("genre", ["mecha", "romance"], { "mecha|romance": 1 })).toBe(1);
     expect(trailblazerProductionMult("steady", ["mecha", "romance"], {})).toBe(1);
+  });
+
+  it("test polarity specialists double their swing on two matching genres and cancel mixed polarity", () => {
+    expect(polarityProductionMult("darkness", ["horror"])).toBe(1.35);
+    expect(polarityProductionMult("darkness", ["grimdark", "vampire"])).toBe(1.70);
+    expect(polarityProductionMult("darkness", ["romance"])).toBe(0.65);
+    expect(polarityProductionMult("darkness", ["idol", "slice"])).toBe(0.30);
+    expect(polarityProductionMult("darkness", ["horror", "romance"])).toBe(1);
+    expect(polarityProductionMult("dawn", ["romance", "magical"])).toBe(1.70);
+    expect(polarityProductionMult("dawn", ["grimdark", "cosmic_horror"])).toBe(0.30);
+    expect(polarityProductionMult("steady", ["horror", "vampire"])).toBe(1);
   });
 });
