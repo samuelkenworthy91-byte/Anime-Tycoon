@@ -57,14 +57,14 @@ function draft(): Draft {
   };
 }
 
-function score(points: { story: number; art: number; sound: number }) {
+function score(points: { story: number; art: number; sound: number }, showrunner = "steady") {
   return computeResult({
     draft: draft(),
     points,
     issues: 0,
     hype: 60,
     research: [],
-    showrunner: "steady",
+    showrunner,
     genreIdeal: IDEAL,
     genreRatio: RATIO,
     comboLevel: 0,
@@ -101,5 +101,19 @@ describe("Story / Art / Sound specialisation balance", () => {
 
     expect(target.quality - highlySpecialised.quality).toBeLessThanOrEqual(1);
     expect(highlySpecialised.breakdown.some((row) => row.label.includes("minor influence"))).toBe(true);
+  });
+
+  it("Who Needs Balance removes the department-ratio component from quality and critic judgement", () => {
+    const targetPoints = {
+      story: Math.round(600 * RATIO[0]),
+      art: Math.round(600 * RATIO[1]),
+      sound: 600 - Math.round(600 * RATIO[0]) - Math.round(600 * RATIO[1]),
+    };
+    const extreme = { story: 520, art: 60, sound: 20 };
+    const target = score(targetPoints, "unbalanced");
+    const skewed = score(extreme, "unbalanced");
+    expect(skewed.quality).toBeCloseTo(target.quality, 8);
+    expect(skewed.total).toBe(target.total);
+    expect(skewed.breakdown.some((row) => row.label === "Department balance" && row.pts.includes("Ignored"))).toBe(true);
   });
 });
