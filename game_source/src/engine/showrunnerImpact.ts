@@ -22,6 +22,9 @@ const IMPACT: Record<string, string> = {
   planner: "Slate Readiness ×1.50 · release moves within ±3 weeks preserve banked planning · earlier cash/capacity warnings",
   auteur: "Signature review multiplier +2 percentage points · outside-speciality penalty ×0.50 · House rank requirements advance faster",
   audience: "Pre-release audience forecast · well-matched publicity ×1.15 · well-matched merch ×1.15 · weak targeting visible earlier",
+  darkness: "Dark net alignment: one genre live output ×1.35 · two genres ×1.70 · bright opposition ×0.65 / ×0.30",
+  dawn: "Bright net alignment: one genre live output ×1.35 · two genres ×1.70 · dark opposition ×0.65 / ×0.30",
+  unbalanced: "Story / Art / Sound target balance removed from raw-quality and critic-specific review calculations",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
