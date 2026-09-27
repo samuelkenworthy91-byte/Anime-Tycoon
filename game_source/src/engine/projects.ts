@@ -430,7 +430,13 @@ export function teamSpeed(
   studio: StudioMod = NO_STUDIO
 ): number {
   const raw = rawTeamCapacity(p, team, fx, mods, studio);
-  return studio.ignoreScheduleCap ? Math.min(4, raw) : Math.min(SCHEDULE_SPEED_CAP, raw);
+  if (!studio.ignoreScheduleCap || raw <= SCHEDULE_SPEED_CAP) return Math.min(SCHEDULE_SPEED_CAP, raw);
+  /* Limit Breaker removes the ordinary hard ceiling without making every point
+     of excess capacity translate 1:1 into calendar deletion. Beyond ×1.35,
+     extra capacity continues to matter with logarithmic diminishing returns.
+     ×2.75 is a corruption/safety stop rather than an ordinary gameplay cap. */
+  const uncapped = SCHEDULE_SPEED_CAP + Math.log1p((raw - SCHEDULE_SPEED_CAP) * 2) * 0.45;
+  return Math.min(2.75, uncapped);
 }
 
 /** surplus capacity improves the work instead of deleting calendar time. */
