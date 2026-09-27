@@ -271,7 +271,7 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
-import { polarityProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
+import { over9000Charge, polarityProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
 import { advanceFanProjects } from "./fanProjects";
@@ -1166,7 +1166,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
     issueChanceMult: r.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : r.showrunner === "delegator" ? 0.60 : 1,
-    ignoreScheduleCap: r.showrunner === "over9000",
+    scheduleSpeedCap: over9000Charge(r.showrunner, r.showrunnerCareer.level).scheduleCap,
   };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds });
@@ -2613,6 +2613,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
       }
     }
     if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) effective *= 2;
+    if (r.showrunner === "over9000") effective *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
     if (!editing) {
       /* Project-identity perks belong on the live contribution path. Roxie's
          schedule modifier already accelerates the calendar; this restores the
@@ -2864,7 +2865,7 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     ...studioBase,
     burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
     issueChanceMult: nx.showrunner === "steady" ? 0.75 : slothIdleStudio ? 0.40 : nx.showrunner === "delegator" ? 0.60 : 1,
-    ignoreScheduleCap: nx.showrunner === "over9000",
+    scheduleSpeedCap: over9000Charge(nx.showrunner, nx.showrunnerCareer.level).scheduleCap,
   };
   const mods: StaffModFn = (st, p, team) => {
     const base = personMod(st, p, team, { bonds: nx.bonds ?? {} });
@@ -3183,6 +3184,8 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     specialisationScoreMult: specialisationProjectEffects(r, d).scoreMult,
     businessMult: businessTrackRevenueMultiplier(researchTrackLevel(r, "business")),
     castAffinityDiscovered: r.castAffinityDiscovered,
+    showrunnerLevel: r.showrunnerCareer.level,
+    staff: r.staff,
   });
   const decisionFanMult = decisionReleaseFansMult(r, d);
   if (Math.abs(decisionFanMult - 1) > 0.001) {
