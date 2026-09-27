@@ -8,7 +8,7 @@ export interface ShowrunnerImpactSummary {
 
 const IMPACT: Record<string, string> = {
   steady: "Staff contribution output ×1.50 · pre-edit production note chance ×0.75",
-  vision: "Synergistic Twist/Lore arcs +2 story quality each · every critic score has a 3/10 floor",
+  vision: "Synergistic Twist/Lore arcs +2 story quality each · every critic score has a 5/10 floor",
   producer: "Contract pay ×1.40 · commission advance and completion bonus ×1.30",
   marketer: "Every production starts +10 hype · production marketing hype ×1.50 · GOOD/EXCELLENT strategic campaigns ×1.20",
   operations: "Production scheduling +10 percentage points · production burn ×0.90 · Slate Readiness builds ×1.25",
@@ -22,6 +22,12 @@ const IMPACT: Record<string, string> = {
   planner: "Slate Readiness ×1.50 · release moves within ±3 weeks preserve banked planning · earlier cash/capacity warnings",
   auteur: "Signature review multiplier +2 percentage points · outside-speciality penalty ×0.50 · House rank requirements advance faster",
   audience: "Pre-release audience forecast · well-matched publicity ×1.15 · well-matched merch ×1.15 · weak targeting visible earlier",
+  darkness: "Dark net alignment: one genre live output ×1.35 · two genres ×1.70 · bright opposition ×0.65 / ×0.30",
+  dawn: "Bright net alignment: one genre live output ×1.35 · two genres ×1.70 · dark opposition ×0.65 / ×0.30",
+  unbalanced: "100% of Story / Art / Sound target-balance penalties are ignored in raw quality and critic-specific review calculations",
+  finisher: "Editing contribution ×1.35 · zero unresolved notes multiplies final quality ×1.05",
+  critical: "Every critic gains +0.40 internally before integer rounding, caps and rare-10 handling",
+  ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
 };
 
 export function showrunnerImpactSummary(id: string): ShowrunnerImpactSummary {
