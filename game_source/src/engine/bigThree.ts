@@ -537,9 +537,10 @@ function selectMarchCandidates(run: RunState, pool0: BigThreeSlot[]): BigThreeSl
 
   while (run.bigThree.slots.length + selected.length < BIG_THREE_MAX_SLOTS) {
     const slotIndex = run.bigThree.slots.length + selected.length;
+    const playerSlots = run.bigThree.slots.filter((slot) => slot.player).length + selected.filter((slot) => slot.player).length;
     const eligible = pool.filter((candidate) => {
-      const limitBroken = run.showrunner === "over9000" && candidate.player;
-      return (limitBroken || !usedStudios.has(candidate.originalStudioId)) &&
+      const superhumanPlayerAllowance = run.showrunner === "over9000" && candidate.player && playerSlots < 2;
+      return (superhumanPlayerAllowance || !usedStudios.has(candidate.originalStudioId)) &&
         !selected.some((pick) => pick.sourceId === candidate.sourceId);
     });
     if (!eligible.length) break;
@@ -552,7 +553,8 @@ function selectMarchCandidates(run: RunState, pool0: BigThreeSlot[]): BigThreeSl
     );
     const pick = eligible[0];
     selected.push(pick);
-    if (!(run.showrunner === "over9000" && pick.player)) usedStudios.add(pick.originalStudioId);
+    const playerSlotsAfterPick = run.bigThree.slots.filter((slot) => slot.player).length + selected.filter((slot) => slot.player).length;
+    if (!(run.showrunner === "over9000" && pick.player && playerSlotsAfterPick < 2)) usedStudios.add(pick.originalStudioId);
   }
 
   return selected;
