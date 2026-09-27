@@ -31,6 +31,7 @@ import {
   ROLE_POINT,
   STAFF_STAT_CAP,
   staffPoint,
+  staffMain,
   slotForMedium,
   rollContract,
   type Contract,
