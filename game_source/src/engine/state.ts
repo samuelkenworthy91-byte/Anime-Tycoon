@@ -1014,7 +1014,9 @@ export function forecastWeek(r: RunState): WeekForecast {
     .filter((p) => p.week === w && p.amount !== 0)
     .map((p) => ({ label: p.label, amount: p.amount }));
   const income = payoutsDue.reduce((a, p) => a + p.amount, 0);
-  const burnMult = studioProduction(r.heads ?? {}, r.staff, r.showrunner).burnMult;
+  const baseBurnMult = studioProduction(r.heads ?? {}, r.staff, r.showrunner).burnMult;
+  const slothIdleForForecast = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
+  const burnMult = baseBurnMult * (slothIdleForForecast ? 0.5 : 1);
   const burn = activeProjects(r.projects).reduce((a, p) => a + Math.round(p.weeklyBurn * burnMult), 0);
   const lateFees = activeProjects(r.projects)
     .filter((p) => w > p.deadlineWeek)
@@ -1157,8 +1159,11 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     /* the Hype Machine's marketing office runs hot */
     hypeMult: baseFx.hypeMult * (r.showrunner === "marketer" ? 1.5 : 1),
   };
+  const studioBase = studioProduction(heads, staffArr, r.showrunner);
+  const slothIdleStudio = r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner);
   const studio = {
-    ...studioProduction(heads, staffArr, r.showrunner),
+    ...studioBase,
+    burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
     issueChanceMult: r.showrunner === "steady" ? 0.75 : 1,
     ignoreScheduleCap: r.showrunner === "over9000",
   };
@@ -1177,11 +1182,11 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
         * creator.outputMult
         * goldenPairMultiplier(staffRelationships, st.id, team.map((member) => member.id))
         * (slothIdle ? 2 : 1)
-        * (delegated ? (preferred ? 1.15 : 1) : 1),
+        * (delegated ? (preferred ? 1.55 : 1.35) : 1),
       pace: base.pace
         * signature.paceMult
         * (slothIdle ? 0.5 : 1)
-        * (delegated ? (preferred ? 1.32 : 1.20) : 1),
+        * (delegated ? (preferred ? 1.15 : 1.08) : 1),
       xpMult: base.xpMult * creator.xpMult,
     };
   };
@@ -2563,7 +2568,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
       if (r.showrunner === "delegator") {
         const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
         const preferred = !!director?.favGenre && project.draft.genres.includes(director.favGenre);
-        effective *= preferred ? 1.38 : 1.20;
+        effective *= preferred ? 1.55 : 1.35;
       } else {
         effective *= 0.95;
       }
@@ -2814,8 +2819,11 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     return { run: { ...nx, staff }, pulses: [], attention: bg.attention };
   }
 
+  const studioBase = studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner);
+  const slothIdleStudio = nx.showrunner === "sloth" && !(nx.contractJobs ?? []).some((job) => job.showrunner);
   const studio = {
-    ...studioProduction(nx.heads ?? {}, nx.staff, nx.showrunner),
+    ...studioBase,
+    burnMult: studioBase.burnMult * (slothIdleStudio ? 0.5 : 1),
     issueChanceMult: nx.showrunner === "steady" ? 0.75 : 1,
     ignoreScheduleCap: nx.showrunner === "over9000",
   };
@@ -2829,8 +2837,8 @@ export function tickStudioDay(r: RunState): { run: RunState; pulses: DeskPulse[]
     const preferred = !!director?.favGenre && p.draft.genres.includes(director.favGenre);
     return {
       ...base,
-      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.15 : 1) : 1),
-      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.32 : 1.20) : 1),
+      out: base.out * discovery * signature.outputMult * (slothIdle ? 2 : 1) * (delegated ? (preferred ? 1.55 : 1.35) : 1),
+      pace: base.pace * discovery * signature.paceMult * (slothIdle ? 0.5 : 1) * (delegated ? (preferred ? 1.15 : 1.08) : 1),
     };
   };
   const loadMap = projectLoadMap(nx.projects, nx.staff, nx.facilities, nx.research);
