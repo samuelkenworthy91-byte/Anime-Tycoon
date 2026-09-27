@@ -15,7 +15,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("showrunner expansion", () => {
   it("exposes twenty-four unique playable identities with stable save IDs", () => {
     expect(SHOWRUNNERS.map(s => s.id)).toEqual(["steady", "vision", "producer", "marketer", "operations", "franchise", "mentor", "research", "casting", "festival", "dealmaker", "genre", "planner", "auteur", "audience", "darkness", "dawn", "unbalanced", "finisher", "critical", "ensemble", "sloth", "delegator", "over9000"]);
-    expect(SHOWRUNNERS.filter((s) => s.artPending)).toHaveLength(9);
+    expect(SHOWRUNNERS.filter((s) => s.artPending)).toHaveLength(0);
     for (const s of SHOWRUNNERS) {
       for (const path of [s.sprite, s.portrait, s.img]) expect(existsSync(resolve("public", path)), path).toBe(true);
       const old = initialRun("Saved Studio", s.id);
