@@ -392,8 +392,8 @@ export interface StudioMod {
   burnMult: number;
   /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
   issueChanceMult?: number;
-  /** Limit Breaker bypasses the normal schedule ceiling, but still retains a
-   * hard safety ceiling so corrupted stats cannot advance entire careers at once. */
+  /** Limit Breaker replaces the ordinary schedule ceiling with a much higher
+   * superhuman ceiling. */
   ignoreScheduleCap?: boolean;
 }
 export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
@@ -430,13 +430,8 @@ export function teamSpeed(
   studio: StudioMod = NO_STUDIO
 ): number {
   const raw = rawTeamCapacity(p, team, fx, mods, studio);
-  if (!studio.ignoreScheduleCap || raw <= SCHEDULE_SPEED_CAP) return Math.min(SCHEDULE_SPEED_CAP, raw);
-  /* Limit Breaker removes the ordinary hard ceiling without making every point
-     of excess capacity translate 1:1 into calendar deletion. Beyond ×1.35,
-     extra capacity continues to matter with logarithmic diminishing returns.
-     ×2.75 is a corruption/safety stop rather than an ordinary gameplay cap. */
-  const uncapped = SCHEDULE_SPEED_CAP + Math.log1p((raw - SCHEDULE_SPEED_CAP) * 2) * 0.45;
-  return Math.min(2.75, uncapped);
+  const cap = studio.ignoreScheduleCap ? 2.25 : SCHEDULE_SPEED_CAP;
+  return Math.min(cap, raw);
 }
 
 /** surplus capacity improves the work instead of deleting calendar time. */
