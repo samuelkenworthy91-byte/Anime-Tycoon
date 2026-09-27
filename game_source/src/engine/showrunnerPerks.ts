@@ -83,12 +83,15 @@ export interface Over9000Charge {
 export function over9000Charge(showrunner: string, level = 1): Over9000Charge {
   if (showrunner !== "over9000") return { charge: 0, label: "Normal", outputMult: 1, scheduleCap: 1.35, salesCap: 1.80 };
   const charge = Math.max(0, Math.min(1, (Math.max(1, level) - 5) / 40));
+  /* Charge is deliberately back-loaded: the perk is visible immediately via
+     slightly-superhuman ceilings, but the dramatic jump belongs to mid/late game. */
+  const power = Math.pow(charge, 1.6);
   const label = charge < 0.15 ? "Charging" : charge < 0.40 ? "Awakening" : charge < 0.70 ? "Ascended" : charge < 1 ? "Limit Break" : "Over 9000";
   return {
     charge,
     label,
-    outputMult: 0.90 + charge * 0.25,
-    scheduleCap: 1.20 + charge * 0.85,
-    salesCap: 1.55 + charge * 0.75,
+    outputMult: 0.90 + power * 0.25,
+    scheduleCap: 1.42 + power * 0.63,
+    salesCap: 1.86 + power * 0.44,
   };
 }
