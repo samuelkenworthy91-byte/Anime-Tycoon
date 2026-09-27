@@ -269,7 +269,7 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
-import { trailblazerProductionMult } from "./showrunnerPerks";
+import { polarityProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
 import { advanceFanProjects } from "./fanProjects";
@@ -2558,6 +2558,9 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     if (r.research.includes("qa")) effective *= 1.15;
     effective *= trackSkillMultiplier(researchTrackLevel(r, "production"));
   }
+  /* The test polarity specialists affect project work only: contracts and
+     editing remain ordinary, so their power is tied to the genres they choose. */
+  if (project && !editing) effective *= polarityProductionMult(r.showrunner, project.draft.genres);
   /* Genji's Steady Hand is deliberately obvious: all staff contribution
      output is 50% stronger everywhere, including contract and edit work. */
   if (r.showrunner === "steady") effective *= 1.5;
@@ -2577,6 +2580,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   if (project) {
     skill *= specialisationProjectEffects(r, project.draft).outputMult;
     skill *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    skill *= polarityProductionMult(r.showrunner, project.draft.genres);
   }
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
