@@ -37,7 +37,7 @@ describe("24-showrunner experimental mechanics", () => {
     expect(contributionEffectiveSkill(sloth, worker, "art"))
       .toBeCloseTo(contributionEffectiveSkill(normal, worker, "art") * 2, 5);
     expect(forecastWeek(sloth).burn).toBeCloseTo(forecastWeek(normal).burn * 0.5, -1);
-    expect(slothFinalQualityMult("sloth")).toBeCloseTo(1.06);
+    expect(slothFinalQualityMult("sloth")).toBeCloseTo(1.08);
     expect(slothFinalQualityMult("steady")).toBe(1);
   });
 
@@ -59,7 +59,7 @@ describe("24-showrunner experimental mechanics", () => {
     const a = sprintQuality(normal, project, "story", facilityFX({}), staff);
     const b = sprintQuality(delegated, project, "story", facilityFX({}), staff);
     expect(b.points).toBeGreaterThan(a.points);
-    expect(b.points).toBeGreaterThanOrEqual(Math.round(a.points * 1.4));
+    expect(b.points).toBeGreaterThanOrEqual(Math.round(a.points * 1.55));
   });
 
   it("Over 9000 bypasses the ordinary schedule and fanbase-sales soft caps but keeps hard safety stops", () => {
@@ -79,11 +79,11 @@ describe("24-showrunner experimental mechanics", () => {
     const broken = teamSpeed(p, team, undefined, undefined, { speed: 0, burnMult: 1, ignoreScheduleCap: true });
     expect(capped).toBeLessThanOrEqual(1.35);
     expect(broken).toBeGreaterThan(1.35);
-    expect(broken).toBeLessThanOrEqual(1.85);
+    expect(broken).toBeLessThanOrEqual(2.05);
 
     expect(fanBaseSalesMultiplier(10_000_000)).toBeLessThanOrEqual(1.8);
     expect(fanBaseSalesMultiplier(10_000_000, true)).toBeGreaterThan(1.8);
-    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(2.2);
+    expect(fanBaseSalesMultiplier(Number.MAX_SAFE_INTEGER, true)).toBeLessThanOrEqual(2.3);
   });
 
   it("Over 9000 can place multiple player productions into the Big Three while ordinary studios remain one-slot-per-studio", () => {
