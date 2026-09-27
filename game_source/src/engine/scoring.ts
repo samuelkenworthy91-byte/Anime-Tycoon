@@ -32,7 +32,7 @@ import {
 import { genreTargetFor } from "./genreTargets";
 import { fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
-import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, storyStructureMult } from "./showrunnerPerks";
+import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
 
 export interface Points {
   story: number;
@@ -475,7 +475,7 @@ export function computeResult(opts: {
   const secretDiscovered = !comboDiscovered && draft.genres.length === 2 && comboKey(draft.genres) in SECRET_COMBOS;
 
   const chemFactor = 1 + (chemMult - 1) * CHEM_QUALITY_WEIGHT;
-  const quality = clamp(raw * chemFactor * cleanMasterQualityMult(showrunner, issues), RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
+  const quality = clamp(raw * chemFactor * cleanMasterQualityMult(showrunner, issues) * slothFinalQualityMult(showrunner), RAW_QUALITY_FLOOR, RAW_QUALITY_CEILING);
 
   /* ---- four critics, each out of 10.
      Absolute quality provides most of the score; the studio's all-time
