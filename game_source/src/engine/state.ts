@@ -2042,14 +2042,28 @@ export function startFullyDelegatedProject(
   const villain = castPick("villain", vision.cast.villain);
 
   const unlockedArcs = ARCS.filter((arc) => !arc.franchiseOnly && !arcLockReason(arc, r));
-  const arcIds = [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
-  for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
-    if (arcIds.length >= 3) break;
-    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
-  }
-  for (const arc of unlockedArcs) {
-    if (arcIds.length >= 3) break;
-    if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+  const delegatorRun = r.showrunner === "delegator";
+  const arcIds = delegatorRun
+    ? [...unlockedArcs]
+        .sort((a, b) => {
+          const score = (arc: Arc) =>
+            arc.q * 2 +
+            (arc.f ?? 0) * 30 +
+            genres.reduce((sum, genre) => sum + arcGenreFit(arc, genre).score * 3, 0);
+          return score(b) - score(a);
+        })
+        .slice(0, 4)
+        .map((arc) => arc.id)
+    : [...vision.arcs.filter((id) => unlockedArcs.some((arc) => arc.id === id))];
+  if (!delegatorRun) {
+    for (const arc of unlockedArcs.filter((a) => a.syn?.some((g) => genres.includes(g)))) {
+      if (arcIds.length >= 3) break;
+      if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+    }
+    for (const arc of unlockedArcs) {
+      if (arcIds.length >= 3) break;
+      if (!arcIds.includes(arc.id)) arcIds.push(arc.id);
+    }
   }
 
   const mediumPool = r.mediumsUnlocked.filter((id) => id !== "movie" || r.officeLevel >= 1) as Draft["medium"][];
@@ -2078,7 +2092,7 @@ export function startFullyDelegatedProject(
     villain: villain.id,
     villainName: villain.name,
     arcs: arcIds,
-    sliders: vision.sliders,
+    sliders: delegatorRun ? [...genreTargetFor(genres).ideal] as [number, number, number] : vision.sliders,
     season: 1,
   };
 
