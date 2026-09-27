@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ARCS, FORMAT_ORDER, GENRES, MEDIUMS, PETS, PROTAGONISTS, SECONDARY, SLOTS, VILLAINS, affinityTier, type CastMember, type CastRole, type Draft, type MediumId, type SlotId } from "../data";
+import { ARCS, FORMAT_ORDER, GENRES, MEDIUMS, PETS, PROTAGONISTS, SECONDARY, SLOTS, VILLAINS, type CastMember, type CastRole, type Draft, type MediumId, type SlotId } from "../data";
 import { genreTargetFor } from "../genreTargets";
 import { rollHire } from "../careers";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
@@ -41,14 +41,18 @@ const botDraft = (r: RunState, i: number): Draft => {
   const slot = (Object.entries(SLOTS).find(([, def]) => def.best.includes(g))?.[0]
     ?? (medium === "tv" || medium === "special" ? "evening" : (MEDIUMS[medium].slot ?? "stream"))) as SlotId;
 
-  const preferredLead = PROTAGONISTS.find((member) => affinityTier(member, [g]) === 2)
-    ?? PROTAGONISTS.find((member) => affinityTier(member, [g]) === 1)
-    ?? PROTAGONISTS[0];
+  const knownAffinity = (member: CastMember) => {
+    const hiddenKnown = r.castAffinityDiscovered.includes(member.id) && member.hiddenAff === g;
+    if (hiddenKnown) return 2;
+    return member.visibleAff.includes(g) ? 1 : 0;
+  };
+  const preferredLead = [...PROTAGONISTS]
+    .sort((a, b) => knownAffinity(b) - knownAffinity(a))[0] ?? PROTAGONISTS[0];
   const animeType = preferredLead.type;
   const pick = (role: CastRole) =>
-    pools[role].find((member) => member.type === animeType && affinityTier(member, [g]) === 2)
-    ?? pools[role].find((member) => member.type === animeType && affinityTier(member, [g]) === 1)
-    ?? pools[role].find((member) => member.type === animeType)
+    [...pools[role]]
+      .filter((member) => member.type === animeType)
+      .sort((a, b) => knownAffinity(b) - knownAffinity(a))[0]
     ?? pools[role][0];
 
   const protag = pick("protag");
