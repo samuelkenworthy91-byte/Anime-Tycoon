@@ -253,13 +253,16 @@ describe("long-run simulation", () => {
   }, 60_000);
 
   it("logs a 25-year Genji comparison for the three experimental archetypes", () => {
-    const seeds = ["LAB-A", "LAB-B"];
+    const seeds = ["LAB-A", "LAB-B", "LAB-C", "LAB-D"];
     const allGenres = GENRES.map((genre) => genre.id);
     const dark: GenreId[] = ["grimdark", "vampire", "horror", "cosmic_horror"];
     const bright: GenreId[] = ["romance", "idol", "slice", "magical"];
 
     const aggregate = (showrunner: string, genrePool: GenreId[], skewMix = false) => {
-      const careers = seeds.map((seed) => playCareer(`${seed}-${showrunner}-${genrePool.join("-")}-${skewMix ? "skew" : "normal"}`, {
+      /* Keep each scenario on common random seeds across showrunners. The
+         showrunner id must not leak into the seed label or the comparison
+         becomes different careers rather than the same career with a new perk. */
+      const careers = seeds.map((seed) => playCareer(`${seed}-${genrePool.join("-")}-${skewMix ? "skew" : "normal"}`, {
         showrunner,
         years: 25,
         genrePool,
