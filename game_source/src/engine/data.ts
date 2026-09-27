@@ -1049,7 +1049,7 @@ export const levelUpCost = (s: Staff) => 8 + s.level * 6;
 
 /* ------------------------------------------------------------- showrunners */
 export interface Showrunner {
-  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research" | "casting" | "festival" | "dealmaker" | "genre" | "planner" | "auteur" | "audience";
+  id: "steady" | "vision" | "producer" | "marketer" | "operations" | "franchise" | "mentor" | "research" | "casting" | "festival" | "dealmaker" | "genre" | "planner" | "auteur" | "audience" | "darkness" | "dawn" | "unbalanced";
   name: string;
   title: string;
   img: string;
@@ -1077,6 +1077,9 @@ export const SHOWRUNNERS: Showrunner[] = [
   { id: "planner", name: "Jen Wailer", title: "The Executive Planner", img: "img/portrait-showrunner-planner.webp", sprite: "img/sprite-showrunner-planner.webp", portrait: "img/portrait-showrunner-planner.webp", perk: "Five Moves Ahead — Slate Readiness builds 50% faster, small release-window moves preserve planning, and the calendar gives earlier cash/capacity warnings." },
   { id: "auteur", name: "James \"Jimmy\" Santorum", title: "The House Auteur", img: "img/portrait-showrunner-auteur.webp", sprite: "img/sprite-showrunner-auteur.webp", portrait: "img/portrait-showrunner-auteur.webp", perk: "House Style — signature-genre review expertise gains +2 percentage points, outside-speciality penalties are halved, and House Specialisation ranks advance faster." },
   { id: "audience", name: "Ryka Inouway", title: "The Audience Whisperer", img: "img/portrait-showrunner-audience.webp", sprite: "img/sprite-showrunner-audience.webp", portrait: "img/portrait-showrunner-audience.webp", perk: "Know Your Crowd — predicts audience shape before release, identifies weak targeting earlier, and gives well-matched publicity and merchandise a 15% execution boost." },
+  { id: "darkness", name: "TEST — Prince of Darkness", title: "The Dark Specialist", img: "img/portrait-showrunner-auteur.webp", sprite: "img/sprite-showrunner-auteur.webp", portrait: "img/portrait-showrunner-auteur.webp", perk: "Prince of Darkness — Grimdark, Vampire, Horror and Cosmic Horror production output is massively stronger; Romance, Idol, Slice of Life and Magical output is equally weakened.", artPending: true },
+  { id: "dawn", name: "TEST — Brighter Than the Dawn", title: "The Bright Specialist", img: "img/portrait-showrunner-audience.webp", sprite: "img/sprite-showrunner-audience.webp", portrait: "img/portrait-showrunner-audience.webp", perk: "Brighter Than the Dawn — Romance, Idol, Slice of Life and Magical production output is massively stronger; Grimdark, Vampire, Horror and Cosmic Horror output is equally weakened.", artPending: true },
+  { id: "unbalanced", name: "TEST — Who Needs Balance?", title: "The Creative Extremist", img: "img/portrait-showrunner-contrarian.webp", sprite: "img/sprite-showrunner-contrarian.webp", portrait: "img/portrait-showrunner-contrarian.webp", perk: "Who Needs Balance? — critics ignore the Story / Art / Sound balance target and judge the production on everything else.", artPending: true },
 ];
 
 /* --------------------------------------------------------------- reviewers */
