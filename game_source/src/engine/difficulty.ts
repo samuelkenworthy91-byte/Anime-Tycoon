@@ -150,9 +150,12 @@ export const FANBASE_SALES_CAP = 1.8;
 export function fanBaseSalesMultiplier(fans: number, ignoreSoftCap = false): number {
   const positive = Math.max(0, fans);
   const raw = 1 + Math.log1p(positive / 75_000) * 0.5;
-  /* Over 9000 may break the economic soft ceiling, but a ×4 hard safety stop
-     prevents malformed imported saves from exploding currency into Infinity. */
-  return ignoreSoftCap ? Math.min(4, raw) : Math.min(FANBASE_SALES_CAP, raw);
+  if (!ignoreSoftCap || raw <= FANBASE_SALES_CAP) return Math.min(FANBASE_SALES_CAP, raw);
+  /* Limit Breaker can continue beyond the normal ×1.80 sales ceiling, but the
+     post-cap portion has diminishing returns rather than compounding at full
+     strength forever. ×3 is retained only as a malformed-save safety stop. */
+  const overflow = FANBASE_SALES_CAP + Math.log1p((raw - FANBASE_SALES_CAP) * 2) * 0.35;
+  return Math.min(3, overflow);
 }
 
 /* ------------------------------------------------------ management strain */
