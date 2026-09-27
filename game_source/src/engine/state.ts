@@ -269,7 +269,7 @@ import { applyLicensedAdaptationOutcome } from "./licensedAdaptation";
 import { officeRelocationBlockReason } from "./progression";
 import { industryPressure, managementOutputMult, talentPoachTerms, type TalentPoachTerms } from "./difficulty";
 import { buildSellerAuction, type SellerAuction } from "./sellerAuction";
-import { trailblazerProductionMult } from "./showrunnerPerks";
+import { polarisedGenreProductionMult, trailblazerProductionMult } from "./showrunnerPerks";
 import { alignRecruitmentPool, specialisationProjectEffects } from "./specialisation";
 import { initialBigThreeState, migrateBigThreeState, recognisePlayerBigThreeRelease, type BigThreeState } from "./bigThree";
 import { advanceFanProjects } from "./fanProjects";
@@ -2543,6 +2543,7 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
     if (project.auto?.mode === "full") effective *= 0.95;
+    effective *= polarisedGenreProductionMult(r.showrunner, project.draft.genres);
   } else {
     effective *= 0.72 + Math.max(0, st.stamina) / 220;
   }
@@ -2577,6 +2578,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
   if (project) {
     skill *= specialisationProjectEffects(r, project.draft).outputMult;
     skill *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    skill *= polarisedGenreProductionMult(r.showrunner, project.draft.genres);
   }
   if (r.showrunner === "steady") skill *= 1.5;
   return skill;
