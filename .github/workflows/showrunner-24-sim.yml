@@ -8,6 +8,7 @@ on:
       - showrunner-24-sim-2026-09-27
       - showrunner-24-tune-2026-09-27
       - showrunner-24-tune2-2026-09-27
+      - showrunner-24-tune3-2026-09-27
     paths:
       - "game_source/src/engine/**"
       - ".github/workflows/showrunner-24-sim.yml"
