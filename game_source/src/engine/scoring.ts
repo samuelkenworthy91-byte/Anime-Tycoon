@@ -32,7 +32,7 @@ import {
 import { genreTargetFor } from "./genreTargets";
 import { fanBaseSalesMultiplier } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
-import { contrarianComboMult, narrativeMomentumFanMult, storyStructureMult } from "./showrunnerPerks";
+import { contrarianComboMult, criticsIgnoreBalance, narrativeMomentumFanMult, storyStructureMult } from "./showrunnerPerks";
 
 export interface Points {
   story: number;
@@ -313,7 +313,8 @@ export function computeResult(opts: {
     ? [points.story / totalPts, points.art / totalPts, points.sound / totalPts]
     : [0.34, 0.33, 0.33];
   const drift = Math.abs(mix[0] - genreRatio[0]) + Math.abs(mix[1] - genreRatio[1]) + Math.abs(mix[2] - genreRatio[2]);
-  const ratioMatch = clamp(1.01 - drift * 0.12, 0.94, 1.01);
+  const ignoresBalance = criticsIgnoreBalance(showrunner);
+  const ratioMatch = ignoresBalance ? 1.01 : clamp(1.01 - drift * 0.12, 0.94, 1.01);
 
   /* ---- slider focus vs the director's memo */
   let sliderPart = 0;
@@ -500,7 +501,7 @@ export function computeResult(opts: {
     let criteria = "";
     if (r.bias === "story") {
       criteria = "Writing · Story-direction slider · Arc structure · Overall execution";
-      s += (perPhase[0] - 2) * 0.35 + (mix[0] - genreRatio[0]) * 0.45 + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (perPhase[0] - 2) * 0.35 + (ignoresBalance ? 0 : (mix[0] - genreRatio[0]) * 0.45) + arcCriticAdj + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "hype") {
       criteria = "Fan energy · Hype · Overall creative direction · Arc momentum";
@@ -508,11 +509,11 @@ export function computeResult(opts: {
     }
     if (r.bias === "harsh") {
       criteria = "Overall execution · Production output · Editing notes · Professional polish";
-      s += -0.5 - issues * 0.14 + productionCriticAdj + (ratioMatch - 0.98) * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += -0.5 - issues * 0.14 + productionCriticAdj + (ignoresBalance ? 0 : (ratioMatch - 0.98) * 0.20) + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     if (r.bias === "tech") {
       criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
-      s += (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35 + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
+      s += (ignoresBalance ? 0 : (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35) + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
     const calibrated = clamp(s, floor, 10);
     /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
