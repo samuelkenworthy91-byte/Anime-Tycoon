@@ -1,3 +1,4 @@
+import { advanceArcballWeek, migrateArcballState } from "./arcball";
 import { initialExpansion, migrateExpansion, snapshotProduction, expansionBusyReason, advanceExpansionDay, finishExpansionProduction, settleProjectReceipt, type ExpansionState } from "./studioExpansion";
 import { initialOverseas, migrateOverseas, defaultContent, overseasOf, advanceOverseasWeek, overseasTierOf, overseasUpkeep, type OverseasState } from "./overseas";
 import {
@@ -764,6 +765,7 @@ export function migrateRun(raw: unknown): RunState {
     arcGenreKnowledge: migratedResearchArcGenreKnowledge,
     revBoostUntil: typeof r.revBoostUntil === "number" ? r.revBoostUntil : 0,
     ipMarket: migrateIPMarket((r as { ipMarket?: unknown }).ipMarket, r.week ?? 0),
+    arcball: migrateArcballState((r as { arcball?: unknown }).arcball, r.week ?? 0),
     bigThree: migrateBigThreeState((r as { bigThree?: unknown }).bigThree),
     strategicSpend: migrateStrategicSpend((r as { strategicSpend?: unknown }).strategicSpend, r.week ?? 0),
     capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
@@ -1742,7 +1744,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     }
   }
 
-  return {
+  const advanced: RunState = {
     ...r,
     week: r.week + n,
     cash,
@@ -1785,6 +1787,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     ipMarket,
     notices: notices.slice(-40),
   };
+  return advanceArcballWeek(advanced);
 }
 
 /* =================================================================== */
@@ -4342,7 +4345,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
   const tier = merchTierOf(r);
   if (!merchProductUnlocked(r, product.id)) return null;
   if (merchBlock(fr, product, r.week, r.cash, tier)) return null;
-  const merchDecisionMult = decisionMerchMult(r);
+  const merchDecisionMult = decisionMerchMult(r, franchiseKey);
   const relationshipMult = partnerCommercialMult(r.partners ?? {});
   const manufacturingMult = r.capitalProjects.includes("merch_factory") ? 1.18 : 1;
   const audienceFit = merchAudienceFit(franchiseAudienceProfile(r, franchiseKey) ?? undefined, product.id);
@@ -4370,7 +4373,7 @@ export function launchMerch(r: RunState, franchiseKey: string, productId: string
     ...r,
     cash: r.cash - product.cost,
     payouts,
-    decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "merch" && m.expiresWeek >= r.week && m.uses > 0),
+    decisionModifiers: consumeDecisionModifiers(r.decisionModifiers ?? [], (m) => m.kind === "merch" && m.expiresWeek >= r.week && m.uses > 0 && (!m.franchiseKey || m.franchiseKey === franchiseKey)),
     franchises: { ...r.franchises, [franchiseKey]: next },
     activeMerchBets: {
       ...(r.activeMerchBets ?? {}),
