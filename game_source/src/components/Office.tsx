@@ -118,6 +118,7 @@ import { experimentalStudyPresentation } from "../engine/creativeDiscovery";
 import { genreUnlockCost, officeRelocationBlockReason, officeRelocationRequirements, unlockGenreLicense } from "../engine/progression";
 import { AWARD_CATEGORIES, awardQualificationText } from "../engine/awards";
 import BigThreeBoard from "./BigThreeBoard";
+import ArcballPanel from "./ArcballPanel";
 import { appointCreativeLead, expansionOf } from "../engine/studioExpansion";
 import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
 import { markTutorialSeen, tutorialSeen, type TutorialId } from "../engine/tutorials";
@@ -136,6 +137,7 @@ export default function Office({
   onMilestone,
   onShip,
   onReleaseShelved,
+  onArcballMatch,
   workPulses = [],
   clockDay = 0,
   clockPhase = 0,
@@ -152,11 +154,12 @@ export default function Office({
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
   onReleaseShelved: (projectId: string) => void;
+  onArcballMatch: (fixtureId: string) => void;
   workPulses?: import("../engine/state").DeskPulse[];
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion">(null);
+  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion" | "arcball">(null);
   const [fcOpen, setFcOpen] = useState(false);
   const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
   const [tutorial, setTutorial] = useState<TutorialId | null>(null);
@@ -521,6 +524,7 @@ export default function Office({
             {nextOffice && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("relocate")}><Building2 size={16} className="text-cyanx"/><span className="text-xs font-bold">MOVE STUDIO</span></button>}
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("awards")}><Award size={16} className="text-gold"/><span className="text-xs font-bold">AWARDS</span></button>
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("rivals")}><Swords size={16} className="text-cyanx"/><span className="text-xs font-bold">RIVALS</span></button>
+            {run.officeLevel >= 1 && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("arcball")}><Trophy size={16} className="text-cyanx"/><span className="text-xs font-bold">ARCBALL</span></button>}
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("hof")}><Trophy size={16} className="text-gold"/><span className="text-xs font-bold">RECORDS</span></button>
             {run.dynasty && <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("dynasty")}><Crown size={16} className="text-gold"/><span className="text-xs font-bold">DYNASTY</span></button>}
           </div>
@@ -600,6 +604,12 @@ export default function Office({
       )}
 
       {/* ------------------------------------------------------ FACILITIES */}
+      {modal === "arcball" && (
+        <Modal title="ARCBALL" onClose={() => setModal(null)}>
+          <ArcballPanel run={run} setRun={setRun} onMatch={(fixtureId) => { setModal(null); onArcballMatch(fixtureId); }} />
+        </Modal>
+      )}
+
       {modal === "market" && (
         <Modal title="THE MARKET" onClose={() => setModal(null)}>
           <MarketPanel
