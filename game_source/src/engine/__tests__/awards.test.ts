@@ -180,7 +180,7 @@ describe("ceremony judging", () => {
     /* aoty + fanfav + 3 craft = 5 categories (no shojo field, shonen eligible) */
     const win = c.playerWins.find((w) => w.category === "aoty")!;
     expect(win.cash).toBe(20_000);
-    expect(win.fans).toBe(60_000);
+    expect(win.fans).toBe(15_000);
   });
 });
 
@@ -281,7 +281,7 @@ describe("ceremony integration", () => {
     const c = buildCeremony(year, shows);
     /* Sweep wins everything it can: aoty + shonen + 3 craft + fanfav */
     const expectedCash = 20_000 + 12_500 + 3 * 5_000 + 5_000;
-    const expectedFans = 60_000 + 40_000 + 3 * 30_000 + 45_000;
+    const expectedFans = 15_000 + 8_000 + 3 * 5_000 + 10_000;
     expect(c.playerCash).toBe(expectedCash);
     expect(c.playerFans).toBe(expectedFans);
     expect(expectedCash).not.toBe(25_000 * c.playerAwards);
