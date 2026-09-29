@@ -19,6 +19,13 @@ export type EntryKind =
   | "reboot"
   | "crossover";
 
+export interface FranchiseEntryAward {
+  year: number;
+  category: string;
+  name: string;
+  fans: number;
+}
+
 /** one release in an IP's timeline */
 export interface FranchiseEntry {
   kind: EntryKind;
@@ -26,6 +33,11 @@ export interface FranchiseEntry {
   score: number; // /40
   revenue: number; // the studio's net take
   fans: number;
+  /** stable project identity so later awards can credit the exact release */
+  sourceId?: string | null;
+  /** portion of this entry's fans earned after release through awards */
+  awardFans?: number;
+  awards?: FranchiseEntryAward[];
   week: number;
   animeType?: AnimeType;
   /** what the fans expected going in (continuations only) */
@@ -181,6 +193,42 @@ export function merchValueOf(fr: Franchise): number {
   const cultF = fr.cult ? 1.25 : 1;
   const bigThreeF = fr.bigThree ? 1.6 : 1;
   return Math.round((base * zeitgeistF * charF * cultF * bigThreeF) / 1_000) * 1_000;
+}
+
+/** Credit an award's audience to the exact winning release and its parent franchise.
+ *  Existing saves without source ids fall back to the newest matching title. */
+export function creditFranchiseAward(
+  fr: Franchise,
+  sourceId: string | null | undefined,
+  title: string,
+  award: FranchiseEntryAward
+): Franchise {
+  const bySource = sourceId ? fr.entries.findIndex((entry) => entry.sourceId === sourceId) : -1;
+  const byTitle = [...fr.entries].map((entry, index) => ({ entry, index })).reverse().find(({ entry }) => entry.title === title)?.index ?? -1;
+  const index = bySource >= 0 ? bySource : byTitle;
+  if (index < 0 || award.fans <= 0) return fr;
+
+  const current = fr.entries[index];
+  const existingAwards = current.awards ?? [];
+  if (existingAwards.some((row) => row.year === award.year && row.category === award.category)) return fr;
+
+  const entries = fr.entries.map((entry, entryIndex) =>
+    entryIndex === index
+      ? {
+          ...entry,
+          fans: entry.fans + award.fans,
+          awardFans: (entry.awardFans ?? 0) + award.fans,
+          awards: [...existingAwards, award],
+        }
+      : entry
+  );
+  const next: Franchise = {
+    ...fr,
+    entries,
+    lifetimeFans: fr.lifetimeFans + award.fans,
+  };
+  next.merchValue = merchValueOf(next);
+  return next;
 }
 
 /* ======================================================== continuations */
@@ -442,7 +490,7 @@ export function createFranchise(
   key: string,
   d: Draft,
   seed: CastSeed,
-  result: { total: number; revenue: number; fans: number; hallOfFame: boolean },
+  result: { total: number; revenue: number; fans: number; hallOfFame: boolean; sourceId?: string | null },
   week: number,
   spunFrom?: string
 ): Franchise {
@@ -461,6 +509,7 @@ export function createFranchise(
         score: result.total,
         revenue: result.revenue,
         fans: result.fans,
+        sourceId: result.sourceId ?? null,
         week,
         animeType: d.animeType,
         hallOfFame: result.hallOfFame,
@@ -495,7 +544,7 @@ export function createFranchise(
 export function recordContinuation(
   fr: Franchise,
   d: Draft,
-  result: { total: number; revenue: number; fans: number; hallOfFame: boolean },
+  result: { total: number; revenue: number; fans: number; hallOfFame: boolean; sourceId?: string | null },
   week: number,
   opts?: { fatigueAdd?: number; fatigueMult?: number }
 ): { franchise: Franchise; verdict: ExpectationVerdict } {
@@ -547,6 +596,7 @@ export function recordContinuation(
         score: result.total,
         revenue: result.revenue,
         fans,
+        sourceId: result.sourceId ?? null,
         week,
         animeType: d.animeType,
         expected: verdict.expected,

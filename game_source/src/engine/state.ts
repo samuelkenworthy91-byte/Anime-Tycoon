@@ -131,6 +131,7 @@ import {
   continuationBlock,
   continuationDef,
   createFranchise,
+  creditFranchiseAward,
   SEQUEL_SCORE_THRESHOLD,
   franchiseBoost,
   MERCH_COOLDOWN,
@@ -1615,6 +1616,23 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       if (ceremony.playerAwards > 0) {
         cash += ceremony.playerCash;
         fans += ceremony.playerFans;
+        /* Award attention belongs to the anime that earned it as well as the studio.
+           Credit each category separately so multi-award sweeps accumulate on the exact release. */
+        for (const cat of ceremony.categories) {
+          if (!cat.winner.player) continue;
+          const draft = cat.winner.draft;
+          const franchiseKey = draft?.continuation === "spinoff"
+            ? cat.winner.title
+            : (draft?.franchiseKey ?? cat.winner.title);
+          const franchise = franchises[franchiseKey];
+          if (!franchise) continue;
+          franchises[franchiseKey] = creditFranchiseAward(
+            franchise,
+            cat.winner.sourceId,
+            cat.winner.title,
+            { year, category: cat.id, name: cat.name, fans: cat.payout.fans }
+          );
+        }
         notices.push(
           `🏆 ${r.studio} takes ${ceremony.playerAwards} award${ceremony.playerAwards > 1 ? "s" : ""} at the London Anime Awards (+£${ceremony.playerCash.toLocaleString("en-GB")}, +${ceremony.playerFans.toLocaleString("en-GB")} fans)!`
         );
@@ -3375,6 +3393,7 @@ export function releaseProject(
     revenue: result.revenue,
     fans: result.fans,
     hallOfFame: result.hallOfFame,
+    sourceId: projectId,
   };
   const castSeed = {
     protag: draft.protag,

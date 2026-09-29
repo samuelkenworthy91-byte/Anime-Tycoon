@@ -66,17 +66,17 @@ describe("the London Anime Awards — category set", () => {
   it("pays out exactly the tiered prizes — no flat £25k anywhere", () => {
     const by = Object.fromEntries(AWARD_CATEGORIES.map((c) => [c.id, c]));
     expect(by.aoty.cash).toBe(20_000);
-    expect(by.aoty.fans).toBe(60_000);
+    expect(by.aoty.fans).toBe(15_000);
     expect(by.shonen.cash).toBe(12_500);
-    expect(by.shonen.fans).toBe(40_000);
+    expect(by.shonen.fans).toBe(8_000);
     expect(by.shojo.cash).toBe(12_500);
-    expect(by.shojo.fans).toBe(40_000);
+    expect(by.shojo.fans).toBe(8_000);
     for (const id of ["writing", "animation", "score"] as const) {
       expect(by[id].cash).toBe(5_000);
-      expect(by[id].fans).toBe(30_000);
+      expect(by[id].fans).toBe(5_000);
     }
     expect(by.fanfav.cash).toBe(5_000);
-    expect(by.fanfav.fans).toBe(45_000);
+    expect(by.fanfav.fans).toBe(10_000);
     expect(AWARD_CATEGORIES.some((c) => c.cash === 25_000)).toBe(false);
   });
 
@@ -84,8 +84,11 @@ describe("the London Anime Awards — category set", () => {
     const aoty = AWARD_CATEGORIES.find((c) => c.id === "aoty")!;
     expect(awardQualifies("aoty", 1, mk({ score: 27 }))).toBe(true);
     expect(awardQualifies("aoty", 9, mk({ score: 29 }))).toBe(false);
-    expect(awardPayoutFor(aoty, 1)).toEqual({ cash: 20_000, fans: 60_000 });
+    expect(awardPayoutFor(aoty, 1)).toEqual({ cash: 20_000, fans: 15_000 });
     expect(awardPayoutFor(aoty, 10).cash).toBeGreaterThan(20_000);
+    expect(awardPayoutFor(aoty, 10).fans).toBe(Math.round(15_000 * Math.pow(1.10, 9)));
+    expect(awardPayoutFor(aoty, 25).fans).toBe(Math.round(15_000 * Math.pow(1.10, 24)));
+    expect(awardPayoutFor(aoty, 40).fans).toBe(awardPayoutFor(aoty, 25).fans);
   });
 
   it("presents Anime of the Year LAST as the super-finale", () => {

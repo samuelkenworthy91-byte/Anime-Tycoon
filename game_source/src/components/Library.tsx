@@ -439,9 +439,16 @@ export default function LibraryPanel({
                   <div className="text-[9px] text-paper/45">
                     {KIND_LABEL[e.kind]} · {dateLabel(e.week)}
                     {e.revenue > 0 && ` · ${formatGBPShort(e.revenue)}`}
+                    {` · ${e.fans.toLocaleString("en-GB")} fans`}
+                    {(e.awardFans ?? 0) > 0 && ` · +${(e.awardFans ?? 0).toLocaleString("en-GB")} from awards`}
                     {e.expected !== undefined && ` · fans expected ${e.expected}/40`}
                     {e.disappointment && <span className="text-red-300"> · fans disappointed</span>}
                   </div>
+                  {!!e.awards?.length && (
+                    <div className="mt-0.5 text-[8px] font-bold text-gold/80">
+                      {e.awards.map((award) => `🏆 ${award.name} (Y${award.year}, +${award.fans.toLocaleString("en-GB")})`).join(" · ")}
+                    </div>
+                  )}
                 </div>
                 <div
                   className={cn(

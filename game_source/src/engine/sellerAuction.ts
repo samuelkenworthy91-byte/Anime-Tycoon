@@ -35,13 +35,29 @@ const rngFrom = (seed: string) => {
 };
 const round25 = (n: number) => Math.max(25_000, Math.round(n / 25_000) * 25_000);
 
+/** Audience has diminishing marginal sale value: early proof matters most, blockbuster scale still helps without becoming a cash printer. */
+export function franchiseFanAppraisal(fans: number): number {
+  let remaining = Math.max(0, fans);
+  let value = 0;
+  const take = (size: number, rate: number) => {
+    const band = Math.min(remaining, size);
+    value += band * rate;
+    remaining -= band;
+  };
+  take(100_000, 42);
+  take(400_000, 20);
+  take(500_000, 10);
+  if (remaining > 0) value += remaining * 5;
+  return value;
+}
+
 export function franchiseFairAppraisal(fr: Franchise): number {
   const hof = fr.entries.some((e) => e.hallOfFame) ? 500_000 : 0;
   const momentum = fr.entries.slice(-2).reduce((sum, e) => sum + Math.max(0, e.score - 20) * 18_000, 0);
   return round25(Math.max(
     300_000,
     fr.totalRevenue * 0.48 +
-    fr.lifetimeFans * 42 +
+    franchiseFanAppraisal(fr.lifetimeFans) +
     fr.bestScore * 28_000 +
     fr.popularity * 11_000 +
     fr.merchValue * 0.22 +

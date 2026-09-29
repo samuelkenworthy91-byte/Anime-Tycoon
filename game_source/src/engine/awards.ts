@@ -265,9 +265,14 @@ export function awardQualifies(id: AwardCategoryId, year: number, n: AwardNomine
   return n.score >= 18 + era && n.audience >= [3_000, 8_000, 20_000, 40_000][era];
 }
 
+export const AWARD_FAN_GROWTH_RATE = 1.10;
+/** The formal career is 25 years; sandbox awards stay at the Year-25 audience scale instead of compounding forever. */
+export const AWARD_FAN_GROWTH_CAREER_YEARS = 25;
+
 export function awardPayoutFor(def: AwardCategoryDef, year: number): { cash: number; fans: number } {
   const cashMult = Math.min(6, 1 + Math.max(0, year - 1) * 0.45);
-  const fanMult = Math.min(1.35, 1 + Math.max(0, year - 1) * 0.03);
+  const fanYear = Math.min(AWARD_FAN_GROWTH_CAREER_YEARS, Math.max(1, year));
+  const fanMult = Math.pow(AWARD_FAN_GROWTH_RATE, fanYear - 1);
   return { cash: Math.round(def.cash * cashMult), fans: Math.round(def.fans * fanMult) };
 }
 
@@ -278,7 +283,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The show that defined the year. The industry's highest honour.",
     tier: 3,
     cash: 20_000,
-    fans: 60_000,
+    fans: 15_000,
     eligible: () => true,
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -289,7 +294,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The finest shonen production of the year.",
     tier: 2,
     cash: 12_500,
-    fans: 40_000,
+    fans: 8_000,
     eligible: (n) => n.animeType === "shonen",
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -300,7 +305,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "The finest shojo production of the year.",
     tier: 2,
     cash: 12_500,
-    fans: 40_000,
+    fans: 8_000,
     eligible: (n) => n.animeType === "shojo",
     metric: (n) => n.score,
     metricLabel: (n) => `${n.score}/40`,
@@ -311,7 +316,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Story craft: structure, character, dialogue and pay-off.",
     tier: 1,
     cash: 5_000,
-    fans: 30_000,
+    fans: 5_000,
     eligible: () => true,
     metric: (n) => n.story,
     metricLabel: (n) => `Writing ${Math.round(n.story)}`,
@@ -322,7 +327,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Visual craft: art direction, sakuga, consistency and polish.",
     tier: 1,
     cash: 5_000,
-    fans: 30_000,
+    fans: 5_000,
     eligible: () => true,
     metric: (n) => n.art,
     metricLabel: (n) => `Animation ${Math.round(n.art)}`,
@@ -333,7 +338,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Music: composition, sound design, voice and theme.",
     tier: 1,
     cash: 5_000,
-    fans: 30_000,
+    fans: 5_000,
     eligible: () => true,
     metric: (n) => n.sound,
     metricLabel: (n) => `Score ${Math.round(n.sound)}`,
@@ -344,7 +349,7 @@ export const AWARD_CATEGORIES: AwardCategoryDef[] = [
     blurb: "Audience, fandom and reach — the crowd's own award.",
     tier: 1,
     cash: 5_000,
-    fans: 45_000,
+    fans: 10_000,
     eligible: () => true,
     metric: (n) => n.audience,
     metricLabel: (n) => `${fansShort(n.audience)} fans`,
