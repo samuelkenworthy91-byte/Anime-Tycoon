@@ -63,8 +63,9 @@ import { appointCreativeLead, expansionOf } from "./engine/studioExpansion";
 import { contractQuickPicks } from "./engine/contractQuickPick";
 import { createNewGamePlusRun } from "./engine/newGamePlus";
 import type { Showrunner } from "./engine/data";
+import ArcballMatch from "./components/ArcballMatch";
 
-type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction";
+type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction" | "arcball";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("title");
@@ -82,6 +83,7 @@ export default function App() {
   const [contPlan, setContPlan] = useState<ContinuationPlan | null>(null);
   const [licensedIpId, setLicensedIpId] = useState<string | null>(null);
   const [auctionId, setAuctionId] = useState<string | null>(null);
+  const [arcballFixtureId, setArcballFixtureId] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12 | 30>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
@@ -737,6 +739,7 @@ export default function App() {
             onMilestone={openMilestone}
             onShip={openShip}
             onReleaseShelved={openShip}
+            onArcballMatch={(fixtureId) => { setArcballFixtureId(fixtureId); setTimeSpeed(0); setScreen("arcball"); }}
             workPulses={workPulses}
             clockDay={clockDay}
             clockPhase={clockPhase}
@@ -809,6 +812,14 @@ export default function App() {
         )}
         {screen === "auction" && run && auctionId && (
           <AuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} auctionId={auctionId} onDone={() => { setAuctionId(null); setScreen("office"); }} />
+        )}
+        {screen === "arcball" && run && arcballFixtureId && (
+          <ArcballMatch
+            run={run}
+            setRun={(fn) => setRun((r) => (r ? fn(r) : r))}
+            fixtureId={arcballFixtureId}
+            onDone={() => { setArcballFixtureId(null); setScreen("office"); }}
+          />
         )}
         {screen === "awards" && run?.awardsCeremony && (
           <AwardsCeremony
