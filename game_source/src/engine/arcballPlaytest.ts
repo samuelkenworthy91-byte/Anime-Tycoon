@@ -21,7 +21,7 @@ const CURATED = [
   { id: "arcball_playtest_346", name: "Aiko Chen", role: "animator" as StaffRole, story: 52, art: 86, sound: 44, potential: 91 },
   { id: "arcball_playtest_344", name: "Ren Park", role: "composer" as StaffRole,  story: 42, art: 37, sound: 82, potential: 88 },
   /* Deliberately poor production worker / excellent current Arcball striker. */
-  { id: "arcball_playtest_46",  name: "Danny Kim", role: "writer" as StaffRole,   story: 24, art: 19, sound: 21, potential: 38 },
+  { id: "arcball_playtest_860", name: "Danny Kim", role: "writer" as StaffRole,   story: 24, art: 19, sound: 21, potential: 38 },
   { id: "arcball_playtest_311", name: "Mika Ito", role: "composer" as StaffRole, story: 39, art: 34, sound: 59, potential: 57 },
   { id: "arcball_playtest_302", name: "Tom Hughes", role: "writer" as StaffRole,  story: 67, art: 31, sound: 29, potential: 74 },
 ] as const;
