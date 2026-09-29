@@ -84,6 +84,7 @@ import { showrunnerStats } from "../engine/studioOps";
 import { SHOWRUNNER_XP_LEVELS, showrunnerLevelTitle } from "../engine/showrunnerCareer";
 import { over9000Charge } from "../engine/showrunnerPerks";
 import { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
+import { arcballPotentialLabel, arcballProfile, arcballStateOf } from "../engine/arcball";
 import { formalizeMentorship, relationshipRecord } from "../engine/staffRelationships";
 
 const BOND_LABEL: Record<BondKind, string> = {
@@ -145,6 +146,7 @@ function CandidateSheet({ candidate, canHire, research, onHire, onClose }: { can
   useEffect(() => { setHireName(candidate?.name ?? ""); }, [candidate?.id]);
   if (!candidate) return null;
   const spec = specDef(candidate.spec);
+  const arcProfile = arcballProfile(candidate);
   const rows = GENRES.map((g) => {
     const familiarity = genreFamiliarity(candidate, g.id);
     const shipped = genreShows(candidate, g.id);
@@ -162,7 +164,8 @@ function CandidateSheet({ candidate, canHire, research, onHire, onClose }: { can
           <button onClick={onClose} className="btn-press p-1 text-paper/40"><X size={17}/></button>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">{(["story","art","sound"] as PointType[]).map((t) => <div key={t} className="rounded-lg border border-line bg-panel2/70 p-2 text-center"><div className="text-[8px] font-bold text-paper/45">{t.toUpperCase()}</div><div className="font-display text-xl font-extrabold" style={{color:POINT_COLOR[t]}}>{Math.round(candidate[t])}</div></div>)}</div>
-        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}{canSeeCandidatePotential(research) ? <div className="mt-2 text-[9px] font-bold text-gold">POTENTIAL OUTLOOK · {potentialLabel(candidate)}</div> : <div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Unlock Talent Scouting to assess candidates before signing.</div>}</div>
+        <div className="mt-3 rounded-xl border border-line bg-panel2/60 p-3"><div className="text-[9px] font-extrabold tracking-widest text-viol">MECHANICAL QUALITIES</div>{spec && <div className="mt-1 text-[10px]"><b className="text-viol">★ {spec.name}:</b> <span className="text-paper/65">{specLabel(spec)}</span></div>}{(candidate.traits ?? []).map((id) => { const t=traitDef(id); if(!t) return null; return <div key={id} className="mt-1 text-[10px]"><b className={t.good?"text-mint":"text-neon2"}>{t.name}:</b> <span className="text-paper/65">{t.desc}{id==="fanatic" && candidate.favGenre ? ` · favourite: ${GENRES.find((g)=>g.id===candidate.favGenre)?.label ?? candidate.favGenre}` : ""}</span></div>; })}{canSeeCandidatePotential(research) ? <div className="mt-2 text-[9px] font-bold text-gold">POTENTIAL OUTLOOK · {potentialLabel(candidate)}</div> : <div className="mt-2 text-[9px] italic text-paper/40">Long-term Potential is hidden. Unlock Talent Scouting to assess candidates before signing.</div>}
+        <div className="mt-2 border-t border-line/60 pt-2 text-[9px]"><b className="text-cyanx">ARCBALL:</b> {arcProfile.bestPosition.toUpperCase()} · current {arcProfile.overall} · {canSeeCandidatePotential(research) ? "potential " + arcballPotentialLabel(arcProfile.potential) : "potential unknown"}. Arcball talent is independent of production craft.</div></div>
         <div className="mt-3"><div className="text-[9px] font-extrabold tracking-widest text-paper/45">GENRE READINESS · PERSONAL OUTPUT MODIFIER</div><div className="mt-1 grid gap-1.5 sm:grid-cols-2">{rows.map(({g,familiarity,shipped,mult,preferred}) => <div key={g.id} className="flex items-center rounded-lg border border-line bg-panel2/50 px-2 py-1.5 text-[9px]"><span className="font-bold">{g.label}</span>{preferred && <span className="ml-1 text-[7px] font-extrabold text-viol">{preferred}</span>}<span className={cn("ml-auto font-extrabold",mult<1?"text-neon":mult>1?"text-mint":"text-paper/70")}>{genreExperienceLabel(familiarity)} ×{mult.toFixed(2)}</span><span className="ml-1 text-paper/30">· {shipped} shipped</span></div>)}</div></div>
         <div className="mt-3 rounded-xl border border-cyanx/35 bg-cyanx/5 p-3"><div className="text-[9px] font-extrabold tracking-widest text-cyanx">SIGNING NAME</div><div className="mt-1 flex gap-2"><input value={hireName} onChange={(e)=>setHireName(e.target.value.slice(0,48))} className="ink-input min-w-0 flex-1 px-3 py-2 text-sm font-bold" aria-label="Staff name"/><Btn variant="ghost" onClick={()=>setHireName(randomStaffName(Math.random, candidate.gender ?? workerLookNameGender(candidate.look)))} aria-label="Randomise staff name"><Dices size={15}/></Btn></div><div className="mt-1 text-[8px] text-paper/40">Rename them now or keep the generated name. This does not change their abilities, portrait or hidden Potential.</div></div>
         <Btn big variant="cyan" className="mt-4 w-full" disabled={!canHire || !cleanName} onClick={() => onHire({ ...candidate, name: cleanName })}>{canHire ? `SIGN ${cleanName || candidate.name} · ${formatGBP(candidate.cost)}` : "CANNOT HIRE"}</Btn>
@@ -173,6 +176,7 @@ function CandidateSheet({ candidate, canHire, research, onHire, onClose }: { can
 
 /* ---------------------------------------------------------- staff card */
 function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (r: RunState) => RunState) => void }) {
+  const arcProfile = arcballProfile(s, arcballStateOf(run).players[s.id]);
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const proj = projectOfStaff(run.projects, s.id);
@@ -265,6 +269,7 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
       </div>
 
       {canSeeEmployeePotential(run.research) && <div className="mt-1.5 rounded-lg border border-gold/30 bg-gold/5 px-2 py-1 text-[9px] font-bold text-gold">POTENTIAL · {potentialLabel(s)}</div>}
+      {run.officeLevel >= 1 && <div className="mt-1 rounded-lg border border-cyanx/25 bg-cyanx/5 px-2 py-1 text-[9px] font-bold text-cyanx">ARCBALL · {arcProfile.bestPosition.toUpperCase()} · {arcProfile.overall} · {canSeeEmployeePotential(run.research) ? arcballPotentialLabel(arcProfile.potential).toUpperCase() + " POTENTIAL" : "POTENTIAL UNKNOWN"}</div>}
 
       {/* spec + traits (always visible — this is who they are) */}
       <div className="mt-1.5 flex flex-wrap gap-1">
@@ -607,6 +612,7 @@ export default function CrewPanel({
                       <div className={cn("mt-0.5 text-[8px] font-extrabold tracking-wider", canSeeCandidatePotential(run.research) ? "text-gold" : "text-paper/35")}>
                         POTENTIAL · {canSeeCandidatePotential(run.research) ? potentialLabel(c).toUpperCase() : "UNKNOWN"}
                       </div>
+                      {run.officeLevel >= 1 && <div className="mt-0.5 text-[8px] font-extrabold tracking-wider text-cyanx">ARCBALL · {arcballProfile(c).bestPosition.toUpperCase()} {arcballProfile(c).overall} · {canSeeCandidatePotential(run.research) ? arcballPotentialLabel(arcballProfile(c).potential).toUpperCase() : "POT ?"}</div>}
                     </div>
                     <Btn
                       variant="cyan"
