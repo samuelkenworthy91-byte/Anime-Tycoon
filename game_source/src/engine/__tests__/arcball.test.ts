@@ -12,6 +12,7 @@ import {
 } from "../arcball";
 import { initialRun, migrateRun, type RunState } from "../state";
 import type { Franchise } from "../franchise";
+import { createArcballPlaytestRun } from "../arcballPlaytest";
 
 function staffedRun(): RunState {
   const run = initialRun("Arc Test", "steady");
@@ -133,5 +134,21 @@ describe("Arcball", () => {
     const migrated = migrateRun(raw);
     expect(arcballStateOf(migrated).version).toBe(1);
     expect(migrated.staff).toHaveLength(5);
+  });
+
+  it("ships the dedicated playtest seed with Arcball ready and every reward tier testable", () => {
+    const run = createArcballPlaytestRun();
+    const state = arcballStateOf(run);
+    expect(run.officeLevel).toBe(1);
+    expect(run.staff).toHaveLength(7);
+    expect(state.unlocked).toBe(true);
+    expect(arcballReady(run)).toBe(true);
+    expect(playableArcballFixture(run)).not.toBeNull();
+    expect(state.tokens).toBeGreaterThanOrEqual(150);
+    expect(state.championshipSpotlights).toBeGreaterThanOrEqual(1);
+    expect(run.franchises["Neon Strikers"]).toBeTruthy();
+    const danny = run.staff.find((staff) => staff.name === "Danny Kim")!;
+    expect(Math.max(danny.story, danny.art, danny.sound)).toBeLessThan(30);
+    expect(arcballProfile(danny).overall).toBeGreaterThanOrEqual(75);
   });
 });
