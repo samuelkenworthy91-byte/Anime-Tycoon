@@ -4,7 +4,7 @@ android {
     namespace = "com.kirameki.studio"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.kirameki.studio"
+        applicationId "com.kirameki.arcballplaytest"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
