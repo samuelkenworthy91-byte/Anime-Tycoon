@@ -8,6 +8,7 @@ import {
   arcballStateOf,
   buildArcballFixtures,
   instantResolveArcballFixture,
+  playableArcballFixture,
   redeemArcballMedal,
 } from "../arcball";
 import { initialRun, migrateRun, type RunState } from "../state";
