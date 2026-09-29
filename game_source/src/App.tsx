@@ -30,7 +30,7 @@ import { ipById } from "./engine/ip";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
-import { clearAllSaves, loadSlot, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import { clearAllSaves, loadSlot, newestSave, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
@@ -64,6 +64,7 @@ import { contractQuickPicks } from "./engine/contractQuickPick";
 import { createNewGamePlusRun } from "./engine/newGamePlus";
 import type { Showrunner } from "./engine/data";
 import ArcballMatch from "./components/ArcballMatch";
+import { createArcballPlaytestRun } from "./engine/arcballPlaytest";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction" | "arcball";
 
@@ -301,6 +302,54 @@ export default function App() {
     /* a save parked exactly at the career end re-opens the retrospective */
     setScreen(resumed.week >= MAX_WEEKS && !resumed.dynasty ? "retrospective" : "office");
   }, []);
+
+  /* Dedicated branch playtest boot. This APK has its own Android application
+     id, so its autosave is isolated from the ordinary Anime Runner install.
+     First launch creates the curated Arcball save; later launches resume it. */
+  const arcballPlaytestBooted = useRef(false);
+  useEffect(() => {
+    if (arcballPlaytestBooted.current) return;
+    arcballPlaytestBooted.current = true;
+    const existing = newestSave();
+    if (existing) {
+      loadRun(existing.id);
+      setTimeSpeed(0);
+      return;
+    }
+
+    const seeded = createArcballPlaytestRun();
+    const playtestMeta = { studio: seeded.studio, showrunner: seeded.showrunner };
+    const playtestSave: SaveData = {
+      run: seeded,
+      meta: playtestMeta,
+      clock: { day: 0, phase: 0, acc: 0, dayCount: 0 },
+      summary: {
+        studio: seeded.studio,
+        week: seeded.week,
+        cash: seeded.cash,
+        fans: seeded.fans,
+        shows: seeded.showsMade,
+        officeLevel: seeded.officeLevel,
+      },
+    };
+    saveSlot("auto", playtestSave);
+    setMeta(playtestMeta);
+    setRun(seeded);
+    setReleased(null);
+    setFocus(null);
+    setShipId(null);
+    setContract(null);
+    setContPlan(null);
+    setPaused(false);
+    setTimeSpeed(0);
+    setSavePicker(false);
+    seenCeremonyYear.current = seeded.awardsCeremony?.year ?? 0;
+    dayAccRef.current = 0;
+    dayCountRef.current = 0;
+    setClockDay(0);
+    setClockPhase(0);
+    setScreen("office");
+  }, [loadRun]);
 
   const startRun = useCallback((studio: string, showrunner: string) => {
     primeAudio();
