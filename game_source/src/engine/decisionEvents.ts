@@ -23,6 +23,8 @@ export interface DecisionModifier {
   genres?: GenreId[];
   audience?: AudienceId;
   medium?: MediumId;
+  /** optional franchise target used by Arcball Championship Spotlight */
+  franchiseKey?: string;
 }
 
 export type DecisionEffect =
@@ -750,6 +752,10 @@ export function modifierMatchesDraft(m: DecisionModifier, d: Draft, week: number
   if (m.expiresWeek < week || m.uses <= 0) return false;
   if (m.medium && m.medium !== d.medium) return false;
   if (m.audience && m.audience !== d.audience) return false;
+  if (m.franchiseKey) {
+    const draftFranchiseKey = d.continuation === "spinoff" ? d.title : (d.franchiseKey ?? d.title);
+    if (draftFranchiseKey !== m.franchiseKey) return false;
+  }
   if (m.genres?.length) {
     const have = new Set(d.genres);
     if (!m.genres.every((g) => have.has(g))) return false;
@@ -781,9 +787,9 @@ export function decisionResearchSpeedMult(run: Pick<RunState, "decisionModifiers
     .reduce((a, m) => a * (m.mult ?? 1), 1);
 }
 
-export function decisionMerchMult(run: Pick<RunState, "decisionModifiers" | "week">): number {
+export function decisionMerchMult(run: Pick<RunState, "decisionModifiers" | "week">, franchiseKey?: string): number {
   return (run.decisionModifiers ?? [])
-    .filter((m) => m.kind === "merch" && m.expiresWeek >= run.week && m.uses > 0)
+    .filter((m) => m.kind === "merch" && m.expiresWeek >= run.week && m.uses > 0 && (!m.franchiseKey || m.franchiseKey === franchiseKey))
     .reduce((a, m) => a * (m.mult ?? 1), 1);
 }
 
