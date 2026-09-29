@@ -69,6 +69,8 @@ jobs:
         run: |
           if [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Final-Playtest.apk
+          elif [ "$GITHUB_REF_NAME" = "arcball-v1" ]; then
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Arcball-Playtest.apk
           else
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
           fi
@@ -80,6 +82,21 @@ jobs:
           path: Anime-Runner-*-Playtest.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish direct GitHub Arcball APK
+        if: github.ref == 'refs/heads/arcball-v1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG='arcball-playtest'
+          APK='Anime-Runner-Arcball-Playtest.apk'
+          BUILT_SHA="$(git rev-parse HEAD)"
+          gh release delete "$TAG" --cleanup-tag -y || true
+          gh release create "$TAG" \
+            "$APK" \
+            --target "$BUILT_SHA" \
+            --title 'Anime Runner — Arcball Playtest' \
+            --notes "Dedicated Arcball Android playtest. Separate app id; includes an isolated seeded save with Arcball unlocked, a due fixture, 180 Arc Tokens, seven workers and a Championship Spotlight."
 
       - name: Publish direct GitHub main APK
         if: github.ref == 'refs/heads/main'
