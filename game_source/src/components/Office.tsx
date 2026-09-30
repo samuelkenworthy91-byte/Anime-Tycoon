@@ -174,9 +174,13 @@ export default function Office({
   const newShowBlocked = startBlockReason(run);
   /* projects needing the player: a milestone to play or a release decision */
   const projAlerts = run.projects.filter((p) => (p.milestone && !p.rush) || p.stage === "ready").length;
-  const roomsUsed = slotsUsed(run.facilities);
+  const facilities = run.facilities ?? {};
+  const roomsUsed = slotsUsed(facilities);
   /* rooms drawn as glowing door signs inside the office scene */
-  const builtRooms = FACILITY_DEFS.filter((d) => (run.facilities[d.id] ?? 0) > 0);
+  const builtRooms = FACILITY_DEFS.filter((d) => {
+    const tier = facilities[d.id];
+    return typeof tier === "number" && Number.isFinite(tier) && tier > 0;
+  });
 
   useEffect(() => {
     if (tutorial) return;
@@ -259,7 +263,7 @@ export default function Office({
       {builtRooms.length > 0 && (
         <div className="pointer-events-none absolute right-[3%] top-[16%] z-10 hidden flex-col items-end gap-1 sm:flex">
           {builtRooms.slice(0, 6).map((d) => {
-            const tier = run.facilities[d.id] ?? 1;
+            const tier = facilities[d.id] ?? 1;
             return (
               <div
                 key={d.id}
