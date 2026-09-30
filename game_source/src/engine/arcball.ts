@@ -1715,7 +1715,10 @@ export function advanceArcballWeek(run: RunState): RunState {
     state = honourResult.state;
     const notices = [...out.notices, ...honourResult.notices];
     let sponsorBonus = 0;
-    if (endingSponsor && last) sponsorBonus = last.title ? endingSponsor.title : last.position <= 3 ? endingSponsor.top3 : 0;
+    if (endingSponsor && last) {
+      const baseSponsorBonus = last.title ? endingSponsor.title : last.position <= 3 ? endingSponsor.top3 : 0;
+      sponsorBonus = Math.round(baseSponsorBonus * arcballClubEffects(state).commercialMult);
+    }
     if (sponsorBonus) {
       out = { ...out, cash: out.cash + sponsorBonus, incomeThisWeek: (out.incomeThisWeek ?? 0) + sponsorBonus };
       notices.push("🤝 " + endingSponsor.name + " season objective paid +" + sponsorBonus.toLocaleString("en-GB") + ".");
