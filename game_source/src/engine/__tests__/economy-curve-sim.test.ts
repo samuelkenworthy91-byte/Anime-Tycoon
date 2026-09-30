@@ -328,13 +328,17 @@ function percentile(values: number[], p: number) {
 const median = (values: number[]) => percentile(values, .5);
 
 const simDescribe = process.env.ECONOMY_CURVE_SIM === "1" ? describe : describe.skip;
+const requestedRunner = process.env.ECONOMY_SHOWRUNNER;
+const activeRunners = requestedRunner && RUNNERS.includes(requestedRunner as (typeof RUNNERS)[number])
+  ? [requestedRunner as (typeof RUNNERS)[number]]
+  : [...RUNNERS];
 
 simDescribe("25-year competent-player economy curve", () => {
-  it("runs three contrasting showrunners across ten deterministic careers each", () => {
+  it("runs ten deterministic careers for each requested showrunner", () => {
     const careers: CurveResult[] = [];
-    for (const showrunner of RUNNERS) for (const seed of SEEDS) careers.push(playCareer(showrunner, seed));
+    for (const showrunner of activeRunners) for (const seed of SEEDS) careers.push(playCareer(showrunner, seed));
 
-    const summary = RUNNERS.map((showrunner) => {
+    const summary = activeRunners.map((showrunner) => {
       const rows = careers.filter((row) => row.showrunner === showrunner);
       const yearly = Array.from({ length: YEARS }, (_, index) => {
         const values = rows.map((row) => row.cashByYear[index]);
@@ -381,7 +385,7 @@ simDescribe("25-year competent-player economy curve", () => {
       bestScore: row.bestScore,
     }))));
 
-    expect(careers).toHaveLength(30);
+    expect(careers).toHaveLength(activeRunners.length * 10);
     for (const row of careers) {
       expect(row.cashByYear).toHaveLength(YEARS);
       expect(Number.isFinite(row.finalCash)).toBe(true);
