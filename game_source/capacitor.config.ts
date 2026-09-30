@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.kirameki.arcballplaytest",
-  appName: "Anime Runner Arcball",
+  appId: "com.kirameki.studio",
+  appName: "Anime Runner",
   webDir: "dist",
   android: {
     allowMixedContent: true,
