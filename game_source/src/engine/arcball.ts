@@ -14,7 +14,7 @@ import {
   type Staff,
 } from "./data";
 import { merchValueOf } from "./franchise";
-import type { RivalStudio } from "./rivals";
+import { bumpRivalry, type RivalStudio } from "./rivals";
 import type { RunState } from "./state";
 
 export const ARCBALL_VERSION = 1;
@@ -71,6 +71,14 @@ export interface ArcballPlayerProgress {
   wins: number;
   playerOfMatch: number;
   arcballFans: number;
+  /** Season-only counters reset each new league year; career totals above never reset. */
+  seasonAppearances: number;
+  seasonGoals: number;
+  seasonAssists: number;
+  seasonWins: number;
+  seasonPlayerOfMatch: number;
+  /** −3..+3 short-term confidence/form, earned through real match performance. */
+  form: number;
   lastTrainingWeek?: number;
 }
 
@@ -97,6 +105,16 @@ export interface ArcballSeasonHistory {
   title: boolean;
 }
 
+export type ArcballHonourId = "player_year" | "golden_scorer" | "playmaker" | "guardian" | "team_season";
+export interface ArcballHonour {
+  year: number;
+  id: ArcballHonourId;
+  staffId: string;
+  name: string;
+  productionPerk?: string;
+}
+export type ArcballSponsorId = "local" | "stream" | "prestige";
+
 export interface ArcballState {
   version: 1;
   unlocked: boolean;
@@ -112,6 +130,11 @@ export interface ArcballState {
   championshipSpotlights: number;
   titles: number;
   history: ArcballSeasonHistory[];
+  honours: ArcballHonour[];
+  /** Rival workers persist across seasons instead of being regenerated every match. */
+  rivalRosters: Record<string, ArcballRivalPlayer[]>;
+  sponsor: ArcballSponsorId | null;
+  sponsorYear: number;
 }
 
 declare module "./state" {
@@ -138,6 +161,10 @@ export interface ArcballRivalPlayer {
   look: number;
   position: ArcballPosition;
   rating: number;
+  potential?: number;
+  age?: number;
+  fans?: number;
+  seasons?: number;
 }
 
 export interface ArcballPlayerMatchStat {
@@ -248,7 +275,12 @@ export function arcballPotentialLabel(value: number): string {
 }
 
 function freshProgress(): ArcballPlayerProgress {
-  return { boosts: {}, appearances: 0, goals: 0, assists: 0, wins: 0, playerOfMatch: 0, arcballFans: 0 };
+  return {
+    boosts: {},
+    appearances: 0, goals: 0, assists: 0, wins: 0, playerOfMatch: 0, arcballFans: 0,
+    seasonAppearances: 0, seasonGoals: 0, seasonAssists: 0, seasonWins: 0, seasonPlayerOfMatch: 0,
+    form: 0,
+  };
 }
 
 function yearOfWeek(week: number) {
@@ -300,6 +332,10 @@ export function initialArcballState(week: number): ArcballState {
     championshipSpotlights: 0,
     titles: 0,
     history: [],
+    honours: [],
+    rivalRosters: {},
+    sponsor: null,
+    sponsorYear: 0,
   };
 }
 
@@ -328,6 +364,12 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
         wins: Math.max(0, Math.floor(p.wins ?? 0)),
         playerOfMatch: Math.max(0, Math.floor(p.playerOfMatch ?? 0)),
         arcballFans: Math.max(0, Math.floor(p.arcballFans ?? 0)),
+        seasonAppearances: Math.max(0, Math.floor(p.seasonAppearances ?? 0)),
+        seasonGoals: Math.max(0, Math.floor(p.seasonGoals ?? 0)),
+        seasonAssists: Math.max(0, Math.floor(p.seasonAssists ?? 0)),
+        seasonWins: Math.max(0, Math.floor(p.seasonWins ?? 0)),
+        seasonPlayerOfMatch: Math.max(0, Math.floor(p.seasonPlayerOfMatch ?? 0)),
+        form: clamp(Math.round(p.form ?? 0), -3, 3),
         lastTrainingWeek: typeof p.lastTrainingWeek === "number" ? p.lastTrainingWeek : undefined,
       };
     }
@@ -350,6 +392,12 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
     championshipSpotlights: Math.max(0, Math.floor(r.championshipSpotlights ?? 0)),
     titles: Math.max(0, Math.floor(r.titles ?? 0)),
     history: Array.isArray(r.history) ? r.history.slice(-30).map((h) => ({ ...h })) : [],
+    honours: Array.isArray(r.honours) ? r.honours.slice(-100).map((h) => ({ ...h })) : [],
+    rivalRosters: r.rivalRosters && typeof r.rivalRosters === "object"
+      ? Object.fromEntries(Object.entries(r.rivalRosters).map(([id, roster]) => [id, Array.isArray(roster) ? roster.map((p) => ({ ...p })) : []]))
+      : {},
+    sponsor: r.sponsor === "local" || r.sponsor === "stream" || r.sponsor === "prestige" ? r.sponsor : null,
+    sponsorYear: Math.max(0, Math.floor(r.sponsorYear ?? 0)),
   };
 }
 
