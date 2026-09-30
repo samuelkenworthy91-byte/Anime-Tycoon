@@ -50,6 +50,7 @@ import { BASE_INTERVENTIONS, INVESTMENT_TIERS, interventionBlock, interventionIn
 import { expansionOf } from "../engine/studioExpansion";
 import { canDelegateRoutineProduction, careerEraForWeek } from "../engine/careerEras";
 import { hasProductionCoordinator, teamCoordinationEfficiency } from "../engine/teamCoordination";
+import { staffInjuryReason, staffIsInjured } from "../engine/staffAvailability";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -101,15 +102,16 @@ function ProjectCard({
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
   const team = run.staff.filter((s) => p.staffIds.includes(s.id));
+  const activeTeam = team.filter((s) => !staffIsInjured(s, run.day ?? run.week * 7));
   const productionHead = studioProduction(run.heads ?? {}, run.staff, run.showrunner);
-  const coordination = teamCoordinationEfficiency(team, productionHead.coordinationRelief ?? 0);
-  const coordinatedByPerk = hasProductionCoordinator(team);
+  const coordination = teamCoordinationEfficiency(activeTeam, productionHead.coordinationRelief ?? 0);
+  const coordinatedByPerk = hasProductionCoordinator(activeTeam);
   const late = daysToDeadline(p, run.day ?? run.week * 7);
   const inPipeline = p.stage !== "airing" && p.stage !== "done";
   const stageIdx = PRODUCTION_STAGES.indexOf(p.stage);
   const plan = p.plan[p.stage] ?? 1;
   const pct = p.stage === "ready" ? 100 : Math.min(100, Math.round((p.progress / plan) * 100));
-  const noTeam = inPipeline && team.length === 0;
+  const noTeam = inPipeline && activeTeam.length === 0;
   const auto = p.auto;
   const autoBlock = inPipeline && !auto ? delegationBlockReason(run, p) : null;
   const heads: [HeadSlot, string | null][] = [
@@ -398,7 +400,7 @@ function ProjectCard({
           >
             <Users size={12} className="text-cyanx" />
             <span className="text-[10px] font-bold text-paper/70">
-              TEAM {team.length}
+              TEAM {team.length}{activeTeam.length !== team.length ? ` · ${activeTeam.length} ACTIVE` : ""}
             </span>
             {team.length > 6 && (
               <span className={cn("rounded px-1.5 py-0.5 text-[8px] font-black", coordination >= 0.999 ? "bg-mint/15 text-mint" : coordination >= 0.8 ? "bg-gold/10 text-gold" : "bg-neon/10 text-neon")}>
@@ -437,6 +439,7 @@ function ProjectCard({
               {run.staff.map((s: Staff) => {
                 const mine = p.staffIds.includes(s.id);
                 const other = !mine ? projectOfStaff(run.projects, s.id) : null;
+                const injury = staffInjuryReason(s, run.day ?? run.week * 7);
                 const opBusy = !mine ? staffOperationReason(run, s.id) : null;
                 return (
                   <div key={s.id} className={cn("flex items-center gap-2 rounded-lg border px-2 py-1.5", mine ? "border-mint/50 bg-mint/[0.06]" : "border-line bg-panel2/40")}>
@@ -446,8 +449,9 @@ function ProjectCard({
                       <div className="text-[9px] text-paper/50">
                         {ROLE_LABEL[s.role]} · {Math.round(staffMain(s))} <span style={{ color: POINT_COLOR[ROLE_POINT[s.role]] }}>●</span>
                         {other && <span className="ml-1 text-gold">on “{other.draft.title}”</span>}
-                        {opBusy && <span className="ml-1 text-viol">{opBusy}</span>}
-                        {s.stamina < 45 && <span className="ml-1 text-neon">tired</span>}
+                        {injury && <span className="ml-1 font-bold text-neon">🤕 {injury} · ZERO OUTPUT</span>}
+                        {!injury && opBusy && <span className="ml-1 text-viol">{opBusy}</span>}
+                        {!injury && s.stamina < 45 && <span className="ml-1 text-neon">tired</span>}
                       </div>
                     </div>
                     <Btn
