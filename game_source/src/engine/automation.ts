@@ -41,6 +41,7 @@ import {
 } from "./projects";
 import type { FacilityFX } from "./facilities";
 import type { RunState } from "./state";
+import { effectiveCoordinatedTeamSize, productionHeadCoordinationRelief, teamCoordinationEfficiency } from "./teamCoordination";
 
 /** auto-manage unlocks at Sakuga Tower — studios with a real pipeline */
 export const AUTO_MIN_OFFICE = 2;
@@ -178,9 +179,14 @@ export function sprintQuality(
     : undefined;
   const creatorSkill = fullDirector && focus ? staffPoint(fullDirector, focus) : 0;
 
-  const teamSkill = focus !== null
+  const productionHead = run.heads.production ? staff.find((s) => s.id === run.heads.production) : undefined;
+  const coordinationRelief = productionHeadCoordinationRelief(productionHead);
+  const coordination = teamCoordinationEfficiency(team, coordinationRelief);
+  const effectiveTeam = effectiveCoordinatedTeamSize(team, coordinationRelief);
+  const rawTeamSkill = focus !== null
     ? team.reduce((a, s) => a + staffPoint(s, focus as PointType), 0)
     : team.reduce((a, s) => a + (s.story + s.art + s.sound) / 3, 0);
+  const teamSkill = rawTeamSkill * coordination;
 
   const morale = team.length ? team.reduce((a, s) => a + moraleF(s), 0) / team.length : 1;
 
@@ -195,7 +201,7 @@ export function sprintQuality(
   const headBonus = headSkill * 0.4 * (headMatches ? 1 : 0.55);
   const creatorBonus = fullMode ? creatorSkill * 0.26 : 0;
   const fullCompetence = fullMode && focus
-    ? 24 + creatorSkill * 0.30 + Math.min(4, team.length) * 4
+    ? 24 + creatorSkill * 0.30 + Math.min(4, effectiveTeam) * 4
     : 0;
   const delegator = run.showrunner === "delegator" && fullMode;
   const preferredCreator = delegator && !!fullDirector?.favGenre && p.draft.genres.includes(fullDirector.favGenre);
@@ -210,15 +216,15 @@ export function sprintQuality(
   /* Full Delegation sacrifices optimisation/control, not baseline competence.
      A properly staffed creator-led production therefore creates fewer routine
      notes than generic automation while still retaining risk on thin teams. */
-  const issueBase = Math.round(1 + risk * 1.6 - team.length * 0.45);
+  const issueBase = Math.round(1 + risk * 1.6 - effectiveTeam * 0.45);
   const issues = focus
     ? Math.max(0, issueBase - (fullMode && team.length >= 3 ? 1 : 0) - (delegator ? 2 : 0))
     : 0;
   const squashed = focus
     ? 0
-    : Math.round(1 + team.length * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix + (fullMode ? 2 : 0) + (delegator ? 4 : 0));
+    : Math.round(1 + effectiveTeam * 0.7 + (headMatches ? headSkill / 22 : 0) + fx.issueFix + (fullMode ? 2 : 0) + (delegator ? 4 : 0));
 
-  const rdGained = focus ? Math.round(2 + team.length * 0.6) : 0;
+  const rdGained = focus ? Math.round(2 + effectiveTeam * 0.6) : 0;
   const spent = 2_000 + team.length * 600 + (p.draft.budget === "blockbuster" ? 2_500 : 0);
 
   return {
