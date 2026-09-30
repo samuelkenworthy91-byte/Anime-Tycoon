@@ -4,6 +4,7 @@ import {
   FORMAT_ORDER,
   GENRES,
   MEDIUMS,
+  OFFICES,
   PETS,
   PROTAGONISTS,
   RESEARCH,
@@ -178,7 +179,8 @@ const botAssign = (r: RunState): RunState => {
 };
 
 const botContract = (r: RunState): RunState => {
-  if (r.cash >= 100_000 || r.contractJobs.length > 0 || !r.contracts.length) return r;
+  const bridgeTarget = r.officeLevel === 0 ? 350_000 : 180_000;
+  if (r.cash >= bridgeTarget || r.contractJobs.length > 0 || !r.contracts.length) return r;
   const contract = [...r.contracts].sort((a, b) => b.pay - a.pay)[0];
   const free = r.staff.filter((s) => !projectOfStaff(r.projects, s.id) && !r.contractJobs.some((j) => j.staffIds.includes(s.id)));
   return free.length ? (startContractAssignment(r, contract, [free[0].id]) ?? r) : r;
@@ -303,10 +305,19 @@ function botCapitalProjects(r: RunState): RunState {
 
 function botProgression(r: RunState): RunState {
   let out = r;
-  let moved = relocateOffice(out);
-  while (moved) {
+  /* A strong player never empties the bank just because the next office is
+     technically purchasable. Preserve a meaningful operating reserve. */
+  let safetyGuard = 0;
+  while (safetyGuard++ < 5 && out.officeLevel < OFFICES.length - 1) {
+    const nextOffice = OFFICES[out.officeLevel + 1];
+    const reserve = out.officeLevel === 0 ? 275_000
+      : out.officeLevel === 1 ? 900_000
+      : out.officeLevel === 2 ? 3_500_000
+      : 12_000_000;
+    if (out.cash < nextOffice.cost + reserve) break;
+    const moved = relocateOffice(out);
+    if (!moved) break;
     out = moved;
-    moved = relocateOffice(out);
   }
   for (const medium of FORMAT_ORDER) {
     const unlocked = unlockFormat(out, medium);
@@ -359,6 +370,10 @@ type CurveResult = {
   first2b: number | null;
   finalCash: number;
   finalRevenue: number;
+  domesticPayoutIncome: number;
+  merchPayoutIncome: number;
+  otherPayoutIncome: number;
+  strategicSpend: number;
   shows: number;
   bestScore: number;
 };
@@ -380,6 +395,9 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
     let greenlit = 0;
     const cashByYear: number[] = [];
     const revenueByYear: number[] = [];
+    let domesticPayoutIncome = 0;
+    let merchPayoutIncome = 0;
+    let otherPayoutIncome = 0;
 
     for (let w = 0; w < WEEKS; w++) {
       for (const p of [...r.projects]) {
@@ -395,6 +413,7 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
       r = botHire(r);
       r = botProgression(r);
       r = botResearch(r);
+      r = botContract(r);
       r = botMerch(r);
       r = botCapitalProjects(r);
 
@@ -402,7 +421,10 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
       while (guard++ < 4 && activeProjects(r.projects).length < projectCapacity(r)) {
         const d = botDraft(r, greenlit);
         if (r.staff.length === 0) break;
-        const reserve = r.officeLevel === 0 ? 55_000 : r.officeLevel === 1 ? 180_000 : Math.max(400_000, r.cash * .05);
+        /* In the bedroom phase build a contract cushion before gambling the
+           whole company on the first original production. */
+        if (r.officeLevel === 0 && r.showsMade === 0 && r.cash < 150_000) break;
+        const reserve = r.officeLevel === 0 ? 75_000 : r.officeLevel === 1 ? 225_000 : Math.max(500_000, r.cash * .06);
         if (r.cash < projectUpfront(d) + reserve) break;
         const next = startProject(r, d);
         if (!next) break;
@@ -416,6 +438,20 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
       r = botCapitalProjects(r);
       r = botArcballCapital(r);
       for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;
+
+      const dueWeek = r.week + 1;
+      for (const payout of r.payouts.filter((payout) => payout.week === dueWeek)) {
+        if (payout.label.includes("Soundtrack") || payout.label.includes("Acrylic") || payout.label.includes("Plush") ||
+            payout.label.includes("Apparel") || payout.label.includes("Artbook") || payout.label.includes("Figure") ||
+            payout.label.includes("Collector") || payout.label.includes("Pop-up") || payout.label.includes("Trading Card") ||
+            payout.label.includes("Worldwide Collector") || payout.label.includes("Mobile Game")) {
+          merchPayoutIncome += payout.amount;
+        } else if (payout.sourceProjectId && !payout.label.startsWith("Overseas")) {
+          domesticPayoutIncome += payout.amount;
+        } else {
+          otherPayoutIncome += payout.amount;
+        }
+      }
       r = advanceWeeks(r, 1);
 
       if ((w + 1) % 48 === 0) {
@@ -435,6 +471,10 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
       first2b: firstCross(cashByYear, 2_000_000_000),
       finalCash: r.cash,
       finalRevenue: r.totalRevenue,
+      domesticPayoutIncome,
+      merchPayoutIncome,
+      otherPayoutIncome,
+      strategicSpend: r.strategicSpend.reduce((sum, row) => sum + row.amount, 0),
       shows: r.showsMade,
       bestScore: r.bestScore,
     };
@@ -491,6 +531,10 @@ simDescribe("25-year competent-player economy curve", () => {
         first2b: crossing("first2b"),
         finalCashMedian: Math.round(median(rows.map((row) => row.finalCash))),
         finalRevenueMedian: Math.round(median(rows.map((row) => row.finalRevenue))),
+        domesticIncomeMedian: Math.round(median(rows.map((row) => row.domesticPayoutIncome))),
+        merchIncomeMedian: Math.round(median(rows.map((row) => row.merchPayoutIncome))),
+        otherIncomeMedian: Math.round(median(rows.map((row) => row.otherPayoutIncome))),
+        strategicSpendMedian: Math.round(median(rows.map((row) => row.strategicSpend))),
         showsMedian: median(rows.map((row) => row.shows)),
         bestScoreMedian: median(rows.map((row) => row.bestScore)),
       };
@@ -505,6 +549,11 @@ simDescribe("25-year competent-player economy curve", () => {
       first1b: row.first1b,
       first2b: row.first2b,
       finalCash: Math.round(row.finalCash),
+      finalRevenue: Math.round(row.finalRevenue),
+      domesticPayoutIncome: Math.round(row.domesticPayoutIncome),
+      merchPayoutIncome: Math.round(row.merchPayoutIncome),
+      otherPayoutIncome: Math.round(row.otherPayoutIncome),
+      strategicSpend: Math.round(row.strategicSpend),
       shows: row.shows,
       bestScore: row.bestScore,
     }))));
