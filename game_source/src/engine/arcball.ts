@@ -84,6 +84,9 @@ export interface ArcballPlayerProgress {
   lastTrainingWeek?: number;
 }
 
+export type ArcballCompetition = "league" | "cup";
+export type ArcballCupRound = "quarterfinal" | "semifinal" | "final";
+
 export interface ArcballFixture {
   id: string;
   seasonYear: number;
@@ -91,6 +94,8 @@ export interface ArcballFixture {
   week: number;
   homeId: string;
   awayId: string;
+  competition?: ArcballCompetition;
+  cupRound?: ArcballCupRound;
   homeScore?: number;
   awayScore?: number;
   resolvedBy?: "watch" | "instant" | "auto" | "rival";
@@ -105,6 +110,12 @@ export interface ArcballSeasonHistory {
   gf: number;
   ga: number;
   title: boolean;
+}
+
+export interface ArcballCupHistory {
+  year: number;
+  championId: string;
+  playerWon: boolean;
 }
 
 export type ArcballHonourId = "player_year" | "golden_scorer" | "playmaker" | "guardian" | "team_season";
@@ -128,10 +139,13 @@ export interface ArcballState {
   approach: ArcballApproachId;
   players: Record<string, ArcballPlayerProgress>;
   fixtures: ArcballFixture[];
+  cupFixtures: ArcballFixture[];
   seasonPurchases: { tier1: number; tier2: number };
   championshipSpotlights: number;
   titles: number;
+  cupTitles: number;
   history: ArcballSeasonHistory[];
+  cupHistory: ArcballCupHistory[];
   honours: ArcballHonour[];
   /** Rival workers persist across seasons instead of being regenerated every match. */
   rivalRosters: Record<string, ArcballRivalPlayer[]>;
@@ -386,6 +400,102 @@ export function buildArcballFixtures(year: number): ArcballFixture[] {
   return [...firstHalf, ...secondHalf].sort((a, b) => a.week - b.week || a.round - b.round || a.id.localeCompare(b.id));
 }
 
+function cupFixtureId(year: number, round: ArcballCupRound, index: number, home: string, away: string) {
+  return "arc_cup_y" + year + "_" + round + "_" + index + "_" + hash32(home + "|" + away).toString(36);
+}
+
+function shuffledCupTeams(year: number): string[] {
+  const teams = ["player", ...RIVAL_STUDIOS];
+  const rng = seeded("arcball-cup-draw|" + year);
+  for (let i = teams.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [teams[i], teams[j]] = [teams[j], teams[i]];
+  }
+  return teams;
+}
+
+export function buildArcballCupFixtures(year: number): ArcballFixture[] {
+  const teams = shuffledCupTeams(year);
+  const base = (year - 1) * 48;
+  const entrants = teams.slice(1); // one deterministic bye into the semi-finals
+  const fixtures: ArcballFixture[] = [];
+  for (let i = 0; i < 3; i += 1) {
+    fixtures.push({
+      id: cupFixtureId(year, "quarterfinal", i, entrants[i * 2], entrants[i * 2 + 1]),
+      seasonYear: year,
+      round: 100 + i,
+      week: base + 10,
+      homeId: entrants[i * 2],
+      awayId: entrants[i * 2 + 1],
+      competition: "cup",
+      cupRound: "quarterfinal",
+    });
+  }
+  return fixtures;
+}
+
+function cupFixtureWinner(fixture: ArcballFixture): string | null {
+  if (fixture.homeScore === undefined || fixture.awayScore === undefined || fixture.homeScore === fixture.awayScore) return null;
+  return fixture.homeScore > fixture.awayScore ? fixture.homeId : fixture.awayId;
+}
+
+function ensureArcballCupRounds(state: ArcballState): ArcballState {
+  const fixtures = [...state.cupFixtures];
+  const quarters = fixtures.filter((f) => f.cupRound === "quarterfinal");
+  const semis = fixtures.filter((f) => f.cupRound === "semifinal");
+  const finals = fixtures.filter((f) => f.cupRound === "final");
+  const base = (state.seasonYear - 1) * 48;
+
+  if (quarters.length === 3 && quarters.every((f) => cupFixtureWinner(f)) && semis.length === 0) {
+    const quarterTeams = new Set(quarters.flatMap((f) => [f.homeId, f.awayId]));
+    const bye = ["player", ...RIVAL_STUDIOS].find((id) => !quarterTeams.has(id));
+    const winners = quarters.map((f) => cupFixtureWinner(f)!).filter(Boolean);
+    const teams = [bye, ...winners].filter((id): id is string => !!id);
+    const rng = seeded("arcball-cup-semi|" + state.seasonYear);
+    if (rng() < .5) [teams[1], teams[2]] = [teams[2], teams[1]];
+    for (let i = 0; i < 2; i += 1) {
+      const home = teams[i * 2];
+      const away = teams[i * 2 + 1];
+      fixtures.push({
+        id: cupFixtureId(state.seasonYear, "semifinal", i, home, away),
+        seasonYear: state.seasonYear,
+        round: 110 + i,
+        week: base + 29,
+        homeId: home,
+        awayId: away,
+        competition: "cup",
+        cupRound: "semifinal",
+      });
+    }
+  }
+
+  const updatedSemis = fixtures.filter((f) => f.cupRound === "semifinal");
+  if (updatedSemis.length === 2 && updatedSemis.every((f) => cupFixtureWinner(f)) && finals.length === 0) {
+    const finalists = updatedSemis.map((f) => cupFixtureWinner(f)!).filter(Boolean);
+    fixtures.push({
+      id: cupFixtureId(state.seasonYear, "final", 0, finalists[0], finalists[1]),
+      seasonYear: state.seasonYear,
+      round: 120,
+      week: base + 43,
+      homeId: finalists[0],
+      awayId: finalists[1],
+      competition: "cup",
+      cupRound: "final",
+    });
+  }
+  return { ...state, cupFixtures: fixtures };
+}
+
+function arcballFixtureById(state: ArcballState, fixtureId: string): ArcballFixture | undefined {
+  return state.fixtures.find((f) => f.id === fixtureId) ?? state.cupFixtures.find((f) => f.id === fixtureId);
+}
+
+function playerArcballFixtures(state: ArcballState): ArcballFixture[] {
+  return [...state.fixtures, ...state.cupFixtures]
+    .filter((f) => f.homeId === "player" || f.awayId === "player")
+    .sort((a, b) => a.week - b.week || a.round - b.round || a.id.localeCompare(b.id));
+}
+
 export function initialArcballState(week: number): ArcballState {
   const seasonYear = yearOfWeek(week);
   return {
@@ -399,10 +509,13 @@ export function initialArcballState(week: number): ArcballState {
     approach: "short",
     players: {},
     fixtures: buildArcballFixtures(seasonYear),
+    cupFixtures: buildArcballCupFixtures(seasonYear),
     seasonPurchases: { tier1: 0, tier2: 0 },
     championshipSpotlights: 0,
     titles: 0,
+    cupTitles: 0,
     history: [],
+    cupHistory: [],
     honours: [],
     rivalRosters: {},
     sponsor: null,
@@ -455,14 +568,17 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
     formation: r.formation && r.formation in ARCBALL_FORMATIONS ? r.formation : "balanced",
     approach: r.approach && r.approach in ARCBALL_APPROACHES ? r.approach : "short",
     players,
-    fixtures: Array.isArray(r.fixtures) && r.fixtures.length ? r.fixtures.map((f) => ({ ...f })) : buildArcballFixtures(seasonYear),
+    fixtures: Array.isArray(r.fixtures) && r.fixtures.length ? r.fixtures.map((f) => ({ ...f, competition: f.competition ?? "league" })) : buildArcballFixtures(seasonYear),
+    cupFixtures: Array.isArray(r.cupFixtures) && r.cupFixtures.length ? r.cupFixtures.map((f) => ({ ...f, competition: "cup" })) : buildArcballCupFixtures(seasonYear),
     seasonPurchases: {
       tier1: Math.max(0, Math.floor(r.seasonPurchases?.tier1 ?? 0)),
       tier2: Math.max(0, Math.floor(r.seasonPurchases?.tier2 ?? 0)),
     },
     championshipSpotlights: Math.max(0, Math.floor(r.championshipSpotlights ?? 0)),
     titles: Math.max(0, Math.floor(r.titles ?? 0)),
+    cupTitles: Math.max(0, Math.floor(r.cupTitles ?? 0)),
     history: Array.isArray(r.history) ? r.history.slice(-30).map((h) => ({ ...h })) : [],
+    cupHistory: Array.isArray(r.cupHistory) ? r.cupHistory.slice(-30).map((h) => ({ ...h })) : [],
     honours: Array.isArray(r.honours) ? r.honours.slice(-100).map((h) => ({ ...h })) : [],
     rivalRosters: r.rivalRosters && typeof r.rivalRosters === "object"
       ? Object.fromEntries(Object.entries(r.rivalRosters).map(([id, roster]) => [id, Array.isArray(roster) ? roster.map((p) => ({ ...p })) : []]))
