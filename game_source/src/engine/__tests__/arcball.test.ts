@@ -21,7 +21,7 @@ import {
   runArcballCamp,
   runArcballPrivateCoaching,
 } from "../arcball";
-import { initialRun, migrateRun, type RunState } from "../state";
+import { contributionEffectiveSkill, initialRun, migrateRun, staffOperationReason, type RunState } from "../state";
 import type { Franchise } from "../franchise";
 
 function staffedRun(): RunState {
@@ -169,6 +169,26 @@ describe("Arcball", () => {
         : member),
     };
     expect(arcballReady(run)).toBe(false);
+  });
+
+  it("makes an Arcball injury a real studio absence until the recovery day", () => {
+    let run = staffedRun();
+    const id = run.staff[0].id;
+    run = {
+      ...run,
+      day: 10,
+      staff: run.staff.map((member) => member.id === id
+        ? { ...member, injuredUntilDay: 38, injuryLabel: "shoulder strain" }
+        : member),
+    };
+    const injured = run.staff.find((member) => member.id === id)!;
+    expect(staffOperationReason(run, id)).toContain("shoulder strain");
+    expect(contributionEffectiveSkill(run, injured, "story")).toBe(0);
+
+    const recoveredRun = { ...run, day: 38 };
+    const recovered = recoveredRun.staff.find((member) => member.id === id)!;
+    expect(staffOperationReason(recoveredRun, id)).toBeNull();
+    expect(contributionEffectiveSkill(recoveredRun, recovered, "story")).toBeGreaterThan(0);
   });
 
   it("instant matches spend real worker energy and award personal creator followers", () => {
