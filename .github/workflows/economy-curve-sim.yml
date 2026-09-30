@@ -1,0 +1,30 @@
+name: Economy Curve Simulation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - arcball-v1
+    paths:
+      - "game_source/src/engine/**"
+      - ".github/workflows/economy-curve-sim.yml"
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game_source/package-lock.json
+      - name: Install dependencies
+        working-directory: game_source
+        run: npm ci
+      - name: Run 30-career economy curve simulation
+        working-directory: game_source
+        env:
+          ECONOMY_CURVE_SIM: "1"
+        run: npx vitest run src/engine/__tests__/economy-curve-sim.test.ts --reporter=verbose
