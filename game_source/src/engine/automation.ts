@@ -42,6 +42,7 @@ import {
 import type { FacilityFX } from "./facilities";
 import type { RunState } from "./state";
 import { effectiveCoordinatedTeamSize, productionHeadCoordinationRelief, teamCoordinationEfficiency } from "./teamCoordination";
+import { staffIsInjured } from "./staffAvailability";
 
 /** auto-manage unlocks at Sakuga Tower — studios with a real pipeline */
 export const AUTO_MIN_OFFICE = 2;
@@ -165,7 +166,7 @@ export function sprintQuality(
   fx: FacilityFX,
   staff: Staff[]
 ): SprintQuality {
-  const team = staff.filter((s) => p.staffIds.includes(s.id));
+  const team = staff.filter((s) => p.staffIds.includes(s.id) && !staffIsInjured(s, run.day ?? run.week * 7));
   const focus = MILESTONE_FOCUS[milestone];
 
   /* the delegated head — their own craft drives the show */
