@@ -3787,10 +3787,11 @@ export const officeSlots = (r: RunState) => OFFICES[r.officeLevel].slots;
 
 /** null = the next tier can be bought; otherwise the blocking reason */
 export function facilityBlockReason(r: RunState, id: FacilityId): string | null {
-  const owned = (r.facilities[id] ?? 0) > 0;
-  const nx = nextTier(r.facilities, id);
+  const facilities = r.facilities ?? {};
+  const owned = (facilities[id] ?? 0) > 0;
+  const nx = nextTier(facilities, id);
   if (!nx) return "Already at maximum tier";
-  if (!owned && slotsUsed(r.facilities) >= officeSlots(r))
+  if (!owned && slotsUsed(facilities) >= officeSlots(r))
     return `No free rooms — ${OFFICES[r.officeLevel].name} has ${officeSlots(r)} slot${officeSlots(r) > 1 ? "s" : ""}`;
   if (r.cash < nx.cost) return `Needs £${nx.cost.toLocaleString("en-GB")}`;
   if (r.rd < nx.rd) return `Needs ${nx.rd} research data (you have ${r.rd})`;
@@ -3800,13 +3801,14 @@ export function facilityBlockReason(r: RunState, id: FacilityId): string | null 
 /** build a new room or upgrade an owned one to the next tier */
 export function buyFacility(r: RunState, id: FacilityId): RunState | null {
   if (facilityBlockReason(r, id)) return null;
-  const nx = nextTier(r.facilities, id)!;
+  const facilities = r.facilities ?? {};
+  const nx = nextTier(facilities, id)!;
   const def = facilityDef(id);
   return {
     ...r,
     cash: r.cash - nx.cost,
     rd: r.rd - nx.rd,
-    facilities: { ...r.facilities, [id]: nx.tier },
+    facilities: { ...facilities, [id]: nx.tier },
     notices: [
       ...r.notices,
       nx.tier === 1
