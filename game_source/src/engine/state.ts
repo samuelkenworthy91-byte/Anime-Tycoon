@@ -217,6 +217,7 @@ import {
 } from "./legacy";
 import { tickDelegated } from "./automation";
 import { teamCoordinationEfficiency } from "./teamCoordination";
+import { staffInjuryReason, staffIsInjured } from "./staffAvailability";
 import { canDelegateRoutineProduction } from "./careerEras";
 import {
   MAX_RESEARCH_TRACK_LEVEL,
@@ -1252,7 +1253,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     if (!opts.liveDaysAlreadyApplied) {
       const keep: ContractAssignment[] = [];
       for (const job of contractJobs) {
-        const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !expansionBusyReason(r,s.id) && !(r.staffResting ?? {})[s.id]);
+        const crew = staffArr.filter((s) => job.staffIds.includes(s.id) && !staffIsInjured(s, w * 7) && !expansionBusyReason(r,s.id) && !(r.staffResting ?? {})[s.id]);
         const runnerSkill = job.showrunner ? showrunnerContractSkill(r.showrunner, r.showsMade, job.contract.type) : 0;
         const baseline = contractWeeklyOutput(job.contract, crew, research, runnerSkill);
         const live = job.liveProgressThisWeek ?? 0;
@@ -1345,6 +1346,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       const rest = (9 + fx.staminaRest) * staminaRecoveryMult(r.showrunner);
       staffArr = staffArr.map((st) => {
         let nx = { ...st };
+        if (staffIsInjured(nx, w * 7)) {
+          if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.min(100, nx.stamina + rest);
+          return nx;
+        }
         const proj = busy.has(st.id) ? projectOfStaff(projects, st.id) : null;
         if (proj) {
           if (!opts.liveDaysAlreadyApplied) nx.stamina = Math.max(12, nx.stamina - drain);
@@ -2182,6 +2187,9 @@ export function startFullyDelegatedProject(
 }
 
 export function staffOperationReason(r: RunState, staffId: string): string | null {
+  const staff = r.staff.find((member) => member.id === staffId);
+  const injury = staff ? staffInjuryReason(staff, r.day ?? r.week * 7) : null;
+  if (injury) return injury;
   const expansionReason = expansionBusyReason(r, staffId);
   if (expansionReason) return expansionReason;
   if (r.audienceTest) return `Test audience study: ${r.audienceTest.title}`;
@@ -2613,6 +2621,7 @@ function chooseDiscipline(st: Staff): PointType {
 }
 
 export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointType, editing = false): number {
+  if (staffIsInjured(st, r.day ?? r.week * 7)) return 0;
   const fx = facilityFX(r.facilities);
   const project = projectOfStaff(r.projects, st.id);
   let effective = staffPoint(st, type);
@@ -2694,7 +2703,7 @@ function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Projec
 }
 
 function liveWorkEligible(r: RunState, st: Staff, pendingIds: Set<string> = new Set()): boolean {
-  if (expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
+  if (staffIsInjured(st, r.day ?? r.week * 7) || expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
   if (pendingIds.has(st.id)) return true;
   const contract = (r.contractJobs ?? []).some((j) => j.staffIds.includes(st.id));
   const project = projectOfStaff(r.projects, st.id);
@@ -2747,7 +2756,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
   if (r.audienceTest) return [];
   const pulses: DeskPulse[] = [];
   const eligible = r.staff.filter((st) => {
-    if (expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
+    if (staffIsInjured(st, r.day ?? r.week * 7) || expansionBusyReason(r, st.id) || (r.staffResting ?? {})[st.id] || st.stamina <= 0) return false;
     const contract = (r.contractJobs ?? []).some((j) => j.staffIds.includes(st.id));
     const project = projectOfStaff(r.projects, st.id);
     const production = !!project && !project.milestone && ["concept", "preprod", "animation", "sound", "post"].includes(project.stage);
