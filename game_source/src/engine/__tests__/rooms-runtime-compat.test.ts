@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { initialRun, migrateRun } from "../state";
+import { facilityBlockReason, initialRun, migrateRun } from "../state";
 import { facilityUpkeep, slotsUsed } from "../facilities";
 import { productionCapabilities } from "../spending";
 
@@ -49,5 +49,15 @@ describe("Rooms runtime compatibility", () => {
     const run: any = initialRun("Raw Recovery", "steady");
     run.strategicSpend = [null, {}, { label: undefined, amount: 1000 }, { label: "Writing Room Overhaul", amount: NaN }];
     expect(() => productionCapabilities(run)).not.toThrow();
+  });
+
+  it("renders Rooms while a live save is temporarily missing its facilities map", async () => {
+    installBrowserStorage();
+    const run: any = initialRun("Live Rooms Recovery", "steady");
+    run.facilities = undefined;
+
+    expect(() => facilityBlockReason(run, "writers")).not.toThrow();
+    const { default: FacilitiesPanel } = await import("../../components/Facilities");
+    expect(() => renderToStaticMarkup(createElement(FacilitiesPanel, { run, onBuy: () => {} }))).not.toThrow();
   });
 });
