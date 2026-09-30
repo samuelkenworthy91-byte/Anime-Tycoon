@@ -65,6 +65,24 @@ function pitchPoint(position: ArcballPosition, player: boolean, active: boolean,
   return [x, player ? Math.max(15, y - shift) : Math.min(85, y + shift)];
 }
 
+const VISUAL_BEATS = 5;
+
+function moveTowardGoal(point: [number, number], player: boolean, amount: number): [number, number] {
+  return [point[0], player ? Math.max(9, point[1] - amount) : Math.min(91, point[1] + amount)];
+}
+
+function lerpPoint(a: [number, number], b: [number, number], amount: number): [number, number] {
+  return [a[0] + (b[0] - a[0]) * amount, a[1] + (b[1] - a[1]) * amount];
+}
+
+function visualPhaseFor(matchPhase: ArcballMatchPhase, beat: number): ArcballMatchPhase {
+  if (beat <= 0) return "buildup";
+  if (beat === 1) return "midfield";
+  if (beat === 2) return matchPhase === "breakaway" ? "breakaway" : "midfield";
+  if (beat === 3 && (matchPhase === "shot" || matchPhase === "goal")) return "chance";
+  return matchPhase;
+}
+
 export default function ArcballMatch({
   run,
   setRun,
@@ -84,33 +102,43 @@ export default function ArcballMatch({
   const [committed, setCommitted] = useState(false);
   const [halfTime, setHalfTime] = useState(false);
   const [halfTimeSeen, setHalfTimeSeen] = useState(false);
+  const [beat, setBeat] = useState(0);
 
   useEffect(() => {
-    if (!match || match.minute >= 90 || speed === 0 || committed || halfTime) return;
-    const baseDelay = speed === 1 ? 5200 : speed === 2 ? 2600 : 1100;
-    const eventHold = match.phase === "goal" ? 1.35 : match.phase === "shot" || match.phase === "chance" ? 1.15 : 1;
+    if (!match || speed === 0 || committed || halfTime) return;
+    const finalBeat = match.minute === 0 ? 1 : VISUAL_BEATS - 1;
+    if (match.minute >= 90 && beat >= finalBeat) return;
+    const beatDelay = speed === 1 ? 1120 : speed === 2 ? 560 : 255;
+    const importantHold = beat === finalBeat && (match.phase === "goal" || match.phase === "shot") ? 1.45 : 1;
     const timer = window.setTimeout(() => {
-      setMatch((current) => current ? stepArcballMatch(run, current, intensity, instruction) : current);
-    }, baseDelay * eventHold);
+      if (beat < finalBeat) {
+        setBeat((value) => value + 1);
+        return;
+      }
+      if (match.minute < 90) {
+        setBeat(0);
+        setMatch((current) => current ? stepArcballMatch(run, current, intensity, instruction) : current);
+      }
+    }, beatDelay * importantHold);
     return () => window.clearTimeout(timer);
-  }, [match, speed, intensity, instruction, run, committed, halfTime]);
+  }, [match, beat, speed, intensity, instruction, run, committed, halfTime]);
 
   useEffect(() => {
-    if (!match || committed || halfTimeSeen || match.minute !== 45) return;
+    if (!match || committed || halfTimeSeen || match.minute !== 45 || beat < VISUAL_BEATS - 1) return;
     setSpeed(0);
     setHalfTime(true);
     setHalfTimeSeen(true);
-  }, [match, committed, halfTimeSeen]);
+  }, [match, beat, committed, halfTimeSeen]);
 
   useEffect(() => {
-    if (!match || match.minute < 90 || committed) return;
+    if (!match || match.minute < 90 || beat < VISUAL_BEATS - 1 || committed) return;
     const next = finishArcballMatch(run, match, "watch");
     if (!next) return;
     setRun(() => next);
     setCommitted(true);
     setSpeed(0);
     sfx.fanfare();
-  }, [match, committed, run, setRun]);
+  }, [match, beat, committed, run, setRun]);
 
   if (!match) {
     return (
@@ -163,16 +191,41 @@ export default function ArcballMatch({
   const supportRival = rivalPlayers.find((p) => p.name === match.supportingRivalName);
 
   const playerHasBall = match.lastPossession === (match.playerIsHome ? "home" : "away");
-  const activeFrom = playerHasBall && supportPlayerRow
-    ? pitchPoint(supportPlayerRow.position, true, false, match.phase)
+  const visualPhase = visualPhaseFor(match.phase, beat);
+  const supportBase = playerHasBall && supportPlayerRow
+    ? pitchPoint(supportPlayerRow.position, true, false, visualPhase)
     : !playerHasBall && supportRival
-      ? pitchPoint(supportRival.position, false, false, match.phase)
+      ? pitchPoint(supportRival.position, false, false, visualPhase)
       : null;
-  const activeTo = playerHasBall && activePlayerRow
-    ? pitchPoint(activePlayerRow.position, true, true, match.phase)
+  const activeBase = playerHasBall && activePlayerRow
+    ? pitchPoint(activePlayerRow.position, true, false, visualPhase)
     : !playerHasBall && activeRival
-      ? pitchPoint(activeRival.position, false, true, match.phase)
+      ? pitchPoint(activeRival.position, false, false, visualPhase)
       : null;
+  const supportCarry = supportBase ? moveTowardGoal(supportBase, playerHasBall, 6) : null;
+  const receivePoint = activeBase ? moveTowardGoal(activeBase, playerHasBall, 5) : null;
+  const activeCarry = activeBase ? moveTowardGoal(activeBase, playerHasBall, match.phase === "breakaway" ? 14 : 10) : null;
+  const goalPoint: [number, number] = playerHasBall ? [50, 7] : [50, 93];
+  const defendingAnchorBase = playerHasBall
+    ? rivalPlayers.find((p) => p.position === "anchor")
+    : playerRows.find((row) => row.position === "anchor");
+  const defendingAnchorPoint: [number, number] | null = defendingAnchorBase
+    ? playerHasBall
+      ? pitchPoint((defendingAnchorBase as (typeof rivalPlayers)[number]).position, false, false, visualPhase)
+      : pitchPoint((defendingAnchorBase as (typeof playerRows)[number]).position, true, false, visualPhase)
+    : null;
+  const interceptPoint = activeCarry && defendingAnchorPoint ? lerpPoint(activeCarry, defendingAnchorPoint, .52) : activeCarry;
+
+  let ballPoint: [number, number] = [50, 50];
+  if (match.minute > 0) {
+    if (beat === 0) ballPoint = supportBase ?? activeBase ?? [50, 50];
+    else if (beat === 1) ballPoint = supportCarry ?? activeBase ?? [50, 50];
+    else if (beat === 2) ballPoint = receivePoint ?? activeBase ?? [50, 50];
+    else if (beat === 3) ballPoint = activeCarry ?? receivePoint ?? [50, 50];
+    else if (match.phase === "goal" || match.phase === "shot") ballPoint = goalPoint;
+    else if (match.phase === "defence") ballPoint = interceptPoint ?? activeCarry ?? [50, 50];
+    else ballPoint = activeCarry ?? receivePoint ?? [50, 50];
+  }
 
   const latestEvent = match.events[match.events.length - 1];
   const playerScore = match.playerIsHome ? match.homeScore : match.awayScore;
@@ -183,6 +236,35 @@ export default function ArcballMatch({
   const opponentOnTarget = match.playerIsHome ? match.awayOnTarget : match.homeOnTarget;
   const playerPoss = match.playerIsHome ? homePoss : awayPoss;
   const opponentPoss = 100 - playerPoss;
+  const attackingTeam = playerHasBall ? run.studio : (rival?.name ?? rivalId);
+  const supportName = playerHasBall ? supportPlayerRow?.member.name : supportRival?.name;
+  const activeName = playerHasBall ? activePlayerRow?.member.name : activeRival?.name;
+  const defenderName = playerHasBall
+    ? rivalPlayers.find((p) => p.position === "anchor")?.name
+    : playerRows.find((row) => row.position === "anchor")?.member.name;
+  const liveCommentary = match.minute === 0
+    ? "The teams settle into shape around centre court. The opening possession is about to begin."
+    : beat === 0
+      ? (supportName ?? activeName ?? attackingTeam) + " brings the ball under control for " + attackingTeam + " and looks upfield."
+      : beat === 1
+        ? (supportName ?? activeName ?? "The carrier") + " advances with the ball as " + (activeName ?? "a teammate") + " moves away from a marker to offer the next pass."
+        : beat === 2
+          ? supportName && activeName
+            ? supportName + " releases the ball into " + activeName + "'s path. " + activeName + " moves to meet it rather than waiting for the pass."
+            : (activeName ?? "The receiver") + " takes the next pass on the move."
+          : beat === 3
+            ? match.phase === "goal" || match.phase === "shot"
+              ? (activeName ?? "The attacker") + " drives into the scoring lane. " + (defenderName ?? "The last defender") + " closes across while the keeper sets for the shot."
+              : match.phase === "defence"
+                ? (activeName ?? "The receiver") + " tries to turn into space, but " + (defenderName ?? "the defence") + " is already stepping toward the passing lane."
+                : match.phase === "breakaway"
+                  ? (activeName ?? "The runner") + " accelerates into open space with the defence retreating toward goal."
+                  : (activeName ?? "The receiver") + " takes possession and carries forward while teammates reshape around the ball."
+            : latestEvent?.text ?? "The move comes to an end.";
+  const visibleHomeScore = match.phase === "goal" && beat < VISUAL_BEATS - 1 && match.lastPossession === "home" ? Math.max(0, match.homeScore - 1) : match.homeScore;
+  const visibleAwayScore = match.phase === "goal" && beat < VISUAL_BEATS - 1 && match.lastPossession === "away" ? Math.max(0, match.awayScore - 1) : match.awayScore;
+  const visibleEvents = beat < VISUAL_BEATS - 1 && match.minute > 0 ? match.events.slice(0, -1) : match.events;
+  const ballTransitionMs = speed === 1 ? 900 : speed === 2 ? 430 : 190;
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-ink">
@@ -190,7 +272,7 @@ export default function ArcballMatch({
         <Shield size={15} className="text-cyanx"/>
         <div className="min-w-0 flex-1">
           <div className="text-[8px] font-black tracking-[0.25em] text-cyanx">ARCBALL LEAGUE · YEAR {state.seasonYear}</div>
-          <div className="truncate font-display text-sm font-black">{homeName} <span className="text-gold">{match.homeScore}–{match.awayScore}</span> {awayName}</div>
+          <div className="truncate font-display text-sm font-black">{homeName} <span className="text-gold">{visibleHomeScore}–{visibleAwayScore}</span> {awayName}</div>
         </div>
         <div className="font-display text-xl font-black text-gold">{match.minute}'</div>
         <button className="btn-press rounded-lg border border-line p-2 text-paper/50" onClick={committed ? onDone : () => { setSpeed(0); onDone(); }} aria-label="Back to studio"><X size={15}/></button>
@@ -219,60 +301,93 @@ export default function ArcballMatch({
               match.phase === "shot" || match.phase === "chance" ? "border-gold/70 bg-ink/90 text-gold" :
               "border-white/20 bg-ink/75 text-white/85"
             )}>
-              {PHASE_LABEL[match.phase]}
+              {PHASE_LABEL[visualPhase]}
             </div>
 
-            {activeFrom && activeTo && (
+            {beat === 2 && supportCarry && receivePoint && (
               <svg className="pointer-events-none absolute inset-0 z-[5] h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <line
-                  x1={activeFrom[0]} y1={activeFrom[1]}
-                  x2={activeTo[0]} y2={activeTo[1]}
-                  stroke="rgba(255,255,255,.78)"
-                  strokeWidth="0.8"
+                  x1={supportCarry[0]} y1={supportCarry[1]}
+                  x2={receivePoint[0]} y2={receivePoint[1]}
+                  stroke="rgba(255,255,255,.72)"
+                  strokeWidth="0.75"
                   strokeDasharray="2.2 1.7"
                 />
-                <circle cx={activeTo[0]} cy={activeTo[1]} r="1.1" fill="white"/>
+              </svg>
+            )}
+            {beat === 4 && activeCarry && (match.phase === "goal" || match.phase === "shot") && (
+              <svg className="pointer-events-none absolute inset-0 z-[5] h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <line
+                  x1={activeCarry[0]} y1={activeCarry[1]}
+                  x2={goalPoint[0]} y2={goalPoint[1]}
+                  stroke="rgba(255,214,90,.8)"
+                  strokeWidth="0.9"
+                  strokeDasharray="2 1.4"
+                />
               </svg>
             )}
 
             {rivalPlayers.map((player) => {
-              const active = match.activeRivalName === player.name && !playerHasBall;
-              const [x, y] = pitchPoint(player.position, false, active, match.phase);
+              const isSupport = !playerHasBall && match.supportingRivalName === player.name;
+              const isActive = !playerHasBall && match.activeRivalName === player.name;
+              const isDefender = playerHasBall && player.position === "anchor";
+              let point = pitchPoint(player.position, false, false, visualPhase);
+              if (isSupport && beat >= 1) point = supportCarry ?? point;
+              if (isActive && beat >= 2) point = beat >= 3 ? (activeCarry ?? receivePoint ?? point) : (receivePoint ?? point);
+              if (isDefender && beat >= 3 && activeCarry) point = lerpPoint(point, activeCarry, beat === 3 ? .35 : .52);
               return (
                 <PitchHead
                   key={player.id}
-                  x={x}
-                  y={y}
+                  x={point[0]}
+                  y={point[1]}
                   name={player.name.split(" ")[0]}
-                  active={active}
-                  hasBall={active}
+                  active={isActive || isDefender}
+                  hasBall={false}
                   portrait={WORKER_LOOKS[player.look]?.portrait}
+                  transitionMs={ballTransitionMs}
                 />
               );
             })}
 
             {playerRows.map(({ position, member }) => {
-              const active = match.activePlayerId === member.id && playerHasBall;
-              const [x, y] = pitchPoint(position, true, active, match.phase);
+              const isSupport = playerHasBall && match.supportingPlayerId === member.id;
+              const isActive = playerHasBall && match.activePlayerId === member.id;
+              const isDefender = !playerHasBall && position === "anchor";
+              let point = pitchPoint(position, true, false, visualPhase);
+              if (isSupport && beat >= 1) point = supportCarry ?? point;
+              if (isActive && beat >= 2) point = beat >= 3 ? (activeCarry ?? receivePoint ?? point) : (receivePoint ?? point);
+              if (isDefender && beat >= 3 && activeCarry) point = lerpPoint(point, activeCarry, beat === 3 ? .35 : .52);
               const projectedEnergy = Math.max(0, Math.round(member.stamina - (match.effort[member.id] ?? 0)));
               return (
                 <PitchHead
                   key={member.id}
-                  x={x}
-                  y={y}
+                  x={point[0]}
+                  y={point[1]}
                   name={member.name.split(" ")[0]}
-                  active={active}
-                  hasBall={active}
+                  active={isActive || isDefender}
+                  hasBall={false}
                   portrait={workerLook(member).portrait}
                   player
                   energy={projectedEnergy}
+                  transitionMs={ballTransitionMs}
                 />
               );
             })}
 
-            {!activeTo && <div className="absolute left-[49%] top-[49%] h-2.5 w-2.5 rounded-full border border-black/50 bg-white shadow"/>}
+            <div
+              className="pointer-events-none absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/70 shadow-[0_0_8px_rgba(255,255,255,.85)]"
+              style={{
+                left: ballPoint[0] + "%",
+                top: ballPoint[1] + "%",
+                transitionProperty: "left, top",
+                transitionDuration: ballTransitionMs + "ms",
+                transitionTimingFunction: "ease-in-out",
+                background: "conic-gradient(#fff 0 18%, #222 18% 34%, #fff 34% 52%, #222 52% 68%, #fff 68% 84%, #222 84% 100%)",
+              }}
+              aria-label="Arcball"
+            />
 
-            {(match.phase === "goal" || match.phase === "shot") && latestEvent && (
+            {beat === VISUAL_BEATS - 1 && (match.phase === "goal" || match.phase === "shot") && latestEvent && (
               <div className={cn(
                 "absolute bottom-[18%] left-[8%] right-[8%] z-40 rounded-xl border p-3 text-center shadow-2xl",
                 match.phase === "goal" ? "border-gold bg-ink/95" : "border-white/25 bg-ink/90"
@@ -283,6 +398,14 @@ export default function ArcballMatch({
                 <div className="mt-1 text-[10px] leading-relaxed text-paper/75">{latestEvent.text}</div>
               </div>
             )}
+          </div>
+
+          <div className="rounded-xl border border-cyanx/30 bg-cyanx/5 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-[8px] font-black tracking-[0.22em] text-cyanx">LIVE PLAY · {match.minute}'</div>
+              <div className="text-[7px] font-black text-paper/35">{Math.min(beat + 1, VISUAL_BEATS)}/{VISUAL_BEATS}</div>
+            </div>
+            <div className="mt-1 text-[11px] leading-relaxed text-paper/80">{liveCommentary}</div>
           </div>
 
           <div className="grid grid-cols-4 gap-1">
@@ -326,7 +449,7 @@ export default function ArcballMatch({
           <div className="rounded-xl border border-line bg-panel2/55 p-3">
             <div className="mb-2 text-[8px] font-black tracking-[0.2em] text-paper/40">MATCH FEED · LATEST FIRST</div>
             <div className="space-y-1.5">
-              {[...match.events].reverse().slice(0, 7).map((event, index) => (
+              {[...visibleEvents].reverse().slice(0, 7).map((event, index) => (
                 <div key={event.minute + "|" + index + "|" + event.text} className={cn(
                   "rounded-md border border-line/40 bg-abyss/25 px-2 py-1.5 text-[10px] leading-relaxed",
                   event.kind === "goal" ? "border-gold/35 font-black text-gold" :
@@ -411,6 +534,7 @@ function PitchHead({
   hasBall,
   player = false,
   energy,
+  transitionMs = 900,
 }: {
   x: number;
   y: number;
@@ -420,12 +544,13 @@ function PitchHead({
   hasBall: boolean;
   player?: boolean;
   energy?: number;
+  transitionMs?: number;
 }) {
   const tired = energy !== undefined && energy <= 35;
   return (
     <div
-      className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center transition-all duration-[1400ms] ease-in-out"
-      style={{ left: x + "%", top: y + "%" }}
+      className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center ease-in-out"
+      style={{ left: x + "%", top: y + "%", transitionProperty: "left, top", transitionDuration: transitionMs + "ms" }}
     >
       <div className="relative">
         <div className={cn(
