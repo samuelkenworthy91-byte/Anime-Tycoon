@@ -17,6 +17,7 @@ import {
 import { merchValueOf } from "./franchise";
 import { bumpRivalry, type RivalStudio } from "./rivals";
 import type { RunState } from "./state";
+import { staffIsInjured } from "./staffAvailability";
 
 export const ARCBALL_VERSION = 1;
 export const ARCBALL_TEAM_SIZE = 5;
@@ -563,6 +564,10 @@ export function setArcballLineup(run: RunState, position: ArcballPosition, staff
   let state = cleanArcballRoster(run, arcballStateOf(run));
   if (!state.unlocked) return null;
   if (staffId && !state.registered.includes(staffId)) return null;
+  if (staffId) {
+    const member = run.staff.find((staff) => staff.id === staffId);
+    if (!member || staffIsInjured(member, run.day ?? run.week * 7)) return null;
+  }
   const lineup = { ...state.lineup };
   if (staffId) {
     for (const pos of ARCBALL_POSITIONS) if (lineup[pos] === staffId) delete lineup[pos];
@@ -581,7 +586,10 @@ export function setArcballTactics(run: RunState, formation: ArcballFormationId, 
 export function arcballLineupStaff(run: RunState, lineupOverride?: Partial<Record<ArcballPosition, string>>): Staff[] {
   const state = cleanArcballRoster(run, arcballStateOf(run));
   const lineup = lineupOverride ?? state.lineup;
-  return ARCBALL_POSITIONS.map((position) => run.staff.find((s) => s.id === lineup[position])).filter((s): s is Staff => !!s);
+  const day = run.day ?? run.week * 7;
+  return ARCBALL_POSITIONS
+    .map((position) => run.staff.find((s) => s.id === lineup[position]))
+    .filter((s): s is Staff => !!s && !staffIsInjured(s, day));
 }
 
 export function arcballReady(run: RunState): boolean {
@@ -822,7 +830,7 @@ export function substituteArcballMatch(run: RunState, match: ArcballMatchState, 
   if (!outgoingId || outgoingId === incomingId) return null;
   const incoming = run.staff.find((staff) => staff.id === incomingId);
   const outgoing = run.staff.find((staff) => staff.id === outgoingId);
-  if (!incoming || !outgoing) return null;
+  if (!incoming || !outgoing || staffIsInjured(incoming, run.day ?? run.week * 7)) return null;
   const playerStats = { ...match.playerStats };
   playerStats[incomingId] = playerStats[incomingId] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
   return {
@@ -1077,6 +1085,41 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
       creatorFans: Math.max(0, Math.round((member.creatorFans ?? 0) + fanGain)),
     };
   });
+  /* A normal Arcball match carries a 20% team injury risk. The risk rises when
+     the squad is exhausted, making repeated low-energy fixtures a real studio gamble. */
+  let injuryNotice = "";
+  const injuryRng = seeded("arcball-injury|" + fixture.id);
+  const participants = staff.filter((member) => !!match.playerStats[member.id]);
+  if (participants.length) {
+    const energies = participants.map((member) => member.stamina);
+    const fatiguePressure = energies.reduce((sum, energy) => sum + Math.max(0, 45 - energy) / 45, 0) / energies.length;
+    const lowestEnergy = Math.min(...energies);
+    const injuryChance = clamp(.20 + fatiguePressure * .16 + (lowestEnergy < 25 ? .08 : 0), .20, .45);
+    if (injuryRng() < injuryChance) {
+      const injured = pickWeighted(participants.map((member) => ({
+        item: member,
+        weight: 1 + Math.max(0, 55 - member.stamina) / 7,
+      })), injuryRng());
+      const fatigueWeeks = injured.stamina < 20 ? 2 : injured.stamina < 35 ? 1 : 0;
+      const weeksOut = Math.min(6, 2 + Math.floor(injuryRng() * 3) + fatigueWeeks);
+      const injuries = ["ankle sprain", "shoulder strain", "wrist sprain", "knee strain", "back strain"];
+      const injuryLabel = injuries[Math.floor(injuryRng() * injuries.length)];
+      const currentDay = run.day ?? run.week * 7;
+      const injuredUntilDay = currentDay + weeksOut * 7;
+      const activeProject = run.projects.find((project) =>
+        !["airing", "done", "shelved"].includes(project.stage) && project.staffIds.includes(injured.id)
+      );
+      staff = staff.map((member) => member.id === injured.id ? {
+        ...member,
+        injuredUntilDay,
+        injuryLabel,
+        arcballInjuries: (member.arcballInjuries ?? 0) + 1,
+      } : member);
+      injuryNotice = " · 🤕 " + injured.name + " suffers a " + injuryLabel + " and is OUT " + weeksOut + " weeks" +
+        (activeProject ? " — they remain assigned to “" + activeProject.draft.title + "” but cannot contribute to production" : "") + ".";
+    }
+  }
+
   const studioFans = Math.round((win ? 500 : draw ? 250 : 100) + playerScore * 100);
   const opponentId = match.playerIsHome ? fixture.awayId : fixture.homeId;
   const opponent = arcballTeamName(run, opponentId);
@@ -1096,7 +1139,7 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     fansThisWeek: (run.fansThisWeek ?? 0) + studioFans,
     notices: [
       ...run.notices,
-      "⚽ ARCBALL: " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (sponsorGain ? " · +" + sponsorGain.toLocaleString("en-GB") + " sponsor bonus" : "") + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + ".",
+      "⚽ ARCBALL: " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (sponsorGain ? " · +" + sponsorGain.toLocaleString("en-GB") + " sponsor bonus" : "") + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + "." + injuryNotice,
     ].slice(-40),
   };
 }
@@ -1330,7 +1373,7 @@ export function trainArcball(run: RunState, staffId: string, drillId: string): R
   const member = run.staff.find((s) => s.id === staffId);
   const drill = ARCBALL_DRILLS.find((d) => d.id === drillId);
   let state = arcballStateOf(run);
-  if (!member || !drill || !state.unlocked || !state.registered.includes(staffId) || state.tokens < drill.cost) return null;
+  if (!member || !drill || !state.unlocked || !state.registered.includes(staffId) || state.tokens < drill.cost || staffIsInjured(member, run.day ?? run.week * 7)) return null;
   const progress = ensurePlayerProgress(state, staffId);
   if (progress.lastTrainingWeek === run.week) return null;
   const readiness = arcballTrainingReadiness(member, drill.id, run.week);
