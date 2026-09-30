@@ -154,6 +154,10 @@ export interface Staff {
   lastEventWeek?: number;
   /** personal requests are deliberately rare: one request per employee per three-year window */
   lastRequestWeek?: number;
+  /** Arcball injuries use live studio days so they can interrupt production mid-week. */
+  injuredUntilDay?: number;
+  injuryLabel?: string;
+  arcballInjuries?: number;
 }
 
 export interface CastMember {
