@@ -102,7 +102,7 @@ function ProjectCard({
   const [delegateOpen, setDelegateOpen] = useState(false);
   const team = run.staff.filter((s) => p.staffIds.includes(s.id));
   const productionHead = studioProduction(run.heads ?? {}, run.staff, run.showrunner);
-  const coordination = teamCoordinationEfficiency(team, productionHead.coordinationRelief);
+  const coordination = teamCoordinationEfficiency(team, productionHead.coordinationRelief ?? 0);
   const coordinatedByPerk = hasProductionCoordinator(team);
   const late = daysToDeadline(p, run.day ?? run.week * 7);
   const inPipeline = p.stage !== "airing" && p.stage !== "done";
@@ -426,7 +426,7 @@ function ProjectCard({
                 <div className={cn("rounded-lg border px-2 py-2 text-[9px]", coordination >= 0.999 ? "border-mint/35 bg-mint/5 text-mint" : "border-gold/30 bg-gold/5 text-paper/60")}>
                   {coordinatedByPerk
                     ? "Production Coordinator active — this large crew has no coordination diminishing."
-                    : `Large-team coordination: ${Math.round(coordination * 100)}%. Your Production Manager recovers ${Math.round(productionHead.coordinationRelief * 100)}% of the coordination loss. Assign a Production Coordinator to remove it completely.`}
+                    : `Large-team coordination: ${Math.round(coordination * 100)}%. Your Production Manager recovers ${Math.round((productionHead.coordinationRelief ?? 0) * 100)}% of the coordination loss. Assign a Production Coordinator to remove it completely.`}
                 </div>
               )}
               {run.staff.length === 0 && (
