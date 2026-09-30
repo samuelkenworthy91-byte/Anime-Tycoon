@@ -656,11 +656,23 @@ function playerTeamNumbers(run: RunState, intensity: ArcballIntensity = "normal"
   })) as Record<ArcballPosition, { member: Staff; profile: ArcballBaseProfile } | null>;
   const values = ARCBALL_POSITIONS.map((position) => {
     const row = byPosition[position];
-    return row ? positionRating(row.profile.stats, position) : 20;
+    if (!row) return 20;
+    const form = state.players[row.member.id]?.form ?? 0;
+    return positionRating(row.profile.stats, position) + form * 1.4;
   });
   let attack = values[4] * .38 + values[3] * .25 + values[2] * .18 + values[1] * .11 + values[0] * .08;
   let defence = values[0] * .35 + values[1] * .30 + values[2] * .18 + values[3] * .10 + values[4] * .07;
   let possession = values[3] * .34 + values[2] * .28 + values[1] * .18 + values[4] * .12 + values[0] * .08;
+
+  /* Archetypes alter how similarly-rated workers actually play. */
+  for (const position of ARCBALL_POSITIONS) {
+    const row = byPosition[position];
+    if (!row) continue;
+    const archetype = arcballArchetype(row.profile);
+    attack += archetype.attack * .55;
+    defence += archetype.defence * .55;
+    possession += archetype.possession * .55;
+  }
 
   const formation = state.formation;
   if (formation === "possession") { possession += 7; attack -= 1; defence -= 1; }
@@ -1002,6 +1014,7 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     const mvp = member.id === mvpId;
     const fanGain = Math.round((80 + stat.goals * 700 + stat.assists * 350 + (win ? 180 : draw ? 90 : 30) + (mvp ? 1200 : 0)) * seasonScale);
     const prior = progress[member.id] ?? freshProgress();
+    const formDelta = stat.rating >= 7.7 || mvp ? 1 : stat.rating < 6.2 ? -1 : win ? 1 : 0;
     progress[member.id] = {
       ...prior,
       appearances: prior.appearances + 1,
@@ -1010,6 +1023,12 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
       wins: prior.wins + (win ? 1 : 0),
       playerOfMatch: prior.playerOfMatch + (mvp ? 1 : 0),
       arcballFans: prior.arcballFans + fanGain,
+      seasonAppearances: prior.seasonAppearances + 1,
+      seasonGoals: prior.seasonGoals + stat.goals,
+      seasonAssists: prior.seasonAssists + stat.assists,
+      seasonWins: prior.seasonWins + (win ? 1 : 0),
+      seasonPlayerOfMatch: prior.seasonPlayerOfMatch + (mvp ? 1 : 0),
+      form: clamp(prior.form + formDelta, -3, 3),
     };
     return {
       ...member,
@@ -1190,17 +1209,22 @@ export function trainArcball(run: RunState, staffId: string, drillId: string): R
   if (!member || !drill || !state.unlocked || !state.registered.includes(staffId) || state.tokens < drill.cost) return null;
   const progress = ensurePlayerProgress(state, staffId);
   if (progress.lastTrainingWeek === run.week) return null;
+  const readiness = arcballTrainingReadiness(member, drill.id, run.week);
   const base = arcballBaseProfile(member);
   const cap = Math.max(base.stats[drill.primary], 55 + Math.round(base.potential * .45));
   const current = arcballProfile(member, progress).stats[drill.primary];
-  const primaryGain = Math.max(0, Math.min(drill.gain, cap - current));
+  const plannedGain = Math.max(1, Math.round(drill.gain * readiness.gainMult));
+  const primaryGain = Math.max(0, Math.min(plannedGain, cap - current));
   if (primaryGain <= 0) return null;
   const boosts = { ...(progress.boosts ?? {}) };
   boosts[drill.primary] = (boosts[drill.primary] ?? 0) + primaryGain;
-  if (drill.secondary && drill.secondaryGain) boosts[drill.secondary] = (boosts[drill.secondary] ?? 0) + drill.secondaryGain;
+  if (drill.secondary && drill.secondaryGain) {
+    const secondaryGain = Math.max(1, Math.round(drill.secondaryGain * readiness.gainMult));
+    boosts[drill.secondary] = (boosts[drill.secondary] ?? 0) + secondaryGain;
+  }
   if (drill.penalty) {
     const r = seeded("arcball-drill|" + staffId + "|" + drill.id + "|" + run.week);
-    if (r() < .28) boosts[drill.penalty] = (boosts[drill.penalty] ?? 0) - 1;
+    if (r() < .28 * readiness.penaltyMult) boosts[drill.penalty] = (boosts[drill.penalty] ?? 0) - 1;
   }
   state = {
     ...state,
@@ -1211,7 +1235,7 @@ export function trainArcball(run: RunState, staffId: string, drillId: string): R
     ...run,
     arcball: state,
     staff: run.staff.map((s) => s.id === staffId ? { ...s, stamina: Math.max(0, s.stamina - drill.stamina) } : s),
-    notices: [...run.notices, "⚽ " + member.name + " completes " + drill.name + ": +" + primaryGain + " " + drill.primary.toUpperCase() + " (−" + drill.cost + " Arc Tokens, −" + drill.stamina + " energy)."].slice(-40),
+    notices: [...run.notices, "⚽ " + member.name + " completes " + drill.name + " at " + readiness.label + " readiness: +" + primaryGain + " " + drill.primary.toUpperCase() + " (−" + drill.cost + " Arc Tokens, −" + drill.stamina + " energy)."].slice(-40),
   };
 }
 
