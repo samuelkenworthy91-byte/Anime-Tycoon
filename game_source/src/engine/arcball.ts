@@ -1145,6 +1145,26 @@ function resultTokenReward(playerScore: number, opponentScore: number): number {
   return playerScore > opponentScore ? 10 : playerScore === opponentScore ? 6 : 4;
 }
 
+function finalizeArcballCup(state: ArcballState): { state: ArcballState; playerWon: boolean; championId: string | null } {
+  if (state.cupHistory.some((entry) => entry.year === state.seasonYear)) return { state, playerWon: false, championId: null };
+  const final = state.cupFixtures.find((fixture) => fixture.cupRound === "final");
+  if (!final) return { state, playerWon: false, championId: null };
+  const championId = cupFixtureWinner(final);
+  if (!championId) return { state, playerWon: false, championId: null };
+  const playerWon = championId === "player";
+  return {
+    state: {
+      ...state,
+      tokens: state.tokens + (playerWon ? 30 : 0),
+      championshipSpotlights: state.championshipSpotlights + (playerWon ? 1 : 0),
+      cupTitles: state.cupTitles + (playerWon ? 1 : 0),
+      cupHistory: [...state.cupHistory, { year: state.seasonYear, championId, playerWon }].slice(-30),
+    },
+    playerWon,
+    championId,
+  };
+}
+
 function resolveFixtureScores(state: ArcballState, fixtureId: string, homeScore: number, awayScore: number, resolvedBy: ArcballFixture["resolvedBy"]): ArcballState {
   return {
     ...state,
@@ -1168,6 +1188,9 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     cupTiebreak = true;
   }
   state = resolveFixtureScores(state, fixture.id, resolvedHomeScore, resolvedAwayScore, resolvedBy);
+  state = ensureArcballCupRounds(state);
+  const cupFinalized = finalizeArcballCup(state);
+  state = cupFinalized.state;
   const playerScore = match.playerIsHome ? resolvedHomeScore : resolvedAwayScore;
   const opponentScore = match.playerIsHome ? resolvedAwayScore : resolvedHomeScore;
   const win = playerScore > opponentScore;
@@ -1242,7 +1265,8 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     }
   }
 
-  const studioFans = Math.round((win ? 500 : draw ? 250 : 100) + playerScore * 100);
+  const cupFanBonus = cupFinalized.playerWon ? 5_000 : 0;
+  const studioFans = Math.round((win ? 500 : draw ? 250 : 100) + playerScore * 100 + cupFanBonus);
   const opponentId = match.playerIsHome ? fixture.awayId : fixture.homeId;
   const opponent = arcballTeamName(run, opponentId);
   const sponsor = state.sponsor && state.sponsorYear === state.seasonYear ? ARCBALL_SPONSORS[state.sponsor] : null;
@@ -1262,7 +1286,7 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     fansThisWeek: (run.fansThisWeek ?? 0) + studioFans,
     notices: [
       ...run.notices,
-      "⚽ " + competitionLabel + ": " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (sponsorGain ? " · +" + sponsorGain.toLocaleString("en-GB") + " sponsor bonus" : "") + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + "." + injuryNotice,
+      "⚽ " + competitionLabel + ": " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (cupFinalized.playerWon ? " · 🏆 CUP WINNERS: +30 Arc Tokens, +1 Championship Spotlight and +5,000 studio fans" : "") + (sponsorGain ? " · +" + sponsorGain.toLocaleString("en-GB") + " sponsor bonus" : "") + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + "." + injuryNotice,
     ].slice(-40),
   };
 }
@@ -1432,6 +1456,7 @@ export function advanceArcballWeek(run: RunState): RunState {
       ...state,
       seasonYear: currentYear,
       fixtures: buildArcballFixtures(currentYear),
+      cupFixtures: buildArcballCupFixtures(currentYear),
       seasonPurchases: { tier1: 0, tier2: 0 },
       players: resetArcballSeasonPlayerStats(state.players),
       sponsor: null,
@@ -1440,17 +1465,29 @@ export function advanceArcballWeek(run: RunState): RunState {
     out = { ...out, arcball: state, notices: notices.slice(-40) };
   }
 
-  state = cleanArcballRoster(out, arcballStateOf(out));
+  state = cleanArcballRoster(out, ensureArcballCupRounds(arcballStateOf(out)));
   const fixtures = state.fixtures.map((fixture) => {
     if (fixture.homeScore !== undefined || fixture.week > out.week) return fixture;
     if (fixture.homeId === "player" || fixture.awayId === "player") return fixture;
     return simulateRivalFixture(out, fixture);
   });
   state = { ...state, fixtures };
+  for (let pass = 0; pass < 3; pass += 1) {
+    state = ensureArcballCupRounds(state);
+    state = {
+      ...state,
+      cupFixtures: state.cupFixtures.map((fixture) => {
+        if (fixture.homeScore !== undefined || fixture.week > out.week) return fixture;
+        if (fixture.homeId === "player" || fixture.awayId === "player") return fixture;
+        return simulateRivalFixture({ ...out, arcball: state }, fixture);
+      }),
+    };
+  }
+  state = finalizeArcballCup(ensureArcballCupRounds(state)).state;
   out = { ...out, arcball: state };
 
-  const overdue = arcballStateOf(out).fixtures
-    .filter((f) => (f.homeId === "player" || f.awayId === "player") && f.homeScore === undefined && f.week < out.week)
+  const overdue = playerArcballFixtures(arcballStateOf(out))
+    .filter((f) => f.homeScore === undefined && f.week < out.week)
     .sort((a, b) => a.week - b.week);
   for (const fixture of overdue) {
     out = arcballReady(out) ? (instantResolveArcballFixture(out, fixture.id, "auto") ?? out) : forfeitPlayerFixture(out, fixture);
@@ -1459,7 +1496,8 @@ export function advanceArcballWeek(run: RunState): RunState {
   const due = playableArcballFixture(out);
   if (due && due.week === out.week) {
     const opponent = arcballTeamName(out, due.homeId === "player" ? due.awayId : due.homeId);
-    out = { ...out, notices: [...out.notices, "⚽ ARCBALL MATCH WEEK — " + out.studio + " vs " + opponent + ". Manage it from MORE → ARCBALL or let it auto-sim next week."].slice(-40) };
+    const comp = due.competition === "cup" ? "ARCBALL CUP " + (due.cupRound?.toUpperCase() ?? "MATCH") : "ARCBALL LEAGUE";
+    out = { ...out, notices: [...out.notices, "⚽ " + comp + " WEEK — " + out.studio + " vs " + opponent + ". Manage it from MORE → ARCBALL or let it auto-sim next week."].slice(-40) };
   }
   return out;
 }
