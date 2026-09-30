@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { OFFICES, type Staff } from "../data";
 import {
+  ARCBALL_INVESTMENTS,
   activateArcball,
   applyChampionshipSpotlight,
+  arcballClubEffects,
   arcballInjuryChance,
   arcballInjuryWeeks,
+  arcballInvestmentQuote,
+  arcballPrivateCoachingQuote,
   arcballProfile,
   arcballReady,
   arcballStateOf,
@@ -12,7 +16,10 @@ import {
   buildArcballFixtures,
   instantResolveArcballFixture,
   playableArcballFixture,
+  purchaseArcballInvestment,
   redeemArcballMedal,
+  runArcballCamp,
+  runArcballPrivateCoaching,
 } from "../arcball";
 import { initialRun, migrateRun, type RunState } from "../state";
 import type { Franchise } from "../franchise";
@@ -90,6 +97,21 @@ describe("Arcball", () => {
     expect(arcballInjuryWeeks(10, 0.999)).toBe(6);
   });
 
+  it("sports science can soften fatigue risk but never removes the 20% baseline danger", () => {
+    const rested = [100, 100, 100, 100, 100];
+    const tired = [20, 24, 28, 32, 36];
+    expect(arcballInjuryChance(rested, .45)).toBeCloseTo(.20, 5);
+    expect(arcballInjuryChance(tired, .45)).toBeLessThan(arcballInjuryChance(tired));
+    expect(arcballInjuryChance(tired, .45)).toBeGreaterThanOrEqual(.20);
+  });
+
+  it("offers more than a billion pounds of permanent Arcball infrastructure", () => {
+    const total = Object.values(ARCBALL_INVESTMENTS)
+      .flatMap((def) => [...def.costs])
+      .reduce((sum, cost) => sum + cost, 0);
+    expect(total).toBeGreaterThan(1_000_000_000);
+  });
+
   it("keeps Arcball talent independent and deterministic per worker", () => {
     const run = staffedRun();
     const first = arcballProfile(run.staff[0]);
@@ -104,6 +126,36 @@ describe("Arcball", () => {
     expect(arcballStateOf(activated!).unlocked).toBe(true);
     expect(arcballStateOf(activated!).registered.length).toBeGreaterThanOrEqual(5);
     expect(arcballReady(activated!)).toBe(true);
+  });
+
+  it("spends real studio capital on permanent Arcball infrastructure", () => {
+    let run = activateArcball({ ...staffedRun(), cash: 2_000_000_000 })!;
+    const quote = arcballInvestmentQuote(run, "medical");
+    expect(quote.level).toBe(0);
+    expect(quote.cost).toBe(10_000_000);
+    const beforeCash = run.cash;
+    run = purchaseArcballInvestment(run, "medical")!;
+    expect(run.cash).toBe(beforeCash - 10_000_000);
+    expect(arcballStateOf(run).investments.medical).toBe(1);
+    expect(arcballClubEffects(arcballStateOf(run)).energyCostMult).toBeLessThan(1);
+  });
+
+  it("allows one expensive squad camp and one private coach per player each season", () => {
+    let run = activateArcball({ ...staffedRun(), cash: 500_000_000 })!;
+    const state0 = arcballStateOf(run);
+    const playerId = state0.registered[0];
+    const coaching = arcballPrivateCoachingQuote(run, playerId);
+    expect(coaching.blockedReason).toBeNull();
+    const cash0 = run.cash;
+    run = runArcballPrivateCoaching(run, playerId)!;
+    expect(run.cash).toBeLessThan(cash0);
+    expect(runArcballPrivateCoaching(run, playerId)).toBeNull();
+
+    const beforeCamp = run.cash;
+    run = runArcballCamp(run, 3)!;
+    expect(run.cash).toBe(beforeCamp - 150_000_000);
+    expect(arcballStateOf(run).campYear).toBe(arcballStateOf(run).seasonYear);
+    expect(runArcballCamp(run, 1)).toBeNull();
   });
 
   it("will not field an injured starter until the manager replaces them", () => {
@@ -171,6 +223,8 @@ describe("Arcball", () => {
     expect(state.cupFixtures).toHaveLength(3);
     expect(state.records.longestWinStreak).toBe(0);
     expect(state.merchDrops).toEqual([]);
+    expect(state.investments).toEqual({ performance: 0, medical: 0, analytics: 0, arena: 0 });
+    expect(state.campYear).toBe(0);
     expect(migrated.staff).toHaveLength(5);
   });
 
