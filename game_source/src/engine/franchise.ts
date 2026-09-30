@@ -187,11 +187,11 @@ export function merchValueOf(fr: Franchise): number {
   /* Consumer products are now a real second business. Following, critical
      pedigree and proven franchise revenue all contribute to the addressable
      merchandise market; current zeitgeist determines how much converts now. */
-  const base = fr.lifetimeFans * 1.8 + fr.bestScore * 16_000 + fr.totalRevenue * 0.025;
+  const base = fr.lifetimeFans * 1.45 + fr.bestScore * 16_000 + fr.totalRevenue * 0.018;
   const zeitgeistF = 0.55 + zeitgeistOf(fr) / 100;
   const charF = 1 + (top ? top.popularity : 0) / 300;
   const cultF = fr.cult ? 1.25 : 1;
-  const bigThreeF = fr.bigThree ? 1.6 : 1;
+  const bigThreeF = fr.bigThree ? 1.4 : 1;
   return Math.round((base * zeitgeistF * charF * cultF * bigThreeF) / 1_000) * 1_000;
 }
 
@@ -741,10 +741,10 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
   { id: "artbook", label: "Production Artbook", desc: "High-margin art and production archive.", cost: 180_000, weeks: 18, mult: 1.10, minPop: 30, minScore: 26, charDriven: false, tier: 2, unlockCost: 250_000 },
   { id: "figures", label: "Scale Figures", desc: "Premium figure manufacturing and pre-orders.", cost: 250_000, weeks: 28, mult: 1.40, minPop: 35, minScore: 0, charDriven: true, tier: 2, unlockCost: 350_000 },
   { id: "collectors", label: "Collector's Edition", desc: "Deluxe box set, extras and limited packaging.", cost: 350_000, weeks: 16, mult: 1.60, minPop: 45, minScore: 28, charDriven: false, tier: 2, unlockCost: 500_000 },
-  { id: "popup", label: "Pop-up Stores & Café", desc: "Temporary themed retail and event-exclusive goods.", cost: 500_000, weeks: 20, mult: 1.80, minPop: 50, minScore: 0, charDriven: true, tier: 3, unlockCost: 800_000, popularityGain: 4, fatigueAdd: 8, freezeWeeks: 6 },
-  { id: "tcg", label: "Trading Card Game", desc: "Launch a collectible card ecosystem with organised play.", cost: 650_000, weeks: 36, mult: 3.40, minPop: 55, minScore: 28, charDriven: true, tier: 3, unlockCost: 1_200_000, popularityGain: 8, fatigueAdd: 14, freezeWeeks: 12 },
-  { id: "global_collection", label: "Worldwide Collector Range", desc: "Coordinated premium launch across major markets.", cost: 1_400_000, weeks: 32, mult: 2.80, minPop: 60, minScore: 32, charDriven: true, tier: 4, unlockCost: 2_500_000, popularityGain: 5, fatigueAdd: 10, freezeWeeks: 8 },
-  { id: "mobile", label: "Mobile Game Licence", desc: "A high-risk, high-reach global mobile spin-off.", cost: 2_500_000, weeks: 48, mult: 4.20, minPop: 65, minScore: 30, charDriven: true, tier: 4, unlockCost: 4_000_000, popularityGain: 6, fatigueAdd: 12, freezeWeeks: 8 },
+  { id: "popup", label: "Pop-up Stores & Café", desc: "Temporary themed retail and event-exclusive goods.", cost: 600_000, weeks: 20, mult: 1.60, minPop: 50, minScore: 0, charDriven: true, tier: 3, unlockCost: 900_000, popularityGain: 4, fatigueAdd: 8, freezeWeeks: 6 },
+  { id: "tcg", label: "Trading Card Game", desc: "Launch a collectible card ecosystem with organised play.", cost: 1_200_000, weeks: 36, mult: 2.80, minPop: 55, minScore: 28, charDriven: true, tier: 3, unlockCost: 1_800_000, popularityGain: 8, fatigueAdd: 14, freezeWeeks: 12 },
+  { id: "global_collection", label: "Worldwide Collector Range", desc: "Coordinated premium launch across major markets.", cost: 2_500_000, weeks: 32, mult: 2.30, minPop: 60, minScore: 32, charDriven: true, tier: 4, unlockCost: 3_500_000, popularityGain: 5, fatigueAdd: 10, freezeWeeks: 8 },
+  { id: "mobile", label: "Mobile Game Licence", desc: "A high-risk, high-reach global mobile spin-off.", cost: 5_000_000, weeks: 48, mult: 3.40, minPop: 65, minScore: 30, charDriven: true, tier: 4, unlockCost: 6_000_000, popularityGain: 6, fatigueAdd: 12, freezeWeeks: 8 },
 ];
 
 export const MERCH_COOLDOWN = 40;
@@ -767,7 +767,7 @@ export function merchBlock(fr: Franchise, product: MerchProduct, week: number, c
 /** Large, engaged fandoms now materially change consumer-product economics.
  * The logarithmic curve keeps million-fan IP valuable without making revenue infinite. */
 export function merchFanbaseMult(fr: Pick<Franchise, "lifetimeFans">): number {
-  return Math.min(2.25, 1 + Math.log10(1 + Math.max(0, fr.lifetimeFans) / 50_000) * 0.60);
+  return Math.min(1.90, 1 + Math.log10(1 + Math.max(0, fr.lifetimeFans) / 50_000) * 0.45);
 }
 
 export function merchReturn(fr: Franchise, product: MerchProduct): number {
