@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   Coins,
@@ -51,6 +51,8 @@ import {
 import type { RunState } from "../engine/state";
 import { canSeeEmployeePotential } from "../engine/staffPotential";
 import Portrait from "./Portrait";
+import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
+import { markTutorialSeen, tutorialSeen } from "../engine/tutorials";
 import { cn } from "../utils/cn";
 
 type Tab = "squad" | "fixtures" | "table" | "training" | "rewards";
@@ -72,6 +74,14 @@ export default function ArcballPanel({
   const [rewardStaffId, setRewardStaffId] = useState(run.staff[0]?.id ?? "");
   const [rewardPoint, setRewardPoint] = useState<PointType>("story");
   const [spotlightKey, setSpotlightKey] = useState(Object.keys(run.franchises)[0] ?? "");
+  const [help, setHelp] = useState(false);
+  useEffect(() => {
+    if (!block && !tutorialSeen(run, "arcball")) setHelp(true);
+  }, [block, run.tutorialsSeen]);
+  const dismissHelp = () => {
+    setRun((r) => markTutorialSeen(r, "arcball"));
+    setHelp(false);
+  };
 
   if (!state.unlocked) {
     return (
@@ -79,7 +89,8 @@ export default function ArcballPanel({
         <div className="ink-card border-cyanx/40 p-4">
           <div className="flex items-center gap-2 text-cyanx">
             <Trophy size={19} />
-            <div className="font-display text-xl font-black">ARCBALL LEAGUE</div>
+            <div className="min-w-0 flex-1 font-display text-xl font-black">ARCBALL LEAGUE</div>
+            <TutorialHelpButton label="WHAT IS ARCBALL?" onClick={() => setHelp(true)} />
           </div>
           <p className="mt-2 text-xs leading-relaxed text-paper/60">
             Five employees represent the studio in the anime industry's inter-studio sport. Arcball skill is completely separate from Story, Art and Sound: a weak producer can still be a star athlete.
@@ -107,6 +118,7 @@ export default function ArcballPanel({
         <div className="text-[10px] text-paper/40">
           Arcball uses the workers you already employ. Matches drain their real studio energy, while sporting fame grows their existing creator following.
         </div>
+        <FirstSeenTutorial id="arcball" open={help} onDismiss={dismissHelp} />
       </div>
     );
   }
@@ -121,6 +133,13 @@ export default function ArcballPanel({
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <div className="font-display text-lg font-black text-cyanx">ARCBALL LEAGUE</div>
+          <div className="text-[8px] text-paper/40">Workers, rivalries and studio prestige.</div>
+        </div>
+        <TutorialHelpButton label="HOW ARCBALL WORKS" onClick={() => setHelp(true)} />
+      </div>
       <div className="grid grid-cols-3 gap-2">
         <Stat label="ARC TOKENS" value={state.tokens.toString()} icon={<Coins size={13}/>} />
         <Stat label="TITLES" value={state.titles.toString()} icon={<Trophy size={13}/>} />
@@ -327,6 +346,7 @@ function Training({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) =
           </div>
         </>
       )}
+      <FirstSeenTutorial id="arcball" open={help} onDismiss={dismissHelp} />
     </div>
   );
 }
