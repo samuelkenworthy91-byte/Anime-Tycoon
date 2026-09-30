@@ -243,6 +243,20 @@ export interface ArcballMatchState {
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
+/** One rested team has a 1-in-5 injury risk per match. Fatigue raises this
+ * toward a hard 45% ceiling so repeatedly fielding exhausted staff is dangerous. */
+export function arcballInjuryChance(energies: number[]): number {
+  if (!energies.length) return 0;
+  const fatiguePressure = energies.reduce((sum, energy) => sum + Math.max(0, 45 - energy) / 45, 0) / energies.length;
+  const lowestEnergy = Math.min(...energies);
+  return clamp(.20 + fatiguePressure * .16 + (lowestEnergy < 25 ? .08 : 0), .20, .45);
+}
+
+export function arcballInjuryWeeks(energy: number, roll: number): number {
+  const fatigueWeeks = energy < 20 ? 2 : energy < 35 ? 1 : 0;
+  return Math.min(6, 2 + Math.floor(clamp(roll, 0, .999999) * 3) + fatigueWeeks);
+}
+
 function hash32(text: string): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < text.length; i += 1) {
@@ -1265,16 +1279,13 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
   const participants = staff.filter((member) => !!match.playerStats[member.id]);
   if (participants.length) {
     const energies = participants.map((member) => member.stamina);
-    const fatiguePressure = energies.reduce((sum, energy) => sum + Math.max(0, 45 - energy) / 45, 0) / energies.length;
-    const lowestEnergy = Math.min(...energies);
-    const injuryChance = clamp(.20 + fatiguePressure * .16 + (lowestEnergy < 25 ? .08 : 0), .20, .45);
+    const injuryChance = arcballInjuryChance(energies);
     if (injuryRng() < injuryChance) {
       const injured = pickWeighted(participants.map((member) => ({
         item: member,
         weight: 1 + Math.max(0, 55 - member.stamina) / 7,
       })), injuryRng());
-      const fatigueWeeks = injured.stamina < 20 ? 2 : injured.stamina < 35 ? 1 : 0;
-      const weeksOut = Math.min(6, 2 + Math.floor(injuryRng() * 3) + fatigueWeeks);
+      const weeksOut = arcballInjuryWeeks(injured.stamina, injuryRng());
       const injuries = ["ankle sprain", "shoulder strain", "wrist sprain", "knee strain", "back strain"];
       const injuryLabel = injuries[Math.floor(injuryRng() * injuries.length)];
       const currentDay = run.day ?? run.week * 7;
@@ -1460,7 +1471,18 @@ function completeArcballSeason(run: RunState, state: ArcballState): ArcballState
 }
 
 export function advanceArcballWeek(run: RunState): RunState {
-  let out = run;
+  const currentDay = run.day ?? run.week * 7;
+  const recovered = run.staff.filter((member) => member.injuredUntilDay !== undefined && member.injuredUntilDay <= currentDay);
+  let out = recovered.length ? {
+    ...run,
+    staff: run.staff.map((member) => member.injuredUntilDay !== undefined && member.injuredUntilDay <= currentDay
+      ? { ...member, injuredUntilDay: undefined, injuryLabel: undefined }
+      : member),
+    notices: [
+      ...run.notices,
+      ...recovered.map((member) => "✅ " + member.name + " is cleared to return after their Arcball injury."),
+    ].slice(-40),
+  } : run;
   let state = ensureArcballRivalRosters(out, cleanArcballRoster(out, arcballStateOf(out)));
   if (!state.unlocked) {
     if (!arcballUnlockReason(out)) {
