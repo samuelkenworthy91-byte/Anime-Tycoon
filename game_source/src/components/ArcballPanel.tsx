@@ -33,6 +33,7 @@ import {
   applyChampionshipSpotlight,
   arcballArchetype,
   arcballPotentialLabel,
+  arcballMerchQuote,
   arcballSponsorBlock,
   arcballTrainingReadiness,
   arcballProfile,
@@ -46,6 +47,7 @@ import {
   playableArcballFixture,
   redeemArcballMedal,
   registerArcballPlayer,
+  runArcballMerchDrop,
   setArcballLineup,
   setArcballTactics,
   signArcballSponsor,
@@ -287,7 +289,7 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
 
 function Fixtures({ run, setRun, onMatch }: { run: RunState; setRun: (fn: (r: RunState) => RunState) => void; onMatch: (fixtureId: string) => void }) {
   const state = arcballStateOf(run);
-  const fixtures = useMemo(() => state.fixtures.filter((f) => f.homeId === "player" || f.awayId === "player").sort((a, b) => b.week - a.week), [state.fixtures]);
+  const fixtures = useMemo(() => [...state.fixtures, ...state.cupFixtures].filter((f) => f.homeId === "player" || f.awayId === "player").sort((a, b) => b.week - a.week || b.round - a.round), [state.fixtures, state.cupFixtures]);
   return (
     <div className="space-y-1.5">
       {fixtures.map((f) => {
@@ -298,7 +300,10 @@ function Fixtures({ run, setRun, onMatch }: { run: RunState; setRun: (fn: (r: Ru
           <div key={f.id} className={cn("rounded-lg border p-2", due ? "border-cyanx/50 bg-cyanx/5" : "border-line bg-panel2/35")}>
             <div className="flex items-center gap-2">
               <span className="w-12 shrink-0 text-[8px] font-black text-paper/40">{dateLabel(f.week)}</span>
-              <div className="min-w-0 flex-1 text-[10px] font-bold">{arcballTeamName(run, f.homeId)} <span className="text-paper/30">v</span> {arcballTeamName(run, f.awayId)}</div>
+              <div className="min-w-0 flex-1 text-[10px] font-bold">
+                <span className={cn("mr-1 rounded px-1 py-0.5 text-[7px] font-black", f.competition === "cup" ? "bg-gold/15 text-gold" : "bg-cyanx/10 text-cyanx")}>{f.competition === "cup" ? (f.cupRound ?? "cup").toUpperCase() : "LEAGUE"}</span>
+                {arcballTeamName(run, f.homeId)} <span className="text-paper/30">v</span> {arcballTeamName(run, f.awayId)}
+              </div>
               {played ? (
                 <span className="font-display text-sm font-black text-gold">{f.homeScore}–{f.awayScore}</span>
               ) : due ? (
@@ -334,6 +339,25 @@ function League({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => 
           </div>
         ))}
       </div>
+
+      <section className="rounded-xl border border-gold/35 bg-gold/5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[9px] font-black tracking-[0.2em] text-gold">ARCBALL CUP · KNOCKOUT</div>
+          <div className="text-[8px] font-black text-paper/45">{state.cupTitles} PLAYER CUP TITLE{state.cupTitles === 1 ? "" : "S"}</div>
+        </div>
+        <div className="mt-1 text-[8px] text-paper/45">One studio receives a quarter-final bye. Winners advance to the semi-finals and final. Cup champions earn 30 Arc Tokens, 1 Championship Spotlight and 5,000 studio fans.</div>
+        <div className="mt-2 space-y-1">
+          {state.cupFixtures.map((fixture) => {
+            const played = fixture.homeScore !== undefined && fixture.awayScore !== undefined;
+            return <div key={fixture.id} className="grid grid-cols-[70px_1fr_auto] items-center gap-2 rounded border border-line/60 bg-ink/25 px-2 py-1.5 text-[8px]">
+              <span className="font-black text-gold">{(fixture.cupRound ?? "cup").toUpperCase()}</span>
+              <span className="truncate">{arcballTeamName(run, fixture.homeId)} <span className="text-paper/30">v</span> {arcballTeamName(run, fixture.awayId)}</span>
+              <span className={played ? "font-black text-paper" : "text-paper/30"}>{played ? fixture.homeScore + "–" + fixture.awayScore : dateLabel(fixture.week)}</span>
+            </div>;
+          })}
+          {state.cupHistory.length > 0 && <div className="pt-1 text-[8px] text-paper/45">Latest champion · {arcballTeamName(run, state.cupHistory[state.cupHistory.length - 1].championId)}</div>}
+        </div>
+      </section>
 
       <section className="rounded-xl border border-gold/30 bg-gold/5 p-3">
         <div className="text-[9px] font-black tracking-[0.2em] text-gold">SEASON SPONSOR</div>
@@ -379,6 +403,12 @@ function League({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => 
 
       <section className="rounded-xl border border-line bg-panel2/35 p-3">
         <div className="text-[9px] font-black tracking-[0.2em] text-paper/50">CAREER RECORDS</div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5 text-[8px]">
+          <div className="rounded border border-line/50 p-2"><span className="text-paper/35">BIGGEST WIN</span><div className="mt-0.5 font-bold text-mint">{state.records.biggestWinText}</div></div>
+          <div className="rounded border border-line/50 p-2"><span className="text-paper/35">WIN STREAK</span><div className="mt-0.5 font-bold text-gold">{state.records.longestWinStreak}</div></div>
+          <div className="rounded border border-line/50 p-2"><span className="text-paper/35">MOST GOALS</span><div className="mt-0.5 font-bold">{state.records.mostGoalsText}</div></div>
+          <div className="rounded border border-line/50 p-2"><span className="text-paper/35">TROPHIES</span><div className="mt-0.5 font-bold">{state.titles} league · {state.cupTitles} cup</div></div>
+        </div>
         <div className="mt-2 space-y-1">
           {career.slice(0, 6).map(({id,p,staff},index) => <div key={id} className="grid grid-cols-[20px_1fr_auto] items-center gap-2 rounded border border-line/50 px-2 py-1.5 text-[9px]"><b className="text-paper/30">{index+1}</b><span className="truncate font-bold">{staff?.name}</span><span className="text-paper/50">{p.appearances} app · <b className="text-gold">{p.goals} G</b> · {p.assists} A · {p.playerOfMatch} POTM</span></div>)}
         </div>
@@ -446,6 +476,7 @@ function Rewards({
 }) {
   const state = arcballStateOf(run);
   const ownedFranchises = Object.values(run.franchises).filter((f) => !f.soldTo);
+  const merchQuote = arcballMerchQuote(run);
   return (
     <div className="space-y-3">
       <section className="rounded-xl border border-line bg-panel2/35 p-3">
@@ -493,6 +524,19 @@ function Rewards({
             USE · {state.championshipSpotlights}
           </Btn>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-mint/35 bg-mint/5 p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-mint">TEAM MERCH · ONCE PER SEASON</div>
+        <div className="mt-1 text-[8px] leading-relaxed text-paper/50">Sell Arcball shirts and player gear. Sporting fame, studio reach and past trophies drive the return; your biggest Arcball star also gains creator followers.</div>
+        <div className="mt-2 grid grid-cols-3 gap-1 text-center text-[8px]">
+          <div className="rounded border border-line p-1.5"><div className="text-paper/35">COST</div><b>£{merchQuote.cost.toLocaleString("en-GB")}</b></div>
+          <div className="rounded border border-line p-1.5"><div className="text-paper/35">RETURN</div><b className="text-mint">£{merchQuote.revenue.toLocaleString("en-GB")}</b></div>
+          <div className="rounded border border-line p-1.5"><div className="text-paper/35">FANS</div><b className="text-cyanx">+{merchQuote.fanGain.toLocaleString("en-GB")}</b></div>
+        </div>
+        <Btn variant="cyan" className="mt-2 w-full" disabled={!!merchQuote.blockedReason} title={merchQuote.blockedReason ?? ""} onClick={() => setRun((r) => runArcballMerchDrop(r) ?? r)}>
+          {merchQuote.blockedReason ?? "RUN ARCBALL MERCH DROP"}
+        </Btn>
       </section>
 
       <div className="rounded-lg border border-line bg-panel2/30 p-2 text-[8px] text-paper/40">
