@@ -32,13 +32,12 @@ import {
 } from "../engine/data";
 import { AIR_WEEKS, forecastWeek, projectCapacity, staffOperationReason, startFullyDelegatedProject, type RunState } from "../engine/state";
 import { AUTO_MIN_OFFICE, delegationBlockReason, fullDelegationOutlook } from "../engine/automation";
-import { HEAD_TITLES, levelTitle, type HeadSlot } from "../engine/careers";
+import { HEAD_TITLES, levelTitle, studioProduction, type HeadSlot } from "../engine/careers";
 import { SEQUEL_SCORE_THRESHOLD, continuationBlock } from "../engine/franchise";
 import {
   MILESTONE_LABEL,
   PRODUCTION_STAGES,
   STAGE_LABEL,
-  TEAM_MAX,
   activeProjects,
   projectOfStaff,
   daysToDeadline,
@@ -50,6 +49,7 @@ import { cn } from "../utils/cn";
 import { BASE_INTERVENTIONS, INVESTMENT_TIERS, interventionBlock, interventionInvestmentKey, interventionQuote } from "../engine/spending";
 import { expansionOf } from "../engine/studioExpansion";
 import { canDelegateRoutineProduction, careerEraForWeek } from "../engine/careerEras";
+import { hasProductionCoordinator, teamCoordinationEfficiency } from "../engine/teamCoordination";
 
 const STAGE_COLOR: Record<string, string> = {
   concept: "#a78bfa",
@@ -101,6 +101,9 @@ function ProjectCard({
   const [teamOpen, setTeamOpen] = useState(false);
   const [delegateOpen, setDelegateOpen] = useState(false);
   const team = run.staff.filter((s) => p.staffIds.includes(s.id));
+  const productionHead = studioProduction(run.heads ?? {}, run.staff, run.showrunner);
+  const coordination = teamCoordinationEfficiency(team, productionHead.coordinationRelief);
+  const coordinatedByPerk = hasProductionCoordinator(team);
   const late = daysToDeadline(p, run.day ?? run.week * 7);
   const inPipeline = p.stage !== "airing" && p.stage !== "done";
   const stageIdx = PRODUCTION_STAGES.indexOf(p.stage);
@@ -395,8 +398,13 @@ function ProjectCard({
           >
             <Users size={12} className="text-cyanx" />
             <span className="text-[10px] font-bold text-paper/70">
-              TEAM {team.length}/{Math.min(TEAM_MAX, run.staff.length || TEAM_MAX)}
+              TEAM {team.length}
             </span>
+            {team.length > 6 && (
+              <span className={cn("rounded px-1.5 py-0.5 text-[8px] font-black", coordination >= 0.999 ? "bg-mint/15 text-mint" : coordination >= 0.8 ? "bg-gold/10 text-gold" : "bg-neon/10 text-neon")}>
+                {coordinatedByPerk ? "COORDINATOR · 100%" : `COORD ${Math.round(coordination * 100)}%`}
+              </span>
+            )}
             <span className="ml-1 flex -space-x-1.5">
               {team.slice(0, 6).map((s) => (
                 <Portrait
@@ -414,6 +422,13 @@ function ProjectCard({
 
           {teamOpen && (
             <div className="mt-1.5 space-y-1">
+              {team.length > 6 && (
+                <div className={cn("rounded-lg border px-2 py-2 text-[9px]", coordination >= 0.999 ? "border-mint/35 bg-mint/5 text-mint" : "border-gold/30 bg-gold/5 text-paper/60")}>
+                  {coordinatedByPerk
+                    ? "Production Coordinator active — this large crew has no coordination diminishing."
+                    : `Large-team coordination: ${Math.round(coordination * 100)}%. Your Production Manager recovers ${Math.round(productionHead.coordinationRelief * 100)}% of the coordination loss. Assign a Production Coordinator to remove it completely.`}
+                </div>
+              )}
               {run.staff.length === 0 && (
                 <div className="rounded-lg border border-line/60 bg-panel2/40 px-2 py-2 text-center text-[10px] text-paper/45">
                   No staff hired yet — scout some in the STAFF menu.
@@ -423,7 +438,6 @@ function ProjectCard({
                 const mine = p.staffIds.includes(s.id);
                 const other = !mine ? projectOfStaff(run.projects, s.id) : null;
                 const opBusy = !mine ? staffOperationReason(run, s.id) : null;
-                const full = !mine && p.staffIds.length >= TEAM_MAX;
                 return (
                   <div key={s.id} className={cn("flex items-center gap-2 rounded-lg border px-2 py-1.5", mine ? "border-mint/50 bg-mint/[0.06]" : "border-line bg-panel2/40")}>
                     <Portrait img={workerLook(s).portrait} name={s.name} alt={s.name} className="h-7 w-7 shrink-0 rounded-lg border border-line bg-panel3" />
@@ -439,7 +453,7 @@ function ProjectCard({
                     <Btn
                       variant={mine ? "ghost" : "cyan"}
                       className="!px-2 !py-1 text-[9px]"
-                      disabled={full || !!opBusy}
+                      disabled={!!opBusy}
                       onClick={() => onAssign(p.id, s.id)}
                     >
                       {mine ? "REMOVE" : opBusy ? "BUSY" : other ? "PULL OVER" : "ASSIGN"}
