@@ -515,6 +515,7 @@ export function activateArcball(run: RunState): RunState | null {
     players,
     lineup: Object.keys(state.lineup).length >= ARCBALL_TEAM_SIZE ? state.lineup : buildBestLineup(run.staff, { ...state, players }, registered),
   };
+  state = ensureArcballRivalRosters(run, state);
   return {
     ...run,
     arcball: state,
@@ -584,16 +585,63 @@ export function arcballReady(run: RunState): boolean {
 const rivalFirst = ["Akira", "Mika", "Jun", "Sora", "Rin", "Kei", "Mio", "Ren", "Yuna", "Haru", "Niko", "Ami", "Tomo", "Kira", "Ryo", "Emi"];
 const rivalLast = ["Sato", "Ito", "Mori", "Tanaka", "Park", "Khan", "Price", "Bell", "Nakamura", "Suzuki", "Hughes", "Kim", "Arai", "Jones", "Miller", "Chen"];
 
-export function rivalArcballRoster(studio: RivalStudio, year: number): ArcballRivalPlayer[] {
-  const r = seeded("arcball-rival|" + studio.id + "|" + year);
+function generateRivalArcballRoster(studio: RivalStudio, year: number): ArcballRivalPlayer[] {
+  const r = seeded("arcball-rival-career|" + studio.id + "|" + year);
   const base = 38 + studio.tier * 6 + studio.reputation * .12 + Math.min(12, (year - 1) * .65);
-  return ARCBALL_POSITIONS.map((position, index) => ({
-    id: "rival|" + studio.id + "|" + index,
-    name: rivalFirst[Math.floor(r() * rivalFirst.length)] + " " + rivalLast[Math.floor(r() * rivalLast.length)],
-    look: Math.floor(r() * Math.max(1, WORKER_LOOKS.length)),
-    position,
-    rating: clamp(Math.round(base - 10 + r() * 20 + (position === "creator" && studio.persona === "experimental" ? 4 : 0)), 30, 96),
-  }));
+  return ARCBALL_POSITIONS.map((position, index) => {
+    const rating = clamp(Math.round(base - 10 + r() * 20 + (position === "creator" && studio.persona === "experimental" ? 4 : 0)), 30, 94);
+    return {
+      id: "rival|" + studio.id + "|" + year + "|" + index,
+      name: rivalFirst[Math.floor(r() * rivalFirst.length)] + " " + rivalLast[Math.floor(r() * rivalLast.length)],
+      look: Math.floor(r() * Math.max(1, WORKER_LOOKS.length)),
+      position,
+      rating,
+      potential: clamp(rating + 4 + Math.floor(r() * 22), rating, 99),
+      age: 19 + Math.floor(r() * 12),
+      fans: Math.max(500, Math.round((rating - 25) * 550 + r() * 12_000)),
+      seasons: 0,
+    };
+  });
+}
+
+export function rivalArcballRoster(studio: RivalStudio, year: number, persistent?: ArcballRivalPlayer[]): ArcballRivalPlayer[] {
+  return persistent?.length ? persistent : generateRivalArcballRoster(studio, year);
+}
+
+function ensureArcballRivalRosters(run: RunState, state: ArcballState): ArcballState {
+  const rivalRosters = { ...state.rivalRosters };
+  for (const studio of run.rivalWorld.studios) {
+    if (!rivalRosters[studio.id]?.length) rivalRosters[studio.id] = generateRivalArcballRoster(studio, state.seasonYear);
+  }
+  return { ...state, rivalRosters };
+}
+
+function evolveArcballRivalRosters(run: RunState, state: ArcballState, newYear: number): ArcballState {
+  const rivalRosters: Record<string, ArcballRivalPlayer[]> = {};
+  for (const studio of run.rivalWorld.studios) {
+    const prior = state.rivalRosters[studio.id]?.length ? state.rivalRosters[studio.id] : generateRivalArcballRoster(studio, state.seasonYear);
+    const evolved = prior.map((player, index) => {
+      const r = seeded("arcball-rival-evolve|" + player.id + "|" + newYear);
+      const age = (player.age ?? 24) + 1;
+      const potential = player.potential ?? Math.min(99, player.rating + 10);
+      const development = age <= 27 ? Math.max(0, Math.round((potential - player.rating) * (.10 + r() * .12))) : 0;
+      const decline = age >= 32 ? 1 + Math.floor(r() * Math.max(1, age - 30)) : 0;
+      return {
+        ...player,
+        age,
+        rating: clamp(player.rating + development - decline, 30, 99),
+        fans: Math.max(0, Math.round((player.fans ?? 0) * 1.08 + player.rating * 120)),
+        seasons: (player.seasons ?? 0) + 1,
+        position: player.position ?? ARCBALL_POSITIONS[index % ARCBALL_POSITIONS.length],
+      };
+    });
+    rivalRosters[studio.id] = ARCBALL_POSITIONS.map((position, index) => {
+      const veteran = evolved.find((player) => player.position === position);
+      if (veteran && (veteran.age ?? 24) <= 36) return veteran;
+      return generateRivalArcballRoster(studio, newYear)[index];
+    });
+  }
+  return { ...state, rivalRosters };
 }
 
 interface TeamNumbers { attack: number; defence: number; possession: number; }
@@ -637,8 +685,8 @@ function playerTeamNumbers(run: RunState, intensity: ArcballIntensity = "normal"
   return { attack, defence, possession };
 }
 
-function rivalTeamNumbers(studio: RivalStudio, year: number): TeamNumbers {
-  const roster = rivalArcballRoster(studio, year);
+function rivalTeamNumbers(studio: RivalStudio, year: number, persistent?: ArcballRivalPlayer[]): TeamNumbers {
+  const roster = rivalArcballRoster(studio, year, persistent);
   const byPos = Object.fromEntries(roster.map((p) => [p.position, p.rating])) as Record<ArcballPosition, number>;
   return {
     attack: byPos.striker * .40 + byPos.creator * .27 + byPos.runner * .18 + byPos.anchor * .10 + byPos.keeper * .05,
@@ -761,7 +809,7 @@ export function stepArcballMatch(
   const nextMinute = Math.min(90, match.minute + 5);
   const rng = seeded(fixture.id + "|" + nextMinute + "|" + match.homeScore + "|" + match.awayScore + "|" + intensity + "|" + instruction);
   const playerNumbers = playerTeamNumbers(run, intensity, instruction);
-  const rivalNumbers = rivalTeamNumbers(rival, state.seasonYear);
+  const rivalNumbers = rivalTeamNumbers(rival, state.seasonYear, state.rivalRosters[rival.id]);
   const homeNumbers = match.playerIsHome ? playerNumbers : rivalNumbers;
   const awayNumbers = match.playerIsHome ? rivalNumbers : playerNumbers;
   const homePoss = (homeNumbers.possession + 2) / Math.max(1, homeNumbers.possession + awayNumbers.possession + 2);
@@ -806,7 +854,7 @@ export function stepArcballMatch(
     const supportPool = arcballLineupStaff(run).filter((s) => s.id !== carrier.id);
     if (supportPool.length) supportingPlayerId = supportPool[Math.floor(rng() * supportPool.length)].id;
   } else {
-    const roster = rivalArcballRoster(rival, state.seasonYear);
+    const roster = rivalArcballRoster(rival, state.seasonYear, state.rivalRosters[rival.id]);
     const carrier = rivalAttackPick(roster, rng());
     activeRivalName = carrier.name;
     const supportPool = roster.filter((p) => p.name !== carrier.name);
@@ -1008,8 +1056,9 @@ function simulateRivalFixture(run: RunState, fixture: ArcballFixture): ArcballFi
   const home = run.rivalWorld.studios.find((s) => s.id === fixture.homeId || s.name === fixture.homeId);
   const away = run.rivalWorld.studios.find((s) => s.id === fixture.awayId || s.name === fixture.awayId);
   if (!home || !away) return { ...fixture, homeScore: 0, awayScore: 0, resolvedBy: "rival" };
-  const hn = rivalTeamNumbers(home, fixture.seasonYear);
-  const an = rivalTeamNumbers(away, fixture.seasonYear);
+  const state = arcballStateOf(run);
+  const hn = rivalTeamNumbers(home, fixture.seasonYear, state.rivalRosters[home.id]);
+  const an = rivalTeamNumbers(away, fixture.seasonYear, state.rivalRosters[away.id]);
   const rng = seeded(fixture.id + "|rival");
   let hs = 0, as = 0;
   for (let i = 0; i < 18; i += 1) {
@@ -1050,7 +1099,7 @@ function completeArcballSeason(run: RunState, state: ArcballState): ArcballState
 
 export function advanceArcballWeek(run: RunState): RunState {
   let out = run;
-  let state = cleanArcballRoster(out, arcballStateOf(out));
+  let state = ensureArcballRivalRosters(out, cleanArcballRoster(out, arcballStateOf(out)));
   if (!state.unlocked) {
     if (!arcballUnlockReason(out)) {
       const activated = activateArcball({ ...out, arcball: state });
@@ -1070,11 +1119,14 @@ export function advanceArcballWeek(run: RunState): RunState {
         ? "🏆 ARCBALL CHAMPIONS — +" + 40 + " Arc Tokens and 1 Championship Spotlight."
         : "⚽ Arcball season complete — " + ordinal(last.position) + " place" + (last.position <= 3 ? " · placement tokens awarded." : "."));
     }
+    state = evolveArcballRivalRosters(out, state, currentYear);
     state = {
       ...state,
       seasonYear: currentYear,
       fixtures: buildArcballFixtures(currentYear),
       seasonPurchases: { tier1: 0, tier2: 0 },
+      sponsor: null,
+      sponsorYear: 0,
     };
     out = { ...out, arcball: state, notices: notices.slice(-40) };
   }
