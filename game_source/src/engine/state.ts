@@ -192,7 +192,6 @@ import {
   activeProjects,
   applyMilestoneOutcome,
   projectOfStaff,
-  TEAM_MAX,
   type StaffModFn,
   assignedStaffIds,
   computeProjectResult,
@@ -217,6 +216,7 @@ import {
   type DynastyState,
 } from "./legacy";
 import { tickDelegated } from "./automation";
+import { teamCoordinationEfficiency } from "./teamCoordination";
 import { canDelegateRoutineProduction } from "./careerEras";
 import {
   MAX_RESEARCH_TRACK_LEVEL,
@@ -2147,8 +2147,8 @@ export function startFullyDelegatedProject(
 
   const free = r.staff.filter((s) => !staffBusyReason(r, s.id) && s.id !== director.id);
   const crewTarget = delegatorRun
-    ? Math.min(TEAM_MAX, Math.max(4, Math.min(5, r.officeLevel + 3)))
-    : Math.min(TEAM_MAX, Math.max(2, Math.min(4, r.officeLevel + 2)));
+    ? Math.max(4, Math.min(5, r.officeLevel + 3))
+    : Math.max(2, Math.min(4, r.officeLevel + 2));
   const chosen = new Set<string>([director.id]);
   /* Creator-led shows build a functional miniature studio first: cover missing
      disciplines, then use any spare seat on the strongest remaining worker. */
@@ -2621,6 +2621,10 @@ export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointTy
     /* Existing morale, traits, specialisations and bonds now modify the live
        percentile check instead of a removed weekly quality calculation. */
     effective *= personMod(st, project, team, { bonds: r.bonds ?? {} }).out;
+    /* Unlimited project crews trade hard caps for coordination. A coordinator
+       removes the loss; otherwise the Production Manager's real skill softens it. */
+    const coordinationRelief = studioProduction(r.heads ?? {}, r.staff, r.showrunner).coordinationRelief;
+    effective *= teamCoordinationEfficiency(team, coordinationRelief);
     effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
     effective *= specialisationProjectEffects(r, project.draft).outputMult;
     effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
