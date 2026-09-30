@@ -62,6 +62,7 @@ import Portrait from "./Portrait";
 import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
 import { markTutorialSeen, tutorialSeen } from "../engine/tutorials";
 import { cn } from "../utils/cn";
+import { injuryDaysRemaining, staffIsInjured } from "../engine/staffAvailability";
 
 type Tab = "squad" | "fixtures" | "league" | "training" | "rewards";
 
@@ -243,7 +244,7 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
                   <option value="">— EMPTY —</option>
                   {state.registered.map((staffId) => {
                     const s = run.staff.find((x) => x.id === staffId);
-                    return s ? <option key={s.id} value={s.id}>{s.name}</option> : null;
+                    return s ? <option key={s.id} value={s.id} disabled={staffIsInjured(s, run.day ?? run.week * 7)}>{s.name}{staffIsInjured(s, run.day ?? run.week * 7) ? " · INJURED" : ""}</option> : null;
                   })}
                 </select>
                 <span className={cn("text-right font-display text-sm font-black", profile ? "text-mint" : "text-paper/25")}>{profile ? profile.overall : "—"}</span>
@@ -259,6 +260,8 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
           {run.staff.map((member) => {
             const registered = state.registered.includes(member.id);
             const profile = arcballProfile(member, state.players[member.id]);
+            const injured = staffIsInjured(member, run.day ?? run.week * 7);
+            const injuryDays = injuryDaysRemaining(member, run.day ?? run.week * 7);
             return (
               <div key={member.id} className={cn("flex items-center gap-2 rounded-lg border p-2", registered ? "border-cyanx/35 bg-cyanx/5" : "border-line bg-panel2/35")}>
                 <Portrait img={workerLook(member).portrait} name={member.name} alt="" className="h-9 w-9 rounded-full border border-line object-cover"/>
@@ -268,6 +271,7 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
                     {profile.bestPosition.toUpperCase()} · ARC {profile.overall} · {arcballArchetype(profile).label.toUpperCase()} · FORM {state.players[member.id]?.form > 0 ? "+" : ""}{state.players[member.id]?.form ?? 0}
                   </div>
                   <div className="text-[7px] text-paper/35">{canSeePotential ? "POT " + arcballPotentialLabel(profile.potential).toUpperCase() : "POTENTIAL UNKNOWN"} · {(state.players[member.id]?.appearances ?? 0)} apps · {(state.players[member.id]?.goals ?? 0)} G · {(state.players[member.id]?.assists ?? 0)} A · {Math.round(state.players[member.id]?.arcballFans ?? 0).toLocaleString("en-GB")} sport fans</div>
+                  {injured && <div className="mt-0.5 text-[8px] font-black text-neon">🤕 {member.injuryLabel?.toUpperCase() ?? "ARCBALL INJURY"} · OUT {injuryDays} DAYS · NO STUDIO WORK</div>}
                 </div>
                 <Btn variant={registered ? "ghost" : "cyan"} className="!px-2 !py-1 text-[8px]" disabled={!registered && state.registered.length >= 8} onClick={() => setRun((r) => registerArcballPlayer(r, member.id) ?? r)}>
                   {registered ? "REMOVE" : "REGISTER"}
@@ -411,7 +415,7 @@ function Training({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) =
               const trained = state.players[member.id]?.lastTrainingWeek === run.week;
               const readiness = arcballTrainingReadiness(member, drill.id, run.week);
               const readinessClass = readiness.label === "EXCELLENT" ? "text-mint" : readiness.label === "GOOD" ? "text-cyanx" : readiness.label === "POOR" ? "text-neon" : "text-paper/55";
-              return <div key={drill.id} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/35 p-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-1 text-[10px] font-bold">{drill.name}<span className={cn("rounded bg-ink/40 px-1 py-0.5 text-[7px] font-black", readinessClass)}>{readiness.label}</span></div><div className="text-[8px] text-paper/40">{drill.desc} · −{drill.stamina} energy · readiness affects gain and downside risk</div></div><Btn variant="cyan" className="!px-2 !py-1 text-[8px]" disabled={trained || state.tokens < drill.cost} onClick={() => setRun((r) => trainArcball(r, member.id, drill.id) ?? r)}>{drill.cost} TOKENS</Btn></div>;
+              return <div key={drill.id} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/35 p-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-1 text-[10px] font-bold">{drill.name}<span className={cn("rounded bg-ink/40 px-1 py-0.5 text-[7px] font-black", readinessClass)}>{readiness.label}</span></div><div className="text-[8px] text-paper/40">{drill.desc} · −{drill.stamina} energy · readiness affects gain and downside risk</div></div><Btn variant="cyan" className="!px-2 !py-1 text-[8px]" disabled={trained || state.tokens < drill.cost || staffIsInjured(member, run.day ?? run.week * 7)} onClick={() => setRun((r) => trainArcball(r, member.id, drill.id) ?? r)}>{drill.cost} TOKENS</Btn></div>;
             })}
           </div>
         </>
