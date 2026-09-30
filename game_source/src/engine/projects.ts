@@ -43,6 +43,7 @@ import { genreTargetFor } from "./genreTargets";
 import { secretComboResearched } from "./creativeDiscovery";
 import { over9000Charge } from "./showrunnerPerks";
 import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
+import { effectiveCoordinatedTeamSize, teamCoordinationEfficiency } from "./teamCoordination";
 
 /* ------------------------------------------------------------- costs */
 const scopeOf = (d: Draft) => PRODUCTION_SCOPES[d.scope ?? "standard"];
@@ -267,7 +268,8 @@ export interface ProjectCommission {
   deadlineDay?: number;
 }
 
-export const TEAM_MAX = 6;
+/** Legacy export retained for old callers. Project assignment itself is uncapped. */
+export const TEAM_MAX = Number.MAX_SAFE_INTEGER;
 
 /* ------------------------------------------------------- stage plans */
 /** split the total dev length across stages (different mediums/budgets
@@ -362,7 +364,6 @@ export function toggleAssign(projects: Project[], projectId: string, staffId: st
   return projects.map((p) => {
     if (p.id === projectId) {
       if (already) return { ...p, staffIds: p.staffIds.filter((s) => s !== staffId) };
-      if (p.staffIds.length >= TEAM_MAX) return p;
       return { ...p, staffIds: [...p.staffIds, staffId] };
     }
     /* pulled onto the new project — drop them from any other one */
@@ -391,13 +392,15 @@ export type StaffModFn = (s: Staff, p: Project, team: Staff[]) => StaffWorkMod;
 export interface StudioMod {
   speed: number;
   burnMult: number;
+  /** Fraction of large-team coordination loss recovered by the Production Manager. */
+  coordinationRelief?: number;
   /** Multiplier on NEW production-note creation. Editing itself never creates notes. */
   issueChanceMult?: number;
   /** Legacy boolean retained for old tests/saves; scheduleSpeedCap is authoritative. */
   ignoreScheduleCap?: boolean;
   scheduleSpeedCap?: number;
 }
-export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, issueChanceMult: 1 };
+export const NO_STUDIO: StudioMod = { speed: 0, burnMult: 1, coordinationRelief: 0, issueChanceMult: 1 };
 
 /** raw studio capacity. Capacity above the schedule ceiling becomes quality
  * and consistency rather than endlessly shortening the campaign. */
@@ -415,6 +418,11 @@ export function rawTeamCapacity(
     const m = mods?.(s, p, team);
     v += (0.22 + rel / 280) * (m ? m.pace : staminaF(s)) + (m?.aura ?? 0);
   }
+  /* Large anime crews are no longer forbidden. Instead, communication overhead
+     dampens the team's staff-driven capacity. A Production Coordinator on the
+     project removes this entirely; Production Manager skill recovers part of it. */
+  const coordination = teamCoordinationEfficiency(team, studio.coordinationRelief ?? 0);
+  v = 0.35 + (v - 0.35) * coordination;
   v += fxSpeedFor(fx, p.draft.budget) + studio.speed;
   if (p.stage === "animation") v += fx.speedAnimation;
   return v;
@@ -496,7 +504,7 @@ export function tickProjectsWeek(
          comes only from visible Kairosoft-style desk bubbles, rushes and explicit
          events. The weekly engine controls schedule, burn, deadlines and rework. */
       if (p.stage === "marketing") {
-        p.hype = Math.min(100, p.hype + Math.round((3 + team.length * 2) * fx.hypeMult));
+        p.hype = Math.min(100, p.hype + Math.round((3 + effectiveCoordinatedTeamSize(team, studio.coordinationRelief ?? 0) * 2) * fx.hypeMult));
       }
       if (p.stage === "ready") {
         /* waiting never fixes editing notes for free; it only lets launch heat cool. */
@@ -577,7 +585,7 @@ export function tickProjectsDay(
     if (!p.milestone) {
       const plan = p.plan[p.stage] ?? 1;
       if (p.stage === "marketing") {
-        p.hype = Math.min(100, p.hype + ((3 + team.length * 2) * fx.hypeMult) / 7);
+        p.hype = Math.min(100, p.hype + ((3 + effectiveCoordinatedTeamSize(team, studio.coordinationRelief ?? 0) * 2) * fx.hypeMult) / 7);
       }
       if (p.stage === "ready") {
         p.hype = Math.max(0, p.hype - 1 / 7);
