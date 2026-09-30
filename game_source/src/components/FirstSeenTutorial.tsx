@@ -21,9 +21,8 @@ import {
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { TutorialId } from "../engine/tutorials";
-import { WORKER_LOOKS } from "../engine/data";
-import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
+import { assetPath } from "../utils/assetPath";
 
 type PreviewId =
   | "pitch" | "project-lead" | "rush-lead"
@@ -230,39 +229,23 @@ function Frame({ title, icon, children }: { title: string; icon?: React.ReactNod
 }
 
 function ArcballCutscene() {
-  const looks = [WORKER_LOOKS[2]?.portrait, WORKER_LOOKS[7]?.portrait, WORKER_LOOKS[11]?.portrait];
-  return <div className="relative h-56 overflow-hidden rounded-2xl border border-cyanx/30 bg-[#111a24]">
-    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#26364f] to-transparent"/>
-    <div className="absolute left-[8%] right-[8%] top-4 flex justify-around opacity-55">
-      {Array.from({length:11},(_,i)=><span key={i} className="h-1.5 w-1.5 rounded-full bg-paper shadow-[0_0_8px_rgba(255,255,255,.8)]"/>)}
+  return (
+    <div className="overflow-hidden rounded-2xl border border-cyanx/30 bg-[#111a24] shadow-[0_18px_50px_rgba(0,0,0,.45)]">
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={assetPath("tutorial/arcball-cutscene.webp")}
+          alt="Workers competing in an inter-studio Arcball match, with the glowing Arcball travelling between attacking and defending players."
+          className="h-full w-full object-cover"
+        />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/95 via-ink/55 to-transparent px-3 pb-3 pt-10">
+          <div className="text-[8px] font-black tracking-[0.22em] text-cyanx">INTER-STUDIO ARCBALL</div>
+          <div className="mt-1 text-[8px] leading-relaxed text-paper/75">
+            A five-a-side studio sport built around passing lanes, movement, interceptions and crescent scoring zones — played by the same workers who make your anime.
+          </div>
+        </div>
+      </div>
     </div>
-    <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-md border border-paper/20 bg-ink/80 px-3 py-1 text-[7px] font-black tracking-[0.2em] text-paper/60">INTER-STUDIO ARCBALL · SOLD OUT</div>
-    <div className="absolute -bottom-10 left-[-8%] right-[-8%] h-48 -skew-y-6 rounded-[50%] border border-white/20 bg-[#24563b] shadow-[inset_0_0_50px_rgba(0,0,0,.45)]">
-      <div className="absolute left-[8%] right-[8%] top-1/2 border-t border-white/25"/>
-      <div className="absolute left-1/2 top-[17%] bottom-[10%] border-l border-white/20"/>
-    </div>
-    <div className="absolute left-[7%] top-[45%] h-1 w-[45%] -rotate-12 bg-gradient-to-r from-transparent via-white/70 to-transparent"/>
-    <div className="absolute right-[6%] top-[50%] h-1 w-[38%] rotate-6 bg-gradient-to-l from-transparent via-gold/80 to-transparent"/>
-    <ArcballCutsceneWorker portrait={looks[0]} x="18%" y="55%" jersey="bg-cyanx" label="REN · CREATOR" />
-    <ArcballCutsceneWorker portrait={looks[1]} x="56%" y="38%" jersey="bg-neon" label="MORI · ANCHOR" rival />
-    <ArcballCutsceneWorker portrait={looks[2]} x="73%" y="63%" jersey="bg-cyanx" label="DANNY · STRIKER" />
-    <div className="absolute left-[48%] top-[56%] h-6 w-6 rounded-full border-2 border-black/60 bg-paper shadow-[0_0_18px_rgba(255,255,255,.95)]">
-      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-ink/80"/>
-    </div>
-    <div className="absolute bottom-2 left-2 right-2 rounded-lg border border-white/10 bg-ink/80 px-2 py-1.5 text-[7px] leading-relaxed text-paper/70">
-      Ren slips the Arcball through the press. Danny explodes into the lane as Mori dives across to intercept.
-    </div>
-  </div>;
-}
-
-function ArcballCutsceneWorker({ portrait, x, y, jersey, label, rival=false }: { portrait?: string | number; x:string; y:string; jersey:string; label:string; rival?:boolean }) {
-  return <div className="absolute z-10 -translate-x-1/2 -translate-y-1/2" style={{left:x,top:y}}>
-    <div className={cn("mx-auto h-12 w-9 -skew-x-6 rounded-t-xl border border-black/40", jersey, rival && "opacity-90")}/>
-    <div className="absolute -top-6 left-1/2 h-10 w-10 -translate-x-1/2 overflow-hidden rounded-full border-2 border-paper/60 bg-panel shadow-lg">
-      {portrait !== undefined ? <Portrait img={portrait} name={label} alt="" className="h-full w-full object-cover"/> : <div className="h-full w-full bg-panel3"/>}
-    </div>
-    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-ink/85 px-1.5 py-0.5 text-[6px] font-black text-paper/70">{label}</div>
-  </div>;
+  );
 }
 
 function ScreenPreview({ kind }: { kind: PreviewId }) {
