@@ -1400,12 +1400,16 @@ export function formatGBP(n: number): string {
 export function formatGBPShort(n: number): string {
   const a = Math.abs(n);
   const sign = n < 0 ? "-" : "";
+  if (a >= 1_000_000_000_000) return `${sign}£${(a / 1_000_000_000_000).toFixed(a >= 10_000_000_000_000 ? 1 : 2)}T`;
+  if (a >= 1_000_000_000) return `${sign}£${(a / 1_000_000_000).toFixed(a >= 10_000_000_000 ? 1 : 2)}B`;
   if (a >= 1_000_000) return `${sign}£${(a / 1_000_000).toFixed(a >= 10_000_000 ? 1 : 2)}M`;
   if (a >= 1_000) return `${sign}£${(a / 1000).toFixed(a >= 100_000 ? 0 : 1)}k`;
   return `${sign}£${Math.round(a)}`;
 }
 export function formatNum(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + "M";
+  if (n >= 1_000_000_000_000) return (n / 1_000_000_000_000).toFixed(n >= 10_000_000_000_000 ? 1 : 2) + "T";
+  if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(n >= 10_000_000_000 ? 1 : 2) + "B";
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 1 : 2) + "M";
   if (n >= 10_000) return (n / 1000).toFixed(1) + "K";
   return Math.round(n).toLocaleString("en-GB");
 }
