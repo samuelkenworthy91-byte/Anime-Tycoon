@@ -273,6 +273,10 @@ export const TRAIT_DEFS: TraitDef[] = [
   { id: "prestigecraft", name: "Prestige Obsessive", desc: "+25% output on Prestige-scope productions · −8% pace", good: true },
   { id: "shortform", name: "Short-Form Specialist", desc: "+20% output on Short-scope productions", good: true },
   { id: "comeback", name: "Comeback Artist", desc: "+25% output on reboots and prequels", good: true },
+  { id: "arcball_icon", name: "Arcball Icon", desc: "Player of the Year honour · +12% production output · releases they work on gain +10% fans", good: true },
+  { id: "arcball_playmaker", name: "Arcball Playmaker", desc: "Playmaker honour · +0.08 team speed aura on anime production", good: true },
+  { id: "arcball_finisher", name: "Arcball Golden Scorer", desc: "Golden Scorer honour · +12% output during Post and Marketing", good: true },
+  { id: "arcball_guardian", name: "Arcball Guardian", desc: "Defensive honour · +8% production output and condition never below 90%", good: true },
 ];
 
 export const traitDef = (id: string): TraitDef | null => TRAIT_DEFS.find((t) => t.id === id) ?? null;
@@ -352,7 +356,8 @@ function pickTraits(seedA: number, seedB: number): string[] {
   let x = seedB;
   while (ids.length < count) {
     x = (x * 1103515245 + 12345) & 0x7fffffff;
-    const t = TRAIT_DEFS[x % TRAIT_DEFS.length].id;
+    const rollable = TRAIT_DEFS.filter((trait) => !trait.id.startsWith("arcball_"));
+    const t = rollable[x % rollable.length].id;
     if (!ids.includes(t)) ids.push(t);
   }
   return ids;
@@ -640,7 +645,8 @@ export function staffResearchDurationMult(staff: Staff[]): number {
 export function staffReleaseFanMult(staff: Staff[]): number {
   const gossip = staff.filter((s) => hasTrait(s, "gossip")).length;
   const publicists = staff.filter((s) => hasTrait(s, "publicist")).length;
-  return Math.min(1.55, 1 + gossip * 0.10 + publicists * 0.15);
+  const arcballIcons = staff.filter((s) => hasTrait(s, "arcball_icon")).length;
+  return Math.min(1.65, 1 + gossip * 0.10 + publicists * 0.15 + arcballIcons * 0.10);
 }
 
 /** Networkers improve freelance terms only when assigned to that contract. */
@@ -710,6 +716,12 @@ export function personMod(s: Staff, p: Project, team: Staff[], ctx: CareerCtx): 
   if (hasTrait(s, "prestigecraft") && (p.draft.scope ?? "standard") === "prestige") { out *= 1.25; pace *= 0.92; }
   if (hasTrait(s, "shortform") && (p.draft.scope ?? "standard") === "short") out *= 1.20;
   if (hasTrait(s, "comeback") && (p.draft.continuation === "reboot" || p.draft.continuation === "prequel")) out *= 1.25;
+
+  /* Arcball's elite honours feed back into the employee's actual studio career. */
+  if (hasTrait(s, "arcball_icon")) out *= 1.12;
+  if (hasTrait(s, "arcball_playmaker")) aura += 0.08;
+  if (hasTrait(s, "arcball_finisher") && ["post", "marketing"].includes(p.stage)) out *= 1.12;
+  if (hasTrait(s, "arcball_guardian")) { cond = Math.max(0.90, cond); out *= 1.08; }
 
   /* specialisation */
   const d = specDef(s.spec);
