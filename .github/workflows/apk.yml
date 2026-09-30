@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - bugfix/arcball-rooms-work-cleanup
       - depth-clarity-overhaul
       - player-value-variety-pass
       - showrunner-expansion-2026-09-27
