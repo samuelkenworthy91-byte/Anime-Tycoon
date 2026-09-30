@@ -86,6 +86,7 @@ import { over9000Charge } from "../engine/showrunnerPerks";
 import { canSeeCandidatePotential, canSeeEmployeePotential, potentialLabel } from "../engine/staffPotential";
 import { arcballPotentialLabel, arcballProfile, arcballStateOf } from "../engine/arcball";
 import { formalizeMentorship, relationshipRecord } from "../engine/staffRelationships";
+import { injuryDaysRemaining, staffIsInjured } from "../engine/staffAvailability";
 
 const BOND_LABEL: Record<BondKind, string> = {
   partnership: "Partners",
@@ -180,6 +181,8 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState<AbilityInfo | null>(null);
   const proj = projectOfStaff(run.projects, s.id);
+  const injured = staffIsInjured(s, run.day ?? run.week * 7);
+  const injuryDays = injuryDaysRemaining(s, run.day ?? run.week * 7);
   const morale = moraleOf(s);
   const xp = s.xp ?? 0;
   const prog = levelProgress(xp);
@@ -235,7 +238,9 @@ function StaffCard({ s, run, setRun }: { s: Staff; run: RunState; setRun: (fn: (
 
       {/* condition row */}
       <div className="mt-1.5 flex items-center gap-2 text-[9px] font-bold">
-        <span className={cn(s.stamina < 45 ? "text-neon" : "text-mint")}>{Math.round(s.stamina)}% energy</span>
+        {injured
+          ? <span className="rounded bg-neon/15 px-1.5 py-0.5 text-neon">🤕 {s.injuryLabel ?? "Arcball injury"} · {injuryDays}d</span>
+          : <span className={cn(s.stamina < 45 ? "text-neon" : "text-mint")}>{Math.round(s.stamina)}% energy</span>}
         <span className="flex flex-1 items-center gap-1">
           <Heart size={9} className={morale < 40 ? "text-neon" : "text-[#ff8fc7]"} />
           <span className="h-1.5 flex-1 rounded bg-abyss">
