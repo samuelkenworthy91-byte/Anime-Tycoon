@@ -453,7 +453,7 @@ function ProjectCard({
                     <Btn
                       variant={mine ? "ghost" : "cyan"}
                       className="!px-2 !py-1 text-[9px]"
-                      disabled={!!opBusy}
+                      disabled={!!opBusy && !mine}
                       onClick={() => onAssign(p.id, s.id)}
                     >
                       {mine ? "REMOVE" : opBusy ? "BUSY" : other ? "PULL OVER" : "ASSIGN"}
