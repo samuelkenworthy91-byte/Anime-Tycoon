@@ -274,6 +274,71 @@ export function arcballPotentialLabel(value: number): string {
   return "Limited";
 }
 
+export interface ArcballArchetype {
+  id: string;
+  label: string;
+  desc: string;
+  attack: number;
+  defence: number;
+  possession: number;
+}
+export function arcballArchetype(profile: ArcballBaseProfile): ArcballArchetype {
+  const s = profile.stats;
+  if (profile.bestPosition === "keeper") return s.pass + s.control >= s.power + s.awareness
+    ? { id: "sweeper", label: "Sweeper Keeper", desc: "Starts attacks cleanly from the back.", attack: 0, defence: 1, possession: 3 }
+    : { id: "stopper", label: "Shot Stopper", desc: "Built around awareness and physical saves.", attack: 0, defence: 4, possession: 0 };
+  if (profile.bestPosition === "anchor") return s.pass >= s.power
+    ? { id: "distributor", label: "Distributor", desc: "Turns defensive wins into clean possession.", attack: 0, defence: 2, possession: 3 }
+    : { id: "wall", label: "Wall", desc: "Wins duels and protects the scoring lane.", attack: 0, defence: 5, possession: -1 };
+  if (profile.bestPosition === "runner") return s.awareness + s.pass >= s.pace + s.control
+    ? { id: "engine", label: "Engine", desc: "Links both halves and keeps the team moving.", attack: 1, defence: 2, possession: 2 }
+    : { id: "sprinter", label: "Sprinter", desc: "Explodes into space and stretches the defence.", attack: 4, defence: 0, possession: -1 };
+  if (profile.bestPosition === "creator") return s.pass >= s.control
+    ? { id: "playmaker", label: "Playmaker", desc: "Creates chances through vision and passing.", attack: 2, defence: 0, possession: 5 }
+    : { id: "dribbler", label: "Dribbler", desc: "Carries through pressure to break shape.", attack: 3, defence: 0, possession: 3 };
+  return s.finish >= s.power
+    ? { id: "poacher", label: "Poacher", desc: "Lives for the final movement and finish.", attack: 5, defence: -1, possession: 0 }
+    : { id: "target", label: "Target Finisher", desc: "Holds defenders off and attacks direct service.", attack: 4, defence: 1, possession: -1 };
+}
+
+export type ArcballReadinessLabel = "EXCELLENT" | "GOOD" | "NORMAL" | "POOR";
+export function arcballTrainingReadiness(staff: Pick<Staff, "id">, drillId: string, week: number): { label: ArcballReadinessLabel; gainMult: number; penaltyMult: number } {
+  const r = seeded("arcball-readiness|" + staff.id + "|" + drillId + "|" + week);
+  const roll = r();
+  if (roll < .16) return { label: "EXCELLENT", gainMult: 1.34, penaltyMult: .35 };
+  if (roll < .40) return { label: "GOOD", gainMult: 1.16, penaltyMult: .70 };
+  if (roll < .82) return { label: "NORMAL", gainMult: 1, penaltyMult: 1 };
+  return { label: "POOR", gainMult: .72, penaltyMult: 1.55 };
+}
+
+export const ARCBALL_SPONSORS: Record<ArcballSponsorId, { name: string; sign: number; win: number; top3: number; title: number; requirement: string }> = {
+  local: { name: "Manga Mart", sign: 12_000, win: 1_500, top3: 8_000, title: 18_000, requirement: "Open to any league entrant." },
+  stream: { name: "AniWave Stream", sign: 30_000, win: 3_000, top3: 22_000, title: 45_000, requirement: "Requires 25,000 studio fans." },
+  prestige: { name: "Kirin Motion Systems", sign: 70_000, win: 6_000, top3: 45_000, title: 100_000, requirement: "Requires 1 Arcball title or 200,000 studio fans." },
+};
+
+export function arcballSponsorBlock(run: RunState, id: ArcballSponsorId): string | null {
+  const state = arcballStateOf(run);
+  if (state.sponsor && state.sponsorYear === state.seasonYear) return "Sponsor already signed for this season";
+  if (id === "stream" && run.fans < 25_000) return "Requires 25,000 studio fans";
+  if (id === "prestige" && state.titles < 1 && run.fans < 200_000) return "Requires an Arcball title or 200,000 studio fans";
+  return null;
+}
+
+export function signArcballSponsor(run: RunState, id: ArcballSponsorId): RunState | null {
+  const block = arcballSponsorBlock(run, id);
+  if (block) return null;
+  const state = arcballStateOf(run);
+  const sponsor = ARCBALL_SPONSORS[id];
+  return {
+    ...run,
+    cash: run.cash + sponsor.sign,
+    incomeThisWeek: (run.incomeThisWeek ?? 0) + sponsor.sign,
+    arcball: { ...state, sponsor: id, sponsorYear: state.seasonYear },
+    notices: [...run.notices, "🤝 ARCBALL SPONSOR — " + sponsor.name + " signs for Year " + state.seasonYear + " (+" + sponsor.sign.toLocaleString("en-GB") + " upfront)."].slice(-40),
+  };
+}
+
 function freshProgress(): ArcballPlayerProgress {
   return {
     boosts: {},
