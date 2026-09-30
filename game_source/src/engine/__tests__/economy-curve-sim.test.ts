@@ -6,6 +6,7 @@ import {
   MEDIUMS,
   PETS,
   PROTAGONISTS,
+  RESEARCH,
   SECONDARY,
   SLOTS,
   VILLAINS,
@@ -19,6 +20,8 @@ import {
 import { rollHire } from "../careers";
 import { genreTargetFor } from "../genreTargets";
 import { activeProjects, projectOfStaff, projectUpfront, type MilestoneOutcome, type Project } from "../projects";
+import { MERCH_PRODUCTS, merchReturn } from "../franchise";
+import { CAPITAL_PROJECTS, buyCapitalProject } from "../spending";
 import { seededRng } from "../scoring";
 import { genreUnlockCost, unlockGenreLicense } from "../progression";
 import { randomStartingGenres } from "../startingGenres";
@@ -26,14 +29,20 @@ import {
   advanceWeeks,
   applyMilestone,
   arcLockReason,
+  buyMerchInfrastructure,
   initialRun,
+  launchMerch,
+  merchProductUnlocked,
+  merchTierOf,
   projectCapacity,
   releaseProject,
   relocateOffice,
   staffCapacity,
   startContractAssignment,
   startProject,
+  startResearchProject,
   tickStudioWorkPulse,
+  unlockMerchProduct,
   unlockFormat,
   type RunState,
 } from "../state";
@@ -73,8 +82,17 @@ function bestGenrePair(r: RunState, index: number) {
 const botDraft = (r: RunState, i: number): Draft => {
   const genres = bestGenrePair(r, i);
   const unlocked = r.mediumsUnlocked.length ? r.mediumsUnlocked : ["fanweb"];
-  const medium = unlocked[Math.floor(Math.random() * unlocked.length)] as MediumId;
-  const budget = r.cash > 8_000_000 ? "blockbuster" : r.cash > 750_000 ? "standard" : "indie";
+  const mediumPreference: MediumId[] = r.cash < 350_000
+    ? ["fanweb"]
+    : r.cash < 1_500_000
+      ? ["ona", "fanweb"]
+      : r.cash < 7_500_000
+        ? ["tv", "ona", "fanweb"]
+        : r.cash < 30_000_000
+          ? ["ova", "special", "tv", "ona"]
+          : ["movie", "special", "ova", "tv"];
+  const medium = (mediumPreference.find((id) => unlocked.includes(id)) ?? unlocked[0]) as MediumId;
+  const budget = r.cash > 25_000_000 ? "blockbuster" : r.cash > 1_500_000 ? "standard" : "indie";
   const ideal = genreTargetFor(genres).ideal;
   const leadGenre = genres[0];
   const slot = (Object.entries(SLOTS).find(([, def]) => def.best.some((g) => genres.includes(g)))?.[0]
@@ -93,16 +111,19 @@ const botDraft = (r: RunState, i: number): Draft => {
       .sort((a, b) => affinity(b) - affinity(a))[0]
     ?? pools[role][0];
 
+  const arcLimit = r.cash < 250_000 ? 1 : r.cash < 900_000 ? 2 : r.cash < 4_000_000 ? 3 : 4;
   const accessibleArcs = ARCS
     .filter((arc) => !arc.franchiseOnly && !arcLockReason(arc, r) && !(arc.anti ?? []).some((g) => genres.includes(g)))
     .map((arc) => ({
       id: arc.id,
+      cost: arc.cost,
       score: arc.q
         + (arc.syn ?? []).filter((g) => genres.includes(g)).length * ((arc.synQ ?? 0) + 5)
-        + (arc.f ?? 0) * 30,
+        + (arc.f ?? 0) * 30
+        - (r.cash < 500_000 ? arc.cost / 10_000 : 0),
     }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4)
+    .sort((a, b) => b.score - a.score || a.cost - b.cost)
+    .slice(0, arcLimit)
     .map((arc) => arc.id);
 
   const protag = pick("protag");
@@ -172,16 +193,113 @@ const botHire = (r: RunState): RunState => {
     cash -= 8_000;
     candidates = [rollHire(r.week), rollHire(r.week), rollHire(r.week)];
   }
-  for (const c of [...candidates].sort((a, b) => (b.story + b.art + b.sound) - (a.story + a.art + a.sound))) {
+  for (const c of [...candidates].sort((a, b) => {
+    const aValue = (a.story + a.art + a.sound) / Math.max(5_000, a.cost);
+    const bValue = (b.story + b.art + b.sound) / Math.max(5_000, b.cost);
+    return staff.length < 2 ? bValue - aValue : (b.story + b.art + b.sound) - (a.story + a.art + a.sound);
+  })) {
     if (staff.length >= staffCapacity(r)) break;
-    const reserve = r.officeLevel === 0 ? 30_000 : 75_000;
-    if (cash - c.cost < reserve) break;
+    const reserve = r.officeLevel === 0 ? (staff.length === 0 ? 22_000 : 42_000) : 100_000;
+    if (cash - c.cost < reserve) continue;
     cash -= c.cost;
     staff = [...staff, { ...c, joinedWeek: r.week }];
     candidates = candidates.filter((x) => x.id !== c.id);
   }
   return { ...r, cash, staff, candidates };
 };
+
+
+const RESEARCH_PRIORITY = ["pipeline", "qa", "marketing", "merch", "local", "merch2", "mocap", "cg", "autoclean"] as const;
+
+function botResearch(r: RunState): RunState {
+  if (r.researchJobs.length > 0) return r;
+  for (const id of RESEARCH_PRIORITY) {
+    if (r.research.includes(id)) continue;
+    const def = RESEARCH.find((item) => item.id === id);
+    if (!def) continue;
+    const next = startResearchProject(r, id, def.rd);
+    if (next) return next;
+  }
+  return r;
+}
+
+function botMerch(r: RunState): RunState {
+  let out = r;
+  if (!out.research.includes("merch") || out.officeLevel < 1) return out;
+
+  /* Infrastructure is only expanded with a healthy reserve; the bot is
+     stress-testing profitable play, not suicidal leverage. */
+  const currentTier = merchTierOf(out);
+  const nextTierCost = [250_000, 1_500_000, 8_000_000, 35_000_000][currentTier] ?? null;
+  if (nextTierCost !== null && out.cash > Math.max(nextTierCost * 2.5, 750_000)) {
+    out = buyMerchInfrastructure(out) ?? out;
+  }
+
+  const tier = merchTierOf(out);
+  const eligibleProducts = MERCH_PRODUCTS
+    .filter((product) => product.tier <= tier)
+    .sort((a, b) => b.mult - a.mult || a.unlockCost - b.unlockCost);
+
+  /* Develop at most one new line per week. */
+  for (const product of eligibleProducts) {
+    if (merchProductUnlocked(out, product.id)) continue;
+    if (out.cash - product.unlockCost < Math.max(500_000, product.unlockCost * 1.5)) continue;
+    const unlocked = unlockMerchProduct(out, product.id);
+    if (unlocked) { out = unlocked; break; }
+  }
+
+  /* Launch the best currently profitable product on each strong franchise.
+     Using the engine's own launch function preserves cooldowns and active-bet rules. */
+  const franchises = Object.values(out.franchises)
+    .filter((fr) => !fr.soldTo)
+    .sort((a, b) => b.merchValue - a.merchValue)
+    .slice(0, Math.min(5, Object.keys(out.franchises).length));
+  for (const fr of franchises) {
+    if (out.activeMerchBets?.[fr.key] && out.activeMerchBets[fr.key].endsWeek > out.week) continue;
+    const candidates = eligibleProducts
+      .filter((product) => merchProductUnlocked(out, product.id))
+      .map((product) => ({ product, projected: merchReturn(fr, product) }))
+      .filter(({ product, projected }) => projected >= product.cost * 1.15)
+      .sort((a, b) => (b.projected - b.product.cost) - (a.projected - a.product.cost));
+    for (const { product } of candidates) {
+      if (out.cash - product.cost < 500_000) continue;
+      const launched = launchMerch(out, fr.key, product.id);
+      if (launched) { out = launched; break; }
+    }
+  }
+  return out;
+}
+
+const CAPITAL_PRIORITY = [
+  "screening_theatre",
+  "museum",
+  "academy",
+  "mocap_stage",
+  "orchestra_hall",
+  "merch_centre",
+  "localisation_campus",
+  "merch_factory",
+  "distribution_network",
+  "convention_venue",
+  "studio_streaming",
+  "flagship_hq",
+  "second_campus",
+] as const;
+
+function botCapitalProjects(r: RunState): RunState {
+  let out = r;
+  for (const id of CAPITAL_PRIORITY) {
+    if (out.capitalProjects.includes(id)) continue;
+    const def = CAPITAL_PROJECTS.find((row) => row.id === id);
+    if (!def || out.officeLevel < def.minOffice) continue;
+    const reserveMult = def.cost >= 500_000_000 ? 1.8 : def.cost >= 100_000_000 ? 2.2 : 3;
+    if (out.cash < def.cost * reserveMult) continue;
+    const bought = buyCapitalProject(out, id);
+    if (bought) out = bought;
+    break;
+  }
+  return out;
+}
 
 function botProgression(r: RunState): RunState {
   let out = r;
@@ -276,11 +394,15 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
       r = botProgression(r);
       r = botHire(r);
       r = botProgression(r);
+      r = botResearch(r);
+      r = botMerch(r);
+      r = botCapitalProjects(r);
 
       let guard = 0;
       while (guard++ < 4 && activeProjects(r.projects).length < projectCapacity(r)) {
         const d = botDraft(r, greenlit);
-        const reserve = r.officeLevel <= 1 ? 60_000 : 150_000;
+        if (r.staff.length === 0) break;
+        const reserve = r.officeLevel === 0 ? 55_000 : r.officeLevel === 1 ? 180_000 : Math.max(400_000, r.cash * .05);
         if (r.cash < projectUpfront(d) + reserve) break;
         const next = startProject(r, d);
         if (!next) break;
@@ -290,6 +412,8 @@ function playCareer(showrunner: string, seedLabel: string): CurveResult {
 
       r = botAssign(r);
       r = botContract(r);
+      r = botMerch(r);
+      r = botCapitalProjects(r);
       r = botArcballCapital(r);
       for (let pulse = 0; pulse < 40; pulse++) r = tickStudioWorkPulse(r).run;
       r = advanceWeeks(r, 1);
