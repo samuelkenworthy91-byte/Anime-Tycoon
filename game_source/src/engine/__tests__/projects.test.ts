@@ -221,6 +221,19 @@ describe("weekly progression", () => {
 });
 
 /* ------------------------------------------------------------- deadlines */
+describe("Arcball injury production impact", () => {
+  it("keeps an injured worker assigned but removes their production contribution", () => {
+    const healthy = worker("healthy", { stamina: 90 });
+    const injured = worker("injured", { stamina: 90, injuredUntilDay: 60, injuryLabel: "knee strain" });
+    const project = { ...makeProject(draft(), 0), staffIds: [healthy.id, injured.id] };
+    const withInjured = tickProjectsWeek([project], [healthy, injured], 1).projects[0];
+    const healthyOnly = tickProjectsWeek([{ ...project, staffIds: [healthy.id] }], [healthy], 1).projects[0];
+    expect(withInjured.staffIds).toContain(injured.id);
+    expect(withInjured.progress).toBeCloseTo(healthyOnly.progress, 8);
+  });
+});
+
+/* ------------------------------------------------------------- deadlines */
 describe("deadlines", () => {
   it("missing the deadline costs cash and hype without adding issues", () => {
     let r = richRun();
