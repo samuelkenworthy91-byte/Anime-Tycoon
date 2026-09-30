@@ -82,6 +82,8 @@ export interface ArcballPlayerProgress {
   /** −3..+3 short-term confidence/form, earned through real match performance. */
   form: number;
   lastTrainingWeek?: number;
+  /** Expensive private Arcball coaching can be bought once per player per season. */
+  lastPrivateCoachingYear?: number;
 }
 
 export type ArcballCompetition = "league" | "cup";
@@ -142,6 +144,7 @@ export interface ArcballHonour {
   productionPerk?: string;
 }
 export type ArcballSponsorId = "local" | "stream" | "prestige";
+export type ArcballInvestmentId = "performance" | "medical" | "analytics" | "arena";
 
 export interface ArcballState {
   version: 1;
@@ -168,6 +171,10 @@ export interface ArcballState {
   rivalRosters: Record<string, ArcballRivalPlayer[]>;
   sponsor: ArcballSponsorId | null;
   sponsorYear: number;
+  /** Permanent, cash-funded Arcball infrastructure. Levels are 0..3. */
+  investments: Record<ArcballInvestmentId, number>;
+  /** One whole-squad high-performance camp can be funded per Arcball season. */
+  campYear: number;
 }
 
 declare module "./state" {
@@ -245,11 +252,12 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 
 /** One rested team has a 1-in-5 injury risk per match. Fatigue raises this
  * toward a hard 45% ceiling so repeatedly fielding exhausted staff is dangerous. */
-export function arcballInjuryChance(energies: number[]): number {
+export function arcballInjuryChance(energies: number[], fatigueMitigation = 0): number {
   if (!energies.length) return 0;
   const fatiguePressure = energies.reduce((sum, energy) => sum + Math.max(0, 45 - energy) / 45, 0) / energies.length;
   const lowestEnergy = Math.min(...energies);
-  return clamp(.20 + fatiguePressure * .16 + (lowestEnergy < 25 ? .08 : 0), .20, .45);
+  const surcharge = (fatiguePressure * .16 + (lowestEnergy < 25 ? .08 : 0)) * (1 - clamp(fatigueMitigation, 0, .8));
+  return clamp(.20 + surcharge, .20, .45);
 }
 
 export function arcballInjuryWeeks(energy: number, roll: number): number {
@@ -367,6 +375,193 @@ export const ARCBALL_SPONSORS: Record<ArcballSponsorId, { name: string; sign: nu
   stream: { name: "AniWave Stream", sign: 30_000, win: 3_000, top3: 22_000, title: 45_000, requirement: "Requires 25,000 studio fans." },
   prestige: { name: "Kirin Motion Systems", sign: 70_000, win: 6_000, top3: 45_000, title: 100_000, requirement: "Requires 1 Arcball title or 200,000 studio fans." },
 };
+
+export interface ArcballInvestmentDef {
+  id: ArcballInvestmentId;
+  name: string;
+  desc: string;
+  costs: readonly [number, number, number];
+  effects: readonly [string, string, string];
+}
+
+/* Arcball is deliberately an expensive sport once the studio becomes wealthy.
+ * These are permanent capital projects, not token rewards. Fully upgrading the
+ * programme costs over £1bn, giving dynasty studios a serious cash sink. */
+export const ARCBALL_INVESTMENTS: Record<ArcballInvestmentId, ArcballInvestmentDef> = {
+  performance: {
+    id: "performance",
+    name: "High Performance Centre",
+    desc: "Dedicated courts, motion capture and specialist coaches accelerate player development.",
+    costs: [5_000_000, 25_000_000, 100_000_000],
+    effects: ["Training gains ×1.12", "Training gains ×1.25", "Training gains ×1.40"],
+  },
+  medical: {
+    id: "medical",
+    name: "Sports Science & Medical Centre",
+    desc: "Physios, load monitoring and rehabilitation reduce fatigue costs without removing Arcball's inherent injury risk.",
+    costs: [10_000_000, 50_000_000, 200_000_000],
+    effects: ["Match/training energy −5% · fatigue injury surcharge −15%", "Energy −10% · surcharge −30% · long injuries −1 week", "Energy −15% · surcharge −45% · long injuries −2 weeks"],
+  },
+  analytics: {
+    id: "analytics",
+    name: "Arcball Analytics Department",
+    desc: "Video analysts and tactical modelling improve how effectively the five execute your chosen system.",
+    costs: [8_000_000, 40_000_000, 150_000_000],
+    effects: ["Team tactical strength +1.5", "Team tactical strength +3", "Team tactical strength +5"],
+  },
+  arena: {
+    id: "arena",
+    name: "Studio Arcball Arena",
+    desc: "A purpose-built home venue turns sporting success into a much larger commercial and fan platform.",
+    costs: [20_000_000, 100_000_000, 400_000_000],
+    effects: ["Match fans / sponsors / merch ×1.15", "Commercial Arcball returns ×1.35", "Commercial Arcball returns ×1.65"],
+  },
+};
+
+export interface ArcballClubEffects {
+  trainingGainMult: number;
+  energyCostMult: number;
+  fatigueRiskMitigation: number;
+  injuryWeeksReduction: number;
+  tacticalBonus: number;
+  commercialMult: number;
+}
+
+export function arcballClubEffects(state: Pick<ArcballState, "investments">): ArcballClubEffects {
+  const performance = clamp(Math.floor(state.investments?.performance ?? 0), 0, 3);
+  const medical = clamp(Math.floor(state.investments?.medical ?? 0), 0, 3);
+  const analytics = clamp(Math.floor(state.investments?.analytics ?? 0), 0, 3);
+  const arena = clamp(Math.floor(state.investments?.arena ?? 0), 0, 3);
+  return {
+    trainingGainMult: [1, 1.12, 1.25, 1.40][performance],
+    energyCostMult: [1, .95, .90, .85][medical],
+    fatigueRiskMitigation: [0, .15, .30, .45][medical],
+    injuryWeeksReduction: [0, 0, 1, 2][medical],
+    tacticalBonus: [0, 1.5, 3, 5][analytics],
+    commercialMult: [1, 1.15, 1.35, 1.65][arena],
+  };
+}
+
+export function arcballInvestmentQuote(run: RunState, id: ArcballInvestmentId): { level: number; nextLevel: number; cost: number | null; blockedReason: string | null } {
+  const state = arcballStateOf(run);
+  const def = ARCBALL_INVESTMENTS[id];
+  const level = clamp(Math.floor(state.investments[id] ?? 0), 0, 3);
+  const cost = level < 3 ? def.costs[level] : null;
+  let blockedReason: string | null = null;
+  if (!state.unlocked) blockedReason = "Enter the Arcball League first";
+  else if (level >= 3) blockedReason = "MAX LEVEL";
+  else if (cost !== null && run.cash < cost) blockedReason = "Needs £" + cost.toLocaleString("en-GB");
+  return { level, nextLevel: Math.min(3, level + 1), cost, blockedReason };
+}
+
+export function purchaseArcballInvestment(run: RunState, id: ArcballInvestmentId): RunState | null {
+  const quote = arcballInvestmentQuote(run, id);
+  if (quote.blockedReason || quote.cost === null) return null;
+  const state = arcballStateOf(run);
+  const def = ARCBALL_INVESTMENTS[id];
+  return {
+    ...run,
+    cash: run.cash - quote.cost,
+    arcball: {
+      ...state,
+      investments: { ...state.investments, [id]: quote.nextLevel },
+    },
+    strategicSpend: [
+      ...run.strategicSpend,
+      { id: "arcball_invest_" + id + "_" + quote.nextLevel + "_" + run.week, label: def.name + " Lv" + quote.nextLevel, amount: quote.cost, week: run.week },
+    ],
+    notices: [...run.notices, "🏟️ ARCBALL INVESTMENT — " + def.name + " reaches Lv" + quote.nextLevel + " for £" + quote.cost.toLocaleString("en-GB") + ". " + def.effects[quote.nextLevel - 1] + "."].slice(-40),
+  };
+}
+
+export const ARCBALL_CAMPS = [
+  { tier: 1 as const, name: "National Performance Camp", cost: 10_000_000, gain: 1, stamina: 10 },
+  { tier: 2 as const, name: "International Elite Camp", cost: 50_000_000, gain: 2, stamina: 18 },
+  { tier: 3 as const, name: "World-Class Residency", cost: 150_000_000, gain: 3, stamina: 25 },
+] as const;
+
+function weakestTrainableArcballStat(member: Staff, progress: ArcballPlayerProgress): ArcballStat | null {
+  const profile = arcballProfile(member, progress);
+  const base = arcballBaseProfile(member);
+  return [...ARCBALL_STATS]
+    .filter((stat) => profile.stats[stat] < Math.min(99, Math.max(base.stats[stat], 55 + Math.round(base.potential * .45))))
+    .sort((a, b) => profile.stats[a] - profile.stats[b] || a.localeCompare(b))[0] ?? null;
+}
+
+export function runArcballCamp(run: RunState, tier: 1 | 2 | 3): RunState | null {
+  const state = arcballStateOf(run);
+  const camp = ARCBALL_CAMPS.find((row) => row.tier === tier);
+  if (!camp || !state.unlocked || state.campYear === state.seasonYear || run.cash < camp.cost) return null;
+  const currentDay = run.day ?? run.week * 7;
+  const participants = state.registered
+    .map((id) => run.staff.find((member) => member.id === id))
+    .filter((member): member is Staff => !!member && !staffIsInjured(member, currentDay));
+  if (!participants.length) return null;
+  const players = { ...state.players };
+  const improved = new Set<string>();
+  for (const member of participants) {
+    const progress = ensurePlayerProgress(state, member.id);
+    const stat = weakestTrainableArcballStat(member, progress);
+    if (!stat) continue;
+    const boosts = { ...(progress.boosts ?? {}) };
+    boosts[stat] = (boosts[stat] ?? 0) + camp.gain;
+    players[member.id] = { ...progress, boosts };
+    improved.add(member.id);
+  }
+  return {
+    ...run,
+    cash: run.cash - camp.cost,
+    staff: run.staff.map((member) => state.registered.includes(member.id) && !staffIsInjured(member, currentDay)
+      ? { ...member, stamina: Math.min(100, member.stamina + camp.stamina) }
+      : member),
+    arcball: { ...state, players, campYear: state.seasonYear },
+    strategicSpend: [
+      ...run.strategicSpend,
+      { id: "arcball_camp_" + state.seasonYear, label: camp.name, amount: camp.cost, week: run.week },
+    ],
+    notices: [...run.notices, "🌍 ARCBALL CAMP — " + camp.name + " costs £" + camp.cost.toLocaleString("en-GB") + ". " + improved.size + " players gain +" + camp.gain + " to their weakest trainable Arcball stat and recover +" + camp.stamina + " energy."].slice(-40),
+  };
+}
+
+export function arcballPrivateCoachingQuote(run: RunState, staffId: string): { cost: number; blockedReason: string | null; stat: ArcballStat | null } {
+  const state = arcballStateOf(run);
+  const member = run.staff.find((staff) => staff.id === staffId);
+  if (!member) return { cost: 0, blockedReason: "No such worker", stat: null };
+  const progress = ensurePlayerProgress(state, staffId);
+  const profile = arcballProfile(member, progress);
+  const cost = Math.round((8_000_000 + Math.max(0, profile.overall - 55) * 350_000) / 500_000) * 500_000;
+  const stat = weakestTrainableArcballStat(member, progress);
+  let blockedReason: string | null = null;
+  if (!state.unlocked || !state.registered.includes(staffId)) blockedReason = "Register this worker first";
+  else if (staffIsInjured(member, run.day ?? run.week * 7)) blockedReason = "Worker is injured";
+  else if (progress.lastPrivateCoachingYear === state.seasonYear) blockedReason = "Private coaching already used this season";
+  else if (!stat) blockedReason = "Player has reached their current training ceiling";
+  else if (run.cash < cost) blockedReason = "Needs £" + cost.toLocaleString("en-GB");
+  return { cost, blockedReason, stat };
+}
+
+export function runArcballPrivateCoaching(run: RunState, staffId: string): RunState | null {
+  const quote = arcballPrivateCoachingQuote(run, staffId);
+  if (quote.blockedReason || !quote.stat) return null;
+  const state = arcballStateOf(run);
+  const member = run.staff.find((staff) => staff.id === staffId)!;
+  const progress = ensurePlayerProgress(state, staffId);
+  const boosts = { ...(progress.boosts ?? {}) };
+  boosts[quote.stat] = (boosts[quote.stat] ?? 0) + 2;
+  return {
+    ...run,
+    cash: run.cash - quote.cost,
+    arcball: {
+      ...state,
+      players: { ...state.players, [staffId]: { ...progress, boosts, lastPrivateCoachingYear: state.seasonYear } },
+    },
+    strategicSpend: [
+      ...run.strategicSpend,
+      { id: "arcball_private_" + staffId + "_" + state.seasonYear, label: "Private Arcball coaching — " + member.name, amount: quote.cost, week: run.week },
+    ],
+    notices: [...run.notices, "🎯 PRIVATE ARCBALL COACHING — " + member.name + " gains +2 " + quote.stat.toUpperCase() + " for £" + quote.cost.toLocaleString("en-GB") + "."].slice(-40),
+  };
+}
 
 export function arcballSponsorBlock(run: RunState, id: ArcballSponsorId): string | null {
   const state = arcballStateOf(run);
@@ -553,6 +748,8 @@ export function initialArcballState(week: number): ArcballState {
     rivalRosters: {},
     sponsor: null,
     sponsorYear: 0,
+    investments: { performance: 0, medical: 0, analytics: 0, arena: 0 },
+    campYear: 0,
   };
 }
 
@@ -588,6 +785,7 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
         seasonPlayerOfMatch: Math.max(0, Math.floor(p.seasonPlayerOfMatch ?? 0)),
         form: clamp(Math.round(p.form ?? 0), -3, 3),
         lastTrainingWeek: typeof p.lastTrainingWeek === "number" ? p.lastTrainingWeek : undefined,
+        lastPrivateCoachingYear: typeof p.lastPrivateCoachingYear === "number" ? p.lastPrivateCoachingYear : undefined,
       };
     }
   }
@@ -627,6 +825,13 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
       : {},
     sponsor: r.sponsor === "local" || r.sponsor === "stream" || r.sponsor === "prestige" ? r.sponsor : null,
     sponsorYear: Math.max(0, Math.floor(r.sponsorYear ?? 0)),
+    investments: {
+      performance: clamp(Math.floor(r.investments?.performance ?? 0), 0, 3),
+      medical: clamp(Math.floor(r.investments?.medical ?? 0), 0, 3),
+      analytics: clamp(Math.floor(r.investments?.analytics ?? 0), 0, 3),
+      arena: clamp(Math.floor(r.investments?.arena ?? 0), 0, 3),
+    },
+    campYear: Math.max(0, Math.floor(r.campYear ?? 0)),
   };
 }
 
@@ -866,6 +1071,11 @@ function playerTeamNumbers(run: RunState, intensity: ArcballIntensity = "normal"
   if (instruction === "keep") { possession += 7; attack -= 2; }
   if (instruction === "press") { defence += 5; possession += 3; }
   if (instruction === "drop") { defence += 8; attack -= 6; possession -= 2; }
+
+  const tacticalBonus = arcballClubEffects(state).tacticalBonus;
+  attack += tacticalBonus;
+  defence += tacticalBonus;
+  possession += tacticalBonus;
 
   return { attack, defence, possession };
 }
@@ -1244,6 +1454,7 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
   const mvpId = rows[0]?.id;
   const seasonScale = 1 + Math.min(1.5, Math.max(0, state.seasonYear - 1) * .05);
   const progress = { ...state.players };
+  const club = arcballClubEffects(state);
   let staff = run.staff.map((member) => {
     const stat = match.playerStats[member.id];
     if (!stat) return member;
@@ -1268,7 +1479,7 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     };
     return {
       ...member,
-      stamina: Math.max(0, member.stamina - Math.round(match.effort[member.id] ?? 10)),
+      stamina: Math.max(0, member.stamina - Math.max(1, Math.round((match.effort[member.id] ?? 10) * club.energyCostMult))),
       creatorFans: Math.max(0, Math.round((member.creatorFans ?? 0) + fanGain)),
     };
   });
@@ -1279,13 +1490,13 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
   const participants = staff.filter((member) => !!match.playerStats[member.id]);
   if (participants.length) {
     const energies = participants.map((member) => member.stamina);
-    const injuryChance = arcballInjuryChance(energies);
+    const injuryChance = arcballInjuryChance(energies, club.fatigueRiskMitigation);
     if (injuryRng() < injuryChance) {
       const injured = pickWeighted(participants.map((member) => ({
         item: member,
         weight: 1 + Math.max(0, 55 - member.stamina) / 7,
       })), injuryRng());
-      const weeksOut = arcballInjuryWeeks(injured.stamina, injuryRng());
+      const weeksOut = Math.max(2, arcballInjuryWeeks(injured.stamina, injuryRng()) - club.injuryWeeksReduction);
       const injuries = ["ankle sprain", "shoulder strain", "wrist sprain", "knee strain", "back strain"];
       const injuryLabel = injuries[Math.floor(injuryRng() * injuries.length)];
       const currentDay = run.day ?? run.week * 7;
@@ -1305,11 +1516,11 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
   }
 
   const cupFanBonus = cupFinalized.playerWon ? 5_000 : 0;
-  const studioFans = Math.round((win ? 500 : draw ? 250 : 100) + playerScore * 100 + cupFanBonus);
+  const studioFans = Math.round(((win ? 500 : draw ? 250 : 100) + playerScore * 100 + cupFanBonus) * club.commercialMult);
   const opponentId = match.playerIsHome ? fixture.awayId : fixture.homeId;
   const opponent = arcballTeamName(run, opponentId);
   const sponsor = state.sponsor && state.sponsorYear === state.seasonYear ? ARCBALL_SPONSORS[state.sponsor] : null;
-  const sponsorGain = sponsor ? (win ? sponsor.win : draw ? Math.round(sponsor.win * .35) : 0) : 0;
+  const sponsorGain = sponsor ? Math.round((win ? sponsor.win : draw ? sponsor.win * .35 : 0) * club.commercialMult) : 0;
   state = { ...state, players: progress, tokens: state.tokens + tokenGain };
   const competitionLabel = fixture.competition === "cup" ? "ARCBALL CUP" : "ARCBALL";
   const resultText = run.studio + " " + playerScore + "–" + opponentScore + " " + opponent + (cupTiebreak ? " (overtime)" : "");
@@ -1576,13 +1787,14 @@ export function arcballMerchQuote(run: RunState): { cost: number; revenue: numbe
   const state = arcballStateOf(run);
   const cost = 20_000;
   const sportFans = Object.values(state.players).reduce((sum, player) => sum + (player.arcballFans ?? 0), 0);
-  const revenue = Math.round(
+  const commercial = arcballClubEffects(state).commercialMult;
+  const revenue = Math.round((
     25_000 +
     Math.min(350_000, sportFans * .18) +
     Math.min(180_000, run.fans * .015) +
     (state.titles + state.cupTitles) * 25_000
-  );
-  const fanGain = Math.round(Math.min(8_000, 500 + sportFans * .01));
+  ) * commercial);
+  const fanGain = Math.round(Math.min(14_000, (500 + sportFans * .01) * commercial));
   let blockedReason: string | null = null;
   if (!state.unlocked) blockedReason = "Enter the Arcball League first";
   else if (!run.research.includes("merch")) blockedReason = "Requires Merchandising research";
@@ -1656,13 +1868,14 @@ export function trainArcball(run: RunState, staffId: string, drillId: string): R
   const base = arcballBaseProfile(member);
   const cap = Math.max(base.stats[drill.primary], 55 + Math.round(base.potential * .45));
   const current = arcballProfile(member, progress).stats[drill.primary];
-  const plannedGain = Math.max(1, Math.round(drill.gain * readiness.gainMult));
+  const club = arcballClubEffects(state);
+  const plannedGain = Math.max(1, Math.round(drill.gain * readiness.gainMult * club.trainingGainMult));
   const primaryGain = Math.max(0, Math.min(plannedGain, cap - current));
   if (primaryGain <= 0) return null;
   const boosts = { ...(progress.boosts ?? {}) };
   boosts[drill.primary] = (boosts[drill.primary] ?? 0) + primaryGain;
   if (drill.secondary && drill.secondaryGain) {
-    const secondaryGain = Math.max(1, Math.round(drill.secondaryGain * readiness.gainMult));
+    const secondaryGain = Math.max(1, Math.round(drill.secondaryGain * readiness.gainMult * club.trainingGainMult));
     boosts[drill.secondary] = (boosts[drill.secondary] ?? 0) + secondaryGain;
   }
   if (drill.penalty) {
@@ -1677,8 +1890,8 @@ export function trainArcball(run: RunState, staffId: string, drillId: string): R
   return {
     ...run,
     arcball: state,
-    staff: run.staff.map((s) => s.id === staffId ? { ...s, stamina: Math.max(0, s.stamina - drill.stamina) } : s),
-    notices: [...run.notices, "⚽ " + member.name + " completes " + drill.name + " at " + readiness.label + " readiness: +" + primaryGain + " " + drill.primary.toUpperCase() + " (−" + drill.cost + " Arc Tokens, −" + drill.stamina + " energy)."].slice(-40),
+    staff: run.staff.map((s) => s.id === staffId ? { ...s, stamina: Math.max(0, s.stamina - Math.max(1, Math.round(drill.stamina * club.energyCostMult))) } : s),
+    notices: [...run.notices, "⚽ " + member.name + " completes " + drill.name + " at " + readiness.label + " readiness: +" + primaryGain + " " + drill.primary.toUpperCase() + " (−" + drill.cost + " Arc Tokens, −" + Math.max(1, Math.round(drill.stamina * club.energyCostMult)) + " energy)."].slice(-40),
   };
 }
 
