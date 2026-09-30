@@ -19,11 +19,12 @@ import {
 import type { DeskPulse, RunState } from "../engine/state";
 import type { MilestoneId, MilestoneOutcome, Project, RushAssignment } from "../engine/projects";
 import { exactDirectionKnown, rushBoostPoint, rushOutcomeRange, rushResearchCost, rushTeamSupport, showrunnerStats, studioKnowledgeEmphasis } from "../engine/studioOps";
-import { personMod, staffGenreMultiplier } from "../engine/careers";
+import { personMod, staffGenreMultiplier, studioProduction } from "../engine/careers";
 import { genreTargetFor } from "../engine/genreTargets";
 import { engineerEyeRange, trailblazerProductionMult } from "../engine/showrunnerPerks";
-import { MILESTONE_LABEL, TEAM_MAX, draftCost } from "../engine/projects";
+import { MILESTONE_LABEL, draftCost } from "../engine/projects";
 import { expansionOf } from "../engine/studioExpansion";
+import { teamCoordinationEfficiency } from "../engine/teamCoordination";
 import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
@@ -92,7 +93,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onAp
           const alreadyAssigned = project.staffIds.includes(promise.staffId);
           const early = project.stage === "concept" && total === 0;
           const earnedLate = total > 0 && participation >= 60;
-          const canAutoAssign = alreadyAssigned || project.staffIds.length < TEAM_MAX;
+          const canAutoAssign = true;
           const canName = !named && !conflictingLead && canAutoAssign && (early || (alreadyAssigned && earnedLate));
           const leadLabel = promise.role === "writer" ? "WRITING" : promise.role === "animator" ? "ANIMATION" : "SOUND";
           return (
@@ -114,9 +115,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onAp
                 <div className="mt-1.5 text-[9px] text-paper/50">
                   {conflictingLead
                     ? `Another ${leadLabel.toLowerCase()} lead is already named.`
-                    : !canAutoAssign
-                      ? "Team is full — make a slot before naming this promised lead."
-                      : total > 0
+                    : total > 0
                         ? `Keep ${creator.name} on the project until they reach 60% of ${leadLabel.toLowerCase()} production days. Current: ${participation}%.`
                         : `Assign ${creator.name} before ${leadLabel.toLowerCase()} work begins, or they can still earn the role later at 60% participation.`}
                 </div>
@@ -400,7 +399,9 @@ export default function Produce({ run, project, milestone, workPulses = [], onAp
           <div className="mt-4 space-y-2">
             {candidates.map((st) => {
               const mod = personMod(st, project, team, { bonds: run.bonds });
-              const skill = Math.round(staffPoint(st, phase!.type) * mod.out);
+              const relief = studioProduction(run.heads ?? {}, run.staff, run.showrunner).coordinationRelief;
+              const coordination = teamCoordinationEfficiency(team, relief);
+              const skill = Math.round(staffPoint(st, phase!.type) * mod.out * coordination);
               const range = rushOutcomeRange(skill);
               const support = rushTeamSupport(team.filter((x) => x.id !== st.id).map((x) => Math.round(staffPoint(x, phase!.type) * personMod(x, project, team, { bonds: run.bonds }).out)));
               const genreMult = staffGenreMultiplier(st, project.draft.genres);
