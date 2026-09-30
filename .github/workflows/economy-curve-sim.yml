@@ -13,6 +13,10 @@ jobs:
   simulate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        showrunner: [steady, operations, marketer]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,8 +27,9 @@ jobs:
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
-      - name: Run 30-career economy curve simulation
+      - name: Run ten-career economy curve simulation
         working-directory: game_source
         env:
           ECONOMY_CURVE_SIM: "1"
+          ECONOMY_SHOWRUNNER: ${{ matrix.showrunner }}
         run: npx vitest run src/engine/__tests__/economy-curve-sim.test.ts --reporter=verbose
