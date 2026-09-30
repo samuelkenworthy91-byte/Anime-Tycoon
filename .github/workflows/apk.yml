@@ -70,7 +70,7 @@ jobs:
           if [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Final-Playtest.apk
           elif [ "$GITHUB_REF_NAME" = "arcball-v1" ]; then
-            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Arcball-Playtest.apk
+            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Arcball.apk
           else
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Main-Playtest.apk
           fi
@@ -79,7 +79,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: anime-runner-${{ github.ref_name }}-playtest-apk
-          path: Anime-Runner-*-Playtest.apk
+          path: |
+            Anime-Runner-*-Playtest.apk
+            Anime-Runner-Arcball.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -88,15 +90,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG='arcball-playtest'
-          APK='Anime-Runner-Arcball-Playtest.apk'
+          TAG='arcball-v1'
+          APK='Anime-Runner-Arcball.apk'
           BUILT_SHA="$(git rev-parse HEAD)"
           gh release delete "$TAG" --cleanup-tag -y || true
           gh release create "$TAG" \
             "$APK" \
             --target "$BUILT_SHA" \
-            --title 'Anime Runner — Arcball Playtest' \
-            --notes "Dedicated Arcball Android playtest. Separate app id; includes an isolated seeded save with Arcball unlocked, a due fixture, 180 Arc Tokens, seven workers and a Championship Spotlight."
+            --title 'Anime Runner — Arcball 1.0 Branch' \
+            --notes "Full Anime Runner game build with Arcball integrated. Uses the normal app identity and normal career/save flow; no seeded playtest career."
 
       - name: Publish direct GitHub main APK
         if: github.ref == 'refs/heads/main'
