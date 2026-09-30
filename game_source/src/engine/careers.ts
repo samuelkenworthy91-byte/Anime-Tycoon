@@ -823,14 +823,18 @@ export interface StaffEvent {
 }
 
 /** what this person is worth on the open market */
-export const marketSalary = (s: Staff) =>
-  Math.round(((280 + staffPoint(s, ROLE_POINT[s.role]) * 13 + s.level * 140) * moraleSalaryDemandMultiplier(s)) / 10) * 10;
+export const marketSalary = (s: Staff) => {
+  /* Public fame now has labour-market value. Arcball stars can become expensive
+     employees even when their production craft is mediocre. */
+  const famePremium = Math.min(2_500, Math.round((s.creatorFans ?? 0) / 500));
+  return Math.round(((280 + staffPoint(s, ROLE_POINT[s.role]) * 13 + s.level * 140 + famePremium) * moraleSalaryDemandMultiplier(s)) / 10) * 10;
+};
 
 export const wantsRaise = (s: Staff, week: number) =>
   marketSalary(s) > s.salary * 1.35 && week - (s.joinedWeek ?? 0) >= 24;
 
 export const poachable = (s: Staff) =>
-  (s.level >= 7 || staffPoint(s, ROLE_POINT[s.role]) >= 85) && moraleOf(s) < 60;
+  (s.level >= 7 || staffPoint(s, ROLE_POINT[s.role]) >= 85 || (s.creatorFans ?? 0) >= 150_000) && moraleOf(s) < 60;
 
 /* ------------------------------------------------------------ experience */
 /** XP a release grants each team member */
