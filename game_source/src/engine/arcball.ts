@@ -672,6 +672,18 @@ export function stepArcballMatch(
   const awayPossessionTicks = match.awayPossessionTicks + (attackHome ? 0 : 1);
   const playerStats = Object.fromEntries(Object.entries(match.playerStats).map(([id, row]) => [id, { ...row }]));
   const events = [...match.events];
+  const approachText: Record<ArcballApproachId, string> = {
+    short: "with a patient short-passing move",
+    direct: "with a direct vertical attack",
+    press: "after winning it high with the press",
+    counter: "on a quick counterattack",
+  };
+  const intensityText: Record<ArcballIntensity, string> = {
+    calm: "without forcing the tempo",
+    normal: "at a measured tempo",
+    push: "with extra runners committing forward",
+    allin: "with almost everyone pouring forward",
+  };
 
   /* Pick a visible ball carrier on every tick. The presentation can now show
      actual possession even when a move never reaches the shot calculation. */
@@ -710,15 +722,15 @@ export function stepArcballMatch(
           playerStats[assister.id] = playerStats[assister.id] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
           playerStats[assister.id].assists += 1;
           playerStats[assister.id].rating += .45;
-          events.push({ minute: nextMinute, text: assister.name + " releases " + scorer.name + ". GOAL — " + scorer.name + " finishes it.", kind: "goal", playerId: scorer.id });
+          events.push({ minute: nextMinute, text: assister.name + " collects the ball " + approachText[state.approach] + ", draws a defender and slides it into " + scorer.name + "'s run. " + scorer.name + " attacks the space " + intensityText[intensity] + ", takes one touch to set and drives the finish beyond the keeper — GOAL.", kind: "goal", playerId: scorer.id });
         } else {
-          events.push({ minute: nextMinute, text: scorer.name + " breaks into range. GOAL — " + scorer.name + " scores for " + run.studio + ".", kind: "goal", playerId: scorer.id });
+          events.push({ minute: nextMinute, text: scorer.name + " carries the ball through the central lane " + approachText[state.approach] + ". The defence backs off for a moment, " + scorer.name + " steps into range and buries the shot for " + run.studio + " — GOAL.", kind: "goal", playerId: scorer.id });
         }
         if (attackHome) homeScore += 1; else awayScore += 1;
       } else {
         phase = "shot";
         if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
-        events.push({ minute: nextMinute, text: scorer.name + " gets the chance and shoots — saved.", kind: "shot", playerId: scorer.id });
+        events.push({ minute: nextMinute, text: scorer.name + " receives in the final third " + approachText[state.approach] + " and turns toward goal. " + scorer.name + " gets the shot away " + intensityText[intensity] + ", but the keeper reads it and makes the save.", kind: "shot", playerId: scorer.id });
       }
     } else {
       const roster = rivalArcballRoster(rival, state.seasonYear);
@@ -728,32 +740,40 @@ export function stepArcballMatch(
         phase = "goal";
         if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
         if (attackHome) homeScore += 1; else awayScore += 1;
-        events.push({ minute: nextMinute, text: attacker.name + " breaks through. GOAL — " + attacker.name + " scores for " + rival.name + ".", kind: "goal" });
+        events.push({ minute: nextMinute, text: rival.name + " works the ball through midfield and pulls the shape apart. " + attacker.name + " accelerates into the gap, reaches the edge of the scoring area and finishes cleanly — GOAL for " + rival.name + ".", kind: "goal" });
       } else {
         phase = "shot";
         if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
-        events.push({ minute: nextMinute, text: attacker.name + " gets a shooting lane — stopped by " + run.studio + ".", kind: "shot" });
+        events.push({ minute: nextMinute, text: rival.name + " moves the ball quickly into " + attacker.name + "'s path. " + attacker.name + " opens a shooting lane and lets it go, but " + run.studio + " closes the angle and keeps it out.", kind: "shot" });
       }
     }
   } else if (rng() < .34) {
     phase = "defence";
+    const playerCarrier = run.staff.find((s) => s.id === activePlayerId)?.name ?? "The ball carrier";
+    const playerSupport = run.staff.find((s) => s.id === supportingPlayerId)?.name;
     events.push({
       minute: nextMinute,
-      text: isPlayerAttack ? "The passing move is read and cut out before the final ball." : run.studio + " reads the build-up and clears.",
+      text: isPlayerAttack
+        ? (playerSupport ? playerSupport + " carries forward and looks for " + playerCarrier + " between the lines. " : playerCarrier + " carries toward the final third. ") + "The defence anticipates the pass, steps across the lane and cuts it out before the chance can develop."
+        : (supportingRivalName ? supportingRivalName + " tries to feed " + (activeRivalName ?? "the runner") + " through the middle. " : rival.name + " pushes into the final third. ") + run.studio + " tracks the run, gets a body in the lane and clears the danger.",
       kind: "defence",
+      playerId: isPlayerAttack ? activePlayerId : undefined,
     });
   } else {
     phase = rng() < .45 ? "midfield" : rng() < .55 ? "breakaway" : "buildup";
     const carrierName = isPlayerAttack
       ? run.staff.find((s) => s.id === activePlayerId)?.name
       : activeRivalName;
+    const supportName = isPlayerAttack
+      ? run.staff.find((s) => s.id === supportingPlayerId)?.name
+      : supportingRivalName;
     events.push({
       minute: nextMinute,
       text: phase === "breakaway"
-        ? (carrierName ?? "The ball carrier") + " drives into space, but the opening closes."
+        ? (supportName ? supportName + " wins it and releases " : "") + (carrierName ?? "the runner") + " into open space. " + (carrierName ?? "The runner") + " carries hard toward the scoring area, but the recovering defence closes the route before a shot opens up."
         : phase === "midfield"
-          ? (carrierName ?? "The ball carrier") + " keeps the move alive through midfield."
-          : (carrierName ?? "The ball carrier") + " recycles possession and builds again.",
+          ? (supportName ? supportName + " and " + (carrierName ?? "the carrier") + " exchange a quick pass in midfield. " : (carrierName ?? "The ball carrier") + " takes control in midfield. ") + "The move shifts the defence side to side, but there is no clean route through yet."
+          : (supportName ? supportName + " drops short for the ball and finds " + (carrierName ?? "the carrier") + " ahead. " : (carrierName ?? "The ball carrier") + " settles possession. ") + "The team keeps its shape " + approachText[isPlayerAttack ? state.approach : "short"] + " and probes for the next opening.",
       kind: "info",
       playerId: isPlayerAttack ? activePlayerId : undefined,
     });
