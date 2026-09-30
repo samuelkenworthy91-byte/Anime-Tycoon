@@ -3,9 +3,12 @@ import { OFFICES, type Staff } from "../data";
 import {
   activateArcball,
   applyChampionshipSpotlight,
+  arcballInjuryChance,
+  arcballInjuryWeeks,
   arcballProfile,
   arcballReady,
   arcballStateOf,
+  buildArcballCupFixtures,
   buildArcballFixtures,
   instantResolveArcballFixture,
   playableArcballFixture,
@@ -69,6 +72,24 @@ describe("Arcball", () => {
     expect(fixtures.filter((f) => f.homeId === "player" || f.awayId === "player")).toHaveLength(12);
   });
 
+  it("draws a seven-studio Cup with three quarter-finals and one bye", () => {
+    const fixtures = buildArcballCupFixtures(1);
+    expect(fixtures).toHaveLength(3);
+    expect(fixtures.every((fixture) => fixture.competition === "cup" && fixture.cupRound === "quarterfinal")).toBe(true);
+    const entrants = new Set(fixtures.flatMap((fixture) => [fixture.homeId, fixture.awayId]));
+    expect(entrants.size).toBe(6);
+    expect(["player", "Toe-i Animation", "Sunnyrise", "Boneworks", "Kyo-Hani", "Madcap House", "Turtle Line"].filter((id) => !entrants.has(id))).toHaveLength(1);
+  });
+
+  it("starts Arcball injuries at one-in-five and scales them with fatigue", () => {
+    expect(arcballInjuryChance([100, 100, 100, 100, 100])).toBeCloseTo(0.20, 5);
+    const tired = arcballInjuryChance([20, 24, 28, 32, 36]);
+    expect(tired).toBeGreaterThan(0.30);
+    expect(tired).toBeLessThanOrEqual(0.45);
+    expect(arcballInjuryWeeks(100, 0)).toBe(2);
+    expect(arcballInjuryWeeks(10, 0.999)).toBe(6);
+  });
+
   it("keeps Arcball talent independent and deterministic per worker", () => {
     const run = staffedRun();
     const first = arcballProfile(run.staff[0]);
@@ -83,6 +104,19 @@ describe("Arcball", () => {
     expect(arcballStateOf(activated!).unlocked).toBe(true);
     expect(arcballStateOf(activated!).registered.length).toBeGreaterThanOrEqual(5);
     expect(arcballReady(activated!)).toBe(true);
+  });
+
+  it("will not field an injured starter until the manager replaces them", () => {
+    let run = activateArcball(staffedRun())!;
+    const starter = Object.values(arcballStateOf(run).lineup)[0]!;
+    run = {
+      ...run,
+      day: 7,
+      staff: run.staff.map((member) => member.id === starter
+        ? { ...member, injuredUntilDay: 35, injuryLabel: "ankle sprain" }
+        : member),
+    };
+    expect(arcballReady(run)).toBe(false);
   });
 
   it("instant matches spend real worker energy and award personal creator followers", () => {
@@ -132,7 +166,11 @@ describe("Arcball", () => {
     const raw = staffedRun() as RunState & { arcball?: unknown };
     delete raw.arcball;
     const migrated = migrateRun(raw);
-    expect(arcballStateOf(migrated).version).toBe(1);
+    const state = arcballStateOf(migrated);
+    expect(state.version).toBe(1);
+    expect(state.cupFixtures).toHaveLength(3);
+    expect(state.records.longestWinStreak).toBe(0);
+    expect(state.merchDrops).toEqual([]);
     expect(migrated.staff).toHaveLength(5);
   });
 
