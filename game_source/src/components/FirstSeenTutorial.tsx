@@ -21,6 +21,8 @@ import {
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { TutorialId } from "../engine/tutorials";
+import { WORKER_LOOKS } from "../engine/data";
+import Portrait from "./Portrait";
 import { cn } from "../utils/cn";
 
 type PreviewId =
@@ -31,7 +33,8 @@ type PreviewId =
   | "dynasty-pressure" | "dynasty-invest" | "dynasty-legacy"
   | "franchise" | "knowledge" | "automation" | "capability"
   | "slate" | "review" | "disciplines" | "publicity" | "merch"
-  | "movement" | "relationships" | "rival-memory" | "reputation" | "era" | "full-delegation";
+  | "movement" | "relationships" | "rival-memory" | "reputation" | "era" | "full-delegation"
+  | "arcball-world" | "arcball-team" | "arcball-cost" | "arcball-rewards" | "arcball-manager";
 
 type Step = { title: string; body: string; preview: PreviewId; callout: string };
 type Guide = { eyebrow: string; title: string; intro: string; steps: Step[] };
@@ -200,6 +203,17 @@ const GUIDES: Record<TutorialId, Guide> = {
       { title: "3 · YOU CAN STEP BACK IN", body: "The production keeps appearing on your Project Board. Press TAKE OVER whenever you want to handle the remaining work yourself.", preview: "full-delegation", callout: "Delegate for convenience; intervene when a show matters enough to deserve your attention." },
     ],
   },
+  "arcball": {
+    eyebrow: "STUDIO CULTURE", title: "WELCOME TO ARCBALL",
+    intro: "Studios compete off-screen too. Arcball is the anime industry's five-a-side worker sport: part rivalry, part celebrity machine, part management headache.",
+    steps: [
+      { title: "1 · THIS IS ARCBALL", body: "Writers, animators, composers and producers represent their studios in packed inter-studio matches. It is a real spectator sport inside Anime Runner's world, with rivalries, stars, sponsors and seasonal honours.", preview: "arcball-world", callout: "Arcball ability is completely separate from Story, Art and Sound." },
+      { title: "2 · YOUR WORKERS ARE THE TEAM", body: "Build a five-person side from your employees: Keeper, Anchor, Runner, Creator and Striker. A poor animator can still be an elite athlete, so hiring and retention decisions become less obvious.", preview: "arcball-team", callout: "Sporting talent can make an otherwise weak production employee worth keeping." },
+      { title: "3 · SPORT COSTS REAL ENERGY", body: "Arcball uses the same people as anime production. Matches and training drain their real studio energy, so playing a star writer before a deadline can hurt the show they are making.", preview: "arcball-cost", callout: "The sport is strongest when it creates a genuine staffing trade-off." },
+      { title: "4 · THE BEST PLAYERS HELP THE STUDIO", body: "Normal success earns fans, Arc Tokens and development options. Elite seasonal awards can permanently improve how a worker contributes to anime production, while titles create major franchise opportunities.", preview: "arcball-rewards", callout: "Top-end Arcball success feeds the main game; ordinary participation remains optional." },
+      { title: "5 · YOU ARE THE MANAGER", body: "You do not directly control a worker during play. Recruit, train, pick the formation and approach, manage effort, make substitutions and then watch the team execute your plan.", preview: "arcball-manager", callout: "The pitch should explain your tactical choices without turning Arcball into an action game." },
+    ],
+  },
 };
 
 function MiniButton({ children, hot = false }: { children: React.ReactNode; hot?: boolean }) {
@@ -215,7 +229,48 @@ function Frame({ title, icon, children }: { title: string; icon?: React.ReactNod
   return <div className="overflow-hidden rounded-2xl border border-paper/15 bg-ink shadow-[0_16px_45px_rgba(0,0,0,.45)]"><div className="flex items-center gap-1.5 border-b border-line bg-panel2/95 px-3 py-2 text-[8px] font-extrabold tracking-[0.2em] text-paper/45">{icon}{title}</div><div className="min-h-44 space-y-2 p-3">{children}</div></div>;
 }
 
+function ArcballCutscene() {
+  const looks = [WORKER_LOOKS[2]?.portrait, WORKER_LOOKS[7]?.portrait, WORKER_LOOKS[11]?.portrait];
+  return <div className="relative h-56 overflow-hidden rounded-2xl border border-cyanx/30 bg-[#111a24]">
+    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#26364f] to-transparent"/>
+    <div className="absolute left-[8%] right-[8%] top-4 flex justify-around opacity-55">
+      {Array.from({length:11},(_,i)=><span key={i} className="h-1.5 w-1.5 rounded-full bg-paper shadow-[0_0_8px_rgba(255,255,255,.8)]"/>)}
+    </div>
+    <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-md border border-paper/20 bg-ink/80 px-3 py-1 text-[7px] font-black tracking-[0.2em] text-paper/60">INTER-STUDIO ARCBALL · SOLD OUT</div>
+    <div className="absolute -bottom-10 left-[-8%] right-[-8%] h-48 -skew-y-6 rounded-[50%] border border-white/20 bg-[#24563b] shadow-[inset_0_0_50px_rgba(0,0,0,.45)]">
+      <div className="absolute left-[8%] right-[8%] top-1/2 border-t border-white/25"/>
+      <div className="absolute left-1/2 top-[17%] bottom-[10%] border-l border-white/20"/>
+    </div>
+    <div className="absolute left-[7%] top-[45%] h-1 w-[45%] -rotate-12 bg-gradient-to-r from-transparent via-white/70 to-transparent"/>
+    <div className="absolute right-[6%] top-[50%] h-1 w-[38%] rotate-6 bg-gradient-to-l from-transparent via-gold/80 to-transparent"/>
+    <ArcballCutsceneWorker portrait={looks[0]} x="18%" y="55%" jersey="bg-cyanx" label="REN · CREATOR" />
+    <ArcballCutsceneWorker portrait={looks[1]} x="56%" y="38%" jersey="bg-neon" label="MORI · ANCHOR" rival />
+    <ArcballCutsceneWorker portrait={looks[2]} x="73%" y="63%" jersey="bg-cyanx" label="DANNY · STRIKER" />
+    <div className="absolute left-[48%] top-[56%] h-6 w-6 rounded-full border-2 border-black/60 bg-paper shadow-[0_0_18px_rgba(255,255,255,.95)]">
+      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-ink/80"/>
+    </div>
+    <div className="absolute bottom-2 left-2 right-2 rounded-lg border border-white/10 bg-ink/80 px-2 py-1.5 text-[7px] leading-relaxed text-paper/70">
+      Ren slips the Arcball through the press. Danny explodes into the lane as Mori dives across to intercept.
+    </div>
+  </div>;
+}
+
+function ArcballCutsceneWorker({ portrait, x, y, jersey, label, rival=false }: { portrait?: string | number; x:string; y:string; jersey:string; label:string; rival?:boolean }) {
+  return <div className="absolute z-10 -translate-x-1/2 -translate-y-1/2" style={{left:x,top:y}}>
+    <div className={cn("mx-auto h-12 w-9 -skew-x-6 rounded-t-xl border border-black/40", jersey, rival && "opacity-90")}/>
+    <div className="absolute -top-6 left-1/2 h-10 w-10 -translate-x-1/2 overflow-hidden rounded-full border-2 border-paper/60 bg-panel shadow-lg">
+      {portrait !== undefined ? <Portrait img={portrait} name={label} alt="" className="h-full w-full object-cover"/> : <div className="h-full w-full bg-panel3"/>}
+    </div>
+    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-ink/85 px-1.5 py-0.5 text-[6px] font-black text-paper/70">{label}</div>
+  </div>;
+}
+
 function ScreenPreview({ kind }: { kind: PreviewId }) {
+  if (kind === "arcball-world") return <ArcballCutscene/>;
+  if (kind === "arcball-team") return <Frame title="ARCBALL · SQUAD"><div className="grid grid-cols-5 gap-1 text-center text-[7px] font-black">{["KEEPER","ANCHOR","RUNNER","CREATOR","STRIKER"].map((role,i)=><div key={role} className="rounded-lg border border-cyanx/25 bg-cyanx/5 p-1.5"><div className="mx-auto mb-1 h-7 w-7 rounded-full border border-cyanx/40 bg-panel3"/><div>{role}</div><div className="text-mint">{[68,74,81,77,83][i]}</div></div>)}</div><Spotlight tone="cyan"><div className="text-[8px]"><b>DANNY KIM</b><br/>Story 24 · Art 19 · Sound 21<br/><span className="text-mint">ARCBALL STRIKER · 83</span></div></Spotlight></Frame>;
+  if (kind === "arcball-cost") return <Frame title="ONE WORKER · TWO JOBS"><div className="grid grid-cols-2 gap-2 text-[8px]"><Spotlight label="STUDIO"><b>ANIME DEADLINE</b><div className="mt-1">Danny assigned to Animation<br/>Energy 82%</div></Spotlight><Spotlight label="ARCBALL" tone="cyan"><b>MATCH TONIGHT</b><div className="mt-1">PUSH intensity<br/>Projected energy 64%</div></Spotlight></div><div className="rounded-lg border border-neon/25 bg-neon/5 p-2 text-[8px] text-neon">Same worker. Same stamina. You choose the priority.</div></Frame>;
+  if (kind === "arcball-rewards") return <Frame title="ARCBALL · CAREER PATH" icon={<Trophy size={10}/>}><div className="grid grid-cols-4 gap-1 text-center text-[7px]"><div className="rounded border border-line p-1">MATCHES<br/><b>FANS</b></div><div className="rounded border border-line p-1">TOKENS<br/><b>TRAINING</b></div><div className="rounded border border-gold/35 p-1 text-gold">AWARDS<br/><b>PERKS</b></div><div className="rounded border border-cyanx/35 p-1 text-cyanx">TITLE<br/><b>SPOTLIGHT</b></div></div><Spotlight><div className="text-[8px]">PLAYER OF THE YEAR → permanent anime-production perk<br/>LEAGUE TITLE → franchise-level commercial advantage</div></Spotlight></Frame>;
+  if (kind === "arcball-manager") return <Frame title="ARCBALL · MATCH DAY"><div className="grid grid-cols-2 gap-2"><Spotlight tone="cyan"><div className="text-[8px]"><b>FORMATION</b><br/>2-1-1 Balanced<br/><b>APPROACH</b><br/>Short Build</div></Spotlight><Spotlight><div className="text-[8px]"><b>TOUCHLINE</b><br/>Feed Striker<br/><b>INTENSITY</b><br/>Push</div></Spotlight></div><div className="rounded-lg border border-line bg-[#24563b] p-3 text-center text-[8px] text-paper/70">● → ● → <span className="text-gold">● SHOT</span><br/><span className="text-[7px] text-paper/45">Players and ball move through the tactical sequence.</span></div></Frame>;
   if (kind === "pitch") return <Frame title="STUDIO CULTURE · AMBITIONS"><Spotlight><b className="text-[10px]">MAYA · ORIGINAL HORROR</b><div className="mt-2 flex flex-wrap gap-1"><MiniButton>FUND DEVELOPMENT</MiniButton><MiniButton hot>ACCEPT LEADERSHIP BRIEF</MiniButton><MiniButton>DECLINE</MiniButton></div></Spotlight></Frame>;
   if (kind === "project-lead" || kind === "rush-lead") return <Frame title={kind === "project-lead" ? "PROJECT BOARD" : "PRODUCTION RUSH"} icon={<Crown size={10}/>}><Spotlight><b className="text-[9px] text-gold">PROMISED WRITING LEAD</b><div className="mt-1 text-[8px] text-paper/55">Maya · {kind === "rush-lead" ? "64" : "0"}% participation</div><div className="mt-2"><MiniButton hot>{kind === "rush-lead" ? "NAME MAYA WRITING LEAD" : "ASSIGN + NAME MAYA WRITING LEAD"}</MiniButton></div></Spotlight></Frame>;
   if (kind.startsWith("overseas-")) return <Frame title="OVERSEAS MARKETS" icon={<Globe2 size={10}/>}><Spotlight tone="cyan"><div className="whitespace-pre-line text-[8px]">{kind === "overseas-title" ? "TITLE · Moonlit Circuit\nTERRITORY · Aurora Federation" : kind === "overseas-shape" ? "Audience · Teens\nEdition · Localised dub\nContent profile · Moderate edits" : "Projected reach · 1.4M\nLocalisation · £48,000\nDistributor share · 32%"}</div></Spotlight>{kind === "overseas-sign" && <MiniButton hot>SIGN OVERSEAS RELEASE</MiniButton>}</Frame>;
