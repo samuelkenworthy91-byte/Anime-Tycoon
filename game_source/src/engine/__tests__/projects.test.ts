@@ -3,7 +3,6 @@ import type { Draft, Staff } from "../data";
 import {
   DEADLINE_SLACK,
   PRODUCTION_STAGES,
-  TEAM_MAX,
   activeProjects,
   applyMilestoneOutcome,
   assignedStaffIds,
@@ -155,11 +154,12 @@ describe("staff assignment", () => {
     expect(ps[0].staffIds).toHaveLength(0);
   });
 
-  it("caps team size", () => {
+  it("allows an anime to use an uncapped production crew", () => {
     const p = makeProject(draft(), 0);
     let ps = [p];
-    for (let i = 0; i < TEAM_MAX + 3; i++) ps = toggleAssign(ps, p.id, `s${i}`);
-    expect(ps[0].staffIds.length).toBeLessThanOrEqual(TEAM_MAX);
+    for (let i = 0; i < 18; i++) ps = toggleAssign(ps, p.id, `s${i}`);
+    expect(ps[0].staffIds).toHaveLength(18);
+    expect(new Set(ps[0].staffIds).size).toBe(18);
   });
 });
 
