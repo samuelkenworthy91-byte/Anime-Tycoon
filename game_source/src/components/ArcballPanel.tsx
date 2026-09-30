@@ -23,13 +23,17 @@ import {
 import {
   ARCBALL_APPROACHES,
   ARCBALL_CONSUMABLES,
+  ARCBALL_SPONSORS,
   ARCBALL_DRILLS,
   ARCBALL_FORMATIONS,
   ARCBALL_POSITION_LABEL,
   ARCBALL_POSITIONS,
   activateArcball,
   applyChampionshipSpotlight,
+  arcballArchetype,
   arcballPotentialLabel,
+  arcballSponsorBlock,
+  arcballTrainingReadiness,
   arcballProfile,
   arcballReady,
   arcballStandings,
@@ -43,10 +47,12 @@ import {
   registerArcballPlayer,
   setArcballLineup,
   setArcballTactics,
+  signArcballSponsor,
   trainArcball,
   useArcballConsumable,
   type ArcballApproachId,
   type ArcballFormationId,
+  type ArcballSponsorId,
 } from "../engine/arcball";
 import type { RunState } from "../engine/state";
 import { canSeeEmployeePotential } from "../engine/staffPotential";
@@ -55,7 +61,7 @@ import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
 import { markTutorialSeen, tutorialSeen } from "../engine/tutorials";
 import { cn } from "../utils/cn";
 
-type Tab = "squad" | "fixtures" | "table" | "training" | "rewards";
+type Tab = "squad" | "fixtures" | "league" | "training" | "rewards";
 
 export default function ArcballPanel({
   run,
@@ -126,7 +132,7 @@ export default function ArcballPanel({
   const tabs: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "squad", label: "SQUAD", icon: Users },
     { id: "fixtures", label: "FIXTURES", icon: CalendarDays },
-    { id: "table", label: "TABLE", icon: Trophy },
+    { id: "league", label: "LEAGUE", icon: Trophy },
     { id: "training", label: "TRAINING", icon: Dumbbell },
     { id: "rewards", label: "REWARDS", icon: Gift },
   ];
@@ -173,7 +179,7 @@ export default function ArcballPanel({
 
       {tab === "squad" && <Squad run={run} setRun={setRun} />}
       {tab === "fixtures" && <Fixtures run={run} setRun={setRun} onMatch={onMatch} />}
-      {tab === "table" && <Table run={run} />}
+      {tab === "league" && <League run={run} setRun={setRun} />}
       {tab === "training" && <Training run={run} setRun={setRun} />}
       {tab === "rewards" && (
         <Rewards
@@ -256,7 +262,10 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
                 <Portrait img={workerLook(member).portrait} name={member.name} alt="" className="h-9 w-9 rounded-full border border-line object-cover"/>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-xs font-bold">{member.name}</div>
-                  <div className="text-[8px] text-paper/45">{profile.bestPosition.toUpperCase()} · ARC {profile.overall} · {canSeePotential ? "POT " + arcballPotentialLabel(profile.potential).toUpperCase() : "POTENTIAL UNKNOWN"}</div>
+                  <div className="text-[8px] text-paper/45">
+                    {profile.bestPosition.toUpperCase()} · ARC {profile.overall} · {arcballArchetype(profile).label.toUpperCase()} · FORM {state.players[member.id]?.form > 0 ? "+" : ""}{state.players[member.id]?.form ?? 0}
+                  </div>
+                  <div className="text-[7px] text-paper/35">{canSeePotential ? "POT " + arcballPotentialLabel(profile.potential).toUpperCase() : "POTENTIAL UNKNOWN"} · {(state.players[member.id]?.appearances ?? 0)} apps · {(state.players[member.id]?.goals ?? 0)} G · {(state.players[member.id]?.assists ?? 0)} A · {Math.round(state.players[member.id]?.arcballFans ?? 0).toLocaleString("en-GB")} sport fans</div>
                 </div>
                 <Btn variant={registered ? "ghost" : "cyan"} className="!px-2 !py-1 text-[8px]" disabled={!registered && state.registered.length >= 8} onClick={() => setRun((r) => registerArcballPlayer(r, member.id) ?? r)}>
                   {registered ? "REMOVE" : "REGISTER"}
@@ -300,18 +309,59 @@ function Fixtures({ run, setRun, onMatch }: { run: RunState; setRun: (fn: (r: Ru
   );
 }
 
-function Table({ run }: { run: RunState }) {
+function League({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => RunState) => void }) {
+  const state = arcballStateOf(run);
   const table = arcballStandings(run);
+  const career = Object.entries(state.players)
+    .map(([id, p]) => ({ id, p, staff: run.staff.find((s) => s.id === id) }))
+    .filter((row) => !!row.staff)
+    .sort((a, b) => (b.p.goals * 4 + b.p.assists * 3 + b.p.playerOfMatch * 5) - (a.p.goals * 4 + a.p.assists * 3 + a.p.playerOfMatch * 5));
   return (
-    <div className="overflow-hidden rounded-xl border border-line">
-      <div className="grid grid-cols-[24px_1fr_repeat(4,30px)] bg-panel3 px-2 py-1.5 text-center text-[8px] font-black text-paper/45">
-        <span>#</span><span className="text-left">STUDIO</span><span>P</span><span>GD</span><span>W</span><span>PTS</span>
-      </div>
-      {table.map((row, index) => (
-        <div key={row.teamId} className={cn("grid grid-cols-[24px_1fr_repeat(4,30px)] items-center border-t border-line/60 px-2 py-2 text-center text-[9px]", row.teamId === "player" && "bg-cyanx/8 text-cyanx")}>
-          <b>{index + 1}</b><span className="truncate text-left font-bold">{arcballTeamName(run, row.teamId)}</span><span>{row.played}</span><span>{row.gd > 0 ? "+" : ""}{row.gd}</span><span>{row.wins}</span><b>{row.points}</b>
+    <div className="space-y-3">
+      <div className="overflow-hidden rounded-xl border border-line">
+        <div className="grid grid-cols-[24px_1fr_repeat(4,30px)] bg-panel3 px-2 py-1.5 text-center text-[8px] font-black text-paper/45">
+          <span>#</span><span className="text-left">STUDIO</span><span>P</span><span>GD</span><span>W</span><span>PTS</span>
         </div>
-      ))}
+        {table.map((row, index) => (
+          <div key={row.teamId} className={cn("grid grid-cols-[24px_1fr_repeat(4,30px)] items-center border-t border-line/60 px-2 py-2 text-center text-[9px]", row.teamId === "player" && "bg-cyanx/8 text-cyanx")}>
+            <b>{index + 1}</b><span className="truncate text-left font-bold">{arcballTeamName(run, row.teamId)}</span><span>{row.played}</span><span>{row.gd > 0 ? "+" : ""}{row.gd}</span><span>{row.wins}</span><b>{row.points}</b>
+          </div>
+        ))}
+      </div>
+
+      <section className="rounded-xl border border-gold/30 bg-gold/5 p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-gold">SEASON SPONSOR</div>
+        {state.sponsor && state.sponsorYear === state.seasonYear ? (
+          <div className="mt-1 text-[10px] text-paper/65"><b>{ARCBALL_SPONSORS[state.sponsor].name}</b> · win bonus £{ARCBALL_SPONSORS[state.sponsor].win.toLocaleString("en-GB")} · top-three/title objectives pay at season end.</div>
+        ) : (
+          <div className="mt-2 grid gap-2">
+            {(Object.entries(ARCBALL_SPONSORS) as [ArcballSponsorId, (typeof ARCBALL_SPONSORS)[ArcballSponsorId]][]).map(([id, sponsor]) => {
+              const block = arcballSponsorBlock(run, id);
+              return <div key={id} className="rounded-lg border border-line bg-panel2/40 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="text-[10px] font-bold">{sponsor.name}</div><div className="text-[8px] text-paper/40">+£{sponsor.sign.toLocaleString("en-GB")} sign · +£{sponsor.win.toLocaleString("en-GB")}/win · {sponsor.requirement}</div></div><Btn variant="gold" className="!px-2 !py-1 text-[8px]" disabled={!!block} title={block ?? ""} onClick={() => setRun((r) => signArcballSponsor(r, id) ?? r)}>{block ? "LOCKED" : "SIGN"}</Btn></div></div>;
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-xl border border-cyanx/30 bg-cyanx/5 p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-cyanx">RIVAL SCOUTING · PERSISTENT CAREERS</div>
+        <div className="mt-1 text-[8px] text-paper/40">These are real league opponents now: they age, develop, decline and remain with their studio across seasons.</div>
+        <div className="mt-2 space-y-2">
+          {run.rivalWorld.studios.map((studio) => {
+            const roster = state.rivalRosters[studio.id] ?? [];
+            const star = [...roster].sort((a,b) => b.rating - a.rating)[0];
+            return <div key={studio.id} className="rounded-lg border border-line bg-panel2/35 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="text-[10px] font-bold">{studio.name}</div><div className="text-[8px] text-paper/40">{roster.map((p) => p.name.split(" ")[0] + " " + p.position.slice(0,3).toUpperCase() + " " + p.rating).join(" · ")}</div></div>{star && <div className="text-right"><div className="text-[7px] text-paper/35">STAR</div><div className="text-[9px] font-black text-gold">{star.name}</div><div className="text-[8px] text-paper/45">ARC {star.rating} · age {star.age ?? "?"}</div></div>}</div></div>;
+          })}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-line bg-panel2/35 p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-paper/50">CAREER RECORDS</div>
+        <div className="mt-2 space-y-1">
+          {career.slice(0, 6).map(({id,p,staff},index) => <div key={id} className="grid grid-cols-[20px_1fr_auto] items-center gap-2 rounded border border-line/50 px-2 py-1.5 text-[9px]"><b className="text-paper/30">{index+1}</b><span className="truncate font-bold">{staff?.name}</span><span className="text-paper/50">{p.appearances} app · <b className="text-gold">{p.goals} G</b> · {p.assists} A · {p.playerOfMatch} POTM</span></div>)}
+        </div>
+        {state.honours.length > 0 && <div className="mt-3 border-t border-line/60 pt-2"><div className="text-[8px] font-black text-gold">HONOURS</div>{[...state.honours].reverse().slice(0,8).map((h,i)=><div key={h.year+"|"+h.id+"|"+h.staffId+"|"+i} className="mt-1 text-[8px] text-paper/55">Y{h.year} · {h.name} · {h.id.replaceAll("_"," ").toUpperCase()}{h.productionPerk ? " · "+h.productionPerk : ""}</div>)}</div>}
+      </section>
     </div>
   );
 }
@@ -341,7 +391,9 @@ function Training({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) =
           <div className="space-y-1.5">
             {ARCBALL_DRILLS.map((drill) => {
               const trained = state.players[member.id]?.lastTrainingWeek === run.week;
-              return <div key={drill.id} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/35 p-2"><div className="min-w-0 flex-1"><div className="text-[10px] font-bold">{drill.name}</div><div className="text-[8px] text-paper/40">{drill.desc} · −{drill.stamina} energy</div></div><Btn variant="cyan" className="!px-2 !py-1 text-[8px]" disabled={trained || state.tokens < drill.cost} onClick={() => setRun((r) => trainArcball(r, member.id, drill.id) ?? r)}>{drill.cost} TOKENS</Btn></div>;
+              const readiness = arcballTrainingReadiness(member, drill.id, run.week);
+              const readinessClass = readiness.label === "EXCELLENT" ? "text-mint" : readiness.label === "GOOD" ? "text-cyanx" : readiness.label === "POOR" ? "text-neon" : "text-paper/55";
+              return <div key={drill.id} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/35 p-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-1 text-[10px] font-bold">{drill.name}<span className={cn("rounded bg-ink/40 px-1 py-0.5 text-[7px] font-black", readinessClass)}>{readiness.label}</span></div><div className="text-[8px] text-paper/40">{drill.desc} · −{drill.stamina} energy · readiness affects gain and downside risk</div></div><Btn variant="cyan" className="!px-2 !py-1 text-[8px]" disabled={trained || state.tokens < drill.cost} onClick={() => setRun((r) => trainArcball(r, member.id, drill.id) ?? r)}>{drill.cost} TOKENS</Btn></div>;
             })}
           </div>
         </>
