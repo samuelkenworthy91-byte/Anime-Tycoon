@@ -650,7 +650,6 @@ export default function ProjectsPanel({
   const [fullDelegateOpen, setFullDelegateOpen] = useState(false);
   const cap = projectCapacity(run);
   const active = activeProjects(run.projects);
-  const airing = run.projects.filter((p) => p.stage === "airing");
   const done = [...run.projects]
     .filter((p) => p.stage === "done")
     .reverse()
@@ -776,14 +775,14 @@ export default function ProjectsPanel({
         </span>
       </div>
 
-      {active.length === 0 && airing.length === 0 && (
+      {active.length === 0 && (
         <div className="rounded-xl border border-line/60 bg-panel2/40 px-3 py-5 text-center text-[11px] text-paper/50">
           <Clapperboard size={18} className="mx-auto mb-1.5 text-paper/30" />
           Nothing in production. Greenlight a show!
         </div>
       )}
 
-      {[...active, ...airing].map((p) => (
+      {active.map((p) => (
         <ProjectCard
           key={p.id}
           p={p}
