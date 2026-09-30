@@ -208,6 +208,7 @@ export default function ArcballPanel({
           setSpotlightKey={setSpotlightKey}
         />
       )}
+      <FirstSeenTutorial id="arcball" open={help} onDismiss={dismissHelp} />
     </div>
   );
 }
@@ -498,7 +499,6 @@ function Training({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) =
           })()}
         </>
       )}
-      <FirstSeenTutorial id="arcball" open={help} onDismiss={dismissHelp} />
     </div>
   );
 }
