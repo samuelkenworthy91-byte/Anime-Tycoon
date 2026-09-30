@@ -29,6 +29,7 @@ export type ArcballFormationId = "balanced" | "possession" | "attack" | "shutdow
 export type ArcballApproachId = "short" | "direct" | "press" | "counter";
 export type ArcballIntensity = "calm" | "normal" | "push" | "allin";
 export type ArcballInstruction = "none" | "feed" | "flanks" | "keep" | "press" | "drop";
+export type ArcballMatchPhase = "kickoff" | "buildup" | "midfield" | "breakaway" | "chance" | "shot" | "goal" | "defence";
 
 export const ARCBALL_STATS: ArcballStat[] = ["pace", "power", "control", "pass", "awareness", "finish"];
 export const ARCBALL_POSITIONS: ArcballPosition[] = ["keeper", "anchor", "runner", "creator", "striker"];
@@ -163,8 +164,17 @@ export interface ArcballMatchState {
   playerStats: Record<string, ArcballPlayerMatchStat>;
   effort: Record<string, number>;
   activePlayerId?: string;
+  supportingPlayerId?: string;
   activeRivalName?: string;
+  supportingRivalName?: string;
   lastPossession: "home" | "away" | null;
+  phase: ArcballMatchPhase;
+  homeShots: number;
+  awayShots: number;
+  homeOnTarget: number;
+  awayOnTarget: number;
+  homePossessionTicks: number;
+  awayPossessionTicks: number;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -608,6 +618,13 @@ export function beginArcballMatch(run: RunState, fixtureId: string): ArcballMatc
     playerStats,
     effort: {},
     lastPossession: null,
+    phase: "kickoff",
+    homeShots: 0,
+    awayShots: 0,
+    homeOnTarget: 0,
+    awayOnTarget: 0,
+    homePossessionTicks: 0,
+    awayPossessionTicks: 0,
   };
 }
 
@@ -643,50 +660,102 @@ export function stepArcballMatch(
   let homeScore = match.homeScore;
   let awayScore = match.awayScore;
   let activePlayerId: string | undefined;
+  let supportingPlayerId: string | undefined;
   let activeRivalName: string | undefined;
+  let supportingRivalName: string | undefined;
+  let phase: ArcballMatchPhase = "buildup";
+  let homeShots = match.homeShots;
+  let awayShots = match.awayShots;
+  let homeOnTarget = match.homeOnTarget;
+  let awayOnTarget = match.awayOnTarget;
+  const homePossessionTicks = match.homePossessionTicks + (attackHome ? 1 : 0);
+  const awayPossessionTicks = match.awayPossessionTicks + (attackHome ? 0 : 1);
   const playerStats = Object.fromEntries(Object.entries(match.playerStats).map(([id, row]) => [id, { ...row }]));
   const events = [...match.events];
+
+  /* Pick a visible ball carrier on every tick. The presentation can now show
+     actual possession even when a move never reaches the shot calculation. */
+  if (isPlayerAttack) {
+    const carrier = playerAttackPick(run, rng(), instruction);
+    activePlayerId = carrier.id;
+    const supportPool = arcballLineupStaff(run).filter((s) => s.id !== carrier.id);
+    if (supportPool.length) supportingPlayerId = supportPool[Math.floor(rng() * supportPool.length)].id;
+  } else {
+    const roster = rivalArcballRoster(rival, state.seasonYear);
+    const carrier = rivalAttackPick(roster, rng());
+    activeRivalName = carrier.name;
+    const supportPool = roster.filter((p) => p.name !== carrier.name);
+    if (supportPool.length) supportingRivalName = supportPool[Math.floor(rng() * supportPool.length)].name;
+  }
+
   if (rng() < shotChance) {
+    phase = "chance";
     const goalChance = clamp(.27 + (attackNumbers.attack - defendNumbers.defence) * .0035, .13, .46);
     const scored = rng() < goalChance;
+    if (attackHome) homeShots += 1; else awayShots += 1;
     if (isPlayerAttack) {
       const scorer = playerAttackPick(run, rng(), instruction);
       activePlayerId = scorer.id;
       playerStats[scorer.id] = playerStats[scorer.id] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
       playerStats[scorer.id].shots += 1;
       if (scored) {
+        phase = "goal";
+        if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
         playerStats[scorer.id].goals += 1;
         playerStats[scorer.id].rating += 1;
         const assistPool = arcballLineupStaff(run).filter((s) => s.id !== scorer.id);
         if (assistPool.length && rng() < .68) {
           const assister = assistPool[Math.floor(rng() * assistPool.length)];
+          supportingPlayerId = assister.id;
           playerStats[assister.id] = playerStats[assister.id] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
           playerStats[assister.id].assists += 1;
           playerStats[assister.id].rating += .45;
-          events.push({ minute: nextMinute, text: scorer.name + " scores from " + assister.name + "'s pass.", kind: "goal", playerId: scorer.id });
+          events.push({ minute: nextMinute, text: assister.name + " releases " + scorer.name + ". GOAL — " + scorer.name + " finishes it.", kind: "goal", playerId: scorer.id });
         } else {
-          events.push({ minute: nextMinute, text: scorer.name + " scores for " + run.studio + ".", kind: "goal", playerId: scorer.id });
+          events.push({ minute: nextMinute, text: scorer.name + " breaks into range. GOAL — " + scorer.name + " scores for " + run.studio + ".", kind: "goal", playerId: scorer.id });
         }
         if (attackHome) homeScore += 1; else awayScore += 1;
       } else {
-        events.push({ minute: nextMinute, text: scorer.name + " shoots — saved.", kind: "shot", playerId: scorer.id });
+        phase = "shot";
+        if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
+        events.push({ minute: nextMinute, text: scorer.name + " gets the chance and shoots — saved.", kind: "shot", playerId: scorer.id });
       }
     } else {
       const roster = rivalArcballRoster(rival, state.seasonYear);
       const attacker = rivalAttackPick(roster, rng());
       activeRivalName = attacker.name;
       if (scored) {
+        phase = "goal";
+        if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
         if (attackHome) homeScore += 1; else awayScore += 1;
-        events.push({ minute: nextMinute, text: attacker.name + " scores for " + rival.name + ".", kind: "goal" });
+        events.push({ minute: nextMinute, text: attacker.name + " breaks through. GOAL — " + attacker.name + " scores for " + rival.name + ".", kind: "goal" });
       } else {
-        events.push({ minute: nextMinute, text: attacker.name + "'s effort is stopped.", kind: "shot" });
+        phase = "shot";
+        if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
+        events.push({ minute: nextMinute, text: attacker.name + " gets a shooting lane — stopped by " + run.studio + ".", kind: "shot" });
       }
     }
   } else if (rng() < .34) {
+    phase = "defence";
     events.push({
       minute: nextMinute,
-      text: isPlayerAttack ? "The move breaks down before the final pass." : run.studio + " reads the danger and clears.",
+      text: isPlayerAttack ? "The passing move is read and cut out before the final ball." : run.studio + " reads the build-up and clears.",
       kind: "defence",
+    });
+  } else {
+    phase = rng() < .45 ? "midfield" : rng() < .55 ? "breakaway" : "buildup";
+    const carrierName = isPlayerAttack
+      ? run.staff.find((s) => s.id === activePlayerId)?.name
+      : activeRivalName;
+    events.push({
+      minute: nextMinute,
+      text: phase === "breakaway"
+        ? (carrierName ?? "The ball carrier") + " drives into space, but the opening closes."
+        : phase === "midfield"
+          ? (carrierName ?? "The ball carrier") + " keeps the move alive through midfield."
+          : (carrierName ?? "The ball carrier") + " recycles possession and builds again.",
+      kind: "info",
+      playerId: isPlayerAttack ? activePlayerId : undefined,
     });
   }
 
@@ -702,10 +771,19 @@ export function stepArcballMatch(
     awayScore,
     playerStats,
     effort,
-    events: events.slice(-18),
+    events: events.slice(-24),
     activePlayerId,
+    supportingPlayerId,
     activeRivalName,
+    supportingRivalName,
     lastPossession: attackHome ? "home" : "away",
+    phase,
+    homeShots,
+    awayShots,
+    homeOnTarget,
+    awayOnTarget,
+    homePossessionTicks,
+    awayPossessionTicks,
   };
 }
 
