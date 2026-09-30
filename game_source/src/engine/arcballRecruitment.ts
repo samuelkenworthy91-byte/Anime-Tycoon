@@ -1,4 +1,4 @@
-import { OFFICES, STAFF_STAT_CAP, type PointType, type Staff, type StaffRole } from "./data";
+import { WORKER_LOOKS, type Staff, type StaffRole } from "./data";
 import { ensureCareer } from "./careers";
 import { bumpRivalry } from "./rivals";
 import { staffCapacity, type RunState } from "./state";
@@ -86,7 +86,7 @@ function replacementFor(player: ArcballRivalPlayer, studioId: string, week: numb
   return {
     id: "rival|" + studioId + "|rookie|" + week + "|" + hash32(seed).toString(36),
     name: first + " " + last,
-    look: hash32(seed + "|look") %  Math.max(1, 120),
+    look: hash32(seed + "|look") % Math.max(1, WORKER_LOOKS.length),
     position: player.position,
     rating,
     potential: Math.min(99, rating + 10 + Math.floor(roll(seed, 6) * 22)),
