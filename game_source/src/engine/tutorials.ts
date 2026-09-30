@@ -20,7 +20,8 @@ export type TutorialId =
   | "rival-memories"
   | "studio-reputation"
   | "career-era-delegation"
-  | "full-delegation";
+  | "full-delegation"
+  | "arcball";
 
 declare module "./state" {
   interface RunState {
