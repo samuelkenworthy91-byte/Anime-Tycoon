@@ -44,6 +44,7 @@ import { secretComboResearched } from "./creativeDiscovery";
 import { over9000Charge } from "./showrunnerPerks";
 import { NO_FX, fxSpeedFor, type FacilityFX } from "./facilities";
 import { effectiveCoordinatedTeamSize, teamCoordinationEfficiency } from "./teamCoordination";
+import { staffIsInjured } from "./staffAvailability";
 
 /* ------------------------------------------------------------- costs */
 const scopeOf = (d: Draft) => PRODUCTION_SCOPES[d.scope ?? "standard"];
@@ -481,7 +482,7 @@ export function tickProjectsWeek(
   const next = projects.map((p0) => {
     if (p0.stage === "done") return p0;
     const p = { ...p0, points: { ...p0.points } };
-    const team = staff.filter((s) => p.staffIds.includes(s.id));
+    const team = staff.filter((s) => p.staffIds.includes(s.id) && !staffIsInjured(s, p.stage === "airing" ? week * 7 : week * 7));
 
     /* ----- airing: the payout schedule does the work; just finish up */
     if (p.stage === "airing") {
@@ -576,7 +577,7 @@ export function tickProjectsDay(
   const next = projects.map((p0) => {
     if (p0.stage === "done" || p0.stage === "airing") return p0;
     const p = { ...p0, points: { ...p0.points } };
-    const team = staff.filter((s) => p.staffIds.includes(s.id));
+    const team = staff.filter((s) => p.staffIds.includes(s.id) && !staffIsInjured(s, day));
 
     const burn = Math.max(1, Math.round((p.weeklyBurn * studio.burnMult) / 7));
     cashDelta -= burn;
