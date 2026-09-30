@@ -250,7 +250,7 @@ export const TRAIT_DEFS: TraitDef[] = [
   { id: "gossip", name: "Industry Gossip", desc: "releases they worked on gain +10% fans", good: true },
   { id: "publicist", name: "Fan Whisperer", desc: "releases they worked on gain +15% fans", good: true },
   { id: "organizer", name: "Production Organizer", desc: "+0.10 team speed aura", good: true },
-  { id: "coordinator", name: "Production Coordinator", desc: "Negates large-team coordination diminishing on every anime they are assigned to", good: true },
+  { id: "coordinator", name: "Production Coordinator", desc: "100% large-team coordination efficiency on every anime they are assigned to", good: true },
   { id: "fixer", name: "Continuity Hawk", desc: "+30% output while a project carries editing notes", good: true },
   { id: "prodigy", name: "Fast Learner", desc: "+50% personal XP earned", good: true },
   { id: "ensemble", name: "Ensemble Brain", desc: "+15% output on teams of 3+", good: true },
@@ -797,15 +797,15 @@ export function studioPointMult(heads: Heads, staff: Staff[], legends: LegendRec
 }
 
 /** studio-wide speed / burn effects from the Production Manager */
-export function studioProduction(heads: Heads, staff: Staff[], showrunner = ""): { speed: number; burnMult: number; coordinationRelief: number } {
+export function studioProduction(heads: Heads, staff: Staff[], showrunner = ""): { speed: number; burnMult: number; coordinationRelief?: number } {
   const pm = heads.production;
   const manager = pm ? staff.find((s) => s.id === pm) : undefined;
   const active = !!manager;
-  return {
+  const base = {
     speed: (active ? 0.08 : 0) + (showrunner === "operations" ? 0.1 : 0),
     burnMult: (active ? 0.9 : 1) * (showrunner === "operations" ? 0.9 : 1),
-    coordinationRelief: productionHeadCoordinationRelief(manager),
   };
+  return manager ? { ...base, coordinationRelief: productionHeadCoordinationRelief(manager) } : base;
 }
 
 /* ------------------------------------------------------- salary politics */
