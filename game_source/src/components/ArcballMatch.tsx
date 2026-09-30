@@ -158,7 +158,7 @@ export default function ArcballMatch({
 
   const rivalId = match.playerIsHome ? fixture.awayId : fixture.homeId;
   const rival = run.rivalWorld.studios.find((s) => s.id === rivalId || s.name === rivalId);
-  const rivalPlayers = rival ? rivalArcballRoster(rival, state.seasonYear) : [];
+  const rivalPlayers = rival ? rivalArcballRoster(rival, state.seasonYear, state.rivalRosters[rival.id]) : [];
   const playerRows = ARCBALL_POSITIONS.flatMap((position) => {
     const member = run.staff.find((s) => s.id === state.lineup[position]);
     return member ? [{ position, member }] : [];
