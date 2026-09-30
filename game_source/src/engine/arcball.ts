@@ -118,6 +118,21 @@ export interface ArcballCupHistory {
   playerWon: boolean;
 }
 
+export interface ArcballRecords {
+  biggestWinMargin: number;
+  biggestWinText: string;
+  longestWinStreak: number;
+  currentWinStreak: number;
+  mostGoalsInMatch: number;
+  mostGoalsText: string;
+}
+
+export interface ArcballMerchDrop {
+  year: number;
+  revenue: number;
+  fanGain: number;
+}
+
 export type ArcballHonourId = "player_year" | "golden_scorer" | "playmaker" | "guardian" | "team_season";
 export interface ArcballHonour {
   year: number;
@@ -146,6 +161,8 @@ export interface ArcballState {
   cupTitles: number;
   history: ArcballSeasonHistory[];
   cupHistory: ArcballCupHistory[];
+  records: ArcballRecords;
+  merchDrops: ArcballMerchDrop[];
   honours: ArcballHonour[];
   /** Rival workers persist across seasons instead of being regenerated every match. */
   rivalRosters: Record<string, ArcballRivalPlayer[]>;
@@ -516,6 +533,8 @@ export function initialArcballState(week: number): ArcballState {
     cupTitles: 0,
     history: [],
     cupHistory: [],
+    records: { biggestWinMargin: 0, biggestWinText: "—", longestWinStreak: 0, currentWinStreak: 0, mostGoalsInMatch: 0, mostGoalsText: "—" },
+    merchDrops: [],
     honours: [],
     rivalRosters: {},
     sponsor: null,
@@ -579,6 +598,15 @@ export function migrateArcballState(raw: unknown, week: number): ArcballState {
     cupTitles: Math.max(0, Math.floor(r.cupTitles ?? 0)),
     history: Array.isArray(r.history) ? r.history.slice(-30).map((h) => ({ ...h })) : [],
     cupHistory: Array.isArray(r.cupHistory) ? r.cupHistory.slice(-30).map((h) => ({ ...h })) : [],
+    records: {
+      biggestWinMargin: Math.max(0, Math.floor(r.records?.biggestWinMargin ?? 0)),
+      biggestWinText: typeof r.records?.biggestWinText === "string" ? r.records.biggestWinText : "—",
+      longestWinStreak: Math.max(0, Math.floor(r.records?.longestWinStreak ?? 0)),
+      currentWinStreak: Math.max(0, Math.floor(r.records?.currentWinStreak ?? 0)),
+      mostGoalsInMatch: Math.max(0, Math.floor(r.records?.mostGoalsInMatch ?? 0)),
+      mostGoalsText: typeof r.records?.mostGoalsText === "string" ? r.records.mostGoalsText : "—",
+    },
+    merchDrops: Array.isArray(r.merchDrops) ? r.merchDrops.slice(-30).map((drop) => ({ ...drop })) : [],
     honours: Array.isArray(r.honours) ? r.honours.slice(-100).map((h) => ({ ...h })) : [],
     rivalRosters: r.rivalRosters && typeof r.rivalRosters === "object"
       ? Object.fromEntries(Object.entries(r.rivalRosters).map(([id, roster]) => [id, Array.isArray(roster) ? roster.map((p) => ({ ...p })) : []]))
@@ -1274,6 +1302,19 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
   state = { ...state, players: progress, tokens: state.tokens + tokenGain };
   const competitionLabel = fixture.competition === "cup" ? "ARCBALL CUP" : "ARCBALL";
   const resultText = run.studio + " " + playerScore + "–" + opponentScore + " " + opponent + (cupTiebreak ? " (overtime)" : "");
+  const margin = playerScore - opponentScore;
+  const currentWinStreak = win ? state.records.currentWinStreak + 1 : 0;
+  state = {
+    ...state,
+    records: {
+      biggestWinMargin: margin > state.records.biggestWinMargin ? margin : state.records.biggestWinMargin,
+      biggestWinText: margin > state.records.biggestWinMargin ? resultText : state.records.biggestWinText,
+      longestWinStreak: Math.max(state.records.longestWinStreak, currentWinStreak),
+      currentWinStreak,
+      mostGoalsInMatch: playerScore > state.records.mostGoalsInMatch ? playerScore : state.records.mostGoalsInMatch,
+      mostGoalsText: playerScore > state.records.mostGoalsInMatch ? resultText : state.records.mostGoalsText,
+    },
+  };
   const opponentStudio = run.rivalWorld.studios.find((studio) => studio.id === opponentId || studio.name === opponentId);
   return {
     ...run,
@@ -1507,6 +1548,58 @@ function ordinal(n: number) {
   if (n % 10 === 2 && n % 100 !== 12) return n + "nd";
   if (n % 10 === 3 && n % 100 !== 13) return n + "rd";
   return n + "th";
+}
+
+export function arcballMerchQuote(run: RunState): { cost: number; revenue: number; fanGain: number; blockedReason: string | null } {
+  const state = arcballStateOf(run);
+  const cost = 20_000;
+  const sportFans = Object.values(state.players).reduce((sum, player) => sum + (player.arcballFans ?? 0), 0);
+  const revenue = Math.round(
+    25_000 +
+    Math.min(350_000, sportFans * .18) +
+    Math.min(180_000, run.fans * .015) +
+    (state.titles + state.cupTitles) * 25_000
+  );
+  const fanGain = Math.round(Math.min(8_000, 500 + sportFans * .01));
+  let blockedReason: string | null = null;
+  if (!state.unlocked) blockedReason = "Enter the Arcball League first";
+  else if (!run.research.includes("merch")) blockedReason = "Requires Merchandising research";
+  else if (state.merchDrops.some((drop) => drop.year === state.seasonYear)) blockedReason = "Arcball merch drop already run this season";
+  else if (run.cash < cost) blockedReason = "Needs £20,000 cash";
+  return { cost, revenue, fanGain, blockedReason };
+}
+
+export function runArcballMerchDrop(run: RunState): RunState | null {
+  const quote = arcballMerchQuote(run);
+  if (quote.blockedReason) return null;
+  const state = arcballStateOf(run);
+  const star = Object.entries(state.players)
+    .map(([id, progress]) => ({ id, progress, staff: run.staff.find((member) => member.id === id) }))
+    .filter((row) => !!row.staff)
+    .sort((a, b) => b.progress.arcballFans - a.progress.arcballFans)[0];
+  const starBonus = star?.staff ? Math.round(Math.min(2_500, quote.fanGain * .3)) : 0;
+  return {
+    ...run,
+    cash: run.cash - quote.cost + quote.revenue,
+    incomeThisWeek: (run.incomeThisWeek ?? 0) + quote.revenue,
+    fans: run.fans + quote.fanGain,
+    fansThisWeek: (run.fansThisWeek ?? 0) + quote.fanGain,
+    staff: star?.staff ? run.staff.map((member) => member.id === star.id ? { ...member, creatorFans: (member.creatorFans ?? 0) + starBonus } : member) : run.staff,
+    arcball: {
+      ...state,
+      merchDrops: [...state.merchDrops, { year: state.seasonYear, revenue: quote.revenue, fanGain: quote.fanGain }].slice(-30),
+    },
+    strategicSpend: [
+      ...run.strategicSpend,
+      { id: "arcball_merch_" + state.seasonYear, label: "Arcball team merchandise", amount: quote.cost, week: run.week },
+    ],
+    notices: [
+      ...run.notices,
+      "🧢 ARCBALL MERCH DROP — team shirts and player gear return £" + quote.revenue.toLocaleString("en-GB") +
+      " on £" + quote.cost.toLocaleString("en-GB") + " spend · +" + quote.fanGain.toLocaleString("en-GB") + " studio fans" +
+      (star?.staff ? " · " + star.staff.name + " gains +" + starBonus.toLocaleString("en-GB") + " creator followers." : "."),
+    ].slice(-40),
+  };
 }
 
 export interface ArcballDrill {
