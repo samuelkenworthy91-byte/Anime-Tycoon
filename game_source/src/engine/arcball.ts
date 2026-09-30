@@ -8,6 +8,7 @@
  * ========================================================================== */
 import {
   RIVAL_STUDIOS,
+  ROLE_POINT,
   STAFF_STAT_CAP,
   WORKER_LOOKS,
   type PointType,
@@ -1037,18 +1038,25 @@ export function finishArcballMatch(run: RunState, match: ArcballMatchState, reso
     };
   });
   const studioFans = Math.round((win ? 500 : draw ? 250 : 100) + playerScore * 100);
-  const opponent = arcballTeamName(run, match.playerIsHome ? fixture.awayId : fixture.homeId);
+  const opponentId = match.playerIsHome ? fixture.awayId : fixture.homeId;
+  const opponent = arcballTeamName(run, opponentId);
+  const sponsor = state.sponsor && state.sponsorYear === state.seasonYear ? ARCBALL_SPONSORS[state.sponsor] : null;
+  const sponsorGain = sponsor ? (win ? sponsor.win : draw ? Math.round(sponsor.win * .35) : 0) : 0;
   state = { ...state, players: progress, tokens: state.tokens + tokenGain };
   const resultText = run.studio + " " + playerScore + "–" + opponentScore + " " + opponent;
+  const opponentStudio = run.rivalWorld.studios.find((studio) => studio.id === opponentId || studio.name === opponentId);
   return {
     ...run,
     arcball: state,
     staff,
+    cash: run.cash + sponsorGain,
+    incomeThisWeek: (run.incomeThisWeek ?? 0) + sponsorGain,
+    rivalWorld: opponentStudio ? bumpRivalry(run.rivalWorld, opponentStudio.id, win ? 2 : 1) : run.rivalWorld,
     fans: run.fans + studioFans,
     fansThisWeek: (run.fansThisWeek ?? 0) + studioFans,
     notices: [
       ...run.notices,
-      "⚽ ARCBALL: " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + ".",
+      "⚽ ARCBALL: " + resultText + " · +" + tokenGain + " Arc Tokens · +" + studioFans.toLocaleString("en-GB") + " studio fans" + (sponsorGain ? " · +" + sponsorGain.toLocaleString("en-GB") + " sponsor bonus" : "") + (mvpId ? " · " + (run.staff.find((s) => s.id === mvpId)?.name ?? "a player") + " Player of the Match" : "") + ".",
     ].slice(-40),
   };
 }
@@ -1088,6 +1096,70 @@ function simulateRivalFixture(run: RunState, fixture: ArcballFixture): ArcballFi
     if (rng() < scoreChance) { if (homeAttack) hs += 1; else as += 1; }
   }
   return { ...fixture, homeScore: hs, awayScore: as, resolvedBy: "rival" };
+}
+
+function addArcballTrait(member: Staff, traitId: string, statGain = 0): Staff {
+  const traits = member.traits ?? [];
+  const point = ROLE_POINT[member.role];
+  return {
+    ...member,
+    traits: traits.includes(traitId) ? traits : [...traits, traitId],
+    [point]: Math.min(STAFF_STAT_CAP, member[point] + statGain),
+  };
+}
+
+function arcballSeasonHonours(run: RunState, state: ArcballState, position: number, goalsAgainst: number): { staff: Staff[]; state: ArcballState; notices: string[] } {
+  const eligible = Object.entries(state.players)
+    .map(([staffId, p]) => ({ staffId, p, staff: run.staff.find((s) => s.id === staffId) }))
+    .filter((row): row is { staffId: string; p: ArcballPlayerProgress; staff: Staff } => !!row.staff && row.p.seasonAppearances > 0);
+  if (!eligible.length) return { staff: run.staff, state, notices: [] };
+
+  const honourRows: { id: ArcballHonourId; row: typeof eligible[number]; trait?: string; statGain?: number; perk: string }[] = [];
+  const scorer = [...eligible].sort((a, b) => b.p.seasonGoals - a.p.seasonGoals || b.p.seasonPlayerOfMatch - a.p.seasonPlayerOfMatch)[0];
+  if (scorer?.p.seasonGoals >= 4) honourRows.push({ id: "golden_scorer", row: scorer, trait: "arcball_finisher", perk: "+12% anime output during Post and Marketing" });
+
+  const playmaker = [...eligible].sort((a, b) => b.p.seasonAssists - a.p.seasonAssists || b.p.seasonPlayerOfMatch - a.p.seasonPlayerOfMatch)[0];
+  if (playmaker?.p.seasonAssists >= 3) honourRows.push({ id: "playmaker", row: playmaker, trait: "arcball_playmaker", perk: "+0.08 anime team-speed aura" });
+
+  const poy = [...eligible].sort((a, b) => {
+    const av = a.p.seasonGoals * 4 + a.p.seasonAssists * 3 + a.p.seasonPlayerOfMatch * 5 + a.p.seasonWins;
+    const bv = b.p.seasonGoals * 4 + b.p.seasonAssists * 3 + b.p.seasonPlayerOfMatch * 5 + b.p.seasonWins;
+    return bv - av;
+  })[0];
+  const poyScore = poy ? poy.p.seasonGoals * 4 + poy.p.seasonAssists * 3 + poy.p.seasonPlayerOfMatch * 5 + poy.p.seasonWins : 0;
+  if (poy && position <= 3 && poyScore >= 22) honourRows.push({ id: "player_year", row: poy, trait: "arcball_icon", statGain: 1, perk: "+12% anime output, +10% release fans, +1 main craft" });
+
+  const keeperId = state.lineup.keeper;
+  const keeper = eligible.find((row) => row.staffId === keeperId);
+  if (keeper && keeper.p.seasonAppearances >= 7 && goalsAgainst <= 18) honourRows.push({ id: "guardian", row: keeper, trait: "arcball_guardian", perk: "+8% anime output and steadier condition" });
+
+  for (const row of [...eligible].sort((a, b) => (b.p.seasonGoals * 2 + b.p.seasonAssists * 2 + b.p.seasonPlayerOfMatch * 3) - (a.p.seasonGoals * 2 + a.p.seasonAssists * 2 + a.p.seasonPlayerOfMatch * 3)).slice(0, 2)) {
+    honourRows.push({ id: "team_season", row, perk: "Team of the Season recognition" });
+  }
+
+  let staff = run.staff;
+  const honours = [...state.honours];
+  const notices: string[] = [];
+  for (const honour of honourRows) {
+    if (honours.some((record) => record.year === state.seasonYear && record.id === honour.id && record.staffId === honour.row.staffId)) continue;
+    if (honour.trait) staff = staff.map((member) => member.id === honour.row.staffId ? addArcballTrait(member, honour.trait!, honour.statGain ?? 0) : member);
+    honours.push({ year: state.seasonYear, id: honour.id, staffId: honour.row.staffId, name: honour.row.staff.name, productionPerk: honour.perk });
+    const label = honour.id === "player_year" ? "PLAYER OF THE YEAR" : honour.id === "golden_scorer" ? "GOLDEN SCORER" : honour.id === "playmaker" ? "PLAYMAKER AWARD" : honour.id === "guardian" ? "GUARDIAN AWARD" : "TEAM OF THE SEASON";
+    notices.push("🏅 ARCBALL " + label + " — " + honour.row.staff.name + (honour.trait ? " · anime production perk earned: " + honour.perk + "." : "."));
+  }
+  return { staff, state: { ...state, honours: honours.slice(-100) }, notices };
+}
+
+function resetArcballSeasonPlayerStats(players: Record<string, ArcballPlayerProgress>): Record<string, ArcballPlayerProgress> {
+  return Object.fromEntries(Object.entries(players).map(([id, p]) => [id, {
+    ...p,
+    seasonAppearances: 0,
+    seasonGoals: 0,
+    seasonAssists: 0,
+    seasonWins: 0,
+    seasonPlayerOfMatch: 0,
+    form: p.form > 0 ? 1 : p.form < 0 ? -1 : 0,
+  }]));
 }
 
 function completeArcballSeason(run: RunState, state: ArcballState): ArcballState {
@@ -1130,9 +1202,20 @@ export function advanceArcballWeek(run: RunState): RunState {
 
   const currentYear = yearOfWeek(out.week);
   if (state.seasonYear < currentYear) {
+    const endingSponsor = state.sponsor && state.sponsorYear === state.seasonYear ? ARCBALL_SPONSORS[state.sponsor] : null;
     state = completeArcballSeason(out, state);
     const last = state.history[state.history.length - 1];
-    const notices = [...out.notices];
+    const position = last?.position ?? 7;
+    const honourResult = arcballSeasonHonours(out, state, position, last?.ga ?? 99);
+    out = { ...out, staff: honourResult.staff };
+    state = honourResult.state;
+    const notices = [...out.notices, ...honourResult.notices];
+    let sponsorBonus = 0;
+    if (endingSponsor && last) sponsorBonus = last.title ? endingSponsor.title : last.position <= 3 ? endingSponsor.top3 : 0;
+    if (sponsorBonus) {
+      out = { ...out, cash: out.cash + sponsorBonus, incomeThisWeek: (out.incomeThisWeek ?? 0) + sponsorBonus };
+      notices.push("🤝 " + endingSponsor.name + " season objective paid +" + sponsorBonus.toLocaleString("en-GB") + ".");
+    }
     if (last?.year === currentYear - 1) {
       notices.push(last.title
         ? "🏆 ARCBALL CHAMPIONS — +" + 40 + " Arc Tokens and 1 Championship Spotlight."
@@ -1144,6 +1227,7 @@ export function advanceArcballWeek(run: RunState): RunState {
       seasonYear: currentYear,
       fixtures: buildArcballFixtures(currentYear),
       seasonPurchases: { tier1: 0, tier2: 0 },
+      players: resetArcballSeasonPlayerStats(state.players),
       sponsor: null,
       sponsorYear: 0,
     };
