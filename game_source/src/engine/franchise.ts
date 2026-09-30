@@ -191,7 +191,7 @@ export function merchValueOf(fr: Franchise): number {
   const zeitgeistF = 0.55 + zeitgeistOf(fr) / 100;
   const charF = 1 + (top ? top.popularity : 0) / 300;
   const cultF = fr.cult ? 1.25 : 1;
-  const bigThreeF = fr.bigThree ? 1.4 : 1;
+  const bigThreeF = fr.bigThree ? 1.6 : 1;
   return Math.round((base * zeitgeistF * charF * cultF * bigThreeF) / 1_000) * 1_000;
 }
 
