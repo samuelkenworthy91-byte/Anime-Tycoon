@@ -191,6 +191,10 @@ export interface ArcballMatchState {
   events: ArcballMatchEvent[];
   playerStats: Record<string, ArcballPlayerMatchStat>;
   effort: Record<string, number>;
+  /** Match-day lineup can change independently of the saved default five. */
+  lineup: Partial<Record<ArcballPosition, string>>;
+  substitutionsUsed: number;
+  subbedOutIds: string[];
   activePlayerId?: string;
   supportingPlayerId?: string;
   activeRivalName?: string;
@@ -574,9 +578,10 @@ export function setArcballTactics(run: RunState, formation: ArcballFormationId, 
   return { ...run, arcball: { ...state, formation, approach } };
 }
 
-export function arcballLineupStaff(run: RunState): Staff[] {
+export function arcballLineupStaff(run: RunState, lineupOverride?: Partial<Record<ArcballPosition, string>>): Staff[] {
   const state = cleanArcballRoster(run, arcballStateOf(run));
-  return ARCBALL_POSITIONS.map((position) => run.staff.find((s) => s.id === state.lineup[position])).filter((s): s is Staff => !!s);
+  const lineup = lineupOverride ?? state.lineup;
+  return ARCBALL_POSITIONS.map((position) => run.staff.find((s) => s.id === lineup[position])).filter((s): s is Staff => !!s);
 }
 
 export function arcballReady(run: RunState): boolean {
@@ -647,10 +652,11 @@ function evolveArcballRivalRosters(run: RunState, state: ArcballState, newYear: 
 
 interface TeamNumbers { attack: number; defence: number; possession: number; }
 
-function playerTeamNumbers(run: RunState, intensity: ArcballIntensity = "normal", instruction: ArcballInstruction = "none"): TeamNumbers {
+function playerTeamNumbers(run: RunState, intensity: ArcballIntensity = "normal", instruction: ArcballInstruction = "none", lineupOverride?: Partial<Record<ArcballPosition, string>>): TeamNumbers {
   const state = arcballStateOf(run);
+  const lineup = lineupOverride ?? state.lineup;
   const byPosition = Object.fromEntries(ARCBALL_POSITIONS.map((position) => {
-    const member = run.staff.find((s) => s.id === state.lineup[position]);
+    const member = run.staff.find((s) => s.id === lineup[position]);
     if (!member) return [position, null];
     const profile = arcballProfile(member, state.players[member.id]);
     return [position, { member, profile }];
@@ -757,10 +763,11 @@ function pickWeighted<T>(rows: { item: T; weight: number }[], roll: number): T {
   return rows[rows.length - 1].item;
 }
 
-function playerAttackPick(run: RunState, roll: number, instruction: ArcballInstruction): Staff {
+function playerAttackPick(run: RunState, roll: number, instruction: ArcballInstruction, lineupOverride?: Partial<Record<ArcballPosition, string>>): Staff {
   const state = arcballStateOf(run);
+  const lineup = lineupOverride ?? state.lineup;
   const rows = ARCBALL_POSITIONS.flatMap((position) => {
-    const member = run.staff.find((s) => s.id === state.lineup[position]);
+    const member = run.staff.find((s) => s.id === lineup[position]);
     if (!member) return [];
     const profile = arcballProfile(member, state.players[member.id]);
     let weight = position === "striker" ? profile.stats.finish * 1.6 : position === "creator" ? profile.stats.control * 1.25 : position === "runner" ? profile.stats.pace : profile.overall * .65;
@@ -791,6 +798,9 @@ export function beginArcballMatch(run: RunState, fixtureId: string): ArcballMatc
     events: [{ minute: 0, text: "Arcball begins.", kind: "info" }],
     playerStats,
     effort: {},
+    lineup: { ...state.lineup },
+    substitutionsUsed: 0,
+    subbedOutIds: [],
     lastPossession: null,
     phase: "kickoff",
     homeShots: 0,
@@ -799,6 +809,36 @@ export function beginArcballMatch(run: RunState, fixtureId: string): ArcballMatc
     awayOnTarget: 0,
     homePossessionTicks: 0,
     awayPossessionTicks: 0,
+  };
+}
+
+export function substituteArcballMatch(run: RunState, match: ArcballMatchState, position: ArcballPosition, incomingId: string): ArcballMatchState | null {
+  if (match.minute >= 90 || match.substitutionsUsed >= 3) return null;
+  const state = arcballStateOf(run);
+  if (!state.registered.includes(incomingId)) return null;
+  if (Object.values(match.lineup).includes(incomingId)) return null;
+  if (match.subbedOutIds.includes(incomingId)) return null;
+  const outgoingId = match.lineup[position];
+  if (!outgoingId || outgoingId === incomingId) return null;
+  const incoming = run.staff.find((staff) => staff.id === incomingId);
+  const outgoing = run.staff.find((staff) => staff.id === outgoingId);
+  if (!incoming || !outgoing) return null;
+  const playerStats = { ...match.playerStats };
+  playerStats[incomingId] = playerStats[incomingId] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
+  return {
+    ...match,
+    lineup: { ...match.lineup, [position]: incomingId },
+    substitutionsUsed: match.substitutionsUsed + 1,
+    subbedOutIds: [...match.subbedOutIds, outgoingId],
+    playerStats,
+    activePlayerId: undefined,
+    supportingPlayerId: undefined,
+    events: [...match.events, {
+      minute: match.minute,
+      text: "SUBSTITUTION — " + incoming.name + " replaces " + outgoing.name + " at " + ARCBALL_POSITION_LABEL[position] + ".",
+      kind: "info",
+      playerId: incomingId,
+    }].slice(-24),
   };
 }
 
@@ -821,7 +861,7 @@ export function stepArcballMatch(
   if (!rival) return { ...match, minute: 90 };
   const nextMinute = Math.min(90, match.minute + 5);
   const rng = seeded(fixture.id + "|" + nextMinute + "|" + match.homeScore + "|" + match.awayScore + "|" + intensity + "|" + instruction);
-  const playerNumbers = playerTeamNumbers(run, intensity, instruction);
+  const playerNumbers = playerTeamNumbers(run, intensity, instruction, match.lineup);
   const rivalNumbers = rivalTeamNumbers(rival, state.seasonYear, state.rivalRosters[rival.id]);
   const homeNumbers = match.playerIsHome ? playerNumbers : rivalNumbers;
   const awayNumbers = match.playerIsHome ? rivalNumbers : playerNumbers;
@@ -862,9 +902,9 @@ export function stepArcballMatch(
   /* Pick a visible ball carrier on every tick. The presentation can now show
      actual possession even when a move never reaches the shot calculation. */
   if (isPlayerAttack) {
-    const carrier = playerAttackPick(run, rng(), instruction);
+    const carrier = playerAttackPick(run, rng(), instruction, match.lineup);
     activePlayerId = carrier.id;
-    const supportPool = arcballLineupStaff(run).filter((s) => s.id !== carrier.id);
+    const supportPool = arcballLineupStaff(run, match.lineup).filter((s) => s.id !== carrier.id);
     if (supportPool.length) supportingPlayerId = supportPool[Math.floor(rng() * supportPool.length)].id;
   } else {
     const roster = rivalArcballRoster(rival, state.seasonYear, state.rivalRosters[rival.id]);
@@ -880,7 +920,7 @@ export function stepArcballMatch(
     const scored = rng() < goalChance;
     if (attackHome) homeShots += 1; else awayShots += 1;
     if (isPlayerAttack) {
-      const scorer = playerAttackPick(run, rng(), instruction);
+      const scorer = playerAttackPick(run, rng(), instruction, match.lineup);
       activePlayerId = scorer.id;
       playerStats[scorer.id] = playerStats[scorer.id] ?? { goals: 0, assists: 0, shots: 0, rating: 6 };
       playerStats[scorer.id].shots += 1;
@@ -889,7 +929,7 @@ export function stepArcballMatch(
         if (attackHome) homeOnTarget += 1; else awayOnTarget += 1;
         playerStats[scorer.id].goals += 1;
         playerStats[scorer.id].rating += 1;
-        const assistPool = arcballLineupStaff(run).filter((s) => s.id !== scorer.id);
+        const assistPool = arcballLineupStaff(run, match.lineup).filter((s) => s.id !== scorer.id);
         if (assistPool.length && rng() < .68) {
           const assister = assistPool[Math.floor(rng() * assistPool.length)];
           supportingPlayerId = assister.id;
@@ -956,7 +996,7 @@ export function stepArcballMatch(
   const intensityCost: Record<ArcballIntensity, number> = { calm: .45, normal: .67, push: .90, allin: 1.20 };
   const extraPress = (arcballStateOf(run).approach === "press" || instruction === "press") ? .08 : 0;
   const effort = { ...match.effort };
-  for (const member of arcballLineupStaff(run)) effort[member.id] = (effort[member.id] ?? 0) + intensityCost[intensity] + extraPress;
+  for (const member of arcballLineupStaff(run, match.lineup)) effort[member.id] = (effort[member.id] ?? 0) + intensityCost[intensity] + extraPress;
 
   return {
     ...match,
