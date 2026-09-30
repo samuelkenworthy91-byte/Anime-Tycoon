@@ -1,5 +1,5 @@
 name: Build Android APK
-# Fresh-build trigger: main and active playtest branches. Rooms state runtime fix rebuild.
+# Fresh-build trigger: main and active playtest branches. Arcball 1.0 main integration build.
 
 on:
   workflow_dispatch:
