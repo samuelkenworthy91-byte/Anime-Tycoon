@@ -4,6 +4,7 @@ import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
 import { WORKER_LOOKS, workerLook } from "../engine/data";
 import {
+  ARCBALL_POSITION_LABEL,
   ARCBALL_POSITIONS,
   arcballStateOf,
   arcballTeamName,
@@ -11,6 +12,7 @@ import {
   finishArcballMatch,
   rivalArcballRoster,
   stepArcballMatch,
+  substituteArcballMatch,
   type ArcballInstruction,
   type ArcballIntensity,
   type ArcballMatchPhase,
@@ -160,9 +162,14 @@ export default function ArcballMatch({
   const rival = run.rivalWorld.studios.find((s) => s.id === rivalId || s.name === rivalId);
   const rivalPlayers = rival ? rivalArcballRoster(rival, state.seasonYear, state.rivalRosters[rival.id]) : [];
   const playerRows = ARCBALL_POSITIONS.flatMap((position) => {
-    const member = run.staff.find((s) => s.id === state.lineup[position]);
+    const member = run.staff.find((s) => s.id === match.lineup[position]);
     return member ? [{ position, member }] : [];
   });
+  const onCourtIds = new Set(Object.values(match.lineup).filter((id): id is string => !!id));
+  const bench = state.registered
+    .filter((id) => !onCourtIds.has(id) && !match.subbedOutIds.includes(id))
+    .map((id) => run.staff.find((staff) => staff.id === id))
+    .filter((staff): staff is NonNullable<typeof staff> => !!staff);
 
   const instant = () => {
     if (!match || committed) return;
@@ -484,7 +491,40 @@ export default function ArcballMatch({
               <HalfStat label="ON TARGET" value={playerOnTarget.toString()} />
             </div>
             <div className="mt-4 text-[9px] leading-relaxed text-paper/55">
-              The clock is stopped. Change intensity or your touchline instruction below before starting the second half.
+              The clock is stopped. Change intensity, touchline instruction and up to three players before starting the second half.
+            </div>
+            <div className="mt-3 rounded-xl border border-cyanx/30 bg-cyanx/5 p-3">
+              <div className="flex items-center justify-between text-[8px] font-black tracking-wider text-cyanx">
+                <span>SUBSTITUTIONS</span><span>{match.substitutionsUsed}/3 USED</span>
+              </div>
+              <div className="mt-2 space-y-1.5">
+                {ARCBALL_POSITIONS.map((position) => {
+                  const currentId = match.lineup[position];
+                  const current = run.staff.find((staff) => staff.id === currentId);
+                  const energy = current ? Math.max(0, Math.round(current.stamina - (match.effort[current.id] ?? 0))) : 0;
+                  return (
+                    <div key={position} className="grid grid-cols-[68px_1fr] items-center gap-2">
+                      <div className="text-[8px]">
+                        <div className="font-black text-gold">{ARCBALL_POSITION_LABEL[position].toUpperCase()}</div>
+                        <div className={cn("text-[7px]", energy <= 35 ? "text-neon" : "text-paper/40")}>{current?.name ?? "Empty"} · {energy}%</div>
+                      </div>
+                      <select
+                        className="ink-input min-w-0 px-2 py-1.5 text-[10px]"
+                        value=""
+                        disabled={match.substitutionsUsed >= 3 || bench.length === 0}
+                        onChange={(event) => {
+                          const incomingId = event.target.value;
+                          if (!incomingId) return;
+                          setMatch((currentMatch) => currentMatch ? (substituteArcballMatch(run, currentMatch, position, incomingId) ?? currentMatch) : currentMatch);
+                        }}
+                      >
+                        <option value="">{match.substitutionsUsed >= 3 ? "SUB LIMIT REACHED" : "KEEP / CHOOSE REPLACEMENT"}</option>
+                        {bench.map((member) => <option key={member.id} value={member.id}>{member.name} · {Math.round(member.stamina)}% energy</option>)}
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <select className="ink-input px-2 py-2 text-xs" value={intensity} onChange={(e) => setIntensity(e.target.value as ArcballIntensity)}>
