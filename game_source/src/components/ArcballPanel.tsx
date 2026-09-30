@@ -25,6 +25,8 @@ import {
   ARCBALL_APPROACHES,
   ARCBALL_CONSUMABLES,
   ARCBALL_SPONSORS,
+  ARCBALL_INVESTMENTS,
+  ARCBALL_CAMPS,
   ARCBALL_DRILLS,
   ARCBALL_FORMATIONS,
   ARCBALL_POSITION_LABEL,
@@ -32,9 +34,12 @@ import {
   activateArcball,
   applyChampionshipSpotlight,
   arcballArchetype,
+  arcballClubEffects,
   arcballInjuryChance,
+  arcballInvestmentQuote,
   arcballPotentialLabel,
   arcballMerchQuote,
+  arcballPrivateCoachingQuote,
   arcballSponsorBlock,
   arcballTrainingReadiness,
   arcballProfile,
@@ -48,7 +53,10 @@ import {
   playableArcballFixture,
   redeemArcballMedal,
   registerArcballPlayer,
+  purchaseArcballInvestment,
+  runArcballCamp,
   runArcballMerchDrop,
+  runArcballPrivateCoaching,
   setArcballLineup,
   setArcballTactics,
   signArcballSponsor,
@@ -56,6 +64,7 @@ import {
   useArcballConsumable,
   type ArcballApproachId,
   type ArcballFormationId,
+  type ArcballInvestmentId,
   type ArcballSponsorId,
 } from "../engine/arcball";
 import type { RunState } from "../engine/state";
@@ -214,7 +223,8 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
     .map((position) => run.staff.find((member) => member.id === state.lineup[position]))
     .filter((member): member is NonNullable<typeof member> => !!member && !staffIsInjured(member, run.day ?? run.week * 7))
     .map((member) => member.stamina);
-  const injuryRisk = starterEnergy.length === 5 ? arcballInjuryChance(starterEnergy) : null;
+  const club = arcballClubEffects(state);
+  const injuryRisk = starterEnergy.length === 5 ? arcballInjuryChance(starterEnergy, club.fatigueRiskMitigation) : null;
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
@@ -246,7 +256,7 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
           </div>
         </div>
         <div className="mt-0.5 text-[8px] leading-relaxed text-paper/45">
-          Rested teams start at 20%. Fatigue can raise the team risk to 45%; tired workers are also more likely to be the one injured. Arcball injuries can remove a worker from anime production for 2–6 weeks.
+          Rested teams always start at 20%. Fatigue can raise that sharply; tired workers are also more likely to be the one injured. Sports Science reduces only the fatigue surcharge, never the baseline danger. Arcball injuries can remove a worker from anime production for 2–6 weeks.
         </div>
       </div>
 
@@ -466,6 +476,26 @@ function Training({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) =
               return <div key={drill.id} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/35 p-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-1 text-[10px] font-bold">{drill.name}<span className={cn("rounded bg-ink/40 px-1 py-0.5 text-[7px] font-black", readinessClass)}>{readiness.label}</span></div><div className="text-[8px] text-paper/40">{drill.desc} · −{drill.stamina} energy · readiness affects gain and downside risk</div></div><Btn variant="cyan" className="!px-2 !py-1 text-[8px]" disabled={trained || state.tokens < drill.cost || staffIsInjured(member, run.day ?? run.week * 7)} onClick={() => setRun((r) => trainArcball(r, member.id, drill.id) ?? r)}>{drill.cost} TOKENS</Btn></div>;
             })}
           </div>
+          {(() => {
+            const coaching = arcballPrivateCoachingQuote(run, member.id);
+            return (
+              <div className="rounded-xl border border-gold/35 bg-gold/5 p-3">
+                <div className="text-[9px] font-black tracking-[0.18em] text-gold">PRIVATE ELITE COACHING · ONCE PER SEASON</div>
+                <div className="mt-1 text-[8px] leading-relaxed text-paper/50">
+                  Hire a specialist around one player. Their weakest trainable Arcball attribute gains +2 with no studio-energy cost. Established stars become more expensive to improve.
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="min-w-0 flex-1 text-[9px]">
+                    <b>{coaching.stat ? "+2 " + coaching.stat.toUpperCase() : "NO TRAINABLE STAT"}</b>
+                    <div className="text-paper/40">{formatGBP(coaching.cost)}</div>
+                  </div>
+                  <Btn variant="gold" className="!px-2 !py-1 text-[8px]" disabled={!!coaching.blockedReason} title={coaching.blockedReason ?? ""} onClick={() => setRun((r) => runArcballPrivateCoaching(r, member.id) ?? r)}>
+                    {coaching.blockedReason ?? "HIRE COACH"}
+                  </Btn>
+                </div>
+              </div>
+            );
+          })()}
         </>
       )}
       <FirstSeenTutorial id="arcball" open={help} onDismiss={dismissHelp} />
@@ -555,6 +585,65 @@ function Rewards({
         <Btn variant="cyan" className="mt-2 w-full" disabled={!!merchQuote.blockedReason} title={merchQuote.blockedReason ?? ""} onClick={() => setRun((r) => runArcballMerchDrop(r) ?? r)}>
           {merchQuote.blockedReason ?? "RUN ARCBALL MERCH DROP"}
         </Btn>
+      </section>
+
+      <section className="rounded-xl border border-gold/40 bg-gold/[0.06] p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-gold">ARCBALL CAPITAL PROGRAMME</div>
+        <div className="mt-1 text-[8px] leading-relaxed text-paper/50">
+          Elite Arcball is expensive. Build a real sporting programme with permanent facilities. Fully upgrading all four paths costs over £1.1bn.
+        </div>
+        <div className="mt-2 space-y-2">
+          {(Object.entries(ARCBALL_INVESTMENTS) as [ArcballInvestmentId, (typeof ARCBALL_INVESTMENTS)[ArcballInvestmentId]][]).map(([id, def]) => {
+            const quote = arcballInvestmentQuote(run, id);
+            const effect = quote.level > 0 ? def.effects[quote.level - 1] : "No investment yet";
+            const nextEffect = quote.nextLevel > quote.level ? def.effects[quote.nextLevel - 1] : null;
+            return (
+              <div key={id} className="rounded-lg border border-line bg-panel2/45 p-2">
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-bold">{def.name} <span className="text-gold">LV {quote.level}/3</span></div>
+                    <div className="mt-0.5 text-[7px] leading-relaxed text-paper/40">{def.desc}</div>
+                    <div className="mt-1 text-[8px] text-mint">CURRENT · {effect}</div>
+                    {nextEffect && <div className="text-[8px] text-cyanx">NEXT · {nextEffect}</div>}
+                  </div>
+                  <Btn
+                    variant="gold"
+                    className="!px-2 !py-1 text-[7px]"
+                    disabled={!!quote.blockedReason}
+                    title={quote.blockedReason ?? ""}
+                    onClick={() => setRun((r) => purchaseArcballInvestment(r, id) ?? r)}
+                  >
+                    {quote.cost === null ? "MAX" : <>UPGRADE<br/>{formatGBP(quote.cost)}</>}
+                  </Btn>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-cyanx/35 bg-cyanx/5 p-3">
+        <div className="text-[9px] font-black tracking-[0.2em] text-cyanx">HIGH-PERFORMANCE CAMP · ONCE PER SEASON</div>
+        <div className="mt-1 text-[8px] leading-relaxed text-paper/50">
+          Take the registered squad away for intensive development. Healthy players improve their weakest trainable Arcball stat and recover energy. Injured workers cannot participate.
+        </div>
+        <div className="mt-2 grid gap-1.5">
+          {ARCBALL_CAMPS.map((camp) => {
+            const used = state.campYear === state.seasonYear;
+            const blocked = used ? "Camp already funded this season" : run.cash < camp.cost ? "Needs " + formatGBP(camp.cost) : null;
+            return (
+              <div key={camp.tier} className="flex items-center gap-2 rounded-lg border border-line bg-panel2/40 p-2">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[9px] font-bold">{camp.name}</div>
+                  <div className="text-[7px] text-paper/40">+{camp.gain} weakest Arcball stat · +{camp.stamina} energy · {formatGBP(camp.cost)}</div>
+                </div>
+                <Btn variant="cyan" className="!px-2 !py-1 text-[7px]" disabled={!!blocked} title={blocked ?? ""} onClick={() => setRun((r) => runArcballCamp(r, camp.tier) ?? r)}>
+                  FUND
+                </Btn>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       <div className="rounded-lg border border-line bg-panel2/30 p-2 text-[8px] text-paper/40">
