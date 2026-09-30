@@ -16,6 +16,7 @@ import {
   POINT_COLOR,
   ROLE_POINT,
   dateLabel,
+  formatGBP,
   formatNum,
   workerLook,
   type PointType,
@@ -55,6 +56,7 @@ import {
   type ArcballSponsorId,
 } from "../engine/arcball";
 import type { RunState } from "../engine/state";
+import { rivalArcballSigningTerms, signRivalArcballPlayer } from "../engine/arcballRecruitment";
 import { canSeeEmployeePotential } from "../engine/staffPotential";
 import Portrait from "./Portrait";
 import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
@@ -349,8 +351,24 @@ function League({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => 
         <div className="mt-2 space-y-2">
           {run.rivalWorld.studios.map((studio) => {
             const roster = state.rivalRosters[studio.id] ?? [];
-            const star = [...roster].sort((a,b) => b.rating - a.rating)[0];
-            return <div key={studio.id} className="rounded-lg border border-line bg-panel2/35 p-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><div className="text-[10px] font-bold">{studio.name}</div><div className="text-[8px] text-paper/40">{roster.map((p) => p.name.split(" ")[0] + " " + p.position.slice(0,3).toUpperCase() + " " + p.rating).join(" · ")}</div></div>{star && <div className="text-right"><div className="text-[7px] text-paper/35">STAR</div><div className="text-[9px] font-black text-gold">{star.name}</div><div className="text-[8px] text-paper/45">ARC {star.rating} · age {star.age ?? "?"}</div></div>}</div></div>;
+            return <details key={studio.id} className="rounded-lg border border-line bg-panel2/35 p-2">
+              <summary className="cursor-pointer text-[10px] font-bold">{studio.name} · {roster.length} players</summary>
+              <div className="mt-2 space-y-1.5">
+                {[...roster].sort((a,b)=>b.rating-a.rating).map((player) => {
+                  const terms = rivalArcballSigningTerms(run, studio.id, player.id);
+                  return <div key={player.id} className="flex items-center gap-2 rounded-lg border border-line/60 bg-abyss/30 p-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[9px] font-bold">{player.name} <span className="text-gold">ARC {player.rating}</span></div>
+                      <div className="text-[7px] text-paper/40">{player.position.toUpperCase()} · age {player.age ?? "?"} · {(player.fans ?? 0).toLocaleString("en-GB")} fans · potential {player.potential ?? "?"}</div>
+                      {terms && <div className="mt-0.5 text-[7px] text-paper/35">Studio role {terms.productionRole.toUpperCase()} · Story {terms.story} / Art {terms.art} / Sound {terms.sound} · {formatGBP(terms.weeklySalary)}/wk</div>}
+                    </div>
+                    {terms && <Btn variant="ghost" className="!px-2 !py-1 text-[7px]" disabled={!!terms.blockedReason} title={terms.blockedReason ?? ""} onClick={() => setRun((r) => signRivalArcballPlayer(r, studio.id, player.id) ?? r)}>
+                      SIGN<br/>{formatGBP(terms.fee)}
+                    </Btn>}
+                  </div>;
+                })}
+              </div>
+            </details>;
           })}
         </div>
       </section>
