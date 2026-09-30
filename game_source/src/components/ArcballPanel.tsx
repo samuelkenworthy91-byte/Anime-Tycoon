@@ -32,6 +32,7 @@ import {
   activateArcball,
   applyChampionshipSpotlight,
   arcballArchetype,
+  arcballInjuryChance,
   arcballPotentialLabel,
   arcballMerchQuote,
   arcballSponsorBlock,
@@ -209,6 +210,11 @@ function Stat({ label, value, icon }: { label: string; value: string; icon: Reac
 function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => RunState) => void }) {
   const state = arcballStateOf(run);
   const canSeePotential = canSeeEmployeePotential(run.research);
+  const starterEnergy = ARCBALL_POSITIONS
+    .map((position) => run.staff.find((member) => member.id === state.lineup[position]))
+    .filter((member): member is NonNullable<typeof member> => !!member && !staffIsInjured(member, run.day ?? run.week * 7))
+    .map((member) => member.stamina);
+  const injuryRisk = starterEnergy.length === 5 ? arcballInjuryChance(starterEnergy) : null;
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
@@ -230,6 +236,18 @@ function Squad({ run, setRun }: { run: RunState; setRun: (fn: (r: RunState) => R
             {Object.entries(ARCBALL_APPROACHES).map(([id, def]) => <option key={id} value={id}>{def.label}</option>)}
           </select>
         </label>
+      </div>
+
+      <div className={cn("rounded-xl border p-2.5", injuryRisk !== null && injuryRisk >= .32 ? "border-neon/45 bg-neon/8" : "border-gold/30 bg-gold/5")}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[9px] font-black tracking-[0.18em] text-gold">MATCH INJURY RISK</div>
+          <div className={cn("font-display text-lg font-black", injuryRisk !== null && injuryRisk >= .32 ? "text-neon" : "text-gold")}>
+            {injuryRisk === null ? "—" : Math.round(injuryRisk * 100) + "%"}
+          </div>
+        </div>
+        <div className="mt-0.5 text-[8px] leading-relaxed text-paper/45">
+          Rested teams start at 20%. Fatigue can raise the team risk to 45%; tired workers are also more likely to be the one injured. Arcball injuries can remove a worker from anime production for 2–6 weeks.
+        </div>
       </div>
 
       <div className="rounded-xl border border-line bg-panel2/40 p-2">
