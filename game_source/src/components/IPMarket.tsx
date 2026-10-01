@@ -26,8 +26,8 @@ function KeyArt({ ipId }: { ipId: string }) {
 export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run: RunState; setRun: (fn: (r: RunState) => RunState) => void; onAdapt: (ipId: string) => void; onEnterAuction: (auctionId: string) => void }) {
   const active = run.ipMarket.auctions.filter((a) => !a.resolved);
   const owned = Object.values(run.ipMarket.owned);
-  const legal = run.facilities.legal ?? 0;
-  const data = run.facilities.data ?? 0;
+  const legal = run.facilities?.legal ?? 0;
+  const data = run.facilities?.data ?? 0;
   const appraisalCost = Math.max(2, 5 - data);
   const sorted = useMemo(() => [...active].sort((a, b) => a.closesWeek - b.closesWeek), [active]);
   const coProdProjects = run.projects.filter((p) => ["concept", "preprod", "animation", "sound"].includes(p.stage));
@@ -37,7 +37,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   const manualBlock = commissionedAuctionBlock(run);
 
   const appraise = (id: string) => setRun((r) => {
-    const cost = Math.max(2, 5 - (r.facilities.data ?? 0));
+    const cost = Math.max(2, 5 - (r.facilities?.data ?? 0));
     if (r.rd < cost) return r;
     return {
       ...r,
@@ -49,7 +49,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   });
 
   const negotiate = (ipId: string, kind: "sequel" | "merch" | "international" | "royalty" | "ownership") => setRun((r) => {
-    const out = negotiateRights(r.ipMarket, ipId, kind, r.facilities.legal ?? 0);
+    const out = negotiateRights(r.ipMarket, ipId, kind, r.facilities?.legal ?? 0);
     if (!out || r.cash < out.cost) return r;
     return {
       ...r,
@@ -61,9 +61,9 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   });
 
   const renew = (ipId: string) => setRun((r) => {
-    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities?.legal ?? 0);
     if (!quote?.available || r.cash < quote.cost) return r;
-    const out = renewIPContract(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    const out = renewIPContract(r.ipMarket, ipId, r.week, r.facilities?.legal ?? 0);
     if (!out) return r;
     return {
       ...r,
@@ -75,7 +75,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
   });
 
   const toggleAutoRenew = (ipId: string) => setRun((r) => {
-    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities.legal ?? 0);
+    const quote = ipRenewalQuote(r.ipMarket, ipId, r.week, r.facilities?.legal ?? 0);
     if (!quote) return r;
     const enabled = !quote.autoRenew;
     const cap = Math.max(5_000, Math.round((quote.cost * IP_AUTO_RENEW_HEADROOM) / 5_000) * 5_000);
