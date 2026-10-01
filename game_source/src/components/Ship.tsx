@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { AlertTriangle, Check, ChevronLeft, ChevronRight, Image, Megaphone, Rocket, Scissors, Target, X } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
-import { POINT_COLOR, POINT_LABEL, formatGBP, type PointType } from "../engine/data";
+import { POINT_COLOR, POINT_LABEL, formatGBP, type GenreId, type PointType } from "../engine/data";
 import { showSaleOffers, unavailablePosterIdsForProject, type RunState } from "../engine/state";
 import { facilityFX } from "../engine/facilities";
 import { lateRevenueMult, type Project } from "../engine/projects";
