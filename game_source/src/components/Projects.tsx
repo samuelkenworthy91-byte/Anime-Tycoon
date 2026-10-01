@@ -41,6 +41,7 @@ import {
   activeProjects,
   projectOfStaff,
   daysToDeadline,
+  TEAM_MAX,
   type Project,
 } from "../engine/projects";
 import Portrait from "./Portrait";
@@ -68,7 +69,6 @@ const STAGE_COLOR: Record<string, string> = {
 function ProjectCard({
   p,
   run,
-  setRun,
   onAssign,
   onMilestone,
   onShip,
@@ -77,14 +77,12 @@ function ProjectCard({
   onResume,
   onScrap,
   onContinueSeason,
-  onLicensed,
   onIntervention,
   onAppointPromise,
   onAppointLead,
 }: {
   p: Project;
   run: RunState;
-  setRun: (fn: (r: RunState) => RunState) => void;
   onAssign: (projectId: string, staffId: string) => void;
   onMilestone: (projectId: string) => void;
   onShip: (projectId: string) => void;
@@ -94,7 +92,6 @@ function ProjectCard({
   onScrap: (projectId: string) => void;
   /** jump straight into creating this IP's next season while it's still on air */
   onContinueSeason?: (franchiseKey: string) => void;
-  onLicensed?: (ipId: string) => void;
   onIntervention: (projectId: string, interventionId: string) => void;
   onAppointPromise: (projectId: string, promiseId: string) => void;
   onAppointLead: (projectId: string, staffId: string | null) => void;
