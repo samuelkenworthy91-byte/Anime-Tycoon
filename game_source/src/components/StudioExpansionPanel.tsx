@@ -87,7 +87,7 @@ function useRunAction({ run, setRun }: Props) {
     setMessage(success);
     setRun((r) => fn(r) ?? r);
   };
-  return { message, act };
+  return { message, setMessage, act };
 }
 export default function StudioExpansionPanel(props: Props) {
   const { run, setRun } = props;
@@ -126,7 +126,7 @@ export default function StudioExpansionPanel(props: Props) {
 function StaffAmbitions(props: Props) {
   const { run } = props,
     x = expansionOf(run),
-    { message, act } = useRunAction(props);
+    { message, setMessage, act } = useRunAction(props);
   const [staffId, setStaff] = useState(run.staff[0]?.id ?? ""),
     [genre, setGenre] = useState<GenreId>(run.genresUnlocked[0]);
   return (
