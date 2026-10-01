@@ -153,6 +153,7 @@ export const STAGE_GATE: Record<ProjectStage, MilestoneId | null> = {
   post: "edit",
   marketing: null,
   ready: null,
+  shelved: null,
   airing: null,
   done: null,
 };
