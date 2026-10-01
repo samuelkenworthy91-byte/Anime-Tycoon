@@ -386,6 +386,8 @@ export interface StaffWorkMod {
   pace: number;
   /** flat team speed added just by being present */
   aura: number;
+  /** multiplier on weekly XP earned */
+  xpMult: number;
 }
 export type StaffModFn = (s: Staff, p: Project, team: Staff[]) => StaffWorkMod;
 
