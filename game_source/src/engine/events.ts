@@ -254,6 +254,7 @@ export function rollStudioEvent(week: number, ctx: StudioEventContext): StudioEv
         ],
       };
   }
+  return null;
 }
 
 /* ------------------------------------------------------------ resolve */
