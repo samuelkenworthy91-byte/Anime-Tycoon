@@ -281,7 +281,7 @@ export default function App() {
     primeAudio();
     sfx.fanfare();
     const migrated = migrateRun(save.run);
-    const restored = restoreAwardNominationMetadata(migrated, save.run.yearShows);
+    const restored = restoreAwardNominationMetadata(migrated, migrated.yearShows);
     const resumed = syncBigThreeEra(restored);
     setMeta(save.meta);
     setRun(resumed);
