@@ -361,7 +361,7 @@ export function coProductionOffer(run: RunState, projectId: string): CoProductio
   const remaining = Math.max(0, total - p.spent);
   if (remaining < 15_000) return null;
   const contribution = Math.max(15_000, Math.min(remaining, Math.round((total * (.22 + pick.s.tier * .035 + (pick.fit ? .06 : 0))) / 5_000) * 5_000));
-  const legalReduction = (run.facilities.legal ?? 0) * .02;
+  const legalReduction = (run.facilities?.legal ?? 0) * .02;
   const flagshipReduction = run.capitalProjects.includes("flagship_hq") ? .03 : 0;
   const revenueShare = Math.max(.12, Math.min(.42, contribution / total * .72 + .08 - legalReduction - flagshipReduction));
   return { studioId: pick.s.id, studioName: pick.s.name, contribution, revenueShare, fit: pick.fit };
