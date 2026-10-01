@@ -113,7 +113,7 @@ export function skillTrainingQuote(staff: Staff, focus: PointType, courseId: Ski
 }
 
 function genreGroupOf(genre: GenreId) {
-  return GENRE_SPEC_GROUPS.find((group) => group.genres.includes(genre));
+  return GENRE_SPEC_GROUPS.find((group) => (group.genres as readonly GenreId[]).includes(genre));
 }
 
 /** Thematic adjacency comes from the same canonical three-genre specialisation
@@ -125,7 +125,7 @@ export function genreTrainingAdjacencyMult(staff: Staff, genre: GenreId): number
   const spec = specDef(staff.spec);
   if (staff.favGenre === genre || spec?.genres?.includes(genre)) return 0.65;
   if (!targetGroup) return 1;
-  const sameGroupGenres = targetGroup.genres.filter((g) => g !== genre);
+  const sameGroupGenres = (targetGroup.genres as readonly GenreId[]).filter((g) => g !== genre);
   const adjacentPreferred = !!staff.favGenre && sameGroupGenres.includes(staff.favGenre);
   const adjacentSpec = !!spec?.genres?.some((g) => sameGroupGenres.includes(g));
   const adjacentExperience = sameGroupGenres.some((g) => (staff.genreExperience?.[g] ?? 0) >= 2);
