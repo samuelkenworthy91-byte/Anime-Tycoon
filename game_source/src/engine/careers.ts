@@ -348,7 +348,7 @@ export function uniformGenreForSeed(seed: number): GenreId {
   const n = ((Math.trunc(seed) % GENRE_IDS.length) + GENRE_IDS.length) % GENRE_IDS.length;
   return GENRE_IDS[n];
 }
-export const genreSpecialisationId = (role: StaffRole, genre: GenreId) => { const group = GENRE_SPEC_GROUPS.find((g) => g.genres.includes(genre)); return `g_${role}_${group?.id ?? GENRE_SPEC_GROUPS[0].id}`; };
+export const genreSpecialisationId = (role: StaffRole, genre: GenreId) => { const group = GENRE_SPEC_GROUPS.find((g) => (g.genres as readonly GenreId[]).includes(genre)); return `g_${role}_${group?.id ?? GENRE_SPEC_GROUPS[0].id}`; };
 
 function pickTraits(seedA: number, seedB: number): string[] {
   const count = 2 + (seedA % 3); // 2..4: candidates should feel meaningfully distinct
