@@ -185,7 +185,7 @@ export default function Retrospective({
             <div className="ink-card p-3">
               <div className="text-[9px] font-black tracking-wider text-viol">CREATIVE RELATIONSHIPS</div>
               {goldenPairs.length ? goldenPairs.slice(0,3).map((pair) => {
-                const names = pair.staffIds.map((id) => run.staff.find((staff) => staff.id === id)?.name ?? run.legends.find((legend) => legend.id === id)?.name ?? "Former creator");
+                const names = pair.staffIds.map((id) => run.staff.find((staff) => staff.id === id)?.name ?? run.legends.find((legend) => legend.staffId === id)?.name ?? "Former creator");
                 return <div key={pair.key} className="mt-1.5 rounded-lg border border-gold/25 bg-gold/5 p-2"><b className="text-[10px] text-gold">GOLDEN PAIR · {names.join(" + ")}</b><div className="text-[9px] text-paper/45">{pair.sharedReleases} shared releases · {pair.acclaimedReleases} hits · best {pair.bestScore}/40{pair.bestTitle ? ` “${pair.bestTitle}”` : ""}</div></div>;
               }) : <div className="mt-2 text-[10px] text-paper/40">No partnership reached Golden Pair status.</div>}
             </div>
