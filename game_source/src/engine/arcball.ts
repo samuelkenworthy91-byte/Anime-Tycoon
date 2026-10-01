@@ -1208,7 +1208,7 @@ export function substituteArcballMatch(run: RunState, match: ArcballMatchState, 
     events: [...match.events, {
       minute: match.minute,
       text: "SUBSTITUTION — " + incoming.name + " replaces " + outgoing.name + " at " + ARCBALL_POSITION_LABEL[position] + ".",
-      kind: "info",
+      kind: "info" as const,
       playerId: incomingId,
     }].slice(-24),
   };
