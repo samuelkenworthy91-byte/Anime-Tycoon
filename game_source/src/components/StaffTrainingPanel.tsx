@@ -36,7 +36,7 @@ export default function StaffTrainingPanel({
   run: RunState;
   setRun: (fn: (r: RunState) => RunState) => void;
 }) {
-  const tier = run.facilities.training ?? 0;
+  const tier = run.facilities?.training ?? 0;
   const availableGenres = useMemo(
     () => GENRES.filter((g) => run.genresUnlocked.includes(g.id)),
     [run.genresUnlocked]
