@@ -65,18 +65,18 @@ export default function OverseasStrategyPanel({
         <button
           className={button}
           disabled={
-            !run.facilities.data ||
+            !run.facilities?.data ||
             !!study ||
-            run.rd < Math.max(3, 8 - (run.facilities.data ?? 0))
+            run.rd < Math.max(3, 8 - (run.facilities?.data ?? 0))
           }
           onClick={() => act((r) => researchRegionalAudience(r, q))}
         >
-          STUDY THIS AUDIENCE · {Math.max(3, 8 - (run.facilities.data ?? 0))} RD
+          STUDY THIS AUDIENCE · {Math.max(3, 8 - (run.facilities?.data ?? 0))} RD
         </button>
         <p className="text-xs">
           {study
             ? "Study valid until week " + study.expiresWeek
-            : run.facilities.data
+            : run.facilities?.data
               ? "No current regional study"
               : "Requires Audience Data Lab"}
         </p>
