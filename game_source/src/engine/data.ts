@@ -27,7 +27,7 @@ import genreV2Runtime from "./generated/genreV3.json";
 
 import arcV3Runtime from "./generated/arcV3.json";
 import { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";
-import { randomInternationalName, type PersonNameGender } from "./internationalNames";
+import { personGender, randomInternationalName, type PersonNameGender } from "./internationalNames";
 
 /* ------------------------------------------------------------------ types */
 export type GenreId =
