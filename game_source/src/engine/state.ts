@@ -3884,7 +3884,7 @@ export function appointHead(r: RunState, slot: HeadSlot, staffId: string): RunSt
 /* ------------------------------------------------------------- training */
 /** null = this person can take a course right now */
 export function trainBlockReason(r: RunState, staffId: string): string | null {
-  const tier = r.facilities.training ?? 0;
+  const tier = r.facilities?.training ?? 0;
   if (tier < 1) return "Build a Training Room first";
   const s = r.staff.find((x) => x.id === staffId);
   if (!s) return "No such staff member";
@@ -3920,7 +3920,7 @@ export function intensiveDevelop(r: RunState, staffId: string): RunState | null 
 
 export function trainStaff(r: RunState, staffId: string, focus: PointType): RunState | null {
   if (trainBlockReason(r, staffId)) return null;
-  const tier = r.facilities.training ?? 0;
+  const tier = r.facilities?.training ?? 0;
   const cost = trainCost(tier);
   const s = r.staff.find((x) => x.id === staffId)!;
   const weeks = trainingWeeks(tier);
