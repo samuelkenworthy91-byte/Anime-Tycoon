@@ -2461,7 +2461,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   if (researchId === "narrative_analytics") {
     const batchSize = researchBatchSize("narrative");
     const unknown = ARC_RESEARCH_ALL_COMBO_IDS.filter((id) => !carrier.arcCombos.includes(id));
-    const curated = ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id));
+    const curated: string[] = ARC_RESEARCH_COMBOS.filter((id) => unknown.includes(id));
     const discoveries = [...curated, ...unknown.filter((id) => !curated.includes(id))].slice(0, batchSize);
     arcCombos = [...new Set([...carrier.arcCombos, ...discoveries])];
     arcKnowledge = { ...carrier.arcKnowledge };
