@@ -10,7 +10,8 @@ export type PresentationScreen =
   | "gameover"
   | "retrospective"
   | "awards"
-  | "auction";
+  | "auction"
+  | "arcball";
 
 /**
  * Presentation priority is deliberately centralised so future pop-ups can join
