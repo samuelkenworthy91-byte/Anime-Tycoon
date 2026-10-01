@@ -230,7 +230,7 @@ export default function StudioSlateV3({
     const inheritedGenres = kind === "franchise"
       ? (chosenFranchise?.genres ?? []).slice(0, 2)
       : kind === "licensed"
-        ? (chosenIpRow?.ip?.genres ?? []).slice(0, 2)
+        ? (chosenIpRow?.ip?.genreTags ?? []).slice(0, 2)
         : genre ? [genre] : [];
     const targetWeek = Math.max(run.week + 1, quarterStart + releaseOffset);
     const patch = {
