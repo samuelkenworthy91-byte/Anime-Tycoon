@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - bugfix/arcball-rooms-work-cleanup
       - depth-clarity-overhaul
       - player-value-variety-pass
       - showrunner-expansion-2026-09-27
@@ -48,6 +49,10 @@ jobs:
       - name: Install dependencies
         working-directory: game_source
         run: npm ci
+
+      - name: TypeScript strict typecheck
+        working-directory: game_source
+        run: npx tsc --noEmit
 
       - name: Run test suite
         working-directory: game_source
