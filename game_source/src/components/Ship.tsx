@@ -44,7 +44,7 @@ export default function Ship({
   const [confirmSale, setConfirmSale] = useState<string | null>(null);
   const [posterBrowserOpen, setPosterBrowserOpen] = useState(false);
   const [posterBrowserStage, setPosterBrowserStage] = useState<"genres" | "grid" | "preview">("genres");
-  const [posterGenre, setPosterGenre] = useState<string | null>(null);
+  const [posterGenre, setPosterGenre] = useState<GenreId | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const saleOffers = showSaleOffers(run, project.id);
@@ -70,7 +70,7 @@ export default function Ship({
     setPosterIndex(0);
     setPosterBrowserOpen(true);
   };
-  const openPosterGenre = (genre: string) => {
+  const openPosterGenre = (genre: GenreId) => {
     setPosterGenre(genre);
     setPosterIndex(0);
     setPosterBrowserStage("grid");
@@ -198,7 +198,7 @@ export default function Ship({
             const afford = run.cash - spent >= cost;
             const capitalActive = !!campaign.capitalSynergy && run.capitalProjects.includes(campaign.capitalSynergy);
             const fitKnown = forecastAccess !== "hidden";
-            const audienceFitKnown = !!audienceProfile || run.facilities?.data > 0 || run.showrunner === "audience";
+            const audienceFitKnown = !!audienceProfile || (run.facilities?.data ?? 0) > 0 || run.showrunner === "audience";
             const fitExact = forecastAccess === "exact";
             return (
               <div key={campaign.id} className={cn("ink-card p-3", isBought && "border-mint/60", capitalActive && "ring-1 ring-gold/20")}>
