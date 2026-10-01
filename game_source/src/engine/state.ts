@@ -1115,6 +1115,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let research = [...(r.research ?? [])];
   let researchTrackLevels = { ...(r.researchTrackLevels ?? {}) };
   let arcCombos = [...(r.arcCombos ?? [])];
+  let arcUnlocked = [...(r.arcUnlocked ?? [])];
   let arcKnowledge = { ...(r.arcKnowledge ?? {}) };
   let arcGenreKnowledge = { ...(r.arcGenreKnowledge ?? {}) };
   let castAffinityDiscovered = [...(r.castAffinityDiscovered ?? [])];
@@ -1303,13 +1304,14 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       for (const job of researchJobs) {
         if (w < job.completesWeek) { keep.push(job); continue; }
         const out = applyResearchCompletion(
-          { research, researchTrackLevels, arcCombos, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices },
+          { research, researchTrackLevels, arcCombos, arcUnlocked, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices },
           job.researchId,
           job.name
         );
         research = out.research;
         researchTrackLevels = out.researchTrackLevels ?? researchTrackLevels;
         arcCombos = out.arcCombos;
+        arcUnlocked = out.arcUnlocked;
         arcKnowledge = out.arcKnowledge;
         arcGenreKnowledge = out.arcGenreKnowledge;
         castAffinityDiscovered = out.castAffinityDiscovered;
@@ -1765,6 +1767,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     research,
     researchTrackLevels,
     arcCombos,
+    arcUnlocked,
     arcKnowledge,
     arcGenreKnowledge,
     castAffinityDiscovered,
