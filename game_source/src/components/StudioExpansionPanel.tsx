@@ -322,7 +322,7 @@ function StaffAmbitions(props: Props) {
 function OverseasPanel(props: Props) {
   const { run } = props,
     o = overseasOf(run),
-    { message, act } = useRunAction(props);
+    { message, setMessage, act } = useRunAction(props);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [q, setQ] = useState<OverseasRequest>({
     projectId:
