@@ -159,6 +159,13 @@ export function CountUp({
 }
 
 /* ------------------------------------------------------------------- Btn */
+type BtnProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
+  children: ReactNode;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  variant?: "primary" | "ghost" | "gold" | "cyan" | "danger";
+  big?: boolean;
+};
+
 export function Btn({
   children,
   onClick,
@@ -166,14 +173,8 @@ export function Btn({
   className,
   disabled,
   big,
-}: {
-  children: ReactNode;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  variant?: "primary" | "ghost" | "gold" | "cyan" | "danger";
-  className?: string;
-  disabled?: boolean;
-  big?: boolean;
-}) {
+  ...buttonProps
+}: BtnProps) {
   const { burst } = useFx();
   const styles: Record<string, string> = {
     primary:
@@ -185,6 +186,7 @@ export function Btn({
   };
   return (
     <button
+      {...buttonProps}
       disabled={disabled}
       onClick={(e) => {
         if (disabled) return;
