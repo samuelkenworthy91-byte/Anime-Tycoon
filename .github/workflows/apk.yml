@@ -52,7 +52,7 @@ jobs:
 
       - name: TypeScript strict typecheck
         working-directory: game_source
-        run: npx tsc --noEmit
+        run: npx tsc -p tsconfig.runtime.json
 
       - name: Run test suite
         working-directory: game_source
