@@ -101,7 +101,7 @@ export default function App() {
 
   const canPause = screen !== "title" && screen !== "gameover" && screen !== "retrospective";
   useEffect(() => {
-    if (timeSpeed > 0) lastClockSpeedRef.current = timeSpeed;
+    if (timeSpeed !== 0) lastClockSpeedRef.current = timeSpeed;
   }, [timeSpeed]);
   /* bumped whenever a save is written/cleared so the title screen re-reads it */
   const [saveStamp, setSaveStamp] = useState(0);
