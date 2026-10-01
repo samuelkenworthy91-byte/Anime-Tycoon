@@ -256,7 +256,7 @@ export function rollAdvancedDecision(week: number, ctx: AdvancedDecisionContext)
 
     () => eligibleAward.length ? (() => {
       const show = [...eligibleAward].sort((a, b) => b.score - a.score)[0];
-      const bestMetric = (["story", "art", "sound"] as const).sort((a, b) => show[b] - show[a])[0];
+      const bestMetric = [...(["story", "art", "sound"] as const)].sort((a, b) => show[b] - show[a])[0];
       const label = bestMetric === "story" ? "WRITING" : bestMetric === "art" ? "ANIMATION" : "ORIGINAL SCORE";
       return make(week, "awards_campaign", "AWARDS SEASON CALLS", "AWARDS",
         `Publicists think “${show.title}” has a real shot at ${label}. Campaigning cannot make bad work good, but it can decide a close ballot.`, [
