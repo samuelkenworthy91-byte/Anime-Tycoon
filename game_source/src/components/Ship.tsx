@@ -88,8 +88,8 @@ export default function Ship({
   const totalPts = project.points.story + project.points.art + project.points.sound;
   const lateMult = lateRevenueMult(project);
   const fx = facilityFX(run.facilities);
-  const mktTier = run.facilities.marketing ?? 0;
-  const dataTier = run.facilities.data ?? 0;
+  const mktTier = run.facilities?.marketing ?? 0;
+  const dataTier = run.facilities?.data ?? 0;
   const forecastAccess = campaignForecastAccess(run, project.draft, dataTier);
   const houseEffect = specialisationProjectEffects(run, project.draft);
 
@@ -198,7 +198,7 @@ export default function Ship({
             const afford = run.cash - spent >= cost;
             const capitalActive = !!campaign.capitalSynergy && run.capitalProjects.includes(campaign.capitalSynergy);
             const fitKnown = forecastAccess !== "hidden";
-            const audienceFitKnown = !!audienceProfile || run.facilities.data > 0 || run.showrunner === "audience";
+            const audienceFitKnown = !!audienceProfile || run.facilities?.data > 0 || run.showrunner === "audience";
             const fitExact = forecastAccess === "exact";
             return (
               <div key={campaign.id} className={cn("ink-card p-3", isBought && "border-mint/60", capitalActive && "ring-1 ring-gold/20")}>
