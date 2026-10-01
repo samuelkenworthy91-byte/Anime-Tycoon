@@ -79,7 +79,7 @@ export const genreCourseById = (id: GenreCourseId) => GENRE_COURSES.find((x) => 
  * spammable dozens of times without the calendar moving: each employee may
  * complete one paid course per industry week. */
 export function trainingBlockReason(run: RunState, staffId: string, minTier = 1): string | null {
-  const tier = run.facilities.training ?? 0;
+  const tier = run.facilities?.training ?? 0;
   if (tier < minTier) return `Training Room tier ${minTier} required`;
   const staff = run.staff.find((s) => s.id === staffId);
   if (!staff) return "No such staff member";
@@ -171,7 +171,7 @@ export function applySkillTraining(run: RunState, staffId: string, focus: PointT
   const course = skillCourseById(courseId);
   const block = trainingBlockReason(run, staffId, course.minTier);
   if (!staff || block) return null;
-  const quote = skillTrainingQuote(staff, focus, courseId, run.facilities.training ?? 0);
+  const quote = skillTrainingQuote(staff, focus, courseId, run.facilities?.training ?? 0);
   if (!quote || run.cash < quote.cash || run.rd < quote.rd) return null;
   const nextStaff = run.staff.map((s) => s.id !== staffId ? s : {
     ...s,
@@ -194,7 +194,7 @@ export function applyGenreTraining(run: RunState, staffId: string, genre: GenreI
   const course = genreCourseById(courseId);
   const block = trainingBlockReason(run, staffId, course.minTier);
   if (!staff || block || !run.genresUnlocked.includes(genre)) return null;
-  const quote = genreTrainingQuote(staff, genre, courseId, run.facilities.training ?? 0);
+  const quote = genreTrainingQuote(staff, genre, courseId, run.facilities?.training ?? 0);
   if (!quote || run.cash < quote.cash || run.rd < quote.rd) return null;
   const genreName = GENRES.find((g) => g.id === genre)?.label ?? genre;
   const nextStaff = run.staff.map((s) => s.id !== staffId ? s : {
