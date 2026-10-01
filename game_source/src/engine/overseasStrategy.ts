@@ -215,7 +215,7 @@ export function researchRegionalAudience(
   r: RunState,
   q: OverseasRequest,
 ): RunState | null {
-  const tier = r.facilities.data ?? 0,
+  const tier = r.facilities?.data ?? 0,
     key = studyKey(q, r.week),
     x = strategyOf(r),
     cost = Math.max(3, 8 - tier);
@@ -244,7 +244,7 @@ export function negotiateDistribution(
   q: OverseasRequest,
   focus: "share" | "reach",
 ): RunState | null {
-  const tier = r.facilities.legal ?? 0,
+  const tier = r.facilities?.legal ?? 0,
     key = negotiationKey(q),
     x = strategyOf(r),
     cost = Math.max(2000, 6000 - tier * 1000);
@@ -359,7 +359,7 @@ export function openCatalogueCase(r: RunState, id: string): RunState | null {
     p.distributionOwner ||
     p.commission ||
     p.draft.licensedIpId ||
-    !r.facilities.legal ||
+    !r.facilities?.legal ||
     r.cash < cost ||
     x.catalogueCases.some((c) => c.projectId === id)
   )
@@ -453,7 +453,7 @@ export function regionalPackage(
   requests: OverseasRequest[],
 ): { block: string | null; cost: number; run: RunState | null } {
   const fail = (block: string) => ({ block, cost: 0, run: null });
-  if (!r.facilities.legal)
+  if (!r.facilities?.legal)
     return fail("A Legal Desk is required for a territorial package");
   if (
     requests.length < 2 ||
