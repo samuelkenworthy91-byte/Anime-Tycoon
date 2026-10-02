@@ -55,8 +55,16 @@ def touch(driver,el,label,minimum=40):
     return r
 
 def close_modal(driver,wait):
+    # First-seen tutorials deliberately sit above their underlying panel.
+    # Treat that as valid onboarding, dismiss it, then close the panel itself.
+    dismiss_tutorials(driver)
     btn=wait.until(lambda d: next((e for e in d.find_elements(By.CSS_SELECTOR,"button[aria-label='Close']") if e.is_displayed()),False))
-    touch(driver,btn,"Modal close",40); btn.click()
+    touch(driver,btn,"Modal close",40)
+    try:
+        btn.click()
+    except ElementClickInterceptedException:
+        dismiss_tutorials(driver)
+        btn.click()
 
 def shot(driver,name):
     path=OUT/f"{name}.png"; driver.save_screenshot(str(path)); return str(path)
