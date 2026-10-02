@@ -2626,7 +2626,7 @@ function chooseDiscipline(st: Staff): PointType {
   return "story";
 }
 
-function showrunnerProjectOutputMultiplier(r: RunState, st: Staff, project: Project, editing = false): number {
+function showrunnerProjectOutputMultiplier(r: RunState, project: Project, editing = false): number {
   let mult = 1;
   if (project.auto?.mode === "full" && r.showrunner === "delegator") {
     const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
@@ -2818,7 +2818,7 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const effective = contributionEffectiveSkill(r, st, type);
     const pulseRoll = Math.random();
     const points = percentileSkillOutput(effective, pulseRoll);
-    const runnerMult = showrunnerProjectOutputMultiplier(r, st, project);
+    const runnerMult = showrunnerProjectOutputMultiplier(r, project);
     const withoutRunner = runnerMult > 1.0001 ? percentileSkillOutput(effective / runnerMult, pulseRoll) : points;
     const runnerExtra = points - withoutRunner;
     if (points > 0) pulses.push({
