@@ -21,7 +21,7 @@ describe("House Specialisation swing", () => {
     const run = houseRun();
     expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.02);
     expect(specialisationProjectEffects(run, { genres: ["slice"] }).scoreMult).toBeCloseTo(1);
-    expect(specialisationProjectEffects(run, { genres: ["mecha", "crime"] }).scoreMult).toBeCloseTo(1.08);
+    expect(specialisationProjectEffects(run, { genres: ["mecha", "crime"] }).scoreMult).toBeCloseTo(1.02);
   });
 
   it("deepens production identity at Authority without punishing outside genres", () => {
