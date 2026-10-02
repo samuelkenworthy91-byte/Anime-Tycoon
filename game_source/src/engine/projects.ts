@@ -694,7 +694,7 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
   const lastMinuteBoost = done === "edit" && Math.random() < 0.24
     ? { type: (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)], points: 2 + Math.floor(Math.random() * 5) }
     : null;
-  return {
+  let next: Project = {
     ...p,
     draft,
     stage: nx,
@@ -713,6 +713,16 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
     spent: p.spent + o.spent,
     rdGained: p.rdGained + o.rdGained + (done === "edit" ? (o.squashed ?? 0) : 0),
   };
+  const milestoneSource =
+    done === "story" ? "Milestone · Story Sprint" :
+    done === "art" ? "Milestone · Animation Sprint" :
+    done === "sound" ? "Milestone · Recording Session" :
+    "Milestone · Edit Bay";
+  for (const type of ["story", "art", "sound"] as const) {
+    if (o.points[type]) next = recordProjectImpact(next, milestoneSource, type, o.points[type]);
+  }
+  if (lastMinuteBoost) next = recordProjectImpact(next, "Last-minute QC inspiration", lastMinuteBoost.type, lastMinuteBoost.points);
+  return next;
 }
 
 /* ---------------------------------------------------------- release */
