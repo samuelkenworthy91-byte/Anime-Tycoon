@@ -235,6 +235,19 @@ export const CHEM_QUALITY_WEIGHT = 0.6;
  *  even for an elite master, tight enough that 9s are repeatable. */
 export const REVIEW_NOISE_RANGE = 0.70;
 
+export const NORMAL_PERFECT_REVIEW_THRESHOLD = 9.92;
+export const CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD = 9.40;
+
+export function perfectReviewThreshold(showrunner: string): number {
+  return showrunner === "critical" ? CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD : NORMAL_PERFECT_REVIEW_THRESHOLD;
+}
+
+export function perfectReviewEligible(showrunner: string, preDarlingInternal: number, calibratedAfterPerks: number): boolean {
+  return showrunner === "critical"
+    ? preDarlingInternal >= CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD
+    : calibratedAfterPerks >= NORMAL_PERFECT_REVIEW_THRESHOLD;
+}
+
 export const CAST_BASE_QUALITY = 0.5;
 export const VISIBLE_CAST_QUALITY = 0.6;
 export const VISIBLE_CAST_SALES = 0.025;
@@ -566,8 +579,8 @@ export function computeResult(opts: {
     /* Critical Darling keeps the +0.40 general critic lift, but has an explicit
        perfect-review identity: 9.40 BEFORE that personal lift is enough to enter
        perfect-score consideration. Everyone else still needs 9.92 after perks. */
-    const perfectThreshold = showrunner === "critical" ? 9.40 : 9.92;
-    const perfectEligible = showrunner === "critical" ? preDarlingInternal >= 9.40 : calibrated >= 9.92;
+    const perfectThreshold = perfectReviewThreshold(showrunner);
+    const perfectEligible = perfectReviewEligible(showrunner, preDarlingInternal, calibrated);
     s = perfectEligible ? 10 : Math.max(floor, Math.floor(calibrated + 0.43));
     /* Eligibility is not an automatic 10. The critic still has to make the
        unusually strong call; this keeps perfect 40s exceptional. */
