@@ -218,6 +218,7 @@ import {
 } from "./legacy";
 import { tickDelegated } from "./automation";
 import { teamCoordinationEfficiency } from "./teamCoordination";
+import { managementPolicyOf, shouldAutoDelegateProject, shouldPauseForRoutineCompletions, type StudioManagementPolicy } from "./management";
 import { staffInjuryReason, staffIsInjured } from "./staffAvailability";
 import { canDelegateRoutineProduction } from "./careerEras";
 import {
@@ -455,8 +456,10 @@ export interface RunState {
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
   capitalProjects: string[];
   staffContracts: Record<string, { expiresWeek: number; bonus: number; exclusive: boolean }>;
-  /** Major-studio era QoL: routine projects default to Auto Manage once a real team is assigned. */
+  /** Major-studio era QoL: legacy compatibility flag; managementPolicy is authoritative. */
   executiveDelegation?: boolean;
+  /** Mature-studio management-by-exception defaults. */
+  managementPolicy?: StudioManagementPolicy;
   /** One consequential consumer-products bet per franchise at a time. */
   activeMerchBets?: Record<string, { productId: string; label: string; startedWeek: number; endsWeek: number; projectedReturn: number; audienceFit: number }>;
 }
@@ -611,6 +614,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     strategicSpend: [],
     capitalProjects: [],
     staffContracts: {},
+    executiveDelegation: false,
+    managementPolicy: { projectMode: "manual", contractMode: "ask", alertMode: "all" },
   };
 }
 
@@ -772,6 +777,8 @@ export function migrateRun(raw: unknown): RunState {
     strategicSpend: migrateStrategicSpend((r as { strategicSpend?: unknown }).strategicSpend, r.week ?? 0),
     capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
     staffContracts: r.staffContracts && typeof r.staffContracts === "object" ? r.staffContracts : {},
+    managementPolicy: managementPolicyOf(r),
+    executiveDelegation: managementPolicyOf(r).projectMode !== "manual",
     recruitmentAdRefreshes: typeof r.recruitmentAdRefreshes === "number" ? Math.max(0, Math.floor(r.recruitmentAdRefreshes)) : 0,
     recruitmentAdMonth: typeof r.recruitmentAdMonth === "number" ? Math.max(0, Math.floor(r.recruitmentAdMonth)) : Math.floor((r.week ?? 0) / 4),
     /* additive migration: an old save simply starts with the neutral
@@ -2225,7 +2232,7 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
         : project;
       if (
         !already &&
-        r.executiveDelegation &&
+        shouldAutoDelegateProject(r, next) &&
         canDelegateRoutineProduction(r.week) &&
         r.officeLevel >= 2 &&
         next.staffIds.length >= 2 &&
