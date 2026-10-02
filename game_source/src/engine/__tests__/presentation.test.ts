@@ -42,6 +42,7 @@ describe("unified presentation selector", () => {
     screen: "office" as const,
     paused: false,
     sellerAuction: false,
+    awardsCeremony: false,
     studioDecision: false,
     auctionForecast: false,
     bigThree: false,
@@ -54,6 +55,7 @@ describe("unified presentation selector", () => {
   it("renders exactly the highest-priority ready surface", () => {
     expect(selectPresentation({ ...baseQueue, levelUp: true, staffRequest: true, nomination: true })).toBe("nomination");
     expect(selectPresentation({ ...baseQueue, bigThree: true, nomination: true, sellerAuction: true })).toBe("sellerAuction");
+    expect(selectPresentation({ ...baseQueue, awardsCeremony: true, studioDecision: true, nomination: true })).toBe("awardsCeremony");
     expect(selectPresentation({ ...baseQueue, studioDecision: true, auctionForecast: true, bigThree: true })).toBe("studioDecision");
   });
 
