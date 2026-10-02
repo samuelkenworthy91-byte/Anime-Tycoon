@@ -435,5 +435,5 @@ input[type="range"].ink-range::-moz-range-thumb {
   .office-hud-forecast > button { min-height: 24px !important; padding: 3px 7px !important; font-size: 9px !important; }
   .office-hud-cash { padding: 3px 7px !important; font-size: 10px !important; }
   .game-controls { top: 34px !important; right: 5px !important; gap: 2px !important; }
-  .game-controls button { min-height: 25px !important; padding: 4px 6px !important; border-radius: 8px !important; font-size: 9px !important; }
+  .game-controls button { min-height: 44px !important; min-width: 44px !important; padding: 6px 8px !important; border-radius: 8px !important; font-size: 9px !important; }
 }
