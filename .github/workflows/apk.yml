@@ -7,7 +7,6 @@ on:
     branches:
       - main
       - bugfix/arcball-rooms-work-cleanup
-      - final-systems-polish-2026-10-02
       - depth-clarity-overhaul
       - player-value-variety-pass
       - showrunner-expansion-2026-09-27
@@ -73,9 +72,7 @@ jobs:
 
       - name: Rename final APK
         run: |
-          if [ "$GITHUB_REF_NAME" = "final-systems-polish-2026-10-02" ]; then
-            cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Final-Systems-Polish.apk
-          elif [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
+          if [ "$GITHUB_REF_NAME" = "depth-clarity-overhaul" ]; then
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Depth-Clarity-Final-Playtest.apk
           elif [ "$GITHUB_REF_NAME" = "arcball-v1" ]; then
             cp game_source/android/app/build/outputs/apk/debug/app-debug.apk Anime-Runner-Arcball.apk
@@ -92,7 +89,6 @@ jobs:
           path: |
             Anime-Runner-*-Playtest.apk
             Anime-Runner-Arcball.apk
-            Anime-Runner-Final-Systems-Polish.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -172,14 +168,3 @@ jobs:
             --target "$BUILT_SHA" \
             --title 'Anime Runner — Crash Audit Playtest' \
             --notes "Bug-fix playtest APK after Arcball, Rooms, Work and runtime crash audit at ${BUILT_SHA}."
-
-      - name: Publish direct GitHub Final Systems Polish APK
-        if: github.ref == 'refs/heads/final-systems-polish-2026-10-02'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG='final-systems-polish-playtest'
-          APK='Anime-Runner-Final-Systems-Polish.apk'
-          BUILT_SHA="$(git rev-parse HEAD)"
-          gh release delete "$TAG" --cleanup-tag -y || true
-          gh release create "$TAG"             "$APK"             --target "$BUILT_SHA"             --title 'Anime Runner — Final Systems Polish'             --notes "Fully validated Pixel 9a Android playtest build from final-systems-polish-2026-10-02 at ${BUILT_SHA}."
