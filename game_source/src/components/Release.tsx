@@ -97,7 +97,7 @@ export default function Release({
     .sort((a, b) => impactScore(b) - impactScore(a))
     .slice(0, 3);
   const biggestDrag = [...impactRows]
-    .filter((row) => row.positive === false || (row.delta ?? 0) < 0)
+    .filter((row) => row.category !== "cost" && (row.positive === false || (row.delta ?? 0) < 0))
     .sort((a, b) => impactScore(b) - impactScore(a))[0] ?? null;
   const impactGroups = [
     ["production", "PRODUCTION OUTPUT"],
@@ -105,10 +105,12 @@ export default function Release({
     ["critical", "CRITICAL ENVIRONMENT"],
     ["commercial", "COMMERCIAL MODIFIERS"],
     ["fans", "FAN IMPACT"],
+    ["cost", "SPEND / TRADE-OFFS"],
   ] as const;
 
   const investmentRows = impactRows.filter((row) =>
     row.source.startsWith("Investment ·") ||
+    row.source === "Executive Rush" ||
     row.source.startsWith("Facilities ·") ||
     row.source === "Business & Audience discipline" ||
     row.source === "Merch Department"
@@ -120,6 +122,9 @@ export default function Release({
   const investmentRevenue = investmentRows
     .filter((row) => row.metric === "revenue")
     .reduce((sum, row) => sum + (row.delta ?? 0), 0);
+  const investmentCost = investmentRows
+    .filter((row) => row.metric === "cost")
+    .reduce((sum, row) => sum + Math.abs(row.delta ?? 0), 0);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {
     const rows: DiscoveryCard[] = [];
@@ -509,6 +514,9 @@ export default function Release({
                             )}
                             {investmentRevenue !== 0 && (
                               <span>{Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 ? " · " : ""}{investmentRevenue >= 0 ? "+" : "−"}{formatGBP(Math.abs(investmentRevenue))} release income</span>
+                            )}
+                            {investmentCost > 0 && (
+                              <span>{Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 || investmentRevenue !== 0 ? " · " : ""}{formatGBP(investmentCost)} deliberately spent</span>
                             )}
                           </div>
                           <div className="mt-1 text-[8px] text-paper/40">Only realised effects on this production are counted.</div>
