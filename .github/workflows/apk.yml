@@ -15,6 +15,7 @@ on:
       - arena/01a0759f-anime-tycoon
       - work/final-awards-rival-posters
       - work/casting-catalog-rebuild
+      - final-systems-polish-2026-10-02
     paths:
       - "game_source/**"
       - ".github/workflows/apk.yml"
