@@ -22,7 +22,7 @@ export default function StudioDNA({ run }: { run: RunState }) {
   const benefits = specialisationBenefits(run);
   const genre = spec.primary ? GENRES.find((g) => g.id === spec.primary)?.label ?? spec.primary : "Uncommitted";
   const tracks = RESEARCH_TRACKS
-    .map((track) => ({ label: track.label, level: researchTrackLevel(run, track.id) }))
+    .map((track) => ({ label: track.name, level: researchTrackLevel(run, track.id) }))
     .filter((row) => row.level > 0)
     .sort((a, b) => b.level - a.level);
   const policy = managementPolicyOf(run);
