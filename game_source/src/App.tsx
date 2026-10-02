@@ -53,7 +53,7 @@ import AuctionForecast from "./components/AuctionForecast";
 import AuctionCeremony from "./components/AuctionCeremony";
 import SellerAuctionCeremony from "./components/SellerAuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
-import { canPresentDeferredLevelUp } from "./engine/presentation";
+import { selectPresentation } from "./engine/presentation";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
@@ -64,6 +64,8 @@ import { contractQuickPicks } from "./engine/contractQuickPick";
 import { createNewGamePlusRun } from "./engine/newGamePlus";
 import type { Showrunner } from "./engine/data";
 import ArcballMatch from "./components/ArcballMatch";
+import { managementPolicyOf, shouldPauseForRoutineCompletions } from "./engine/management";
+import type { DynastyPathId } from "./engine/legacy";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction" | "arcball";
 
@@ -193,33 +195,30 @@ export default function App() {
   }, [run?.ipMarket.pendingPromptId, screen]);
 
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
-  const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
+  const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((staff) => (staff.pendingLevelUps?.length ?? 0) > 0);
   const sellerAuctionOpen = !!run?.sellerAuction;
   const bigThreePresentation = run ? pendingBigThreeReveal(run) : null;
-  const bigThreeRevealOpen = !!bigThreePresentation && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
-  const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen;
   const pendingStaffRequestId = run ? nextStaffRequestId(run, dismissedStaffRequestSet) : null;
-  const staffRequestPresentationOpen = !!pendingStaffRequestId && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen && !nominationAnnouncementOpen && !released;
-  const levelUpPresentationAllowed = canPresentDeferredLevelUp({
+  const activePresentation = selectPresentation({
     screen,
     paused,
-    sellerAuctionOpen,
-    decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
-    auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
-    productionRevealOpen: screen === "release" || !!released,
-  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !staffRequestPresentationOpen && !released;
+    sellerAuction: sellerAuctionOpen,
+    studioDecision: (run?.studioEvents.length ?? 0) > 0,
+    auctionForecast: !!run?.ipMarket.pendingPromptId,
+    bigThree: !!bigThreePresentation,
+    nomination: !!nominationAnnouncement,
+    staffRequest: !!pendingStaffRequestId,
+    levelUp: pendingLevelUp,
+    productionReveal: screen === "release" || !!released,
+  });
+  const bigThreeRevealOpen = activePresentation === "bigThree";
+  const nominationAnnouncementOpen = activePresentation === "nomination";
+  const staffRequestPresentationOpen = activePresentation === "staffRequest";
+  const levelUpPresentationAllowed = activePresentation === "levelUp";
   useEffect(() => {
-    if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
-  }, [pendingLevelUp, levelUpPresentationAllowed]);
-  useEffect(() => {
-    if (nominationAnnouncementOpen) setTimeSpeed(0);
-  }, [nominationAnnouncementOpen]);
-  useEffect(() => {
-    if (bigThreeRevealOpen) setTimeSpeed(0);
-  }, [bigThreeRevealOpen]);
-  useEffect(() => { if (staffRequestPresentationOpen) setTimeSpeed(0); }, [staffRequestPresentationOpen]);
-  useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
+    if (activePresentation) setTimeSpeed(0);
+  }, [activePresentation]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -246,11 +245,17 @@ export default function App() {
           if (weekBoundary) {
             const before = n;
             n = advanceBigThreeWeek(advanceAwardsWeek(n, { liveDaysAlreadyApplied: true }));
-            const attention =
+            const criticalAttention =
               n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
               n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
-              n.marketEvents.length > before.marketEvents.length || n.studioEvents.length > before.studioEvents.length || n.staffEvents.length > before.staffEvents.length ||
-              n.contractJobs.length < before.contractJobs.length || n.trainingJobs.length < before.trainingJobs.length || n.researchJobs.length < before.researchJobs.length;
+              n.marketEvents.length > before.marketEvents.length ||
+              n.studioEvents.length > before.studioEvents.length ||
+              n.staffEvents.length > before.staffEvents.length;
+            const routineCompletion =
+              n.contractJobs.length < before.contractJobs.length ||
+              n.trainingJobs.length < before.trainingJobs.length ||
+              n.researchJobs.length < before.researchJobs.length;
+            const attention = criticalAttention || (routineCompletion && shouldPauseForRoutineCompletions(n));
             if (attention) setTimeSpeed(0);
 
             const insolvency = applyWeeklyInsolvency(n);
@@ -370,13 +375,13 @@ export default function App() {
     setScreen("title");
   }, [snapshot]);
 
-  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"]) => {
+  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"], legacy: DynastyPathId | "none") => {
     if (!run) return;
     const completed = snapshot();
     if (completed) saveSlot("legacy", completed);
     primeAudio();
     sfx.fanfare();
-    const next = createNewGamePlusRun(run, studio, showrunner);
+    const next = createNewGamePlusRun(run, studio, showrunner, legacy);
     setMeta({ studio, showrunner });
     setRun(next);
     seenCeremonyYear.current = 0;
@@ -603,7 +608,13 @@ export default function App() {
 
   const quickBestContract = useCallback((c: Contract) => {
     if (!run) return;
-    const pick = contractQuickPicks(run, c).minimum;
+    const policy = managementPolicyOf(run);
+    if (policy.contractMode === "ask") {
+      takeContract(c);
+      return;
+    }
+    const picks = contractQuickPicks(run, c);
+    const pick = policy.contractMode === "fastest" ? picks.fastest : picks.minimum;
     if (!pick) {
       sfx.back();
       return;
@@ -615,7 +626,7 @@ export default function App() {
     }
     sfx.select();
     setRun(next);
-  }, [run]);
+  }, [run, takeContract]);
 
   const finishContract = useCallback(
     (selection: { staffIds: string[]; showrunner: boolean }) => {
@@ -641,12 +652,7 @@ export default function App() {
       const clockHotkeyAllowed =
         (screen === "office" || liveEditing) &&
         !paused &&
-        !sellerAuctionOpen &&
-        !bigThreeRevealOpen &&
-        !nominationAnnouncementOpen &&
-        !(pendingLevelUp && levelUpPresentationAllowed) &&
-        (run?.studioEvents.length ?? 0) === 0 &&
-        !run?.ipMarket.pendingPromptId &&
+        !activePresentation &&
         !released;
 
       if ((e.code === "Space" || e.key === " ") && !e.repeat && clockHotkeyAllowed && !isTextEntryTarget(e.target)) {
@@ -840,7 +846,7 @@ export default function App() {
             onBack={() => { setContract(null); setScreen("office"); }}
           />
         )}
-        {run && run.ipMarket.pendingPromptId && (screen === "office" || screen === "produce") && (
+        {run && activePresentation === "auctionForecast" && run.ipMarket.pendingPromptId && (
           <AuctionForecast run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} onEnter={enterAuction} />
         )}
         {screen === "auction" && run && auctionId && (
@@ -922,11 +928,11 @@ export default function App() {
           </div>
         )}
 
-        {run?.sellerAuction && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+        {run?.sellerAuction && activePresentation === "sellerAuction" && (
           <SellerAuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
         )}
 
-        {run && run.studioEvents.length > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+        {run && activePresentation === "studioDecision" && run.studioEvents.length > 0 && (
           <DecisionEventOverlay
             event={run.studioEvents[0]}
             onChoose={(choiceId) => {
