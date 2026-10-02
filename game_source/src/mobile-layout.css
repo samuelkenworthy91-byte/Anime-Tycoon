@@ -12,8 +12,8 @@
 
 .game-controls-toggle {
   display: flex !important;
-  min-height: 30px !important;
-  min-width: 30px !important;
+  min-height: 44px !important;
+  min-width: 44px !important;
   align-items: center;
   justify-content: center;
   padding: 6px !important;
@@ -22,7 +22,7 @@
 .game-controls-panel {
   display: none !important;
   position: absolute;
-  top: 34px;
+  top: 48px;
   right: 0;
   width: max-content;
   max-width: calc(100vw - 10px);
@@ -41,8 +41,9 @@
 }
 
 .game-controls-panel button {
-  min-height: 27px !important;
-  padding: 4px 6px !important;
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 6px 8px !important;
   border-radius: 8px !important;
   font-size: 9px !important;
 }
