@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Draft } from "../data";
-import { PETS } from "../data";
+import type { CastMember, CastRole, Draft, GenreId } from "../data";
+import { ARCS, PETS, PROTAGONISTS, SECONDARY, VILLAINS, affinityTier } from "../data";
 import { eliteCriticalWeight, industryCriticalStandard } from "../difficulty";
 import { computeProjectResult, makeProject, recordProjectImpact, type ScoringContext } from "../projects";
 import {
@@ -8,8 +8,10 @@ import {
   NORMAL_PERFECT_REVIEW_THRESHOLD,
   perfectReviewEligible,
   perfectReviewThreshold,
+  computeResult,
   seededRng,
 } from "../scoring";
+import { genreTargetFor } from "../genreTargets";
 
 const mascotId = PETS[0].id;
 const draft = (): Draft => ({
@@ -59,6 +61,73 @@ describe("Critical Darling perfect-review identity", () => {
     expect(perfectReviewEligible("steady", 9.4, 9.919)).toBe(false);
     expect(perfectReviewEligible("steady", 9.4, 9.92)).toBe(true);
   });
+  it("turns the 9.40 identity into materially more real 10s on identical elite work", () => {
+    const genres: GenreId[] = ["romance", "military"];
+    const pools: Record<CastRole, CastMember[]> = {
+      protag: PROTAGONISTS,
+      secondary: SECONDARY,
+      pet: PETS,
+      villain: VILLAINS,
+    };
+    const cast = Object.fromEntries(
+      (["protag", "secondary", "pet", "villain"] as CastRole[]).map((role) => [
+        role,
+        pools[role].find((member) => affinityTier(member, genres) === 2) ?? pools[role][0],
+      ]),
+    ) as Record<CastRole, CastMember>;
+    const target = genreTargetFor(genres);
+    const eliteDraft: Draft = {
+      title: "Perfect Gate Trial",
+      medium: "tv",
+      budget: "blockbuster",
+      scope: "prestige",
+      slot: "midnight",
+      animeType: "shonen",
+      genres,
+      audience: "teens",
+      protag: cast.protag.id,
+      protagName: cast.protag.name,
+      secondary: cast.secondary.id,
+      pet: cast.pet.id,
+      villain: cast.villain.id,
+      arcs: ["narr_politics", "lore", "confession", "finale"].filter((id) => ARCS.some((arc) => arc.id === id)),
+      sliders: target.ideal,
+      season: 1,
+    };
+    const baseOpts = {
+      draft: eliteDraft,
+      points: { story: 900, art: 1500, sound: 750 },
+      issues: 0,
+      hype: 95,
+      research: [] as string[],
+      genreIdeal: target.ideal,
+      genreRatio: target.ratio,
+      comboLevel: 5,
+      newCombo: false,
+      comboDiscovered: true,
+      castCombos: [] as string[],
+      arcCombos: [] as string[],
+      studioTop: 40,
+      reviewExpectation: 38,
+      franchiseMult: 1,
+      costs: 1_000_000,
+      fanBase: 250_000,
+      qualityFloor: 40,
+      careerWeek: 12 * 48,
+      industryPressureLevel: 3,
+    };
+    let steadyTens = 0;
+    let criticalTens = 0;
+    for (let seed = 1; seed <= 400; seed += 1) {
+      const steady = computeResult({ ...baseOpts, showrunner: "steady", rng: seededRng(seed) });
+      const critical = computeResult({ ...baseOpts, showrunner: "critical", rng: seededRng(seed) });
+      steadyTens += steady.reviews.filter((review) => review.score === 10).length;
+      criticalTens += critical.reviews.filter((review) => review.score === 10).length;
+    }
+    expect(criticalTens).toBeGreaterThan(steadyTens);
+    expect(criticalTens).toBeGreaterThan(0);
+  });
+
 });
 
 describe("mature-industry critical standard", () => {
