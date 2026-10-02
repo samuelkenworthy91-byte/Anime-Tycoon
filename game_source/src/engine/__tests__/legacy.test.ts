@@ -392,6 +392,6 @@ describe("the long haul", () => {
     expect(restored.cash).toBe(r.cash);
     expect(restored.dynasty).toBeTruthy();
     expect(restored.dynasty!.records).toHaveLength(5);
-    expect(restored.dynasty!.investments.map((i) => i.id)).toEqual(expect.arrayContaining(["campus", "academy"]));
+    expect(restored.dynasty!.investments.map((i) => i.id)).toEqual(expect.arrayContaining(["secondLot", "megaFarm"]));
   }, 15_000);
 });
