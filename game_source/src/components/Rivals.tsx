@@ -19,6 +19,7 @@ import { GENRES, OFFICES, ROLE_LABEL, dateLabel, formatGBP, formatNum } from "..
 import {
   PERSONAS,
   RIVAL_STATUS_LABEL,
+  rivalIntent,
   rivalTalentAvailable,
   type RankingEntry,
   type RivalStudio,
@@ -99,6 +100,7 @@ function StudioCard({ studio, run }: { studio: RivalStudio; run: RunState }) {
   const upcoming = studio.productions.filter((pr) => pr.week > run.week).sort((a, b) => a.week - b.week);
   const recent = studio.releases.slice(-5).reverse();
   const memories = rivalMemoriesFor(run, studio.id).slice(0, 3);
+  const intent = rivalIntent(studio, run.week);
 
   return (
     <div className={cn("ink-card p-3", open && "border-cyanx/40")}>
@@ -160,6 +162,11 @@ function StudioCard({ studio, run }: { studio: RivalStudio; run: RunState }) {
             </span>
           );
         })}
+      </div>
+
+      <div className="mt-2 rounded-lg border border-gold/25 bg-gold/5 px-2.5 py-2">
+        <div className="flex items-center gap-1.5 text-[8px] font-black tracking-[0.18em] text-gold"><Swords size={10}/> CURRENT INTENT · {intent.headline}</div>
+        <div className="mt-1 text-[9px] leading-relaxed text-paper/50">{intent.detail}</div>
       </div>
 
       {/* upcoming productions */}
