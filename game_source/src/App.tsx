@@ -158,21 +158,9 @@ export default function App() {
     }
   }, [screen]);
 
-  /* ------------------------------------ awards: a new ceremony year pops
-     the full-screen theatre; leaving returns to the office with the clock
-     still paused (timeSpeed untouched) */
+  /* Awards now join the same central attention queue as auctions, decisions,
+     cultural reveals and growth events. */
   const seenCeremonyYear = useRef(0);
-  useEffect(() => {
-    const year = run?.awardsCeremony?.year ?? 0;
-    if (!year || year === seenCeremonyYear.current) return;
-    if (screen === "office" || screen === "produce") {
-      seenCeremonyYear.current = year;
-      setTimeSpeed(0);      /* the live sim halts while the theatre is open */
-      sfx.fanfare();
-      setScreen("awards");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run?.awardsCeremony?.year, screen]);
 
   /* ------------------------------------ annual rights forecast: like other attention events,
      the live clock stops and the player explicitly decides whether to engage. */
@@ -190,6 +178,7 @@ export default function App() {
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
   const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((staff) => (staff.pendingLevelUps?.length ?? 0) > 0);
   const sellerAuctionOpen = !!run?.sellerAuction;
+  const pendingAwardsCeremony = !!(run?.awardsCeremony?.year && run.awardsCeremony.year !== seenCeremonyYear.current);
   const bigThreePresentation = run ? pendingBigThreeReveal(run) : null;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
   const pendingStaffRequestId = run ? nextStaffRequestId(run, dismissedStaffRequestSet) : null;
@@ -197,6 +186,7 @@ export default function App() {
     screen,
     paused,
     sellerAuction: sellerAuctionOpen,
+    awardsCeremony: pendingAwardsCeremony,
     studioDecision: (run?.studioEvents.length ?? 0) > 0,
     auctionForecast: !!run?.ipMarket.pendingPromptId,
     bigThree: !!bigThreePresentation,
@@ -210,8 +200,16 @@ export default function App() {
   const staffRequestPresentationOpen = activePresentation === "staffRequest";
   const levelUpPresentationAllowed = activePresentation === "levelUp";
   useEffect(() => {
-    if (activePresentation) setTimeSpeed(0);
-  }, [activePresentation]);
+    if (!activePresentation) return;
+    setTimeSpeed(0);
+    if (activePresentation === "awardsCeremony") {
+      const year = run?.awardsCeremony?.year ?? 0;
+      if (!year || year === seenCeremonyYear.current) return;
+      seenCeremonyYear.current = year;
+      sfx.fanfare();
+      setScreen("awards");
+    }
+  }, [activePresentation, run?.awardsCeremony?.year]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
