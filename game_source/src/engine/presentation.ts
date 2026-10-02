@@ -60,6 +60,7 @@ export function canPresentDeferredLevelUp(context: DeferredLevelUpContext): bool
  * needs to; only one attention surface is allowed to own the screen at a time. */
 export type PresentationKind =
   | "sellerAuction"
+  | "awardsCeremony"
   | "studioDecision"
   | "auctionForecast"
   | "bigThree"
@@ -71,6 +72,7 @@ export interface PresentationQueueContext {
   screen: PresentationScreen;
   paused: boolean;
   sellerAuction: boolean;
+  awardsCeremony: boolean;
   studioDecision: boolean;
   auctionForecast: boolean;
   bigThree: boolean;
@@ -82,6 +84,7 @@ export interface PresentationQueueContext {
 
 const PRESENTATION_KIND_PRIORITY: Record<PresentationKind, number> = {
   sellerAuction: PRESENTATION_PRIORITY.criticalReveal,
+  awardsCeremony: PRESENTATION_PRIORITY.criticalReveal - 5,
   studioDecision: PRESENTATION_PRIORITY.playerDecision,
   auctionForecast: PRESENTATION_PRIORITY.playerDecision - 1,
   bigThree: PRESENTATION_PRIORITY.culturalReveal,
@@ -97,6 +100,7 @@ export function selectPresentation(context: PresentationQueueContext): Presentat
   if (context.screen !== "office" && context.screen !== "produce") return null;
   const ready: PresentationKind[] = [];
   if (context.sellerAuction) ready.push("sellerAuction");
+  if (context.awardsCeremony) ready.push("awardsCeremony");
   if (context.studioDecision) ready.push("studioDecision");
   if (context.auctionForecast) ready.push("auctionForecast");
   if (context.bigThree) ready.push("bigThree");
