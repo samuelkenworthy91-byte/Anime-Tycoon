@@ -9,7 +9,7 @@ from __future__ import annotations
 import json, os, sys, time
 from pathlib import Path
 from selenium import webdriver
-from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -21,7 +21,16 @@ VIEWPORT={"width":412,"height":915,"deviceScaleFactor":2.625,"mobile":True}
 
 def visible_buttons(driver,phrase):
     needle=phrase.upper()
-    return [el for el in driver.find_elements(By.TAG_NAME,"button") if el.is_displayed() and needle in (el.text or "").upper()]
+    out=[]
+    for el in driver.find_elements(By.TAG_NAME,"button"):
+        try:
+            if el.is_displayed() and needle in (el.text or "").upper():
+                out.append(el)
+        except StaleElementReferenceException:
+            # React may replace buttons while a modal/save picker is mounting.
+            # Retry on the next poll rather than treating a healthy rerender as failure.
+            continue
+    return out
 
 def dismiss_tutorials(driver):
     for _ in range(16):
