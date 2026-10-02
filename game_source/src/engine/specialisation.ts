@@ -157,15 +157,18 @@ interface RankEffects {
 }
 
 const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
+  /* House identity now changes how a studio PRODUCES rather than simply
+     multiplying the final Story/Art/Sound score by up to 25%. The old curve
+     made including the house genre mathematically mandatory. */
   1: {
-    signatureOutput: 1.02,
-    signaturePace: 1.02,
-    signatureInterventionCost: 0.97,
-    signatureInterventionEffect: 1.03,
-    signatureRisk: 0.98,
-    signatureIssueChance: 0.98,
-    signatureScore: 1.08,
-    outsideScore: 0.97,
+    signatureOutput: 1.05,
+    signaturePace: 1.03,
+    signatureInterventionCost: 0.96,
+    signatureInterventionEffect: 1.04,
+    signatureRisk: 0.96,
+    signatureIssueChance: 0.96,
+    signatureScore: 1.02,
+    outsideScore: 1,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -173,14 +176,14 @@ const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
     outsideIssueChance: 1,
   },
   2: {
-    signatureOutput: 1.03,
-    signaturePace: 1.03,
-    signatureInterventionCost: 0.95,
-    signatureInterventionEffect: 1.05,
-    signatureRisk: 0.96,
-    signatureIssueChance: 0.96,
-    signatureScore: 1.15,
-    outsideScore: 0.94,
+    signatureOutput: 1.08,
+    signaturePace: 1.05,
+    signatureInterventionCost: 0.92,
+    signatureInterventionEffect: 1.08,
+    signatureRisk: 0.92,
+    signatureIssueChance: 0.92,
+    signatureScore: 1.03,
+    outsideScore: 1,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -188,14 +191,14 @@ const RANK_EFFECTS: Record<1 | 2 | 3, RankEffects> = {
     outsideIssueChance: 1,
   },
   3: {
-    signatureOutput: 1.04,
-    signaturePace: 1.04,
-    signatureInterventionCost: 0.92,
-    signatureInterventionEffect: 1.08,
-    signatureRisk: 0.94,
-    signatureIssueChance: 0.94,
-    signatureScore: 1.25,
-    outsideScore: 0.90,
+    signatureOutput: 1.12,
+    signaturePace: 1.08,
+    signatureInterventionCost: 0.88,
+    signatureInterventionEffect: 1.12,
+    signatureRisk: 0.88,
+    signatureIssueChance: 0.88,
+    signatureScore: 1.04,
+    outsideScore: 1,
     outsideOutput: 1,
     outsidePace: 1,
     outsideInterventionCost: 1,
@@ -340,7 +343,7 @@ export function choosePrimarySpecialisation(run: RunState, genre: GenreId): RunS
     ],
     notices: [
       ...run.notices,
-      `🎯 HOUSE SPECIALTY LOCKED: ${genreLabel(genre)} shows gain Story, Art and Sound scoring expertise. As your House rank grows this reaches +25%; work outside your specialty can fall to −10%.`,
+      `🎯 HOUSE SPECIALTY LOCKED: ${genreLabel(genre)} becomes your production language. Signature shows gain faster output, safer interventions and fewer production issues; only a small direct craft-score edge remains, and outside genres are no longer penalised.`,
     ].slice(-40),
   };
 }
