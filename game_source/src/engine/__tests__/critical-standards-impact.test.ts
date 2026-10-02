@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Draft } from "../data";
 import { PETS } from "../data";
 import { eliteCriticalWeight, industryCriticalStandard } from "../difficulty";
-import { computeProjectResult, makeProject, recordProjectImpact } from "../projects";
+import { computeProjectResult, makeProject, recordProjectImpact, type ScoringContext } from "../projects";
 import {
   CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD,
   NORMAL_PERFECT_REVIEW_THRESHOLD,
@@ -34,7 +34,7 @@ const draft = (): Draft => ({
   season: 1,
 });
 
-const context = (over: Record<string, unknown> = {}) => ({
+const context = (over: Partial<ScoringContext> = {}): ScoringContext => ({
   research: [],
   showrunner: "steady",
   comboLevels: {},
