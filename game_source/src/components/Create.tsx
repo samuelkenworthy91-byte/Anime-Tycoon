@@ -68,7 +68,7 @@ import {
   type SlotId,
 } from "../engine/data";
 import { arcClashesFor, secretComboResearched } from "../engine/creativeDiscovery";
-import { arcLockReason, formatLockReason, latestFranchisePosterId, selfFundedGreenlightCost, selfFundedQualityMult, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
+import { arcLockReason, campaignPressureFor, formatLockReason, latestFranchisePosterId, selfFundedGreenlightCost, selfFundedQualityMult, selfFundedStartupMult, soldCastRights, startBlockReason } from "../engine/state";
 import type { RunState } from "../engine/state";
 import { cn } from "../utils/cn";
 import { partnerById, type Commission } from "../engine/market";
@@ -79,6 +79,7 @@ import { randomAnimeTitle } from "../engine/titleGenerator";
 import { creationKnowledgeSummary } from "../engine/reviewDiagnostics";
 import { genreTargetFor } from "../engine/genreTargets";
 import { internationalNameForSeed } from "../engine/internationalNames";
+import { industryCriticalStandard } from "../engine/difficulty";
 
 import { filterCastByFilters, mixedCastOrder, type CastBrowseFilter } from "../engine/castDisplayOrder";
 
@@ -321,6 +322,7 @@ export default function Create({
   const dueAtGreenlight = commission ? projectUpfront(d) : selfFundedGreenlightCost(run, d);
   /** Commission advances count when deciding affordability; self-funded starts carry the early-studio premium. */
   const greenlightBlock = startBlockReason(run, d, commission);
+  const criticalClimate = industryCriticalStandard(run.week, campaignPressureFor(run).level);
   const arcLimit = PRODUCTION_SCOPES[d.scope ?? "standard"].arcLimit;
   const selectedArcCombos = useMemo(() => arcCombosFor(d.arcs), [d.arcs]);
   const learnedArcCombos = selectedArcCombos.filter((c) => run.arcCombos.includes(c.id));
@@ -1566,6 +1568,20 @@ export default function Create({
                   <Row k="TOTAL BUDGET" v={formatGBP(cost)} money />
                   <Row k={startupMult > 1 ? `DUE AT GREENLIGHT · STARTUP ×${startupMult.toFixed(2)}` : "DUE AT GREENLIGHT (40%)"} v={formatGBP(dueAtGreenlight)} money big />
                   <div className="text-[10px] text-paper/40">The rest burns weekly while the show is in production.</div>
+                  <div className="mt-2 rounded-xl border border-viol/35 bg-viol/[0.06] px-2.5 py-2 text-[10px] leading-relaxed text-paper/60">
+                    <div className="flex items-center justify-between gap-2">
+                      <b className="text-viol">CRITICAL CLIMATE · {criticalClimate.label}</b>
+                      <span className="text-[9px] font-bold text-paper/40">YEAR {criticalClimate.year}</span>
+                    </div>
+                    <div className="mt-1">
+                      {criticalClimate.elitePenalty > 0
+                        ? `Elite internal reviews can face up to −${criticalClimate.elitePenalty.toFixed(2)} as contemporary standards rise. Ordinary reviews are barely affected.`
+                        : "The industry is still emerging; there is no mature-era elite review penalty yet."}
+                    </div>
+                    {run.showrunner === "critical" && (
+                      <div className="mt-1 font-bold text-gold">Critical Darling: a 9.40 pre-perk internal critic score can enter the rare 10/10 roll.</div>
+                    )}
+                  </div>
                   {rookieQualityMult < 1 && (
                     <div className="mt-2 rounded-xl border border-neon/40 bg-neon/[0.06] px-2.5 py-2 text-[10px] leading-relaxed text-paper/60">
                       <b className="text-neon">ROOKIE STUDIO · ×{rookieQualityMult.toFixed(2)} QUALITY EFFICIENCY</b><br/>
