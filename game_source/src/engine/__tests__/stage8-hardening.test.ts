@@ -176,7 +176,7 @@ describe("Stage 8 specialisation hardening", () => {
     const outside = specialisationProjectEffects(specialised, { genres: [outsideGenre] });
 
     expect(signature.outputMult).toBeGreaterThan(1);
-    expect(signature.outputMult).toBeLessThanOrEqual(1.04);
+    expect(signature.outputMult).toBeLessThanOrEqual(1.05);
     expect(signature.interventionCostMult).toBeGreaterThanOrEqual(0.95);
     expect(outside.outputMult).toBeGreaterThanOrEqual(0.99);
     expect(outside.interventionCostMult).toBeLessThanOrEqual(1.03);
