@@ -26,6 +26,9 @@ import { cn } from "../utils/cn";
 const AUTO_MS = [850, 1150, 1050, 1550, 850, 850, 850, 850, 1550, 1650];
 
 function verdictLabel(result: ShowResult) {
+  if (result.total === 40) return "PERFECT MASTERWORK";
+  if (result.total >= 38) return "ERA-DEFINING MASTERWORK";
+  if (result.total >= 36) return "ALL-TIME CLASSIC";
   if (result.hallOfFame) return "HALL OF FAME";
   if (result.tier === "hit" && result.total >= 34) return "MASTERPIECE";
   if (result.tier === "hit") return "BREAKOUT HIT";
@@ -103,6 +106,20 @@ export default function Release({
     ["commercial", "COMMERCIAL MODIFIERS"],
     ["fans", "FAN IMPACT"],
   ] as const;
+
+  const investmentRows = impactRows.filter((row) =>
+    row.source.startsWith("Investment ·") ||
+    row.source.startsWith("Facilities ·") ||
+    row.source === "Business & Audience discipline" ||
+    row.source === "Merch Department"
+  );
+  const investmentCraft = investmentRows.reduce((acc, row) => {
+    if (row.metric === "story" || row.metric === "art" || row.metric === "sound") acc[row.metric] += row.delta ?? 0;
+    return acc;
+  }, { story: 0, art: 0, sound: 0 });
+  const investmentRevenue = investmentRows
+    .filter((row) => row.metric === "revenue")
+    .reduce((sum, row) => sum + (row.delta ?? 0), 0);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {
     const rows: DiscoveryCard[] = [];
@@ -480,6 +497,21 @@ export default function Release({
                         <div className="rounded-xl border border-neon/30 bg-neon/5 p-2.5">
                           <div className="text-[9px] font-black tracking-[0.2em] text-neon2">BIGGEST DRAG</div>
                           <div className="mt-1 text-[10px] leading-snug text-paper/75"><b className="text-paper">{biggestDrag.source}</b> · {biggestDrag.detail}</div>
+                        </div>
+                      )}
+
+                      {(investmentRows.length > 0) && (
+                        <div className="rounded-xl border border-gold/30 bg-gold/5 p-2.5">
+                          <div className="text-[9px] font-black tracking-[0.2em] text-gold">WHAT DID YOUR INVESTMENTS ADD?</div>
+                          <div className="mt-1 text-[10px] leading-snug text-paper/70">
+                            {Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 && (
+                              <span>Story {investmentCraft.story >= 0 ? "+" : ""}{investmentCraft.story.toFixed(1)} · Art {investmentCraft.art >= 0 ? "+" : ""}{investmentCraft.art.toFixed(1)} · Sound {investmentCraft.sound >= 0 ? "+" : ""}{investmentCraft.sound.toFixed(1)}</span>
+                            )}
+                            {investmentRevenue !== 0 && (
+                              <span>{Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 ? " · " : ""}{investmentRevenue >= 0 ? "+" : "−"}{formatGBP(Math.abs(investmentRevenue))} release income</span>
+                            )}
+                          </div>
+                          <div className="mt-1 text-[8px] text-paper/40">Only realised effects on this production are counted.</div>
                         </div>
                       )}
 
