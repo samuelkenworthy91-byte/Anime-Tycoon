@@ -38,7 +38,7 @@ import {
   type ContentProfile,
 } from "../engine/overseas";
 
-type Props = { run: RunState; setRun: (fn: (r: RunState) => RunState) => void };
+type Props = { run: RunState; setRun: (fn: (r: RunState) => RunState) => void; initialTab?: "staff" | "overseas" };
 const button =
   "min-h-11 rounded-lg border border-line px-3 py-2 text-xs font-bold disabled:opacity-40";
 const field =
@@ -91,7 +91,7 @@ function useRunAction({ run, setRun }: Props) {
 }
 export default function StudioExpansionPanel(props: Props) {
   const { run, setRun } = props;
-  const [tab, setTab] = useState<"staff" | "overseas">("staff");
+  const [tab, setTab] = useState<"staff" | "overseas">(props.initialTab ?? "staff");
   const [tutorial, setTutorial] = useState<TutorialId | null>(null);
   const expansion = expansionOf(run);
   const hasCreatorCommitment = expansion.pitches.some((p) => !["declined", "accepted"].includes(p.status)) || expansion.promises.some((p) => p.status === "active");
@@ -426,7 +426,7 @@ function OverseasPanel(props: Props) {
                 {(["cheap","recommended","maximum"] as OverseasPresetId[]).map((preset) => {
                   const info = quickQuote(territory.id, preset);
                   const disabled = !info?.quote.release || !!info.quote.block;
-                  return <button key={preset} className={button + (preset === "recommended" ? " border-cyanx/50 text-cyanx" : "")} disabled={disabled} onClick={() => quickSign(territory.id, preset)}>{preset === "cheap" ? "CHEAP EXPORT" : preset === "recommended" ? "RECOMMENDED" : "MAX PUSH"}</button>;
+                  return <button key={preset} className={button + (preset === "recommended" ? " border-cyanx/50 text-cyanx" : "")} disabled={disabled} onClick={() => quickSign(territory.id, preset)}>{preset === "cheap" ? "CONSERVATIVE" : preset === "recommended" ? "BALANCED" : "AGGRESSIVE"}</button>;
                 })}
               </div>
             </div>
