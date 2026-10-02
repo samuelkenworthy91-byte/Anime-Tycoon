@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceFanProjects, fanProjectCapacity, startFanProject } from "../fanProjects";
+import { advanceFanProjects, fanProjectCapacity, franchiseFandom, startFanProject } from "../fanProjects";
 import { initialRun } from "../state";
 
 describe("fan projects", () => {
@@ -31,5 +31,29 @@ describe("fan projects", () => {
     expect(run.fanProjects?.fandom.test.online).toBeGreaterThan(0);
     expect(run.franchiseAudienceProfiles?.test.online).toBeGreaterThan(20);
     expect(run.fans).toBeGreaterThan(0);
+  });
+});
+
+
+describe("fan project approaches", () => {
+  function finish(approach:"community"|"publicity"|"prestige"){
+    let run=seeded();
+    run=startFanProject(run,"test","fan_art",approach)!;
+    const end=run.fanProjects!.active[0].endsWeek;
+    return advanceFanProjects({...run,week:end});
+  }
+
+  it("trades reach against fandom depth instead of adding more project types",()=>{
+    const community=finish("community");
+    const publicity=finish("publicity");
+    expect(publicity.fans).toBeGreaterThan(community.fans);
+    expect(franchiseFandom(community,"test").online ?? 0).toBeGreaterThan(franchiseFandom(publicity,"test").online ?? 0);
+  });
+
+  it("lets a prestige approach prioritise franchise popularity",()=>{
+    const community=finish("community");
+    const prestige=finish("prestige");
+    expect(prestige.franchises.test.popularity).toBeGreaterThan(community.franchises.test.popularity);
+    expect(prestige.fanProjects?.history.at(-1)?.approach).toBe("prestige");
   });
 });
