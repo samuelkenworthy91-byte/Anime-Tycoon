@@ -24,9 +24,11 @@ import {
 import {
   CAREER_RANKS,
   DYNASTY_INVESTMENTS,
+  DYNASTY_PATHS,
   NO_DYNASTY,
   beginDynastyMode,
   buyInvestment,
+  chooseDynastyPath,
   computeIndustryRecords,
   dynastyDifficulty,
   dynastyFX,
@@ -159,54 +161,46 @@ describe("career evaluation", () => {
 
 /* -------------------------------------------------------- investments */
 describe("dynasty investments", () => {
-  const dynastyRun = () => beginDynastyMode(richRun({ week: CAREER_WEEKS, cash: 100_000_000 }));
+  const dynastyRun = () => beginDynastyMode(richRun({ week: CAREER_WEEKS, cash: 5_000_000_000 }));
 
-  it("starts with no bonuses and requires the post-career sandbox to buy", () => {
+  it("requires one permanent strategic path before new capital projects", () => {
     const pre = richRun({ week: CAREER_WEEKS });
     expect(dynastyFX(pre)).toEqual(NO_DYNASTY);
-    expect(investmentBlockReason(pre, "campus")).toBe("Requires Post-Career Sandbox");
-    expect(pre.dynasty).toBeNull();
-  });
+    expect(investmentBlockReason(pre, "secondLot")).toBe("Requires Post-Career Sandbox");
 
-  it("stacks permanent bonuses from each investment", () => {
     let r = dynastyRun();
-    expect(dynastyFX(r)).toEqual(NO_DYNASTY);
-
-    r = buyInvestment(r, "campus")!;
-    expect(dynastyFX(r).extraStaff).toBe(2);
-    expect(dynastyFX(r).pointMult).toBeCloseTo(1.1);
-
-    r = buyInvestment(r, "academy")!;
-    expect(dynastyFX(r).xpMult).toBeCloseTo(1.5);
-
-    r = buyInvestment(r, "intl")!;
-    expect(dynastyFX(r).revenueMult).toBeCloseTo(1.2);
-
-    r = buyInvestment(r, "museum")!;
-    expect(dynastyFX(r).rdWeekly).toBe(4);
-    expect(dynastyFX(r).fanMult).toBeCloseTo(0.05);
-
-    r = buyInvestment(r, "secondBuilding")!;
-    expect(dynastyFX(r).extraProjects).toBe(1);
-
-    r = buyInvestment(r, "render")!;
-    expect(dynastyFX(r).speed).toBeCloseTo(0.25);
-
-    /* can't double-buy */
-    expect(investmentBlockReason(r, "campus")).toBe("Already owned");
-    expect(buyInvestment(r, "campus")).toBeNull();
+    expect(investmentBlockReason(r, "secondLot")).toBe("Choose a Dynasty strategy first");
+    r = chooseDynastyPath(r, "production")!;
+    expect(r.dynasty?.path).toBe("production");
+    expect(chooseDynastyPath(r, "creative")).toBeNull();
+    expect(investmentBlockReason(r, "masterworkCampus")).toContain(DYNASTY_PATHS.creative.name);
   });
 
-  it("blocks purchases the studio cannot afford", () => {
-    const r = beginDynastyMode(richRun({ week: CAREER_WEEKS, cash: 1_000 }));
-    expect(investmentBlockReason(r, "campus")).toContain("Needs £");
-    expect(buyInvestment(r, "campus")).toBeNull();
+  it("makes each strategy powerful in a different direction rather than buying every bonus", () => {
+    let production = chooseDynastyPath(dynastyRun(), "production")!;
+    production = buyInvestment(production, "secondLot")!;
+    production = buyInvestment(production, "megaFarm")!;
+    const prodFx = dynastyFX(production);
+    expect(prodFx.extraProjects).toBe(1);
+    expect(prodFx.extraStaff).toBe(3);
+    expect(prodFx.speed).toBeCloseTo(.20);
+    expect(prodFx.pointMult).toBeCloseTo(1.05);
+
+    let creative = chooseDynastyPath(dynastyRun(), "creative")!;
+    creative = buyInvestment(creative, "masterworkCampus")!;
+    creative = buyInvestment(creative, "livingArchive")!;
+    const creativeFx = dynastyFX(creative);
+    expect(creativeFx.pointMult).toBeCloseTo(1.08);
+    expect(creativeFx.rdWeekly).toBe(15);
+    expect(creativeFx.fanMult).toBeCloseTo(.08);
+    expect(buyInvestment(creative, "secondLot")).toBeNull();
   });
 
-  it("defines six enormous money sinks", () => {
-    expect(DYNASTY_INVESTMENTS).toHaveLength(6);
+  it("uses empire-scale prices instead of the obsolete £6m–£14m shop", () => {
+    expect(DYNASTY_INVESTMENTS).toHaveLength(8);
     for (const d of DYNASTY_INVESTMENTS) {
-      expect(d.cost).toBeGreaterThanOrEqual(6_000_000);
+      expect(d.cost).toBeGreaterThanOrEqual(400_000_000);
+      expect(d.path).toBeTruthy();
       expect(d.effects.length).toBeGreaterThan(0);
     }
   });
@@ -348,9 +342,10 @@ describe("the long haul", () => {
       /* the campaign ends at year 25; the save endures another 12 years in dynasty mode */
       if (r.week >= CAREER_WEEKS && !r.dynasty) {
         r = beginDynastyMode(r);
-        if (r.cash < 40_000_000) r = { ...r, cash: 40_000_000 };
-        r = buyInvestment(r, "campus") ?? r;
-        r = buyInvestment(r, "academy") ?? r;
+        if (r.cash < 2_500_000_000) r = { ...r, cash: 2_500_000_000 };
+        r = chooseDynastyPath(r, "production") ?? r;
+        r = buyInvestment(r, "secondLot") ?? r;
+        r = buyInvestment(r, "megaFarm") ?? r;
       }
     }
 
