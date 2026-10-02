@@ -26,7 +26,7 @@ const IMPACT: Record<string, string> = {
   dawn: "Bright net alignment: one genre live output ×1.35 · two genres ×1.70 · dark opposition ×0.65 / ×0.30",
   unbalanced: "100% of Story / Art / Sound target-balance penalties are ignored in raw quality and critic-specific review calculations",
   finisher: "Editing contribution ×1.35 · zero unresolved notes multiplies final quality ×1.05",
-  critical: "Every critic gains +0.40 internally before integer rounding, caps and rare-10 handling",
+  critical: "Every critic +0.40 internally · 9.40 pre-perk critic score enters rare 10/10 consideration (normal threshold 9.92)",
   ensemble: "Project staff contribution +15% per represented Writer / Animator / Composer role · maximum ×1.45",
   sloth: "While not on a contract: project staff output ×2.00 · project pace ×0.50 · production burn ×0.50 · note risk ×0.40 · final quality ×1.09 · critics +0.35 polish recognition · no automatic showrunner project bubbles",
   delegator: "Full Delegation live output ×1.60 (×1.80 preferred) · auto milestones ×1.65/×1.85 · up to 5 crew · known-safe curation · director/crew competence establishes a 34–39 quality floor before critics",
