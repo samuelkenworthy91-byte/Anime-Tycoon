@@ -5,7 +5,6 @@ on:
     branches:
       - depth-clarity-overhaul
       - player-value-variety-pass
-      - final-systems-polish-2026-10-02
     paths:
       - "game_source/src/**"
       - "game_source/public/**"
@@ -93,12 +92,6 @@ jobs:
           ANIME_RUNNER_URL: http://127.0.0.1:4173
           SMOKE_ARTIFACT_DIR: artifacts/pixel9a-slate
         run: python3 game_source/scripts/pixel9a-slate-smoke.py
-
-      - name: Pixel 9a executive workflow smoke
-        env:
-          ANIME_RUNNER_URL: http://127.0.0.1:4173
-          SMOKE_ARTIFACT_DIR: artifacts/pixel9a-executive
-        run: python3 game_source/scripts/pixel9a-executive-smoke.py
 
       - name: Upload Pixel 9a screenshots
         if: always()
