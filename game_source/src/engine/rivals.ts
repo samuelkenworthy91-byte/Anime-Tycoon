@@ -321,6 +321,43 @@ export const PERSONAS: Record<RivalPersonaId, PersonaDef> = {
 
 export const personaOf = (id: RivalPersonaId): PersonaDef => PERSONAS[id];
 
+
+export interface RivalIntent {
+  headline: string;
+  detail: string;
+  genres: GenreId[];
+  horizon: number;
+}
+
+/** Player-facing strategic read derived only from visible persona + announced
+ * slate. It explains what a rival is trying to do without leaking hidden score
+ * rolls or future outcomes. */
+export function rivalIntent(studio: RivalStudio, week: number): RivalIntent {
+  const horizon = 24;
+  const upcoming = studio.productions
+    .filter((production) => production.week > week && production.week <= week + horizon)
+    .sort((a, b) => a.week - b.week);
+  const counts = new Map<GenreId, number>();
+  for (const production of upcoming) {
+    for (const genre of production.genres) counts.set(genre, (counts.get(genre) ?? 0) + 1);
+  }
+  const genres = [...counts.entries()].sort((a,b)=>b[1]-a[1]).map(([genre])=>genre).slice(0,3);
+  const focus = genres.length ? genres : studio.specialist.slice(0,2);
+  const persona = PERSONAS[studio.persona];
+  const posture =
+    studio.status === "restructuring" ? "REBUILDING" :
+    studio.momentum >= 14 ? "PRESSING AN ADVANTAGE" :
+    studio.momentum <= -12 ? "TRYING TO RECOVER" :
+    studio.rivalry >= 70 ? "CHALLENGING YOUR STUDIO" :
+    studio.persona === "volume" ? "FLOODING THE MARKET" :
+    studio.persona === "prestige" || studio.persona === "technical" ? "CHASING PRESTIGE" :
+    "BUILDING ITS SLATE";
+  const detail = upcoming.length
+    ? `${upcoming.length} announced release${upcoming.length===1?"":"s"} in the next ${horizon} weeks · ${persona.label.toLowerCase()} · emphasis on ${focus.map((id)=>GENRES.find((g)=>g.id===id)?.label??id).join(" / ")}.`
+    : `No announced release inside the next ${horizon} weeks; expect its ${persona.label.toLowerCase()} identity to favour ${focus.map((id)=>GENRES.find((g)=>g.id===id)?.label??id).join(" / ")} when it greenlights again.`;
+  return { headline: posture, detail, genres: focus, horizon };
+}
+
 /* the six parody studios and their fixed personalities (names never change) */
 const ROSTER: Record<string, RivalPersonaId> = {
   "Toe-i Animation": "blockbuster",
