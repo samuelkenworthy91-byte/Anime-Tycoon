@@ -878,13 +878,13 @@ export default function App() {
               aria-label={controlsOpen ? "Close sound and speed controls" : "Open sound and speed controls"}
               aria-expanded={controlsOpen}
               onClick={() => setControlsOpen((open) => !open)}
-              className="game-controls-toggle btn-press rounded-xl border border-line bg-panel2/95 p-2 text-paper/70"
+              className="game-controls-toggle btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/95 p-2 text-paper/70"
             >
               {controlsOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}
             </button>
             <div className="game-controls-panel flex gap-1.5">
             {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12, 30] as const).map((speed) => (
-              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
+              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press min-h-11 min-w-11 rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>
             ))}
@@ -896,14 +896,14 @@ export default function App() {
                 setMuteUI(m);
                 sfx.click();
               }}
-              className="btn-press rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper"
+              className="btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper"
             >
               {muteUI ? <VolumeX size={15} /> : <Volume2 size={15} />}
             </button>
             <button
               aria-label="Pause"
               onClick={() => canPause && setPaused((p) => !p)}
-              className={cn("btn-press rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper", !canPause && "opacity-30")}
+              className={cn("btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper", !canPause && "opacity-30")}
             >
               <Pause size={15} />
             </button>
