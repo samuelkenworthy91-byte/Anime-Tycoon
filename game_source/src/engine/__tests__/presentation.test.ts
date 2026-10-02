@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canPresentDeferredLevelUp, PRESENTATION_PRIORITY, type DeferredLevelUpContext } from "../presentation";
+import { canPresentDeferredLevelUp, PRESENTATION_PRIORITY, selectPresentation, type DeferredLevelUpContext } from "../presentation";
 
 const base: DeferredLevelUpContext = {
   screen: "office",
@@ -33,5 +33,33 @@ describe("deferred presentation priority", () => {
     expect(PRESENTATION_PRIORITY.levelUp).toBeLessThan(PRESENTATION_PRIORITY.productionReveal);
     expect(PRESENTATION_PRIORITY.levelUp).toBeLessThan(PRESENTATION_PRIORITY.playerDecision);
     expect(PRESENTATION_PRIORITY.levelUp).toBeLessThan(PRESENTATION_PRIORITY.criticalReveal);
+  });
+});
+
+
+describe("unified presentation selector", () => {
+  const baseQueue = {
+    screen: "office" as const,
+    paused: false,
+    sellerAuction: false,
+    studioDecision: false,
+    auctionForecast: false,
+    bigThree: false,
+    nomination: false,
+    staffRequest: false,
+    levelUp: false,
+    productionReveal: false,
+  };
+
+  it("renders exactly the highest-priority ready surface", () => {
+    expect(selectPresentation({ ...baseQueue, levelUp: true, staffRequest: true, nomination: true })).toBe("nomination");
+    expect(selectPresentation({ ...baseQueue, bigThree: true, nomination: true, sellerAuction: true })).toBe("sellerAuction");
+    expect(selectPresentation({ ...baseQueue, studioDecision: true, auctionForecast: true, bigThree: true })).toBe("studioDecision");
+  });
+
+  it("defers attention while another screen or pause owns input", () => {
+    expect(selectPresentation({ ...baseQueue, paused: true, sellerAuction: true })).toBeNull();
+    expect(selectPresentation({ ...baseQueue, screen: "create", bigThree: true })).toBeNull();
+    expect(selectPresentation({ ...baseQueue, productionReveal: true, levelUp: true })).toBeNull();
   });
 });
