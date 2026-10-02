@@ -30,7 +30,7 @@ import { ipById } from "./engine/ip";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
-import { clearAllSaves, loadSlot, newestSave, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import { clearAllSaves, loadSlot, newestSave, saveSlot, saveSlotDetailed, slotLabel, type SaveData, type SlotId } from "./engine/storage";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
@@ -109,6 +109,7 @@ export default function App() {
   /* slot picker shown over the pause menu */
   const [savePicker, setSavePicker] = useState(false);
   const [savedTo, setSavedTo] = useState<SlotId | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
 
   /** the current career, packaged for storage */
   const snapshot = useCallback((): SaveData | null => {
@@ -135,10 +136,24 @@ export default function App() {
    * safe re-entry point (mini-games are transient).                        */
   useEffect(() => {
     if (!run || screen === "title" || screen === "gameover") return;
-    const snap = snapshot();
-    if (snap) saveSlot("auto", snap);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run, meta, screen]);
+    /* RunState changes many times per live work pulse. Debounce the JSON write
+       so a busy mature studio does not hammer localStorage several times a
+       second. Important screen transitions still trigger their own debounce. */
+    const timeout = window.setTimeout(() => {
+      const snap = snapshot();
+      if (!snap) return;
+      const result = saveSlotDetailed("auto", snap);
+      if (!result.ok) {
+        setSaveWarning(result.error === "quota"
+          ? "AUTOSAVE FAILED · browser storage is full. Export or delete an old save."
+          : "AUTOSAVE FAILED · your current session is still running. Make a manual save or export.");
+      } else {
+        setSaveWarning(null);
+        setSaveStamp((n) => n + 1);
+      }
+    }, 1200);
+    return () => window.clearTimeout(timeout);
+  }, [run, meta, screen, snapshot]);
 
   /* bankruptcy is the only way a studio dies — retire the save then */
   useEffect(() => {
@@ -282,7 +297,13 @@ export default function App() {
     sfx.fanfare();
     const migrated = migrateRun(save.run);
     const restored = restoreAwardNominationMetadata(migrated, migrated.yearShows);
-    const resumed = syncBigThreeEra(restored);
+    let resumed = syncBigThreeEra(restored);
+    if (save.recoveredFrom) {
+      resumed = {
+        ...resumed,
+        notices: [...resumed.notices, `💾 SAVE RECOVERY · the primary ${slotLabel(slot)} copy was unreadable, so the game restored ${save.recoveredFrom === "legacy-version" ? "a migratable older-version save" : save.recoveredFrom === "backup1" ? "the newest recovery snapshot" : "the second recovery snapshot"}.`].slice(-40),
+      };
+    }
     setMeta(save.meta);
     setRun(resumed);
     setReleased(null);
@@ -335,10 +356,19 @@ export default function App() {
   }, [meta]);
 
   const quitToTitle = useCallback(() => {
+    const snap = snapshot();
+    if (snap) {
+      const result = saveSlotDetailed("auto", snap);
+      if (!result.ok) {
+        setSaveWarning("SAVE & QUIT could not write the autosave. Your session remains open; use SAVE GAME or export before leaving.");
+        return;
+      }
+      setSaveStamp((n) => n + 1);
+    }
     sfx.back();
     setPaused(false);
     setScreen("title");
-  }, []);
+  }, [snapshot]);
 
   const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"]) => {
     if (!run) return;
@@ -674,8 +704,9 @@ export default function App() {
             </Btn>
           </div>
           <div className="text-[10px] text-mint/70">
-            Autosaving continuously — SAVE GAME writes a slot you can come back to.
+            Autosave is debounced and keeps two recovery snapshots. SAVE GAME writes a protected manual slot.
           </div>
+          {saveWarning && <div className="rounded-lg border border-neon/50 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon">{saveWarning}</div>}
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
             <Keyboard size={12} /> SPACE clock pause/resume · M mute · ESC pause menu
           </div>
@@ -705,18 +736,20 @@ export default function App() {
           onPick={(id) => {
             const snap = snapshot();
             if (!snap) return;
-            const ok = saveSlot(id, snap);
-            setSavedTo(ok ? id : null);
+            const result = saveSlotDetailed(id, snap);
+            setSavedTo(result.ok ? id : null);
+            setSaveWarning(result.ok ? null : result.error === "quota" ? "SAVE FAILED · browser storage is full. Export or delete an older slot." : "SAVE FAILED · browser storage rejected the write.");
             setSaveStamp((n) => n + 1);
-            if (ok) sfx.fanfare();
+            if (result.ok) sfx.fanfare();
           }}
         />
 
         {savedTo && (
           <div className="anim-pop flex items-center justify-center gap-2 rounded-xl border border-mint/50 bg-mint/10 px-3 py-2 text-xs font-bold text-mint">
-            <Check size={14} /> Saved to {slotLabel(savedTo)}
+            <Check size={14} /> Saved to {slotLabel(savedTo)} · recovery copies rotate automatically
           </div>
         )}
+        {saveWarning && <div className="rounded-xl border border-neon/50 bg-neon/10 px-3 py-2 text-[10px] font-bold text-neon">{saveWarning}</div>}
       </div>
     </div>
   );
