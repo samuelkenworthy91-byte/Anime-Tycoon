@@ -192,6 +192,7 @@ import {
   activeProjects,
   applyMilestoneOutcome,
   projectOfStaff,
+  recordProjectImpact,
   type StaffModFn,
   assignedStaffIds,
   computeProjectResult,
@@ -2340,6 +2341,8 @@ export interface DeskPulse {
   /** rare project-wide outcomes surfaced through the same bubble system:
    *  research = +1 RD, note = +1 editing issue (see tickStudioWorkPulse) */
   kind?: "research" | "note";
+  /** realised extra points attributable to named production systems */
+  impactDeltas?: { source: string; points: number }[];
 }
 
 const POINT_TYPES: PointType[] = ["story", "art", "sound"];
@@ -2623,6 +2626,41 @@ function chooseDiscipline(st: Staff): PointType {
   return "story";
 }
 
+function showrunnerProjectOutputMultiplier(r: RunState, st: Staff, project: Project, editing = false): number {
+  let mult = 1;
+  if (project.auto?.mode === "full" && r.showrunner === "delegator") {
+    const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
+    const preferred = !!director?.favGenre && project.draft.genres.includes(director.favGenre);
+    /* normal Full Delegation is ×0.95; attribute only the Delegator's improvement over that baseline */
+    mult *= (preferred ? 1.55 : 1.35) / 0.95;
+  }
+  if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) mult *= 2;
+  if (r.showrunner === "over9000") mult *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
+  if (!editing) {
+    mult *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
+    mult *= polarityProductionMult(r.showrunner, project.draft.genres);
+    if (r.showrunner === "ensemble") {
+      const team = r.staff.filter((mate) => project.staffIds.includes(mate.id));
+      const represented = new Set(team.map((mate) => mate.role)).size;
+      mult *= 1 + Math.min(3, represented) * 0.15;
+    }
+  }
+  if (r.showrunner === "steady") mult *= 1.5;
+  return Math.max(0.01, mult);
+}
+
+function showrunnerProductionImpactLabel(id: string): string {
+  if (id === "sloth") return "The Sloth · crew output";
+  if (id === "steady") return "Genji Ashida · Steady Hand";
+  if (id === "delegator") return "The Delegator · delegated crew";
+  if (id === "over9000") return "Over 9000 · Saiyan charge";
+  if (id === "ensemble") return "Ensemble Director · team disciplines";
+  if (id === "genre") return "Roxie Kade · No Blueprint";
+  if (id === "darkness") return "Prince of Darkness · genre alignment";
+  if (id === "dawn") return "Brighter Than the Dawn · genre alignment";
+  return "Showrunner production perk";
+}
+
 export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointType, editing = false): number {
   if (staffIsInjured(st, r.day ?? r.week * 7)) return 0;
   const fx = facilityFX(r.facilities);
@@ -2777,8 +2815,22 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const project = projectOfStaff(r.projects, st.id);
     if (!project || project.milestone) continue;
     const type = chooseDiscipline(st);
-    const points = percentileSkillOutput(contributionEffectiveSkill(r, st, type));
-    if (points > 0) pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: "project", projectId: project.id });
+    const effective = contributionEffectiveSkill(r, st, type);
+    const pulseRoll = Math.random();
+    const points = percentileSkillOutput(effective, pulseRoll);
+    const runnerMult = showrunnerProjectOutputMultiplier(r, st, project);
+    const withoutRunner = runnerMult > 1.0001 ? percentileSkillOutput(effective / runnerMult, pulseRoll) : points;
+    const runnerExtra = points - withoutRunner;
+    if (points > 0) pulses.push({
+      actorId: st.id,
+      name: st.name,
+      type,
+      points,
+      nonce: Date.now() + pulses.length,
+      source: "project",
+      projectId: project.id,
+      impactDeltas: runnerExtra !== 0 ? [{ source: showrunnerProductionImpactLabel(r.showrunner), points: runnerExtra }] : undefined,
+    });
   }
 
   const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
@@ -2805,7 +2857,13 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
       const project = r.projects.find((candidate) => candidate.id === pulse.projectId);
       return !!project && (project.executiveRushUntilDay ?? -1) >= nowDay;
     })
-    .map((pulse, index) => ({ ...pulse, nonce: pulse.nonce + 10_000 + index }));
+    .map((pulse, index) => ({
+      ...pulse,
+      nonce: pulse.nonce + 10_000 + index,
+      /* the duplicated bubble exists only because Rush was purchased, so the
+         entire duplicate is real, non-overlapping Rush output */
+      impactDeltas: [{ source: "Executive Rush", points: pulse.points }],
+    }));
   pulses.push(...rushCopies);
 
   /* ---- rare project-wide outcomes on the active production ---- */
@@ -2851,7 +2909,12 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
         projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
       }
     } else if (pulse.source === "project" && pulse.projectId) {
-      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } }));
+      projects = projects.map((p) => {
+        if (p.id !== pulse.projectId || p.milestone) return p;
+        let next: Project = { ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } };
+        for (const impact of pulse.impactDeltas ?? []) next = recordProjectImpact(next, impact.source, pulse.type, impact.points);
+        return next;
+      });
     } else if (pulse.source === "contract" && pulse.jobId) {
       contractJobs = contractJobs.map((j) => j.id === pulse.jobId ? ({ ...j, progress: Math.min(j.contract.target, j.progress + pulse.points), liveProgressThisWeek: (j.liveProgressThisWeek ?? 0) + pulse.points }) : j);
     }
@@ -3219,6 +3282,8 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     franchises: r.franchises,
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r) + campaignPressureFor(r).audienceBar,
+    careerWeek: r.week,
+    industryPressureLevel: campaignPressureFor(r).level,
     specialisationScoreMult: specialisationProjectEffects(r, d).scoreMult,
     businessMult: businessTrackRevenueMultiplier(researchTrackLevel(r, "business")),
     castAffinityDiscovered: r.castAffinityDiscovered,
