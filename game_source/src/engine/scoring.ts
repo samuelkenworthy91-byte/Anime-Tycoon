@@ -723,7 +723,7 @@ export function computeResult(opts: {
   if (showrunner === "finisher")
     breakdown.push({ label: "The Finisher · Final Cut", pts: issues === 0 ? "clean master ×1.05 final quality · editing ×1.35" : "editing ×1.35 · clean-master quality bonus missed" });
   if (showrunner === "critical")
-    breakdown.push({ label: "Critical Darling · Critical Language", pts: "+0.40 internal score for every critic before rounding" });
+    breakdown.push({ label: "Critical Darling · Critical Language", pts: "+0.40 every critic · 9.40 pre-perk internal score enters rare 10/10 consideration" });
   if (showrunner === "ensemble")
     breakdown.push({ label: "Ensemble Director · Greater Than the Sum", pts: "staff contribution +15% per represented Writer / Animator / Composer role" });
   if (showrunner === "darkness")
