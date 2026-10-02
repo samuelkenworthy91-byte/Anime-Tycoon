@@ -101,7 +101,7 @@ describe("studio signature-genre specialisation", () => {
     expect(original.outputMult).toBeGreaterThan(1);
   });
 
-  it("creates a meaningful quality swing between house and outside work", () => {
+  it("creates a production identity without making outside genres mathematically wrong", () => {
     const run = withFantasyHistory([27, 28, 22, 23]);
     const house = specialisationProjectEffects(run, draft(["fantasy"]));
     const combo = specialisationProjectEffects(run, draft(["fantasy", "horror"]));
@@ -110,9 +110,8 @@ describe("studio signature-genre specialisation", () => {
     expect(house.paceMult).toBeGreaterThan(1);
     expect(house.scoreMult).toBeGreaterThan(1);
     expect(combo.scoreMult).toBe(house.scoreMult);
-    expect(outside.scoreMult).toBeLessThan(1);
-    expect(house.scoreMult).toBeCloseTo(1.15);
-    expect(outside.scoreMult).toBeCloseTo(0.94);
+    expect(house.scoreMult).toBeCloseTo(1.03);
+    expect(outside.scoreMult).toBe(1);
     expect(outside.outputMult).toBe(1);
     expect(outside.paceMult).toBe(1);
     expect(outside.interventionCostMult).toBe(1);
