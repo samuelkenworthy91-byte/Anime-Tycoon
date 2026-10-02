@@ -202,6 +202,8 @@ export interface Project {
   points: Points;
   /** Realised extra Story/Art/Sound attributed to named systems while producing. */
   impactTotals?: Record<string, Points>;
+  /** Actual cash deliberately spent on named production interventions. */
+  impactCosts?: Record<string, number>;
   /** quality already banked by live desk bubbles since the last week boundary */
   liveQuality?: Points;
   issues: number;
@@ -328,6 +330,7 @@ export function makeProject(draft: Draft, week: number, day = week * 7): Project
     staffIds: [],
     points: { story: 0, art: 0, sound: 0 },
     impactTotals: {},
+    impactCosts: {},
     liveQuality: { story: 0, art: 0, sound: 0 },
     issues: 0,
     hype: 0,
@@ -353,6 +356,17 @@ export function recordProjectImpact(p: Project, source: string, type: PointType,
     impactTotals: {
       ...(p.impactTotals ?? {}),
       [source]: { ...current, [type]: current[type] + delta },
+    },
+  };
+}
+
+export function recordProjectCost(p: Project, source: string, cost: number): Project {
+  if (!Number.isFinite(cost) || cost <= 0) return p;
+  return {
+    ...p,
+    impactCosts: {
+      ...(p.impactCosts ?? {}),
+      [source]: (p.impactCosts?.[source] ?? 0) + cost,
     },
   };
 }
@@ -824,6 +838,23 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   });
 
   let out = res;
+
+  if (p.impactCosts) {
+    for (const [source, cost] of Object.entries(p.impactCosts)) {
+      if (!Number.isFinite(cost) || cost <= 0) continue;
+      out = {
+        ...out,
+        impactReport: [...(out.impactReport ?? []), {
+          category: "cost",
+          source,
+          metric: "cost",
+          delta: -cost,
+          positive: false,
+          detail: `£${Math.round(cost).toLocaleString("en-GB")} spent on this production`,
+        }],
+      };
+    }
+  }
 
   const appendImpact = (entry: NonNullable<ShowResult["impactReport"]>[number]) => {
     out = { ...out, impactReport: [...(out.impactReport ?? []), entry] };
