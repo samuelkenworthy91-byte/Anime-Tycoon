@@ -24,13 +24,14 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
-import { advanceAwardsWeek, pendingNominationAnnouncement, restoreAwardNominationMetadata } from "./engine/awardCycle";
-import { advanceBigThreeWeek, pendingBigThreeReveal, syncBigThreeEra } from "./engine/bigThree";
+import { advanceAwardsWeek, pendingNominationAnnouncement } from "./engine/awardCycle";
+import { advanceBigThreeWeek, pendingBigThreeReveal } from "./engine/bigThree";
 import { ipById } from "./engine/ip";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
 import { clearAllSaves, loadSlot, newestSave, saveSlot, saveSlotDetailed, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import { buildSaveData, restoreRunFromSave, safeResumeScreen } from "./engine/session";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
@@ -116,19 +117,12 @@ export default function App() {
   /** the current career, packaged for storage */
   const snapshot = useCallback((): SaveData | null => {
     if (!run) return null;
-    return {
-      run,
-      meta,
-      clock: { day: clockDay, phase: clockPhase, acc: dayAccRef.current, dayCount: dayCountRef.current },
-      summary: {
-        studio: run.studio,
-        week: run.week,
-        cash: run.cash,
-        fans: run.fans,
-        shows: run.showsMade,
-        officeLevel: run.officeLevel,
-      },
-    };
+    return buildSaveData(run, meta, {
+      day: clockDay,
+      phase: clockPhase,
+      acc: dayAccRef.current,
+      dayCount: dayCountRef.current,
+    });
   }, [run, meta, clockDay, clockPhase]);
 
   /* ------------------------------------------------------------ autosave
@@ -300,15 +294,7 @@ export default function App() {
     if (!save) return;
     primeAudio();
     sfx.fanfare();
-    const migrated = migrateRun(save.run);
-    const restored = restoreAwardNominationMetadata(migrated, migrated.yearShows);
-    let resumed = syncBigThreeEra(restored);
-    if (save.recoveredFrom) {
-      resumed = {
-        ...resumed,
-        notices: [...resumed.notices, `💾 SAVE RECOVERY · the primary ${slotLabel(slot)} copy was unreadable, so the game restored ${save.recoveredFrom === "legacy-version" ? "a migratable older-version save" : save.recoveredFrom === "backup1" ? "the newest recovery snapshot" : "the second recovery snapshot"}.`].slice(-40),
-      };
-    }
+    const resumed = restoreRunFromSave(save, slot);
     setMeta(save.meta);
     setRun(resumed);
     setReleased(null);
@@ -325,7 +311,7 @@ export default function App() {
     setClockDay(save.clock?.day ?? 0);
     setClockPhase(save.clock?.phase ?? 0);
     /* a save parked exactly at the career end re-opens the retrospective */
-    setScreen(resumed.week >= MAX_WEEKS && !resumed.dynasty ? "retrospective" : "office");
+    setScreen(safeResumeScreen(resumed));
   }, []);
 
   const startRun = useCallback((studio: string, showrunner: string) => {
