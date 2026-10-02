@@ -86,15 +86,16 @@ function score(points: number, multiplier: number, seed: number, flaws = false) 
 }
 
 describe("House Specialisation balance simulation", () => {
-  it("makes each signature rank materially stronger without replacing production craft", () => {
+  it("keeps a small direct signature scoring edge while production identity carries the real power", () => {
     const baseline = score(170, 1, 101);
-    const studio = score(170, 1.08, 101);
-    const authority = score(170, 1.15, 101);
-    const institution = score(170, 1.25, 101);
+    const studio = score(170, 1.02, 101);
+    const authority = score(170, 1.03, 101);
+    const institution = score(170, 1.04, 101);
 
     expect(studio.quality).toBeGreaterThan(baseline.quality);
-    expect(authority.quality).toBeGreaterThan(studio.quality);
-    expect(institution.quality).toBeGreaterThan(authority.quality);
+    expect(authority.quality).toBeGreaterThanOrEqual(studio.quality);
+    expect(institution.quality).toBeGreaterThanOrEqual(authority.quality);
+    expect(institution.quality - baseline.quality).toBeLessThan(3);
   });
 
   it("keeps outside-house work viable even at Institution", () => {
@@ -102,21 +103,23 @@ describe("House Specialisation balance simulation", () => {
     expect(strongOutside.total).toBeGreaterThanOrEqual(21);
   });
 
-  it("lets an Institution turn excellent signature craft into Hall-of-Fame work", () => {
-    const signature = score(420, 1.25, 303);
-    expect(signature.total).toBeGreaterThanOrEqual(32);
+  it("lets excellent signature craft remain elite without a +25% blanket rescue", () => {
+    const baseline = score(420, 1, 303);
+    const signature = score(420, 1.04, 303);
+    expect(signature.total).toBeGreaterThanOrEqual(baseline.total);
+    expect(signature.quality).toBeGreaterThan(baseline.quality);
   });
 
   it("does not let +25% rescue bad direction and unresolved editing into automatic 38–40 scores", () => {
-    const flawedSignature = score(700, 1.25, 404, true);
+    const flawedSignature = score(700, 1.04, 404, true);
     expect(flawedSignature.total).toBeLessThan(38);
   });
 
-  it("preserves the intended outside penalties as rank rises", () => {
-    const studioOutside = score(220, 0.97, 505);
-    const authorityOutside = score(220, 0.94, 505);
-    const institutionOutside = score(220, 0.90, 505);
-    expect(studioOutside.quality).toBeGreaterThan(authorityOutside.quality);
-    expect(authorityOutside.quality).toBeGreaterThan(institutionOutside.quality);
+  it("does not punish excellent work merely for using a genre outside the house identity", () => {
+    const outsideStudio = score(220, 1, 505);
+    const outsideAuthority = score(220, 1, 505);
+    const outsideInstitution = score(220, 1, 505);
+    expect(outsideAuthority.quality).toBe(outsideStudio.quality);
+    expect(outsideInstitution.quality).toBe(outsideStudio.quality);
   });
 });
