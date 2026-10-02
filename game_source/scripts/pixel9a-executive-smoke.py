@@ -116,6 +116,8 @@ def main():
         report["screenshots"].append(shot(driver,"04-overseas"))
         close_modal(driver,wait)
 
+        controls=wait.until(lambda d: next((e for e in d.find_elements(By.CSS_SELECTOR,"button[aria-label='Open sound and speed controls']") if e.is_displayed()),False))
+        touch(driver,controls,"Open sound and speed controls",36); controls.click()
         pause=wait.until(lambda d: next((e for e in d.find_elements(By.CSS_SELECTOR,"button[aria-label='Pause']") if e.is_displayed()),False))
         touch(driver,pause,"Pause",36); pause.click()
         click_text(driver,wait,"SAVE GAME")
