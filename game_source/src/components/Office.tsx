@@ -1318,7 +1318,7 @@ export function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[75] flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <div
         className="anim-pop nice-scroll max-h-[calc(100dvh-5rem)] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
         onClick={(e) => e.stopPropagation()}
