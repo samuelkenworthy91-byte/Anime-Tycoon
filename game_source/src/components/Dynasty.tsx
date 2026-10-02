@@ -3,10 +3,13 @@ import { Banknote, Building2, GraduationCap, Landmark, Crown, Scale, Trophy, Che
 import { Btn } from "../fx/fx";
 import {
   DYNASTY_INVESTMENTS,
+  DYNASTY_PATHS,
+  chooseDynastyPath,
   computeIndustryRecords,
   dynastyDifficulty,
   dynastyYear,
   investmentBlockReason,
+  type DynastyPathId,
   type InvestmentDef,
 } from "../engine/legacy";
 import { formatGBP, formatNum, yearOfWeek, ROLE_POINT } from "../engine/data";
@@ -43,16 +46,52 @@ export default function DynastyPanel({ run, onBuy }: { run: RunState; onBuy: (id
         <Rec icon={<Banknote size={13} className="text-mint" />} k="Rest recovery" v={`×${diff.restMult.toFixed(2)}`} />
       </div>
 
+      {/* ------------------------------------------------ legacy strategy */}
+      <div>
+        <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-gold">
+          <Building2 size={14} /> DYNASTY STRATEGY
+        </div>
+        {!run.dynasty?.path ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(Object.entries(DYNASTY_PATHS) as [DynastyPathId, (typeof DYNASTY_PATHS)[DynastyPathId]][]).map(([id, path]) => (
+              <button
+                key={id}
+                type="button"
+                className="btn-press ink-card min-h-24 p-3 text-left hover:border-gold/60"
+                onClick={() => {
+                  const next = chooseDynastyPath(run, id);
+                  if (next) onBuy(`__path__:${id}`);
+                }}
+              >
+                <div className="font-display text-sm font-black text-gold">{path.name}</div>
+                <div className="mt-1 text-[10px] leading-relaxed text-paper/55">{path.blurb}</div>
+                <div className="mt-2 text-[8px] font-black tracking-wider text-paper/35">PERMANENT STRATEGIC IDENTITY</div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-gold/45 bg-gold/5 p-3">
+            <div className="font-display text-base font-black text-gold">{DYNASTY_PATHS[run.dynasty.path].name}</div>
+            <div className="mt-1 text-[10px] text-paper/55">{DYNASTY_PATHS[run.dynasty.path].blurb}</div>
+          </div>
+        )}
+      </div>
+
       {/* ------------------------------------------------ investments */}
       <div>
         <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-gold">
-          <Building2 size={14} /> POST-CAREER INVESTMENTS
+          <Building2 size={14} /> STRATEGIC CAPITAL PROJECTS
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          {DYNASTY_INVESTMENTS.map((d) => (
-            <InvestmentCard key={d.id} run={run} def={d} onBuy={onBuy} />
-          ))}
+          {DYNASTY_INVESTMENTS
+            .filter((d) => !d.path || !run.dynasty?.path || d.path === run.dynasty.path)
+            .map((d) => (
+              <InvestmentCard key={d.id} run={run} def={d} onBuy={onBuy} />
+            ))}
         </div>
+        <p className="mt-1.5 text-[9px] text-paper/40">
+          These are empire-scale commitments, not another stack-everything bonus shop. Your Dynasty strategy determines which projects this studio can pursue.
+        </p>
       </div>
 
       {/* ------------------------------------------------ records */}
