@@ -1,5 +1,5 @@
 import type { PointType } from "./data";
-import { draftCost, recordProjectImpact, type Project, type ProjectStage } from "./projects";
+import { draftCost, recordProjectCost, recordProjectImpact, type Project, type ProjectStage } from "./projects";
 import type { RunState } from "./state";
 import { specialisationProjectEffects } from "./specialisation";
 
@@ -272,7 +272,9 @@ export function applyIntervention(run: RunState, projectId: string, key: string,
     ...(d.id === "consultant" ? { consultantUntilDay: nowDay + 14, consultantConverted: 0 } : {}),
   };
   const label = d.scalable ? `${d.name} · ${quote.tier.name}` : d.name;
-  if (gain > 0) updated = recordProjectImpact(updated, `Investment · ${label}`, point, gain);
+  const impactSource = d.id === "crunch" ? "Executive Rush" : `Investment · ${label}`;
+  updated = recordProjectCost(updated, impactSource, quote.cost);
+  if (gain > 0) updated = recordProjectImpact(updated, impactSource, point, gain);
   const strategicSpend = [...run.strategicSpend, { id: `int_${run.week}_${projectId}_${d.id}_${parsed.tier}`, label, amount: quote.cost, week: run.week, projectId }];
   const previousLevel = d.capability ? productionCapability(run, d.capability).level : 0;
   const nextCapability = d.capability ? productionCapability({ strategicSpend }, d.capability) : null;
