@@ -46,7 +46,7 @@ import { cn } from "../utils/cn";
 import SellerAuctionCeremony from "./SellerAuctionCeremony";
 import { AUDIENCE_SEGMENT_LABELS, franchiseAudienceProfile, type AudienceSegmentId } from "../engine/audienceSegments";
 import { merchAudienceFit, publicityAudienceFit, publicityFitLabel } from "../engine/publicity";
-import { FAN_PROJECTS, fanProjectBlock, fanProjectCapacity, franchiseFandom, startFanProject } from "../engine/fanProjects";
+import { FAN_PROJECTS, FAN_PROJECT_APPROACHES, fanProjectBlock, fanProjectCapacity, franchiseFandom, startFanProject, type FanProjectApproach } from "../engine/fanProjects";
 
 /* ------------------------------------------------------------------ plan */
 export interface ContinuationPlan {
@@ -121,6 +121,7 @@ export default function LibraryPanel({
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [picking, setPicking] = useState<null | "crossover" | "spinoff">(null);
   const [confirmSale, setConfirmSale] = useState(false);
+  const [fanApproach, setFanApproach] = useState<FanProjectApproach>("community");
 
   const shelved = run.projects.filter((project) => project.stage === "shelved").sort((a, b) => (b.shelvedWeek ?? 0) - (a.shelvedWeek ?? 0));
   const allFranchises = Object.values(run.franchises).sort(
@@ -470,10 +471,18 @@ export default function LibraryPanel({
           <div className="rounded-xl border border-viol/30 bg-viol/[0.04] p-3">
             <div className="flex items-center gap-2"><Heart size={12} className="text-viol"/><div className="text-[10px] font-black tracking-widest text-viol">FAN PROJECTS · {run.fanProjects?.active.length ?? 0}/{fanProjectCapacity(run)} ACTIVE</div></div>
             <div className="mt-1 text-[9px] text-paper/45">Optional studio side-projects. They cost cash, grow particular fan communities and gently reshape the audience profile used by publicity and merchandise. They never improve review scores.</div>
+            <div className="mt-2 grid grid-cols-3 gap-1">
+              {(Object.entries(FAN_PROJECT_APPROACHES) as [FanProjectApproach,(typeof FAN_PROJECT_APPROACHES)[FanProjectApproach]][]).map(([id,approach])=>(
+                <button key={id} type="button" onClick={()=>setFanApproach(id)} className={cn("min-h-12 rounded-lg border p-1.5 text-left",fanApproach===id?"border-viol/60 bg-viol/10":"border-line bg-panel2/45")}>
+                  <b className={cn("block text-[8px]",fanApproach===id?"text-viol":"text-paper/60")}>{approach.label.toUpperCase()}</b>
+                  <span className="mt-0.5 block text-[7px] leading-tight text-paper/35">{approach.description}</span>
+                </button>
+              ))}
+            </div>
             <div className="mt-2 grid grid-cols-5 gap-1">
               {(["core","casual","online","prestige","collectors"] as AudienceSegmentId[]).map((id)=><div key={id} className="rounded bg-panel2/70 p-1 text-center"><b className="block text-[10px]">{fandom[id] ?? 0}</b><span className="text-[6px] text-paper/35">{AUDIENCE_SEGMENT_LABELS[id]}</span></div>)}
             </div>
-            {activeFanProject && (()=>{const def=FAN_PROJECTS.find((item)=>item.id===activeFanProject.defId);return <div className="mt-2 rounded-lg border border-viol/30 bg-viol/10 p-2 text-[9px]"><b className="text-viol">ACTIVE · {def?.name ?? activeFanProject.defId}</b><div className="text-paper/50">{Math.max(0,activeFanProject.endsWeek-run.week)} weeks remaining · final turnout can be normal, quiet or unexpectedly viral.</div></div>;})()}
+            {activeFanProject && (()=>{const def=FAN_PROJECTS.find((item)=>item.id===activeFanProject.defId);const approach=FAN_PROJECT_APPROACHES[activeFanProject.approach??"community"];return <div className="mt-2 rounded-lg border border-viol/30 bg-viol/10 p-2 text-[9px]"><b className="text-viol">ACTIVE · {def?.name ?? activeFanProject.defId}</b><div className="text-paper/50">{approach.label} · {Math.max(0,activeFanProject.endsWeek-run.week)} weeks remaining · final turnout can be normal, quiet or unexpectedly viral.</div></div>;})()}
             <div className="mt-2 grid grid-cols-2 gap-1.5">
               {FAN_PROJECTS.map((project)=>{
                 const block=fanProjectBlock(run,fr.key,project.id);
@@ -481,7 +490,7 @@ export default function LibraryPanel({
                   <div className="text-[10px] font-bold">{project.name}</div>
                   <div className="text-[8px] text-paper/45">{project.description}</div>
                   <div className="mt-1 text-[8px] text-paper/60">−{formatGBPShort(project.cost)} · {project.weeks} wk · {project.targets.map((id)=>AUDIENCE_SEGMENT_LABELS[id]).join(" + ")}</div>
-                  {block?<div className="mt-1 text-[8px] text-paper/35">{block}</div>:<Btn variant="ghost" className="mt-1 w-full !py-1 text-[9px]" onClick={()=>setRun((r)=>startFanProject(r,fr.key,project.id)??r)}>START</Btn>}
+                  {block?<div className="mt-1 text-[8px] text-paper/35">{block}</div>:<Btn variant="ghost" className="mt-1 w-full !py-1 text-[9px]" onClick={()=>setRun((r)=>startFanProject(r,fr.key,project.id,fanApproach)??r)}>START · {FAN_PROJECT_APPROACHES[fanApproach].label.toUpperCase()}</Btn>}
                 </div>;
               })}
             </div>
