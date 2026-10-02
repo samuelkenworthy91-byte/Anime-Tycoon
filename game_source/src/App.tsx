@@ -14,7 +14,6 @@ import {
   tickEditDay,
   MAX_WEEKS,
   type DeskPulse,
-  migrateRun,
   projectById,
   releaseProject,
   sellReadyProject,
