@@ -109,13 +109,13 @@ function SlotRow({
               URL.revokeObjectURL(url);
               sfx.select();
             }}
-            className="btn-press min-h-9 min-w-9 rounded-lg border border-line px-2 text-paper/45 hover:border-cyanx hover:text-cyanx"
+            className="btn-press min-h-11 min-w-11 rounded-lg border border-line px-2 text-paper/45 hover:border-cyanx hover:text-cyanx"
           >
             <Download size={13} />
           </button>
         )}
         {mode === "save" && !auto && !archive && (
-          <label className="btn-press flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-lg border border-line px-2 text-paper/45 hover:border-mint hover:text-mint" title="Import save backup">
+          <label className="btn-press flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border border-line px-2 text-paper/45 hover:border-mint hover:text-mint" title="Import save backup">
             <Upload size={13}/>
             <input
               type="file"
@@ -145,7 +145,7 @@ function SlotRow({
               clearSlot(id);
               onDelete(id);
             }}
-            className="btn-press min-h-9 min-w-9 rounded-lg border border-line px-2 text-paper/40 hover:border-neon hover:text-neon"
+            className="btn-press min-h-11 min-w-11 rounded-lg border border-line px-2 text-paper/40 hover:border-neon hover:text-neon"
           >
             <Trash2 size={13} />
           </button>
