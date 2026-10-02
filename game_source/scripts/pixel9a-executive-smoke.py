@@ -32,6 +32,10 @@ def visible_buttons(driver,phrase):
             continue
     return out
 
+def first_visible_button(driver,phrase):
+    matches=visible_buttons(driver,phrase)
+    return matches[0] if matches else False
+
 def dismiss_tutorials(driver):
     for _ in range(16):
         closers=[el for el in driver.find_elements(By.CSS_SELECTOR,"button[aria-label='Close tutorial']") if el.is_displayed()]
@@ -93,7 +97,7 @@ def main():
         time.sleep(.4); dismiss_tutorials(driver)
         report["checks"].append({"office":no_overflow(driver,"office")})
 
-        more=wait.until(lambda d: visible_buttons(d,"MORE")[0] if visible_buttons(d,"MORE") else False)
+        more=wait.until(lambda d: first_visible_button(d,"MORE"))
         touch(driver,more,"More dock",36); more.click()
         time.sleep(.2); dismiss_tutorials(driver)
         for label in ("CREATOR AMBITIONS","OVERSEAS MARKETS","MANAGEMENT POLICY","STUDIO DNA"):
@@ -130,7 +134,7 @@ def main():
         pause=wait.until(lambda d: next((e for e in d.find_elements(By.CSS_SELECTOR,"button[aria-label='Pause']") if e.is_displayed()),False))
         touch(driver,pause,"Pause",36); pause.click()
         click_text(driver,wait,"SAVE GAME")
-        slot=wait.until(lambda d: visible_buttons(d,"SLOT 1")[0] if visible_buttons(d,"SLOT 1") else False)
+        slot=wait.until(lambda d: first_visible_button(d,"SLOT 1"))
         touch(driver,slot,"Save Slot 1",40); slot.click()
         wait.until(lambda d: "SAVED TO SLOT 1" in (d.find_element(By.TAG_NAME,"body").text or "").upper())
         exports=[e for e in driver.find_elements(By.CSS_SELECTOR,"button[aria-label='Export SLOT 1']") if e.is_displayed()]
