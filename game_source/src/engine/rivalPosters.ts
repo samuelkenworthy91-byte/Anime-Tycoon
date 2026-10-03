@@ -6,14 +6,14 @@
  *
  *    id          — stable identity (locked onto a release at greenlight)
  *    img         — public/ file path (WebP)
- *    studio      — owning rival studio (pools never cross studios)
+ *    studio      — legacy studio assignment; shared art is available to all studios
  *    animeTypes  — Shonen/Shojo compatibility
  *    genres      — genre tags used for matching
  *    family      — optional franchise visual family (seasons share a world)
  *    pending     — slot reserved for a future art drop; unselectable
  *
  *  Selection rules (C7/C8):
- *   1. studio pool only                 4. recent-use avoidance
+ *   1. studio + shared pool                 4. recent-use avoidance
  *   2. Shonen/Shojo compatible          5. never re-roll once locked
  *   3. best genre fit                   6. franchise family continuity
  * ========================================================================== */
@@ -24,6 +24,7 @@ export interface RivalPoster {
   id: string;
   img: string;
   studio: string;
+  shared?: boolean;
   persona: string;
   animeTypes: AnimeType[];
   genres: GenreId[];
@@ -54,7 +55,7 @@ export const rivalPosterById = (id: string | null | undefined): RivalPoster | nu
   (id && BY_ID.get(id)) || null;
 
 export const rivalPostersForStudio = (studio: string): RivalPoster[] =>
-  RIVAL_POSTERS.filter((p) => p.studio === studio);
+  RIVAL_POSTERS.filter((p) => p.shared || p.studio === studio);
 
 /** Player-facing key-art catalogue. Every shipped poster is browseable unless
  * another franchise already owns it. Genre/type only affect ordering, never
