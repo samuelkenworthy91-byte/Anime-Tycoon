@@ -199,7 +199,12 @@ const sharedPosters = sharedRows.map((row) => {
   return runtime;
 });
 
-const allPosters = [...basePosters, ...sharedPosters];
+const expansionPosters = JSON.parse(fs.readFileSync(path.join(ROOT, "src/engine/generated/posterExpansion2026.json"), "utf8")).posters;
+if (expansionPosters.length !== 609) throw new Error("Expected 609 expansion posters");
+for (const poster of expansionPosters) {
+  if (!poster.shared || !fs.existsSync(path.join(ROOT, "public", poster.img))) throw new Error(`Missing expansion poster: ${poster.id}`);
+}
+const allPosters = [...basePosters, ...sharedPosters, ...expansionPosters];
 const ids = allPosters.map((p) => p.id);
 const imgs = allPosters.filter((p) => p.img).map((p) => p.img);
 if (new Set(ids).size !== ids.length) throw new Error("Poster IDs must stay globally unique");
@@ -207,15 +212,15 @@ if (new Set(imgs).size !== imgs.length) throw new Error("Poster image paths must
 
 const manifest = {
   schema: 3,
-  capacity: { perStudio: 28, studios: 6, baseTotal: 168, sharedIndustry: sharedPosters.length, total: allPosters.length },
+  capacity: { perStudio: 28, studios: 6, baseTotal: 168, sharedIndustry: sharedPosters.length, sharedExpansion2026: expansionPosters.length, total: allPosters.length },
   generated: allPosters.filter((p) => !p.pending).length,
   pending: allPosters.filter((p) => !!p.pending).length,
   posters: allPosters,
 };
 
-if (manifest.posters.length !== 381) throw new Error(`Expected 381 total poster rows, got ${manifest.posters.length}`);
-if (manifest.generated !== 379 || manifest.pending !== 2) {
-  throw new Error(`Expected 379 generated / 2 pending, got ${manifest.generated}/${manifest.pending}`);
+if (manifest.posters.length !== 990) throw new Error(`Expected 990 total poster rows, got ${manifest.posters.length}`);
+if (manifest.generated !== 988 || manifest.pending !== 2) {
+  throw new Error(`Expected 988 generated / 2 pending, got ${manifest.generated}/${manifest.pending}`);
 }
 for (const studio of Object.keys(STUDIO_META)) {
   const base = basePosters.filter((p) => p.studio === studio);

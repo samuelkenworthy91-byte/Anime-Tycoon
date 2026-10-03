@@ -833,6 +833,7 @@ export function unavailablePosterIdsForProject(r: RunState, project: Project): s
   for (const studio of r.rivalWorld.studios) {
     for (const franchise of studio.franchises) if (franchise.posterId) blocked.add(franchise.posterId);
     for (const production of studio.productions) if (production.posterId) blocked.add(production.posterId);
+    for (const release of studio.releases) if (release.posterId) blocked.add(release.posterId);
   }
 
   /* Claims from an older save may predate franchise-aware ownership. Keep them
