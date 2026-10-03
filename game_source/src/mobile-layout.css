@@ -7,7 +7,8 @@
    media query: one sliders button is visible by default; speed, sound and
    pause controls only appear after the player opens it. */
 .game-controls {
-  z-index: 60 !important;
+  /* Keep clock controls clickable above office menus and their backdrops. */
+  z-index: 130 !important;
 }
 
 .game-controls-toggle {

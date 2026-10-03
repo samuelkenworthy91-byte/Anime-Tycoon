@@ -850,7 +850,7 @@ export default function App() {
         )}
 
         {screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
-          <div className={cn("game-controls absolute right-3 top-2.5 z-[60]", controlsOpen && "game-controls-open")}>
+          <div className={cn("game-controls absolute right-3 top-2.5 z-[130]", controlsOpen && "game-controls-open")}>
             <button
               type="button"
               aria-label={controlsOpen ? "Close sound and speed controls" : "Open sound and speed controls"}
