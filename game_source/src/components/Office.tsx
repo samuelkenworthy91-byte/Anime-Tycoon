@@ -1,3 +1,4 @@
+import TargetedResearchPanel from "./TargetedResearchPanel";
 import StudioExpansionPanel from "./StudioExpansionPanel";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
@@ -822,8 +823,9 @@ export default function Office({
           })()}
 
           <div className="mb-2 mt-4 text-xs font-bold tracking-widest text-paper/50">STUDIO KNOWLEDGE STUDIES</div>
+          <TargetedResearchPanel run={run} onStudy={research} />
           <div className="grid gap-2 sm:grid-cols-2">
-            {RESEARCH.filter((u) => ["genre_studies", "narrative_analytics", "talent_analysis"].includes(u.id)).map((u) => {
+            {RESEARCH.filter((u) => ["talent_analysis"].includes(u.id)).map((u) => {
               const owned = run.research.includes(u.id);
               const pending = run.researchJobs.find((j) => j.researchId === u.id);
               const block = researchBlockReason(run, u.id);

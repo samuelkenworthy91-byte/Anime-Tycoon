@@ -351,7 +351,7 @@ export default function Produce({ run, project, milestone, workPulses = [], onAp
               const k = known.length ? Math.min(...known) : 0;
               const exactTarget = genreTargetFor(genres).ideal[phase!.idx];
               const testedSeries = run.audienceComboSeries?.[comboKey(genres)]?.length ?? 0;
-              const exactKnown = exactDirectionKnown(known, genres.length === 2 ? testedSeries : 0);
+              const exactKnown = (run.targetedResearchLevels?.[`study_pair_${comboKey(genres)}`]??0)>=20 || exactDirectionKnown(known, genres.length === 2 ? testedSeries : 0);
               const engineerHint = engineerEyeRange(run.showrunner, exactTarget, exactKnown);
               const exactSingles = defs.map((g) => ({ id: g!.id, label: g!.label, target: genreTargetFor([g!.id]).ideal[phase!.idx] }));
               const emphasis = studioKnowledgeEmphasis(exactTarget, phase!.a, phase!.b);

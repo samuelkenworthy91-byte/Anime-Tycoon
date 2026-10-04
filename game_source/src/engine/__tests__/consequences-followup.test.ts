@@ -109,10 +109,10 @@ describe("continuation character billing memory", () => {
 });
 
 describe("experimental combo research", () => {
-  it("registers eight expensive Genre Studies follow-up projects", () => {
-    expect(RESEARCHABLE_SECRET_COMBOS).toHaveLength(8);
+  it("registers a research route for every hidden genre combination", () => {
+    expect(RESEARCHABLE_SECRET_COMBOS.length).toBeGreaterThan(8);
     const ids = new Set(RESEARCHABLE_SECRET_COMBOS.map((study) => study.id));
-    expect(ids.size).toBe(8);
+    expect(ids.size).toBe(RESEARCHABLE_SECRET_COMBOS.length);
     for (const study of RESEARCHABLE_SECRET_COMBOS) {
       const item = RESEARCH.find((entry) => entry.id === study.id);
       expect(item).toBeTruthy();

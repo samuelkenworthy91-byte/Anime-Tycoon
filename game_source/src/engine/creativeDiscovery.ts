@@ -3,13 +3,13 @@ import { ARCS, ARC_COMBOS, GENRES, RESEARCH, SECRET_COMBOS, comboKey, comboMult,
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 export const EXPERIMENTAL_COMBO_RESEARCH_PREFIX = "experimental_combo_";
-export const MAX_RESEARCHABLE_SECRET_COMBOS = 8;
+export const MAX_RESEARCHABLE_SECRET_COMBOS = Object.keys(SECRET_COMBOS).length;
 
 export const secretComboResearchId = (key: string) =>
   `${EXPERIMENTAL_COMBO_RESEARCH_PREFIX}${key.replaceAll("|", "__")}`;
 
 export const secretComboResearched = (research: readonly string[], key: string) =>
-  research.includes(secretComboResearchId(key));
+  research.includes(secretComboResearchId(key)) || (key.split("|").length===2 && research.includes(`study_pair_${comboKey(key.split("|") as GenreId[])}`));
 
 /**
  * The strongest experimental pairings can be found two ways: gamble on the
@@ -80,30 +80,6 @@ const LITERAL_ARC_DESCRIPTIONS: Record<string, string> = {
 for (const arc of ARCS) {
   const literal = LITERAL_ARC_DESCRIPTIONS[arc.id];
   if (literal) arc.desc = literal;
-}
-
-/* Keep the structure model semantically clean: positive structures live in
-   ARC_COMBOS, negative structures in ARC_CLASHES. */
-for (const oldNegative of ["backwards_training", "spoiled_mystery"]) {
-  const at = ARC_COMBOS.findIndex((combo) => combo.id === oldNegative);
-  if (at >= 0) ARC_COMBOS.splice(at, 1);
-}
-const EXTRA_ARC_COMBOS = [
-  { id: "failed_retrieval", name: "Failed Retrieval", arcs: ["narr_rescue", "narr_betrayal"], q: 4, f: 0.03, ordered: true },
-  { id: "personal_vendetta", name: "Personal Vendetta", arcs: ["narr_betrayal", "narr_revenge"], q: 4, f: 0.03, ordered: true },
-  { id: "retrieval_crisis", name: "Retrieval Crisis", arcs: ["narr_rivalintro", "narr_rescue", "narr_betrayal"], q: 5, f: 0.04, ordered: true },
-  { id: "lie_becomes_personal", name: "The Lie Becomes Personal", arcs: ["narr_falsewin", "narr_betrayal", "narr_revenge"], q: 6, f: 0.04, ordered: true },
-  { id: "avenge_the_mentor", name: "Avenge the Mentor", arcs: ["narr_mentor", "narr_sacrifice", "narr_revenge"], q: 6, f: 0.03, ordered: true },
-  { id: "bring_them_home", name: "Bring Them Home", arcs: ["narr_foundfamily", "narr_betrayal", "narr_rescue"], q: 5, f: 0.05, ordered: true },
-  { id: "mask_was_threat", name: "The Mask Was the Threat", arcs: ["narr_secretid", "narr_villainreveal"], q: 4, f: 0.03, ordered: true },
-];
-for (const combo of EXTRA_ARC_COMBOS) {
-  if (!ARC_COMBOS.some((existing) => existing.id === combo.id)) ARC_COMBOS.push(combo);
-}
-const redemptionRoad = ARC_COMBOS.find((combo) => combo.id === "road");
-if (redemptionRoad) {
-  redemptionRoad.ordered = true;
-  redemptionRoad.q = Math.max(redemptionRoad.q, 4);
 }
 
 export interface GenreReleaseEffect {

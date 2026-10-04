@@ -1,3 +1,4 @@
+import { targetedStudy, targetedLevel, targetedCost, completeTargetedStudy, syncTargetedMastery, migrateTargetedLevels } from "./targetedResearch";
 import { advanceArcballWeek, migrateArcballState } from "./arcball";
 import { initialExpansion, migrateExpansion, snapshotProduction, expansionBusyReason, advanceExpansionDay, finishExpansionProduction, settleProjectReceipt, type ExpansionState } from "./studioExpansion";
 import { initialOverseas, migrateOverseas, defaultContent, overseasOf, advanceOverseasWeek, overseasTierOf, overseasUpkeep, type OverseasState } from "./overseas";
@@ -357,6 +358,8 @@ export interface RunState {
   legacyComboLevels: Record<string, number>;
   /** studio familiarity with each individual genre; information unlocks as this rises */
   genreKnowledge: Partial<Record<GenreId, number>>;
+  targetedResearchLevels?: Record<string, number>;
+  targetedResearchEligibility?: string;
   /** discovered cast chemistry ids */
   castCombos: string[];
   /** stable cast IDs whose fixed hidden affinity the player has discovered */
@@ -760,6 +763,7 @@ export function migrateRun(raw: unknown): RunState {
     expansion: migrateExpansion(r.expansion, Math.max(r.day ?? 0,(r.week ?? 0)*7)),
     overseas: migrateOverseas(r.overseas,r.week ?? 0),
     genreKnowledge: migrateGenreRecord(r.genreKnowledge),
+    targetedResearchLevels: migrateTargetedLevels(r),
     arcCombos: migratedResearchArcCombos,
     arcUnlocked: migratedResearchArcUnlocked,
     arcKnowledge: migratedResearchArcKnowledge,
@@ -1098,6 +1102,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   if (!opts.liveDaysAlreadyApplied) {
     for (let day = r.week * 7 + 1; day <= (r.week + 1) * 7; day++) r = advanceExpansionDay({ ...r, day });
   }
+  r = syncTargetedMastery(r);
   const sourceWeek = r.week;
   r = { ...advanceOverseasWeek({ ...r, week: sourceWeek + 1 }), week: sourceWeek };
   for (const payout of r.payouts) if (payout.week === sourceWeek + 1) r = settleProjectReceipt(r, payout);
@@ -1115,6 +1120,10 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
   let rd = r.rd;
   let research = [...(r.research ?? [])];
   let researchTrackLevels = { ...(r.researchTrackLevels ?? {}) };
+  let targetedResearchLevels = { ...(r.targetedResearchLevels ?? {}) };
+  let genreKnowledge = { ...(r.genreKnowledge ?? {}) };
+  let comboLevels = { ...(r.comboLevels ?? {}) };
+  let researchedIpMarket = r.ipMarket;
   let arcCombos = [...(r.arcCombos ?? [])];
   let arcUnlocked = [...(r.arcUnlocked ?? [])];
   let arcKnowledge = { ...(r.arcKnowledge ?? {}) };
@@ -1305,10 +1314,14 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
       for (const job of researchJobs) {
         if (w < job.completesWeek) { keep.push(job); continue; }
         const out = applyResearchCompletion(
-          { research, researchTrackLevels, arcCombos, arcUnlocked, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices },
+          { research, researchTrackLevels, targetedResearchLevels, genreKnowledge, comboLevels, genresUnlocked:r.genresUnlocked, ipMarket:researchedIpMarket, franchises:r.franchises, arcCombos, arcUnlocked, arcKnowledge, arcGenreKnowledge, castAffinityDiscovered, notices },
           job.researchId,
           job.name
         );
+        researchedIpMarket = out.ipMarket ?? researchedIpMarket;
+        targetedResearchLevels = out.targetedResearchLevels ?? targetedResearchLevels;
+        genreKnowledge = out.genreKnowledge ?? genreKnowledge;
+        comboLevels = out.comboLevels ?? comboLevels;
         research = out.research;
         researchTrackLevels = out.researchTrackLevels ?? researchTrackLevels;
         arcCombos = out.arcCombos;
@@ -1767,6 +1780,9 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     projects,
     research,
     researchTrackLevels,
+    targetedResearchLevels,
+    genreKnowledge,
+    comboLevels,
     arcCombos,
     arcUnlocked,
     arcKnowledge,
@@ -1796,7 +1812,7 @@ export function advanceWeeks(r: RunState, n: number, opts: { liveDaysAlreadyAppl
     ipMarket,
     notices: notices.slice(-40),
   };
-  return advanceArcballWeek(advanced);
+  return syncTargetedMastery(advanceArcballWeek({...advanced,ipMarket:{...advanced.ipMarket,studioArcs:[...new Set([...advanced.ipMarket.studioArcs,...researchedIpMarket.studioArcs])]}}));
 }
 
 /* =================================================================== */
@@ -2425,6 +2441,12 @@ export function startTestAudience(r: RunState): RunState | null {
 
 /** the shared carrier every research-completion path reads/writes */
 interface ResearchCarrier {
+  targetedResearchLevels?: Record<string,number>;
+  genreKnowledge?: Partial<Record<GenreId,number>>;
+  comboLevels?: Record<string,number>;
+  genresUnlocked?: GenreId[];
+  ipMarket?: RunState["ipMarket"];
+  franchises?: RunState["franchises"];
   research: string[];
   researchTrackLevels?: Partial<Record<ResearchTrackId, number>>;
   arcCombos: string[];
@@ -2444,6 +2466,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
   name: string,
   rand: () => number = Math.random
 ): T {
+  if (targetedStudy(researchId)) return completeTargetedStudy(carrier, researchId);
   const discipline = researchTrackForResearchId(researchId);
   if (discipline) return completeResearchTrack(carrier, discipline.id);
 
@@ -2511,7 +2534,7 @@ export function applyResearchCompletion<T extends ResearchCarrier>(
 }
 
 function finishResearchJob(r: RunState, job: ResearchJob): RunState {
-  return applyResearchCompletion(r, job.researchId, job.name);
+  return syncTargetedMastery(applyResearchCompletion(r, job.researchId, job.name));
 }
 
 function tickDailyBackground(r: RunState): { run: RunState; attention: boolean; studioLocked: boolean } {
@@ -3997,6 +4020,7 @@ function repeatResearchRunIndex(r: Pick<RunState, "research" | "arcGenreKnowledg
 /** Escalating base RD cost: each completed repeat pass adds 50% of the original
  * cost. Showrunner discounts are applied after this value is calculated. */
 export function researchProjectCost(r: RunState, id: string, fallbackRd?: number): number {
+  if (targetedStudy(id)) return researchRdCost(targetedCost(r,id),r.showrunner);
   const def = RESEARCH.find((x) => x.id === id);
   const base = fallbackRd ?? def?.rd ?? 0;
   const repeats = repeatResearchRunIndex(r, id);
@@ -4036,6 +4060,9 @@ export function researchProjectCost(r: RunState, id: string, fallbackRd?: number
 export function researchBlockReason(r: RunState, id: string): string | null {
   const def = RESEARCH.find((x) => x.id === id);
   if (!def) return "Unknown research";
+  const target = targetedStudy(id);
+  if (target && targetedLevel(r,id)>=20) return "COMPLETE — all eligible discoveries mastered";
+  if (target && target.genres.some(g=>!r.genresUnlocked.includes(g))) return "License the selected genres first";
   if ((r.researchJobs ?? []).some((j) => j.researchId === id)) return "Already in research";
   if (!def.repeatable && r.research.includes(id)) return "Already researched";
   if (def.requires && !r.research.includes(def.requires))

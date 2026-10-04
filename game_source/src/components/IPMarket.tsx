@@ -88,7 +88,7 @@ export default function IPMarket({ run, setRun, onAdapt, onEnterAuction }: { run
 
   return <><div className="space-y-4">
     <div className="rounded-xl border border-gold/35 bg-gold/5 p-3 text-xs text-paper/65">
-      <b className="text-gold">RIGHTS MARKET</b> · A rights opportunity has a random chance to appear and can fire at most once per 48-week industry year. Entering launches the live auction room; returned opportunities remain here until the end of the week.
+      <b className="text-gold">RIGHTS MARKET</b> · A rights opportunity has a random chance to appear and can open at most three times per 48-week industry year, including one auction you may commission yourself. Entering launches the live auction room; returned opportunities remain here until the end of the week.
       <div className="mt-2"><TutorialHelpButton onClick={() => setHelp(true)} /></div>
       <div className="mt-2 flex flex-wrap gap-2 text-[9px]">
         <span className={cn("rounded border px-2 py-1", legal ? "border-gold/40 text-gold" : "border-line text-paper/40")}>LEGAL DESK T{legal} · {legal ? `+${legal * 14}% negotiation chance + cheaper renewals` : "build for better rights terms"}</span>

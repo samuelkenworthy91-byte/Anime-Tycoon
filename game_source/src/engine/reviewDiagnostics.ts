@@ -1,5 +1,6 @@
 import type { Draft, GenreId, PointType } from "./data";
 import type { ShowResult } from "./scoring";
+import { comboKey } from "./data";
 import { genreTargetFor } from "./genreTargets";
 
 export type KnowledgeBand = "UNKNOWN" | "EARLY" | "UNDERSTOOD" | "MASTERED";
@@ -54,9 +55,10 @@ export function diagnoseRelease(
   draft: Draft,
   result: Pick<ShowResult, "points" | "issues" | "chemMult" | "arcClashes" | "genreSalesMult" | "total" | "tier">,
   genreKnowledge: Partial<Record<GenreId, number>> = {},
+  studyLevels:Record<string,number> = {},
 ): ReleaseDiagnosis {
   const target = genreTargetFor(draft.genres);
-  const knowledge = knowledgeBand(knowledgeForGenres(draft.genres, genreKnowledge));
+  const knowledge = creationKnowledgeSummary(draft.genres,genreKnowledge,studyLevels).band;
   const out: ReleaseDiagnostic[] = [];
   const pointTypes: PointType[] = ["story", "art", "sound"];
   const totalPoints = Math.max(1, result.points.story + result.points.art + result.points.sound);
@@ -132,8 +134,9 @@ export function reviewEvidenceFor(criteria: string | undefined, diagnosis: Relea
   return all[0] ?? null;
 }
 
-export function creationKnowledgeSummary(genres: readonly GenreId[], ledger: Partial<Record<GenreId, number>> = {}) {
-  const value = knowledgeForGenres(genres, ledger);
+export function creationKnowledgeSummary(genres: readonly GenreId[], ledger: Partial<Record<GenreId, number>> = {}, studyLevels:Record<string,number> = {}) {
+  const pairKnowledge=genres.length===2?Math.ceil((studyLevels[`study_pair_${comboKey([...genres])}`]??0)*9/20):0;
+  const value = Math.max(knowledgeForGenres(genres, ledger),pairKnowledge);
   const band = knowledgeBand(value);
   if (!genres.length) return { value, band, label: "Pick a genre to use studio knowledge", detail: "" };
   if (band === "MASTERED") return { value, band, label: "MASTERED", detail: "Exact direction ranges and production lessons are available." };

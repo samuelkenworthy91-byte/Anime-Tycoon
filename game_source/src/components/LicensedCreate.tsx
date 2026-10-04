@@ -25,7 +25,7 @@ export default function LicensedCreate({run,ipId,onBegin,onCancel}:{run:RunState
  const directionKnown=directionDefs.map(g=>run.genreKnowledge?.[g!.id]??0);
  const directionKnowledgeFloor=directionKnown.length?Math.min(...directionKnown):0;
  const directionTests=run.audienceComboSeries?.[comboKey(directionGenres)]?.length??0;
- const directionExact=exactDirectionKnown(directionKnown,directionGenres.length===2?directionTests:0);
+ const directionExact=(run.targetedResearchLevels?.[`study_pair_${comboKey(directionGenres)}`]??0)>=20 || exactDirectionKnown(directionKnown,directionGenres.length===2?directionTests:0);
  const directionTargets=genreTargetFor(directionGenres).ideal;
  const directionPhases=[
   {a:"Plot",b:"Characters",label:"STORY DIRECTION",tip:"Sets whether the adaptation prioritises plot/world mechanics or character and emotional work. This directly affects review scoring; the ideal comes from this IP's genre combination."},

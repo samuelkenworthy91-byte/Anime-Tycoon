@@ -49,6 +49,7 @@ export default function Release({
   careerWeek = 0,
   showsMadeBefore = 0,
   genreKnowledge = {},
+  studyLevels = {},
   onContinue,
 }: {
   draft: Draft;
@@ -57,6 +58,7 @@ export default function Release({
   careerWeek?: number;
   showsMadeBefore?: number;
   genreKnowledge?: Partial<Record<GenreId, number>>;
+  studyLevels?:Record<string,number>;
   onContinue: () => void;
 }) {
   /*
@@ -78,7 +80,7 @@ export default function Release({
   const shownUnits = result.sales.slice(0, salesWeek).reduce((a, b) => a + b, 0);
   const shownRevenue = Math.round(shownUnits * 2.6);
   const careerYear = careerYearForWeek(careerWeek);
-  const diagnosis = useMemo(() => diagnoseRelease(draft, result, genreKnowledge), [draft, result, genreKnowledge]);
+  const diagnosis = useMemo(() => diagnoseRelease(draft, result, genreKnowledge,studyLevels), [draft, result, genreKnowledge,studyLevels]);
   const audienceProfile = useMemo(() => audienceProfileForRelease(draft, result), [draft, result]);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {

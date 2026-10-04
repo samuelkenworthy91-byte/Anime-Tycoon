@@ -4,6 +4,7 @@ import {
   AUDIENCES,
   GENRES,
   arcCombosFor,
+  rewardedArcCombosFor,
   BUDGETS,
   CAST_WEIGHTS,
   MEDIUMS,
@@ -418,8 +419,12 @@ export function computeResult(opts: {
 
   /* ---- hidden story structures: synergies are rewarding, clashes hurt */
   const arcCombosHit = arcCombosFor(draft.arcs);
-  const baseArcComboQ = arcCombosHit.reduce((a, c) => a + c.q, 0);
-  const baseArcComboF = arcCombosHit.reduce((a, c) => a + c.f, 0);
+  const rewardedCombos = rewardedArcCombosFor(draft.arcs);
+  const positiveCombos = rewardedCombos.filter(c=>c.q>0||c.f>0).sort((a,b)=>(b.q+b.f*100)-(a.q+a.f*100));
+  const positiveQ = positiveCombos.reduce((sum,c,i)=>sum+Math.max(0,c.q)*Math.pow(.5,i),0);
+  const positiveF = positiveCombos.reduce((sum,c,i)=>sum+Math.max(0,c.f)*Math.pow(.5,i),0);
+  const baseArcComboQ = Math.min(18,positiveQ) + rewardedCombos.reduce((a, c) => a + Math.min(0,c.q), 0);
+  const baseArcComboF = Math.min(.15,positiveF) + rewardedCombos.reduce((a,c)=>a+Math.min(0,c.f),0);
   const arcComboQ = (baseArcComboQ > 0 ? storyStructureMult(showrunner, baseArcComboQ * 1.6) : baseArcComboQ) * arcWeight;
   const arcComboF = (baseArcComboF > 0 ? storyStructureMult(showrunner, baseArcComboF * 1.5) : baseArcComboF) * arcWeight;
   const arcClashesHit = arcClashesFor(draft.arcs);
@@ -609,7 +614,7 @@ export function computeResult(opts: {
     licensed
       ? { label: `Canonical IP cast · ${(draft.licensedCharacters ?? []).join(" + ")}`, pts: "Property characters (no studio casting)" }
       : { label: `Known casting contribution · ${protag.name} + ${sec.name} + ${pet.name} + ${vil.name}`, pts: `+${publicCasting.toFixed(1)}` },
-    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)} critic quality${arcCombosHit.length ? ` · ${arcCombosHit.length} synergy` : ""}` },
+    { label: licensed ? "Studio blueprint influence (adaptation-weighted)" : "Story arcs", pts: `${arcQ >= 0 ? "+" : ""}${arcQuality.toFixed(1)} critic quality${arcCombosHit.length ? ` · ${rewardedCombos.length} rewarded synergy` : ""}` },
     { label: slotFit ? "Time-slot fit" : "Time-slot mismatch", pts: slotFit ? `+${SLOT_QUALITY_POINTS.toFixed(1)}` : "+0.0" },
     { label: `Genre combo ×${actualComboMult.toFixed(2)} (Lv${comboLevel})`, pts: `×${comboFactor.toFixed(2)} quality` },
     { label: `Unresolved editing notes (${issues})`, pts: `−${(issues * ISSUE_QUALITY_COST).toFixed(1)}` },
@@ -621,7 +626,7 @@ export function computeResult(opts: {
     breakdown.push({ label: `${genreEffect.secret ? "Secret" : "Genre"} pairing word of mouth`, pts: `×${genreEffect.salesMultiplier.toFixed(2)} sales` });
   if (chemFactor !== 1) breakdown.push({ label: `Cast chemistry ×${chemMult.toFixed(2)}`, pts: `×${chemFactor.toFixed(2)}` });
   if (arcCombosHit.length > 0)
-    breakdown.push({ label: `Arc synergy: ${arcCombosHit.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ.toFixed(1)} Q` });
+    breakdown.push({ label: `Arc synergy: ${rewardedCombos.map((c) => c.name).join(", ")}`, pts: `${arcComboQ >= 0 ? "+" : ""}${arcComboQ.toFixed(1)} Q` });
   if (arcClashesHit.length > 0)
     breakdown.push({ label: `Story clash: ${arcClashesHit.map((c) => c.name).join(", ")}`, pts: `×${arcStructureMult.toFixed(2)} quality` });
   const affNotes: string[] = [];

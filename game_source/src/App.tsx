@@ -848,6 +848,7 @@ export default function App() {
             careerWeek={run.week}
             showsMadeBefore={Math.max(0, run.showsMade - 1)}
             genreKnowledge={run.genreKnowledge}
+            studyLevels={run.targetedResearchLevels}
             onContinue={continueFromRelease}
           />
         )}

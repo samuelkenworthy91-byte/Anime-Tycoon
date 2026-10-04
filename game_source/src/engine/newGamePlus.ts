@@ -11,7 +11,7 @@ declare module "./state" {
 
 const KNOWLEDGE_RESEARCH = new Set(["staff_appraisal", "talent_scouting"]);
 const isKnowledgeResearch = (id: string) =>
-  KNOWLEDGE_RESEARCH.has(id) || id.startsWith("experimental_combo_");
+  KNOWLEDGE_RESEARCH.has(id) || id.startsWith("experimental_combo_") || id.startsWith("study_genre_") || id.startsWith("study_pair_");
 
 /** New Game+ deliberately carries INFORMATION, not the old studio's economy.
  * Known genre pairs come across at Lv1: their fit stays revealed/quick-pickable
@@ -34,6 +34,7 @@ export function createNewGamePlusRun(
     comboLevels: knownPairs,
     legacyComboLevels: { ...(completed.legacyComboLevels ?? {}) },
     genreKnowledge: { ...(completed.genreKnowledge ?? {}) },
+    targetedResearchLevels: { ...(completed.targetedResearchLevels ?? {}) },
     castCombos: [...new Set(completed.castCombos ?? [])],
     castAffinityDiscovered: [...new Set(completed.castAffinityDiscovered ?? [])],
     arcCombos: [...new Set(completed.arcCombos ?? [])],

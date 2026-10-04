@@ -60,9 +60,9 @@ describe("V3/V5 content integration after catalog rebuild", () => {
 
   it("loads unique arcs and valid combo references", () => {
     const baseArcCount = 66;
-    const baseComboCount = 31;
+    const baseComboCount = 36;
     expect(ARCS).toHaveLength(baseArcCount + arcRuntime.add_arcs.length + AUCTION_IPS.length);
-    expect(ARC_COMBOS).toHaveLength(baseComboCount + arcRuntime.add_combos.length + AUCTION_IPS.length);
+    expect(ARC_COMBOS).toHaveLength(baseComboCount + arcRuntime.add_combos.length + AUCTION_IPS.length + 386);
     expect(new Set(ARCS.map((arc) => arc.id)).size).toBe(ARCS.length);
     expect(new Set(ARC_COMBOS.map((combo) => combo.id)).size).toBe(ARC_COMBOS.length);
     for (const combo of ARC_COMBOS) for (const id of combo.arcs) expect(ARCS.some((arc) => arc.id === id)).toBe(true);

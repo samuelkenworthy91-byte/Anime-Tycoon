@@ -1,5 +1,6 @@
+import { genreTargetFor } from "../engine/genreTargets";
 import { BookOpen, ChevronRight, HelpCircle, Sparkles } from "lucide-react";
-import { COMBO, GENRES, type GenreId } from "../engine/data";
+import { comboMult, GENRES, type GenreId } from "../engine/data";
 import type { RunState } from "../engine/state";
 import { GENRE_MASTERY_KNOWLEDGE } from "../engine/studioOps";
 import { cn } from "../utils/cn";
@@ -34,7 +35,7 @@ export default function KnowledgeDossier({ run, selection, onSelect }: { run: Ru
         <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px]"><b>DIRECTION MEMO</b><br/><span className="text-paper/60">{
           k < 3 ? "Audience direction preferences are still fuzzy." :
           k < GENRE_MASTERY_KNOWLEDGE ? `High-confidence read only. More releases/research narrow the slider targets; exact numbers unlock at MASTERED (${GENRE_MASTERY_KNOWLEDGE}).` :
-          `MASTERED · exact scoring targets: Plot ${g.ideal[0]}% · Sakuga ${g.ideal[1]}% · Music ${g.ideal[2]}%`
+          `MASTERED · exact scoring targets: Plot ${genreTargetFor([g.id]).ideal[0]}% · Sakuga ${genreTargetFor([g.id]).ideal[1]}% · Music ${genreTargetFor([g.id]).ideal[2]}%`
         }</span></div>
         <div className="rounded-lg border border-line bg-panel2/70 p-2 text-[10px] sm:col-span-2"><b>STORY KNOWLEDGE</b><br/><span className="text-paper/60">{learnedArcs} arc relationship{learnedArcs===1?"":"s"} learned for this genre. Test audiences and repeated releases add more evidence.</span></div>
       </div>
@@ -42,7 +43,7 @@ export default function KnowledgeDossier({ run, selection, onSelect }: { run: Ru
       <div className="mt-1 grid gap-1 sm:grid-cols-2">{knownPairs.length ? knownPairs.map(([key,lv]) => {
         const other = key.split("|").find((x) => x !== g.id) as GenreId | undefined;
         const og = GENRES.find((x)=>x.id===other);
-        const mult = COMBO[key] ?? 1;
+        const mult = comboMult(key.split("|") as GenreId[],true);
         return <button key={key} className="btn-press flex items-center rounded-lg border border-line bg-panel2/60 px-2 py-1.5 text-left text-[10px]" onClick={()=>onSelect({kind:"pair",key})}><span className="font-bold">{og?.label ?? other}</span><span className="ml-auto text-gold">{pairFit(mult)} · Lv{lv}</span><ChevronRight size={10}/></button>
       }) : <div className="text-[10px] text-paper/40">No pairing has been shipped yet.</div>}</div>
     </div>;
@@ -50,12 +51,13 @@ export default function KnowledgeDossier({ run, selection, onSelect }: { run: Ru
   if (selection?.kind === "pair") {
     const [a,b] = selection.key.split("|") as GenreId[];
     const ga=GENRES.find((x)=>x.id===a)!; const gb=GENRES.find((x)=>x.id===b)!;
-    const lv=run.comboLevels[selection.key]??0; const mult=COMBO[selection.key]??1;
+    const lv=run.comboLevels[selection.key]??0; const mult=comboMult([a,b],true);
     return <div className="rounded-xl border border-gold/45 bg-gold/5 p-3">
       <button className="mb-2 text-[10px] font-bold text-cyanx" onClick={() => onSelect(null)}>← ALL KNOWLEDGE</button>
       <div className="font-display text-lg font-extrabold">{ga.label} × {gb.label}</div>
       <div className={cn("mt-1 text-xs font-extrabold", mult>=1.03?"text-mint":mult<0.95?"text-neon":"text-gold")}>{pairFit(mult)} · COMBO LEVEL {lv}</div>
-      <div className="mt-2 rounded-lg border border-line bg-panel2/70 p-2 text-[10px] text-paper/60">Your studio has shipped this exact pairing {lv} time{lv===1?"":"s"}. Learned review interaction: <b className="text-paper">×{mult.toFixed(2)}</b>. Higher combo knowledge adds the separate familiarity bonus shown during greenlight.</div>
+      <div className="mt-2 rounded-lg border border-line bg-panel2/70 p-2 text-[10px] text-paper/60">Pair familiarity level {lv}. Research progress: {run.targetedResearchLevels?.[`study_pair_${selection.key}`]??0}/20. Learned review interaction: <b className="text-paper">×{mult.toFixed(2)}</b>. Higher combo knowledge adds the separate familiarity bonus shown during greenlight.</div>
+      {(run.targetedResearchLevels?.[`study_pair_${selection.key}`]??0)>=20&&<div className="mt-2 text-[10px] text-gold">MASTERED · Direction {genreTargetFor([a,b]).ideal.join(" / ")} · Story / Art / Sound {genreTargetFor([a,b]).ratio.map(n=>`${Math.round(n*100)}%`).join(" / ")}</div>}
       <div className="mt-2 flex items-center gap-1 text-[9px] text-paper/45"><HelpCircle size={10}/> Unknown pairings stay hidden until you actually ship or research them.</div>
     </div>;
   }

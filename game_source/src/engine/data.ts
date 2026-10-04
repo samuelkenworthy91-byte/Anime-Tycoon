@@ -26,6 +26,7 @@ import {
 import genreV2Runtime from "./generated/genreV3.json";
 
 import arcV3Runtime from "./generated/arcV3.json";
+import { expandedArcCombos } from "./storyExpansion";
 import { IP_HIDDEN_ARC_SEEDS } from "./ipHiddenArcs";
 import { personGender, randomInternationalName, type PersonNameGender } from "./internationalNames";
 
@@ -754,6 +755,7 @@ export interface ArcCombo {
   q: number;
   f: number;
   ordered?: boolean;
+  family?: string;
 }
 
 export const ARC_COMBOS: ArcCombo[] = [
@@ -791,8 +793,17 @@ export const ARC_COMBOS: ArcCombo[] = [
   { id: "backwards_training", name: "Training After the Test", arcs: ["tournament", "montage"], q: -3, f: -0.01, ordered: true },
   { id: "spoiled_mystery", name: "Mystery Spoiled Early", arcs: ["narr_villainreveal", "case"], q: -3, f: -0.01, ordered: true },
   ...arcV3Runtime.add_combos as ArcCombo[],
-  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: `combo_${seed.id}`, name: seed.comboName, arcs: [seed.id, seed.partnerArc], q: 2, f: 0.015 } as ArcCombo)),
-];
+  ...IP_HIDDEN_ARC_SEEDS.map((seed) => ({ id: `combo_${seed.id}`, name: seed.comboName, arcs: [seed.id, seed.partnerArc], q: 3, f: 0.025 } as ArcCombo)),
+
+  { id: "failed_retrieval", name: "Failed Retrieval", arcs: ["narr_rescue", "narr_betrayal"], q: 4, f: 0.03, ordered: true },
+  { id: "personal_vendetta", name: "Personal Vendetta", arcs: ["narr_betrayal", "narr_revenge"], q: 4, f: 0.03, ordered: true },
+  { id: "retrieval_crisis", name: "Retrieval Crisis", arcs: ["narr_rivalintro", "narr_rescue", "narr_betrayal"], q: 5, f: 0.04, ordered: true },
+  { id: "lie_becomes_personal", name: "The Lie Becomes Personal", arcs: ["narr_falsewin", "narr_betrayal", "narr_revenge"], q: 6, f: 0.04, ordered: true },
+  { id: "avenge_the_mentor", name: "Avenge the Mentor", arcs: ["narr_mentor", "narr_sacrifice", "narr_revenge"], q: 6, f: 0.03, ordered: true },
+  { id: "bring_them_home", name: "Bring Them Home", arcs: ["narr_foundfamily", "narr_betrayal", "narr_rescue"], q: 5, f: 0.05, ordered: true },
+  { id: "mask_was_threat", name: "The Mask Was the Threat", arcs: ["narr_secretid", "narr_villainreveal"], q: 4, f: 0.03, ordered: true },
+  ...expandedArcCombos(ARCS),
+].filter(combo=>!["backwards_training","spoiled_mystery"].includes(combo.id)).map(combo=>combo.q<=0||combo.id.startsWith("exp_")||combo.id.startsWith("combo_ip_")?combo:{...combo,ordered:combo.id==="road"?true:combo.ordered,q:Math.max(combo.q,combo.arcs.length>=4?7:combo.arcs.length===3?5:3),f:Math.max(combo.f,combo.arcs.length>=4?.045:combo.arcs.length===3?.035:.025)});
 
 const containsInOrder = (haystack: string[], needles: string[]) => {
   let at = -1;
@@ -805,6 +816,13 @@ const containsInOrder = (haystack: string[], needles: string[]) => {
 /** hidden story structures. Some only work when the beats are in the right order. */
 export const arcCombosFor = (arcIds: string[]): ArcCombo[] =>
   ARC_COMBOS.filter((c) => c.ordered ? containsInOrder(arcIds, c.arcs) : c.arcs.every((a) => arcIds.includes(a)));
+
+/** Score only the longest payoff in each family; strict substructures do not double-pay. */
+export const rewardedArcCombosFor = (arcIds: string[]): ArcCombo[] => {
+ const hits=arcCombosFor(arcIds);
+ return hits.filter(c => c.q < 0 || !hits.some(other => other.q >= 0 && other.arcs.length > c.arcs.length &&
+  ((c.family && c.family===other.family) || c.arcs.every(id=>other.arcs.includes(id)))));
+};
 
 export const arcGenreKey = (arcId: string, genre: GenreId) => `${arcId}|${genre}`;
 
@@ -1428,3 +1446,9 @@ export const yearOfWeek = (w: number) => Math.floor(w / 48) + 1;
 export const monthOfWeek = (w: number) => Math.floor((w % 48) / 4);
 export const weekOfMonth = (w: number) => (w % 4) + 1;
 export const dateLabel = (w: number) => `Y${yearOfWeek(w)} ${MONTHS[monthOfWeek(w)]} W${weekOfMonth(w)}`;
+
+export const TARGETED_RESEARCH_IDS = GENRES.flatMap((g, i) => [
+ { id:`study_genre_${g.id}`, name:`${g.label} Studies`, rd:32, repeatable:true, desc:"Targeted genre knowledge: all eligible discoveries within 20 studies." },
+ ...GENRES.slice(i+1).map(other=>({id:`study_pair_${comboKey([g.id,other.id])}`,name:`${g.label} × ${other.label} Studies`,rd:38,repeatable:true,desc:"A 20-level pairing study with compounded costs and exact production guidance."}))
+]);
+RESEARCH.push(...TARGETED_RESEARCH_IDS);

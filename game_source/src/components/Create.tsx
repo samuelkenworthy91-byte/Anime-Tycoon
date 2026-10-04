@@ -381,6 +381,8 @@ export default function Create({
    *  Known positive structures can contribute their full ordered sequence as
    *  long as none of their arcs has a revealed genre risk. Known clashes are
    *  never introduced by the shortcut. */
+  const [structureLength,setStructureLength]=useState(0);
+  const [structurePage,setStructurePage]=useState(0);
   const researchedArcPlan = useMemo(() => {
     if (!d.genres.length) return [] as string[];
 
@@ -414,6 +416,7 @@ export default function Create({
     const knownStructures = ARC_COMBOS
       .filter((combo) => run.arcCombos.includes(combo.id) && (combo.q > 0 || combo.f > 0))
       .filter((combo) => combo.arcs.every((id) => !hasKnownGenreRisk(id)))
+      .filter(combo=>!structureLength||combo.arcs.length===structureLength)
       .sort((a, b) => (b.q + b.f * 100) - (a.q + a.f * 100) || b.arcs.length - a.arcs.length);
 
     for (const combo of knownStructures) {
@@ -433,7 +436,7 @@ export default function Create({
     }
 
     return plan.slice(0, arcLimit);
-  }, [d.genres, arcLimit, run]);
+  }, [d.genres, arcLimit, run,structureLength]);
 
   const researchedGoodArcShortcuts = useMemo(() => {
     if (!d.genres.length) return [] as (typeof ARCS)[number][];
@@ -468,12 +471,13 @@ export default function Create({
     return ARC_COMBOS
       .filter((combo) => run.arcCombos.includes(combo.id) && (combo.q > 0 || combo.f > 0))
       .filter((combo) => combo.arcs.every((id) => !hasKnownGenreRisk(id)))
+      .filter(combo=>!structureLength||combo.arcs.length===structureLength)
       .sort((a, b) => (b.q + b.f * 100) - (a.q + a.f * 100) || b.arcs.length - a.arcs.length || a.name.localeCompare(b.name));
-  }, [d.genres, run]);
+  }, [d.genres, run, structureLength]);
 
   const searchableArcs = useMemo(
-    () => ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id)),
-    [run.ipMarket.studioArcs]
+    () => ARCS.filter((a) => a.unlock?.kind !== "studioArc" || run.ipMarket.studioArcs.includes(a.id) || run.arcUnlocked.includes(a.id)),
+    [run.ipMarket.studioArcs,run.arcUnlocked]
   );
   const visibleArcs = useMemo(() => {
     const query = arcSearch.trim().toLowerCase();
@@ -876,7 +880,7 @@ export default function Create({
                 )}
               </div>
               {d.genres.length > 0 && (() => {
-                const knowledge = creationKnowledgeSummary(d.genres, run.genreKnowledge);
+                const knowledge = creationKnowledgeSummary(d.genres, run.genreKnowledge,run.targetedResearchLevels);
                 const target = genreTargetFor(d.genres);
                 const word = (value: number) => value < 34 ? "LOW" : value > 66 ? "HIGH" : "MODERATE";
                 return (
@@ -1280,8 +1284,9 @@ export default function Create({
 
                   <div className="mt-2.5">
                     <div className="text-[8px] font-black tracking-[0.16em] text-paper/45">RESEARCHED / PROVEN COMBOS</div>
+                    <div className="my-2 flex flex-wrap gap-1">{[0,2,3,4,5,6].map(n=><button key={n} className="rounded border border-line px-2 py-1 text-[10px]" onClick={()=>{setStructureLength(n);setStructurePage(0);}}>{n===0?'ALL LENGTHS':`${n} ARCS`}{structureLength===n?' ✓':''}</button>)}<button className="rounded border border-gold px-2 py-1 text-[10px]" onClick={()=>setStructurePage(p=>((p+1)*24>=researchedComboShortcuts.length?0:p+1))}>MORE STRUCTURES</button></div>
                     <div className="mt-1 flex flex-wrap gap-1.5">
-                      {researchedComboShortcuts.length > 0 ? researchedComboShortcuts.map((combo) => {
+                      {researchedComboShortcuts.length > 0 ? researchedComboShortcuts.slice((structurePage*24)%Math.max(1,researchedComboShortcuts.length),(structurePage*24)%Math.max(1,researchedComboShortcuts.length)+24).map((combo) => {
                         const base = d.arcs.filter((id) => !combo.arcs.includes(id));
                         const next = [...base, ...combo.arcs];
                         const tooLong = next.length > arcLimit;
@@ -1305,7 +1310,7 @@ export default function Create({
                             title={alreadyActive ? "This structure is already active" : createsKnownClash ? "Would create a story clash your studio already knows about" : tooLong ? "Not enough arc slots in this production scope" : `Insert ${combo.name} in the correct order`}
                           >
                             <span className={rating.cls}>{alreadyActive ? "✓ " : "+ "}{combo.name}</span>
-                            <span className="ml-1 font-normal text-paper/45">· {combo.arcs.map((id) => ARCS.find((arc) => arc.id === id)?.name ?? id).join(" → ")}</span>
+                            <span className="ml-1 font-normal text-paper/45">· {combo.arcs.length} arcs{tooLong ? " · requires a longer production" : ""} · {combo.arcs.map((id) => ARCS.find((arc) => arc.id === id)?.name ?? id).join(" → ")}</span>
                           </button>
                         );
                       }) : <span className="text-[9px] italic text-paper/35">No positive researched/proven story structures are available yet.</span>}
