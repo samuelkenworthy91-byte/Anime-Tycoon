@@ -15,7 +15,6 @@ import {
   tickEditDay,
   MAX_WEEKS,
   type DeskPulse,
-  migrateRun,
   projectById,
   releaseProject,
   sellReadyProject,
@@ -25,13 +24,14 @@ import {
   startProject,
   type RunState,
 } from "./engine/state";
-import { advanceAwardsWeek, pendingNominationAnnouncement, restoreAwardNominationMetadata } from "./engine/awardCycle";
-import { advanceBigThreeWeek, pendingBigThreeReveal, syncBigThreeEra } from "./engine/bigThree";
+import { advanceAwardsWeek, pendingNominationAnnouncement } from "./engine/awardCycle";
+import { advanceBigThreeWeek, pendingBigThreeReveal } from "./engine/bigThree";
 import { ipById } from "./engine/ip";
 import { applyWeeklyInsolvency } from "./engine/insolvency";
 import { randomStartingGenres } from "./engine/startingGenres";
 import type { MilestoneId, MilestoneOutcome } from "./engine/projects";
-import { clearAllSaves, loadSlot, newestSave, saveSlot, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import { clearAllSaves, loadSlot, newestSave, saveSlot, saveSlotDetailed, slotLabel, type SaveData, type SlotId } from "./engine/storage";
+import { buildSaveData, restoreRunFromSave, safeResumeScreen } from "./engine/session";
 import SaveSlots from "./components/SaveSlots";
 import Title from "./components/Title";
 import Office from "./components/Office";
@@ -54,7 +54,7 @@ import AuctionForecast from "./components/AuctionForecast";
 import AuctionCeremony from "./components/AuctionCeremony";
 import SellerAuctionCeremony from "./components/SellerAuctionCeremony";
 import { resolveStudioEvent } from "./engine/events";
-import { canPresentDeferredLevelUp } from "./engine/presentation";
+import { selectPresentation } from "./engine/presentation";
 import { cn } from "./utils/cn";
 import StaffLevelUpModal from "./components/StaffLevelUpModal";
 import ShowrunnerLevelUpModal from "./components/ShowrunnerLevelUpModal";
@@ -65,6 +65,8 @@ import { contractQuickPicks } from "./engine/contractQuickPick";
 import { createNewGamePlusRun } from "./engine/newGamePlus";
 import type { Showrunner } from "./engine/data";
 import ArcballMatch from "./components/ArcballMatch";
+import { managementPolicyOf, shouldPauseForRoutineCompletions } from "./engine/management";
+import type { DynastyPathId } from "./engine/legacy";
 
 type Screen = "title" | "office" | "create" | "licensed" | "produce" | "ship" | "contract" | "release" | "gameover" | "retrospective" | "awards" | "auction" | "arcball";
 
@@ -111,23 +113,17 @@ export default function App() {
   /* slot picker shown over the pause menu */
   const [savePicker, setSavePicker] = useState(false);
   const [savedTo, setSavedTo] = useState<SlotId | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
 
   /** the current career, packaged for storage */
   const snapshot = useCallback((): SaveData | null => {
     if (!run) return null;
-    return {
-      run,
-      meta,
-      clock: { day: clockDay, phase: clockPhase, acc: dayAccRef.current, dayCount: dayCountRef.current },
-      summary: {
-        studio: run.studio,
-        week: run.week,
-        cash: run.cash,
-        fans: run.fans,
-        shows: run.showsMade,
-        officeLevel: run.officeLevel,
-      },
-    };
+    return buildSaveData(run, meta, {
+      day: clockDay,
+      phase: clockPhase,
+      acc: dayAccRef.current,
+      dayCount: dayCountRef.current,
+    });
   }, [run, meta, clockDay, clockPhase]);
 
   /* ------------------------------------------------------------ autosave
@@ -137,10 +133,24 @@ export default function App() {
    * safe re-entry point (mini-games are transient).                        */
   useEffect(() => {
     if (!run || screen === "title" || screen === "gameover") return;
-    const snap = snapshot();
-    if (snap) saveSlot("auto", snap);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run, meta, screen]);
+    /* RunState changes many times per live work pulse. Debounce the JSON write
+       so a busy mature studio does not hammer localStorage several times a
+       second. Important screen transitions still trigger their own debounce. */
+    const timeout = window.setTimeout(() => {
+      const snap = snapshot();
+      if (!snap) return;
+      const result = saveSlotDetailed("auto", snap);
+      if (!result.ok) {
+        setSaveWarning(result.error === "quota"
+          ? "AUTOSAVE FAILED · browser storage is full. Export or delete an old save."
+          : "AUTOSAVE FAILED · your current session is still running. Make a manual save or export.");
+      } else {
+        setSaveWarning(null);
+        setSaveStamp((n) => n + 1);
+      }
+    }, 1200);
+    return () => window.clearTimeout(timeout);
+  }, [run, meta, screen, snapshot]);
 
   /* bankruptcy is the only way a studio dies — retire the save then */
   useEffect(() => {
@@ -150,21 +160,9 @@ export default function App() {
     }
   }, [screen]);
 
-  /* ------------------------------------ awards: a new ceremony year pops
-     the full-screen theatre; leaving returns to the office with the clock
-     still paused (timeSpeed untouched) */
+  /* Awards now join the same central attention queue as auctions, decisions,
+     cultural reveals and growth events. */
   const seenCeremonyYear = useRef(0);
-  useEffect(() => {
-    const year = run?.awardsCeremony?.year ?? 0;
-    if (!year || year === seenCeremonyYear.current) return;
-    if (screen === "office" || screen === "produce") {
-      seenCeremonyYear.current = year;
-      setTimeSpeed(0);      /* the live sim halts while the theatre is open */
-      sfx.fanfare();
-      setScreen("awards");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run?.awardsCeremony?.year, screen]);
 
   /* ------------------------------------ annual rights forecast: like other attention events,
      the live clock stops and the player explicitly decides whether to engage. */
@@ -180,33 +178,40 @@ export default function App() {
   }, [run?.ipMarket.pendingPromptId, screen]);
 
   const pendingShowrunnerLevelUp = (run?.showrunnerCareer?.pendingLevelUps?.length ?? 0) > 0;
-  const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((s) => (s.pendingLevelUps?.length ?? 0) > 0);
+  const pendingLevelUp = pendingShowrunnerLevelUp || !!run?.staff.some((staff) => (staff.pendingLevelUps?.length ?? 0) > 0);
   const sellerAuctionOpen = !!run?.sellerAuction;
+  const pendingAwardsCeremony = !!(run?.awardsCeremony?.year && run.awardsCeremony.year !== seenCeremonyYear.current);
   const bigThreePresentation = run ? pendingBigThreeReveal(run) : null;
-  const bigThreeRevealOpen = !!bigThreePresentation && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId;
   const nominationAnnouncement = run ? pendingNominationAnnouncement(run) : null;
-  const nominationAnnouncementOpen = !!nominationAnnouncement && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen;
   const pendingStaffRequestId = run ? nextStaffRequestId(run, dismissedStaffRequestSet) : null;
-  const staffRequestPresentationOpen = !!pendingStaffRequestId && screen === "office" && !paused && !sellerAuctionOpen && (run?.studioEvents.length ?? 0) === 0 && !run?.ipMarket.pendingPromptId && !bigThreeRevealOpen && !nominationAnnouncementOpen && !released;
-  const levelUpPresentationAllowed = canPresentDeferredLevelUp({
+  const activePresentation = selectPresentation({
     screen,
     paused,
-    sellerAuctionOpen,
-    decisionEventOpen: (run?.studioEvents.length ?? 0) > 0,
-    auctionForecastOpen: !!run?.ipMarket.pendingPromptId,
-    productionRevealOpen: screen === "release" || !!released,
-  }) && !nominationAnnouncementOpen && !bigThreeRevealOpen && !staffRequestPresentationOpen && !released;
+    sellerAuction: sellerAuctionOpen,
+    awardsCeremony: pendingAwardsCeremony,
+    studioDecision: (run?.studioEvents.length ?? 0) > 0,
+    auctionForecast: !!run?.ipMarket.pendingPromptId,
+    bigThree: !!bigThreePresentation,
+    nomination: !!nominationAnnouncement,
+    staffRequest: !!pendingStaffRequestId,
+    levelUp: pendingLevelUp,
+    productionReveal: screen === "release" || !!released,
+  });
+  const bigThreeRevealOpen = activePresentation === "bigThree";
+  const nominationAnnouncementOpen = activePresentation === "nomination";
+  const staffRequestPresentationOpen = activePresentation === "staffRequest";
+  const levelUpPresentationAllowed = activePresentation === "levelUp";
   useEffect(() => {
-    if (pendingLevelUp && levelUpPresentationAllowed) setTimeSpeed(0);
-  }, [pendingLevelUp, levelUpPresentationAllowed]);
-  useEffect(() => {
-    if (nominationAnnouncementOpen) setTimeSpeed(0);
-  }, [nominationAnnouncementOpen]);
-  useEffect(() => {
-    if (bigThreeRevealOpen) setTimeSpeed(0);
-  }, [bigThreeRevealOpen]);
-  useEffect(() => { if (staffRequestPresentationOpen) setTimeSpeed(0); }, [staffRequestPresentationOpen]);
-  useEffect(() => { if (sellerAuctionOpen) setTimeSpeed(0); }, [sellerAuctionOpen]);
+    if (!activePresentation) return;
+    setTimeSpeed(0);
+    if (activePresentation === "awardsCeremony") {
+      const year = run?.awardsCeremony?.year ?? 0;
+      if (!year || year === seenCeremonyYear.current) return;
+      seenCeremonyYear.current = year;
+      sfx.fanfare();
+      setScreen("awards");
+    }
+  }, [activePresentation, run?.awardsCeremony?.year]);
 
   /* ------------------------------------------------------- game clock */
   useEffect(() => {
@@ -233,11 +238,17 @@ export default function App() {
           if (weekBoundary) {
             const before = n;
             n = advanceBigThreeWeek(advanceAwardsWeek(n, { liveDaysAlreadyApplied: true }));
-            const attention =
+            const criticalAttention =
               n.projects.some((p) => p.milestone && !p.rush && !before.projects.find((x) => x.id === p.id)?.milestone) ||
               n.projects.some((p) => p.stage === "ready" && before.projects.find((x) => x.id === p.id)?.stage !== "ready") ||
-              n.marketEvents.length > before.marketEvents.length || n.studioEvents.length > before.studioEvents.length || n.staffEvents.length > before.staffEvents.length ||
-              n.contractJobs.length < before.contractJobs.length || n.trainingJobs.length < before.trainingJobs.length || n.researchJobs.length < before.researchJobs.length;
+              n.marketEvents.length > before.marketEvents.length ||
+              n.studioEvents.length > before.studioEvents.length ||
+              n.staffEvents.length > before.staffEvents.length;
+            const routineCompletion =
+              n.contractJobs.length < before.contractJobs.length ||
+              n.trainingJobs.length < before.trainingJobs.length ||
+              n.researchJobs.length < before.researchJobs.length;
+            const attention = criticalAttention || (routineCompletion && shouldPauseForRoutineCompletions(n));
             if (attention) setTimeSpeed(0);
 
             const insolvency = applyWeeklyInsolvency(n);
@@ -282,9 +293,7 @@ export default function App() {
     if (!save) return;
     primeAudio();
     sfx.fanfare();
-    const migrated = migrateRun(save.run);
-    const restored = restoreAwardNominationMetadata(migrated, migrated.yearShows);
-    const resumed = syncBigThreeEra(restored);
+    const resumed = restoreRunFromSave(save, slot);
     setMeta(save.meta);
     setRun(resumed);
     setReleased(null);
@@ -301,7 +310,7 @@ export default function App() {
     setClockDay(save.clock?.day ?? 0);
     setClockPhase(save.clock?.phase ?? 0);
     /* a save parked exactly at the career end re-opens the retrospective */
-    setScreen(resumed.week >= MAX_WEEKS && !resumed.dynasty ? "retrospective" : "office");
+    setScreen(safeResumeScreen(resumed));
   }, []);
 
   const startRun = useCallback((studio: string, showrunner: string) => {
@@ -337,18 +346,27 @@ export default function App() {
   }, [meta]);
 
   const quitToTitle = useCallback(() => {
+    const snap = snapshot();
+    if (snap) {
+      const result = saveSlotDetailed("auto", snap);
+      if (!result.ok) {
+        setSaveWarning("SAVE & QUIT could not write the autosave. Your session remains open; use SAVE GAME or export before leaving.");
+        return;
+      }
+      setSaveStamp((n) => n + 1);
+    }
     sfx.back();
     setPaused(false);
     setScreen("title");
-  }, []);
+  }, [snapshot]);
 
-  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"]) => {
+  const startNewGamePlus = useCallback((studio: string, showrunner: Showrunner["id"], legacy: DynastyPathId | "none") => {
     if (!run) return;
     const completed = snapshot();
     if (completed) saveSlot("legacy", completed);
     primeAudio();
     sfx.fanfare();
-    const next = createNewGamePlusRun(run, studio, showrunner);
+    const next = createNewGamePlusRun(run, studio, showrunner, legacy);
     setMeta({ studio, showrunner });
     setRun(next);
     seenCeremonyYear.current = 0;
@@ -575,7 +593,13 @@ export default function App() {
 
   const quickBestContract = useCallback((c: Contract) => {
     if (!run) return;
-    const pick = contractQuickPicks(run, c).minimum;
+    const policy = managementPolicyOf(run);
+    if (policy.contractMode === "ask") {
+      takeContract(c);
+      return;
+    }
+    const picks = contractQuickPicks(run, c);
+    const pick = policy.contractMode === "fastest" ? picks.fastest : picks.minimum;
     if (!pick) {
       sfx.back();
       return;
@@ -587,7 +611,7 @@ export default function App() {
     }
     sfx.select();
     setRun(next);
-  }, [run]);
+  }, [run, takeContract]);
 
   const finishContract = useCallback(
     (selection: { staffIds: string[]; showrunner: boolean }) => {
@@ -613,12 +637,7 @@ export default function App() {
       const clockHotkeyAllowed =
         (screen === "office" || liveEditing) &&
         !paused &&
-        !sellerAuctionOpen &&
-        !bigThreeRevealOpen &&
-        !nominationAnnouncementOpen &&
-        !(pendingLevelUp && levelUpPresentationAllowed) &&
-        (run?.studioEvents.length ?? 0) === 0 &&
-        !run?.ipMarket.pendingPromptId &&
+        !activePresentation &&
         !released;
 
       if ((e.code === "Space" || e.key === " ") && !e.repeat && clockHotkeyAllowed && !isTextEntryTarget(e.target)) {
@@ -683,8 +702,9 @@ export default function App() {
             </Btn>
           </div>
           <div className="text-[10px] text-mint/70">
-            Autosaving continuously — SAVE GAME writes a slot you can come back to.
+            Autosave is debounced and keeps two recovery snapshots. SAVE GAME writes a protected manual slot.
           </div>
+          {saveWarning && <div className="rounded-lg border border-neon/50 bg-neon/10 px-2 py-1.5 text-[10px] font-bold text-neon">{saveWarning}</div>}
           <div className="flex items-center justify-center gap-2 border-t border-line/60 pt-3 text-[10px] text-paper/40">
             <Keyboard size={12} /> SPACE clock pause/resume · M mute · ESC pause menu
           </div>
@@ -714,18 +734,20 @@ export default function App() {
           onPick={(id) => {
             const snap = snapshot();
             if (!snap) return;
-            const ok = saveSlot(id, snap);
-            setSavedTo(ok ? id : null);
+            const result = saveSlotDetailed(id, snap);
+            setSavedTo(result.ok ? id : null);
+            setSaveWarning(result.ok ? null : result.error === "quota" ? "SAVE FAILED · browser storage is full. Export or delete an older slot." : "SAVE FAILED · browser storage rejected the write.");
             setSaveStamp((n) => n + 1);
-            if (ok) sfx.fanfare();
+            if (result.ok) sfx.fanfare();
           }}
         />
 
         {savedTo && (
           <div className="anim-pop flex items-center justify-center gap-2 rounded-xl border border-mint/50 bg-mint/10 px-3 py-2 text-xs font-bold text-mint">
-            <Check size={14} /> Saved to {slotLabel(savedTo)}
+            <Check size={14} /> Saved to {slotLabel(savedTo)} · recovery copies rotate automatically
           </div>
         )}
+        {saveWarning && <div className="rounded-xl border border-neon/50 bg-neon/10 px-3 py-2 text-[10px] font-bold text-neon">{saveWarning}</div>}
       </div>
     </div>
   );
@@ -816,7 +838,7 @@ export default function App() {
             onBack={() => { setContract(null); setScreen("office"); }}
           />
         )}
-        {run && run.ipMarket.pendingPromptId && (screen === "office" || screen === "produce") && (
+        {run && activePresentation === "auctionForecast" && run.ipMarket.pendingPromptId && (
           <AuctionForecast run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} onEnter={enterAuction} />
         )}
         {screen === "auction" && run && auctionId && (
@@ -866,13 +888,13 @@ export default function App() {
               aria-label={controlsOpen ? "Close sound and speed controls" : "Open sound and speed controls"}
               aria-expanded={controlsOpen}
               onClick={() => setControlsOpen((open) => !open)}
-              className="game-controls-toggle btn-press rounded-xl border border-line bg-panel2/95 p-2 text-paper/70"
+              className="game-controls-toggle btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/95 p-2 text-paper/70"
             >
               {controlsOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}
             </button>
             <div className="game-controls-panel flex gap-1.5">
             {(screen === "office" || (screen === "produce" && focus?.milestone === "edit")) && ([0, 1, 4, 8, 12, 30] as const).map((speed) => (
-              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
+              <button key={speed} aria-label={`Time ${speed === 0 ? "paused" : `${speed}x`}`} onClick={() => { setTimeSpeed(speed); sfx.click(); }} className={cn("btn-press min-h-11 min-w-11 rounded-xl border px-2 py-1.5 text-[10px] font-extrabold", timeSpeed === speed ? "border-cyanx bg-cyanx/20 text-cyanx" : "border-line bg-panel2/90 text-paper/55")}>
                 {speed === 0 ? "Ⅱ" : `${speed}×`}
               </button>
             ))}
@@ -884,14 +906,14 @@ export default function App() {
                 setMuteUI(m);
                 sfx.click();
               }}
-              className="btn-press rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper"
+              className="btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper"
             >
               {muteUI ? <VolumeX size={15} /> : <Volume2 size={15} />}
             </button>
             <button
               aria-label="Pause"
               onClick={() => canPause && setPaused((p) => !p)}
-              className={cn("btn-press rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper", !canPause && "opacity-30")}
+              className={cn("btn-press min-h-11 min-w-11 rounded-xl border border-line bg-panel2/90 p-2 text-paper/70 hover:text-paper", !canPause && "opacity-30")}
             >
               <Pause size={15} />
             </button>
@@ -899,11 +921,11 @@ export default function App() {
           </div>
         )}
 
-        {run?.sellerAuction && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+        {run?.sellerAuction && activePresentation === "sellerAuction" && (
           <SellerAuctionCeremony run={run} setRun={(fn) => setRun((r) => (r ? fn(r) : r))} />
         )}
 
-        {run && run.studioEvents.length > 0 && screen !== "title" && screen !== "gameover" && screen !== "retrospective" && (
+        {run && activePresentation === "studioDecision" && run.studioEvents.length > 0 && (
           <DecisionEventOverlay
             event={run.studioEvents[0]}
             onChoose={(choiceId) => {

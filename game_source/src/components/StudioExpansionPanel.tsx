@@ -38,7 +38,7 @@ import {
   type ContentProfile,
 } from "../engine/overseas";
 
-type Props = { run: RunState; setRun: (fn: (r: RunState) => RunState) => void };
+type Props = { run: RunState; setRun: (fn: (r: RunState) => RunState) => void; initialTab?: "staff" | "overseas" };
 const button =
   "min-h-11 rounded-lg border border-line px-3 py-2 text-xs font-bold disabled:opacity-40";
 const field =
@@ -91,7 +91,7 @@ function useRunAction({ run, setRun }: Props) {
 }
 export default function StudioExpansionPanel(props: Props) {
   const { run, setRun } = props;
-  const [tab, setTab] = useState<"staff" | "overseas">("staff");
+  const [tab, setTab] = useState<"staff" | "overseas">(props.initialTab ?? "staff");
   const [tutorial, setTutorial] = useState<TutorialId | null>(null);
   const expansion = expansionOf(run);
   const hasCreatorCommitment = expansion.pitches.some((p) => !["declined", "accepted"].includes(p.status)) || expansion.promises.some((p) => p.status === "active");
@@ -425,8 +425,14 @@ function OverseasPanel(props: Props) {
               <div className="mt-2 grid grid-cols-3 gap-1.5">
                 {(["cheap","recommended","maximum"] as OverseasPresetId[]).map((preset) => {
                   const info = quickQuote(territory.id, preset);
-                  const disabled = !info?.quote.release || !!info.quote.block;
-                  return <button key={preset} className={button + (preset === "recommended" ? " border-cyanx/50 text-cyanx" : "")} disabled={disabled} onClick={() => quickSign(territory.id, preset)}>{preset === "cheap" ? "CHEAP EXPORT" : preset === "recommended" ? "RECOMMENDED" : "MAX PUSH"}</button>;
+                  const release = info?.quote.release;
+                  const disabled = !release || !!info?.quote.block;
+                  const label = preset === "cheap" ? "CONSERVATIVE" : preset === "recommended" ? "BALANCED" : "AGGRESSIVE";
+                  const contribution = release ? release.receipts + release.catalogueReceipts - release.cost : 0;
+                  return <button key={preset} className={button + " min-h-14 flex-col !items-start !justify-center " + (preset === "recommended" ? " border-cyanx/50 text-cyanx" : "")} disabled={disabled} onClick={() => quickSign(territory.id, preset)}>
+                    <span className="text-[9px] font-black">{label}</span>
+                    {release && <span className="text-[7px] font-normal text-paper/45">cost {formatGBP(release.cost)} · net {contribution >= 0 ? "+" : "−"}{formatGBP(Math.abs(contribution))} · +{Math.max(0,release.fans).toLocaleString("en-GB")} fans</span>}
+                  </button>;
                 })}
               </div>
             </div>

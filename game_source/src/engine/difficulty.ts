@@ -137,6 +137,54 @@ export const campaignRivalBoost = (input: IndustryPressureInput) => industryPres
 export const campaignAudienceBar = (input: IndustryPressureInput) => industryPressure(input).audienceBar;
 export const campaignSalaryMult = (input: IndustryPressureInput) => industryPressure(input).salaryMult;
 
+
+/* ------------------------------------------------ elite critical standard
+ * Production numbers are allowed to become enormous. What moves instead is the
+ * industry's definition of exceptional work. This only bears down on the top
+ * review bands: ordinary/middling work remains on the familiar absolute scale. */
+export type CriticalEra = "emerging" | "established" | "competitive" | "elite" | "golden";
+
+export interface IndustryCriticalStandard {
+  year: number;
+  era: CriticalEra;
+  label: string;
+  /** maximum critic-point deduction once an internal review is already elite */
+  elitePenalty: number;
+}
+
+export function industryCriticalStandard(week = 0, pressureLevel = 0): IndustryCriticalStandard {
+  const year = Math.max(1, Math.floor(Math.max(0, week) / 48) + 1);
+  const chronology =
+    year <= 4 ? 0 :
+    year <= 8 ? (year - 4) * 0.07 :
+    year <= 13 ? 0.28 + (year - 8) * 0.055 :
+    year <= 19 ? 0.555 + (year - 13) * 0.04 :
+    0.795 + Math.min(0.055, (year - 19) * 0.009);
+  /* Success can accelerate the arms race a little, but chronology is dominant.
+     This deliberately avoids rubber-banding a great player into worse reviews. */
+  const success = Math.min(0.12, Math.max(0, pressureLevel) * 0.02);
+  const elitePenalty = round2(clamp(chronology + success, 0, 0.85));
+  const era: CriticalEra =
+    year <= 4 ? "emerging" :
+    year <= 8 ? "established" :
+    year <= 13 ? "competitive" :
+    year <= 19 ? "elite" : "golden";
+  const label =
+    era === "emerging" ? "EMERGING INDUSTRY" :
+    era === "established" ? "ESTABLISHED INDUSTRY" :
+    era === "competitive" ? "COMPETITIVE ERA" :
+    era === "elite" ? "ELITE ERA" : "GOLDEN AGE";
+  return { year, era, label, elitePenalty };
+}
+
+/** 6s and ordinary 7s are not made worse by the moving standard. The pressure
+ * progressively appears through the 8s and is fully active at 9+. */
+export function eliteCriticalWeight(internalScore: number): number {
+  if (internalScore <= 7) return 0;
+  if (internalScore >= 9) return 1;
+  return clamp((internalScore - 7) / 2, 0, 1);
+}
+
 /* ----------------------------------------------------------- fan flywheel */
 
 /**

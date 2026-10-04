@@ -1,7 +1,7 @@
-import { Save, Trash2, FolderOpen, HardDriveDownload, Sparkles } from "lucide-react";
+import { Save, Trash2, FolderOpen, HardDriveDownload, Sparkles, Download, Upload, ShieldCheck } from "lucide-react";
 import { Btn } from "../fx/fx";
 import { sfx } from "../engine/audio";
-import { clearSlot, listSlots, saveAgeLabel, slotLabel, type SaveGame, type SlotId } from "../engine/storage";
+import { clearSlot, exportSlot, importSlot, listSlots, saveAgeLabel, slotLabel, type SaveGame, type SlotId } from "../engine/storage";
 import { dateLabel, formatGBP, formatNum } from "../engine/data";
 import { cn } from "../utils/cn";
 
@@ -13,6 +13,8 @@ function SlotRow({
   onPick,
   onDelete,
   index,
+  recoveries,
+  onChanged,
 }: {
   id: SlotId;
   save: SaveGame | null;
@@ -20,6 +22,8 @@ function SlotRow({
   onPick: (id: SlotId) => void;
   onDelete: (id: SlotId) => void;
   index: number;
+  recoveries: number;
+  onChanged: () => void;
 }) {
   const auto = id === "auto";
   const archive = id === "legacy";
@@ -76,6 +80,10 @@ function SlotRow({
               {dateLabel(save.summary.week)} · {formatGBP(save.summary.cash)} ·{" "}
               {formatNum(save.summary.fans)} fans · {save.summary.shows} shows
             </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[8px] font-bold text-paper/35">
+              {recoveries > 0 && <span className="flex items-center gap-1 text-mint"><ShieldCheck size={9}/> {recoveries} recovery cop{recoveries === 1 ? "y" : "ies"}</span>}
+              {save.recoveredFrom && <span className="text-gold">RECOVERED · {save.recoveredFrom.replace("backup", "backup ")}</span>}
+            </div>
           </>
         ) : (
           <div className="mt-0.5 text-sm font-bold italic text-paper/35">
@@ -84,19 +92,65 @@ function SlotRow({
         )}
       </button>
 
-      {save && !auto && (
-        <button
-          aria-label={`Delete ${slotLabel(id)}`}
-          onClick={() => {
-            sfx.back();
-            clearSlot(id);
-            onDelete(id);
-          }}
-          className="btn-press shrink-0 rounded-lg border border-line px-2 text-paper/40 hover:border-neon hover:text-neon"
-        >
-          <Trash2 size={13} />
-        </button>
-      )}
+      <div className="flex shrink-0 flex-col gap-1">
+        {save && (
+          <button
+            aria-label={`Export ${slotLabel(id)}`}
+            title="Export save backup"
+            onClick={() => {
+              const raw = exportSlot(id);
+              if (!raw) return;
+              const blob = new Blob([raw], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `anime-runner-${id}-${save.summary.studio.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+              sfx.select();
+            }}
+            className="btn-press min-h-11 min-w-11 rounded-lg border border-line px-2 text-paper/45 hover:border-cyanx hover:text-cyanx"
+          >
+            <Download size={13} />
+          </button>
+        )}
+        {mode === "save" && !auto && !archive && (
+          <label className="btn-press flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border border-line px-2 text-paper/45 hover:border-mint hover:text-mint" title="Import save backup">
+            <Upload size={13}/>
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (typeof reader.result !== "string") return;
+                  const result = importSlot(id as "1" | "2" | "3", reader.result);
+                  if (result.ok) { sfx.fanfare(); onChanged(); }
+                  else window.alert("IMPORT FAILED — this file is not a valid Anime Runner save or is too old/corrupt to migrate.");
+                };
+                reader.readAsText(file);
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+        )}
+        {save && !auto && (
+          <button
+            aria-label={`Delete ${slotLabel(id)}`}
+            onClick={() => {
+              sfx.back();
+              clearSlot(id);
+              onDelete(id);
+            }}
+            className="btn-press min-h-11 min-w-11 rounded-lg border border-line px-2 text-paper/40 hover:border-neon hover:text-neon"
+          >
+            <Trash2 size={13} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -132,7 +186,9 @@ export default function SaveSlots({
           save={s.save}
           mode={mode}
           index={i}
+          recoveries={s.recoveries}
           onPick={onPick}
+          onChanged={() => onChanged?.()}
           onDelete={() => onChanged?.()}
         />
       ))}
@@ -142,8 +198,8 @@ export default function SaveSlots({
           <Save size={16} className="mx-auto mb-1.5 text-paper/30" />
           No saved careers yet.
           <br />
-          Found a studio — the game autosaves as you play, and you can write to a
-          slot any time from the pause menu.
+          Found a studio — autosave keeps two recovery snapshots, manual slots can be exported,
+          and JSON backups can be imported from the pause menu.
         </div>
       )}
     </div>

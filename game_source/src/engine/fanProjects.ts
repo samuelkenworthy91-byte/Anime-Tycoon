@@ -30,8 +30,14 @@ export const FAN_PROJECTS: FanProjectDef[] = [
 ];
 
 export type FanProjectTwist = "normal" | "viral" | "quiet";
-export interface ActiveFanProject { id:string; defId:string; franchiseKey:string; startedWeek:number; endsWeek:number; twist:FanProjectTwist; }
-export interface FanProjectHistory { id:string; defId:string; franchiseKey:string; completedWeek:number; twist:FanProjectTwist; fans:number; }
+export type FanProjectApproach = "community" | "publicity" | "prestige";
+export const FAN_PROJECT_APPROACHES: Record<FanProjectApproach,{label:string;description:string;fanMult:number;fandomMult:number;popMult:number;fatigueDelta:number}> = {
+  community: { label:"Community First", description:"Smaller reach, much deeper fandom and less franchise fatigue.", fanMult:0.85, fandomMult:1.40, popMult:1, fatigueDelta:-1 },
+  publicity: { label:"Publicity Push", description:"Chase wider reach and buzz at the cost of shallower fandom and extra fatigue.", fanMult:1.35, fandomMult:0.80, popMult:1.20, fatigueDelta:1 },
+  prestige: { label:"Prestige Event", description:"Prioritise cultural cachet and franchise popularity over raw turnout.", fanMult:0.80, fandomMult:1.00, popMult:1.65, fatigueDelta:0 },
+};
+export interface ActiveFanProject { id:string; defId:string; franchiseKey:string; startedWeek:number; endsWeek:number; twist:FanProjectTwist; approach?:FanProjectApproach; }
+export interface FanProjectHistory { id:string; defId:string; franchiseKey:string; completedWeek:number; twist:FanProjectTwist; approach?:FanProjectApproach; fans:number; }
 export interface FanProjectState {
   active: ActiveFanProject[];
   history: FanProjectHistory[];
@@ -61,17 +67,17 @@ export function fanProjectBlock(run: RunState, franchiseKey:string, defId:string
   return null;
 }
 
-export function startFanProject(run: RunState, franchiseKey:string, defId:string): RunState | null {
+export function startFanProject(run: RunState, franchiseKey:string, defId:string, approach:FanProjectApproach="community"): RunState | null {
   const block=fanProjectBlock(run,franchiseKey,defId), def=fanProjectDef(defId);
   if(block || !def) return null;
   const state=fanProjectStateOf(run), id=`fan:${franchiseKey}:${defId}:${run.week}`;
-  const job:ActiveFanProject={id,defId,franchiseKey,startedWeek:run.week,endsWeek:run.week+def.weeks,twist:twistFor(id)};
+  const job:ActiveFanProject={id,defId,franchiseKey,startedWeek:run.week,endsWeek:run.week+def.weeks,twist:twistFor(id),approach};
   return {
     ...run,
     cash:run.cash-def.cost,
     fanProjects:{...state,active:[...state.active,job]},
     strategicSpend:[...run.strategicSpend,{id,label:`Fan Project · ${def.name}`,amount:def.cost,week:run.week}],
-    notices:[...run.notices,`🎪 FAN PROJECT: ${def.name} begins for “${run.franchises[franchiseKey].baseTitle}” (−£${def.cost.toLocaleString("en-GB")}, ${def.weeks} weeks).`].slice(-40),
+    notices:[...run.notices,`🎪 FAN PROJECT: ${def.name} begins for “${run.franchises[franchiseKey].baseTitle}” · ${FAN_PROJECT_APPROACHES[approach].label} (−£${def.cost.toLocaleString("en-GB")}, ${def.weeks} weeks).`].slice(-40),
   };
 }
 
@@ -84,18 +90,20 @@ export function advanceFanProjects(run: RunState): RunState {
     const def=fanProjectDef(job.defId), fr=franchises[job.franchiseKey];
     if(!def || !fr) continue;
     const mult=job.twist==="viral"?1.75:job.twist==="quiet"?0.65:1;
-    const fanGain=Math.max(0,Math.round(def.fans*mult));
-    const popGain=Math.max(0,Math.round(def.popularity*(job.twist==="viral"?1.5:job.twist==="quiet"?0.5:1)));
+    const approach=FAN_PROJECT_APPROACHES[job.approach ?? "community"];
+    const fanGain=Math.max(0,Math.round(def.fans*mult*approach.fanMult));
+    const popGain=Math.max(0,Math.round(def.popularity*(job.twist==="viral"?1.5:job.twist==="quiet"?0.5:1)*approach.popMult));
     fans+=fanGain;
-    const next:Franchise={...fr,popularity:Math.min(100,fr.popularity+popGain),fatigue:Math.min(100,fr.fatigue+def.fatigue),lifetimeFans:fr.lifetimeFans+fanGain};
+    const fatigueGain=Math.max(0,def.fatigue+approach.fatigueDelta);
+    const next:Franchise={...fr,popularity:Math.min(100,fr.popularity+popGain),fatigue:Math.min(100,fr.fatigue+fatigueGain),lifetimeFans:fr.lifetimeFans+fanGain};
     next.merchValue=merchValueOf(next);
     franchises[job.franchiseKey]=next;
     const row={...(fandom[job.franchiseKey] ?? {})};
-    for(const target of def.targets) row[target]=Math.min(100,(row[target] ?? 0)+Math.round(def.fandom*mult));
+    for(const target of def.targets) row[target]=Math.min(100,(row[target] ?? 0)+Math.round(def.fandom*mult*approach.fandomMult));
     fandom[job.franchiseKey]=row;
-    profiles[job.franchiseKey]=boostAudienceProfile(profiles[job.franchiseKey],def.targets,Math.max(1,Math.round(def.profileShift*mult))) ?? profiles[job.franchiseKey];
-    history.push({id:job.id,defId:job.defId,franchiseKey:job.franchiseKey,completedWeek:run.week,twist:job.twist,fans:fanGain});
-    notices.push(`🎉 ${def.name} finishes for “${fr.baseTitle}”: +${fanGain.toLocaleString("en-GB")} fans · +${popGain} popularity · ${def.targets.join(" + ")} fandom${job.twist==="viral"?" · it went viral":job.twist==="quiet"?" · quiet turnout":""}.`);
+    profiles[job.franchiseKey]=boostAudienceProfile(profiles[job.franchiseKey],def.targets,Math.max(1,Math.round(def.profileShift*mult*approach.fandomMult))) ?? profiles[job.franchiseKey];
+    history.push({id:job.id,defId:job.defId,franchiseKey:job.franchiseKey,completedWeek:run.week,twist:job.twist,approach:job.approach ?? "community",fans:fanGain});
+    notices.push(`🎉 ${def.name} finishes for “${fr.baseTitle}” · ${approach.label}: +${fanGain.toLocaleString("en-GB")} fans · +${popGain} popularity · ${def.targets.join(" + ")} fandom${job.twist==="viral"?" · it went viral":job.twist==="quiet"?" · quiet turnout":""}.`);
   }
   return {...run,fans,franchises,franchiseAudienceProfiles:profiles,fanProjects:{active:state.active.filter((job)=>job.endsWeek>run.week),history:history.slice(-80),fandom},notices:notices.slice(-40)};
 }

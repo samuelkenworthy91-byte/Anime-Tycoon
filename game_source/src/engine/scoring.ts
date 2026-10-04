@@ -31,7 +31,7 @@ import {
   reviewExpectationAdjustment,
 } from "./production";
 import { genreTargetFor } from "./genreTargets";
-import { FANBASE_SALES_CAP, fanBaseSalesMultiplier } from "./difficulty";
+import { FANBASE_SALES_CAP, eliteCriticalWeight, fanBaseSalesMultiplier, industryCriticalStandard } from "./difficulty";
 import { arcClashesFor, genreReleaseEffect } from "./creativeDiscovery";
 import { cleanMasterQualityMult, contrarianComboMult, criticalDarlingReviewBonus, criticsIgnoreBalance, narrativeMomentumFanMult, slothCriticPolishBonus, slothFinalQualityMult, storyStructureMult } from "./showrunnerPerks";
 
@@ -48,6 +48,25 @@ export interface Review {
   criteria?: string;
   score: number; // out of 10
   quote: string;
+  /** transparent review maths used by the premiere diagnosis */
+  internalScore?: number;
+  standardPenalty?: number;
+  perfectEligible?: boolean;
+  perfectThreshold?: number;
+}
+
+export type ImpactCategory = "production" | "creative" | "critical" | "commercial" | "fans" | "cost";
+
+export interface ImpactEntry {
+  category: ImpactCategory;
+  source: string;
+  metric: "story" | "art" | "sound" | "quality" | "critic" | "revenue" | "fans" | "cost" | "hype";
+  detail: string;
+  before?: number;
+  delta?: number;
+  after?: number;
+  multiplier?: number;
+  positive?: boolean;
 }
 
 export interface ShowResult {
@@ -79,6 +98,10 @@ export interface ShowResult {
   quality: number;
   /** positive arc synergies and negative arc clashes newly learned this release */
   arcCombosDiscovered: string[];
+  /** structured, player-facing accounting of what changed this release */
+  impactReport?: ImpactEntry[];
+  /** moving elite-review standard active for this release */
+  criticalStandard?: { year: number; label: string; elitePenalty: number };
   /** ids of negative ordered structures that actually fired this release */
   arcClashes?: string[];
   /** commercial genre-pair effect applied to every weekly sales point */
@@ -213,6 +236,19 @@ export const CHEM_QUALITY_WEIGHT = 0.6;
  *  even for an elite master, tight enough that 9s are repeatable. */
 export const REVIEW_NOISE_RANGE = 0.70;
 
+export const NORMAL_PERFECT_REVIEW_THRESHOLD = 9.92;
+export const CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD = 9.40;
+
+export function perfectReviewThreshold(showrunner: string): number {
+  return showrunner === "critical" ? CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD : NORMAL_PERFECT_REVIEW_THRESHOLD;
+}
+
+export function perfectReviewEligible(showrunner: string, preDarlingInternal: number, calibratedAfterPerks: number): boolean {
+  return showrunner === "critical"
+    ? preDarlingInternal >= CRITICAL_DARLING_PERFECT_REVIEW_THRESHOLD
+    : calibratedAfterPerks >= NORMAL_PERFECT_REVIEW_THRESHOLD;
+}
+
 export const CAST_BASE_QUALITY = 0.5;
 export const VISIBLE_CAST_QUALITY = 0.6;
 export const VISIBLE_CAST_SALES = 0.025;
@@ -276,6 +312,12 @@ export function computeResult(opts: {
   fanBase: number;
   /** dynasty-era audience expectations — mildly raises the review bar */
   audienceBar?: number;
+  /** career timing drives the mature-industry elite review standard */
+  careerWeek?: number;
+  /** success can accelerate that standard slightly without dominating it */
+  industryPressureLevel?: number;
+  /** realised production-time bonus points carried forward by the project */
+  productionImpact?: Record<string, Points>;
   /** knowledge affects explanation only; never affinity mechanics */
   castAffinityDiscovered?: string[];
   /** Optional competence floor used by quality-first Full Delegation. */
@@ -304,6 +346,9 @@ export function computeResult(opts: {
     costs,
     fanBase,
     audienceBar,
+    careerWeek = 0,
+    industryPressureLevel = 0,
+    productionImpact = {},
     castAffinityDiscovered = [],
     qualityFloor,
     salesCap,
@@ -499,6 +544,7 @@ export function computeResult(opts: {
   const floor = showrunner === "vision" ? 5 : 4;
   const expectationAdj = reviewExpectationAdjustment(reviewExpectation);
   const audienceAdj = -Math.max(0, audienceBar ?? 0) * 0.07;
+  const criticalStandard = industryCriticalStandard(careerWeek, industryPressureLevel);
   /* absolute-quality mapping with a soft cap above quality 36
      (36 → ~9.0, 40 → ~9.5). A 10 requires elite quality AND critic
      agreement — elite work lands 9s regularly, 10s occasionally. */
@@ -528,19 +574,35 @@ export function computeResult(opts: {
       criteria = "Animation/sound craft · Overall output · Direction · Editing notes";
       s += (ignoreDepartmentBalance ? 0 : (mix[1] - genreRatio[1]) * 0.45 + (mix[2] - genreRatio[2]) * 0.35) + productionCriticAdj + overallDirectionAdj - issues * 0.20 + (roll() - 0.5) * REVIEW_NOISE_RANGE * 2;
     }
+    /* Mature industries are harder to impress only at the top end. A 6 stays a
+       6; the moving standard mainly distinguishes strong 8s, 9s and 10s. */
+    const standardPenalty = criticalStandard.elitePenalty * eliteCriticalWeight(s);
+    s -= standardPenalty;
+    const preDarlingInternal = s;
     s += criticalDarlingReviewBonus(showrunner) + slothCriticPolishBonus(showrunner);
     const calibrated = clamp(s, floor, 10);
-    /* Integer reviews retain the Kairosoft feel, but 10/10 has a deliberately
-       higher bar than ordinary rounding. Other bands use a slight conservative
-       threshold so strong work is not an automatic Hall of Fame. */
-    s = calibrated >= 9.92 ? 10 : Math.max(floor, Math.floor(calibrated + 0.43));
-    /* A numerical 10 is a critic calling the work effectively flawless.
-       Even after the raw score clears the 9.92 bar, that judgement is rare;
-       9/10 remains the normal result for excellent work. */
+    /* Critical Darling keeps the +0.40 general critic lift, but has an explicit
+       perfect-review identity: 9.40 BEFORE that personal lift is enough to enter
+       perfect-score consideration. Everyone else still needs 9.92 after perks. */
+    const perfectThreshold = perfectReviewThreshold(showrunner);
+    const perfectEligible = perfectReviewEligible(showrunner, preDarlingInternal, calibrated);
+    s = perfectEligible ? 10 : Math.max(floor, Math.floor(calibrated + 0.43));
+    /* Eligibility is not an automatic 10. The critic still has to make the
+       unusually strong call; this keeps perfect 40s exceptional. */
     if (s === 10 && roll() >= 0.28) s = 9;
     const tier = tierOf(s * 4);
     const pool = r.quotes[tier];
-    return { outlet: r.name, focus: r.focus, criteria, score: s, quote: pool[Math.floor(roll() * pool.length)] };
+    return {
+      outlet: r.name,
+      focus: r.focus,
+      criteria,
+      score: s,
+      quote: pool[Math.floor(roll() * pool.length)],
+      internalScore: preDarlingInternal,
+      standardPenalty,
+      perfectEligible,
+      perfectThreshold,
+    };
   });
 
   const total = reviews.reduce((a, r) => a + r.score, 0);
@@ -666,7 +728,7 @@ export function computeResult(opts: {
   if (showrunner === "finisher")
     breakdown.push({ label: "The Finisher · Final Cut", pts: issues === 0 ? "clean master ×1.05 final quality · editing ×1.35" : "editing ×1.35 · clean-master quality bonus missed" });
   if (showrunner === "critical")
-    breakdown.push({ label: "Critical Darling · Critical Language", pts: "+0.40 internal score for every critic before rounding" });
+    breakdown.push({ label: "Critical Darling · Critical Language", pts: "+0.40 every critic · 9.40 pre-perk internal score enters rare 10/10 consideration" });
   if (showrunner === "ensemble")
     breakdown.push({ label: "Ensemble Director · Greater Than the Sum", pts: "staff contribution +15% per represented Writer / Animator / Composer role" });
   if (showrunner === "darkness")
@@ -675,6 +737,40 @@ export function computeResult(opts: {
     breakdown.push({ label: "Brighter Than the Dawn", pts: "bright alignment modifies live production output; dark genres apply the mirrored penalty" });
   if (showrunner === "unbalanced")
     breakdown.push({ label: "Who Needs Balance?", pts: "Story / Art / Sound target-balance penalties ignored" });
+
+  const impactReport: ImpactEntry[] = [];
+  for (const [source, gains] of Object.entries(productionImpact)) {
+    for (const metric of ["story", "art", "sound"] as const) {
+      const delta = gains?.[metric] ?? 0;
+      if (Math.abs(delta) < 0.001) continue;
+      impactReport.push({
+        category: "production",
+        source,
+        metric,
+        delta,
+        positive: delta >= 0,
+        detail: `${delta >= 0 ? "+" : ""}${Math.round(delta * 10) / 10} ${metric.toUpperCase()} realised during production`,
+      });
+    }
+  }
+  impactReport.push(
+    { category: "creative", source: "Production output", metric: "quality", delta: pointScore * POINT_QUALITY_SCALE * PRODUCTION_CORE_CALIBRATION, positive: true, detail: `${Math.round(totalPts)} delivered points → ${pointScore.toFixed(1)} capped production score` },
+    { category: "creative", source: "Direction sliders", metric: "quality", multiplier: sliderFitMult, delta: sliderPart * SLIDER_QUALITY_SCALE, positive: sliderFitMult >= 0.92, detail: `${Math.round(sliderFitMult * 100)}% fit · +${(sliderPart * SLIDER_QUALITY_SCALE).toFixed(1)} then ×${sliderFitMult.toFixed(2)}` },
+    { category: "creative", source: "Casting", metric: "quality", multiplier: castFitMult, delta: casting, positive: castFitMult >= 0.9, detail: `+${casting.toFixed(1)} cast quality · whole-production fit ×${castFitMult.toFixed(2)}` },
+    { category: "creative", source: "Story arcs", metric: "quality", multiplier: arcStructureMult, delta: arcQuality, positive: arcQuality >= 0, detail: `${arcQuality >= 0 ? "+" : ""}${arcQuality.toFixed(1)} quality · structure ×${arcStructureMult.toFixed(2)}` },
+    { category: "creative", source: "Genre / combo mastery", metric: "quality", multiplier: comboFactor, positive: comboFactor >= 1, detail: `genre pairing ×${genreTargetFor(draft.genres).comboQualityMult.toFixed(2)} · mastery ×${comboFactor.toFixed(2)}` },
+    { category: "creative", source: "Editing notes", metric: "quality", delta: -issues * ISSUE_QUALITY_COST, positive: issues === 0, detail: `${issues} unresolved · −${(issues * ISSUE_QUALITY_COST).toFixed(1)} quality` },
+    { category: "critical", source: "Studio reputation expectation", metric: "critic", delta: expectationAdj, positive: expectationAdj >= 0, detail: `${expectationAdj >= 0 ? "+" : ""}${expectationAdj.toFixed(2)} critic points` },
+    { category: "critical", source: "Audience / campaign pressure", metric: "critic", delta: audienceAdj, positive: audienceAdj >= 0, detail: `${audienceAdj.toFixed(2)} critic points` },
+    { category: "critical", source: `Industry standard · ${criticalStandard.label}`, metric: "critic", delta: -criticalStandard.elitePenalty, positive: false, detail: `up to −${criticalStandard.elitePenalty.toFixed(2)} on elite internal reviews · ordinary scores barely affected` },
+  );
+  if (showrunner === "critical") {
+    const eligible = reviews.filter((review) => review.perfectEligible).length;
+    impactReport.push({ category: "critical", source: "Critical Darling · Critical Language", metric: "critic", delta: 0.40, positive: true, detail: `+0.40 every critic · ${eligible}/4 critics cleared the special 9.40 perfect-score gate` });
+  }
+  if (showrunner === "sloth") {
+    impactReport.push({ category: "critical", source: "The Sloth · critic polish", metric: "critic", delta: slothCriticPolishBonus(showrunner), positive: true, detail: `+${slothCriticPolishBonus(showrunner).toFixed(2)} internal critic score` });
+  }
 
   return {
     reviews,
@@ -697,6 +793,8 @@ export function computeResult(opts: {
     secretDiscovered,
     quality,
     arcCombosDiscovered,
+    impactReport,
+    criticalStandard: { year: criticalStandard.year, label: criticalStandard.label, elitePenalty: criticalStandard.elitePenalty },
     arcClashes: arcClashesHit.map((c) => c.id),
     genreSalesMult: genreEffect.salesMultiplier,
   };

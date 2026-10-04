@@ -54,9 +54,20 @@ export interface DynastyInvestment {
   boughtWeek: number;
 }
 
+export type DynastyPathId = "creative" | "global" | "talent" | "production";
+
+export const DYNASTY_PATHS: Record<DynastyPathId, { name: string; blurb: string }> = {
+  creative: { name: "Creative Institution", blurb: "Become the studio whose craft changes what the industry believes anime can be." },
+  global: { name: "Global Media Group", blurb: "Turn proven anime into a worldwide audience and distribution machine." },
+  talent: { name: "Talent Dynasty", blurb: "Build the industry's deepest bench and make great creators the studio's lasting advantage." },
+  production: { name: "Production Empire", blurb: "Scale capacity and infrastructure until several elite productions can move at once." },
+};
+
 export interface DynastyState {
   /** the week dynasty mode began (normally CAREER_WEEKS) */
   startedWeek: number;
+  /** one permanent strategic identity; old saves may not have chosen yet */
+  path?: DynastyPathId;
   investments: DynastyInvestment[];
   /** the all-time industry records, refreshed each year end */
   records: IndustryRecord[];
@@ -68,8 +79,10 @@ export interface DynastyState {
 export function migrateDynasty(raw: unknown, week: number): DynastyState | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const d = raw as Partial<DynastyState>;
+  const path = (d as { path?: unknown }).path;
   return {
     startedWeek: typeof d.startedWeek === "number" ? d.startedWeek : week,
+    path: path === "creative" || path === "global" || path === "talent" || path === "production" ? path : undefined,
     investments: Array.isArray(d.investments) ? d.investments : [],
     records: Array.isArray(d.records) ? d.records : [],
     legacies: Array.isArray(d.legacies) ? d.legacies : [],
@@ -83,58 +96,47 @@ export interface InvestmentDef {
   name: string;
   cost: number;
   blurb: string;
+  path?: DynastyPathId;
   /** exact numeric effects, shown verbatim in the UI */
   effects: string[];
 }
 
 /** enormous optional money sinks — each is a permanent studio-wide buff */
 export const DYNASTY_INVESTMENTS: InvestmentDef[] = [
-  {
-    id: "secondBuilding",
-    name: "Second Production Building",
-    cost: 6_000_000,
-    blurb: "A satellite studio across town. Two pipelines, one empire.",
-    effects: ["+1 concurrent production slot"],
-  },
-  {
-    id: "campus",
-    name: "World-Class Animation Campus",
-    cost: 14_000_000,
-    blurb: "The whole industry orbits this address.",
-    effects: ["+10% all production points", "+2 staff desks"],
-  },
-  {
-    id: "intl",
-    name: "International Marketing Division",
-    cost: 9_000_000,
-    blurb: "Day-one simulcast in forty languages.",
-    effects: ["+20% revenue from every release"],
-  },
-  {
-    id: "render",
-    name: "Advanced Render Farm",
-    cost: 12_000_000,
-    blurb: "A server hall that hums like a cathedral.",
-    effects: ["+0.25 team speed on every production"],
-  },
-  {
-    id: "museum",
-    name: "Studio Museum & Archive",
-    cost: 7_000_000,
-    blurb: "Every storyboard ever drawn, behind glass.",
-    effects: ["+4 research data/week", "+5% fans from every release"],
-  },
-  {
-    id: "academy",
-    name: "Talent Academy",
-    cost: 11_000_000,
-    blurb: "The next generation is trained in-house.",
-    effects: ["staff earn +50% XP"],
-  },
+  { id: "masterworkCampus", name: "Masterwork Campus", cost: 650_000_000, path: "creative", blurb: "Purpose-built rooms for the studio's most demanding work.", effects: ["+8% production points", "+0.10 team speed"] },
+  { id: "livingArchive", name: "Living Archive Institute", cost: 400_000_000, path: "creative", blurb: "The studio turns decades of production history into active craft knowledge.", effects: ["+15 RD/week", "+8% release fans"] },
+  { id: "worldDistribution", name: "World Distribution Network", cost: 900_000_000, path: "global", blurb: "Permanent regional teams turn international release into normal business.", effects: ["+15% release revenue", "+6% release fans"] },
+  { id: "mediaNetwork", name: "Anime Runner Media Network", cost: 1_800_000_000, path: "global", blurb: "A distribution and broadcast network large enough to carry another slate.", effects: ["+20% release revenue", "+1 concurrent production"] },
+  { id: "nationalAcademy", name: "National Talent Academy", cost: 450_000_000, path: "talent", blurb: "A serious creator pipeline rather than another recruitment advert.", effects: ["+60% staff XP", "+3 staff desks"] },
+  { id: "creatorResidency", name: "Creator Residency Quarter", cost: 850_000_000, path: "talent", blurb: "Elite creators can stay, teach and make ambitious work inside the studio.", effects: ["+8% production points", "+3 staff desks"] },
+  { id: "secondLot", name: "Second Production Lot", cost: 750_000_000, path: "production", blurb: "A second full production lot with its own permanent operating teams.", effects: ["+1 concurrent production", "+3 staff desks"] },
+  { id: "megaFarm", name: "Next-Generation Render Complex", cost: 1_200_000_000, path: "production", blurb: "Industrial-scale finishing infrastructure built for an empire-sized slate.", effects: ["+0.20 team speed", "+5% production points"] },
 ];
 
+/* Old dynasty purchases remain valid after migration, but are no longer offered
+   as the post-career design. This preserves old saves without keeping the
+   cheap all-bonuses shopping list alive. */
+const LEGACY_INVESTMENTS: InvestmentDef[] = [
+  { id: "secondBuilding", name: "Second Production Building", cost: 6_000_000, blurb: "Legacy investment", effects: ["+1 concurrent production slot"] },
+  { id: "campus", name: "World-Class Animation Campus", cost: 14_000_000, blurb: "Legacy investment", effects: ["+10% all production points", "+2 staff desks"] },
+  { id: "intl", name: "International Marketing Division", cost: 9_000_000, blurb: "Legacy investment", effects: ["+20% revenue from every release"] },
+  { id: "render", name: "Advanced Render Farm", cost: 12_000_000, blurb: "Legacy investment", effects: ["+0.25 team speed on every production"] },
+  { id: "museum", name: "Studio Museum & Archive", cost: 7_000_000, blurb: "Legacy investment", effects: ["+4 research data/week", "+5% fans from every release"] },
+  { id: "academy", name: "Talent Academy", cost: 11_000_000, blurb: "Legacy investment", effects: ["staff earn +50% XP"] },
+];
+
+
 export const investmentDef = (id: string): InvestmentDef | null =>
-  DYNASTY_INVESTMENTS.find((i) => i.id === id) ?? null;
+  DYNASTY_INVESTMENTS.find((i) => i.id === id) ?? LEGACY_INVESTMENTS.find((i) => i.id === id) ?? null;
+
+export function chooseDynastyPath(run: RunState, path: DynastyPathId): RunState | null {
+  if (!run.dynasty || run.dynasty.path || !DYNASTY_PATHS[path]) return null;
+  return {
+    ...run,
+    dynasty: { ...run.dynasty, path },
+    notices: [...run.notices, `🏯 LEGACY STRATEGY · ${DYNASTY_PATHS[path].name}: ${DYNASTY_PATHS[path].blurb}`].slice(-40),
+  };
+}
 
 /** the aggregate mechanical effect of every owned investment */
 export interface DynastyFX {
@@ -183,6 +185,15 @@ export function dynastyFX(run: RunState): DynastyFX {
     fx.fanMult += 0.05;
   }
   if (owned.has("academy")) fx.xpMult *= 1.5;
+
+  if (owned.has("masterworkCampus")) { fx.pointMult *= 1.08; fx.speed += 0.10; }
+  if (owned.has("livingArchive")) { fx.rdWeekly += 15; fx.fanMult += 0.08; }
+  if (owned.has("worldDistribution")) { fx.revenueMult *= 1.15; fx.fanMult += 0.06; }
+  if (owned.has("mediaNetwork")) { fx.revenueMult *= 1.20; fx.extraProjects += 1; }
+  if (owned.has("nationalAcademy")) { fx.xpMult *= 1.60; fx.extraStaff += 3; }
+  if (owned.has("creatorResidency")) { fx.pointMult *= 1.08; fx.extraStaff += 3; }
+  if (owned.has("secondLot")) { fx.extraProjects += 1; fx.extraStaff += 3; }
+  if (owned.has("megaFarm")) { fx.speed += 0.20; fx.pointMult *= 1.05; }
   return fx;
 }
 
@@ -192,6 +203,8 @@ export function investmentBlockReason(run: RunState, id: string): string | null 
   if ((run.dynasty.investments ?? []).some((i) => i.id === id)) return "Already owned";
   const def = investmentDef(id);
   if (!def) return "Unknown investment";
+  if (def.path && !run.dynasty.path) return "Choose a Dynasty strategy first";
+  if (def.path && run.dynasty.path !== def.path) return `Requires ${DYNASTY_PATHS[def.path].name}`;
   if (run.cash < def.cost) return `Needs £${def.cost.toLocaleString("en-GB")}`;
   return null;
 }
@@ -580,6 +593,7 @@ export function beginDynastyMode(run: RunState): RunState {
   if (run.dynasty) return run;
   const dynasty: DynastyState = {
     startedWeek: Math.max(run.week, CAREER_WEEKS),
+    path: undefined,
     investments: [],
     records: computeIndustryRecords(run),
     legacies: [],

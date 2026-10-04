@@ -193,6 +193,7 @@ import {
   activeProjects,
   applyMilestoneOutcome,
   projectOfStaff,
+  recordProjectImpact,
   type StaffModFn,
   assignedStaffIds,
   computeProjectResult,
@@ -218,6 +219,7 @@ import {
 } from "./legacy";
 import { tickDelegated } from "./automation";
 import { teamCoordinationEfficiency } from "./teamCoordination";
+import { managementPolicyOf, shouldAutoDelegateProject, shouldPauseForRoutineCompletions, type StudioManagementPolicy } from "./management";
 import { staffInjuryReason, staffIsInjured } from "./staffAvailability";
 import { canDelegateRoutineProduction } from "./careerEras";
 import {
@@ -457,8 +459,10 @@ export interface RunState {
   strategicSpend: { id: string; label: string; amount: number; week: number; projectId?: string }[];
   capitalProjects: string[];
   staffContracts: Record<string, { expiresWeek: number; bonus: number; exclusive: boolean }>;
-  /** Major-studio era QoL: routine projects default to Auto Manage once a real team is assigned. */
+  /** Major-studio era QoL: legacy compatibility flag; managementPolicy is authoritative. */
   executiveDelegation?: boolean;
+  /** Mature-studio management-by-exception defaults. */
+  managementPolicy?: StudioManagementPolicy;
   /** One consequential consumer-products bet per franchise at a time. */
   activeMerchBets?: Record<string, { productId: string; label: string; startedWeek: number; endsWeek: number; projectedReturn: number; audienceFit: number }>;
 }
@@ -613,6 +617,8 @@ export function initialRun(studio: string, showrunner: string): RunState {
     strategicSpend: [],
     capitalProjects: [],
     staffContracts: {},
+    executiveDelegation: false,
+    managementPolicy: { projectMode: "manual", contractMode: "ask", alertMode: "all" },
   };
 }
 
@@ -775,6 +781,8 @@ export function migrateRun(raw: unknown): RunState {
     strategicSpend: migrateStrategicSpend((r as { strategicSpend?: unknown }).strategicSpend, r.week ?? 0),
     capitalProjects: Array.isArray(r.capitalProjects) ? r.capitalProjects : [],
     staffContracts: r.staffContracts && typeof r.staffContracts === "object" ? r.staffContracts : {},
+    managementPolicy: managementPolicyOf(r),
+    executiveDelegation: managementPolicyOf(r).projectMode !== "manual",
     recruitmentAdRefreshes: typeof r.recruitmentAdRefreshes === "number" ? Math.max(0, Math.floor(r.recruitmentAdRefreshes)) : 0,
     recruitmentAdMonth: typeof r.recruitmentAdMonth === "number" ? Math.max(0, Math.floor(r.recruitmentAdMonth)) : Math.floor((r.week ?? 0) / 4),
     /* additive migration: an old save simply starts with the neutral
@@ -2241,7 +2249,7 @@ export function assignToProject(r: RunState, projectId: string, staffId: string)
         : project;
       if (
         !already &&
-        r.executiveDelegation &&
+        shouldAutoDelegateProject(r, next) &&
         canDelegateRoutineProduction(r.week) &&
         r.officeLevel >= 2 &&
         next.staffIds.length >= 2 &&
@@ -2357,6 +2365,8 @@ export interface DeskPulse {
   /** rare project-wide outcomes surfaced through the same bubble system:
    *  research = +1 RD, note = +1 editing issue (see tickStudioWorkPulse) */
   kind?: "research" | "note";
+  /** realised extra points attributable to named production systems */
+  impactDeltas?: { source: string; points: number }[];
 }
 
 const POINT_TYPES: PointType[] = ["story", "art", "sound"];
@@ -2647,65 +2657,82 @@ function chooseDiscipline(st: Staff): PointType {
   return "story";
 }
 
-export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointType, editing = false): number {
-  if (staffIsInjured(st, r.day ?? r.week * 7)) return 0;
+interface ContributionStep {
+  source: string;
+  mult: number;
+  before: number;
+  after: number;
+}
+
+function contributionEffectiveSkillDetail(r: RunState, st: Staff, type: PointType, editing = false): { base: number; effective: number; steps: ContributionStep[] } {
+  if (staffIsInjured(st, r.day ?? r.week * 7)) return { base: 0, effective: 0, steps: [] };
   const fx = facilityFX(r.facilities);
   const project = projectOfStaff(r.projects, st.id);
-  let effective = staffPoint(st, type);
+  const base = staffPoint(st, type);
+  let effective = base;
+  const steps: ContributionStep[] = [];
+  const apply = (source: string, mult: number) => {
+    if (!Number.isFinite(mult) || Math.abs(mult - 1) < 0.0001) return;
+    const before = effective;
+    effective *= mult;
+    steps.push({ source, mult, before, after: effective });
+  };
+
   if (project) {
     const team = r.staff.filter((mate) => project.staffIds.includes(mate.id));
-    /* Existing morale, traits, specialisations and bonds now modify the live
-       percentile check instead of a removed weekly quality calculation. */
-    effective *= personMod(st, project, team, { bonds: r.bonds ?? {} }).out;
-    /* Unlimited project crews trade hard caps for coordination. A coordinator
-       removes the loss; otherwise the Production Manager's real skill softens it. */
+    apply("Staff morale / traits / relationships", personMod(st, project, team, { bonds: r.bonds ?? {} }).out);
     const coordinationRelief = studioProduction(r.heads ?? {}, r.staff, r.showrunner).coordinationRelief;
-    effective *= teamCoordinationEfficiency(team, coordinationRelief);
-    effective *= managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq"));
-    effective *= specialisationProjectEffects(r, project.draft).outputMult;
-    effective *= productionTrackProjectMultiplier(researchTrackLevel(r, "production"));
+    apply("Team coordination", teamCoordinationEfficiency(team, coordinationRelief));
+    apply("Studio management capacity", managementOutputMult(activeProjects(r.projects).length, r.officeLevel, Object.values(r.heads ?? {}).filter(Boolean).length, r.capitalProjects.includes("flagship_hq")));
+    apply("House specialisation · live output", specialisationProjectEffects(r, project.draft).outputMult);
+    apply("Production research track", productionTrackProjectMultiplier(researchTrackLevel(r, "production")));
     if (project.auto?.mode === "full") {
       if (r.showrunner === "delegator") {
         const director = project.auto.directorStaffId ? r.staff.find((member) => member.id === project.auto!.directorStaffId) : undefined;
         const preferred = !!director?.favGenre && project.draft.genres.includes(director.favGenre);
-        effective *= preferred ? 1.55 : 1.35;
+        apply("The Delegator · delegated crew", preferred ? 1.55 : 1.35);
       } else {
-        effective *= 0.95;
+        apply("Full Delegation", 0.95);
       }
     }
-    if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) effective *= 2;
-    if (r.showrunner === "over9000") effective *= over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult;
+    if (r.showrunner === "sloth" && !(r.contractJobs ?? []).some((job) => job.showrunner)) apply("The Sloth · crew output", 2);
+    if (r.showrunner === "over9000") apply("Over 9000 · Saiyan charge", over9000Charge(r.showrunner, r.showrunnerCareer.level).outputMult);
     if (!editing) {
-      /* Project-identity perks belong on the live contribution path. Roxie's
-         schedule modifier already accelerates the calendar; this restores the
-         missing Story/Art/Sound output half of No Blueprint. */
-      effective *= trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {});
-      effective *= polarityProductionMult(r.showrunner, project.draft.genres);
+      apply("Roxie Kade · No Blueprint", trailblazerProductionMult(r.showrunner, project.draft.genres, r.comboLevels ?? {}));
+      apply(
+        r.showrunner === "darkness" ? "Prince of Darkness · genre alignment" :
+        r.showrunner === "dawn" ? "Brighter Than the Dawn · genre alignment" :
+        "Showrunner genre alignment",
+        polarityProductionMult(r.showrunner, project.draft.genres),
+      );
       if (r.showrunner === "ensemble") {
         const represented = new Set(team.map((mate) => mate.role)).size;
-        effective *= 1 + Math.min(3, represented) * 0.15;
+        apply("Ensemble Director · team disciplines", 1 + Math.min(3, represented) * 0.15);
       }
     }
   } else {
-    effective *= 0.72 + Math.max(0, st.stamina) / 220;
+    apply("Availability / stamina", 0.72 + Math.max(0, st.stamina) / 220);
   }
-  effective *= fx.pointMult[type];
-  effective *= studioPointMult(r.heads ?? {}, r.staff, r.legends ?? [])[type];
-  if (r.research.includes("pipeline")) effective *= 1.12;
-  if (type === "story" && r.research.includes("storyboard")) effective *= 1.15;
-  if (type === "art" && r.research.includes("mocap")) effective *= 1.12;
+
+  apply(`Facilities · ${type}`, fx.pointMult[type]);
+  apply("Department heads & legends", studioPointMult(r.heads ?? {}, r.staff, r.legends ?? [])[type]);
+  if (r.research.includes("pipeline")) apply("Pipeline research", 1.12);
+  if (type === "story" && r.research.includes("storyboard")) apply("Storyboard research", 1.15);
+  if (type === "art" && r.research.includes("mocap")) apply("Motion-capture research", 1.12);
   const craftDiscipline: ResearchTrackId = type === "story" ? "writing" : type === "art" ? "animation" : "sound";
-  effective *= trackSkillMultiplier(researchTrackLevel(r, craftDiscipline));
+  apply(`${craftDiscipline[0].toUpperCase() + craftDiscipline.slice(1)} research track`, trackSkillMultiplier(researchTrackLevel(r, craftDiscipline)));
   if (editing) {
-    effective *= 1 + fx.issueFix * 0.15;
-    if (r.research.includes("qa")) effective *= 1.15;
-    effective *= trackSkillMultiplier(researchTrackLevel(r, "production"));
-    if (r.showrunner === "finisher") effective *= 1.35;
+    apply("Post-production facilities", 1 + fx.issueFix * 0.15);
+    if (r.research.includes("qa")) apply("QA research", 1.15);
+    apply("Production research · editing", trackSkillMultiplier(researchTrackLevel(r, "production")));
+    if (r.showrunner === "finisher") apply("The Finisher · editing", 1.35);
   }
-  /* Genji's Steady Hand is deliberately obvious: all staff contribution
-     output is 50% stronger everywhere, including contract and edit work. */
-  if (r.showrunner === "steady") effective *= 1.5;
-  return Math.max(0, effective);
+  if (r.showrunner === "steady") apply("Genji Ashida · Steady Hand", 1.5);
+  return { base, effective: Math.max(0, effective), steps };
+}
+
+export function contributionEffectiveSkill(r: RunState, st: Staff, type: PointType, editing = false): number {
+  return contributionEffectiveSkillDetail(r, st, type, editing).effective;
 }
 
 function showrunnerEffectiveSkill(r: RunState, type: PointType, project?: Project): number {
@@ -2801,8 +2828,27 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
     const project = projectOfStaff(r.projects, st.id);
     if (!project || project.milestone) continue;
     const type = chooseDiscipline(st);
-    const points = percentileSkillOutput(contributionEffectiveSkill(r, st, type));
-    if (points > 0) pulses.push({ actorId: st.id, name: st.name, type, points, nonce: Date.now() + pulses.length, source: "project", projectId: project.id });
+    const detail = contributionEffectiveSkillDetail(r, st, type);
+    const pulseRoll = Math.random();
+    const points = percentileSkillOutput(detail.effective, pulseRoll);
+    let previousPoints = percentileSkillOutput(detail.base, pulseRoll);
+    const impactDeltas: { source: string; points: number }[] = [];
+    for (const step of detail.steps) {
+      const afterPoints = percentileSkillOutput(step.after, pulseRoll);
+      const delta = afterPoints - previousPoints;
+      if (delta !== 0) impactDeltas.push({ source: step.source, points: delta });
+      previousPoints = afterPoints;
+    }
+    if (points > 0) pulses.push({
+      actorId: st.id,
+      name: st.name,
+      type,
+      points,
+      nonce: Date.now() + pulses.length,
+      source: "project",
+      projectId: project.id,
+      impactDeltas: impactDeltas.length ? impactDeltas : undefined,
+    });
   }
 
   const runnerJob = (r.contractJobs ?? []).find((j) => j.showrunner);
@@ -2829,7 +2875,13 @@ export function rollStudioWorkPulses(r: RunState, roll: () => number = Math.rand
       const project = r.projects.find((candidate) => candidate.id === pulse.projectId);
       return !!project && (project.executiveRushUntilDay ?? -1) >= nowDay;
     })
-    .map((pulse, index) => ({ ...pulse, nonce: pulse.nonce + 10_000 + index }));
+    .map((pulse, index) => ({
+      ...pulse,
+      nonce: pulse.nonce + 10_000 + index,
+      /* the duplicated bubble exists only because Rush was purchased, so the
+         entire duplicate is real, non-overlapping Rush output */
+      impactDeltas: [{ source: "Executive Rush", points: pulse.points }],
+    }));
   pulses.push(...rushCopies);
 
   /* ---- rare project-wide outcomes on the active production ---- */
@@ -2875,7 +2927,12 @@ export function tickStudioWorkPulse(r: RunState, roll: () => number = Math.rando
         projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, issues: p.issues + pulse.points }));
       }
     } else if (pulse.source === "project" && pulse.projectId) {
-      projects = projects.map((p) => p.id !== pulse.projectId || p.milestone ? p : ({ ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } }));
+      projects = projects.map((p) => {
+        if (p.id !== pulse.projectId || p.milestone) return p;
+        let next: Project = { ...p, points: { ...p.points, [pulse.type]: p.points[pulse.type] + pulse.points } };
+        for (const impact of pulse.impactDeltas ?? []) next = recordProjectImpact(next, impact.source, pulse.type, impact.points);
+        return next;
+      });
     } else if (pulse.source === "contract" && pulse.jobId) {
       contractJobs = contractJobs.map((j) => j.id === pulse.jobId ? ({ ...j, progress: Math.min(j.contract.target, j.progress + pulse.points), liveProgressThisWeek: (j.liveProgressThisWeek ?? 0) + pulse.points }) : j);
     }
@@ -3243,6 +3300,8 @@ export function previewResult(r: RunState, p: Project): ShowResult {
     franchises: r.franchises,
     fans: r.fans,
     audienceBar: dynastyAudienceBar(r) + campaignPressureFor(r).audienceBar,
+    careerWeek: r.week,
+    industryPressureLevel: campaignPressureFor(r).level,
     specialisationScoreMult: specialisationProjectEffects(r, d).scoreMult,
     businessMult: businessTrackRevenueMultiplier(researchTrackLevel(r, "business")),
     castAffinityDiscovered: r.castAffinityDiscovered,

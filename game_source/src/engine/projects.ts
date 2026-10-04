@@ -200,6 +200,10 @@ export interface Project {
   /** one overall named creator; distinct from promise-based departmental leadership */
   creativeLeadId?: string;
   points: Points;
+  /** Realised extra Story/Art/Sound attributed to named systems while producing. */
+  impactTotals?: Record<string, Points>;
+  /** Actual cash deliberately spent on named production interventions. */
+  impactCosts?: Record<string, number>;
   /** quality already banked by live desk bubbles since the last week boundary */
   liveQuality?: Points;
   issues: number;
@@ -325,6 +329,8 @@ export function makeProject(draft: Draft, week: number, day = week * 7): Project
     lateDays: 0,
     staffIds: [],
     points: { story: 0, art: 0, sound: 0 },
+    impactTotals: {},
+    impactCosts: {},
     liveQuality: { story: 0, art: 0, sound: 0 },
     issues: 0,
     hype: 0,
@@ -340,6 +346,30 @@ export function makeProject(draft: Draft, week: number, day = week * 7): Project
 }
 
 export const projectUpfront = (d: Draft) => Math.round(draftCost(d) * 0.4);
+
+
+export function recordProjectImpact(p: Project, source: string, type: PointType, delta: number): Project {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 0.0001) return p;
+  const current = p.impactTotals?.[source] ?? { story: 0, art: 0, sound: 0 };
+  return {
+    ...p,
+    impactTotals: {
+      ...(p.impactTotals ?? {}),
+      [source]: { ...current, [type]: current[type] + delta },
+    },
+  };
+}
+
+export function recordProjectCost(p: Project, source: string, cost: number): Project {
+  if (!Number.isFinite(cost) || cost <= 0) return p;
+  return {
+    ...p,
+    impactCosts: {
+      ...(p.impactCosts ?? {}),
+      [source]: (p.impactCosts?.[source] ?? 0) + cost,
+    },
+  };
+}
 
 /** projects that occupy a production slot */
 export const activeProjects = (projects: Project[]) =>
@@ -678,7 +708,7 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
   const lastMinuteBoost = done === "edit" && Math.random() < 0.24
     ? { type: (["story", "art", "sound"] as PointType[])[Math.floor(Math.random() * 3)], points: 2 + Math.floor(Math.random() * 5) }
     : null;
-  return {
+  let next: Project = {
     ...p,
     draft,
     stage: nx,
@@ -697,6 +727,16 @@ export function applyMilestoneOutcome(p: Project, o: MilestoneOutcome): Project 
     spent: p.spent + o.spent,
     rdGained: p.rdGained + o.rdGained + (done === "edit" ? (o.squashed ?? 0) : 0),
   };
+  const milestoneSource =
+    done === "story" ? "Milestone · Story Sprint" :
+    done === "art" ? "Milestone · Animation Sprint" :
+    done === "sound" ? "Milestone · Recording Session" :
+    "Milestone · Edit Bay";
+  for (const type of ["story", "art", "sound"] as const) {
+    if (o.points[type]) next = recordProjectImpact(next, milestoneSource, type, o.points[type]);
+  }
+  if (lastMinuteBoost) next = recordProjectImpact(next, "Last-minute QC inspiration", lastMinuteBoost.type, lastMinuteBoost.points);
+  return next;
 }
 
 /* ---------------------------------------------------------- release */
@@ -723,6 +763,8 @@ export interface ScoringContext {
   fans: number;
   /** dynasty-era audience expectations — mildly raises the review bar */
   audienceBar?: number;
+  careerWeek?: number;
+  industryPressureLevel?: number;
   /** House Specialty multiplies Story / Art / Sound equally before review scoring. */
   specialisationScoreMult?: number;
   /** Every Business & Audience level improves shipped-release economics. */
@@ -786,6 +828,9 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
     costs: p.spent,
     fanBase: ctx.fans,
     audienceBar: ctx.audienceBar,
+    careerWeek: ctx.careerWeek,
+    industryPressureLevel: ctx.industryPressureLevel,
+    productionImpact: p.impactTotals ?? {},
     castAffinityDiscovered: ctx.castAffinityDiscovered,
     qualityFloor: delegationQualityFloor,
     salesCap: over9000Charge(ctx.showrunner, ctx.showrunnerLevel ?? 1).salesCap,
@@ -793,6 +838,49 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
   });
 
   let out = res;
+
+  if (p.impactCosts) {
+    for (const [source, cost] of Object.entries(p.impactCosts)) {
+      if (!Number.isFinite(cost) || cost <= 0) continue;
+      out = {
+        ...out,
+        impactReport: [...(out.impactReport ?? []), {
+          category: "cost",
+          source,
+          metric: "cost",
+          delta: -cost,
+          positive: false,
+          detail: `£${Math.round(cost).toLocaleString("en-GB")} spent on this production`,
+        }],
+      };
+    }
+  }
+
+  const appendImpact = (entry: NonNullable<ShowResult["impactReport"]>[number]) => {
+    out = { ...out, impactReport: [...(out.impactReport ?? []), entry] };
+  };
+  const addCraftMultiplierImpact = (source: string, mult: number, before: Points) => {
+    if (Math.abs(mult - 1) <= 0.001) return { ...before };
+    const after = { story: before.story * mult, art: before.art * mult, sound: before.sound * mult };
+    for (const metric of ["story", "art", "sound"] as const) {
+      appendImpact({
+        category: "production",
+        source,
+        metric,
+        before: before[metric],
+        delta: after[metric] - before[metric],
+        after: after[metric],
+        multiplier: mult,
+        positive: mult >= 1,
+        detail: `${before[metric].toFixed(1)} → ${after[metric].toFixed(1)} (${after[metric] - before[metric] >= 0 ? "+" : ""}${(after[metric] - before[metric]).toFixed(1)})`,
+      });
+    }
+    return after;
+  };
+  let craftWalk: Points = { ...p.points };
+  craftWalk = addCraftMultiplierImpact(houseScoreMult > 1 ? "House genre expertise" : "Outside house specialty", houseScoreMult, craftWalk);
+  craftWalk = addCraftMultiplierImpact("Rookie self-funded production", rookieSoloMult, craftWalk);
+  craftWalk = addCraftMultiplierImpact("Delegator · executive quality control", delegatedScoreMult, craftWalk);
 
   if (Math.abs(houseScoreMult - 1) > 0.001) {
     out = {
@@ -815,22 +903,41 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
 
   const business = ctx.businessMult ?? 1;
   if (business > 1.001) {
+    const revenueBefore = out.revenue;
+    const fansBefore = out.fans;
+    const revenueAfter = Math.round(revenueBefore * business);
+    const fansAfter = Math.round(fansBefore * (1 + (business - 1) * 0.5));
     out = {
       ...out,
-      revenue: Math.round(out.revenue * business),
-      fans: Math.round(out.fans * (1 + (business - 1) * 0.5)),
+      revenue: revenueAfter,
+      fans: fansAfter,
       breakdown: [...out.breakdown, { label: "Business & Audience discipline", pts: `×${business.toFixed(2)} release revenue` }],
+      impactReport: [
+        ...(out.impactReport ?? []),
+        { category: "commercial", source: "Business & Audience discipline", metric: "revenue", before: revenueBefore, delta: revenueAfter - revenueBefore, after: revenueAfter, multiplier: business, positive: true, detail: `£${revenueBefore.toLocaleString("en-GB")} → £${revenueAfter.toLocaleString("en-GB")} (+£${(revenueAfter - revenueBefore).toLocaleString("en-GB")})` },
+        { category: "fans", source: "Business & Audience discipline", metric: "fans", before: fansBefore, delta: fansAfter - fansBefore, after: fansAfter, positive: true, detail: `+${(fansAfter - fansBefore).toLocaleString("en-GB")} extra fans` },
+      ],
     };
   }
 
   /* the market pays what the market pays — reviews are unaffected */
   const mkt = ctx.marketMult ?? 1;
   if (Math.abs(mkt - 1) > 0.001) {
+    const revenueBefore = out.revenue;
+    const fansBefore = out.fans;
+    const revenueAfter = Math.round(revenueBefore * mkt);
+    const fanMult = Math.min(1.2, Math.max(0.85, mkt));
+    const fansAfter = Math.round(fansBefore * fanMult);
     out = {
       ...out,
-      revenue: Math.round(out.revenue * mkt),
-      fans: Math.round(out.fans * Math.min(1.2, Math.max(0.85, mkt))),
+      revenue: revenueAfter,
+      fans: fansAfter,
       breakdown: [...out.breakdown, { label: "Market demand", pts: `×${mkt.toFixed(2)} revenue` }],
+      impactReport: [
+        ...(out.impactReport ?? []),
+        { category: "commercial", source: "Market demand", metric: "revenue", before: revenueBefore, delta: revenueAfter - revenueBefore, after: revenueAfter, multiplier: mkt, positive: mkt >= 1, detail: `£${revenueBefore.toLocaleString("en-GB")} → £${revenueAfter.toLocaleString("en-GB")} (${revenueAfter - revenueBefore >= 0 ? "+" : "−"}£${Math.abs(revenueAfter - revenueBefore).toLocaleString("en-GB")})` },
+        { category: "fans", source: "Market demand", metric: "fans", before: fansBefore, delta: fansAfter - fansBefore, after: fansAfter, multiplier: fanMult, positive: fanMult >= 1, detail: `${fansAfter - fansBefore >= 0 ? "+" : ""}${(fansAfter - fansBefore).toLocaleString("en-GB")} fans` },
+      ],
     };
   }
 
@@ -842,17 +949,27 @@ export function computeProjectResult(p: Project, ctx: ScoringContext): ShowResul
       ...out,
       revenue: out.revenue + extra,
       breakdown: [...out.breakdown, { label: "Merch Department", pts: `+£${extra.toLocaleString("en-GB")}` }],
+      impactReport: [...(out.impactReport ?? []), { category: "commercial", source: "Merch Department", metric: "revenue", before: out.revenue, delta: extra, after: out.revenue + extra, multiplier: merch, positive: true, detail: `+£${extra.toLocaleString("en-GB")} realised on this release` }],
     };
   }
 
   /* the broadcaster docks a late delivery */
   const mult = lateRevenueMult(p);
   if (mult < 1) {
+    const revenueBefore = out.revenue;
+    const fansBefore = out.fans;
+    const revenueAfter = Math.round(revenueBefore * mult);
+    const fansAfter = Math.round(fansBefore * mult);
     out = {
       ...out,
-      revenue: Math.round(out.revenue * mult),
-      fans: Math.round(out.fans * mult),
+      revenue: revenueAfter,
+      fans: fansAfter,
       breakdown: [...out.breakdown, { label: `Late delivery (${p.lateWeeks} wk)`, pts: `×${mult.toFixed(2)} revenue` }],
+      impactReport: [
+        ...(out.impactReport ?? []),
+        { category: "commercial", source: `Late delivery (${p.lateWeeks} wk)`, metric: "revenue", before: revenueBefore, delta: revenueAfter - revenueBefore, after: revenueAfter, multiplier: mult, positive: false, detail: `−£${(revenueBefore - revenueAfter).toLocaleString("en-GB")} release income` },
+        { category: "fans", source: `Late delivery (${p.lateWeeks} wk)`, metric: "fans", before: fansBefore, delta: fansAfter - fansBefore, after: fansAfter, multiplier: mult, positive: false, detail: `−${(fansBefore - fansAfter).toLocaleString("en-GB")} fans` },
+      ],
     };
   }
   return out;

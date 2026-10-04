@@ -89,7 +89,7 @@ import { researchRdCost } from "../engine/studioOps";
 import { activeProjects } from "../engine/projects";
 import ProjectTracker from "./ProjectTracker";
 import KnowledgeDossier, { type KnowledgeSelection } from "./KnowledgeDossier";
-import { buyInvestment, computeIndustryRecords } from "../engine/legacy";
+import { buyInvestment, chooseDynastyPath, computeIndustryRecords, type DynastyPathId } from "../engine/legacy";
 import { AUTO_MIN_OFFICE, resumeAuto, setDelegation, takeOver } from "../engine/automation";
 import { type HeadSlot } from "../engine/careers";
 import Portrait from "./Portrait";
@@ -123,6 +123,9 @@ import ArcballPanel from "./ArcballPanel";
 import { appointCreativeLead, expansionOf } from "../engine/studioExpansion";
 import FirstSeenTutorial, { TutorialHelpButton } from "./FirstSeenTutorial";
 import { markTutorialSeen, tutorialSeen, type TutorialId } from "../engine/tutorials";
+import ManagementPolicyPanel from "./ManagementPolicy";
+import StudioDNA from "./StudioDNA";
+import { actionCentreItems, type ActionCentreTarget } from "../engine/management";
 
 /* =================================================================== */
 export default function Office({
@@ -160,8 +163,9 @@ export default function Office({
   clockDay?: number;
   clockPhase?: number;
 }) {
-  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion" | "arcball">(null);
+  const [modal, setModal] = useState<null | "newproject" | "auctions" | "projects" | "facilities" | "staff" | "research" | "contracts" | "market" | "relocate" | "hof" | "awards" | "sequels" | "rivals" | "dynasty" | "more" | "expansion" | "arcball" | "actions" | "management" | "dna">(null);
   const [fcOpen, setFcOpen] = useState(false);
+  const [expansionTab, setExpansionTab] = useState<"staff" | "overseas">("staff");
   const [knowledge, setKnowledge] = useState<KnowledgeSelection>(null);
   const [tutorial, setTutorial] = useState<TutorialId | null>(null);
   const runner = SHOWRUNNERS.find((s) => s.id === run.showrunner) ?? SHOWRUNNERS[0];
@@ -175,6 +179,15 @@ export default function Office({
   const newShowBlocked = startBlockReason(run);
   /* projects needing the player: a milestone to play or a release decision */
   const projAlerts = run.projects.filter((p) => (p.milestone && !p.rush) || p.stage === "ready").length;
+  const actionItems = useMemo(() => actionCentreItems(run), [run]);
+  const openActionTarget = (target: ActionCentreTarget) => {
+    if (target === "ambitions" || target === "overseas") {
+      setExpansionTab(target === "ambitions" ? "staff" : "overseas");
+      setModal("expansion");
+      return;
+    }
+    setModal(target);
+  };
   const facilities = run.facilities ?? {};
   const roomsUsed = slotsUsed(facilities);
   /* rooms drawn as glowing door signs inside the office scene */
@@ -450,6 +463,19 @@ export default function Office({
 
       <ProjectTracker run={run} clockDay={clockDay} onOpen={() => setModal("projects")} />
 
+      {/* ---------------------------------------------------- contextual action centre */}
+      {actionItems.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setModal("actions")}
+          className="relative z-20 mx-2 mb-1 flex min-h-9 shrink-0 items-center gap-2 rounded-lg border border-gold/35 bg-gold/10 px-2.5 py-1.5 text-left sm:mx-auto sm:w-full sm:max-w-xl"
+        >
+          <AlertTriangle size={12} className={actionItems[0].tone === "critical" ? "text-neon" : "text-gold"}/>
+          <span className="shrink-0 text-[8px] font-black tracking-widest text-gold">ACTION CENTRE · {actionItems.length}</span>
+          <span className="min-w-0 flex-1 truncate text-[9px] font-bold text-paper/70">{actionItems[0].label} · {actionItems[0].detail}</span>
+        </button>
+      )}
+
       {/* ---------------------------------------------------- compact dock */}
       <div className="relative z-20 shrink-0 border-t border-line/60 bg-ink/90 px-2 py-1.5 backdrop-blur-md">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
@@ -504,9 +530,45 @@ export default function Office({
         </div>
       </div>
 
-      {modal === "expansion" && <Modal title="STUDIO CULTURE & OVERSEAS" onClose={() => setModal(null)}><StudioExpansionPanel run={run} setRun={setRun}/></Modal>}
+      {modal === "expansion" && <Modal title={expansionTab === "staff" ? "CREATOR AMBITIONS" : "OVERSEAS MARKETS"} onClose={() => setModal(null)}><StudioExpansionPanel key={expansionTab} run={run} setRun={setRun} initialTab={expansionTab}/></Modal>}
       {/* ----------------------------------------------------------- MORE */}
       <FirstSeenTutorial id={tutorial ?? "financial-distress"} open={tutorial !== null} onDismiss={dismissTutorial} />
+
+      {modal === "actions" && (
+        <Modal title="ACTION CENTRE" onClose={() => setModal(null)}>
+          <div className="space-y-2">
+            {actionItems.length ? actionItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => openActionTarget(item.target)}
+                className={cn(
+                  "btn-press w-full rounded-xl border p-3 text-left",
+                  item.tone === "critical" ? "border-neon/45 bg-neon/5" :
+                  item.tone === "opportunity" ? "border-mint/40 bg-mint/5" :
+                  item.tone === "attention" ? "border-gold/40 bg-gold/5" :
+                  "border-cyanx/35 bg-cyanx/5"
+                )}
+              >
+                <div className="text-[10px] font-black tracking-wider text-paper">{item.label.toUpperCase()}</div>
+                <div className="mt-1 text-[10px] leading-relaxed text-paper/55">{item.detail}</div>
+              </button>
+            )) : <div className="rounded-xl border border-mint/30 bg-mint/5 p-4 text-center text-xs text-mint">Nothing currently needs executive attention.</div>}
+          </div>
+        </Modal>
+      )}
+
+      {modal === "management" && (
+        <Modal title="MANAGEMENT POLICY" onClose={() => setModal(null)}>
+          <ManagementPolicyPanel run={run} setRun={setRun}/>
+        </Modal>
+      )}
+
+      {modal === "dna" && (
+        <Modal title="STUDIO DNA" onClose={() => setModal(null)}>
+          <StudioDNA run={run}/>
+        </Modal>
+      )}
 
       {modal === "newproject" && (
         <Modal title="NEW PROJECT" onClose={() => setModal(null)}>
@@ -519,7 +581,14 @@ export default function Office({
 
       {modal === "more" && (
         <Modal title="STUDIO MENU" onClose={() => setModal(null)}>
-          <button className="btn-press ink-card mb-3 min-h-11 w-full p-3 text-left font-bold text-gold" onClick={() => setModal("expansion")}>STUDIO CULTURE & OVERSEAS</button>
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <button className="btn-press ink-card min-h-11 p-3 text-left font-bold text-gold" onClick={() => { setExpansionTab("staff"); setModal("expansion"); }}>CREATOR AMBITIONS</button>
+            <button className="btn-press ink-card min-h-11 p-3 text-left font-bold text-cyanx" onClick={() => { setExpansionTab("overseas"); setModal("expansion"); }}>OVERSEAS MARKETS</button>
+          </div>
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <button className="btn-press ink-card min-h-11 p-3 text-left font-bold text-mint" onClick={() => setModal("management")}>MANAGEMENT POLICY</button>
+            <button className="btn-press ink-card min-h-11 p-3 text-left font-bold text-viol" onClick={() => setModal("dna")}>STUDIO DNA</button>
+          </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("facilities")}><Hammer size={16} className="text-gold"/><span className="text-xs font-bold">STUDIO ROOMS</span></button>
             <button className="btn-press ink-card flex items-center gap-2 p-3 text-left" onClick={() => setModal("market")}><BarChart3 size={16} className="text-mint"/><span className="text-xs font-bold">MARKET</span></button>
@@ -817,7 +886,7 @@ export default function Office({
             const benefits = specialisationBenefits(run);
             if (profile.primary) {
               const genre = GENRES.find((g) => g.id === profile.primary);
-              return <div className="rounded-xl border border-gold/45 bg-gold/5 p-3"><div className="flex items-center gap-2"><Star size={15} className="text-gold"/><div className="font-display text-sm font-extrabold">{genre?.label ?? profile.primary} HOUSE</div><span className="ml-auto rounded bg-gold/10 px-2 py-0.5 text-[8px] font-black text-gold">{profile.rank.toUpperCase()}</span></div><div className="mt-1 text-[10px] text-paper/55">Any show containing <b className="text-paper">{genre?.label ?? profile.primary}</b> — alone or in a two-genre combination — gains <b className="text-mint">+{benefits?.signatureScorePct ?? 0}% to Story, Art and Sound scoring</b>. Shows without it take only a <b className="text-neon">−{benefits?.outsideScorePenaltyPct ?? 0}% scoring penalty</b>.</div><div className="mt-1 text-[9px] text-paper/35">House expertise strengthens as successful signature releases move Studio → Authority → Institution.</div></div>;
+              return <div className="rounded-xl border border-gold/45 bg-gold/5 p-3"><div className="flex items-center gap-2"><Star size={15} className="text-gold"/><div className="font-display text-sm font-extrabold">{genre?.label ?? profile.primary} HOUSE</div><span className="ml-auto rounded bg-gold/10 px-2 py-0.5 text-[8px] font-black text-gold">{profile.rank.toUpperCase()}</span></div><div className="mt-1 text-[10px] text-paper/55">Any show containing <b className="text-paper">{genre?.label ?? profile.primary}</b> gains <b className="text-mint">+{benefits?.signatureOutputPct ?? 0}% live output</b>, <b className="text-cyanx">+{benefits?.signaturePacePct ?? 0}% pace</b>, safer interventions and only <b className="text-gold">+{benefits?.signatureScorePct ?? 0}% direct craft scoring</b>. Outside genres have <b className="text-paper">no score penalty</b>.</div><div className="mt-1 text-[9px] text-paper/35">House expertise strengthens as successful signature releases move Studio → Authority → Institution.</div></div>;
             }
             return <div className="rounded-xl border border-gold/35 bg-gold/5 p-3"><div className="text-[10px] font-bold text-gold">CHOOSE ONE PERMANENT HOUSE SPECIALTY</div><div className="mt-1 text-[9px] text-paper/50">This is your studio's creative identity. It gives a real scoring edge to every show containing that genre, with a small penalty when you work completely outside it.</div><div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">{GENRES.filter((g)=>run.genresUnlocked.includes(g.id)).map((g)=>{const Icon=g.icon;return <button key={g.id} className="btn-press min-h-11 rounded-lg border border-line bg-panel2 px-2 text-left hover:border-gold" onClick={()=>{const next=choosePrimarySpecialisation(run,g.id);if(next){sfx.fanfare();setRun(()=>next);}}}><div className="flex items-center gap-1.5"><Icon size={13} style={{color:g.color}}/><b className="text-[10px]">{g.label}</b></div></button>})}</div></div>;
           })()}
@@ -1059,6 +1128,12 @@ export default function Office({
           <DynastyPanel
             run={run}
             onBuy={(id) => {
+              if (id.startsWith("__path__:")) {
+                const path = id.slice("__path__:".length) as DynastyPathId;
+                sfx.fanfare();
+                setRun((r) => chooseDynastyPath(r, path) ?? r);
+                return;
+              }
               sfx.cash();
               setRun((r) => buyInvestment(r, id) ?? r);
             }}
@@ -1245,7 +1320,7 @@ export function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[75] flex items-center justify-center bg-abyss/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <div
         className="anim-pop nice-scroll max-h-[calc(100dvh-5rem)] w-full max-w-3xl overflow-y-auto rounded-2xl border border-line bg-panel p-4 md:p-5"
         onClick={(e) => e.stopPropagation()}

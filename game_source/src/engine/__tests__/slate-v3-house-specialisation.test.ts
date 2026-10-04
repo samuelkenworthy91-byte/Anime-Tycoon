@@ -17,25 +17,25 @@ function houseRun(entries: Array<{ week: number; title: string; score: number; h
 }
 
 describe("House Specialisation swing", () => {
-  it("starts at +8% house craft and -3% outside craft", () => {
+  it("starts with production identity and only a small direct craft edge", () => {
     const run = houseRun();
-    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.08);
-    expect(specialisationProjectEffects(run, { genres: ["slice"] }).scoreMult).toBeCloseTo(0.97);
-    expect(specialisationProjectEffects(run, { genres: ["mecha", "crime"] }).scoreMult).toBeCloseTo(1.08);
+    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.02);
+    expect(specialisationProjectEffects(run, { genres: ["slice"] }).scoreMult).toBeCloseTo(1);
+    expect(specialisationProjectEffects(run, { genres: ["mecha", "crime"] }).scoreMult).toBeCloseTo(1.02);
   });
 
-  it("reaches +15/-6 at Authority", () => {
+  it("deepens production identity at Authority without punishing outside genres", () => {
     const run = houseRun([
       { week: 1, title: "A", score: 28 },
       { week: 2, title: "B", score: 27 },
       { week: 3, title: "C", score: 23 },
       { week: 4, title: "D", score: 22 },
     ]);
-    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.15);
-    expect(specialisationProjectEffects(run, { genres: ["romance"] }).scoreMult).toBeCloseTo(0.94);
+    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.03);
+    expect(specialisationProjectEffects(run, { genres: ["romance"] }).scoreMult).toBeCloseTo(1);
   });
 
-  it("reaches +25/-10 at Institution", () => {
+  it("caps the direct Institution score edge while production mastery keeps growing", () => {
     const run = houseRun([
       { week: 1, title: "A", score: 33, hallOfFame: true },
       { week: 2, title: "B", score: 30 },
@@ -46,8 +46,8 @@ describe("House Specialisation swing", () => {
       { week: 7, title: "G", score: 22 },
       { week: 8, title: "H", score: 21 },
     ]);
-    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.25);
-    expect(specialisationProjectEffects(run, { genres: ["romance"] }).scoreMult).toBeCloseTo(0.90);
+    expect(specialisationProjectEffects(run, { genres: ["mecha"] }).scoreMult).toBeCloseTo(1.04);
+    expect(specialisationProjectEffects(run, { genres: ["romance"] }).scoreMult).toBeCloseTo(1);
   });
 });
 

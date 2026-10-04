@@ -26,6 +26,9 @@ import { cn } from "../utils/cn";
 const AUTO_MS = [850, 1150, 1050, 1550, 850, 850, 850, 850, 1550, 1650];
 
 function verdictLabel(result: ShowResult) {
+  if (result.total === 40) return "PERFECT MASTERWORK";
+  if (result.total >= 38) return "ERA-DEFINING MASTERWORK";
+  if (result.total >= 36) return "ALL-TIME CLASSIC";
   if (result.hallOfFame) return "HALL OF FAME";
   if (result.tier === "hit" && result.total >= 34) return "MASTERPIECE";
   if (result.tier === "hit") return "BREAKOUT HIT";
@@ -82,6 +85,48 @@ export default function Release({
   const careerYear = careerYearForWeek(careerWeek);
   const diagnosis = useMemo(() => diagnoseRelease(draft, result, genreKnowledge,studyLevels), [draft, result, genreKnowledge,studyLevels]);
   const audienceProfile = useMemo(() => audienceProfileForRelease(draft, result), [draft, result]);
+  const impactRows = result.impactReport ?? [];
+  const impactScore = (row: typeof impactRows[number]) => {
+    const delta = Math.abs(row.delta ?? 0);
+    if (row.metric === "revenue") return result.revenue > 0 ? (delta / result.revenue) * 100 : 0;
+    if (row.metric === "fans") return result.fans > 0 ? (delta / result.fans) * 100 : 0;
+    if (row.metric === "critic") return delta * 20;
+    if (row.metric === "quality") return delta * 8;
+    return delta;
+  };
+  const topPositiveImpacts = [...impactRows]
+    .filter((row) => row.positive !== false && (row.delta ?? 0) > 0)
+    .sort((a, b) => impactScore(b) - impactScore(a))
+    .slice(0, 3);
+  const biggestDrag = [...impactRows]
+    .filter((row) => row.category !== "cost" && (row.positive === false || (row.delta ?? 0) < 0))
+    .sort((a, b) => impactScore(b) - impactScore(a))[0] ?? null;
+  const impactGroups = [
+    ["production", "PRODUCTION OUTPUT"],
+    ["creative", "CREATIVE DECISIONS"],
+    ["critical", "CRITICAL ENVIRONMENT"],
+    ["commercial", "COMMERCIAL MODIFIERS"],
+    ["fans", "FAN IMPACT"],
+    ["cost", "SPEND / TRADE-OFFS"],
+  ] as const;
+
+  const investmentRows = impactRows.filter((row) =>
+    row.source.startsWith("Investment ·") ||
+    row.source === "Executive Rush" ||
+    row.source.startsWith("Facilities ·") ||
+    row.source === "Business & Audience discipline" ||
+    row.source === "Merch Department"
+  );
+  const investmentCraft = investmentRows.reduce((acc, row) => {
+    if (row.metric === "story" || row.metric === "art" || row.metric === "sound") acc[row.metric] += row.delta ?? 0;
+    return acc;
+  }, { story: 0, art: 0, sound: 0 });
+  const investmentRevenue = investmentRows
+    .filter((row) => row.metric === "revenue")
+    .reduce((sum, row) => sum + (row.delta ?? 0), 0);
+  const investmentCost = investmentRows
+    .filter((row) => row.metric === "cost")
+    .reduce((sum, row) => sum + Math.abs(row.delta ?? 0), 0);
 
   const discoveries = useMemo<DiscoveryCard[]>(() => {
     const rows: DiscoveryCard[] = [];
@@ -332,6 +377,13 @@ export default function Release({
                                     </div>
                                   ) : null;
                                 })()}
+                                {r.internalScore != null && ((r.standardPenalty ?? 0) > 0.01 || r.perfectEligible) && (
+                                  <div className="mt-1 text-[8px] font-bold text-paper/40">
+                                    INTERNAL {r.internalScore.toFixed(2)}
+                                    {(r.standardPenalty ?? 0) > 0.01 ? ` · INDUSTRY −${r.standardPenalty!.toFixed(2)}` : ""}
+                                    {r.perfectEligible ? ` · PERFECT GATE CLEARED (${r.perfectThreshold?.toFixed(2)})` : ""}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : <div className="flex h-full items-center justify-center text-[9px] tracking-[0.3em] text-paper/30">EMBARGOED</div>}
@@ -431,11 +483,87 @@ export default function Release({
 
                 {draft.franchiseKey && result.total < 32 && <div className="mt-2 rounded-xl border border-neon/40 bg-neon/10 p-2 text-center text-[10px] font-bold text-neon2">This entry missed 32/40, so another season or sequel film is locked. Spin-off and reboot routes remain available from SERIES.</div>}
 
-                <details className="mt-3 rounded-xl border border-line/50 bg-panel2/55 p-3">
-                  <summary className="cursor-pointer text-[10px] font-bold tracking-widest text-paper/50">DEVELOPMENT REPORT</summary>
-                  <div className="mt-2 space-y-1">
-                    {result.breakdown.map((b) => <div key={b.label} className="flex justify-between gap-4 text-[11px]"><span className="text-paper/55">{b.label}</span><span className="text-right font-bold text-paper/85">{b.pts}</span></div>)}
-                  </div>
+                <details className="mt-3 rounded-xl border border-line/50 bg-panel2/55 p-3" open>
+                  <summary className="cursor-pointer text-[10px] font-black tracking-widest text-gold">DETAILED IMPACT BREAKDOWN</summary>
+
+                  {!!impactRows.length && (
+                    <div className="mt-3 space-y-3">
+                      <div className="rounded-xl border border-mint/30 bg-mint/5 p-2.5">
+                        <div className="text-[9px] font-black tracking-[0.2em] text-mint">WHAT MADE THIS BETTER?</div>
+                        <div className="mt-2 space-y-1.5">
+                          {topPositiveImpacts.map((row, i) => (
+                            <div key={`top-${row.source}-${row.metric}-${i}`} className="text-[10px] leading-snug text-paper/75">
+                              <b className="text-paper">{row.source}</b> · {row.detail}
+                            </div>
+                          ))}
+                          {!topPositiveImpacts.length && <div className="text-[10px] text-paper/45">No major positive modifier was recorded.</div>}
+                        </div>
+                      </div>
+
+                      {biggestDrag && (
+                        <div className="rounded-xl border border-neon/30 bg-neon/5 p-2.5">
+                          <div className="text-[9px] font-black tracking-[0.2em] text-neon2">BIGGEST DRAG</div>
+                          <div className="mt-1 text-[10px] leading-snug text-paper/75"><b className="text-paper">{biggestDrag.source}</b> · {biggestDrag.detail}</div>
+                        </div>
+                      )}
+
+                      {(investmentRows.length > 0) && (
+                        <div className="rounded-xl border border-gold/30 bg-gold/5 p-2.5">
+                          <div className="text-[9px] font-black tracking-[0.2em] text-gold">WHAT DID YOUR INVESTMENTS ADD?</div>
+                          <div className="mt-1 text-[10px] leading-snug text-paper/70">
+                            {Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 && (
+                              <span>Story {investmentCraft.story >= 0 ? "+" : ""}{investmentCraft.story.toFixed(1)} · Art {investmentCraft.art >= 0 ? "+" : ""}{investmentCraft.art.toFixed(1)} · Sound {investmentCraft.sound >= 0 ? "+" : ""}{investmentCraft.sound.toFixed(1)}</span>
+                            )}
+                            {investmentRevenue !== 0 && (
+                              <span>{Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 ? " · " : ""}{investmentRevenue >= 0 ? "+" : "−"}{formatGBP(Math.abs(investmentRevenue))} release income</span>
+                            )}
+                            {investmentCost > 0 && (
+                              <span>{Math.abs(investmentCraft.story) + Math.abs(investmentCraft.art) + Math.abs(investmentCraft.sound) > 0.01 || investmentRevenue !== 0 ? " · " : ""}{formatGBP(investmentCost)} deliberately spent</span>
+                            )}
+                          </div>
+                          <div className="mt-1 text-[8px] text-paper/40">Only realised effects on this production are counted.</div>
+                        </div>
+                      )}
+
+                      {result.criticalStandard && (
+                        <div className="rounded-xl border border-viol/30 bg-viol/5 p-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[9px] font-black tracking-[0.18em] text-viol">{result.criticalStandard.label}</span>
+                            <span className="text-[9px] font-bold text-paper/55">YEAR {result.criticalStandard.year}</span>
+                          </div>
+                          <div className="mt-1 text-[9px] text-paper/55">Elite internal reviews can face up to −{result.criticalStandard.elitePenalty.toFixed(2)} critic points. Ordinary reviews are barely affected.</div>
+                        </div>
+                      )}
+
+                      {impactGroups.map(([category, label]) => {
+                        const rows = impactRows.filter((row) => row.category === category);
+                        if (!rows.length) return null;
+                        return (
+                          <details key={category} className="rounded-xl border border-line/45 bg-ink/25 p-2.5">
+                            <summary className="cursor-pointer text-[9px] font-black tracking-[0.18em] text-cyanx">{label} · {rows.length}</summary>
+                            <div className="mt-2 space-y-1.5">
+                              {rows.map((row, i) => (
+                                <div key={`${category}-${row.source}-${row.metric}-${i}`} className="rounded-lg border border-line/30 bg-panel2/45 px-2 py-1.5">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <span className="text-[10px] font-bold text-paper/80">{row.source}</span>
+                                    <span className={cn("shrink-0 text-[9px] font-black uppercase", row.positive === false || (row.delta ?? 0) < 0 ? "text-neon2" : "text-mint")}>{row.metric}</span>
+                                  </div>
+                                  <div className="mt-0.5 text-[9px] leading-snug text-paper/55">{row.detail}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <details className="mt-3 rounded-lg border border-line/35 bg-ink/20 p-2">
+                    <summary className="cursor-pointer text-[9px] font-bold tracking-widest text-paper/45">FORMULA DETAILS</summary>
+                    <div className="mt-2 space-y-1">
+                      {result.breakdown.map((b, i) => <div key={`${b.label}-${i}`} className="flex justify-between gap-4 text-[10px]"><span className="text-paper/50">{b.label}</span><span className="text-right font-bold text-paper/75">{b.pts}</span></div>)}
+                    </div>
+                  </details>
                 </details>
               </section>
             )}

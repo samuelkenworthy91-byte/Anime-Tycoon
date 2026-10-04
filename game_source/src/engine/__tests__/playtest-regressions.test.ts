@@ -43,7 +43,8 @@ describe("playtest regression guards", () => {
     expect(app).toContain('tag === "TEXTAREA"');
     expect(app).toContain('target.isContentEditable');
     expect(app).toContain('return lastClockSpeedRef.current');
-    expect(app).toContain('pendingLevelUp && levelUpPresentationAllowed');
+    expect(app).toContain('!activePresentation');
+    expect(app).toContain('levelUpPresentationAllowed = activePresentation === "levelUp"');
   });
 
   it("keeps the worker dossier close target deliberately below the very top edge", () => {

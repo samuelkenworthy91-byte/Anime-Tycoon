@@ -16,7 +16,7 @@ import {
   Home,
 } from "lucide-react";
 import { Btn, CountUp } from "../fx/fx";
-import { runCareerEvaluation, type CareerCategory } from "../engine/legacy";
+import { DYNASTY_PATHS, runCareerEvaluation, type CareerCategory, type DynastyPathId } from "../engine/legacy";
 import { CAREER_YEARS, SHOWRUNNERS, formatGBP, formatNum, ROLE_LABEL, type Showrunner } from "../engine/data";
 import { studioReputationTraits } from "../engine/studioReputation";
 import { rivalMemoriesFor } from "../engine/rivalMemories";
@@ -42,7 +42,7 @@ export default function Retrospective({
 }: {
   run: RunState;
   onContinue: () => void;
-  onNewGamePlus: (studio: string, showrunner: Showrunner["id"]) => void;
+  onNewGamePlus: (studio: string, showrunner: Showrunner["id"], legacy: DynastyPathId | "none") => void;
   onTitle: () => void;
 }) {
   const ev = useMemo(() => runCareerEvaluation(run), [run]);
@@ -52,6 +52,7 @@ export default function Retrospective({
     ? run.showrunner as Showrunner["id"]
     : SHOWRUNNERS[0].id;
   const [ngRunner, setNgRunner] = useState<Showrunner["id"]>(knownRunner);
+  const [ngLegacy, setNgLegacy] = useState<DynastyPathId | "none">("none");
   const h = ev.history;
   const reputation = useMemo(() => studioReputationTraits(run), [run]);
   const goldenPairs = (run.staffRelationships ?? []).filter((relationship) => relationship.goldenPair).sort((a,b)=>b.acclaimedReleases-a.acclaimedReleases);
@@ -237,7 +238,13 @@ export default function Retrospective({
             <select value={ngRunner} onChange={(event) => setNgRunner(event.target.value as Showrunner["id"])} className="ink-input mt-1 min-h-11 w-full px-3 py-2 text-sm font-bold">
               {SHOWRUNNERS.map((runner)=><option key={runner.id} value={runner.id}>{runner.name} · {runner.title}</option>)}
             </select>
-            <Btn big variant="gold" className="mt-3 w-full" onClick={() => onNewGamePlus(ngStudio.trim() || `${run.studio} Next`, ngRunner)}>
+            <label className="mt-3 block text-[9px] font-bold tracking-wider text-paper/45">OPTIONAL LEGACY CULTURE</label>
+            <select value={ngLegacy} onChange={(event) => setNgLegacy(event.target.value as DynastyPathId | "none")} className="ink-input mt-1 min-h-11 w-full px-3 py-2 text-sm font-bold">
+              <option value="none">No inherited culture · pure fresh start</option>
+              {(Object.entries(DYNASTY_PATHS) as [DynastyPathId, (typeof DYNASTY_PATHS)[DynastyPathId]][]).map(([id,path])=><option key={id} value={id}>{path.name}</option>)}
+            </select>
+            <div className="mt-1 text-[9px] text-paper/40">Legacy culture grants only one modest institutional starting bias; cash, staff, facilities, IP and production power still reset.</div>
+            <Btn big variant="gold" className="mt-3 w-full" onClick={() => onNewGamePlus(ngStudio.trim() || `${run.studio} Next`, ngRunner, ngLegacy)}>
               <Star size={18}/> START NEW GAME+ WITH KNOWLEDGE
             </Btn>
             <div className="mt-2 text-[9px] text-paper/40">Your completed career is copied to a protected CAREER ARCHIVE load slot first.</div>
