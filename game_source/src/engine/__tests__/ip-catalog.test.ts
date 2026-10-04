@@ -3,9 +3,9 @@ import { AUCTION_IPS } from "../ip";
 import { IP_SOURCE_CANON } from "../ipSourceCanon";
 
 describe("auction IP authored source canon", () => {
-  it("covers all 100 source properties with player-facing plot summaries", () => {
-    expect(AUCTION_IPS).toHaveLength(100);
-    expect(Object.keys(IP_SOURCE_CANON)).toHaveLength(100);
+  it("covers all 137 source properties with player-facing plot summaries", () => {
+    expect(AUCTION_IPS).toHaveLength(137);
+    expect(Object.keys(IP_SOURCE_CANON)).toHaveLength(137);
     for (const ip of AUCTION_IPS) {
       expect(ip.description.length, ip.title).toBeGreaterThan(60);
       expect(ip.characters, ip.title).toHaveLength(4);

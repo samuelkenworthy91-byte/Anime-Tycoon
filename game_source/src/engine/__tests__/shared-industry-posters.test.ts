@@ -66,8 +66,8 @@ describe("shared industry poster batch", () => {
 
   it("wires the catalog into the runtime manifest without duplicate ids or image paths", () => {
     expect(manifest.schema).toBe(3);
-    expect(manifest.posters).toHaveLength(990);
-    expect(manifest.generated).toBe(988);
+    expect(manifest.posters).toHaveLength(1027);
+    expect(manifest.generated).toBe(1025);
     expect(manifest.pending).toBe(2);
     expect(new Set(manifest.posters.map((poster) => poster.id)).size).toBe(manifest.posters.length);
     const images = manifest.posters.filter((poster) => poster.img).map((poster) => poster.img);

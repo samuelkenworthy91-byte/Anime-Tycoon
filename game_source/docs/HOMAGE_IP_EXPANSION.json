@@ -1,0 +1,1038 @@
+[
+  {
+    "slot": 101,
+    "series": "Ember Standard",
+    "homage": "Fire Emblem: The Binding Blade",
+    "poster": "auction-ip/poster_101.webp",
+    "genres": [
+      "fantasy",
+      "military"
+    ],
+    "characters": [
+      {
+        "name": "Roi Ember",
+        "sourceCharacter": "Roy"
+      },
+      {
+        "name": "Lili Flare",
+        "sourceCharacter": "Lilina"
+      },
+      {
+        "name": "Zephyr Fell",
+        "sourceCharacter": "Zephiel"
+      },
+      {
+        "name": "Merlin Us",
+        "sourceCharacter": "Merlinus"
+      }
+    ]
+  },
+  {
+    "slot": 102,
+    "series": "The Dawnward Company",
+    "homage": "Fire Emblem: Path of Radiance",
+    "poster": "auction-ip/poster_102.webp",
+    "genres": [
+      "fantasy",
+      "military"
+    ],
+    "characters": [
+      {
+        "name": "Ayke Greil",
+        "sourceCharacter": "Ike"
+      },
+      {
+        "name": "Elynsia Dawn",
+        "sourceCharacter": "Elincia"
+      },
+      {
+        "name": "Ash Nard",
+        "sourceCharacter": "Ashnard"
+      },
+      {
+        "name": "Sore N",
+        "sourceCharacter": "Soren"
+      }
+    ]
+  },
+  {
+    "slot": 103,
+    "series": "Backstreet Amplifier",
+    "homage": "BECK: Mongolian Chop Squad",
+    "poster": "auction-ip/poster_103.webp",
+    "genres": [
+      "idol",
+      "slice"
+    ],
+    "characters": [
+      {
+        "name": "Yuki Tanacker",
+        "sourceCharacter": "Yukio Tanaka"
+      },
+      {
+        "name": "Ryu Strings Minami",
+        "sourceCharacter": "Ryusuke Minami"
+      },
+      {
+        "name": "Agee Ran",
+        "sourceCharacter": "Eiji Ran"
+      },
+      {
+        "name": "Chibass",
+        "sourceCharacter": "Tsunemi Chiba"
+      }
+    ]
+  },
+  {
+    "slot": 104,
+    "series": "Azure Infernal: The Elder Blade",
+    "homage": "Devil May Cry 3: Vergil perspective",
+    "poster": "auction-ip/poster_104.webp",
+    "genres": [
+      "horror",
+      "samurai"
+    ],
+    "characters": [
+      {
+        "name": "Virgil Frost",
+        "sourceCharacter": "Vergil"
+      },
+      {
+        "name": "Dan Tay",
+        "sourceCharacter": "Dante"
+      },
+      {
+        "name": "Arch Ham",
+        "sourceCharacter": "Arkham"
+      },
+      {
+        "name": "Lady Mary",
+        "sourceCharacter": "Lady"
+      }
+    ]
+  },
+  {
+    "slot": 105,
+    "series": "The Bloom Beyond",
+    "homage": "Annihilation by Jeff VanderMeer",
+    "poster": "auction-ip/poster_105.webp",
+    "genres": [
+      "cosmic_horror",
+      "survival"
+    ],
+    "characters": [
+      {
+        "name": "Bio Logist",
+        "sourceCharacter": "the biologist"
+      },
+      {
+        "name": "Anthro Pola",
+        "sourceCharacter": "the anthropologist"
+      },
+      {
+        "name": "Psy Colegist",
+        "sourceCharacter": "the psychologist"
+      },
+      {
+        "name": "Sue Veyor",
+        "sourceCharacter": "the surveyor"
+      }
+    ]
+  },
+  {
+    "slot": 106,
+    "series": "The Saffron Sign",
+    "homage": "Hastur / The King in Yellow mythology",
+    "poster": "auction-ip/poster_106.webp",
+    "genres": [
+      "cosmic_horror",
+      "mystery"
+    ],
+    "characters": [
+      {
+        "name": "Hildren Castaine",
+        "sourceCharacter": "Hildred Castaigne"
+      },
+      {
+        "name": "Cassie Lda",
+        "sourceCharacter": "Cassilda"
+      },
+      {
+        "name": "Haze-Tur",
+        "sourceCharacter": "Hastur"
+      },
+      {
+        "name": "Camille Mask",
+        "sourceCharacter": "Camilla"
+      }
+    ]
+  },
+  {
+    "slot": 107,
+    "series": "Solarwake Treasure",
+    "homage": "Treasure Planet",
+    "poster": "auction-ip/poster_107.webp",
+    "genres": [
+      "space",
+      "pirate"
+    ],
+    "characters": [
+      {
+        "name": "Jem Hawkings",
+        "sourceCharacter": "Jim Hawkins"
+      },
+      {
+        "name": "Jon Silvers",
+        "sourceCharacter": "John Silver"
+      },
+      {
+        "name": "Scrooper",
+        "sourceCharacter": "Scroop"
+      },
+      {
+        "name": "Morf",
+        "sourceCharacter": "Morph"
+      }
+    ]
+  },
+  {
+    "slot": 108,
+    "series": "Neon Debt 2088",
+    "homage": "Cyberpunk 2077",
+    "poster": "auction-ip/poster_108.webp",
+    "genres": [
+      "cyber",
+      "crime"
+    ],
+    "characters": [
+      {
+        "name": "Vee Vector",
+        "sourceCharacter": "V"
+      },
+      {
+        "name": "Jack Wellstone",
+        "sourceCharacter": "Jackie Welles"
+      },
+      {
+        "name": "Atom Smelter",
+        "sourceCharacter": "Adam Smasher"
+      },
+      {
+        "name": "Jonny Chromehand",
+        "sourceCharacter": "Johnny Silverhand"
+      }
+    ]
+  },
+  {
+    "slot": 109,
+    "series": "Last Train Partners",
+    "homage": "Rush Hour",
+    "poster": "auction-ip/poster_109.webp",
+    "genres": [
+      "martial",
+      "comedy"
+    ],
+    "characters": [
+      {
+        "name": "Li Quick",
+        "sourceCharacter": "Lee"
+      },
+      {
+        "name": "James Cartwheel",
+        "sourceCharacter": "James Carter"
+      },
+      {
+        "name": "Sang Along",
+        "sourceCharacter": "Sang"
+      },
+      {
+        "name": "Sue Young",
+        "sourceCharacter": "Soo Yung"
+      }
+    ]
+  },
+  {
+    "slot": 110,
+    "series": "The Wind's True Name",
+    "homage": "The Name of the Wind",
+    "poster": "auction-ip/poster_110.webp",
+    "genres": [
+      "magical",
+      "fantasy"
+    ],
+    "characters": [
+      {
+        "name": "Quoth Arden",
+        "sourceCharacter": "Kvothe"
+      },
+      {
+        "name": "Deena Song",
+        "sourceCharacter": "Denna"
+      },
+      {
+        "name": "Ambroze Jackass",
+        "sourceCharacter": "Ambrose Jakis"
+      },
+      {
+        "name": "Baste",
+        "sourceCharacter": "Bast"
+      }
+    ]
+  },
+  {
+    "slot": 111,
+    "series": "Oathstorm Chronicle",
+    "homage": "The Stormlight Archive",
+    "poster": "auction-ip/poster_111.webp",
+    "genres": [
+      "fantasy",
+      "martial"
+    ],
+    "characters": [
+      {
+        "name": "Kala Din",
+        "sourceCharacter": "Kaladin"
+      },
+      {
+        "name": "Shalyn Davarish",
+        "sourceCharacter": "Shallan Davar"
+      },
+      {
+        "name": "Odi Yumm",
+        "sourceCharacter": "Odium"
+      },
+      {
+        "name": "Sylver Whisper",
+        "sourceCharacter": "Sylphrena"
+      }
+    ]
+  },
+  {
+    "slot": 112,
+    "series": "Blackblade Pilgrimage",
+    "homage": "Berserk: later arcs",
+    "poster": "auction-ip/poster_112.webp",
+    "genres": [
+      "grimdark",
+      "horror"
+    ],
+    "characters": [
+      {
+        "name": "Gatz Blackblade",
+        "sourceCharacter": "Guts"
+      },
+      {
+        "name": "Kaska Ember",
+        "sourceCharacter": "Casca"
+      },
+      {
+        "name": "Griffin Whitewing",
+        "sourceCharacter": "Griffith"
+      },
+      {
+        "name": "Pukk Feather",
+        "sourceCharacter": "Puck"
+      }
+    ]
+  },
+  {
+    "slot": 113,
+    "series": "Blue Horizon: The Devouring Fleet",
+    "homage": "Warhammer 40,000: Tau versus Tyranids",
+    "poster": "auction-ip/poster_113.webp",
+    "genres": [
+      "space",
+      "military"
+    ],
+    "characters": [
+      {
+        "name": "Shade Sun",
+        "sourceCharacter": "Commander Shadowsun"
+      },
+      {
+        "name": "Farsighted",
+        "sourceCharacter": "Commander Farsight"
+      },
+      {
+        "name": "Swarm Lordling",
+        "sourceCharacter": "the Swarmlord"
+      },
+      {
+        "name": "Dusk Strider",
+        "sourceCharacter": "Darkstrider"
+      }
+    ]
+  },
+  {
+    "slot": 114,
+    "series": "Wildcode Partners",
+    "homage": "Digimon Adventure",
+    "poster": "auction-ip/poster_114.webp",
+    "genres": [
+      "monster_taming",
+      "isekai"
+    ],
+    "characters": [
+      {
+        "name": "Ty Kamiya",
+        "sourceCharacter": "Tai Kamiya"
+      },
+      {
+        "name": "Mat Ishida-ish",
+        "sourceCharacter": "Matt Ishida"
+      },
+      {
+        "name": "Myotis Moon",
+        "sourceCharacter": "Myotismon"
+      },
+      {
+        "name": "Agumi",
+        "sourceCharacter": "Agumon"
+      }
+    ]
+  },
+  {
+    "slot": 115,
+    "series": "The Lynxbound Contract",
+    "homage": "The Witcher: School of the Cat",
+    "poster": "auction-ip/poster_115.webp",
+    "genres": [
+      "fantasy",
+      "horror"
+    ],
+    "characters": [
+      {
+        "name": "Aydan Lynx",
+        "sourceCharacter": "Aiden"
+      },
+      {
+        "name": "Lamburt Wolf",
+        "sourceCharacter": "Lambert"
+      },
+      {
+        "name": "Jade Carradine",
+        "sourceCharacter": "Jad Karadin"
+      },
+      {
+        "name": "Gaytan Claw",
+        "sourceCharacter": "Gaetan"
+      }
+    ]
+  },
+  {
+    "slot": 116,
+    "series": "The Quiet King's Secret",
+    "homage": "Nabari no Ou",
+    "poster": "auction-ip/poster_116.webp",
+    "genres": [
+      "supernatural",
+      "shinobi"
+    ],
+    "characters": [
+      {
+        "name": "Miharo Rokugo",
+        "sourceCharacter": "Miharu Rokujou"
+      },
+      {
+        "name": "Yoi Tay",
+        "sourceCharacter": "Yoite"
+      },
+      {
+        "name": "Hatori Headwind",
+        "sourceCharacter": "Tojuro Hattori"
+      },
+      {
+        "name": "Tobari Cloudveil",
+        "sourceCharacter": "Tobari Kumohira"
+      }
+    ]
+  },
+  {
+    "slot": 117,
+    "series": "Seven Winds of Saffron",
+    "homage": "Magi: Adventure of Sinbad",
+    "poster": "auction-ip/poster_117.webp",
+    "genres": [
+      "fantasy",
+      "arabia"
+    ],
+    "characters": [
+      {
+        "name": "Sailbad Saffron",
+        "sourceCharacter": "Sinbad"
+      },
+      {
+        "name": "Jaff Ar Compass",
+        "sourceCharacter": "Ja’far"
+      },
+      {
+        "name": "Barbaro Ssa",
+        "sourceCharacter": "Barbarossa"
+      },
+      {
+        "name": "Yu Nan",
+        "sourceCharacter": "Yunan"
+      }
+    ]
+  },
+  {
+    "slot": 118,
+    "series": "Two Voices, One Street",
+    "homage": "Once (2007)",
+    "poster": "auction-ip/poster_118.webp",
+    "genres": [
+      "idol",
+      "romance"
+    ],
+    "characters": [
+      {
+        "name": "Gai Strummer",
+        "sourceCharacter": "Guy"
+      },
+      {
+        "name": "Gurl Keys",
+        "sourceCharacter": "Girl"
+      },
+      {
+        "name": "Exie Flame",
+        "sourceCharacter": "Guy’s ex-girlfriend"
+      },
+      {
+        "name": "Billie Busker",
+        "sourceCharacter": "Billy"
+      }
+    ]
+  },
+  {
+    "slot": 119,
+    "series": "Velvet Comet Cabaret",
+    "homage": "Moulin Rouge!",
+    "poster": "auction-ip/poster_119.webp",
+    "genres": [
+      "idol",
+      "romance"
+    ],
+    "characters": [
+      {
+        "name": "Cristian Verse",
+        "sourceCharacter": "Christian"
+      },
+      {
+        "name": "Satina Velvet",
+        "sourceCharacter": "Satine"
+      },
+      {
+        "name": "Duke Monroth-ish",
+        "sourceCharacter": "the Duke of Monroth"
+      },
+      {
+        "name": "Harold Ziddler",
+        "sourceCharacter": "Harold Zidler"
+      }
+    ]
+  },
+  {
+    "slot": 120,
+    "series": "Notes from the Tour Bus",
+    "homage": "Almost Famous",
+    "poster": "auction-ip/poster_120.webp",
+    "genres": [
+      "idol",
+      "crime"
+    ],
+    "characters": [
+      {
+        "name": "Will Millerton",
+        "sourceCharacter": "William Miller"
+      },
+      {
+        "name": "Pennie Laine",
+        "sourceCharacter": "Penny Lane"
+      },
+      {
+        "name": "Russel Hamhand",
+        "sourceCharacter": "Russell Hammond"
+      },
+      {
+        "name": "Jeff Bebop",
+        "sourceCharacter": "Jeff Bebe"
+      }
+    ]
+  },
+  {
+    "slot": 121,
+    "series": "The Harbour Tape",
+    "homage": "Cloverfield",
+    "poster": "auction-ip/poster_121.webp",
+    "genres": [
+      "kaiju",
+      "mystery"
+    ],
+    "characters": [
+      {
+        "name": "Rob Hawkings",
+        "sourceCharacter": "Rob Hawkins"
+      },
+      {
+        "name": "Beth McEntire",
+        "sourceCharacter": "Beth McIntyre"
+      },
+      {
+        "name": "Hudd Platt",
+        "sourceCharacter": "Hudson Platt"
+      },
+      {
+        "name": "Marlina Quartz",
+        "sourceCharacter": "Marlena Diamond"
+      }
+    ]
+  },
+  {
+    "slot": 122,
+    "series": "Colossus Redline",
+    "homage": "Rampage: kaiju/military homage from the handwritten Rage entry",
+    "poster": "auction-ip/poster_122.webp",
+    "genres": [
+      "kaiju",
+      "military"
+    ],
+    "characters": [
+      {
+        "name": "David O’Koi",
+        "sourceCharacter": "Davis Okoye"
+      },
+      {
+        "name": "Katie Coldwell",
+        "sourceCharacter": "Kate Caldwell"
+      },
+      {
+        "name": "Clara Wide-Eye",
+        "sourceCharacter": "Claire Wyden"
+      },
+      {
+        "name": "Georgie",
+        "sourceCharacter": "George"
+      }
+    ]
+  },
+  {
+    "slot": 123,
+    "series": "Chitinfront Cadets",
+    "homage": "Starship Troopers",
+    "poster": "auction-ip/poster_123.webp",
+    "genres": [
+      "kaiju",
+      "space"
+    ],
+    "characters": [
+      {
+        "name": "Jonnie Ricoh",
+        "sourceCharacter": "Johnny Rico"
+      },
+      {
+        "name": "Dizzie Flora",
+        "sourceCharacter": "Dizzy Flores"
+      },
+      {
+        "name": "Brainie Bug",
+        "sourceCharacter": "the Brain Bug"
+      },
+      {
+        "name": "Carmine Ibanes",
+        "sourceCharacter": "Carmen Ibanez"
+      }
+    ]
+  },
+  {
+    "slot": 124,
+    "series": "The Other Crown",
+    "homage": "Ni no Kuni: Wrath of the White Witch",
+    "poster": "auction-ip/poster_124.webp",
+    "genres": [
+      "monster_taming",
+      "isekai"
+    ],
+    "characters": [
+      {
+        "name": "Ollie Ver",
+        "sourceCharacter": "Oliver"
+      },
+      {
+        "name": "Estelle Harp",
+        "sourceCharacter": "Esther"
+      },
+      {
+        "name": "Shade Arr",
+        "sourceCharacter": "Shadar"
+      },
+      {
+        "name": "Mr Drizzle",
+        "sourceCharacter": "Drippy"
+      }
+    ]
+  },
+  {
+    "slot": 125,
+    "series": "Kinship of the Skybeasts",
+    "homage": "Monster Hunter Stories",
+    "poster": "auction-ip/poster_125.webp",
+    "genres": [
+      "monster_taming",
+      "kaiju"
+    ],
+    "characters": [
+      {
+        "name": "Loot Rider",
+        "sourceCharacter": "Lute"
+      },
+      {
+        "name": "Lilly A",
+        "sourceCharacter": "Lilia"
+      },
+      {
+        "name": "Chev Al",
+        "sourceCharacter": "Cheval"
+      },
+      {
+        "name": "Navi Roux",
+        "sourceCharacter": "Navirou"
+      }
+    ]
+  },
+  {
+    "slot": 126,
+    "series": "My Boss Has Fangs",
+    "homage": "Renfield",
+    "poster": "auction-ip/poster_126.webp",
+    "genres": [
+      "vampire",
+      "comedy"
+    ],
+    "characters": [
+      {
+        "name": "Ren Fields",
+        "sourceCharacter": "Renfield"
+      },
+      {
+        "name": "Rebby Quincey",
+        "sourceCharacter": "Rebecca Quincy"
+      },
+      {
+        "name": "Count Drakool",
+        "sourceCharacter": "Count Dracula"
+      },
+      {
+        "name": "Teddie Lowbow",
+        "sourceCharacter": "Teddy Lobo"
+      }
+    ]
+  },
+  {
+    "slot": 127,
+    "series": "Ten Reasons to Stay",
+    "homage": "10 Things I Hate About You",
+    "poster": "auction-ip/poster_127.webp",
+    "genres": [
+      "romance",
+      "slice"
+    ],
+    "characters": [
+      {
+        "name": "Kat Strayford",
+        "sourceCharacter": "Kat Stratford"
+      },
+      {
+        "name": "Patrik Veroona",
+        "sourceCharacter": "Patrick Verona"
+      },
+      {
+        "name": "Joey Donut",
+        "sourceCharacter": "Joey Donner"
+      },
+      {
+        "name": "Bee Strayford",
+        "sourceCharacter": "Bianca Stratford"
+      }
+    ]
+  },
+  {
+    "slot": 128,
+    "series": "Last Bell: Evacuation",
+    "homage": "Highschool of the Dead",
+    "poster": "auction-ip/poster_128.webp",
+    "genres": [
+      "horror",
+      "survival"
+    ],
+    "characters": [
+      {
+        "name": "Taka Komore",
+        "sourceCharacter": "Takashi Komuro"
+      },
+      {
+        "name": "Reya Miyamotto",
+        "sourceCharacter": "Rei Miyamoto"
+      },
+      {
+        "name": "Koichi Shadow",
+        "sourceCharacter": "Koichi Shido"
+      },
+      {
+        "name": "Shizu Mariwell",
+        "sourceCharacter": "Shizuka Marikawa"
+      }
+    ]
+  },
+  {
+    "slot": 129,
+    "series": "Midnight Travelling Show",
+    "homage": "Cirque du Freak / The Saga of Darren Shan",
+    "poster": "auction-ip/poster_129.webp",
+    "genres": [
+      "vampire",
+      "slice"
+    ],
+    "characters": [
+      {
+        "name": "Darin Shann",
+        "sourceCharacter": "Darren Shan"
+      },
+      {
+        "name": "Stevie Leotard",
+        "sourceCharacter": "Steve Leonard"
+      },
+      {
+        "name": "Des Tiny",
+        "sourceCharacter": "Desmond Tiny"
+      },
+      {
+        "name": "Larton Crespley",
+        "sourceCharacter": "Larten Crepsley"
+      }
+    ]
+  },
+  {
+    "slot": 130,
+    "series": "Thirty Sunless Nights",
+    "homage": "30 Days of Night",
+    "poster": "auction-ip/poster_130.webp",
+    "genres": [
+      "nordic",
+      "vampire"
+    ],
+    "characters": [
+      {
+        "name": "Eban Snowson",
+        "sourceCharacter": "Eben Oleson"
+      },
+      {
+        "name": "Stellar Olesun",
+        "sourceCharacter": "Stella Oleson"
+      },
+      {
+        "name": "Marlowe Frost",
+        "sourceCharacter": "Marlow"
+      },
+      {
+        "name": "Billie Kitkat",
+        "sourceCharacter": "Billy Kitka"
+      }
+    ]
+  },
+  {
+    "slot": 131,
+    "series": "Chrome Chapel",
+    "homage": "Priest (2011)",
+    "poster": "auction-ip/poster_131.webp",
+    "genres": [
+      "vampire",
+      "cyber"
+    ],
+    "characters": [
+      {
+        "name": "Brother Preest",
+        "sourceCharacter": "Priest"
+      },
+      {
+        "name": "Sister Preestess",
+        "sourceCharacter": "Priestess"
+      },
+      {
+        "name": "Black Cap",
+        "sourceCharacter": "Black Hat"
+      },
+      {
+        "name": "Hix Marshal",
+        "sourceCharacter": "Hicks"
+      }
+    ]
+  },
+  {
+    "slot": 132,
+    "series": "The Scarlet Tracker",
+    "homage": "Black Leopard, Red Wolf",
+    "poster": "auction-ip/poster_132.webp",
+    "genres": [
+      "romance",
+      "mystery"
+    ],
+    "characters": [
+      {
+        "name": "Trailker",
+        "sourceCharacter": "Tracker"
+      },
+      {
+        "name": "Leop Ard",
+        "sourceCharacter": "Leopard"
+      },
+      {
+        "name": "Sogo Moon",
+        "sourceCharacter": "Sogolon"
+      },
+      {
+        "name": "Mossie",
+        "sourceCharacter": "Mossi"
+      }
+    ]
+  },
+  {
+    "slot": 133,
+    "series": "The Last Bookshop Secret",
+    "homage": "The Shadow of the Wind",
+    "poster": "auction-ip/poster_133.webp",
+    "genres": [
+      "slice",
+      "mystery"
+    ],
+    "characters": [
+      {
+        "name": "Dani Semper",
+        "sourceCharacter": "Daniel Sempere"
+      },
+      {
+        "name": "Fermino Torrez",
+        "sourceCharacter": "Fermín Romero de Torres"
+      },
+      {
+        "name": "Javi Fumero-ish",
+        "sourceCharacter": "Francisco Javier Fumero"
+      },
+      {
+        "name": "Julien Caraxel",
+        "sourceCharacter": "Julián Carax"
+      }
+    ]
+  },
+  {
+    "slot": 134,
+    "series": "Children of the Storm Court",
+    "homage": "Percy Jackson",
+    "poster": "auction-ip/poster_134.webp",
+    "genres": [
+      "mythology",
+      "magical"
+    ],
+    "characters": [
+      {
+        "name": "Perry Jackswell",
+        "sourceCharacter": "Percy Jackson"
+      },
+      {
+        "name": "Anna Bethwyn",
+        "sourceCharacter": "Annabeth Chase"
+      },
+      {
+        "name": "Chronos Crooked",
+        "sourceCharacter": "Kronos"
+      },
+      {
+        "name": "Grover Underhoof",
+        "sourceCharacter": "Grover Underwood"
+      }
+    ]
+  },
+  {
+    "slot": 135,
+    "series": "Synthetic Witness",
+    "homage": "Detroit: Become Human",
+    "poster": "auction-ip/poster_135.webp",
+    "genres": [
+      "mecha",
+      "mystery"
+    ],
+    "characters": [
+      {
+        "name": "Conner RKay",
+        "sourceCharacter": "Connor"
+      },
+      {
+        "name": "Hank Anderson-ish",
+        "sourceCharacter": "Hank Anderson"
+      },
+      {
+        "name": "Amandroid",
+        "sourceCharacter": "Amanda"
+      },
+      {
+        "name": "Kaira",
+        "sourceCharacter": "Kara"
+      }
+    ]
+  },
+  {
+    "slot": 136,
+    "series": "Salt Roads and Spellfire",
+    "homage": "Supernatural",
+    "poster": "auction-ip/poster_136.webp",
+    "genres": [
+      "supernatural",
+      "magical"
+    ],
+    "characters": [
+      {
+        "name": "Samm Winchesterton",
+        "sourceCharacter": "Sam Winchester"
+      },
+      {
+        "name": "Deen Winchesterish",
+        "sourceCharacter": "Dean Winchester"
+      },
+      {
+        "name": "Crow Lee",
+        "sourceCharacter": "Crowley"
+      },
+      {
+        "name": "Castielle",
+        "sourceCharacter": "Castiel"
+      }
+    ]
+  },
+  {
+    "slot": 137,
+    "series": "The Brasswood Realms",
+    "homage": "Nightingale (game)",
+    "poster": "auction-ip/poster_137.webp",
+    "genres": [
+      "magical",
+      "survival"
+    ],
+    "characters": [
+      {
+        "name": "Nellie Blithe",
+        "sourceCharacter": "Nellie Bly"
+      },
+      {
+        "name": "Alan Quartermoon",
+        "sourceCharacter": "Allan Quatermain"
+      },
+      {
+        "name": "Viktor Frankenshine",
+        "sourceCharacter": "Victor Frankenstein"
+      },
+      {
+        "name": "Pukk Wayward",
+        "sourceCharacter": "Puck"
+      }
+    ]
+  }
+]

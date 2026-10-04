@@ -5,10 +5,11 @@
     "studios": 6,
     "baseTotal": 168,
     "sharedIndustry": 213,
-    "total": 990,
-    "sharedExpansion2026": 609
+    "total": 1027,
+    "sharedExpansion2026": 609,
+    "sharedHomage2026": 37
   },
-  "generated": 988,
+  "generated": 1025,
   "pending": 2,
   "posters": [
     {
@@ -16994,6 +16995,635 @@
       "variant": "a",
       "style": "mixed-anime",
       "provenance": "recovered-visual-and-sequence-review"
+    },
+    {
+      "id": "homage_rival_101",
+      "img": "rival-posters/homage_rival_101.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Griffinwatch",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy",
+        "military"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_102",
+      "img": "rival-posters/homage_rival_102.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Wolf Banner",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy",
+        "military"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_103",
+      "img": "rival-posters/homage_rival_103.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "After-Hours Static",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "slice"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_104",
+      "img": "rival-posters/homage_rival_104.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Mirrorblade Shrine",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "samurai"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_105",
+      "img": "rival-posters/homage_rival_105.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Living Lighthouse",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "survival"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_106",
+      "img": "rival-posters/homage_rival_106.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Theatre of Missing Stars",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cosmic_horror",
+        "mystery"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_107",
+      "img": "rival-posters/homage_rival_107.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Glass Corsair",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space",
+        "pirate"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_108",
+      "img": "rival-posters/homage_rival_108.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Chrome Getaway",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "cyber",
+        "crime"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_109",
+      "img": "rival-posters/homage_rival_109.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Market Street Mayhem",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "martial",
+        "comedy"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_110",
+      "img": "rival-posters/homage_rival_110.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Windglass Academy",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "fantasy"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_111",
+      "img": "rival-posters/homage_rival_111.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Golden Duel",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy",
+        "martial"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_112",
+      "img": "rival-posters/homage_rival_112.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Cathedral of Roots",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "grimdark",
+        "horror"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_113",
+      "img": "rival-posters/homage_rival_113.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Orbital Greenhouse",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "space",
+        "military"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_114",
+      "img": "rival-posters/homage_rival_114.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Portal Fox Companions",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "isekai"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_115",
+      "img": "rival-posters/homage_rival_115.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Lanternmaw",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy",
+        "horror"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_116",
+      "img": "rival-posters/homage_rival_116.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Silent Script Guardians",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "shinobi"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_117",
+      "img": "rival-posters/homage_rival_117.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Moonlit Oasis",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "fantasy",
+        "arabia"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_118",
+      "img": "rival-posters/homage_rival_118.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Raincheck Duet",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "romance"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_119",
+      "img": "rival-posters/homage_rival_119.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Aerial Hearts",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "romance"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_120",
+      "img": "rival-posters/homage_rival_120.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Royalty Ledger",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "idol",
+        "crime"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_121",
+      "img": "rival-posters/homage_rival_121.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Submerged Eye",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "mystery"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_122",
+      "img": "rival-posters/homage_rival_122.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Crystal Siege",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "military"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_123",
+      "img": "rival-posters/homage_rival_123.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Beetle Moon",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "kaiju",
+        "space"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_124",
+      "img": "rival-posters/homage_rival_124.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Paper Crane Kingdom",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "isekai"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_125",
+      "img": "rival-posters/homage_rival_125.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Tidebound Rider",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "monster_taming",
+        "kaiju"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_126",
+      "img": "rival-posters/homage_rival_126.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Intern of the Night",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "comedy"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_127",
+      "img": "rival-posters/homage_rival_127.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Autumn Margins",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "slice"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_128",
+      "img": "rival-posters/homage_rival_128.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Roofline Rescue",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "horror",
+        "survival"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_129",
+      "img": "rival-posters/homage_rival_129.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Nightshift Seamstress",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "slice"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_130",
+      "img": "rival-posters/homage_rival_130.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Polar Bloodwatch",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "nordic",
+        "vampire"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_131",
+      "img": "rival-posters/homage_rival_131.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Stained-Glass Pursuit",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "vampire",
+        "cyber"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_132",
+      "img": "rival-posters/homage_rival_132.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "River of Hidden Vows",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "romance",
+        "mystery"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_133",
+      "img": "rival-posters/homage_rival_133.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Letters Behind the Shelves",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "slice",
+        "mystery"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_134",
+      "img": "rival-posters/homage_rival_134.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Constellation Heirs",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mythology",
+        "magical"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_135",
+      "img": "rival-posters/homage_rival_135.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Drawing in Evidence",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "mecha",
+        "mystery"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_136",
+      "img": "rival-posters/homage_rival_136.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "Midnight Diner Wards",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "supernatural",
+        "magical"
+      ],
+      "family": null,
+      "pending": false
+    },
+    {
+      "id": "homage_rival_137",
+      "img": "rival-posters/homage_rival_137.webp",
+      "studio": "Shared Industry",
+      "shared": true,
+      "persona": "The Antler Observatory",
+      "animeTypes": [
+        "shonen",
+        "shojo"
+      ],
+      "genres": [
+        "magical",
+        "survival"
+      ],
+      "family": null,
+      "pending": false
     }
   ]
 }

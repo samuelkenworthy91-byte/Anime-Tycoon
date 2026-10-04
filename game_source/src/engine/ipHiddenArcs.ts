@@ -1,3 +1,4 @@
+import { HOMAGE_IP_HIDDEN_ARCS } from "./homageIpExpansion";
 // One hidden studio-wide story blueprint for every user IP. No runtime copyright/reference names live here.
 export const IP_HIDDEN_ARC_SEEDS = [
   {"slot":1,"id":"ip_arc_001","name":"Crystal Pilgrimage","cost":17000,"q":2,"f":0.02,"syn":["fantasy","mythology"],"synQ":4,"synF":0.025,"anti":["slice"],"antiQ":-3,"antiF":-0.01,"partnerArc":"lore","comboName":"Crystal Pilgrimage + Worldbuilding Dive","desc":"The characters travel toward a distant goal, with each stage of the journey creating a new obstacle, discovery or change in their relationships."},
@@ -100,6 +101,7 @@ export const IP_HIDDEN_ARC_SEEDS = [
   {"slot":98,"id":"ip_arc_098","name":"Twin City Revolution","cost":14000,"q":2,"f":0.02,"syn":["cyber","magical"],"synQ":4,"synF":0.025,"anti":["slice"],"antiQ":-3,"antiF":-0.01,"partnerArc":"war","comboName":"Twin City Revolution + War Arc","desc":"Two divided cities are drawn into the same uprising, forcing characters on both sides to decide whether to preserve the old order or join the revolution."},
   {"slot":99,"id":"ip_arc_099","name":"Found-Family Job","cost":17000,"q":2,"f":0.02,"syn":["space","pirate"],"synQ":4,"synF":0.025,"anti":["slice"],"antiQ":-3,"antiF":-0.01,"partnerArc":"launch","comboName":"Found-Family Job + Launch Arc","desc":"A crew takes on a dangerous job for money, but the mission becomes personal as the teammates begin treating one another like family."},
   {"slot":100,"id":"ip_arc_100","name":"Dream Logic Investigation","cost":20000,"q":2,"f":0.02,"syn":["mystery","supernatural"],"synQ":4,"synF":0.025,"anti":["slice"],"antiQ":-3,"antiF":-0.01,"partnerArc":"twist","comboName":"Dream Logic Investigation + Plot Twist","desc":"The characters investigate an event that follows dream logic, testing impossible clues and changing assumptions until they discover the rule connecting them."},
+  ...HOMAGE_IP_HIDDEN_ARCS,
 ] as const;
 
 export const IP_HIDDEN_ARC_BY_SLOT = Object.fromEntries(IP_HIDDEN_ARC_SEEDS.map((x) => [x.slot, x])) as Record<number, (typeof IP_HIDDEN_ARC_SEEDS)[number]>;

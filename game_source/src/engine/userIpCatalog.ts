@@ -1,3 +1,4 @@
+import { HOMAGE_IP_CATALOG } from "./homageIpExpansion";
 // Generated from docs/USER_AUCTION_IP_CATALOG.csv. Keep stable slot/id ordering.
 export const USER_IP_CATALOG = [
   {"slot":1,"id":"ip_001","title":"Crystal Quest: Four Hearts, One Tomorrow","sourceType":"jrpg","animeType":"shonen","genres":["fantasy","mythology"],"hiddenArcId":"ip_arc_001","posterAsset":"auction-ip/poster_001.webp"},
@@ -100,4 +101,5 @@ export const USER_IP_CATALOG = [
   {"slot":98,"id":"ip_098","title":"Aether Divide","sourceType":"tv","animeType":"shojo","genres":["cyber","magical"],"hiddenArcId":"ip_arc_098","posterAsset":"auction-ip/poster_098.webp"},
   {"slot":99,"id":"ip_099","title":"Starwind Outlaws","sourceType":"tv","animeType":"shonen","genres":["space","pirate"],"hiddenArcId":"ip_arc_099","posterAsset":"auction-ip/poster_099.webp"},
   {"slot":100,"id":"ip_100","title":"Pine Veil","sourceType":"tv","animeType":"shojo","genres":["mystery","supernatural"],"hiddenArcId":"ip_arc_100","posterAsset":"auction-ip/poster_100.webp"},
+  ...HOMAGE_IP_CATALOG,
 ] as const;

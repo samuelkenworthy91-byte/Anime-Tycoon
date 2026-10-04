@@ -1,3 +1,4 @@
+import { HOMAGE_IP_SOURCE_CANON } from "./homageIpExpansion";
 export type SourceCanonRole = "protagonist" | "companion" | "antagonist" | "mascot";
 export interface SourceCanonCharacter {
   role: SourceCanonRole;
@@ -31,7 +32,7 @@ const c = (
 });
 
 /**
- * Hand-authored parody canon for the 100 auction properties.
+ * Hand-authored parody canon for the auction properties.
  * Names deliberately riff on actual source characters rather than being random
  * generator output, so licensed sequels/reboots have recognisable continuity.
  */
@@ -136,6 +137,7 @@ export const IP_SOURCE_CANON: Record<number, SourceCanon> = {
   98: c("Arcane", "Two sisters separated by a disastrous childhood become opposing figures in the conflict between a wealthy city and its exploited undercity as magical technology destabilises both.", "Vee", "Kate Lynn", "Silko", "Jynx"),
   99: c("Firefly", "The crew of a small transport ship takes legal and illegal jobs on the edge of a star system while sheltering fugitives wanted by the central government.", "Mal Rewinds", "Zoe Washburn-ish", "Adelai Nisky", "River Tamper"),
   100: c("Twin Peaks", "An eccentric federal agent investigates the murder of a popular teenager in a picturesque small town and uncovers secret lives, surreal visions and an evil that does not fit ordinary detective logic.", "Dale Cupper", "Audrey Horne-ish", "Bob Black", "Log Lass"),
+  ...HOMAGE_IP_SOURCE_CANON,
 };
 
 export function sourceCanonFor(slot: number): SourceCanon {
