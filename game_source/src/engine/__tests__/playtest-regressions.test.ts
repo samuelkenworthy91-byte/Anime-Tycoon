@@ -21,7 +21,7 @@ describe("playtest regression guards", () => {
     const panelRule = css.indexOf(".game-controls-panel {");
     const openRule = css.indexOf(".game-controls-open .game-controls-panel");
 
-    expect(app).toContain('z-[60]');
+    expect(app).toContain('z-[130]');
     expect(app).toContain("controlsOpen");
     expect(panelRule).toBeGreaterThanOrEqual(0);
     expect(openRule).toBeGreaterThanOrEqual(0);
@@ -30,7 +30,7 @@ describe("playtest regression guards", () => {
     expect(css).toContain("display: none !important");
     expect(css).toContain("display: flex !important");
     expect(css).not.toContain("@media (min-width: 601px), (orientation: landscape)");
-    expect(css).toContain("z-index: 60");
+    expect(css).toContain("z-index: 130");
     expect(css).toContain("safe-area-inset-top");
   });
 

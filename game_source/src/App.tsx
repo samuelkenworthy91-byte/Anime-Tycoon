@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, Home, Volume2, VolumeX, Keyboard, HardDriveDownload, ChevronLeft, Check, SlidersHorizontal, X } from "lucide-react";
 import { FxProvider, Btn } from "./fx/fx";
 import { isMuted, primeAudio, setMuted, sfx } from "./engine/audio";
+import { isMusicMuted, setMusicMuted } from "./engine/soundtrack";
 import { ARCS, type Contract, type Draft } from "./engine/data";
 import type { ShowResult } from "./engine/scoring";
 import {
@@ -88,6 +89,7 @@ export default function App() {
   const [timeSpeed, setTimeSpeed] = useState<0 | 1 | 4 | 8 | 12 | 30>(1);
   const [workPulses, setWorkPulses] = useState<DeskPulse[]>([]);
   const [muteUI, setMuteUI] = useState(isMuted());
+  const [musicMuteUI, setMusicMuteUI] = useState(isMusicMuted());
   const [controlsOpen, setControlsOpen] = useState(false);
   const [dismissedStaffRequests, setDismissedStaffRequests] = useState<string[]>([]);
   const dismissedStaffRequestSet = useMemo(() => new Set(dismissedStaffRequests), [dismissedStaffRequests]);
@@ -666,6 +668,13 @@ export default function App() {
             >
               <HardDriveDownload size={16} /> SAVE GAME
             </Btn>
+            <Btn variant="ghost" className="w-full" onClick={() => {
+              const muted = !isMusicMuted();
+              setMusicMuted(muted);
+              setMusicMuteUI(muted);
+            }}>
+              {musicMuteUI ? <VolumeX size={16} /> : <Volume2 size={16} />} MUSIC {musicMuteUI ? "OFF" : "ON"}
+            </Btn>
             <Btn variant="gold" className="w-full" onClick={restart}>
               <RotateCcw size={16} /> INSTANT RESTART
             </Btn>
@@ -682,7 +691,7 @@ export default function App() {
         </div>
       </div>
     ),
-    [restart, quitToTitle]
+    [restart, quitToTitle, musicMuteUI]
   );
 
   /* ------------------------------------------------- save slot picker */

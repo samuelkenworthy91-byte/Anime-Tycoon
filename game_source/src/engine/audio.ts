@@ -1,4 +1,5 @@
-/* Tiny synthesized SFX engine — no audio assets needed. */
+/* Synthesized effects plus the persistent shuffled soundtrack. */
+import { primeSoundtrack, setSoundtrackGlobalMuted } from "./soundtrack";
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -37,6 +38,7 @@ function ac(): AudioContext | null {
 
 export function primeAudio() {
   ac();
+  primeSoundtrack(muted);
 }
 
 export function isMuted() {
@@ -45,6 +47,7 @@ export function isMuted() {
 
 export function setMuted(m: boolean) {
   muted = m;
+  setSoundtrackGlobalMuted(m);
   localStorage.setItem("kirameki.muted", m ? "1" : "0");
   if (master) master.gain.value = m ? 0 : 0.5;
 }
